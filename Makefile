@@ -1,12 +1,21 @@
 CC ?= gcc
+INSTALL ?= install
 JEPREFIX ?= /usr/local
+VERSION ?= 0.0.0
+prefix ?= /usr
+exec_prefix ?= $(prefix)
+libdir ?= $(exec_prefix)/lib
+includedir ?= $(prefix)/include
+datarootdir ?= $(prefix)/share
+docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
 
 CFLAGS_EXTRA = -fPIC -Wall -Werror
 OBJECTS = numakind.o numakind_mcdram.o
-all: $(OBJECTS) libnumakind.so.1
+
+all: libnumakind.so.0.0
 
 clean:
-	rm -rf $(OBJECTS) libnumakind.so.1
+	rm -rf $(OBJECTS) libnumakind.so.0.0
 
 numakind.o: numakind.c numakind.h numakind_mcdram.h
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEPREFIX)/include -c numakind.c
@@ -14,7 +23,15 @@ numakind.o: numakind.c numakind.h numakind_mcdram.h
 numakind_mcdram.o: numakind_mcdram.c numakind.h numakind_mcdram.h
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEPREFIX)/include -c numakind_mcdram.c
 
-libnumakind.so.1: $(OBJECTS)
-	$(CC) -shared -Wl,-soname,numakind.so.1 -o libnumakind.so.1 $^
+libnumakind.so.0.0: $(OBJECTS)
+	$(CC) -shared -Wl,-soname,numakind.so.0 -o libnumakind.so.0.0 $^
 
-.PHONY: all clean
+install:
+	$(INSTALL) -d $(DESTDIR)$(includedir)
+	$(INSTALL) -m 644 numakind.h hbw_malloc.h $(DESTDIR)$(includedir)
+	$(INSTALL) -d $(DESTDIR)$(libdir)
+	$(INSTALL) libnumakind.so.0.0 $(DESTDIR)$(libdir)
+	ln -sf $(DESTDIR)$(libdir)/libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so.0
+	ln -sf $(DESTDIR)$(libdir)/libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so
+
+.PHONY: all clean install
