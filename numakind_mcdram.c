@@ -78,7 +78,6 @@ int numakind_mcdram_nodemask(unsigned long *nodemask, unsigned long maxnode)
     int *bandwidth = NULL;
     int high_bandwidth = 0;
     int num_unique = 0;
-    int use_bandwidth = -1;
     int cpu;
     struct bandwidth_nodes_t *bandwidth_nodes = NULL;
     struct bitmask nodemask_bm = {maxnode, nodemask};
@@ -97,7 +96,7 @@ int numakind_mcdram_nodemask(unsigned long *nodemask, unsigned long maxnode)
                                                PMTT_PATH);
             }
             if (!init_err) {
-                init_err = create_bandwidths_nodes(NUMA_NUM_NODES, bandwidth,
+                init_err = create_bandwidth_nodes(NUMA_NUM_NODES, bandwidth,
                                                   &num_unique,
                                                   &bandwidth_nodes);
             }
@@ -160,14 +159,12 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
     *       Path to PMTT table to be parsed.                                   *
     *   RETURNS zero on success, error code on failure                         *
     ***************************************************************************/
-    int err = 0;
     const size_t PMTT_BUF_SIZE = 2000;
     int mfd;
     ACPI_TABLE_PMTT hdr;
     unsigned char buf[PMTT_BUF_SIZE];
     ACPI_PMTT_HEADER *pbuf = (ACPI_PMTT_HEADER *)&buf;
     int size;
-    int i, j;
     int nread;
     int pmtt_socket_size;
 

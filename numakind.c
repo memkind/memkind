@@ -37,7 +37,7 @@ int numakind_nodemask(numakind_t kind, unsigned long *nodemask,
 
     switch (kind) {
         case NUMAKIND_MCDRAM:
-            err = numkind_mcdram_nodemask(nodemask, maxnode);
+            err = numakind_mcdram_nodemask(nodemask, maxnode);
             break;
         case NUMAKIND_DEFAULT:            numa_bitmask_clearall(&nodemask_bm);
             numa_bitmask_setbit(&nodemask_bm, numa_preferred());
@@ -164,7 +164,7 @@ void numakind_error_message(int err, char *msg, size_t size)
             strncpy(msg, "<numakind> Two NUMA memory nodes are equidistant from target cpu node", size);
             break;
         default:
-            snprintf(msg, "<numakind> Undefined error number: %i", size, err);
+            snprintf(msg, size, "<numakind> Undefined error number: %i", err);
             break;
     }
     if (size > 0)

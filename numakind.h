@@ -19,7 +19,7 @@ typedef enum {
     NUMAKIND_ERROR_TIEDISTANCE = -9
 } numakind_error_t;
 
-const size_t NUMAKIND_ERROR_MESSAGE_SIZE = 128;
+static const size_t NUMAKIND_ERROR_MESSAGE_SIZE = 128;
 
 /* returns 1 if numa kind is availble else 0 */
 int numakind_isavail(numakind_t kind);
