@@ -1,4 +1,6 @@
-#include <stdlib.h>
+#ifndef hbw_malloc_include_h
+#define hbw_malloc_include_h
+
 #include "numakind.h"
 
 inline void *hbw_malloc(size_t size)
@@ -46,3 +48,5 @@ inline void hbw_free(void *ptr)
 {
     numakind_free(NUMAKIND_DEFAULT, ptr);
 }
+
+#endif
