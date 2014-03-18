@@ -33,5 +33,7 @@ install:
 	$(INSTALL) libnumakind.so.0.0 $(DESTDIR)$(libdir)
 	ln -sf $(DESTDIR)$(libdir)/libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so.0
 	ln -sf $(DESTDIR)$(libdir)/libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so
+	$(INSTALL) -d $(DESTDIR)$(docdir)
+	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
 
 .PHONY: all clean install
