@@ -1,6 +1,10 @@
 #ifndef numakind_include_h
 #define numakind_include_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     NUMAKIND_DEFAULT = 0,
     NUMAKIND_MCDRAM,
@@ -50,4 +54,7 @@ void numakind_free(numakind_t kind, void *ptr);
 /* Convert error number into an error message */
 void numakind_error_message(int err, char *msg, size_t size);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

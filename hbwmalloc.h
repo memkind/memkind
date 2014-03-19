@@ -4,6 +4,10 @@
 #include "numakind.h"
 #include "pthread.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static inline int hbw_policy(int mode)
 {
     static pthread_mutex_t policy_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -80,4 +84,9 @@ static inline void hbw_free(void *ptr)
     numakind_free(NUMAKIND_DEFAULT, ptr);
 }
 
+  // all of your legacy C code here
+
+#ifdef __cplusplus
+}
+#endif
 #endif
