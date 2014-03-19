@@ -4,6 +4,18 @@
 #include "numakind.h"
 #include "pthread.h"
 
+static inline int hbw_policy(int mode)
+{
+    static pthread_mutex_t policy_mutex = PTHREAD_MUTEX_INITIALIZER;
+    static int policy = 1;
+    if (mode) {
+        pthread_mutex_lock(&policy_mutex);
+        policy = mode;
+        pthread_mutex_unlock(&policy_mutex);
+    }
+    return policy;
+}
+
 static inline int hbw_getpolicy(void)
 {
     return hbw_policy(0);
@@ -14,18 +26,6 @@ static inline void hbw_setpolicy(int mode)
     if (mode == 1 || mode == 2) {
         hbw_policy(mode);
     }
-}
-
-static inline int hbw_policy(int mode)
-{
-    static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
-    static policy = 1;
-    if (mode) {
-        pthread_mutex_lock(&policy_mutex);
-        policy = mode;
-        pthread_mutex_unlock(&policy_mutex);
-    }
-    return policy;
 }
 
 static inline int hbw_IsHBWAvailable(void)
