@@ -28,7 +28,7 @@ libnumakind.so.0.0: $(OBJECTS)
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)
-	$(INSTALL) -m 644 numakind.h hbw_malloc.h $(DESTDIR)$(includedir)
+	$(INSTALL) -m 644 numakind.h hbwmalloc.h $(DESTDIR)$(includedir)
 	$(INSTALL) -d $(DESTDIR)$(libdir)
 	$(INSTALL) libnumakind.so.0.0 $(DESTDIR)$(libdir)
 	ln -sf $(DESTDIR)$(libdir)/libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so.0
