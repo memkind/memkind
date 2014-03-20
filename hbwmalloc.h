@@ -84,8 +84,6 @@ static inline void hbw_free(void *ptr)
     numakind_free(NUMAKIND_DEFAULT, ptr);
 }
 
-  // all of your legacy C code here
-
 #ifdef __cplusplus
 }
 #endif
