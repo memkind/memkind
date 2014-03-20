@@ -4,11 +4,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 enum {
     HBW_POLICY_BIND = 1,
     HBW_POLICY_PREFERRED = 2
 };
-
 
 inline int hbw_getpolicy(void);
 inline void hbw_setpolicy(int mode);
