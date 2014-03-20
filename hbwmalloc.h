@@ -1,6 +1,5 @@
 #ifndef hbw_malloc_include_h
 #define hbw_malloc_include_h
-
 #ifdef __cplusplus
 extern "C" {
 #endif
