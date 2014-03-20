@@ -1,0 +1,11 @@
+1. Test 1 is all the APIs
+   -- All APIs work, the memalign psize has to have 
+      rules on how to use it. 
+   -- The memalign psize function needs further testing with kernel booted up with 2GB page size;
+2. Test 2 Malloc different size
+   -- Malloc allocates 4MB even if asked for 4K? why is that so
+	-- Looks like JEMALLOC take 4MB chunks but why?
+3. Malloc stress test written - has some problem allocating 4 and 8GB memory-
+   	  -- Needs investigation.
+
+
