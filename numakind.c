@@ -211,10 +211,10 @@ static int numakind_getarena(numakind_t kind, int *arena)
         pthread_mutex_lock(&init_mutex);
         if (!is_init && !init_err) {
             num_cpu = numa_num_configured_cpus();
-            map_len = (NUMAKIND_NUMKIND - 1) * num_cpu;
+            map_len = (NUMAKIND_NUM_KIND - 1) * num_cpu;
             arena_map = je_malloc(sizeof(unsigned int) * map_len);
             if (arena_map) {
-                for (kind_select = 1; kind_select < NUMAKIND_NUMKIND && !init_err; ++kind_select) {
+                for (kind_select = 1; kind_select < NUMAKIND_NUM_KIND && !init_err; ++kind_select) {
                     for (i = 0; i < num_cpu && !init_err; ++i) {
                         arena_map[i] = kind_select;
                         init_err = je_mallctl("arenas.extendk", arena_map + i,

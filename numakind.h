@@ -9,7 +9,7 @@ typedef enum {
     NUMAKIND_DEFAULT = 0,
     NUMAKIND_MCDRAM,
     NUMAKIND_MCDRAM_HUGETLB,
-    NUMAKIND_NUMKIND
+    NUMAKIND_NUM_KIND
 } numakind_t;
 
 typedef enum {
