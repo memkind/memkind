@@ -41,10 +41,28 @@ void *hbw_calloc(size_t num, size_t size)
     return result;
 }
 
-int hbw_posix_memalign(void **memptr, size_t alignment, size_t size)
+int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
 {
     int err;
     err = numakind_posix_memalign(NUMAKIND_MCDRAM, memptr, alignment, size);
+    if (err && hbw_getpolicy() == 2) {
+        err = numakind_posix_memalign(NUMAKIND_DEFAULT, memptr, alignment,
+                                      size);
+    }
+    return err;
+}
+
+int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
+    size_t pagesize)
+{
+    int err;
+    if (pagesize == 1<<21) {
+        err = numakind_posix_memalign(NUMAKIND_MCDRAM_HUGETLB, memptr, 
+                                      alignment, size);
+    }
+    else {
+        err = numakind_posix_memalign(NUMAKIND_MCDRAM, memptr, alignment, size);
+    }
     if (err && hbw_getpolicy() == 2) {
         err = numakind_posix_memalign(NUMAKIND_DEFAULT, memptr, alignment,
                                       size);

@@ -15,7 +15,9 @@ void hbw_setpolicy(int mode);
 int hbw_IsHBWAvailable(void);
 void *hbw_malloc(size_t size);
 void *hbw_calloc(size_t num, size_t size);
-int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
+int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size);
+int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
+    size_t pagesize);
 void *hbw_realloc(void *ptr, size_t size);
 void hbw_free(void *ptr);
 
