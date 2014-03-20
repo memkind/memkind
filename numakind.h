@@ -34,6 +34,9 @@ int numakind_isavail(int kind);
 /* sets nodemask for the nearest numa node for the specified numa kind */
 int numakind_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode);
 
+/* set flags for call to mmap */
+int numakind_mmap_flags(int kind, int *flags);
+
 /* mbind to the nearest numa node of the specified kind */
 int numakind_mbind(int kind, void *addr, size_t len);
 

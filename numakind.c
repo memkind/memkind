@@ -67,6 +67,22 @@ int numakind_isavail(int kind)
     return result;
 }
 
+int numakind_mmap_flags(int kind, int *flags)
+{
+    int err = 0;
+    switch (kind) {
+        case NUMAKIND_MCDRAM:
+        case NUMAKIND_DEFAULT:
+            *flags = 0;
+            break;
+        default:
+            *flags = 0;
+            err = NUMAKIND_ERROR_UNAVAILABLE;
+            break;
+    }
+    return err;
+}
+
 int numakind_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};
