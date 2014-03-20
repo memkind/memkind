@@ -9,7 +9,7 @@ includedir ?= $(prefix)/include
 datarootdir ?= $(prefix)/share
 docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
 
-CFLAGS_EXTRA = -fPIC -Wall -Werror
+CFLAGS_EXTRA = -fPIC -Wall -Werror -g -O0
 OBJECTS = numakind.o numakind_mcdram.o hbwmalloc.o
 
 all: libnumakind.so.0.0

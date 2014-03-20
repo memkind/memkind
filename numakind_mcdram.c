@@ -65,7 +65,7 @@ int numakind_mcdram_isavail(void)
 {
     int err;
     err = numakind_mcdram_nodemask(NULL, 0);
-    return (err != NUMAKIND_ERROR_UNAVAILABLE);
+    return (!err);
 }
 
 int numakind_mcdram_nodemask(unsigned long *nodemask, unsigned long maxnode)
@@ -88,7 +88,7 @@ int numakind_mcdram_nodemask(unsigned long *nodemask, unsigned long maxnode)
             numcpu = numa_num_configured_cpus();
             closest_numanode = (int *)je_malloc(sizeof(int) * numcpu);
             bandwidth = (int *)je_malloc(sizeof(int) * NUMA_NUM_NODES);
-            if (closest_numanode && bandwidth) {
+            if (!(closest_numanode && bandwidth)) {
                 init_err = NUMAKIND_ERROR_MALLOC;
             }
             if (!init_err) {

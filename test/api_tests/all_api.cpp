@@ -93,7 +93,7 @@ TEST_F(APITESTS, HbwCalloc2GB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
   size_t size = (size_t)(2*GB);
-  ptr = (char *) hbw_calloc(0,size);
+  ptr = (char *) hbw_calloc(size,1);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
@@ -156,9 +156,6 @@ TEST_F(APITESTS, HbwAllocateMemAlignPsize4K){
   int ret = HBW_SUCCESS, fret=0;
   size_t size = (size_t)(16*MB);
   char *tmp = NULL;
-  /*These two values need to be udpdate
-   based on the page sizes set in /proc/cmdline
-  */
   size_t align = 4*KB;
   hbw_pagesize_t psize = hbw_4k_page;
 
@@ -207,3 +204,5 @@ TEST_F(APITESTS, HbwAllocateMemAlignPsize2M){
   }
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
+
+

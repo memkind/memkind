@@ -1,9 +1,8 @@
 CC=g++
 CFLAGS=-O3 -Wall
 ROOT_DIR=/home/mic/mcdram/tests
-MCDRAM_INSTALL_DIR=/home/mic/mcdram_install
-INCLUDES=-I$(MCDRAM_INSTALL_DIR)/include/hbwmalloc/ -I$(ROOT_DIR)/include/
-LIBS=-L$(MCDRAM_INSTALL_DIR)/lib/ -lhbwmalloc -lnuma -lgtest
+INCLUDES=-I$(MCDRAM_INSTALL_DIR)/include/ -I$(ROOT_DIR)/include/
+LIBS=-L$(MCDRAM_INSTALL_DIR)/lib/ -L$(JEMALLOC_PATH)/lib -lnumakind -lnuma -lgtest -lpthread -ljemalloc
 bin = $(shell mkdir -p bin)
 
 all:			$(bin) all_api malloc_tests threaded_malloc
