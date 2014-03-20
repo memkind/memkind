@@ -4,6 +4,8 @@
 #include <numaif.h>
 #include <pthread.h>
 #include <sched.h>
+#include <sys/mman.h>
+#include <linux/mman.h>
 #include <jemalloc/jemalloc.h>
 
 #include "numakind.h"
@@ -54,6 +56,7 @@ int numakind_isavail(int kind)
     int result;
     switch (kind) {
         case NUMAKIND_MCDRAM:
+        case NUMAKIND_MCDRAM_HUGETLB:
             result = numakind_mcdram_isavail();
             break;
         case NUMAKIND_DEFAULT:
@@ -71,6 +74,8 @@ int numakind_mmap_flags(int kind, int *flags)
 {
     int err = 0;
     switch (kind) {
+        case NUMAKIND_MCDRAM_HUGETLB:
+            *flags = MAP_HUGETLB;
         case NUMAKIND_MCDRAM:
         case NUMAKIND_DEFAULT:
             *flags = 0;

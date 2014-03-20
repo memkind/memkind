@@ -8,6 +8,7 @@ extern "C" {
 typedef enum {
     NUMAKIND_DEFAULT = 0,
     NUMAKIND_MCDRAM,
+    NUMAKIND_MCDRAM_HUGETLB,
     NUMAKIND_NUMKIND
 } numakind_t;
 
