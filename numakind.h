@@ -1,6 +1,5 @@
 #ifndef numakind_include_h
 #define numakind_include_h
-
 #ifdef __cplusplus
 extern "C" {
 #endif
