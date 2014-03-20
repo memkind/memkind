@@ -10,14 +10,14 @@ enum {
     HBW_POLICY_PREFERRED = 2
 };
 
-inline int hbw_getpolicy(void);
-inline void hbw_setpolicy(int mode);
-inline int hbw_IsHBWAvailable(void);
-inline void *hbw_malloc(size_t size);
-inline void *hbw_calloc(size_t num, size_t size);
-inline int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
-inline void *hbw_realloc(void *ptr, size_t size);
-inline void hbw_free(void *ptr);
+int hbw_getpolicy(void);
+void hbw_setpolicy(int mode);
+int hbw_IsHBWAvailable(void);
+void *hbw_malloc(size_t size);
+void *hbw_calloc(size_t num, size_t size);
+int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
+void *hbw_realloc(void *ptr, size_t size);
+void hbw_free(void *ptr);
 
 #ifdef __cplusplus
 }
