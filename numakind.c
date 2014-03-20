@@ -11,7 +11,45 @@
 
 static int numakind_getarena(numakind_t kind, int *arena);
 
-int numakind_isavail(numakind_t kind)
+void numakind_error_message(int err, char *msg, size_t size)
+{
+    switch (err) {
+        case NUMAKIND_ERROR_UNAVAILABLE:
+            strncpy(msg, "<numakind> Requested numa kind is not available", size);
+            break;
+        case NUMAKIND_ERROR_MBIND:
+            strncpy(msg, "<numakind> Call to mbind() failed", size);
+            break;
+        case NUMAKIND_ERROR_MEMALIGN:
+            strncpy(msg, "<numakind> Call to posix_memalign() failed", size);
+            break;
+        case NUMAKIND_ERROR_MALLCTL:
+            strncpy(msg, "<numakind> Call to je_mallctl() failed", size);
+            break;
+        case NUMAKIND_ERROR_MALLOC:
+            strncpy(msg, "<numakind> Call to je_malloc() failed", size);
+            break;
+        case NUMAKIND_ERROR_GETCPU:
+            strncpy(msg, "<numakind> Call to sched_getcpu() returned out of range", size);
+            break;
+        case NUMAKIND_ERROR_MCDRAM:
+            strncpy(msg, "<numakind> Initializing for MCDRAM failed", size);
+            break;
+        case NUMAKIND_ERROR_PMTT:
+            strncpy(msg, "<numakind> Parsing PMTT table failed", size);
+            break;
+        case NUMAKIND_ERROR_TIEDISTANCE:
+            strncpy(msg, "<numakind> Two NUMA memory nodes are equidistant from target cpu node", size);
+            break;
+        default:
+            snprintf(msg, size, "<numakind> Undefined error number: %i", err);
+            break;
+    }
+    if (size > 0)
+        msg[size-1] = '\0';
+}
+
+int numakind_isavail(int kind)
 {
     int result;
     switch (kind) {
@@ -29,8 +67,7 @@ int numakind_isavail(numakind_t kind)
     return result;
 }
 
-int numakind_nodemask(numakind_t kind, unsigned long *nodemask,
-        unsigned long maxnode)
+int numakind_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};
     int err = 0;
@@ -50,7 +87,7 @@ int numakind_nodemask(numakind_t kind, unsigned long *nodemask,
     return err;
 }
 
-int numakind_mbind(numakind_t kind, void *addr, size_t size)
+int numakind_mbind(int kind, void *addr, size_t size)
 {
     nodemask_t nodemask;
     int err = 0;
@@ -131,44 +168,6 @@ int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
 void numakind_free(numakind_t kind, void *ptr)
 {
     je_free(ptr);
-}
-
-void numakind_error_message(int err, char *msg, size_t size)
-{
-    switch (err) {
-        case NUMAKIND_ERROR_UNAVAILABLE:
-            strncpy(msg, "<numakind> Requested numa kind is not available", size);
-            break;
-        case NUMAKIND_ERROR_MBIND:
-            strncpy(msg, "<numakind> Call to mbind() failed", size);
-            break;
-        case NUMAKIND_ERROR_MEMALIGN:
-            strncpy(msg, "<numakind> Call to posix_memalign() failed", size);
-            break;
-        case NUMAKIND_ERROR_MALLCTL:
-            strncpy(msg, "<numakind> Call to je_mallctl() failed", size);
-            break;
-        case NUMAKIND_ERROR_MALLOC:
-            strncpy(msg, "<numakind> Call to je_malloc() failed", size);
-            break;
-        case NUMAKIND_ERROR_GETCPU:
-            strncpy(msg, "<numakind> Call to sched_getcpu() returned out of range", size);
-            break;
-        case NUMAKIND_ERROR_MCDRAM:
-            strncpy(msg, "<numakind> Initializing for MCDRAM failed", size);
-            break;
-        case NUMAKIND_ERROR_PMTT:
-            strncpy(msg, "<numakind> Parsing PMTT table failed", size);
-            break;
-        case NUMAKIND_ERROR_TIEDISTANCE:
-            strncpy(msg, "<numakind> Two NUMA memory nodes are equidistant from target cpu node", size);
-            break;
-        default:
-            snprintf(msg, size, "<numakind> Undefined error number: %i", err);
-            break;
-    }
-    if (size > 0)
-        msg[size-1] = '\0';
 }
 
 

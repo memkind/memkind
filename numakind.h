@@ -25,15 +25,17 @@ typedef enum {
 
 static const size_t NUMAKIND_ERROR_MESSAGE_SIZE = 128;
 
+/* Convert error number into an error message */
+void numakind_error_message(int err, char *msg, size_t size);
+
 /* returns 1 if numa kind is availble else 0 */
-int numakind_isavail(numakind_t kind);
+int numakind_isavail(int kind);
 
 /* sets nodemask for the nearest numa node for the specified numa kind */
-int numakind_nodemask(numakind_t kind, unsigned long *nodemask,
-        unsigned long maxnode);
+int numakind_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode);
 
 /* mbind to the nearest numa node of the specified kind */
-int numakind_mbind(numakind_t kind, void *addr, size_t len);
+int numakind_mbind(int kind, void *addr, size_t len);
 
 /* malloc from the nearest numa node of the specified kind */
 void *numakind_malloc(numakind_t kind, size_t size);
@@ -50,9 +52,6 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size);
 
 /* Free memory allocated with the numakind API */
 void numakind_free(numakind_t kind, void *ptr);
-
-/* Convert error number into an error message */
-void numakind_error_message(int err, char *msg, size_t size);
 
 #ifdef __cplusplus
 }
