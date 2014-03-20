@@ -6,7 +6,8 @@ then
     exit 1
 fi
 
-DESTDIR=$(dirname $0)
+DESTDIR=`pwd`
+
 PREFIX=/usr
 
 while getopts i:j:p: opt
@@ -26,5 +27,8 @@ shift `expr $OPTIND - 1`
 echo $PREFIX
 make CC=gcc JEPREFIX=$JEPREFIX PREFIX=$PREFIX
 make install DESTDIR=$DESTDIR
+cd test
+make CC=gcc JEMALLOC_PATH=$JEPREFIX MCDRAM_INSTALL_DIR=$DESTDIR/$PREFIX ROOT_DIR=`pwd`
+
 
 
