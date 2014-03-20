@@ -25,7 +25,7 @@ void *hbw_malloc(size_t size)
 {
     void *result;
     result = numakind_malloc(NUMAKIND_MCDRAM, size);
-    if (!result && hbw_getpolicy() == 2) {
+    if (!result && hbw_getpolicy() == HBW_POLICY_PREFERRED) {
         result = numakind_malloc(NUMAKIND_DEFAULT, size);
     }
     return result;
@@ -35,7 +35,7 @@ void *hbw_calloc(size_t num, size_t size)
 {
     void *result;
     result = numakind_calloc(NUMAKIND_MCDRAM, num, size);
-    if (!result && hbw_getpolicy() == 2) {
+    if (!result && hbw_getpolicy() == HBW_POLICY_PREFERRED) {
         result = numakind_calloc(NUMAKIND_DEFAULT, num, size);
     }
     return result;
@@ -45,7 +45,7 @@ int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
 {
     int err;
     err = numakind_posix_memalign(NUMAKIND_MCDRAM, memptr, alignment, size);
-    if (err && hbw_getpolicy() == 2) {
+    if (err && hbw_getpolicy() == HBW_POLICY_PREFERRED) {
         err = numakind_posix_memalign(NUMAKIND_DEFAULT, memptr, alignment,
                                       size);
     }
@@ -63,7 +63,7 @@ int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
     else {
         err = numakind_posix_memalign(NUMAKIND_MCDRAM, memptr, alignment, size);
     }
-    if (err && hbw_getpolicy() == 2) {
+    if (err && hbw_getpolicy() == HBW_POLICY_PREFERRED) {
         err = numakind_posix_memalign(NUMAKIND_DEFAULT, memptr, alignment,
                                       size);
     }
@@ -74,7 +74,7 @@ void *hbw_realloc(void *ptr, size_t size)
 {
     void *result;
     result = numakind_realloc(NUMAKIND_MCDRAM, ptr, size);
-    if (!result && hbw_getpolicy() == 2) {
+    if (!result && hbw_getpolicy() == HBW_POLICY_PREFERRED) {
         result = numakind_realloc(NUMAKIND_DEFAULT, ptr, size);
     }
     return result;
