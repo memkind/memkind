@@ -30,8 +30,8 @@ install:
 	$(INSTALL) -m 644 numakind.h hbwmalloc.h $(DESTDIR)$(includedir)
 	$(INSTALL) -d $(DESTDIR)$(libdir)
 	$(INSTALL) libnumakind.so.0.0 $(DESTDIR)$(libdir)
-	cd $(DESTDIR)$(libdir); ln -sf libnumakind.so.0.0 libnumakind.so.0
-	cd $(DESTDIR)$(libdir); ln -sf libnumakind.so.0.0 libnumakind.so
+	ln -sf libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so.0
+	ln -sf libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so
 	$(INSTALL) -d $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
 
