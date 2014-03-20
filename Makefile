@@ -10,7 +10,7 @@ datarootdir ?= $(prefix)/share
 docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
 
 CFLAGS_EXTRA = -fPIC -Wall -Werror
-OBJECTS = numakind.o numakind_mcdram.o
+OBJECTS = numakind.o numakind_mcdram.o hbwmalloc.o
 
 all: libnumakind.so.0.0
 
@@ -23,8 +23,12 @@ numakind.o: numakind.c numakind.h numakind_mcdram.h
 numakind_mcdram.o: numakind_mcdram.c numakind.h numakind_mcdram.h
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEPREFIX)/include -c numakind_mcdram.c
 
+hbwmalloc.o: hbwmalloc.c hbwmalloc.h numakind.h numakind_mcdram.h
+	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c hbwmalloc.c
+
 libnumakind.so.0.0: $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libnumakind.so.0 -o libnumakind.so.0.0 $^
+
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)
 	$(INSTALL) -m 644 numakind.h hbwmalloc.h $(DESTDIR)$(includedir)
