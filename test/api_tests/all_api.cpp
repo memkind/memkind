@@ -157,7 +157,7 @@ TEST_F(APITESTS, HbwAllocateMemAlignPsize4K){
   size_t size = (size_t)(16*MB);
   char *tmp = NULL;
   size_t align = 4*KB;
-  hbw_pagesize_t psize = hbw_4k_page;
+  hbw_pagesize_t psize = HBW_PAGESIZE_4KB;
 
   fret = hbw_allocate_memalign_psize(&ptr,align,size,psize);
   
@@ -186,7 +186,7 @@ TEST_F(APITESTS, HbwAllocateMemAlignPsize2M){
    based on the page sizes set in /proc/cmdline
   */
   size_t align = 2*MB;
-  hbw_pagesize_t psize = hbw_2m_page;
+  hbw_pagesize_t psize = HBW_PAGESIZE_2MB;
 
   fret = hbw_allocate_memalign_psize(&ptr,align,size,psize);
   

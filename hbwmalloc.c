@@ -53,10 +53,10 @@ int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
 }
 
 int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
-    size_t pagesize)
+    int pagesize)
 {
     int err;
-    if (pagesize == 1<<21) {
+    if (pagesize == HBW_PAGESIZE_2MB) {
         err = numakind_posix_memalign(NUMAKIND_MCDRAM_HUGETLB, memptr, 
                                       alignment, size);
     }

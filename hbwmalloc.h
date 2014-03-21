@@ -4,10 +4,15 @@
 extern "C" {
 #endif
 
-enum {
+typedef enum {
     HBW_POLICY_BIND = 1,
     HBW_POLICY_PREFERRED = 2
-};
+} hbw_policy_t;
+
+typedef enum {
+    HBW_PAGESIZE_4KB = 1,
+    HBW_PAGESIZE_2MB = 2
+} hbw_pagesize_t;
 
 int hbw_getpolicy(void);
 void hbw_setpolicy(int mode);
@@ -16,7 +21,7 @@ void *hbw_malloc(size_t size);
 void *hbw_calloc(size_t num, size_t size);
 int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size);
 int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
-    size_t pagesize);
+    int pagesize);
 void *hbw_realloc(void *ptr, size_t size);
 void hbw_free(void *ptr);
 
