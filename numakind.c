@@ -152,7 +152,12 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
     }
     else {
         numakind_getarena(kind, &arena);
-        err = je_rallocm(&ptr, NULL, size, 0, ALLOCM_ARENA(arena));
+        if (ptr == NULL) {
+            err = je_allocm(&ptr, NULL, size, ALLOCM_ARENA(arena));
+        }
+        else {
+            err = je_rallocm(&ptr, NULL, size, 0, ALLOCM_ARENA(arena));
+        }
         if (err) {
             ptr = NULL;
         }
