@@ -46,6 +46,9 @@ void numakind_error_message(int err, char *msg, size_t size)
         case NUMAKIND_ERROR_ALIGNMENT:
             strncpy(msg, "<numakind> Alignment must be a power of two and larger than sizeof(void *)", size);
             break;
+        case NUMAKIND_ERROR_ALLOCM:
+            strncpy(msg, "<numakind> Call to je_allocm() failed", size);
+            break;
         default:
             snprintf(msg, size, "<numakind> Undefined error number: %i", err);
             break;
@@ -136,8 +139,10 @@ void *numakind_malloc(numakind_t kind, size_t size)
         result = je_malloc(size);
     }
     else {
-        numakind_getarena(kind, &arena);
-        err = je_allocm(&result, NULL, size, ALLOCM_ARENA(arena));
+        err = numakind_getarena(kind, &arena);
+        if (!err) {
+            err = je_allocm(&result, NULL, size, ALLOCM_ARENA(arena));
+        }
         if (err) {
             result = NULL;
         }
@@ -154,12 +159,14 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
         ptr = je_realloc(ptr, size);
     }
     else {
-        numakind_getarena(kind, &arena);
-        if (ptr == NULL) {
-            err = je_allocm(&ptr, NULL, size, ALLOCM_ARENA(arena));
-        }
-        else {
-            err = je_rallocm(&ptr, NULL, size, 0, ALLOCM_ARENA(arena));
+        err = numakind_getarena(kind, &arena);
+        if (!err) {
+            if (ptr == NULL) {
+                err = je_allocm(&ptr, NULL, size, ALLOCM_ARENA(arena));
+            }
+            else {
+                err = je_rallocm(&ptr, NULL, size, 0, ALLOCM_ARENA(arena));
+            }
         }
         if (err) {
             ptr = NULL;
@@ -189,19 +196,21 @@ int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
         err = err ? NUMAKIND_ERROR_MEMALIGN : 0;
     }
     else {
-         numakind_getarena(kind, &arena);
-         if ( (alignment > sizeof(void*)) &&
-              (((alignment - 1) & alignment) == 0) ){
+         err = numakind_getarena(kind, &arena);
+         if (!err) {
+             if ( (alignment < sizeof(void*)) ||
+                  (((alignment - 1) & alignment) != 0) ){
+                  err = NUMAKIND_ERROR_ALIGNMENT;
+             }
+         }
+         if (!err) {
               err = je_allocm(memptr, NULL, size,
                               ALLOCM_ALIGN(alignment) | ALLOCM_ARENA(arena));
+              err = err ? NUMAKIND_ERROR_ALLOCM : 0;
          }
-         else {
-             err = NUMAKIND_ERROR_ALIGNMENT;
-         }
-         if (err) {
-             err = NUMAKIND_ERROR_MEMALIGN;
-             *memptr = NULL;
-         }
+    }
+    if (err) {
+        *memptr = NULL;
     }
     return err;
 }
