@@ -43,6 +43,9 @@ void numakind_error_message(int err, char *msg, size_t size)
         case NUMAKIND_ERROR_TIEDISTANCE:
             strncpy(msg, "<numakind> Two NUMA memory nodes are equidistant from target cpu node", size);
             break;
+        case NUMAKIND_ERROR_ALIGNMENT:
+            strncpy(msg, "<numakind> Alignment must be a power of two and larger than sizeof(void *)", size);
+            break;
         default:
             snprintf(msg, size, "<numakind> Undefined error number: %i", err);
             break;
@@ -125,7 +128,7 @@ int numakind_mbind(int kind, void *addr, size_t size)
 
 void *numakind_malloc(numakind_t kind, size_t size)
 {
-    void *result;
+    void *result = NULL;
     int err = 0;
     int arena;
 
@@ -178,15 +181,27 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
 int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
         size_t size)
 {
-    /* FIXME Probably not the most efficient implementation */
     int err = 0;
+    int arena;
+
     if (kind == NUMAKIND_DEFAULT) {
         err = je_posix_memalign(memptr, alignment, size);
         err = err ? NUMAKIND_ERROR_MEMALIGN : 0;
     }
     else {
-        *memptr = numakind_malloc(kind, size + alignment);
-        *memptr += alignment - ( (size_t)memptr % alignment );
+         numakind_getarena(kind, &arena);
+         if ( (alignment > sizeof(void*)) &&
+              (((alignment - 1) & alignment) == 0) ){
+              err = je_allocm(memptr, NULL, size,
+                              ALLOCM_ALIGN(alignment) | ALLOCM_ARENA(arena));
+         }
+         else {
+             err = NUMAKIND_ERROR_ALIGNMENT;
+         }
+         if (err) {
+             err = NUMAKIND_ERROR_MEMALIGN;
+             *memptr = NULL;
+         }
     }
     return err;
 }
@@ -219,7 +234,9 @@ static int numakind_getarena(numakind_t kind, int *arena)
             map_len = (NUMAKIND_NUM_KIND - 1) * num_cpu;
             arena_map = je_malloc(sizeof(unsigned int) * map_len);
             if (arena_map) {
-                for (kind_select = 1; kind_select < NUMAKIND_NUM_KIND && !init_err; ++kind_select) {
+                for (kind_select = 1;
+                     kind_select < NUMAKIND_NUM_KIND && !init_err;
+                     ++kind_select) {
                     for (i = 0; i < num_cpu && !init_err; ++i) {
                         arena_map[i] = kind_select;
                         init_err = je_mallctl("arenas.extendk", arena_map + i,

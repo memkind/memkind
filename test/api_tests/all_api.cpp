@@ -23,7 +23,7 @@
 
  Description:
  Helloworld for MYO shared programming model
- In this example, one global shared data(*buffer) is declared, and inited 
+ In this example, one global shared data(*buffer) is declared, and inited
  at myoiUserInit(). After runtime init(myoiLibInit), both host and LRB can
  have the buffer pointed to the same address.
 */
@@ -42,23 +42,23 @@ protected:
   {
 
   }
-  
+
   void TearDown()
   {
   }
-  
+
 };
 
 TEST_F(APITESTS,HbwExistsTest){
-  
+
   int ret = HBW_SUCCESS;
   ret = hbw_IsHBWAvailable();
   ASSERT_EQ(1,ret);
- 
+
 }
 
 TEST_F(APITESTS,HbwSetGetPolicyPreferred){
-  
+
   hbw_setpolicy(2);
   ASSERT_EQ(2, hbw_getpolicy());
 }
@@ -99,7 +99,7 @@ TEST_F(APITESTS, HbwCalloc2GB){
   }
   /*Lets touch a part of this memory*/
   ptr[1024] ='a';
-  
+
   if (NULL != ptr){
     hbw_free(ptr);
   }
@@ -112,14 +112,14 @@ TEST_F(APITESTS, HbwRealloc2GB){
   int ret = HBW_SUCCESS;
   size_t size = (size_t)(2*GB);
   ptr = (char *) hbw_realloc(ptr, size);
-  
+
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
 
   /*Lets touch a part of this memory*/
   ptr[1024] ='a';
-  
+
   if (NULL != ptr){
     hbw_free(ptr);
   }
@@ -127,7 +127,7 @@ TEST_F(APITESTS, HbwRealloc2GB){
 }
 
 TEST_F(APITESTS, HbwAllocateMemAlign2GB){
-  
+
   void *ptr = NULL;
   int ret = HBW_SUCCESS, fret=0;
   size_t size = (size_t)(2*GB);
@@ -137,21 +137,25 @@ TEST_F(APITESTS, HbwAllocateMemAlign2GB){
   fret = hbw_allocate_memalign(&ptr,align,size);
 
   if (fret != HBW_SUCCESS
-      || ((size_t)ptr%align != 0) 
+      || ((size_t)ptr%align != 0)
       || (NULL == ptr)){
     ret = HBW_ERROR;
+    goto exit;
   }
+
   tmp = (char *)ptr;
   tmp[1024] ='a';
+
   if (NULL != ptr){
     hbw_free(ptr);
   }
-  
+
+ exit:
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(APITESTS, HbwAllocateMemAlignPsize4K){
-  
+
   void *ptr = NULL;
   int ret = HBW_SUCCESS, fret=0;
   size_t size = (size_t)(16*MB);
@@ -160,48 +164,49 @@ TEST_F(APITESTS, HbwAllocateMemAlignPsize4K){
   hbw_pagesize_t psize = HBW_PAGESIZE_4KB;
 
   fret = hbw_allocate_memalign_psize(&ptr,align,size,psize);
-  
-  tmp = (char *)ptr;
-  tmp[1024] = 'a';
 
   if (fret != HBW_SUCCESS
       || (NULL == ptr)){
     ret = HBW_ERROR;
+    goto exit;
   }
-  
+
+  tmp = (char *)ptr;
+  tmp[1024] = 'a';
 
   if (NULL != ptr){
     hbw_free(ptr);
   }
+
+ exit:
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(APITESTS, HbwAllocateMemAlignPsize2M){
-  
+
   void *ptr = NULL;
   int ret = HBW_SUCCESS, fret=0;
   size_t size = (size_t)(16*MB);
   char *tmp = NULL;
-  /*These two values need to be udpdate
-   based on the page sizes set in /proc/cmdline
-  */
   size_t align = 2*MB;
   hbw_pagesize_t psize = HBW_PAGESIZE_2MB;
 
   fret = hbw_allocate_memalign_psize(&ptr,align,size,psize);
-  
-  tmp = (char *)ptr;
-  tmp[1024] = 'a';
 
   if (fret != HBW_SUCCESS
       || (NULL == ptr)){
     ret = HBW_ERROR;
+    goto exit;
   }
-  
+
+  tmp = (char *)ptr;
+  tmp[1024] = 'a';
 
   if (NULL != ptr){
     hbw_free(ptr);
   }
+
+ exit:
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
