@@ -1,7 +1,7 @@
 CC ?= gcc
 INSTALL ?= install
 JEPREFIX ?= /usr/local
-VERSION ?= 0.0.0
+VERSION ?= $(shell git describe --long | sed 's|^v||')
 prefix ?= /usr
 exec_prefix ?= $(prefix)
 libdir ?= $(exec_prefix)/lib64
