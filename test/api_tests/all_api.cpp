@@ -52,21 +52,21 @@ protected:
 TEST_F(APITESTS,HbwExistsTest){
 
   int ret = HBW_SUCCESS;
-  ret = hbw_IsHBWAvailable();
+  ret = HBW_IsHBWAvailable();
   ASSERT_EQ(1,ret);
 
 }
 
 TEST_F(APITESTS,HbwSetGetPolicyPreferred){
 
-  hbw_setpolicy(2);
-  ASSERT_EQ(2, hbw_getpolicy());
+  HBW_setpolicy(2);
+  ASSERT_EQ(2, HBW_getpolicy());
 }
 
 TEST_F(APITESTS,HbwSetGetPolicyBind){
 
-  hbw_setpolicy(1);
-  ASSERT_EQ(1, hbw_getpolicy());
+  HBW_setpolicy(1);
+  ASSERT_EQ(1, HBW_getpolicy());
 }
 
 
@@ -75,7 +75,7 @@ TEST_F(APITESTS, HbwMalloc2GB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
   size_t size = (size_t)(2048*MB);
-  ptr = (char *) hbw_malloc(size);
+  ptr = (char *) HBW_malloc(size);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
@@ -83,7 +83,7 @@ TEST_F(APITESTS, HbwMalloc2GB){
   ptr[1024] ='a';
 
   if (NULL != ptr){
-    hbw_free(ptr);
+    HBW_free(ptr);
   }
 
   ASSERT_EQ(HBW_SUCCESS, ret);
@@ -93,7 +93,7 @@ TEST_F(APITESTS, HbwCalloc2GB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
   size_t size = (size_t)(2*GB);
-  ptr = (char *) hbw_calloc(size,1);
+  ptr = (char *) HBW_calloc(size,1);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
@@ -101,7 +101,7 @@ TEST_F(APITESTS, HbwCalloc2GB){
   ptr[1024] ='a';
 
   if (NULL != ptr){
-    hbw_free(ptr);
+    HBW_free(ptr);
   }
 
   ASSERT_EQ(HBW_SUCCESS, ret);
@@ -111,7 +111,7 @@ TEST_F(APITESTS, HbwRealloc2GB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
   size_t size = (size_t)(2*GB);
-  ptr = (char *) hbw_realloc(ptr, size);
+  ptr = (char *) HBW_realloc(ptr, size);
 
   if (NULL == ptr){
     ret = HBW_ERROR;
@@ -121,7 +121,7 @@ TEST_F(APITESTS, HbwRealloc2GB){
   ptr[1024] ='a';
 
   if (NULL != ptr){
-    hbw_free(ptr);
+    HBW_free(ptr);
   }
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
@@ -134,7 +134,7 @@ TEST_F(APITESTS, HbwAllocateMemAlign2GB){
   size_t align = 32;
   char *tmp = NULL;
 
-  fret = hbw_allocate_memalign(&ptr,align,size);
+  fret = HBW_allocate_memalign(&ptr,align,size);
 
   if (fret != HBW_SUCCESS
       || ((size_t)ptr%align != 0)
@@ -147,7 +147,7 @@ TEST_F(APITESTS, HbwAllocateMemAlign2GB){
   tmp[1024] ='a';
 
   if (NULL != ptr){
-    hbw_free(ptr);
+    HBW_free(ptr);
   }
 
  exit:
@@ -163,7 +163,7 @@ TEST_F(APITESTS, HbwAllocateMemAlignPsize4K){
   size_t align = 4*KB;
   hbw_pagesize_t psize = HBW_PAGESIZE_4KB;
 
-  fret = hbw_allocate_memalign_psize(&ptr,align,size,psize);
+  fret = HBW_allocate_memalign_psize(&ptr,align,size,psize);
 
   if (fret != HBW_SUCCESS
       || (NULL == ptr)){
@@ -175,7 +175,7 @@ TEST_F(APITESTS, HbwAllocateMemAlignPsize4K){
   tmp[1024] = 'a';
 
   if (NULL != ptr){
-    hbw_free(ptr);
+    HBW_free(ptr);
   }
 
  exit:
@@ -191,7 +191,7 @@ TEST_F(APITESTS, HbwAllocateMemAlignPsize2M){
   size_t align = 2*MB;
   hbw_pagesize_t psize = HBW_PAGESIZE_2MB;
 
-  fret = hbw_allocate_memalign_psize(&ptr,align,size,psize);
+  fret = HBW_allocate_memalign_psize(&ptr,align,size,psize);
 
   if (fret != HBW_SUCCESS
       || (NULL == ptr)){
@@ -203,7 +203,7 @@ TEST_F(APITESTS, HbwAllocateMemAlignPsize2M){
   tmp[1024] = 'a';
 
   if (NULL != ptr){
-    hbw_free(ptr);
+    HBW_free(ptr);
   }
 
  exit:
