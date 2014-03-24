@@ -10,36 +10,36 @@
 #include <sys/syscall.h>
 #include <bits/syscall.h>
 #include <sys/types.h>
+#include <jemalloc/jemalloc.h>
 
-
-
+// The include file actbl.h comes from acpica which is available from this URL:
+// https://acpica.org/sites/acpica/files/acpica-unix-20130517.tar.gz
+//
 #define ACPI_MACHINE_WIDTH 64
 #define COMPILER_DEPENDENT_UINT64 unsigned long
 #define COMPILER_DEPENDENT_INT64 long
 #include "actypes.h"
 #include "actbl.h"
+
 #include "numakind.h"
+#include "numakind_mcdram.h"
 
 static const char *PMTT_PATH = "/sys/firmware/acpi/tables/PMTT";
-static const char *NUMKIND_INFO_PATH = "/etc/numakind.info";
 
 struct memctlr_t {
     ACPI_PMTT_CONTROLLER memctlr;
     ACPI_PMTT_DOMAIN domain[1];
 };
 
-static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
-                                const char *pmtt_path);
 static int parse_pmtt_memory_controllers(int num_bandwidth, int *bandwidth,
-                                         ACPI_PMTT_HEADER *buf, int size);
-static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
-                                            ACPI_PMTT_HEADER *buf_in,
-                                            int *bytes_remaining);
+               ACPI_PMTT_HEADER *buf, int size);
 
+static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
+               ACPI_PMTT_HEADER *buf_in, int *bytes_remaining);
 
 
 static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
-                                const char *pmtt_path)
+               const char *pmtt_path)
 {
     /***************************************************************************
     *   num_bandwidth (IN):                                                    *
@@ -152,40 +152,40 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
     return err;
 }
 
-
 int main (int argc, char *argv[]){
   
-  static int init_err = 0, i = 0;
-  FILE *fp = NULL;
-  int *bandwidth = NULL;
+    int err = 0;
+    FILE *fp = NULL;
+    int *bandwidth = NULL;
   
-  bandwidth = (int *)malloc(sizeof(int) *
-                            NUMA_NUM_NODES);
+    bandwidth = (int *)malloc(sizeof(int) *
+                              NUMA_NUM_NODES);
+    if (!bandwidth) {
+        fprintf(stderr, "ERROR: <%s> in allocating bandwidth array\n", argv[0]);
+        return -1;
+    }
 
-  if (NULL == bandwidth){
-    perror("Error in allocating bandwidth array\n");
-  }
+    fp = fopen(NUMAKIND_BANDWIDTH_PATH, "w");
+    if (!fp) {
+        fprintf(stderr, "ERROR: <%s> opening %s for writing\n", argv[0], NUMAKIND_BANDWIDTH_PATH);
+        return -2;
+    }
+    err = parse_pmtt_bandwidth(NUMA_NUM_NODES,
+                               bandwidth,
+                               PMTT_PATH);
+    if (err) {
+        fprintf(stderr, "ERROR: <%s> opening %s for reading\n", argv[0], PMTT_PATH);
+        return -3;
 
-  fp = fopen ("/etc/numakind.info", "w+");
- 
-  if (!init_err){
-    init_err = parse_pmtt_bandwidth(NUMA_NUM_NODES,
-                                    bandwidth,
-                                    PMTT_PATH);
-  }
+    }
+    nwrite = fwrite(bandwidth, sizeof(int), NUMA_NUM_NODES, fp);
+    if (nwrite != NUMA_NUM_NODES) {
+        return -4;
+    }
+    fclose(fp);
   
-  for ( i = 0; i < NUMA_NUM_NODES; i++ ){
-    fprintf(fp, "%d\n", bandwidth[i]);
-  }
-                    
-  fclose(fp);
-  
-  if (NULL != bandwidth){
     free(bandwidth);
-    bandwidth = NULL;
-  }
-  
-  return 0;
+    return 0;
 }
   
   

@@ -4,6 +4,7 @@ JEPREFIX ?= /usr/local
 VERSION ?= $(shell git describe --long | sed 's|^v||')
 prefix ?= /usr
 exec_prefix ?= $(prefix)
+sbindir ?= $(prefix)/sbin
 libdir ?= $(exec_prefix)/lib64
 includedir ?= $(prefix)/include
 datarootdir ?= $(prefix)/share
@@ -29,6 +30,10 @@ hbwmalloc.o: hbwmalloc.c hbwmalloc.h numakind.h numakind_mcdram.h
 libnumakind.so.0.0: $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libnumakind.so.0 -o libnumakind.so.0.0 $^
 
+
+numakind_pmtt: numakind_pmtt.c
+		$(CC) $(CFLAGS) -L. -lnumakind -o $@ $^
+
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)
 	$(INSTALL) -m 644 numakind.h hbwmalloc.h $(DESTDIR)$(includedir)
@@ -38,5 +43,7 @@ install:
 	ln -sf libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so
 	$(INSTALL) -d $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
+	$(INSTALL) -d $(DESTDIR)$(sbindir)
+	$(INSTALL) numakind_pmtt $(DESTDIR)$(sbindir) 
 
 .PHONY: all clean install
