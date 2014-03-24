@@ -49,27 +49,27 @@ protected:
 TEST_F(MALLOCTESTS, HbwMalloc1KB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(KB);
+  ptr = (char *) HBW_malloc(KB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
 
   ptr[1024] ='a';
 
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc2KB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(2*KB);
+  ptr = (char *) HBW_malloc(2*KB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
 
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
@@ -78,62 +78,62 @@ TEST_F(MALLOCTESTS, HbwMalloc2KB){
 TEST_F(MALLOCTESTS, HbwMalloc4KB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(4 * KB);
+  ptr = (char *) HBW_malloc(4 * KB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
 
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc16KB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(16 * KB);
+  ptr = (char *) HBW_malloc(16 * KB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
 
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc256KB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(256 * KB);
+  ptr = (char *) HBW_malloc(256 * KB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc512KB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(512 * KB);
+  ptr = (char *) HBW_malloc(512 * KB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc1MB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(MB);
+  ptr = (char *) HBW_malloc(MB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
@@ -141,107 +141,107 @@ TEST_F(MALLOCTESTS, HbwMalloc1MB){
 TEST_F(MALLOCTESTS, HbwMalloc2MB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(2 * MB);
+  ptr = (char *) HBW_malloc(2 * MB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc4MB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(4 * MB);
+  ptr = (char *) HBW_malloc(4 * MB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc16MB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(16 * MB);
+  ptr = (char *) HBW_malloc(16 * MB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc256MB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(256 * MB);
+  ptr = (char *) HBW_malloc(256 * MB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc512MB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(512 * MB);
+  ptr = (char *) HBW_malloc(512 * MB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc1GB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(GB);
+  ptr = (char *) HBW_malloc(GB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc2GB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(2 * GB);
+  ptr = (char *) HBW_malloc(2 * GB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc4GB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(4 * GB);
+  ptr = (char *) HBW_malloc(4 * GB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
 TEST_F(MALLOCTESTS, HbwMalloc8GB){
   char *ptr = NULL;
   int ret = HBW_SUCCESS;
-  ptr = (char *) hbw_malloc(8 * GB);
+  ptr = (char *) HBW_malloc(8 * GB);
   if (NULL == ptr){
     ret = HBW_ERROR;
   }
   ptr[1024] ='a';
-  hbw_free(ptr);
+  HBW_free(ptr);
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
