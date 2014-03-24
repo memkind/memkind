@@ -1,0 +1,45 @@
+#!/bin/bash
+#
+# This shell script takes care creating and deleting accesible 
+# bandwidth files from PMTT tables
+### BEGIN INIT INFO
+# start - Create bandwidth file from PMTT table
+# stop  - Delete bandwidth file from /etc/
+# restart - Delete and recreate file from PMTT table
+### END INIT INFO
+ 
+ 
+start() {
+    echo "Generating bandwidth values"
+    /usr/sbin/pmtt_reader
+    echo "Bandwidth values available at /etc/numakind.info"
+}
+ 
+stop() {
+    echo "Delete Bandwidth values file"
+    rm /etc/numakind.info
+}
+
+case $1 in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    status)
+        FILE=/etc/numakind.info
+        if [ -f $FILE ];
+        then
+            echo "File $FILE exists"
+        else
+            echo "File $FILE does not exists"
+        fi
+        ;;
+esac
+ 
+exit 0
