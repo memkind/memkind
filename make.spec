@@ -13,6 +13,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: jemalloc
 BuildRequires: numactl
 BuildRequires: numactl-devel
+Requires(postun): initscripts
 
 %description
 numakind is a library which extends libnuma with the ability to
@@ -43,6 +44,11 @@ if [ $1 -eq 0 ] ; then
     /sbin/chkconfig --del numakind
 fi
 
+%postun
+if [ "$1" -ge "1" ] ; then
+    /sbin/service <script> condrestart >/dev/null 2>&1 || :
+fi
+
 %files
 %defattr(-,root,root,-)
 %{_includedir}/numakind.h
@@ -51,7 +57,7 @@ fi
 %{_libdir}/libnumakind.so.0
 %{_libdir}/libnumakind.so
 %{_sbindir}/numakind-pmtt
-/etc/init.d/numakind
+%{_initddir}/numakind
 %doc /usr/share/doc/numakind-%{version}/README.txt
 $(coverage_file)
 

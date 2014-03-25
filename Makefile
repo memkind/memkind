@@ -9,6 +9,7 @@ libdir ?= $(exec_prefix)/lib64
 includedir ?= $(prefix)/include
 datarootdir ?= $(prefix)/share
 docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
+initddir ?= /etc/rc.d/init.d
 
 CFLAGS_EXTRA = -fPIC -Wall -Werror -g -O0
 OBJECTS = numakind.o numakind_mcdram.o hbwmalloc.o
@@ -44,7 +45,7 @@ install:
 	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	$(INSTALL) numakind-pmtt $(DESTDIR)$(sbindir)
-	$(INSTALL) -d $(DESTDIR)/etc/init.d
-	$(INSTALL) numakind-init $(DESTDIR)/etc/init.d/numakind
+	$(INSTALL) -d $(DESTDIR)$(initddir)
+	$(INSTALL) numakind-init $(DESTDIR)$(initddir)/numakind
 
 .PHONY: all clean install
