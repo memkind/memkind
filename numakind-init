@@ -64,7 +64,6 @@ case $1 in
     force-reload)
         stop
         start
-        fi
         ;;
     status)
 
