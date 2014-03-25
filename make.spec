@@ -13,7 +13,6 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: jemalloc
 BuildRequires: numactl
 BuildRequires: numactl-devel
-Requires(postun): initscripts
 
 %description
 numakind is a library which extends libnuma with the ability to
