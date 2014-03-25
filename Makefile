@@ -44,6 +44,8 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
-	$(INSTALL) numakind_pmtt $(DESTDIR)$(sbindir) 
+	$(INSTALL) numakind_pmtt $(DESTDIR)$(sbindir)
+	$(INSTALL) -d $(DESTDIR)/etc/init.d
+	$(INSTALL) numakind-init $(DESTDIR)/etc/init.d/numakind
 
 .PHONY: all clean install
