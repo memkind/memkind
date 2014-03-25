@@ -153,12 +153,12 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
 }
 
 int main (int argc, char *argv[]){
-  
+
     int err = 0;
     FILE *fp = NULL;
     int *bandwidth = NULL;
     size_t nwrite;
-  
+
     bandwidth = (int *)je_malloc(sizeof(int) *
                                  NUMA_NUM_NODES);
     if (!bandwidth) {
@@ -184,9 +184,9 @@ int main (int argc, char *argv[]){
         return -4;
     }
     fclose(fp);
-  
+
     je_free(bandwidth);
     return 0;
 }
-  
-  
+
+
