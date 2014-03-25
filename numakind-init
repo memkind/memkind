@@ -7,13 +7,13 @@
 # Short-Description: Sets up numakind library
 # Description: Parses the PMTT table and creates the file /etc/numakind/node-bandwidth.
 #
-#              start - Create bandwidth file from PMTT table
+#              start - Create bandwidth file from PMTT table.
 #
-#              stop  - Delete bandwidth file from /etc/numakind
+#              stop  - Delete bandwidth file from /etc/numakind.
 #
-#              restart - Delete and recreate bandwidth file from PMTT table
+#              restart - Delete and recreate bandwidth file from PMTT table.
 #
-#              force-reload - Delete and recreate bandwidth file and ignore deletion errors
+#              force-reload - Delete and recreate bandwidth file.  Ignore deletion errors.
 #
 #              status - Print existance of bandwidth file
 # Default-Start: 3 4 5
