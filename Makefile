@@ -16,7 +16,7 @@ OBJECTS = numakind.o numakind_mcdram.o hbwmalloc.o
 all: libnumakind.so.0.0 numakind-pmtt
 
 clean:
-	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt
+	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt numakind_pmtt.o
 
 numakind.o: numakind.c numakind.h numakind_mcdram.h
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEPREFIX)/include -c numakind.c
