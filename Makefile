@@ -11,7 +11,7 @@ datarootdir ?= $(prefix)/share
 docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
 initddir ?= /etc/rc.d/init.d
 
-CFLAGS_EXTRA = -fPIC -Wall -Werror -g -O0
+CFLAGS_EXTRA = -fPIC -Wall -Werror -O3
 OBJECTS = numakind.o numakind_mcdram.o hbwmalloc.o
 
 all: libnumakind.so.0.0 numakind-pmtt
