@@ -24,6 +24,7 @@
 
 err=0
 FILE=/etc/numakind/node-bandwidth
+DIR=`dirname $FILE`
 
 start() {
     echo_success "creating bandwidth values file"
@@ -46,6 +47,14 @@ stop() {
         echo_success "deleted file: $FILE"
     else
         echo_failure "could not delete file: $FILE"
+    fi
+    rmdir $DIR
+    err=$?
+    if [ ! $err ] && [ ! -d $DIR ]
+    then
+        echo_success "deleted directory: $DIR"
+    else
+        echo_failure "could not delete directory: $DIR"
     fi
 }
 
