@@ -46,7 +46,7 @@ fi
 
 %postun
 if [ "$1" -ge "1" ] ; then
-    /sbin/service <script> condrestart >/dev/null 2>&1 || :
+    /sbin/service numakind condrestart >/dev/null 2>&1 || :
 fi
 
 %files
