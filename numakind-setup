@@ -8,16 +8,27 @@
 # restart - Delete and recreate file from PMTT table
 ### END INIT INFO
  
+err=0
+FILE=/etc/numakind/node-bandwidth
  
 start() {
-    echo "Generating bandwidth values"
-    /usr/sbin/pmtt_reader
-    echo "Bandwidth values available at /etc/numakind.info"
+    echo "LOG: <$0> creating bandwidth values file: $FILE"
+    /usr/sbin/numakind-pmtt
+    err=$?
+    if [ $err -ne 0 ]
+    then
+        echo "ERROR: <$0> could not create file: $FILE" 1>&2 
+    fi
 }
  
 stop() {
-    echo "Delete Bandwidth values file"
-    rm /etc/numakind.info
+    echo "LOG: <$0> deleting bandwidth values file: $FILE"
+    rm $FILE
+    err=$?
+    if [ $err -ne 0 ]
+    then
+        echo "ERROR: <$0> could not delete file: $FILE" 1>&2 
+    fi
 }
 
 case $1 in
@@ -29,17 +40,20 @@ case $1 in
         ;;
     restart)
         stop
-        start
+        if [ $err -eq 0 ]
+        then
+            start
+        fi
         ;;
     status)
-        FILE=/etc/numakind.info
+
         if [ -f $FILE ];
         then
-            echo "File $FILE exists"
+            echo "LOG: <$0> file $FILE exists"
         else
-            echo "File $FILE does not exists"
+            echo "LOG: <$0> File $FILE does not exists"
         fi
         ;;
 esac
  
-exit 0
+exit $err
