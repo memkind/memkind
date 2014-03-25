@@ -4,7 +4,7 @@ JEPREFIX ?= /usr/local
 VERSION ?= $(shell git describe --long | sed 's|^v||')
 prefix ?= /usr
 exec_prefix ?= $(prefix)
-sbindir ?= $(prefix)/sbin
+sbindir ?= $(exec_prefix)/sbin
 libdir ?= $(exec_prefix)/lib64
 includedir ?= $(prefix)/include
 datarootdir ?= $(prefix)/share
@@ -13,7 +13,7 @@ docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
 CFLAGS_EXTRA = -fPIC -Wall -Werror -g -O0
 OBJECTS = numakind.o numakind_mcdram.o hbwmalloc.o
 
-all: libnumakind.so.0.0
+all: libnumakind.so.0.0 numakind_pmtt
 
 clean:
 	rm -rf $(OBJECTS) libnumakind.so.0.0
@@ -31,8 +31,8 @@ libnumakind.so.0.0: $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libnumakind.so.0 -o libnumakind.so.0.0 $^
 
 
-numakind_pmtt: numakind_pmtt.c
-		$(CC) $(CFLAGS) -L. -lnumakind -o $@ $^
+numakind_pmtt: numakind_pmtt.c libnumakind.so.0.0
+	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -L. -lnumakind -lnuma -ljemalloc numakind_pmtt.c -o $@
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)
