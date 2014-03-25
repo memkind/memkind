@@ -38,7 +38,7 @@ make DESTDIR=%{buildroot} VERSION=%{version} install
 %post
 /sbin/ldconfig
 /sbin/chkconfig --add numakind
-/sbin/service numakind condrestart >/dev/null 2>&1
+/sbin/service numakind force-reload >/dev/null 2>&1
 
 %preun
 /sbin/service numakind stop >/dev/null 2>&1
