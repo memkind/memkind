@@ -157,9 +157,10 @@ int main (int argc, char *argv[]){
     int err = 0;
     FILE *fp = NULL;
     int *bandwidth = NULL;
+    size_t nwrite;
   
-    bandwidth = (int *)malloc(sizeof(int) *
-                              NUMA_NUM_NODES);
+    bandwidth = (int *)je_malloc(sizeof(int) *
+                                 NUMA_NUM_NODES);
     if (!bandwidth) {
         fprintf(stderr, "ERROR: <%s> in allocating bandwidth array\n", argv[0]);
         return -1;
@@ -184,7 +185,7 @@ int main (int argc, char *argv[]){
     }
     fclose(fp);
   
-    free(bandwidth);
+    je_free(bandwidth);
     return 0;
 }
   
