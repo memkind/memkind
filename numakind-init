@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+# This shell script takes care creating and deleting accesible 
+# bandwidth files from PMTT tables
+### BEGIN INIT INFO
+# Provides: numakind
+# Short-Description: Sets up numakind library
+# Description: Parses the PMTT table and creates the file /etc/numakind/node-bandwidth.
+#
+#              start - Create bandwidth file from PMTT table
+#
+#              stop  - Delete bandwidth file from /etc/numakind
+#
+#              restart - Delete and recreate bandwidth file from PMTT table
+#
+#              force-reload - Delete and recreate bandwidth file and ignore deletion errors
+#
+#              status - Print existance of bandwidth file
+### END INIT INFO
+ 
+err=0
+FILE=/etc/numakind/node-bandwidth
+ 
+start() {
+    log_success_msg "creating bandwidth values file"
+    /usr/sbin/numakind-pmtt
+    err=$?
+    if [ ! $err ] && [ -f $FILE ]
+    then
+        log_success_msg "created file: $FILE"
+    else
+        log_failure_msg "could not create file: $FILE" 
+    fi
+}
+ 
+stop() {
+    log_success_msg "deleting bandwidth values file"
+    rm $FILE
+    err=$?
+    if [ ! $err ] && [ ! -f $FILE ]
+    then
+        log_success_msg "deleted file: $FILE"
+    else
+        log_failure_msg "could not delete file: $FILE"
+    fi
+}
+
+case $1 in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        if [ ! $err ]
+        then
+            start
+        fi
+        ;;
+    force-reload)
+        stop
+        start
+        fi
+        ;;
+    status)
+
+        if [ -f $FILE ];
+        then
+            log_success_msg "file $FILE exists"
+        else
+            log_success_msg "file $FILE does not exists"
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|force-reload}"
+        err=2
+esac
+log_end_msg $err 
+exit $err
