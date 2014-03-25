@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <limits.h>
 #include <pthread.h>
@@ -66,8 +67,8 @@ int numakind_mcdram_nodemask(unsigned long *nodemask, unsigned long maxnode)
                 init_err = NUMAKIND_ERROR_MALLOC;
             }
             if (!init_err) {
-                init_err = parse_bandwidth_node(NUMA_NUM_NODES, bandwidth,
-                                                NODE_BANDWIDTH_PATH);
+                init_err = parse_node_bandwidth(NUMA_NUM_NODES, bandwidth,
+                                                NUMAKIND_BANDWIDTH_PATH);
             }
             if (!init_err) {
                 init_err = create_bandwidth_nodes(NUMA_NUM_NODES, bandwidth,
@@ -119,7 +120,7 @@ int numakind_mcdram_nodemask(unsigned long *nodemask, unsigned long maxnode)
     return init_err;
 }
 
-static int parse_numa_bandwidth(int num_bandwidth, int *bandwidth,
+static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
                const char *bandwidth_path)
 {
     FILE *fid;
@@ -127,12 +128,13 @@ static int parse_numa_bandwidth(int num_bandwidth, int *bandwidth,
     int err = 0;
     fid = fopen(bandwidth_path, "r");
     if (!fid) {
-        err = NUMAKIND_PMTT_ERROR;
+        err = NUMAKIND_ERROR_PMTT;
     }
     if (!err) {
         nread = fread(bandwidth, sizeof(int), num_bandwidth, fid);
         if (nread != num_bandwidth) {
-           err = NUMAKIND_PMTT_ERROR;
+           err = NUMAKIND_ERROR_PMTT;
+        }
     }
     return err;
 }

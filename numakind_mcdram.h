@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-const char *NUMAKIND_BANDWIDTH_PATH = "/etc/numakind/node-bandwidth";
+static const char *NUMAKIND_BANDWIDTH_PATH = "/etc/numakind/node-bandwidth";
 
 int numakind_mcdram_isavail(void);
 int numakind_mcdram_nodemask(unsigned long *nodemask, unsigned long maxnode);

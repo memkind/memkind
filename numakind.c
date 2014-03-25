@@ -38,7 +38,7 @@ void numakind_error_message(int err, char *msg, size_t size)
             strncpy(msg, "<numakind> Initializing for MCDRAM failed", size);
             break;
         case NUMAKIND_ERROR_PMTT:
-            strncpy(msg, "<numakind> Parsing PMTT table failed", size);
+            snprintf(msg, size, "<numakind> Unable to parse bandwidth table: %s", NUMAKIND_BANDWIDTH_PATH);
             break;
         case NUMAKIND_ERROR_TIEDISTANCE:
             strncpy(msg, "<numakind> Two NUMA memory nodes are equidistant from target cpu node", size);
