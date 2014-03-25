@@ -12,9 +12,8 @@
 #include <bits/syscall.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <jemalloc/jemalloc.h>
 
-const int STRLEN = 512;
+static const int STRLEN = 512;
 // The include file actbl.h comes from acpica which is available from this URL:
 // https://acpica.org/sites/acpica/files/acpica-unix-20130517.tar.gz
 //
@@ -68,6 +67,8 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
     if (numa_available() == -1) {
         return NUMAKIND_ERROR_MCDRAM;
     }
+
+
     mfd = open(pmtt_path, O_RDONLY);
     if (mfd == -1) {
         return NUMAKIND_ERROR_PMTT;
@@ -163,7 +164,7 @@ int main (int argc, char *argv[]){
     size_t nwrite;
     char dir[STRLEN];
 
-    bandwidth = (int *)je_malloc(sizeof(int) *
+    bandwidth = (int *)malloc(sizeof(int) *
                                  NUMA_NUM_NODES);
     if (!bandwidth) {
         fprintf(stderr, "ERROR: <%s> in allocating bandwidth array\n", argv[0]);
@@ -197,7 +198,7 @@ int main (int argc, char *argv[]){
     }
     fclose(fp);
 
-    je_free(bandwidth);
+    free(bandwidth);
     return 0;
 }
 
