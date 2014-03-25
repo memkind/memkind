@@ -40,8 +40,11 @@ make DESTDIR=%{buildroot} VERSION=%{version} install
 /sbin/service numakind force-reload >/dev/null 2>&1
 
 %preun
-/sbin/service numakind stop >/dev/null 2>&1
-/sbin/chkconfig --del numakind
+if [ -z "$1" ] || [ "$1" == 0 ]
+then
+    /sbin/service numakind stop >/dev/null 2>&1
+    /sbin/chkconfig --del numakind
+fi
 
 %postun
 /sbin/ldconfig
