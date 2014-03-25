@@ -41,6 +41,8 @@ make DESTDIR=%{buildroot} VERSION=%{version} install
 %{_libdir}/libnumakind.so.0.0
 %{_libdir}/libnumakind.so.0
 %{_libdir}/libnumakind.so
+%{_sbindir}/numakind-pmtt
+/etc/init.d/numakind
 %doc /usr/share/doc/numakind-%{version}/README.txt
 $(coverage_file)
 
