@@ -49,6 +49,14 @@ stop() {
     fi
 }
 
+restart() {
+    stop
+    if [ ! $err ]
+    then
+        start
+    fi
+}
+
 case $1 in
     start)
         start
@@ -57,11 +65,7 @@ case $1 in
         stop
         ;;
     restart)
-        stop
-        if [ ! $err ]
-        then
-            start
-        fi
+        restart
         ;;
     force-reload)
         stop
@@ -72,12 +76,18 @@ case $1 in
         if [ -f $FILE ];
         then
             echo_success "file $FILE exists"
+            err=0
         else
-            echo_success "file $FILE does not exists"
+            echo_failure "file $FILE does not exists"
+            err=3
         fi
         ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
     *)
-        echo "Usage: $0 {start|stop|restart|force-reload}"
+        echo "Usage: $0 {start|stop|restart|force-reload|status|condrestart|try-restart}"
         err=2
 esac
 exit $err
