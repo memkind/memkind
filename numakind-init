@@ -20,30 +20,32 @@
 # Default-Stop: 0 1 2 6
 ### END INIT INFO
 
+. /etc/rc.d/init.d/functions
+
 err=0
 FILE=/etc/numakind/node-bandwidth
 
 start() {
-    log_success_msg "creating bandwidth values file"
+    echo_success "creating bandwidth values file"
     numakind-pmtt
     err=$?
     if [ ! $err ] && [ -f $FILE ]
     then
-        log_success_msg "created file: $FILE"
+        echo_success "created file: $FILE"
     else
-        log_failure_msg "could not create file: $FILE"
+        echo_failure "could not create file: $FILE"
     fi
 }
 
 stop() {
-    log_success_msg "deleting bandwidth values file"
+    echo_success "deleting bandwidth values file"
     rm $FILE
     err=$?
     if [ ! $err ] && [ ! -f $FILE ]
     then
-        log_success_msg "deleted file: $FILE"
+        echo_success "deleted file: $FILE"
     else
-        log_failure_msg "could not delete file: $FILE"
+        echo_failure "could not delete file: $FILE"
     fi
 }
 
@@ -69,9 +71,9 @@ case $1 in
 
         if [ -f $FILE ];
         then
-            log_success_msg "file $FILE exists"
+            echo_success "file $FILE exists"
         else
-            log_success_msg "file $FILE does not exists"
+            echo_success "file $FILE does not exists"
         fi
         ;;
     *)
