@@ -1,7 +1,7 @@
 CC=g++
-CFLAGS=-O3 -Wall
+CFLAGS=-O3 -Wall -fopenmp
 INCLUDES=-I./include
-LIBS=-lnumakind -lnuma -lgtest -lpthread -ljemalloc
+LIBS=-lnumakind -lnuma -lgtest -lpthread -ljemalloc -lgomp
 bin = $(shell mkdir -p bin)
 
 all:			$(bin) all_api malloc_tests threaded_malloc
