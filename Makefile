@@ -13,7 +13,7 @@ docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
 CFLAGS_EXTRA = -fPIC -Wall -Werror -g -O0
 OBJECTS = numakind.o numakind_mcdram.o hbwmalloc.o
 
-all: libnumakind.so.0.0 numakind_pmtt
+all: libnumakind.so.0.0 numakind-pmtt
 
 clean:
 	rm -rf $(OBJECTS) libnumakind.so.0.0
@@ -31,7 +31,7 @@ libnumakind.so.0.0: $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libnumakind.so.0 -o libnumakind.so.0.0 $^
 
 
-numakind_pmtt: numakind_pmtt.c libnumakind.so.0.0
+numakind-pmtt: numakind_pmtt.c libnumakind.so.0.0
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -L. -lnumakind -lnuma -ljemalloc numakind_pmtt.c -o $@
 
 install:
@@ -44,7 +44,7 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
-	$(INSTALL) numakind_pmtt $(DESTDIR)$(sbindir)
+	$(INSTALL) numakind-pmtt $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)/etc/init.d
 	$(INSTALL) numakind-init $(DESTDIR)/etc/init.d/numakind
 
