@@ -1,8 +1,7 @@
 CC=g++
 CFLAGS=-O3 -Wall
-ROOT_DIR=/home/mic/mcdram/tests
-INCLUDES=-I$(MCDRAM_INSTALL_DIR)/include/ -I$(ROOT_DIR)/include/
-LIBS=-L$(MCDRAM_INSTALL_DIR)/lib64 -L$(JEMALLOC_PATH)/lib64 -lnumakind -lnuma -lgtest -lpthread -ljemalloc
+INCLUDES=-I./include
+LIBS=-lnumakind -lnuma -lgtest -lpthread -ljemalloc
 bin = $(shell mkdir -p bin)
 
 all:			$(bin) all_api malloc_tests threaded_malloc
@@ -26,7 +25,7 @@ malloc_tests.o:		api_tests/malloc_tests.cpp include/common.h
 			$(CC) $(CFLAGS) $(INCLUDES) -c api_tests/malloc_tests.cpp -o bin/malloc_tests.o
 
 threaded_malloc.o:	api_tests/threaded_malloc.cpp include/common.h
-			$(CC) $(CFLAGS) -fopenmp $(INCLUDES) -c api_tests/threaded_malloc.cpp -o bin/threaded_malloc.o 
+			$(CC) $(CFLAGS) -fopenmp $(INCLUDES) -c api_tests/threaded_malloc.cpp -o bin/threaded_malloc.o
 
 clean:
 			rm -f *~ *.o bin/* include/*~
