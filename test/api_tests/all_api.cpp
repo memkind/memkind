@@ -29,6 +29,9 @@
 */
 
 #include "common.h"
+#include "omp.h"
+
+#define NTHREADS 2
 
 class APITESTS: public :: testing::Test
 {
@@ -48,6 +51,41 @@ protected:
   }
 
 };
+
+class THREADEDMALLOC: public :: testing::Test
+{
+
+protected:
+  
+  THREADEDMALLOC()
+  {}
+  
+  void SetUp()
+  {}
+  
+  void TearDown()
+  {}
+
+};
+
+
+
+class MALLOCTESTS: public :: testing::Test
+{
+  
+protected:
+  
+  MALLOCTESTS()
+  {}
+  
+  void SetUp()
+  {}
+  
+  void TearDown()
+  {}
+
+};
+
 
 TEST_F(APITESTS,HbwExistsTest){
 
@@ -207,6 +245,308 @@ TEST_F(APITESTS, HbwAllocateMemAlignPsize2M){
   }
 
  exit:
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc1KB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(KB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+
+  ptr[1024] ='a';
+
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc2KB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(2*KB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+
+
+TEST_F(MALLOCTESTS, HbwMalloc4KB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(4 * KB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc16KB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(16 * KB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc256KB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(256 * KB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc512KB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(512 * KB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc1MB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(MB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+
+TEST_F(MALLOCTESTS, HbwMalloc2MB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(2 * MB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc4MB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(4 * MB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc16MB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(16 * MB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc256MB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(256 * MB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc512MB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(512 * MB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc1GB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(GB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc2GB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(2 * GB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc4GB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(4 * GB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(MALLOCTESTS, HbwMalloc8GB){
+  char *ptr = NULL;
+  int ret = HBW_SUCCESS;
+  ptr = (char *) HBW_malloc(8 * GB);
+  if (NULL == ptr){
+    ret = HBW_ERROR;
+  }
+  ptr[1024] ='a';
+  HBW_free(ptr);
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(THREADEDMALLOC, HbwMalloc1KB){
+
+  char *ptr[NTHREADS];
+  int ret = HBW_SUCCESS;
+  omp_set_num_threads(NTHREADS);
+
+#pragma omp parallel
+  {
+    int tid = omp_get_thread_num();
+    ptr[tid] = (char *) HBW_malloc(KB);
+    if (NULL == ptr[tid]){
+      ret = HBW_ERROR;
+    }
+  
+    ptr[tid][1024] ='a';
+    HBW_free(ptr[tid]);
+  }
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(THREADEDMALLOC, HbwMalloc4KB){
+
+  char *ptr[NTHREADS];
+  int ret = HBW_SUCCESS;
+  omp_set_num_threads(NTHREADS);
+
+#pragma omp parallel
+  {
+    int tid = omp_get_thread_num();
+    ptr[tid] = (char *) HBW_malloc(4 * KB);
+    if (NULL == ptr[tid]){
+      ret = HBW_ERROR;
+    }
+  
+    ptr[tid][1024] ='a';
+    HBW_free(ptr[tid]);
+  }
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+
+TEST_F(THREADEDMALLOC, HbwMalloc2MB){
+
+  char *ptr[NTHREADS];
+  int ret = HBW_SUCCESS;
+  omp_set_num_threads(NTHREADS);
+
+#pragma omp parallel
+  {
+    int tid = omp_get_thread_num();
+    ptr[tid] = (char *) HBW_malloc(2 * MB);
+    if (NULL == ptr[tid]){
+      ret = HBW_ERROR;
+    }
+  
+    ptr[tid][1024] ='a';
+    HBW_free(ptr[tid]);
+  }
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+
+TEST_F(THREADEDMALLOC, HbwMalloc16MB){
+
+  char *ptr[NTHREADS];
+  int ret = HBW_SUCCESS;
+  omp_set_num_threads(NTHREADS);
+
+#pragma omp parallel
+  {
+    int tid = omp_get_thread_num();
+    ptr[tid] = (char *) HBW_malloc(16 * MB);
+    if (NULL == ptr[tid]){
+      ret = HBW_ERROR;
+    }
+  
+    ptr[tid][1024] ='a';
+    HBW_free(ptr[tid]);
+  }
+  ASSERT_EQ(HBW_SUCCESS, ret);
+}
+
+TEST_F(THREADEDMALLOC, HbwMalloc2GB){
+
+  char *ptr[NTHREADS];
+  int ret = HBW_SUCCESS;
+  omp_set_num_threads(NTHREADS);
+
+#pragma omp parallel
+  {
+    int tid = omp_get_thread_num();
+    ptr[tid] = (char *) HBW_malloc(2 * GB);
+    if (NULL == ptr[tid]){
+      ret = HBW_ERROR;
+    }
+  
+    ptr[tid][1024] ='a';
+    HBW_free(ptr[tid]);
+  }
   ASSERT_EQ(HBW_SUCCESS, ret);
 }
 
