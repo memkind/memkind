@@ -7,11 +7,14 @@
 #include <pthread.h>
 #include <numa.h>
 #include <numaif.h>
+#include <libgen.h>
 #include <sys/syscall.h>
 #include <bits/syscall.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <jemalloc/jemalloc.h>
 
+const int STRLEN = 512;
 // The include file actbl.h comes from acpica which is available from this URL:
 // https://acpica.org/sites/acpica/files/acpica-unix-20130517.tar.gz
 //
@@ -158,12 +161,21 @@ int main (int argc, char *argv[]){
     FILE *fp = NULL;
     int *bandwidth = NULL;
     size_t nwrite;
+    char dir[STRLEN];
 
     bandwidth = (int *)je_malloc(sizeof(int) *
                                  NUMA_NUM_NODES);
     if (!bandwidth) {
         fprintf(stderr, "ERROR: <%s> in allocating bandwidth array\n", argv[0]);
         return -1;
+    }
+
+    strncpy(dir, NUMAKIND_BANDWIDTH_PATH, STRLEN);
+    dirname(dir);
+    err = mkdir(dir, 0755);
+    if (err && err != EEXIST) {
+        fprintf(stderr, "ERROR: <%s> creating output directory %s\n", argv[0], dir);
+        return -2;
     }
 
     fp = fopen(NUMAKIND_BANDWIDTH_PATH, "w");
@@ -175,7 +187,7 @@ int main (int argc, char *argv[]){
                                bandwidth,
                                PMTT_PATH);
     if (err) {
-        fprintf(stderr, "ERROR: <%s> opening %s for reading\n", argv[0], PMTT_PATH);
+        fprintf(stderr, "ERROR: <%s> parsing file %s\n", argv[0], PMTT_PATH);
         return -3;
 
     }
