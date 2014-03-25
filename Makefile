@@ -30,9 +30,8 @@ hbwmalloc.o: hbwmalloc.c hbwmalloc.h numakind.h numakind_mcdram.h
 libnumakind.so.0.0: $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libnumakind.so.0 -o libnumakind.so.0.0 $^
 
-
-numakind-pmtt: numakind_pmtt.c libnumakind.so.0.0
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -L. -lnumakind -lnuma -ljemalloc numakind_pmtt.c -o $@
+numakind-pmtt: numakind_pmtt.c $(OBJECTS)
+	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) $(OBJECTS) -lnuma -ljemalloc numakind_pmtt.c -o $@
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)
