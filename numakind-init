@@ -45,16 +45,16 @@ stop() {
     if [ ! $err ] && [ ! -f $FILE ]
     then
         echo_success "deleted file: $FILE"
+        rmdir $DIR
+        err=$?
+        if [ ! $err ] && [ ! -d $DIR ]
+        then
+            echo_success "deleted directory: $DIR"
+        else
+            echo_failure "could not delete directory: $DIR"
+        fi
     else
         echo_failure "could not delete file: $FILE"
-    fi
-    rmdir $DIR
-    err=$?
-    if [ ! $err ] && [ ! -d $DIR ]
-    then
-        echo_success "deleted directory: $DIR"
-    else
-        echo_failure "could not delete directory: $DIR"
     fi
 }
 
@@ -81,7 +81,6 @@ case $1 in
         start
         ;;
     status)
-
         if [ -f $FILE ];
         then
             echo_success "file $FILE exists"
