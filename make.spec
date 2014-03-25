@@ -36,18 +36,16 @@ make DESTDIR=%{buildroot} VERSION=%{version} install
 %clean
 
 %post
+/sbin/ldconfig
 /sbin/chkconfig --add numakind
+/sbin/service numakind condrestart >/dev/null 2>&1
 
 %preun
-if [ $1 -eq 0 ] ; then
-    /sbin/service numakind stop >/dev/null 2>&1
-    /sbin/chkconfig --del numakind
-fi
+/sbin/service numakind stop >/dev/null 2>&1
+/sbin/chkconfig --del numakind
 
 %postun
-if [ "$1" -ge "1" ] ; then
-    /sbin/service numakind condrestart >/dev/null 2>&1 || :
-fi
+/sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
