@@ -38,7 +38,7 @@ make DESTDIR=%{buildroot} VERSION=%{version} install
 /sbin/chkconfig --add numakind
 
 %preun
-if [$1 -eq 0 ] ; then
+if [ $1 -eq 0 ] ; then
     /sbin/service numakind stop >/dev/null 2>&1
     /sbin/chkconfig --del numakind
 fi
