@@ -30,7 +30,7 @@ start() {
     echo_success "creating bandwidth values file"
     numakind-pmtt
     err=$?
-    if [ ! $err ] && [ -f $FILE ]
+    if [ $err -eq 0 ] && [ -f $FILE ]
     then
         echo_success "created file: $FILE"
     else
@@ -42,12 +42,12 @@ stop() {
     echo_success "deleting bandwidth values file"
     rm $FILE
     err=$?
-    if [ ! $err ] && [ ! -f $FILE ]
+    if [ $err -eq 0 ] && [ ! -f $FILE ]
     then
         echo_success "deleted file: $FILE"
         rmdir $DIR
         err=$?
-        if [ ! $err ] && [ ! -d $DIR ]
+        if [ $err -eq 0 ] && [ ! -d $DIR ]
         then
             echo_success "deleted directory: $DIR"
         else
@@ -60,7 +60,7 @@ stop() {
 
 restart() {
     stop
-    if [ ! $err ]
+    if [ $err -eq 0 ]
     then
         start
     fi
