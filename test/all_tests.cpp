@@ -95,18 +95,11 @@ TEST_F(APITESTS,HbwExistsTest){
 
 }
 
-TEST_F(APITESTS,HbwSetGetPolicyPreferred){
-
+TEST_F(APITESTS,HbwPolicy){
+  ASSERT_EQ(1, HBW_getpolicy());
   HBW_setpolicy(2);
   ASSERT_EQ(2, HBW_getpolicy());
 }
-
-TEST_F(APITESTS,HbwSetGetPolicyBind){
-
-  HBW_setpolicy(1);
-  ASSERT_EQ(1, HBW_getpolicy());
-}
-
 
 
 TEST_F(APITESTS, HbwMalloc2GB){
