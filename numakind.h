@@ -6,10 +6,10 @@ extern "C" {
 
 typedef enum {
     NUMAKIND_DEFAULT = 0,
-    NUMAKIND_MCDRAM,
-    NUMAKIND_MCDRAM_HUGETLB,
-    NUMAKIND_MCDRAM_PREFERRED,
-    NUMAKIND_MCDRAM_PREFERRED_HUGETLB,
+    NUMAKIND_HBW,
+    NUMAKIND_HBW_HUGETLB,
+    NUMAKIND_HBW_PREFERRED,
+    NUMAKIND_HBW_PREFERRED_HUGETLB,
     NUMAKIND_NUM_KIND
 } numakind_t;
 
@@ -20,7 +20,7 @@ typedef enum {
     NUMAKIND_ERROR_MALLCTL = -4,
     NUMAKIND_ERROR_MALLOC = -5,
     NUMAKIND_ERROR_GETCPU = -6,
-    NUMAKIND_ERROR_MCDRAM = -7,
+    NUMAKIND_ERROR_HBW = -7,
     NUMAKIND_ERROR_PMTT = -8,
     NUMAKIND_ERROR_TIEDISTANCE = -9,
     NUMAKIND_ERROR_ALIGNMENT = -10,
@@ -33,13 +33,13 @@ static const size_t NUMAKIND_ERROR_MESSAGE_SIZE = 128;
 void numakind_error_message(int err, char *msg, size_t size);
 
 /* returns 1 if numa kind is availble else 0 */
-int numakind_isavail(int kind);
+int numakind_is_available(int kind);
 
 /* sets nodemask for the nearest numa node for the specified numa kind */
-int numakind_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode);
+int numakind_get_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode);
 
 /* set flags for call to mmap */
-int numakind_mmap_flags(int kind, int *flags);
+int numakind_get_mmap_flags(int kind, int *flags);
 
 /* mbind to the nearest numa node of the specified kind */
 int numakind_mbind(int kind, void *addr, size_t len);
