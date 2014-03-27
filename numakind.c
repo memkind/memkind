@@ -247,7 +247,6 @@ static int numakind_getarena(numakind_t kind, int *arena)
 {
     static int init_err = 0;
     static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
-    static pthread_mutex_t destroy_mutex = PTHREAD_MUTEX_INITIALIZER;
     static int is_init = 0;
     static int num_cpu = 0;
     static unsigned int map_len = 0;
@@ -299,7 +298,7 @@ static int numakind_getarena(numakind_t kind, int *arena)
     if (kind < 0 && !init_err) {
         /* Destroy arena_map */
         if (map_len) {
-            pthread_mutex_lock(&destroy_mutex);
+            pthread_mutex_lock(&init_mutex);
             if (map_len) {
                 for (i = 0; i < map_len && !init_err; ++i) {
                     init_err = je_mallctl("arenas.purge", arena_map + i,
@@ -310,7 +309,7 @@ static int numakind_getarena(numakind_t kind, int *arena)
                 map_len = 0;
                 num_cpu = 0;
                 is_init = 0;
-                pthread_mutex_unlock(&destroy_mutex);
+                pthread_mutex_unlock(&init_mutex);
             }
         }
         init_err = init_err ? NUMAKIND_ERROR_MALLCTL : 0;
