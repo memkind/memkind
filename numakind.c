@@ -98,7 +98,7 @@ int numakind_mmap_flags(int kind, int *flags)
     return err;
 }
 
-int numakind_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode)
+int numakind_get_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};
     int err = 0;
@@ -127,7 +127,7 @@ int numakind_mbind(int kind, void *addr, size_t size)
     nodemask_t nodemask;
     int err = 0;
     int mode;
-    err = numakind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
+    err = numakind_get_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
     if (!err) {
         switch (kind) {
             case NUMAKIND_HBW:
