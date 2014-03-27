@@ -63,6 +63,8 @@ int numakind_isavail(int kind)
     switch (kind) {
         case NUMAKIND_MCDRAM:
         case NUMAKIND_MCDRAM_HUGETLB:
+        case NUMAKIND_MCDRAM_PREFERRED:
+        case NUMAKIND_MCDRAM_PREFERRED_HUGETLB:
             result = numakind_mcdram_isavail();
             break;
         case NUMAKIND_DEFAULT:
@@ -81,8 +83,10 @@ int numakind_mmap_flags(int kind, int *flags)
     int err = 0;
     switch (kind) {
         case NUMAKIND_MCDRAM_HUGETLB:
+        case NUMAKIND_MCDRAM_PREFERRED_HUGETLB:
             *flags = MAP_HUGETLB;
         case NUMAKIND_MCDRAM:
+        case NUMAKIND_MCDRAM_PREFERRED:
         case NUMAKIND_DEFAULT:
             *flags = 0;
             break;
@@ -101,9 +105,13 @@ int numakind_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode)
 
     switch (kind) {
         case NUMAKIND_MCDRAM:
+        case NUMAKIND_MCDRAM_HUGETLB:
+        case NUMAKIND_MCDRAM_PREFERRED:
+        case NUMAKIND_MCDRAM_PREFERRED_HUGETLB:
             err = numakind_mcdram_nodemask(nodemask, maxnode);
             break;
-        case NUMAKIND_DEFAULT:            numa_bitmask_clearall(&nodemask_bm);
+        case NUMAKIND_DEFAULT:
+            numa_bitmask_clearall(&nodemask_bm);
             numa_bitmask_setbit(&nodemask_bm, numa_preferred());
             break;
         default:
@@ -118,13 +126,27 @@ int numakind_mbind(int kind, void *addr, size_t size)
 {
     nodemask_t nodemask;
     int err = 0;
-    if (!numakind_isavail(kind)) {
-        err = NUMAKIND_ERROR_UNAVAILABLE;
-    }
-    else {
-        numakind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
-        err = mbind(addr, size, MPOL_BIND, nodemask.n, NUMA_NUM_NODES, 0);
-        err = err ? NUMAKIND_ERROR_MBIND : 0;
+    int mode;
+    err = numakind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
+    if (!err) {
+        switch (kind) {
+            case NUMAKIND_MCDRAM:
+            case NUMAKIND_MCDRAM_HUGETLB:
+                mode = MPOL_BIND;
+                break;
+            case NUMAKIND_MCDRAM_PREFERRED:
+            case NUMAKIND_MCDRAM_PREFERRED_HUGETLB:
+            case NUMAKIND_DEFAULT:
+                mode = MPOL_PREFERRED;
+                break;
+            default:
+                err = NUMAKIND_ERROR_UNAVAILABLE;
+                break;
+        }
+        if (!err) {
+            err = mbind(addr, size, mode, nodemask.n, NUMA_NUM_NODES, 0);
+            err = err ? NUMAKIND_ERROR_MBIND : 0;
+        }
     }
     return err;
 }

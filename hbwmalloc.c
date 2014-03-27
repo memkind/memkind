@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include <pthread.h>
 
 #include "hbwmalloc.h"
@@ -23,61 +25,73 @@ int HBW_IsHBWAvailable(void)
 
 void *HBW_malloc(size_t size)
 {
-    void *result;
-    result = numakind_malloc(NUMAKIND_MCDRAM, size);
-    if (!result && HBW_getpolicy() == HBW_POLICY_PREFERRED) {
-        result = numakind_malloc(NUMAKIND_DEFAULT, size);
+    int kind;
+    if (HBW_getpolicy() == HBW_POLICY_BIND) {
+        kind = NUMAKIND_MCDRAM;
     }
-    return result;
+    else {
+        kind = NUMAKIND_MCDRAM_PREFERRED;
+    }
+    return numakind_malloc(kind, size);
 }
 
 void *HBW_calloc(size_t num, size_t size)
 {
-    void *result;
-    result = numakind_calloc(NUMAKIND_MCDRAM, num, size);
-    if (!result && HBW_getpolicy() == HBW_POLICY_PREFERRED) {
-        result = numakind_calloc(NUMAKIND_DEFAULT, num, size);
+    int kind;
+    if (HBW_getpolicy() == HBW_POLICY_BIND) {
+        kind = NUMAKIND_MCDRAM;
     }
-    return result;
+    else {
+        kind = NUMAKIND_MCDRAM_PREFERRED;
+    }
+    return numakind_calloc(kind, num, size);
 }
 
 int HBW_allocate_memalign(void **memptr, size_t alignment, size_t size)
 {
-    int err;
-    err = numakind_posix_memalign(NUMAKIND_MCDRAM, memptr, alignment, size);
-    if (err && HBW_getpolicy() == HBW_POLICY_PREFERRED) {
-        err = numakind_posix_memalign(NUMAKIND_DEFAULT, memptr, alignment,
-                                      size);
+    int kind;
+    if (HBW_getpolicy() == HBW_POLICY_BIND) {
+        kind = NUMAKIND_MCDRAM;
     }
-    return err;
+    else {
+        kind = NUMAKIND_MCDRAM_PREFERRED;
+    }
+    return numakind_posix_memalign(kind, memptr, alignment, size);
 }
 
 int HBW_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
     int pagesize)
 {
-    int err;
-    if (pagesize == HBW_PAGESIZE_2MB) {
-        err = numakind_posix_memalign(NUMAKIND_MCDRAM_HUGETLB, memptr, 
-                                      alignment, size);
+    int kind;
+    if (HBW_getpolicy() == HBW_POLICY_BIND) {
+        if (pagesize == HBW_PAGESIZE_2MB) {
+            kind = NUMAKIND_MCDRAM_HUGETLB;
+        }
+        else {
+            kind = NUMAKIND_MCDRAM;
+        }
     }
     else {
-        err = numakind_posix_memalign(NUMAKIND_MCDRAM, memptr, alignment, size);
+        if (pagesize == HBW_PAGESIZE_2MB) {
+            kind = NUMAKIND_MCDRAM_PREFERRED_HUGETLB;
+        }
+        else {
+            kind = NUMAKIND_MCDRAM_PREFERRED;
+        }
     }
-    if (err && HBW_getpolicy() == HBW_POLICY_PREFERRED) {
-        err = numakind_posix_memalign(NUMAKIND_DEFAULT, memptr, alignment,
-                                      size);
-    }
-    return err;
+    return numakind_posix_memalign(kind, memptr, alignment, size);
 }
 
 void *HBW_realloc(void *ptr, size_t size)
 {
-    void *result;
-    result = numakind_realloc(NUMAKIND_MCDRAM, ptr, size);
-    if (!result && HBW_getpolicy() == HBW_POLICY_PREFERRED) {
-        result = numakind_realloc(NUMAKIND_DEFAULT, ptr, size);
+    int kind;
+    if (HBW_getpolicy() == HBW_POLICY_BIND) {
+        kind = NUMAKIND_MCDRAM;
     }
-    return result;
+    else {
+        kind = NUMAKIND_MCDRAM_PREFERRED;
+    }
+    return numakind_realloc(kind, ptr, size);
 }
 
 void HBW_free(void *ptr)
@@ -89,10 +103,34 @@ static inline int HBW_policy(int mode)
 {
     static pthread_mutex_t policy_mutex = PTHREAD_MUTEX_INITIALIZER;
     static int policy = HBW_POLICY_BIND;
+    static int is_set = 0; /* Policy can be set only once */
+    int err = 0;
+
+    if (!mode) {
+        return policy;
+    }
+
     if (mode == HBW_POLICY_BIND || mode == HBW_POLICY_PREFERRED) {
-        pthread_mutex_lock(&policy_mutex);
-        policy = mode;
-        pthread_mutex_unlock(&policy_mutex);
+        if (is_set == 0) {
+            pthread_mutex_lock(&policy_mutex);
+            if (is_set == 0) {
+                policy = mode;
+                is_set = 1;
+            }
+            else {
+                err = 1;
+            }
+            pthread_mutex_unlock(&policy_mutex);
+        }
+        else {
+            err = 1;
+        }
+        if (err) {
+            fprintf(stderr, "WARNING: HBW_setpolicy() called more than once, only first call heeded.\n");
+        }
+    }
+    else {
+        fprintf(stderr, "WARNING: HBW_setpolicy() called with unknown mode %i, ignored.\n", mode);
     }
     return policy;
 }
