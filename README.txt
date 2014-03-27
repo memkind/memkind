@@ -2,9 +2,9 @@ Christopher Cantalupo <christopher.m.cantalupo@intel.com>
 2014 March 21
 
 This directory includes a re-factorization of the modifications made
-for MCDRAM.  It was noted that no modifications have been made for the
-case where previously freed mmap'ed regions are "recycled", only that
-mbind() is called after mmap().  
+for high bandwidth memory.  It was noted that no modifications have
+been made for the case where previously freed mmap'ed regions are
+"recycled", only that mbind() is called after mmap().
 
 The default behavior of jemalloc is to use a hash of the thread ID to
 choose the arena where the memory will be allocated.  The table that

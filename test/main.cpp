@@ -21,7 +21,7 @@
  estoppel or otherwise. Any license under such intellectual property rights
  must be express and approved by Intel in writing.
 
- Desription: Main file for google-test setup for MCDRAM-tests
+ Desription: Main file for google-test setup for HBW-memory tests
 
  */
 
