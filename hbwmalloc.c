@@ -19,7 +19,7 @@ void HBW_setpolicy(int mode)
 
 int HBW_IsHBWAvailable(void)
 {
-    return numakind_isavail(NUMAKIND_MCDRAM);
+    return numakind_isavail(NUMAKIND_HBW);
 }
 
 
@@ -27,10 +27,10 @@ void *HBW_malloc(size_t size)
 {
     int kind;
     if (HBW_getpolicy() == HBW_POLICY_BIND) {
-        kind = NUMAKIND_MCDRAM;
+        kind = NUMAKIND_HBW;
     }
     else {
-        kind = NUMAKIND_MCDRAM_PREFERRED;
+        kind = NUMAKIND_HBW_PREFERRED;
     }
     return numakind_malloc(kind, size);
 }
@@ -39,10 +39,10 @@ void *HBW_calloc(size_t num, size_t size)
 {
     int kind;
     if (HBW_getpolicy() == HBW_POLICY_BIND) {
-        kind = NUMAKIND_MCDRAM;
+        kind = NUMAKIND_HBW;
     }
     else {
-        kind = NUMAKIND_MCDRAM_PREFERRED;
+        kind = NUMAKIND_HBW_PREFERRED;
     }
     return numakind_calloc(kind, num, size);
 }
@@ -51,10 +51,10 @@ int HBW_allocate_memalign(void **memptr, size_t alignment, size_t size)
 {
     int kind;
     if (HBW_getpolicy() == HBW_POLICY_BIND) {
-        kind = NUMAKIND_MCDRAM;
+        kind = NUMAKIND_HBW;
     }
     else {
-        kind = NUMAKIND_MCDRAM_PREFERRED;
+        kind = NUMAKIND_HBW_PREFERRED;
     }
     return numakind_posix_memalign(kind, memptr, alignment, size);
 }
@@ -65,18 +65,18 @@ int HBW_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
     int kind;
     if (HBW_getpolicy() == HBW_POLICY_BIND) {
         if (pagesize == HBW_PAGESIZE_2MB) {
-            kind = NUMAKIND_MCDRAM_HUGETLB;
+            kind = NUMAKIND_HBW_HUGETLB;
         }
         else {
-            kind = NUMAKIND_MCDRAM;
+            kind = NUMAKIND_HBW;
         }
     }
     else {
         if (pagesize == HBW_PAGESIZE_2MB) {
-            kind = NUMAKIND_MCDRAM_PREFERRED_HUGETLB;
+            kind = NUMAKIND_HBW_PREFERRED_HUGETLB;
         }
         else {
-            kind = NUMAKIND_MCDRAM_PREFERRED;
+            kind = NUMAKIND_HBW_PREFERRED;
         }
     }
     return numakind_posix_memalign(kind, memptr, alignment, size);
@@ -86,10 +86,10 @@ void *HBW_realloc(void *ptr, size_t size)
 {
     int kind;
     if (HBW_getpolicy() == HBW_POLICY_BIND) {
-        kind = NUMAKIND_MCDRAM;
+        kind = NUMAKIND_HBW;
     }
     else {
-        kind = NUMAKIND_MCDRAM_PREFERRED;
+        kind = NUMAKIND_HBW_PREFERRED;
     }
     return numakind_realloc(kind, ptr, size);
 }

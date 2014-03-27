@@ -34,8 +34,8 @@ void numakind_error_message(int err, char *msg, size_t size)
         case NUMAKIND_ERROR_GETCPU:
             strncpy(msg, "<numakind> Call to sched_getcpu() returned out of range", size);
             break;
-        case NUMAKIND_ERROR_MCDRAM:
-            strncpy(msg, "<numakind> Initializing for MCDRAM failed", size);
+        case NUMAKIND_ERROR_HBW:
+            strncpy(msg, "<numakind> Initializing for HBW failed", size);
             break;
         case NUMAKIND_ERROR_PMTT:
             snprintf(msg, size, "<numakind> Unable to parse bandwidth table: %s", NUMAKIND_BANDWIDTH_PATH);
@@ -61,10 +61,10 @@ int numakind_isavail(int kind)
 {
     int result;
     switch (kind) {
-        case NUMAKIND_MCDRAM:
-        case NUMAKIND_MCDRAM_HUGETLB:
-        case NUMAKIND_MCDRAM_PREFERRED:
-        case NUMAKIND_MCDRAM_PREFERRED_HUGETLB:
+        case NUMAKIND_HBW:
+        case NUMAKIND_HBW_HUGETLB:
+        case NUMAKIND_HBW_PREFERRED:
+        case NUMAKIND_HBW_PREFERRED_HUGETLB:
             result = numakind_mcdram_isavail();
             break;
         case NUMAKIND_DEFAULT:
@@ -82,11 +82,11 @@ int numakind_mmap_flags(int kind, int *flags)
 {
     int err = 0;
     switch (kind) {
-        case NUMAKIND_MCDRAM_HUGETLB:
-        case NUMAKIND_MCDRAM_PREFERRED_HUGETLB:
+        case NUMAKIND_HBW_HUGETLB:
+        case NUMAKIND_HBW_PREFERRED_HUGETLB:
             *flags = MAP_HUGETLB;
-        case NUMAKIND_MCDRAM:
-        case NUMAKIND_MCDRAM_PREFERRED:
+        case NUMAKIND_HBW:
+        case NUMAKIND_HBW_PREFERRED:
         case NUMAKIND_DEFAULT:
             *flags = 0;
             break;
@@ -104,10 +104,10 @@ int numakind_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode)
     int err = 0;
 
     switch (kind) {
-        case NUMAKIND_MCDRAM:
-        case NUMAKIND_MCDRAM_HUGETLB:
-        case NUMAKIND_MCDRAM_PREFERRED:
-        case NUMAKIND_MCDRAM_PREFERRED_HUGETLB:
+        case NUMAKIND_HBW:
+        case NUMAKIND_HBW_HUGETLB:
+        case NUMAKIND_HBW_PREFERRED:
+        case NUMAKIND_HBW_PREFERRED_HUGETLB:
             err = numakind_mcdram_nodemask(nodemask, maxnode);
             break;
         case NUMAKIND_DEFAULT:
@@ -130,12 +130,12 @@ int numakind_mbind(int kind, void *addr, size_t size)
     err = numakind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
     if (!err) {
         switch (kind) {
-            case NUMAKIND_MCDRAM:
-            case NUMAKIND_MCDRAM_HUGETLB:
+            case NUMAKIND_HBW:
+            case NUMAKIND_HBW_HUGETLB:
                 mode = MPOL_BIND;
                 break;
-            case NUMAKIND_MCDRAM_PREFERRED:
-            case NUMAKIND_MCDRAM_PREFERRED_HUGETLB:
+            case NUMAKIND_HBW_PREFERRED:
+            case NUMAKIND_HBW_PREFERRED_HUGETLB:
             case NUMAKIND_DEFAULT:
                 mode = MPOL_PREFERRED;
                 break;
