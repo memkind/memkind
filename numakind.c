@@ -78,7 +78,7 @@ int numakind_is_available(int kind)
     return result;
 }
 
-int numakind_mmap_flags(int kind, int *flags)
+int numakind_get_mmap_flags(int kind, int *flags)
 {
     int err = 0;
     switch (kind) {
