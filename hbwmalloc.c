@@ -116,11 +116,11 @@ static inline int HBW_policy(int mode)
             if (is_set == 0) {
                 policy = mode;
                 is_set = 1;
+                pthread_mutex_unlock(&policy_mutex);
             }
             else {
                 err = 1;
             }
-            pthread_mutex_unlock(&policy_mutex);
         }
         else {
             err = 1;
