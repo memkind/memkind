@@ -19,7 +19,7 @@ void HBW_setpolicy(int mode)
 
 int HBW_IsHBWAvailable(void)
 {
-    return numakind_isavail(NUMAKIND_HBW);
+    return numakind_is_available(NUMAKIND_HBW);
 }
 
 

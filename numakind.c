@@ -57,7 +57,7 @@ void numakind_error_message(int err, char *msg, size_t size)
         msg[size-1] = '\0';
 }
 
-int numakind_isavail(int kind)
+int numakind_is_available(int kind)
 {
     int result;
     switch (kind) {
