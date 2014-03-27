@@ -12,20 +12,20 @@ docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
 initddir ?= /etc/rc.d/init.d
 
 CFLAGS_EXTRA = -fPIC -Wall -Werror -O3
-OBJECTS = numakind.o numakind_mcdram.o hbwmalloc.o
+OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
 
 all: libnumakind.so.0.0 numakind-pmtt
 
 clean:
 	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt numakind_pmtt.o
 
-numakind.o: numakind.c numakind.h numakind_mcdram.h
+numakind.o: numakind.c numakind.h numakind_hbw.h
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEPREFIX)/include -c numakind.c
 
-numakind_mcdram.o: numakind_mcdram.c numakind.h numakind_mcdram.h
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEPREFIX)/include -c numakind_mcdram.c
+numakind_hbw.o: numakind_hbw.c numakind.h numakind_hbw.h
+	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEPREFIX)/include -c numakind_hbw.c
 
-hbwmalloc.o: hbwmalloc.c hbwmalloc.h numakind.h numakind_mcdram.h
+hbwmalloc.o: hbwmalloc.c hbwmalloc.h numakind.h numakind_hbw.h
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c hbwmalloc.c
 
 libnumakind.so.0.0: $(OBJECTS)

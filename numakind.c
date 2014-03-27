@@ -9,7 +9,7 @@
 #include <jemalloc/jemalloc.h>
 
 #include "numakind.h"
-#include "numakind_mcdram.h"
+#include "numakind_hbw.h"
 
 static int numakind_getarena(numakind_t kind, int *arena);
 
@@ -65,7 +65,7 @@ int numakind_isavail(int kind)
         case NUMAKIND_HBW_HUGETLB:
         case NUMAKIND_HBW_PREFERRED:
         case NUMAKIND_HBW_PREFERRED_HUGETLB:
-            result = numakind_mcdram_isavail();
+            result = numakind_hbw_isavail();
             break;
         case NUMAKIND_DEFAULT:
             result = 1;
@@ -108,7 +108,7 @@ int numakind_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode)
         case NUMAKIND_HBW_HUGETLB:
         case NUMAKIND_HBW_PREFERRED:
         case NUMAKIND_HBW_PREFERRED_HUGETLB:
-            err = numakind_mcdram_nodemask(nodemask, maxnode);
+            err = numakind_hbw_nodemask(nodemask, maxnode);
             break;
         case NUMAKIND_DEFAULT:
             numa_bitmask_clearall(&nodemask_bm);

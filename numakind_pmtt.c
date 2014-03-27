@@ -24,7 +24,7 @@ static const int STRLEN = 512;
 #include "actbl.h"
 
 #include "numakind.h"
-#include "numakind_mcdram.h"
+#include "numakind_hbw.h"
 
 static const char *PMTT_PATH = "/sys/firmware/acpi/tables/PMTT";
 

@@ -9,7 +9,7 @@
 #include <jemalloc/jemalloc.h>
 
 #include "numakind.h"
-#include "numakind_mcdram.h"
+#include "numakind_hbw.h"
 
 
 struct numanode_bandwidth_t {
@@ -36,14 +36,14 @@ static int set_closest_numanode(int num_unique,
 static int numanode_bandwidth_compare(const void *a, const void *b);
 
 
-int numakind_mcdram_isavail(void)
+int numakind_hbw_isavail(void)
 {
     int err;
-    err = numakind_mcdram_nodemask(NULL, 0);
+    err = numakind_hbw_nodemask(NULL, 0);
     return (!err);
 }
 
-int numakind_mcdram_nodemask(unsigned long *nodemask, unsigned long maxnode)
+int numakind_hbw_nodemask(unsigned long *nodemask, unsigned long maxnode)
 {
     static int init_err = 0;
     static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
