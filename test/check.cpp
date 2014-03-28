@@ -1,5 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <numaif.h>
 #include "check.h"
 
@@ -66,7 +70,7 @@ int Check::check_page_size(void *ptr, size_t size, size_t page_size)
 {
     int err = 0;
     size_t i;
-    size_t num_check, test;
+    size_t num_check, test= 0;
     num_check = size / 4096;
     num_check += size % 4096 ? 1 : 0;
     err = check_page_size(ptr, &test);
@@ -116,14 +120,13 @@ int Check::check_page_size(void *ptr, size_t *page_size)
   return err;
 }
 
-unsigned long long
-Check::get_physaddr(void *vaddr, int *page_size)
+unsigned long long Check::get_physaddr(void *vaddr, size_t *page_size)
 {
-
+   int pagemap_fd;
    unsigned long long addr;
+   
+   pagemap_fd = open("/proc/self/pagemap", O_RDONLY);
    if (pagemap_fd < 0) {
-     pagemap_fd = open("/proc/self/pagemap", O_RDONLY);
-     if (pagemap_fd < 0)
        return 0;
    }
    int n = pread(pagemap_fd, &addr, 8, ((unsigned long long)vaddr / 4096) * 8);
