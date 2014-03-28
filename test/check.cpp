@@ -53,7 +53,8 @@ int Check::check_page_hbw(size_t num_bandwidth, const int *bandwidth,
                         bandwidth[j] : max_bandwidth;
     }
 
-    if (bandwidth[status[0]] != max_bandwidth) {
+    if ((size_t)status[0] >= num_bandwidth ||
+        bandwidth[status[0]] != max_bandwidth) {
         err = -1;
     }
     for (i = 1; i < nr_pages && !err; ++i) {
