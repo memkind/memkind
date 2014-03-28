@@ -4,9 +4,9 @@ INCLUDES=-I./include
 LIBS=-lnumakind -lnuma -lgtest -lpthread -ljemalloc -lgomp
 bin = $(shell mkdir -p bin)
 
-all:			$(bin) all_tests
+all:			$(bin) bin/all_tests
 
-all_tests:		main.o api_tests.o most_tests.o check.o include/common.h
+bin/all_tests:		main.o api_tests.o most_tests.o check.o include/common.h
 			$(CC) $(CFLAGS) -o bin/all_tests api_tests.o most_tests.o main.o check.o $(LIBS)
 
 main.o:			main.cpp include/common.h
