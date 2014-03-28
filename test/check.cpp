@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <numaif.h>
-#include <check.h>
+#include "check.h"
 
 
-int check_page_hbw(size_t num_bandwidth, const int *bandwidth, 
-                   const void *ptr, size_t size)
+int Check::check_page_hbw(size_t num_bandwidth, const int *bandwidth, 
+                          const void *ptr, size_t size)
 {
     int err = 0;
     const size_t page_size = 4096;
@@ -23,14 +23,14 @@ int check_page_hbw(size_t num_bandwidth, const int *bandwidth,
     address = (void**)malloc(sizeof(void *) * nr_pages);
     if (!address) {
         fprintf(stderr, "WARNING:  <check_page_hbw> "
-                        "failed in call to malloc(%i)\n", 
+                        "failed in call to malloc(%lui)\n", 
                         nr_pages * sizeof(void*));
         return -2;
     }
     status = (int*)malloc(sizeof(int) * nr_pages);
     if (!address) {
         fprintf(stderr, "WARNING:  <check_page_hbw> "
-                        "failed in call to malloc(%i)\n", 
+                        "failed in call to malloc(%lui)\n", 
                         nr_pages * sizeof(int));
         free(address);
         return -2;
@@ -62,7 +62,7 @@ int check_page_hbw(size_t num_bandwidth, const int *bandwidth,
     return err;
             
 }
-int check_page_size(void *ptr, size_t size, size_t page_size)
+int Check::check_page_size(void *ptr, size_t size, size_t page_size)
 {
 
 }

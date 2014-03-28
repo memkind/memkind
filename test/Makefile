@@ -6,14 +6,20 @@ bin = $(shell mkdir -p bin)
 
 all:			$(bin) all_tests
 
-all_tests:		main.o all_tests.o include/common.h
-			$(CC) $(CFLAGS) -o bin/all_tests all_tests.o main.o $(LIBS)
+all_tests:		main.o api_tests.o most_tests.o check.o include/common.h
+			$(CC) $(CFLAGS) -o bin/all_tests api_tests.o most_tests.o main.o check.o $(LIBS)
 
 main.o:			main.cpp include/common.h
 			$(CC) $(CFLAGS) $(INCLUDES) -c main.cpp -o main.o
 
-all_tests.o:		all_tests.cpp include/common.h
-			$(CC) $(CFLAGS) $(INCLUDES) -c all_tests.cpp -o all_tests.o
+api_tests.o:		api_tests.cpp include/common.h
+			$(CC) $(CFLAGS) $(INCLUDES) -c api_tests.cpp -o api_tests.o
+
+most_tests.o:		most_tests.cpp include/common.h
+			$(CC) $(CFLAGS) $(INCLUDES) -c most_tests.cpp -o most_tests.o
+
+check.o:		check.cpp
+			$(CC) $(CFLAGS) $(INCLUDES) -c check.cpp -o check.o
 
 clean:
 			rm -f *.o bin/all_tests
