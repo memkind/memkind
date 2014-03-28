@@ -49,8 +49,8 @@ int Check::check_page_hbw(size_t num_bandwidth, const int *bandwidth,
 
     max_bandwidth = 0;
     for (j = 0; j < num_bandwidth; ++j) {
-        max_bandwidth = bandwidth[i] > max_bandwidth ? 
-                        bandwidth[i] : max_bandwidth;
+        max_bandwidth = bandwidth[j] > max_bandwidth ? 
+                        bandwidth[j] : max_bandwidth;
     }
 
     if (bandwidth[status[0]] != max_bandwidth) {
@@ -123,7 +123,7 @@ int Check::check_page_size(void *ptr, size_t *page_size)
 
 unsigned long long Check::get_physaddr(void *vaddr, size_t *page_size)
 {
-   int pagemap_fd;
+   unsigned int pagemap_fd;
    unsigned long long addr;
    
    pagemap_fd = open("/proc/self/pagemap", O_RDONLY);
