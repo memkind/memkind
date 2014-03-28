@@ -64,6 +64,80 @@ int Check::check_page_hbw(size_t num_bandwidth, const int *bandwidth,
 }
 int Check::check_page_size(void *ptr, size_t size, size_t page_size)
 {
-
+    int err = 0;
+    size_t i;
+    size_t num_check, test;
+    num_check = size / 4096;
+    num_check += size % 4096 ? 1 : 0;
+    err = check_page_size(ptr, &test);
+    err = err ? -1 : 0;
+    if (test != page_size) {
+        err = -1;
+    }
+    for (i = 1; i < num_check && !err; ++i) {
+        check_page_size((char *)ptr + i * 4096, &test);
+        if (test != page_size) {
+            err = i;
+        }
+    }
+    return err;
 }
 
+
+int Check::check_page_size(void *ptr, size_t *page_size)
+{
+  
+  size_t lpsize;
+  int err = 0;
+  unsigned long long phys_addr;
+
+  phys_addr = get_physaddr(ptr, &lpsize);
+  if (!phys_addr){
+    err = -1;
+    goto exit;
+  }
+
+  switch (lpsize){
+  case 12:
+    *page_size = 4 * 1024;
+    break;
+  case 21:
+    *page_size = 2 * 1024 * 1024;
+    break;
+  case 31:
+    *page_size = 1024 * 1024 * 1024;
+    break;
+  default:
+    err = -1;
+    break;
+  }
+
+ exit:
+  return err;
+}
+
+unsigned long long
+Check::get_physaddr(void *vaddr, int *page_size)
+{
+
+   unsigned long long addr;
+   if (pagemap_fd < 0) {
+     pagemap_fd = open("/proc/self/pagemap", O_RDONLY);
+     if (pagemap_fd < 0)
+       return 0;
+   }
+   int n = pread(pagemap_fd, &addr, 8, ((unsigned long long)vaddr / 4096) * 8);
+
+   if (n != 8) {
+     perror("pread");
+     return 0;
+   }
+   if (!(addr & (1ULL<<63))) { 
+     return 0;
+   }
+   *page_size = (addr >> 55) & 0x3fUL;
+
+   addr &= ~(1ULL<<60)-1;
+   addr <<= 12;
+   return addr + ((unsigned long long)vaddr  & (4096-1));
+}
