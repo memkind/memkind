@@ -12,8 +12,9 @@ int Check::check_page_hbw(size_t num_bandwidth, const int *bandwidth,
                           const void *ptr, size_t size)
 {
     int err = 0;
-    const size_t page_size = 4096;
+    const int page_size = 4096;
     int i, nr_pages, max_bandwidth;
+    size_t j;
     void **address = NULL;
     int *status = NULL;
 
@@ -47,7 +48,7 @@ int Check::check_page_hbw(size_t num_bandwidth, const int *bandwidth,
     move_pages(0, nr_pages, address, NULL, status, MPOL_MF_MOVE);
 
     max_bandwidth = 0;
-    for (i = 0; i < num_bandwidth; ++i) {
+    for (j = 0; j < num_bandwidth; ++j) {
         max_bandwidth = bandwidth[i] > max_bandwidth ? 
                         bandwidth[i] : max_bandwidth;
     }
@@ -56,7 +57,7 @@ int Check::check_page_hbw(size_t num_bandwidth, const int *bandwidth,
         err = -1;
     }
     for (i = 1; i < nr_pages && !err; ++i) {
-        if (status[i] >= num_bandwidth ||
+        if ((size_t)status[i] >= num_bandwidth ||
             bandwidth[status[i]] != max_bandwidth) {
             err = i;
         }
