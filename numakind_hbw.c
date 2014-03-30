@@ -213,6 +213,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
             (*bandwidth_nodes)[0].numanodes[i] = numanode_bandwidth[i].numanode;
             if (numanode_bandwidth[i].bandwidth != last_bandwidth) {
                 (*bandwidth_nodes)[k].num_numanodes = l;
+                (*bandwidth_nodes)[k].bandwidth = last_bandwidth;
                 l = 0;
                 ++k;
                 (*bandwidth_nodes)[k].numanodes = (*bandwidth_nodes)[0].numanodes + i;
