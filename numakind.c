@@ -85,6 +85,7 @@ int numakind_get_mmap_flags(int kind, int *flags)
         case NUMAKIND_HBW_HUGETLB:
         case NUMAKIND_HBW_PREFERRED_HUGETLB:
             *flags = MAP_HUGETLB;
+            break;
         case NUMAKIND_HBW:
         case NUMAKIND_HBW_PREFERRED:
         case NUMAKIND_DEFAULT:
@@ -253,7 +254,7 @@ static int numakind_getarena(numakind_t kind, int *arena)
     static unsigned int *arena_map = NULL;
     static size_t unsigned_size = sizeof(unsigned int);
     int err = 0;
-    int i, cpu_node, arena_index;
+    int i, j, cpu_node, arena_index;
     unsigned int kind_select;
 
     if (!is_init && !init_err) {
@@ -264,11 +265,11 @@ static int numakind_getarena(numakind_t kind, int *arena)
             map_len = (NUMAKIND_NUM_KIND - 1) * num_cpu;
             arena_map = je_malloc(sizeof(unsigned int) * map_len);
             if (arena_map) {
-                for (kind_select = 1;
+                for (kind_select = 1, j = 0;
                      kind_select < NUMAKIND_NUM_KIND && !init_err;
                      ++kind_select) {
-                    for (i = 0; i < num_cpu && !init_err; ++i) {
-                        init_err = je_mallctl("arenas.extendk", arena_map + i,
+                    for (i = 0; i < num_cpu && !init_err; ++i, ++j) {
+                        init_err = je_mallctl("arenas.extendk", arena_map + j,
                                               &unsigned_size, &kind_select, unsigned_size);
                     }
                 }
