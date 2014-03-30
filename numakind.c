@@ -268,9 +268,8 @@ static int numakind_getarena(numakind_t kind, int *arena)
                      kind_select < NUMAKIND_NUM_KIND && !init_err;
                      ++kind_select) {
                     for (i = 0; i < num_cpu && !init_err; ++i) {
-                        arena_map[i] = kind_select;
                         init_err = je_mallctl("arenas.extendk", arena_map + i,
-                                              &unsigned_size, NULL, 0);
+                                              &unsigned_size, &kind_select, unsigned_size);
                     }
                 }
                 init_err = init_err ? NUMAKIND_ERROR_MALLCTL : 0;
