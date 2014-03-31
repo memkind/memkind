@@ -43,7 +43,7 @@ protected:
   
   void SetUp()
   {
-    *ptr = NULL;
+    ptr = NULL;
     ret = HBW_SUCCESS;
   }
   
