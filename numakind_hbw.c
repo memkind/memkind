@@ -221,6 +221,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
             }
         }
         (*bandwidth_nodes)[k].num_numanodes = l;
+        (*bandwidth_nodes)[k].bandwidth = last_bandwidth;
     }
     if (numanode_bandwidth) {
         je_free(numanode_bandwidth);
