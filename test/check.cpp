@@ -7,6 +7,7 @@
 #include <numaif.h>
 #include "check.h"
 
+static int pagemap_fd = -1;
 
 int Check::check_page_hbw(size_t num_bandwidth, const int *bandwidth, 
                           const void *ptr, size_t size)
@@ -68,81 +69,45 @@ int Check::check_page_hbw(size_t num_bandwidth, const int *bandwidth,
     return err;
             
 }
-int Check::check_page_size(void *ptr, size_t size, size_t page_size)
-{
-    int err = 0;
-    size_t i;
-    size_t num_check, test= 0;
-    num_check = size / 4096;
-    num_check += size % 4096 ? 1 : 0;
-    err = check_page_size(ptr, &test);
-    err = err ? -1 : 0;
-    if (test != page_size) {
-        err = -1;
-    }
-    for (i = 1; i < num_check && !err; ++i) {
-        check_page_size((char *)ptr + i * 4096, &test);
-        if (test != page_size) {
-            err = i;
-        }
-    }
-    return err;
-}
 
-
-int Check::check_page_size(void *ptr, size_t *page_size)
-{
+int Check::check_page_size(void **addr_ptr, size_t page_size, 
+                           int nr_pages){
   
-  size_t lpsize;
-  int err = 0;
-  unsigned long long phys_addr;
-
-  phys_addr = get_physaddr(ptr, &lpsize);
-  if (!phys_addr){
-    err = -1;
-    goto exit;
+  int i, ret = 1;
+  
+  if (pagemap_fd < 0){
+    pagemap_fd = open("/proc/self/pagemap", O_RDONLY);
+    if (pagemap_fd < 0)
+      return 0;
   }
-
-  switch (lpsize){
-  case 12:
-    *page_size = 4 * 1024;
-    break;
-  case 21:
-    *page_size = 2 * 1024 * 1024;
-    break;
-  case 31:
-    *page_size = 1024 * 1024 * 1024;
-    break;
-  default:
-    err = -1;
-    break;
-  }
-
- exit:
-  return err;
+  
+  for (i = 0; i < nr_pages; i++){
+    if (!is_page_present(addr_ptr[i],
+                         page_size)){
+      return 0;
+    }
+  }  
+  return ret;
 }
 
-unsigned long long Check::get_physaddr(void *vaddr, size_t *page_size)
-{
-   unsigned int pagemap_fd;
-   unsigned long long addr;
-   
-   pagemap_fd = open("/proc/self/pagemap", O_RDONLY);
-   if (pagemap_fd < 0) {
-       return 0;
-   }
-   int n = pread(pagemap_fd, &addr, 8, ((unsigned long long)vaddr / 4096) * 8);
-
-   if (n != 8) {
-     perror("pread");
-     return 0;
-   }
-   if (!(addr & (1ULL<<63))) { 
-     return 0;
-   }
-   *page_size = (addr >> 55) & 0x3fUL;
-
-   addr &= ~(1ULL<<60)-1;
-   addr <<= 12;
-   return addr + ((unsigned long long)vaddr  & (4096-1));
+int Check::is_page_present(void *vaddr, size_t page_size){
+  
+  int n;
+  unsigned long long addr;
+  int ret = 1;
+  
+  n = pread(pagemap_fd, &addr, 
+            PAGEMAP_ENTRY,
+            (((unsigned long long)vaddr/page_size)*PAGEMAP_ENTRY));
+  
+  if (n != PAGEMAP_ENTRY){
+    perror("pread");
+    ret = -1;
+  }
+  
+  if (!(addr & (1ULL<<63))) {
+    ret = 0;
+  }
+  
+  return ret;
 }
