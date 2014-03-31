@@ -182,17 +182,23 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
         ptr = je_realloc(ptr, size);
     }
     else {
-        err = numakind_getarena(kind, &arena);
-        if (!err) {
-            if (ptr == NULL) {
-                err = je_allocm(&ptr, NULL, size, ALLOCM_ARENA(arena));
-            }
-            else {
-                err = je_rallocm(&ptr, NULL, size, 0, ALLOCM_ARENA(arena));
-            }
-        }
-        if (err) {
+        if (size == 0 && ptr != NULL) {
+            numakind_free(kind, ptr);
             ptr = NULL;
+        }
+        else {
+            err = numakind_getarena(kind, &arena);
+            if (!err) {
+                if (ptr == NULL) {
+                    err = je_allocm(&ptr, NULL, size, ALLOCM_ARENA(arena));
+                }
+                else {
+                    err = je_rallocm(&ptr, NULL, size, 0, ALLOCM_ARENA(arena));
+                }
+            }
+            if (err) {
+                ptr = NULL;
+            }
         }
     }
     return ptr;
@@ -200,10 +206,21 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
 
 void *numakind_calloc(numakind_t kind, size_t num, size_t size)
 {
-    void *result;
-    result = numakind_malloc(kind, num * size);
-    if (result) {
-        memset(result, 0, num * size);
+    void *result = NULL;
+    int err = 0;
+    int arena;
+
+    if (kind == NUMAKIND_DEFAULT) {
+        result = je_calloc(num, size);
+    }
+    else {
+        err = numakind_getarena(kind, &arena);
+        if (!err) {
+            err = je_allocm(&result, NULL, size, ALLOCM_ARENA(arena) | MALLOCX_ZERO);
+        }
+        if (err) {
+            result = NULL;
+        }
     }
     return result;
 }
