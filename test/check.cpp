@@ -46,6 +46,13 @@ int Check::check_page_hbw(size_t num_bandwidth, const int *bandwidth,
         address[i] = (char *)ptr + i * page_size;
     }
 
+    if (!check_page_size(address, page_size,
+                         nr_pages)){
+      fprintf(stderr, "ERROR:  <check_page_hbw> "
+              "failed in call to check_page_size\n");
+    }
+
+
     move_pages(0, nr_pages, address, NULL, status, MPOL_MF_MOVE);
 
     max_bandwidth = 0;
