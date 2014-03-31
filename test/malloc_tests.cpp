@@ -31,26 +31,6 @@
 #include "common.h"
 #include "omp.h"
 
-#define NTHREADS 2
-
-class THREADEDMALLOC: public :: testing::Test
-{
-
-protected:
-  
-  THREADEDMALLOC()
-  {}
-  
-  void SetUp()
-  {}
-  
-  void TearDown()
-  {}
-
-};
-
-
-
 class MALLOCTESTS: public :: testing::Test
 {
   
