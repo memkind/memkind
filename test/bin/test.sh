@@ -20,7 +20,7 @@ then
     echo "read-configuration $ckpt" > simics.in
     echo "continue" >> simics.in
     simics < simics.in >& simics.out &
-    echo $! > simics-pid
+    echo $! > simics.pid
     sleep 15
     rm simics.in
     echo '#!/bin/sh' > askpass.sh
@@ -43,8 +43,8 @@ ssh root@$knlmcdram "install ~mic/libgtest*.so.0.0.0 /usr/lib64"
 ssh root@$knlmcdram "/sbin/ldconfig"
 ssh mic@$knlmcdram "./all_tests --gtest_output=xml:all_tests.xml"
 scp mic@$knlmcdram:all_tests.xml .
-if [ -f simics-pid ]
+if [ -f simics.pid ]
 then
-    kill -9 `cat simics-pid`
-    rm simics-pid
+    kill -9 `cat simics.pid`
+    rm simics.pid
 fi
