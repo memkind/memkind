@@ -33,7 +33,6 @@
 #include "check.h"
 #include "omp.h"
 
-#define NTHREADS 2
 
 class APITESTS: public :: testing::Test
 {
