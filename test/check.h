@@ -1,18 +1,17 @@
 #ifndef check_include_h
 #define check_include_h
 
-#define PAGEMAP_ENTRY 8
-
 class Check {
   public:
-    int check_page_hbw(size_t num_bandwidth, const int *bandwidth, 
-                     const void *ptr, size_t size);
-    int check_page_size(void **ptr, size_t page_size,
-                        int nr_pages);
+    Check(const void *ptr, size_t size);
+    ~Check();
+    int check_node_hbw(size_t num_bandwidth, const int *bandwidth);
+    int check_page_size(size_t page_size);
   private:
-    int is_page_present(void *vaddr, size_t page_size);
-
-
+    void **address;
+    int pagemap_fd;
+    int num_address;
+    int is_correct_page_size(void *vaddr, size_t page_size);
 };
 
 #endif
