@@ -218,7 +218,8 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
     else {
         err = numakind_getarena(kind, &arena);
         if (!err) {
-            err = je_allocm(&result, NULL, size, ALLOCM_ARENA(arena) | MALLOCX_ZERO);
+            err = je_allocm(&result, NULL, size,
+                            ALLOCM_ARENA(arena) | MALLOCX_ZERO);
         }
         if (err) {
             result = NULL;
@@ -289,7 +290,8 @@ static int numakind_getarena(numakind_t kind, int *arena)
                      ++kind_select) {
                     for (i = 0; i < num_cpu && !init_err; ++i, ++j) {
                         init_err = je_mallctl("arenas.extendk", arena_map + j,
-                                              &unsigned_size, &kind_select, unsigned_size);
+                                              &unsigned_size, &kind_select,
+                                              unsigned_size);
                     }
                 }
                 init_err = init_err ? NUMAKIND_ERROR_MALLCTL : 0;
