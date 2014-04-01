@@ -15,13 +15,13 @@ BuildRequires: numactl
 BuildRequires: numactl-devel
 
 %description
-numakind is a library which extends libnuma with the ability to
-categorize groups of numa nodes into different "kinds" of memory. It
-provides a low level interface for generating inputs to mbind() and
-mmap(), and a high level interface for heap management.  The heap
-management is implemented with an extension to the jemalloc library
-which dedicates "arenas" to each CPU node and kind of memory.  To use
-numakind, jemalloc must be compiled with the --enable-numakind option.
+The numakind library extends libnuma with the ability to categorize
+groups of numa nodes into different "kinds" of memory. It provides a
+low level interface for generating inputs to mbind() and mmap(), and a
+high level interface for heap management.  The heap management is
+implemented with an extension to the jemalloc library which dedicates
+"arenas" to each CPU node and kind of memory.  To use numakind,
+jemalloc must be compiled with the --enable-numakind option.
 
 %prep
 %setup -q -c -T -a 0
