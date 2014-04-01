@@ -84,10 +84,12 @@ int numakind_get_mmap_flags(int kind, int *flags)
     switch (kind) {
         case NUMAKIND_HBW_HUGETLB:
         case NUMAKIND_HBW_PREFERRED_HUGETLB:
-            *flags = MAP_HUGETLB;
+            *flags = MAP_HUGETLB | MAP_ANON;
             break;
         case NUMAKIND_HBW:
         case NUMAKIND_HBW_PREFERRED:
+            *flags = MAP_ANON;
+            break;
         case NUMAKIND_DEFAULT:
             *flags = 0;
             break;
