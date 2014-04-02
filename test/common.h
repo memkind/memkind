@@ -36,4 +36,7 @@
 #define GB 1073741824L
 #define KB 1024
 
+#define HBW_SUCCESS 0
+#define HBW_ERROR -1
+
 #endif
