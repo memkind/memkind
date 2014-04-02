@@ -30,7 +30,7 @@ Check::Check(const void *ptr, size_t size)
         num_address += size % min_page_size ? 1 : 0;
 
         address = new void* [num_address];
-        for (i = 0; i < num_address; ++i) {
+        for (i = 0; i < num_address - 1; ++i) {
             address[i] = (char *)ptr + i * min_page_size;
         }
         address[i] = (char *)ptr + size - 1;
