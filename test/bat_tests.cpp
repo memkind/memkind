@@ -68,11 +68,12 @@ TEST_F(BATest, HBW_policy) {
 }
 
 TEST_F(BATest, HBW_malloc) {
+  const unsigned int num_size = 2;
   unsigned int i;
   size_t size;
-  size_t size_array[2] = {(size_t)(2*KB), (size_t)(2048*MB)};
+  size_t size_array[num_size] = {(size_t)(2*KB), (size_t)(2048*MB)};
   char *ptr;
-  for (i = 0; i < sizeof(size_array); ++i) {
+  for (i = 0; i < num_size; ++i) {
       size = size_array[i];
       ASSERT_TRUE((ptr = (char *)HBW_malloc(size)) != NULL);
       memset(ptr, 0, size);
@@ -127,13 +128,14 @@ TEST_F(BATest, HBW_allocate_memalign) {
   HBW_free(ptr);
 }
 TEST_F(BATest, HBW_allocate_memalign_psize) {
+  const unsigned int num_size = 2;
   unsigned int i;
   void *ptr = NULL;
   size_t size = (size_t)(16*MB);
-  hbw_pagesize_t hbw_psize[2] = {HBW_PAGESIZE_4KB, HBW_PAGESIZE_2MB};
+  hbw_pagesize_t hbw_psize[num_size] = {HBW_PAGESIZE_4KB, HBW_PAGESIZE_2MB};
   size_t psize[2] = {4*KB, 2*MB};
   size_t align[2] = {4*KB, 2*MB};
-  for (i = 0; i < sizeof(psize); ++i) {
+  for (i = 0; i < num_size; ++i) {
       ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align[i], size, 
                                                hbw_psize[i]));
       ASSERT_TRUE(ptr != NULL);
