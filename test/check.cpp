@@ -149,7 +149,6 @@ int Check::check_page_size(size_t page_size)
 int Check::check_page_size(size_t page_size, void *vaddr){
   
 
-    ifstream ip;
     string read;
     unsigned long long virt_addr;
     size_t lpagesize;
