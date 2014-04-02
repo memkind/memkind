@@ -7,6 +7,7 @@ using namespace std;
 class Check {
   public:
     Check(const void *ptr, size_t size);
+    Check(const Check &);
     ~Check();
     int check_node_hbw(size_t num_bandwidth, const int *bandwidth);
     int check_page_size(size_t page_size);

@@ -83,10 +83,11 @@ TEST_F(BATest, HBW_malloc) {
 }
 
 TEST_F(BATest, HBW_calloc) {
+  unsigned int i;
   size_t size = (size_t)(2048*MB);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_calloc(size, 1)) != NULL);
-  for (int i = 0; i < size; ++i) {
+  for (i = 0; i < size; ++i) {
       EXPECT_EQ('\0', ptr[i]);
   }
   Check check(ptr, size);
@@ -126,16 +127,17 @@ TEST_F(BATest, HBW_allocate_memalign) {
   HBW_free(ptr);
 }
 TEST_F(BATest, HBW_allocate_memalign_psize) {
+  unsigned int i;
   void *ptr = NULL;
   size_t size = (size_t)(16*MB);
   hbw_pagesize_t hbw_psize[2] = {HBW_PAGESIZE_4KB, HBW_PAGESIZE_2MB};
   size_t psize[2] = {4*KB, 2*MB};
   size_t align[2] = {4*KB, 2*MB};
-  for (int i = 0; i < sizeof(psize); ++i) {
+  for (i = 0; i < sizeof(psize); ++i) {
       ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align[i], size, 
                                                hbw_psize[i]));
       ASSERT_TRUE(ptr != NULL);
-      check = Check(ptr, size);
+      Check check(ptr, size);
       EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
       EXPECT_EQ(0, check.check_page_size(psize[i]));
       HBW_free(ptr);

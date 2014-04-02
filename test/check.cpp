@@ -24,9 +24,9 @@ Check::Check(const void *ptr, size_t size)
     if (ptr && size) {
         num_address = size / min_page_size;
         num_address += size % min_page_size ? 1 : 0;
-        address = new (void *)[num_address];
+        address = new void* [num_address];
         for (i = 0; i < num_address; ++i) {
-            address[i] = (char *)ptr + i * page_size;
+            address[i] = (char *)ptr + i * min_page_size;
         }
     }
     else {
@@ -39,18 +39,16 @@ Check::~Check()
     if (address) {
         delete[] address;
     }
-    if (close(pagemap_fd)){
-        throw errno;
-    }
 }
 
 Check::Check(const Check &other)
 {
     num_address = other.num_address;
 
-    address = new (void *)[num_address];
-    for (i = 0; i < num_address; ++i) {
+    address = new void* [num_address];
+    for (int i = 0; i < num_address; ++i) {
         address[i] = other.address[i];
+    }
 }
 
 int Check::check_node_hbw(size_t num_bandwidth, const int *bandwidth)
