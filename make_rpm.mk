@@ -19,13 +19,8 @@ include make.spec
 
 all: $(rpm)
 
-$(rpm): $(srpm)
-	rpmbuild $(rpmbuild_flags) --rebuild $^
-
-$(srpm): $(specfile) $(source_tar)
-	rpmbuild $(rpmbuild_flags) $(specfile) -bc --short-circuit
-	rpmbuild $(rpmbuild_flags) $(specfile) -bi --short-circuit
-	rpmbuild $(rpmbuild_flags) $(specfile) -bs
+$(rpm): $(specfile) $(source_tar)
+	rpmbuild $(rpmbuild_flags) $(specfile) -ba
 
 $(source_tar): $(topdir) $(specfile) $(src)
 	if [ -n "$(revision)" ]; then \
