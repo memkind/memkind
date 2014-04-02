@@ -218,7 +218,7 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
     else {
         err = numakind_getarena(kind, &arena);
         if (!err) {
-            err = je_allocm(&result, NULL, size,
+            err = je_allocm(&result, NULL, num * size,
                             ALLOCM_ARENA(arena) | MALLOCX_ZERO);
         }
         if (err) {
