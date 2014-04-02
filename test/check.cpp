@@ -17,17 +17,23 @@
 
 using namespace std;
 
+
+/*Check every 4K space between the start
+and the end address additionally also
+check the end address for pagesize*/
 Check::Check(const void *ptr, size_t size)
 {
     const int min_page_size = 4096;
     int i;
     if (ptr && size) {
-        num_address = size / min_page_size;
+        num_address = size / min_page_size + 1;
         num_address += size % min_page_size ? 1 : 0;
+
         address = new void* [num_address];
         for (i = 0; i < num_address; ++i) {
             address[i] = (char *)ptr + i * min_page_size;
         }
+        address[i] = (char *)ptr + size - 1;
     }
     else {
         address = NULL;
@@ -165,7 +171,11 @@ int Check::check_page_size(size_t page_size, void *vaddr){
         getline(ip, read);
         lpagesize = get_kpagesize(read);
         if (lpagesize == page_size){
-          return 1;
+          return 0;
+        }
+        else{
+          /*The pagesize of allocation and req don't match*/
+          return -1;
         }
       }
       else{
@@ -174,6 +184,6 @@ int Check::check_page_size(size_t page_size, void *vaddr){
     }
 
     /*Never found a match!*/
-    return 0;
+    return 1;
 }
 
