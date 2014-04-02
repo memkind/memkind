@@ -11,6 +11,61 @@ index 1051389..17d395e 100644
  OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
  
  all: libnumakind.so.0.0 numakind-pmtt
+diff --git a/debug.patch b/debug.patch
+index bc8389e..e69de29 100644
+--- a/debug.patch
++++ b/debug.patch
+@@ -1,50 +0,0 @@
+-diff --git a/Makefile b/Makefile
+-index 1051389..17d395e 100644
+---- a/Makefile
+-+++ b/Makefile
+-@@ -11,7 +11,7 @@ datarootdir ?= $(prefix)/share
+- docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
+- initddir ?= /etc/rc.d/init.d
+- 
+--CFLAGS_EXTRA = -fPIC -Wall -Werror -O3
+-+CFLAGS_EXTRA = -fPIC -Wall -Werror -O0 -g
+- OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
+- 
+- all: libnumakind.so.0.0 numakind-pmtt
+-diff --git a/test/Makefile b/test/Makefile
+-index caadd23..7879169 100644
+---- a/test/Makefile
+-+++ b/test/Makefile
+-@@ -1,5 +1,5 @@
+- CC=g++
+--CFLAGS=-O3 -Wall -fopenmp
+-+CFLAGS=-O0 -g -Wall -fopenmp
+- JEPREFIX ?= /usr
+- NKPREFIX ?= /usr
+- INCLUDE = -I$(JEPREFIX)/include -I$(NKPREFIX)/include
+-diff --git a/test/bin/test.sh b/test/bin/test.sh
+-index b753459..edd3315 100755
+---- a/test/bin/test.sh
+-+++ b/test/bin/test.sh
+-@@ -32,15 +32,18 @@ then
+-     rm askpass.sh
+-  fi
+- 
+--scp ~/rpmbuild/RPMS/x86_64/numakind-0.0*.rpm mic@$knlmcdram:
+--scp ~/rpmbuild/RPMS/x86_64/jemalloc-3.5*.rpm mic@$knlmcdram:
+-+scp ~/rpmbuild/RPMS/x86_64/numakind*.rpm mic@$knlmcdram:
+-+scp ~/rpmbuild/RPMS/x86_64/jemalloc*.rpm mic@$knlmcdram:
+- scp /usr/lib64/libgtest*.so.0.0.0 mic@$knlmcdram:
+- scp $basedir/all_tests mic@$knlmcdram:
+- ssh root@$knlmcdram "rpm -e numakind >& /dev/null"
+- ssh root@$knlmcdram "rpm -e jemalloc >& /dev/null"
+--ssh root@$knlmcdram "rpm -i ~mic/jemalloc-3.5*.rpm ~mic/numakind-0.0*.rpm"
+-+ssh root@$knlmcdram "rpm -i ~mic/jemalloc*.rpm ~mic/numakind*.rpm"
+- ssh root@$knlmcdram "install ~mic/libgtest*.so.0.0.0 /usr/lib64"
+- ssh root@$knlmcdram "/sbin/ldconfig"
+-+
+-+exit
+-+
+- ssh mic@$knlmcdram "./all_tests --gtest_output=xml:all_tests.xml"
+- scp mic@$knlmcdram:all_tests.xml .
+- if [ -f simics.pid ]
 diff --git a/test/Makefile b/test/Makefile
 index caadd23..7879169 100644
 --- a/test/Makefile
@@ -23,10 +78,10 @@ index caadd23..7879169 100644
  NKPREFIX ?= /usr
  INCLUDE = -I$(JEPREFIX)/include -I$(NKPREFIX)/include
 diff --git a/test/bin/test.sh b/test/bin/test.sh
-index b753459..edd3315 100755
+index b753459..ff2d654 100755
 --- a/test/bin/test.sh
 +++ b/test/bin/test.sh
-@@ -32,15 +32,18 @@ then
+@@ -32,15 +32,20 @@ then
      rm askpass.sh
   fi
  
@@ -39,6 +94,8 @@ index b753459..edd3315 100755
  ssh root@$knlmcdram "rpm -e numakind >& /dev/null"
  ssh root@$knlmcdram "rpm -e jemalloc >& /dev/null"
 -ssh root@$knlmcdram "rpm -i ~mic/jemalloc-3.5*.rpm ~mic/numakind-0.0*.rpm"
++ssh root@$knlmcdram "rpm -e numakind-debuginfo >& /dev/null"
++ssh root@$knlmcdram "rpm -e jemalloc-debuginfo >& /dev/null"
 +ssh root@$knlmcdram "rpm -i ~mic/jemalloc*.rpm ~mic/numakind*.rpm"
  ssh root@$knlmcdram "install ~mic/libgtest*.so.0.0.0 /usr/lib64"
  ssh root@$knlmcdram "/sbin/ldconfig"
