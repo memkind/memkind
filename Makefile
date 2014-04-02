@@ -32,7 +32,7 @@ libnumakind.so.0.0: $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libnumakind.so.0 -o libnumakind.so.0.0 $^
 
 numakind-pmtt: numakind_pmtt.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) $(OBJECTS) -lnuma -ljemalloc numakind_pmtt.c -o $@
+	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) $(OBJECTS) -lnuma -L$(JEPREFIX)/lib64 -ljemalloc numakind_pmtt.c -o $@
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)
