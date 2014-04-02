@@ -34,14 +34,11 @@
 #include "omp.h"
 
 
-class APITESTS: public :: testing::Test
+class BATest: public :: testing::Test
 {
 protected:
   size_t num_bandwidth;
   int *bandwidth;
-
-  APITESTS()
-  {}
 
   void SetUp()
   {
@@ -62,183 +59,148 @@ protected:
     delete[] bandwidth;
   }
 
-  int check_page_hbw(void *ptr, size_t size)
-  {
-    Check checkObj;
-    memset(ptr, 0, size);
-    return checkObj.check_page_hbw(num_bandwidth, bandwidth, ptr, size);
-  }
-
 };
 
 
-TEST_F(APITESTS,HbwExistsTest){
-
-  int ret = HBW_SUCCESS;
-  ret = HBW_IsHBWAvailable();
-  ASSERT_EQ(1,ret);
-
+TEST_F(BATest, HBW_IsHBWAvailable) {
+  ASSERT_EQ(1, HBW_IsHBWAvailable());
 }
 
-TEST_F(APITESTS,HbwPolicy){
-  ASSERT_EQ(1, HBW_getpolicy());
+TEST_F(BATest, HBW_policy) {
+  EXPECT_EQ(1, HBW_getpolicy());
   HBW_setpolicy(2);
-  ASSERT_EQ(2, HBW_getpolicy());
+  EXPECT_EQ(2, HBW_getpolicy());
 }
 
+TEST_F(BATest, HBW_malloc) {
+  int i;
+  size_t size;
+  size_t size_array[2] = {(size_t)(2*KB), (size_t)(2048*MB)};
+  char *ptr;
+  Check check;
+  for (i = 0; i < sizeof(size_array); ++i) {
+      size = size_array[i];
+      ASSERT_TRUE(ptr = (char *)HBW_malloc(size));
+      memset(ptr, 0, size);
+      check = Check(ptr, size);
+      EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+      HBW_free(ptr);
+  }
+}
 
-TEST_F(APITESTS, HbwMalloc2GB){
-  char *ptr = NULL;
-  int ret = HBW_SUCCESS;
+TEST_F(BATest, HBW_calloc) {
   size_t size = (size_t)(2048*MB);
-  ptr = (char *) HBW_malloc(size);
-  if (NULL == ptr){
-    ret = HBW_ERROR;
+  char *ptr;
+  ASSERT_TRUE(ptr = (char *)HBW_calloc(size, 1));
+  for (int i = 0; i < size; ++i) {
+      EXPECT_EQ('\0', ptr[i]);
   }
-  /*Check that we got high bandwidth nodes*/
-  ASSERT_EQ(HBW_SUCCESS, check_page_hbw(ptr, size));
-
-  if (NULL != ptr){
-    HBW_free(ptr);
-  }
-
-  ASSERT_EQ(HBW_SUCCESS, ret);
+  Check check(ptr, size);
+  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+  HBW_free(ptr);
 }
 
-TEST_F(APITESTS, HbwMalloc2KB){
-  char *ptr = NULL;
-  int ret = HBW_SUCCESS;
-  size_t size = (size_t)(2*KB);
-  ptr = (char *) HBW_malloc(size);
-  if (NULL == ptr){
-    ret = HBW_ERROR;
-  }
-  /*Check that we got high bandwidth nodes*/
-  ASSERT_EQ(HBW_SUCCESS, check_page_hbw(ptr, size));
-
-  if (NULL != ptr){
-    HBW_free(ptr);
-  }
-
-  ASSERT_EQ(HBW_SUCCESS, ret);
+TEST_F(BATest, HBW_realloc) {
+  size_t size0 = (size_t)(2*KB);
+  size_t size1 = (size_t)(2048*MB);
+  char *ptr = (char *)HBW_realloc(NULL, size0);
+  ASSERT_TRUE(ptr != NULL);
+  memset(ptr, 0, size0);
+  Check check(ptr, size0);
+  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+  ptr = (char *)HBW_realloc(ptr, size1);
+  ASSERT_TRUE(ptr != NULL);
+  memset(ptr, 0, size1);
+  Check check(ptr, size1);
+  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+  ptr = (char *)HBW_realloc(ptr, size0);
+  ASSERT_TRUE(ptr != NULL);
+  memset(ptr, 0, size0);
+  Check check(ptr, size0);
+  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+  HBW_free(ptr);
 }
 
-TEST_F(APITESTS, HbwCalloc2GB){
-  char *ptr = NULL;
-  int ret = HBW_SUCCESS;
-  size_t size = (size_t)(2*GB);
-  ptr = (char *) HBW_calloc(size,1);
-  if (NULL == ptr){
-    ret = HBW_ERROR;
-  }
-  /*Check that we got high bandwidth nodes*/
-  ASSERT_EQ(HBW_SUCCESS, check_page_hbw(ptr, size));
+// FIX ME have not refactored below
 
-  if (NULL != ptr){
-    HBW_free(ptr);
-  }
-
-  ASSERT_EQ(HBW_SUCCESS, ret);
-}
-
-TEST_F(APITESTS, HbwRealloc2GB){
-  char *ptr = NULL;
-  int ret = HBW_SUCCESS;
-  size_t size = (size_t)(2*GB);
-  ptr = (char *) HBW_realloc(ptr, size);
-
-  if (NULL == ptr){
-    ret = HBW_ERROR;
-  }
-
-  /*Check that we got high bandwidth nodes*/
-  ASSERT_EQ(HBW_SUCCESS, check_page_hbw(ptr, size));
-
-  if (NULL != ptr){
-    HBW_free(ptr);
-  }
-  ASSERT_EQ(HBW_SUCCESS, ret);
-}
-
-TEST_F(APITESTS, HbwAllocateMemAlign2GB){
-
+TEST_F(BATest, HBW_allocate_memalign) {
   void *ptr = NULL;
-  int ret = HBW_SUCCESS, fret=0;
+  int ret = 0, fret=0;
   size_t size = (size_t)(2*GB);
   size_t align = 32;
 
   fret = HBW_allocate_memalign(&ptr,align,size);
 
-  if (fret != HBW_SUCCESS
+  if (fret != 0
       || ((size_t)ptr%align != 0)
-      || (NULL == ptr)){
+      || (NULL == ptr)) {
     ret = HBW_ERROR;
     goto exit;
   }
 
   /*Check that we got high bandwidth nodes*/
-  ASSERT_EQ(HBW_SUCCESS, check_page_hbw(ptr, size));
+  ASSERT_EQ(0, check_page_hbw(ptr, size));
 
-  if (NULL != ptr){
+  if (NULL != ptr) {
     HBW_free(ptr);
   }
 
  exit:
-  ASSERT_EQ(HBW_SUCCESS, ret);
+  ASSERT_EQ(0, ret);
 }
 
-TEST_F(APITESTS, HbwAllocateMemAlignPsize4K){
+TEST_F(BATest, HbwAllocateMemAlignPsize4K) {
 
   void *ptr = NULL;
-  int ret = HBW_SUCCESS, fret=0;
+  int ret = 0, fret=0;
   size_t size = (size_t)(16*MB);
   size_t align = 4*KB;
   hbw_pagesize_t psize = HBW_PAGESIZE_4KB;
 
   fret = HBW_allocate_memalign_psize(&ptr,align,size,psize);
 
-  if (fret != HBW_SUCCESS
-      || (NULL == ptr)){
+  if (fret != 0
+      || (NULL == ptr)) {
     ret = HBW_ERROR;
     goto exit;
   }
 
   /*Check that we got high bandwidth nodes*/
-  ASSERT_EQ(HBW_SUCCESS, check_page_hbw(ptr, size));
+  ASSERT_EQ(0, check_page_hbw(ptr, size));
 
-  if (NULL != ptr){
+  if (NULL != ptr) {
     HBW_free(ptr);
   }
 
  exit:
-  ASSERT_EQ(HBW_SUCCESS, ret);
+  ASSERT_EQ(0, ret);
 }
 
-TEST_F(APITESTS, HbwAllocateMemAlignPsize2M){
+TEST_F(BATest, HbwAllocateMemAlignPsize2M) {
 
   void *ptr = NULL;
-  int ret = HBW_SUCCESS, fret=0;
+  int ret = 0, fret=0;
   size_t size = (size_t)(16*MB);
   size_t align = 2*MB;
   hbw_pagesize_t psize = HBW_PAGESIZE_2MB;
 
   fret = HBW_allocate_memalign_psize(&ptr,align,size,psize);
 
-  if (fret != HBW_SUCCESS
-      || (NULL == ptr)){
+  if (fret != 0
+      || (NULL == ptr)) {
     ret = HBW_ERROR;
     goto exit;
   }
 
   /*Check that we got high bandwidth nodes*/
-  ASSERT_EQ(HBW_SUCCESS, check_page_hbw(ptr, size));
+  ASSERT_EQ(0, check_page_hbw(ptr, size));
 
-  if (NULL != ptr){
+  if (NULL != ptr) {
     HBW_free(ptr);
   }
 
  exit:
-  ASSERT_EQ(HBW_SUCCESS, ret);
+  ASSERT_EQ(0, ret);
 }
 
 

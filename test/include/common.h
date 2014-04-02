@@ -32,13 +32,8 @@
 #include <gtest/gtest.h>
 #include "hbwmalloc.h"
 
-#define HBW_SUCCESS 0
-#define HBW_ERROR -1
 #define MB 1048576L
 #define GB 1073741824L
 #define KB 1024
-#define CLEARBUF(buf,size)      memset(buf,' ',size)
-
-
 
 #endif

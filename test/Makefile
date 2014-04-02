@@ -6,14 +6,14 @@ bin = $(shell mkdir -p bin)
 
 all:			$(bin) bin/all_tests
 
-bin/all_tests:		main.o api_tests.o threaded_tests.o malloc_tests.o check.o include/common.h
-			$(CC) $(CFLAGS) -o bin/all_tests api_tests.o threaded_tests.o malloc_tests.o main.o check.o $(LIBS)
+bin/all_tests:		main.o bat_tests.o threaded_tests.o malloc_tests.o check.o include/common.h
+			$(CC) $(CFLAGS) -o bin/all_tests bat_tests.o threaded_tests.o malloc_tests.o main.o check.o $(LIBS)
 
 main.o:			main.cpp include/common.h
 			$(CC) $(CFLAGS) $(INCLUDES) -c main.cpp -o main.o
 
-api_tests.o:		api_tests.cpp include/common.h
-			$(CC) $(CFLAGS) $(INCLUDES) -c api_tests.cpp -o api_tests.o
+bat_tests.o:		bat_tests.cpp include/common.h
+			$(CC) $(CFLAGS) $(INCLUDES) -c bat_tests.cpp -o bat_tests.o
 
 threaded_tests.o:	threaded_tests.cpp include/common.h
 			$(CC) $(CFLAGS) $(INCLUDES) -c threaded_tests.cpp -o threaded_tests.o
