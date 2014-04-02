@@ -1,26 +1,32 @@
 topdir = $(HOME)/rpmbuild
+name = numakind
 version = $(shell git describe | sed 's|[^0-9]*\([0-9]*\.[0-9]*\.[0-9]*\).*|\1|')
-specfile = $(topdir)/SPECS/numakind-$(version).spec
-source_tar = $(topdir)/SOURCES/numakind-$(version).tar.gz
-#revision ?= $(shell git rev-parse --abbrev-ref HEAD)
+release= 1
 arch = $(shell uname -p)
-rpm = $(topdir)/RPMS/$(arch)/numakind-$(version)-1.$(arch).rpm
+#revision ?= $(shell git rev-parse --abbrev-ref HEAD)
+
+rpm = $(topdir)/RPMS/$(arch)/$(name)-$(version)-$(release).$(arch).rpm
+specfile = $(topdir)/SPECS/$(name)-$(version).spec
+source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
+rpmbuild = rpmbuild -E '%define _topdir $(topdir)' $(specfile)
+
+
 src = $(shell find)
 
 include make.spec
 
 all: $(rpm)
 
-$(rpm): $(source_tar) $(specfile)
-	rpmbuild -bc --short-circuit -E '%define _topdir $(topdir)' $(specfile)
+$(rpm): $(specfile) $(source_tar)
+	$(rpmbuild) -bc --short-circuit
 
-$(source_tar): $(topdir) $(src)
+$(source_tar): $(topdir) $(specfile) $(src)
 	if [ -n "$(revision)" ]; then \
 	  git archive $(revision) -o $@; \
 	else \
 	  tar cvf $@ *; \
 	fi ; \
-	rpmbuild -bp -E '%define _topdir $(topdir)' $(specfile)	
+	$(rpmbuild) -bp
 
 $(specfile): $(topdir) make.spec
 	@echo "$$numakind_specfile" > $@
@@ -29,6 +35,6 @@ $(topdir):
 	mkdir -p $@/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 
 clean:
-	rm -rf $(topdir)
+	$(rpmbuild) --clean --rmsource --rmspec
 
 .PHONY: all prep clean

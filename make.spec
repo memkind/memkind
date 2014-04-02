@@ -1,7 +1,7 @@
 define numakind_specfile
 
 Summary: Extention to libnuma for kinds of memory
-Name: numakind
+Name: $(name)
 Version: $(version)
 Release: 1
 License: See COPYING
