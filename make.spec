@@ -1,7 +1,7 @@
-define numakind_specfile
+define make_spec
 
 Summary: Extention to libnuma for kinds of memory
-Name: numakind
+Name: $(name)
 Version: $(version)
 Release: 1
 License: See COPYING
@@ -10,9 +10,10 @@ Vendor: Intel Corporation
 URL: http://www.intel.com
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: jemalloc
 BuildRequires: numactl
 BuildRequires: numactl-devel
+
+%{!?jeprefix: %define jeprefix "/usr"}
 
 %description
 The numakind library extends libnuma with the ability to categorize
@@ -24,10 +25,10 @@ implemented with an extension to the jemalloc library which dedicates
 jemalloc must be compiled with the --enable-numakind option.
 
 %prep
-%setup -q -c -T -a 0
+%setup -D -q -c -T -a 0
 
 %build
-$(make_prefix) $(MAKE)
+$(make_prefix) $(MAKE) JEPREFIX=%{jeprefix}
 
 %install
 make DESTDIR=%{buildroot} VERSION=%{version} install
@@ -66,4 +67,4 @@ $(coverage_file)
 - Initial build.
 endef
 
-export numakind_specfile
+export make_spec
