@@ -12,16 +12,19 @@
 Check::Check(const void *ptr, size_t size)
 {
     const int min_page_size = 4096;
+    if (ptr && size) {
+        num_address = size / min_page_size;
+        num_address += size % min_page_size ? 1 : 0;
 
-    num_address = size / min_page_size;
-    num_address += size % min_page_size ? 1 : 0;
+        address = new (void *)[num_address];
 
-    address = new (void *)[num_address];
-
-    for (i = 0; i < num_address; ++i) {
-        address[i] = (char *)ptr + i * page_size;
+        for (i = 0; i < num_address; ++i) {
+            address[i] = (char *)ptr + i * page_size;
+        }
     }
-
+    else {
+        address = NULL;
+    }
     pagemap_fd = open("/proc/self/pagemap", O_RDONLY);
     if (pagemap_fd < 0) {
         throw errno;
@@ -30,7 +33,9 @@ Check::Check(const void *ptr, size_t size)
 
 Check::~Check()
 {
-    delete[] address;
+    if (address) {
+        delete[] address;
+    }
     if (close(pagemap_fd)){
         throw errno;
     }

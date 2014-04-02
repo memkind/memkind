@@ -21,11 +21,6 @@
  estoppel or otherwise. Any license under such intellectual property rights
  must be express and approved by Intel in writing.
 
- Description:
- Helloworld for MYO shared programming model
- In this example, one global shared data(*buffer) is declared, and inited
- at myoiUserInit(). After runtime init(myoiLibInit), both host and LRB can
- have the buffer pointed to the same address.
 */
 
 #include <fstream>
@@ -80,7 +75,7 @@ TEST_F(BATest, HBW_malloc) {
   Check check;
   for (i = 0; i < sizeof(size_array); ++i) {
       size = size_array[i];
-      ASSERT_TRUE(ptr = (char *)HBW_malloc(size));
+      ASSERT_TRUE((ptr = (char *)HBW_malloc(size)) != NULL);
       memset(ptr, 0, size);
       check = Check(ptr, size);
       EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
@@ -91,7 +86,7 @@ TEST_F(BATest, HBW_malloc) {
 TEST_F(BATest, HBW_calloc) {
   size_t size = (size_t)(2048*MB);
   char *ptr;
-  ASSERT_TRUE(ptr = (char *)HBW_calloc(size, 1));
+  ASSERT_TRUE((ptr = (char *)HBW_calloc(size, 1)) != NULL);
   for (int i = 0; i < size; ++i) {
       EXPECT_EQ('\0', ptr[i]);
   }
@@ -103,104 +98,53 @@ TEST_F(BATest, HBW_calloc) {
 TEST_F(BATest, HBW_realloc) {
   size_t size0 = (size_t)(2*KB);
   size_t size1 = (size_t)(2048*MB);
-  char *ptr = (char *)HBW_realloc(NULL, size0);
-  ASSERT_TRUE(ptr != NULL);
+  char *ptr;
+  Check check;
+  ASSERT_TRUE((ptr = (char *)HBW_realloc(NULL, size0)) != NULL);
   memset(ptr, 0, size0);
-  Check check(ptr, size0);
+  check = Check(ptr, size0);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  ptr = (char *)HBW_realloc(ptr, size1);
-  ASSERT_TRUE(ptr != NULL);
+  ASSERT_TRUE((ptr = (char *)HBW_realloc(ptr, size1)) != NULL);
   memset(ptr, 0, size1);
-  Check check(ptr, size1);
+  check = Check(ptr, size1);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  ptr = (char *)HBW_realloc(ptr, size0);
-  ASSERT_TRUE(ptr != NULL);
+  ASSERT_TRUE((ptr = (char *)HBW_realloc(ptr, size0)) != NULL);
   memset(ptr, 0, size0);
-  Check check(ptr, size0);
+  check = Check(ptr, size0);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }
 
-// FIX ME have not refactored below
-
 TEST_F(BATest, HBW_allocate_memalign) {
   void *ptr = NULL;
-  int ret = 0, fret=0;
   size_t size = (size_t)(2*GB);
   size_t align = 32;
+  Check check;
 
-  fret = HBW_allocate_memalign(&ptr,align,size);
-
-  if (fret != 0
-      || ((size_t)ptr%align != 0)
-      || (NULL == ptr)) {
-    ret = HBW_ERROR;
-    goto exit;
-  }
-
-  /*Check that we got high bandwidth nodes*/
-  ASSERT_EQ(0, check_page_hbw(ptr, size));
-
-  if (NULL != ptr) {
-    HBW_free(ptr);
-  }
-
- exit:
-  ASSERT_EQ(0, ret);
+  ASSERT_EQ(0, HBW_allocate_memalign(&ptr, align, size));
+  ASSERT_TRUE(ptr != NULL);
+  EXPECT_EQ(0, (size_t)ptr % align);
+  check = Check(ptr, size);
+  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+  HBW_free(ptr);
 }
 
-TEST_F(BATest, HbwAllocateMemAlignPsize4K) {
-
+TEST_F(BATest, HBW_allocate_memalign_psize) {
   void *ptr = NULL;
-  int ret = 0, fret=0;
   size_t size = (size_t)(16*MB);
-  size_t align = 4*KB;
-  hbw_pagesize_t psize = HBW_PAGESIZE_4KB;
+  hbw_pagesize_t hbw_psize[2] = {HBW_PAGESIZE_4KB, HBW_PAGESIZE_2MB};
+  size_t psize[2] = {4*KB, 2*MB};
+  size_t align[2] = {4*KB, 2*MB};
+  Check check;
 
-  fret = HBW_allocate_memalign_psize(&ptr,align,size,psize);
-
-  if (fret != 0
-      || (NULL == ptr)) {
-    ret = HBW_ERROR;
-    goto exit;
+  for (int i = 0; i < sizeof(psize); ++i) {
+      ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align[i], size, hbw_psize[i]));
+      ASSERT_TRUE(ptr != NULL);
+      check = Check(ptr, size);
+      EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+      EXPECT_EQ(0, check.check_page_size(psize[i]));
+      HBW_free(ptr);
   }
-
-  /*Check that we got high bandwidth nodes*/
-  ASSERT_EQ(0, check_page_hbw(ptr, size));
-
-  if (NULL != ptr) {
-    HBW_free(ptr);
-  }
-
- exit:
-  ASSERT_EQ(0, ret);
-}
-
-TEST_F(BATest, HbwAllocateMemAlignPsize2M) {
-
-  void *ptr = NULL;
-  int ret = 0, fret=0;
-  size_t size = (size_t)(16*MB);
-  size_t align = 2*MB;
-  hbw_pagesize_t psize = HBW_PAGESIZE_2MB;
-
-  fret = HBW_allocate_memalign_psize(&ptr,align,size,psize);
-
-  if (fret != 0
-      || (NULL == ptr)) {
-    ret = HBW_ERROR;
-    goto exit;
-  }
-
-  /*Check that we got high bandwidth nodes*/
-  ASSERT_EQ(0, check_page_hbw(ptr, size));
-
-  if (NULL != ptr) {
-    HBW_free(ptr);
-  }
-
- exit:
-  ASSERT_EQ(0, ret);
 }
 
 
