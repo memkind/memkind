@@ -84,14 +84,11 @@ TEST_F(BATest, HBW_malloc) {
 }
 
 TEST_F(BATest, HBW_calloc) {
-  unsigned int i;
   size_t size = (size_t)(2048*MB);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_calloc(size, 1)) != NULL);
-  for (i = 0; i < size; ++i) {
-      EXPECT_EQ('\0', ptr[i]);
-  }
   Check check(ptr, size);
+  EXPECT_EQ(0, check.check_zero());
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }

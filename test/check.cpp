@@ -25,6 +25,8 @@ Check::Check(const void *ptr, size_t size)
 {
     const int min_page_size = 4096;
     int i;
+    this->ptr = ptr;
+    this->size = size;
     if (ptr && size) {
         num_address = size / min_page_size + 1;
         num_address += size % min_page_size ? 1 : 0;
@@ -91,6 +93,19 @@ int Check::check_node_hbw(size_t num_bandwidth, const int *bandwidth)
     return err;
 
 }
+
+int Check::check_zero(void)
+{
+  size_t i;
+  const char *cptr = (char *)ptr;
+  for (i = 0; i < size; ++i) {
+      if (cptr[i] != '\0') {
+          return -1;
+      }
+  }
+  return 0;
+}
+
 
 void Check::skip_lines(ifstream &ip, int num_lines){
    

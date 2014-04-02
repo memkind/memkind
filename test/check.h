@@ -12,7 +12,10 @@ class Check {
     int check_node_hbw(size_t num_bandwidth, const int *bandwidth);
     int check_page_size(size_t page_size);
     int check_page_size(size_t page_size, void *vaddr);
+    int check_zero(void);
   private:
+    const void *ptr;
+    size_t size;
     void **address;
     unsigned long long start_addr;
     unsigned long long end_addr;
