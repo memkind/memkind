@@ -10,12 +10,11 @@ srpm = $(topdir)/SRPMS/$(name)-$(version)-$(release).src.rpm
 specfile = $(topdir)/SPECS/$(name)-$(version).spec
 source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
 
+src = $(shell cat MANIFEST)
+
 JEPREFIX = /usr
 rpmbuild_flags = -E '%define _topdir $(topdir)' -E '%define jeprefix $(JEPREFIX)'
 
-src  = $(shell find . -iname "*\.[c|cpp|h]")
-src += $(shell find . -iname "README*")
-src += $(shell find . -iname "Makefile")
 
 include make.spec
 
@@ -28,7 +27,7 @@ $(source_tar): $(topdir) $(specfile) $(src)
 	if [ -n "$(revision)" ]; then \
 	  git archive $(revision) -o $@; \
 	else \
-	  tar czvf $@ *; \
+	  tar czvf $@ $(src); \
 	fi ; \
 	rpmbuild $(rpmbuild_flags) $(specfile) -bp
 
