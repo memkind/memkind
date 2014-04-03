@@ -13,10 +13,10 @@ source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
 
 rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = -E '%define _topdir $(topdir)' \
-                 -E '%define jeprefix jeprefix' \
+                 -E '%define jemalloc_prefix jemalloc_prefix' \
                  --clean --rmsource --rmspec
-ifneq ($(JEPREFIX),)
-	rpmbuild_flags += -E '%define jeprefix $(JEPREFIX)'
+ifneq ($(jemalloc_prefix),)
+	rpmbuild_flags += -E '%define jemalloc_prefix $(jemalloc_prefix)'
 endif
 
 include make.spec

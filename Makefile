@@ -1,6 +1,6 @@
 CC ?= gcc
 INSTALL ?= install
-JEPREFIX ?= /usr/local
+JEMALLOC_PREFIX ?= /usr/local
 VERSION ?= $(shell git describe --long | sed 's|^v||')
 prefix ?= /usr
 exec_prefix ?= $(prefix)
@@ -20,10 +20,10 @@ clean:
 	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt numakind_pmtt.o
 
 numakind.o: numakind.c numakind.h numakind_hbw.h
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEPREFIX)/include -c numakind.c
+	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEMALLOC_PREFIX)/include -c numakind.c
 
 numakind_hbw.o: numakind_hbw.c numakind.h numakind_hbw.h
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEPREFIX)/include -c numakind_hbw.c
+	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEMALLOC_PREFIX)/include -c numakind_hbw.c
 
 hbwmalloc.o: hbwmalloc.c hbwmalloc.h numakind.h numakind_hbw.h
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c hbwmalloc.c
@@ -32,7 +32,7 @@ libnumakind.so.0.0: $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libnumakind.so.0 -o libnumakind.so.0.0 $^
 
 numakind-pmtt: numakind_pmtt.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) $(OBJECTS) -lnuma -L$(JEPREFIX)/lib64 -ljemalloc numakind_pmtt.c -o $@
+	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) $(OBJECTS) -lnuma -L$(JEMALLOC_PREFIX)/lib64 -ljemalloc numakind_pmtt.c -o $@
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)

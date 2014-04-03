@@ -1,9 +1,9 @@
 CC=g++
 CFLAGS=-O3 -Wall -fopenmp
-JEPREFIX ?= /usr
-NKPREFIX ?= /usr
-INCLUDE = -I$(JEPREFIX)/include -I$(NKPREFIX)/include
-LDFLAGS = -L$(JEPREFIX)/lib64 -L$(NKPREFIX)/lib64
+JEMALLOC_PREFIX ?= /usr
+NUMAKIND_PREFIX ?= /usr
+INCLUDE = -I$(JEMALLOC_PREFIX)/include -I$(NUMAKIND_PREFIX)/include
+LDFLAGS = -L$(JEMALLOC_PREFIX)/lib64 -L$(NUMAKIND_PREFIX)/lib64
 LIBS = -lnumakind -lnuma -lgtest -lpthread -ljemalloc -lgomp
 OBJECTS = main.o bat_tests.o threaded_tests.o malloc_tests.o check.o
 bin = $(shell mkdir -p bin)

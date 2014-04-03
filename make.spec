@@ -12,7 +12,7 @@ Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: numactl
 BuildRequires: numactl-devel
-%if ! %{defined jeprefix}
+%if ! %{defined jemalloc_prefix}
 BuildRequires: jemalloc
 %endif
 
@@ -30,10 +30,10 @@ jemalloc must be compiled with the --enable-numakind option.
 %setup -D -q -c -T -a 0
 
 %build
-%if ! %{defined jeprefix}
+%if ! %{defined jemalloc_prefix}
 $(make_prefix) $(MAKE)
 %else
-$(make_prefix) $(MAKE) JEPREFIX=%{jeprefix}
+$(make_prefix) $(MAKE) JEMALLOC_PREFIX=%{jemalloc_prefix}
 %endif
 
 %install
