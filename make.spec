@@ -12,8 +12,10 @@ Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: numactl
 BuildRequires: numactl-devel
+%if ! %{defined jeprefix}
+BuildRequires: jemalloc
+%endif
 
-%{!?jeprefix: %define jeprefix "/usr"}
 
 %description
 The numakind library extends libnuma with the ability to categorize
@@ -28,7 +30,11 @@ jemalloc must be compiled with the --enable-numakind option.
 %setup -D -q -c -T -a 0
 
 %build
+%if ! %{defined jeprefix}
+$(make_prefix) $(MAKE)
+%else
 $(make_prefix) $(MAKE) JEPREFIX=%{jeprefix}
+%endif
 
 %install
 make DESTDIR=%{buildroot} VERSION=%{version} install
