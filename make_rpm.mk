@@ -12,6 +12,9 @@ specfile = $(topdir)/SPECS/$(name)-$(version).spec
 source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
 
 rpmbuild_flags = -E '%define _topdir $(topdir)'
+rpmclean_flags = -E '%define _topdir $(topdir)' \
+                 -E '%define jeprefix jeprefix' \
+                 --clean --rmsource --rmspec
 ifneq ($(JEPREFIX),)
 	rpmbuild_flags += -E '%define jeprefix $(JEPREFIX)'
 endif
@@ -38,6 +41,6 @@ $(topdir):
 	mkdir -p $@/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 
 clean:
-	-rpmbuild $(rpmbuild_flags) --clean --rmsource --rmspec $(specfile)
+	-rpmbuild $(rpmclean_flags) $(specfile)
 
 .PHONY: all clean
