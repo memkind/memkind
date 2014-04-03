@@ -10,8 +10,12 @@ srpm = $(topdir)/SRPMS/$(name)-$(version)-$(release).src.rpm
 specfile = $(topdir)/SPECS/$(name)-$(version).spec
 source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
 
-JEPREFIX = /usr
-rpmbuild_flags = -E '%define _topdir $(topdir)' -E '%define jeprefix $(JEPREFIX)'
+ifeq ($(JEPREFIX),)
+	rpmbuild_flags = -E '%define _topdir $(topdir)'
+else
+	rpmbuild_flags = -E '%define _topdir $(topdir)' -E '%define jeprefix $(JEPREFIX)'
+endif
+
 
 src = $(shell find)
 
