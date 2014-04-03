@@ -65,7 +65,7 @@ fi
 %{_libdir}/libnumakind.so
 %{_sbindir}/numakind-pmtt
 %{_initddir}/numakind
-%doc /usr/share/doc/numakind-%{version}/README.txt
+%doc %{_docdir}/numakind-%{version}/README.txt
 $(coverage_file)
 
 %changelog
