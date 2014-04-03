@@ -1,8 +1,9 @@
 name = numakind
-
 arch = $(shell uname -p)
 version = $(shell git describe | sed 's|[^0-9]*\([0-9]*\.[0-9]*\.[0-9]*\).*|\1|')
 release= 1
+
+src = $(shell cat MANIFEST)
 
 topdir = $(HOME)/rpmbuild
 rpm = $(topdir)/RPMS/$(arch)/$(name)-$(version)-$(release).$(arch).rpm
@@ -10,11 +11,10 @@ srpm = $(topdir)/SRPMS/$(name)-$(version)-$(release).src.rpm
 specfile = $(topdir)/SPECS/$(name)-$(version).spec
 source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
 
-src = $(shell cat MANIFEST)
-
-JEPREFIX = /usr
-rpmbuild_flags = -E '%define _topdir $(topdir)' -E '%define jeprefix $(JEPREFIX)'
-
+rpmbuild_flags = -E '%define _topdir $(topdir)'
+ifneq ($(JEPREFIX),)
+	rpmbuild_flags += -E '%define jeprefix $(JEPREFIX)'
+endif
 
 include make.spec
 
