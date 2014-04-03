@@ -13,7 +13,9 @@ source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
 JEPREFIX = /usr
 rpmbuild_flags = -E '%define _topdir $(topdir)' -E '%define jeprefix $(JEPREFIX)'
 
-src = $(shell find)
+src  = $(shell find . -iname "*\.[c|cpp|h]")
+src += $(shell find . -iname "README*")
+src += $(shell find . -iname "Makefile")
 
 include make.spec
 
@@ -37,6 +39,6 @@ $(topdir):
 	mkdir -p $@/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 
 clean:
-	-rpmbuild $(rpmbuild_flags) --clean --rmsource --rmspec
+	-rpmbuild $(rpmbuild_flags) --clean --rmsource --rmspec $(specfile)
 
 .PHONY: all clean
