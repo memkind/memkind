@@ -71,8 +71,8 @@ TEST_F(BATest, HBW_malloc_2B) {
   size_t size = (size_t)(2);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_malloc(size)) != NULL);
-  memset(ptr, 0, size);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }
@@ -81,8 +81,8 @@ TEST_F(BATest, HBW_malloc_2KB) {
   size_t size = (size_t)(2*KB);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_malloc(size)) != NULL);
-  memset(ptr, 0, size);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }
@@ -91,8 +91,8 @@ TEST_F(BATest, HBW_malloc_2MB) {
   size_t size = (size_t)(2*MB);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_malloc(size)) != NULL);
-  memset(ptr, 0, size);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }
@@ -101,8 +101,8 @@ TEST_F(BATest, HBW_malloc_2GB) {
   size_t size = (size_t)(2*GB);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_malloc(size)) != NULL);
-  memset(ptr, 0, size);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }
@@ -156,16 +156,16 @@ TEST_F(BATest, HBW_realloc_2KB_2MB_2KB) {
   size_t size1 = (size_t)(2*MB);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_realloc(NULL, size0)) != NULL);
-  memset(ptr, 0, size0);
   Check check1(ptr, size0);
+  memset(ptr, 0, size0);
   EXPECT_EQ(0, check1.check_node_hbw(num_bandwidth, bandwidth));
   ASSERT_TRUE((ptr = (char *)HBW_realloc(ptr, size1)) != NULL);
-  memset(ptr, 0, size1);
   Check check2(ptr, size1);
+  memset(ptr, 0, size1);
   EXPECT_EQ(0, check2.check_node_hbw(num_bandwidth, bandwidth));
   ASSERT_TRUE((ptr = (char *)HBW_realloc(ptr, size0)) != NULL);
-  memset(ptr, 0, size0);
   Check check3(ptr, size0);
+  memset(ptr, 0, size0);
   EXPECT_EQ(0, check3.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }
@@ -174,12 +174,12 @@ TEST_F(BATest, HBW_allocate_memalign_2B) {
   void *ptr = NULL;
   size_t size = (size_t)(2);
   size_t align = 32;
-
   ASSERT_EQ(0, HBW_allocate_memalign(&ptr, align, size));
   ASSERT_TRUE(ptr != NULL);
-  EXPECT_EQ(0, (size_t)ptr % align);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+  EXPECT_EQ(0, check.check_align(align));
   HBW_free(ptr);
 }
 
@@ -187,12 +187,12 @@ TEST_F(BATest, HBW_allocate_memalign_2KB) {
   void *ptr = NULL;
   size_t size = (size_t)(2*KB);
   size_t align = 32;
-
   ASSERT_EQ(0, HBW_allocate_memalign(&ptr, align, size));
   ASSERT_TRUE(ptr != NULL);
-  EXPECT_EQ(0, (size_t)ptr % align);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+  EXPECT_EQ(0, check.check_align(align));
   HBW_free(ptr);
 }
 
@@ -200,12 +200,12 @@ TEST_F(BATest, HBW_allocate_memalign_2MB) {
   void *ptr = NULL;
   size_t size = (size_t)(2*MB);
   size_t align = 32;
-
   ASSERT_EQ(0, HBW_allocate_memalign(&ptr, align, size));
   ASSERT_TRUE(ptr != NULL);
-  EXPECT_EQ(0, (size_t)ptr % align);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+  EXPECT_EQ(0, check.check_align(align));
   HBW_free(ptr);
 }
 
@@ -216,9 +216,10 @@ TEST_F(BATest, HBW_allocate_memalign_2GB) {
 
   ASSERT_EQ(0, HBW_allocate_memalign(&ptr, align, size));
   ASSERT_TRUE(ptr != NULL);
-  EXPECT_EQ(0, (size_t)ptr % align);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+  EXPECT_EQ(0, check.check_align(align));
   HBW_free(ptr);
 }
 
@@ -231,8 +232,10 @@ TEST_F(BATest, HBW_allocate_memalign_psize_2B) {
   ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align, size, hbw_psize));
   ASSERT_TRUE(ptr != NULL);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   EXPECT_EQ(0, check.check_page_size(psize));
+  EXPECT_EQ(0, check.check_align(align));
   HBW_free(ptr);
 }
 
@@ -245,36 +248,42 @@ TEST_F(BATest, HBW_allocate_memalign_psize_2KB) {
   ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align, size, hbw_psize));
   ASSERT_TRUE(ptr != NULL);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   EXPECT_EQ(0, check.check_page_size(psize));
+  EXPECT_EQ(0, check.check_align(align));
   HBW_free(ptr);
 }
 
 TEST_F(BATest, HBW_allocate_memalign_psize_2MB) {
   void *ptr = NULL;
   size_t size = (size_t)(2*MB);
-  hbw_pagesize_t hbw_psize = HBW_PAGESIZE_2MB;
+  hbw_pagesize_t hbw_psize = HBW_PAGESIZE_4KB;
   size_t psize = 2*MB;
   size_t align = 4*KB;
   ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align, size, hbw_psize));
   ASSERT_TRUE(ptr != NULL);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   EXPECT_EQ(0, check.check_page_size(psize));
+  EXPECT_EQ(0, check.check_align(align));
   HBW_free(ptr);
 }
 
 TEST_F(BATest, HBW_allocate_memalign_psize_2GB) {
   void *ptr = NULL;
   size_t size = (size_t)(2*GB);
-  hbw_pagesize_t hbw_psize = HBW_PAGESIZE_2MB;
+  hbw_pagesize_t hbw_psize = HBW_PAGESIZE_4KB;
   size_t psize = 2*MB;
   size_t align = 2*MB;
   ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align, size, hbw_psize));
   ASSERT_TRUE(ptr != NULL);
   Check check(ptr, size);
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   EXPECT_EQ(0, check.check_page_size(psize));
+  EXPECT_EQ(0, check.check_align(align));
   HBW_free(ptr);
 }
 
