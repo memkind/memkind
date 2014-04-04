@@ -19,9 +19,9 @@ index caadd23..7879169 100644
  CC=g++
 -CFLAGS=-O3 -Wall -fopenmp
 +CFLAGS=-O0 -g -Wall -fopenmp
- JEPREFIX ?= /usr
- NKPREFIX ?= /usr
- INCLUDE = -I$(JEPREFIX)/include -I$(NKPREFIX)/include
+ JEMALLOC_PREFIX ?= /usr
+ NUMAKIND_PREFIX ?= /usr
+ INCLUDE = -I$(JEMALLOC_PREFIX)/include -I$(NUMAKIND_PREFIX)/include
 diff --git a/test/bin/test.sh b/test/bin/test.sh
 index b753459..ff2d654 100755
 --- a/test/bin/test.sh
