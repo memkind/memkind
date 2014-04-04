@@ -105,6 +105,10 @@ int Check::check_zero(void)
   return 0;
 }
 
+int Check::check_align(size_t align)
+{
+  return (size_t)ptr % align;
+}
 
 void Check::skip_lines(ifstream &ip, int num_lines){
    
