@@ -65,7 +65,7 @@ int numakind_is_available(int kind)
         case NUMAKIND_HBW_HUGETLB:
         case NUMAKIND_HBW_PREFERRED:
         case NUMAKIND_HBW_PREFERRED_HUGETLB:
-            result = numakind_hbw_isavail();
+            result = numakind_hbw_is_available();
             break;
         case NUMAKIND_DEFAULT:
             result = 1;
@@ -111,7 +111,7 @@ int numakind_get_nodemask(int kind, unsigned long *nodemask, unsigned long maxno
         case NUMAKIND_HBW_HUGETLB:
         case NUMAKIND_HBW_PREFERRED:
         case NUMAKIND_HBW_PREFERRED_HUGETLB:
-            err = numakind_hbw_nodemask(nodemask, maxnode);
+            err = numakind_hbw_get_nodemask(nodemask, maxnode);
             break;
         case NUMAKIND_DEFAULT:
             numa_bitmask_clearall(&nodemask_bm);

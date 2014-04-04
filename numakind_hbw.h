@@ -6,8 +6,8 @@ extern "C" {
 
 static const char *NUMAKIND_BANDWIDTH_PATH = "/etc/numakind/node-bandwidth";
 
-int numakind_hbw_isavail(void);
-int numakind_hbw_nodemask(unsigned long *nodemask, unsigned long maxnode);
+int numakind_hbw_is_available(void);
+int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode);
 
 #ifdef __cplusplus
 }

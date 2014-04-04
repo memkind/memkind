@@ -36,14 +36,14 @@ static int set_closest_numanode(int num_unique,
 static int numanode_bandwidth_compare(const void *a, const void *b);
 
 
-int numakind_hbw_isavail(void)
+int numakind_hbw_is_available(void)
 {
     int err;
-    err = numakind_hbw_nodemask(NULL, 0);
+    err = numakind_hbw_get_nodemask(NULL, 0);
     return (!err);
 }
 
-int numakind_hbw_nodemask(unsigned long *nodemask, unsigned long maxnode)
+int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode)
 {
     static int init_err = 0;
     static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
