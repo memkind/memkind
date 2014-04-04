@@ -15,8 +15,8 @@ rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = -E '%define _topdir $(topdir)' \
                  -E '%define jemalloc_prefix jemalloc_prefix' \
                  --clean --rmsource --rmspec
-ifneq ($(jemalloc_prefix),)
-	rpmbuild_flags += -E '%define jemalloc_prefix $(jemalloc_prefix)'
+ifneq ($(JEMALLOC_PREFIX),)
+	rpmbuild_flags += -E '%define jemalloc_prefix $(JEMALLOC_PREFIX)'
 endif
 
 include make.spec
