@@ -227,14 +227,12 @@ TEST_F(BATest, HBW_allocate_memalign_psize_2B) {
   void *ptr = NULL;
   size_t size = (size_t)(2);
   hbw_pagesize_t hbw_psize = HBW_PAGESIZE_4KB;
-  size_t psize = 4*KB;
   size_t align = 8;
   ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align, size, hbw_psize));
   ASSERT_TRUE(ptr != NULL);
   Check check(ptr, size);
   memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  EXPECT_EQ(0, check.check_page_size(psize));
   EXPECT_EQ(0, check.check_align(align));
   HBW_free(ptr);
 }
@@ -243,14 +241,12 @@ TEST_F(BATest, HBW_allocate_memalign_psize_2KB) {
   void *ptr = NULL;
   size_t size = (size_t)(2*KB);
   hbw_pagesize_t hbw_psize = HBW_PAGESIZE_4KB;
-  size_t psize = 4*KB;
   size_t align = 128;
   ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align, size, hbw_psize));
   ASSERT_TRUE(ptr != NULL);
   Check check(ptr, size);
   memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  EXPECT_EQ(0, check.check_page_size(psize));
   EXPECT_EQ(0, check.check_align(align));
   HBW_free(ptr);
 }
@@ -258,7 +254,7 @@ TEST_F(BATest, HBW_allocate_memalign_psize_2KB) {
 TEST_F(BATest, HBW_allocate_memalign_psize_2MB) {
   void *ptr = NULL;
   size_t size = (size_t)(2*MB);
-  hbw_pagesize_t hbw_psize = HBW_PAGESIZE_4KB;
+  hbw_pagesize_t hbw_psize = HBW_PAGESIZE_2MB;
   size_t psize = 2*MB;
   size_t align = 4*KB;
   ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align, size, hbw_psize));
@@ -274,7 +270,7 @@ TEST_F(BATest, HBW_allocate_memalign_psize_2MB) {
 TEST_F(BATest, HBW_allocate_memalign_psize_2GB) {
   void *ptr = NULL;
   size_t size = (size_t)(2*GB);
-  hbw_pagesize_t hbw_psize = HBW_PAGESIZE_4KB;
+  hbw_pagesize_t hbw_psize = HBW_PAGESIZE_2MB;
   size_t psize = 2*MB;
   size_t align = 2*MB;
   ASSERT_EQ(0, HBW_allocate_memalign_psize(&ptr, align, size, hbw_psize));
