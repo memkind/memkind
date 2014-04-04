@@ -234,6 +234,7 @@ int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
     int err = 0;
     int arena;
 
+    *memptr = NULL
     if (kind == NUMAKIND_DEFAULT) {
         err = je_posix_memalign(memptr, alignment, size);
         err = err ? NUMAKIND_ERROR_MEMALIGN : 0;
