@@ -147,9 +147,9 @@ TEST_F(BATest, HBW_calloc_2GB) {
   HBW_free(ptr);
 }
 
-TEST_F(BATest, HBW_realloc_2KB_2GB_2KB) {
+TEST_F(BATest, HBW_realloc_2KB_2MB_2KB) {
   size_t size0 = (size_t)(2*KB);
-  size_t size1 = (size_t)(2048*MB);
+  size_t size1 = (size_t)(2*MB);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_realloc(NULL, size0)) != NULL);
   memset(ptr, 0, size0);
