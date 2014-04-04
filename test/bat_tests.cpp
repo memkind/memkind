@@ -68,7 +68,6 @@ TEST_F(BATest, HBW_policy) {
 }
 
 TEST_F(BATest, HBW_malloc_2B) {
-  unsigned int i;
   size_t size = (size_t)(2);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_malloc(size)) != NULL);
@@ -79,7 +78,6 @@ TEST_F(BATest, HBW_malloc_2B) {
 }
 
 TEST_F(BATest, HBW_malloc_2KB) {
-  unsigned int i;
   size_t size = (size_t)(2*KB);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_malloc(size)) != NULL);
@@ -90,7 +88,6 @@ TEST_F(BATest, HBW_malloc_2KB) {
 }
 
 TEST_F(BATest, HBW_malloc_2MB) {
-  unsigned int i;
   size_t size = (size_t)(2*MB);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_malloc(size)) != NULL);
@@ -101,7 +98,6 @@ TEST_F(BATest, HBW_malloc_2MB) {
 }
 
 TEST_F(BATest, HBW_malloc_2GB) {
-  unsigned int i;
   size_t size = (size_t)(2*GB);
   char *ptr;
   ASSERT_TRUE((ptr = (char *)HBW_malloc(size)) != NULL);

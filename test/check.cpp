@@ -66,8 +66,6 @@ int Check::check_node_hbw(size_t num_bandwidth, const int *bandwidth)
     size_t j;
     int *status = NULL;
 
-    return 0; /* FIXME disabling check until errno 2 set by move_pages is resolved */
-
     status = new int [num_address];
 
     move_pages(0, num_address, address, NULL, status, MPOL_MF_MOVE);
