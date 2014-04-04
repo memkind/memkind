@@ -113,6 +113,7 @@ TEST_F(BATest, HBW_calloc_2B) {
   ASSERT_TRUE((ptr = (char *)HBW_calloc(size, 1)) != NULL);
   Check check(ptr, size);
   EXPECT_EQ(0, check.check_zero());
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }
@@ -123,6 +124,7 @@ TEST_F(BATest, HBW_calloc_2KB) {
   ASSERT_TRUE((ptr = (char *)HBW_calloc(size, 1)) != NULL);
   Check check(ptr, size);
   EXPECT_EQ(0, check.check_zero());
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }
@@ -133,6 +135,7 @@ TEST_F(BATest, HBW_calloc_2MB) {
   ASSERT_TRUE((ptr = (char *)HBW_calloc(size, 1)) != NULL);
   Check check(ptr, size);
   EXPECT_EQ(0, check.check_zero());
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }
@@ -143,6 +146,7 @@ TEST_F(BATest, HBW_calloc_2GB) {
   ASSERT_TRUE((ptr = (char *)HBW_calloc(size, 1)) != NULL);
   Check check(ptr, size);
   EXPECT_EQ(0, check.check_zero());
+  memset(ptr, 0, size);
   EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
   HBW_free(ptr);
 }
