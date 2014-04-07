@@ -312,8 +312,8 @@ static int numakind_getarena(numakind_t kind, int *arena)
             else {
                 is_init = 1;
             }
-            pthread_mutex_unlock(&init_mutex);
         }
+        pthread_mutex_unlock(&init_mutex);
         if (init_err)
             return init_err;
     }
@@ -331,8 +331,8 @@ static int numakind_getarena(numakind_t kind, int *arena)
                 map_len = 0;
                 num_cpu = 0;
                 is_init = 0;
-                pthread_mutex_unlock(&init_mutex);
             }
+            pthread_mutex_unlock(&init_mutex);
         }
         init_err = init_err ? NUMAKIND_ERROR_MALLCTL : 0;
         return init_err;
