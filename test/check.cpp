@@ -173,7 +173,7 @@ int Check::check_page_size(size_t page_size)
 
     ip.open ("/proc/self/smaps");
 
-    if (!check_page_size(page_size, address[0])) {
+    if (check_page_size(page_size, address[0])) {
         err = -1;
     }
     for (i = 1; i < num_address && !err; ++i) {
