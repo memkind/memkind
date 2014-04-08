@@ -95,19 +95,35 @@ int Check::check_node_hbw(size_t num_bandwidth, const int *bandwidth)
 
 int Check::check_zero(void)
 {
-  size_t i;
-  const char *cptr = (char *)ptr;
-  for (i = 0; i < size; ++i) {
+    size_t i;
+    const char *cptr = (char *)ptr;
+    for (i = 0; i < size; ++i) {
       if (cptr[i] != '\0') {
-          return -1;
+        return -1;
       }
-  }
-  return 0;
+    }
+    return 0;
 }
 
 int Check::check_align(size_t align)
 {
-  return (size_t)ptr % align;
+    return (size_t)ptr % align;
+}
+
+string Check::skip_to_next_entry (ifstream &ip){
+    
+    string temp, token;
+    size_t found = 0;
+    
+    while (1){
+      getline (ip, temp);
+      found = temp.find("-");
+      if (found != string::npos){
+        istringstream iss(temp);
+        getline(iss, token, ' ');
+        return token;
+      }
+    }
 }
 
 void Check::skip_lines(ifstream &ip, int num_lines){
@@ -174,34 +190,39 @@ int Check::check_page_size(size_t page_size, void *vaddr){
     string read;
     unsigned long long virt_addr;
     size_t lpagesize;
-    
+ 
     virt_addr = (unsigned long long)(vaddr);
 
+    ip >> read;  
+
     while (!ip.eof()){
-      ip >> read;
+
       start_addr = end_addr = 0;
       get_address_range(read, &start_addr,
                         &end_addr);
       if ((virt_addr >= start_addr) &&
           (virt_addr <= end_addr)){
-        
-        skip_lines(ip, 12);
+      
+        skip_lines(ip, 11);
         getline(ip, read);
         lpagesize = get_kpagesize(read);
+        lpagesize *= 1024; 
         if (lpagesize == page_size){
+          ip.clear();
+          ip.seekg(0, ios::beg);
           return 0;
         }
         else{
           /*The pagesize of allocation and req don't match*/
+          fprintf(stderr,"%zd does not match entry in SMAPS (%zd)\n",
+                  page_size, lpagesize);
           return -1;
         }
       }
       else{
-        skip_lines(ip,14);
+        read = skip_to_next_entry(ip);
       }
     }
-
     /*Never found a match!*/
     return 1;
 }
-
