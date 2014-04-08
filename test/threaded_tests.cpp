@@ -58,7 +58,7 @@ protected:
 
 
 TEST_F(THREADEDMALLOC, HbwMalloc1KB){
-  #pragma omp parallel
+  #pragma omp parallel num_threads(NTHREADS)
   {
     tid = omp_get_thread_num();
     ptr[tid] = (char *) HBW_malloc(KB);
@@ -75,7 +75,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc1KB){
 
 
 TEST_F(THREADEDMALLOC, HbwMalloc4KB){
-  #pragma omp parallel
+  #pragma omp parallel num_threads(NTHREADS)
   {
     tid = omp_get_thread_num();
     ptr[tid] = (char *) HBW_malloc(4 * KB);
@@ -92,7 +92,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc4KB){
 
 
 TEST_F(THREADEDMALLOC, HbwMalloc2MB){
-  #pragma omp parallel
+  #pragma omp parallel num_threads(NTHREADS)
   {
     int tid = omp_get_thread_num();
     ptr[tid] = (char *) HBW_malloc(2 * MB);
@@ -109,7 +109,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc2MB){
 
 
 TEST_F(THREADEDMALLOC, HbwMalloc16MB){
-  #pragma omp parallel
+  #pragma omp parallel num_threads(NTHREADS)
   {
     tid = omp_get_thread_num();
     ptr[tid] = (char *) HBW_malloc(16 * MB);
@@ -125,7 +125,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc16MB){
 }
 
 TEST_F(THREADEDMALLOC, HbwMalloc2GB){
-  #pragma omp parallel
+  #pragma omp parallel num_threads(NTHREADS)
   {
     tid = omp_get_thread_num();
     ptr[tid] = (char *) HBW_malloc(2 * GB);
