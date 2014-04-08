@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-O3 -Wall -fopenmp
+CFLAGS=-O3 -Wall -fopenmp -std=c++0x
 JEMALLOC_PREFIX ?= /usr
 NUMAKIND_PREFIX ?= /usr
 INCLUDE = -I$(JEMALLOC_PREFIX)/include -I$(NUMAKIND_PREFIX)/include

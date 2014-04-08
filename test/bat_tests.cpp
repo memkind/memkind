@@ -24,9 +24,11 @@
 */
 
 #include <fstream>
+#include <algorithm>
 #include "common.h"
 #include "check.h"
 #include "omp.h"
+#include "numakind.h"
 
 
 class BATest: public :: testing::Test
@@ -283,5 +285,45 @@ TEST_F(BATest, HBW_allocate_memalign_psize_2GB) {
   HBW_free(ptr);
 }
 
+int myrandom(int i) { return random() % i;}
 
+TEST_F(BATest, numakind_malloc_stress)
+{
+    int i;
+    numakind_t kind;
+    int num_trials = 1000;
+    void *ptr;
+    size_t size;
+    std::vector<void *> ptrs;
+
+    for (i = 0; i < num_trials; i++) {
+        if (ptrs.size() == 0 || myrandom(2)) {
+            size = myrandom(8*MB - 1) + 1;
+            kind = (numakind_t)myrandom(NUMAKIND_NUM_KIND);
+            ptr = numakind_malloc(kind, myrandom(8*MB));
+            Check check(ptr, size);
+            memset(ptr, 0, size);
+            if (kind == NUMAKIND_HBW ||
+                kind == NUMAKIND_HBW_HUGETLB ||
+                kind == NUMAKIND_HBW_PREFERRED ||
+                kind == NUMAKIND_HBW_PREFERRED_HUGETLB) {
+                EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+            }
+            if (kind == NUMAKIND_HBW_HUGETLB ||
+                kind == NUMAKIND_HBW_PREFERRED_HUGETLB) {
+                EXPECT_EQ(0, check.check_page_size(2*MB));
+            }
+            ptrs.push_back(ptr);
+        }
+        else {
+            std::random_shuffle(ptrs.begin(), ptrs.end(), myrandom);
+            numakind_free(NUMAKIND_DEFAULT, ptrs.back());
+            ptrs.pop_back();
+        }
+    }
+    while (ptrs.size()) {
+        numakind_free(NUMAKIND_DEFAULT, ptrs.back());
+        ptrs.pop_back();
+    }
+}
 
