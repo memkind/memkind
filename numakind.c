@@ -11,6 +11,15 @@
 #include "numakind.h"
 #include "numakind_hbw.h"
 
+struct numakind_arena_map_t {
+    int init_err;
+    int num_cpu;
+    unsigned int *arena_map;
+};
+static struct numakind_arena_map_t numakind_arena_map_g;
+static pthread_once_t numakind_arena_map_once_g = PTHREAD_ONCE_INIT;
+
+static void numakind_init_arena_map(void);
 static int numakind_getarena(numakind_t kind, int *arena);
 
 void numakind_error_message(int err, char *msg, size_t size)
@@ -264,91 +273,61 @@ void numakind_free(numakind_t kind, void *ptr)
     je_free(ptr);
 }
 
+static void numakind_init_arena_map(void)
+{
+    struct numakind_arena_map_t *g = &numakind_arena_map_g;
+    unsigned int kind_select;
+    int i, j;
+    size_t unsigned_size = sizeof(unsigned);
+    unsigned int map_len;
+
+    g->init_err = 0;
+    g->num_cpu = numa_num_configured_cpus();
+    map_len = (NUMAKIND_NUM_KIND - 1) * g->num_cpu;
+    g->arena_map = je_malloc(sizeof(unsigned int) * map_len);
+    if (g->arena_map) {
+        for (kind_select = 1, j = 0;
+             kind_select < NUMAKIND_NUM_KIND && !g->init_err;
+             ++kind_select) {
+            for (i = 0; i < g->num_cpu && !g->init_err; ++i, ++j) {
+                g->init_err = je_mallctl("arenas.extendk", g->arena_map + j,
+                                         &unsigned_size, &kind_select,
+                                         unsigned_size);
+            }
+        }
+        g->init_err = g->init_err ? NUMAKIND_ERROR_MALLCTL : 0;
+    }
+    else {
+        g->init_err = NUMAKIND_ERROR_MALLOC;
+    }
+    if (g->init_err) {
+        g->num_cpu = 0;
+        if (g->arena_map) {
+            je_free(g->arena_map);
+            g->arena_map = NULL;
+        }
+    }
+}
 
 static int numakind_getarena(numakind_t kind, int *arena)
 {
-    static int init_err = 0;
-    static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
-    static int is_init = 0;
-    static int num_cpu = 0;
-    static unsigned int map_len = 0;
-    static unsigned int *arena_map = NULL;
-    static size_t unsigned_size = sizeof(unsigned int);
     int err = 0;
-    int i, j, cpu_node, arena_index;
-    unsigned int kind_select;
+    int cpu_node, arena_index;
+    struct numakind_arena_map_t *g = &numakind_arena_map_g;
+    pthread_once(&numakind_arena_map_once_g, numakind_init_arena_map);
 
-    if (!is_init && !init_err) {
-        /* Initialize arena_map */
-        pthread_mutex_lock(&init_mutex);
-        if (!is_init && !init_err) {
-            num_cpu = numa_num_configured_cpus();
-            map_len = (NUMAKIND_NUM_KIND - 1) * num_cpu;
-            arena_map = je_malloc(sizeof(unsigned int) * map_len);
-            if (arena_map) {
-                for (kind_select = 1, j = 0;
-                     kind_select < NUMAKIND_NUM_KIND && !init_err;
-                     ++kind_select) {
-                    for (i = 0; i < num_cpu && !init_err; ++i, ++j) {
-                        init_err = je_mallctl("arenas.extendk", arena_map + j,
-                                              &unsigned_size, &kind_select,
-                                              unsigned_size);
-                    }
-                }
-                init_err = init_err ? NUMAKIND_ERROR_MALLCTL : 0;
-            }
-            else {
-                init_err = NUMAKIND_ERROR_MALLOC;
-            }
-            if (init_err) {
-                is_init = 0;
-                num_cpu = 0;
-                map_len = 0;
-                if (arena_map) {
-                    je_free(arena_map);
-                    arena_map = NULL;
-                }
-            }
-            else {
-                is_init = 1;
-            }
-        }
-        pthread_mutex_unlock(&init_mutex);
-        if (init_err)
-            return init_err;
-    }
-    if (kind < 0 && !init_err) {
-        /* Destroy arena_map */
-        if (map_len) {
-            pthread_mutex_lock(&init_mutex);
-            if (map_len) {
-                for (i = 0; i < map_len && !init_err; ++i) {
-                    init_err = je_mallctl("arenas.purge", arena_map + i,
-                                          &unsigned_size, NULL, 0);
-                }
-                je_free(arena_map);
-                arena_map = NULL;
-                map_len = 0;
-                num_cpu = 0;
-                is_init = 0;
-            }
-            pthread_mutex_unlock(&init_mutex);
-        }
-        init_err = init_err ? NUMAKIND_ERROR_MALLCTL : 0;
-        return init_err;
-    }
-    else if (!init_err) {
+    if (!g->init_err) {
         cpu_node = numa_node_of_cpu(sched_getcpu());
-        if (cpu_node >= num_cpu) {
+        if (cpu_node >= g->num_cpu) {
             err = NUMAKIND_ERROR_GETCPU;
         }
         else {
-            arena_index = ((int)kind - 1) * num_cpu + cpu_node;
-            *arena = arena_map[arena_index];
+            arena_index = ((int)kind - 1) * g->num_cpu + cpu_node;
+            *arena = g->arena_map[arena_index];
         }
     }
     else {
-        err = init_err;
+        err = g->init_err;
     }
     return err;
 }
