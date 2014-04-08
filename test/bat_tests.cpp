@@ -301,6 +301,7 @@ TEST_F(BATest, numakind_malloc_stress)
             size = myrandom(8*MB - 1) + 1;
             kind = (numakind_t)myrandom(NUMAKIND_NUM_KIND);
             ptr = numakind_malloc(kind, myrandom(8*MB));
+            ASSERT_TRUE(ptr != NULL);
             Check check(ptr, size);
             memset(ptr, 0, size);
             if (kind == NUMAKIND_HBW ||

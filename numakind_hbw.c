@@ -104,8 +104,8 @@ int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode)
             else {
                 is_init = 1;
             }
-            pthread_mutex_unlock(&init_mutex);
         }
+        pthread_mutex_unlock(&init_mutex);
     }
     if (!init_err && nodemask) {
         numa_bitmask_clearall(&nodemask_bm);
