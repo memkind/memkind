@@ -285,6 +285,76 @@ TEST_F(BATest, HBW_allocate_memalign_psize_2GB) {
   HBW_free(ptr);
 }
 
+TEST_F(BATest, numakind_malloc_recycle_hbw_2MB)
+{
+    void *ptr = NULL;
+    size_t size = (size_t)(2*MB);
+    ptr = numakind_malloc(NUMAKIND_DEFAULT, size);
+    ASSERT_TRUE(ptr != NULL);
+    memset(ptr, 0, size);
+    numakind_free(NUMAKIND_DEFAULT, ptr);
+    ptr = numakind_malloc(NUMAKIND_HBW, size);
+    ASSERT_TRUE(ptr != NULL);
+    Check check(ptr, size);
+    memset(ptr, 0, size);
+    EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+    numakind_free(NUMAKIND_HBW, ptr);
+}
+
+TEST_F(BATest, numakind_malloc_recycle_hbw_2GB)
+{
+    void *ptr = NULL;
+    size_t size = (size_t)(2*GB);
+    ptr = numakind_malloc(NUMAKIND_DEFAULT, size);
+    ASSERT_TRUE(ptr != NULL);
+    memset(ptr, 0, size);
+    numakind_free(NUMAKIND_DEFAULT, ptr);
+    ptr = numakind_malloc(NUMAKIND_HBW, size);
+    ASSERT_TRUE(ptr != NULL);
+    Check check(ptr, size);
+    memset(ptr, 0, size);
+    EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+    numakind_free(NUMAKIND_HBW, ptr);
+}
+
+TEST_F(BATest, numakind_malloc_recycle_psize_2MB)
+{
+    void *ptr = NULL;
+    size_t size = (size_t)(2*MB);
+    ptr = numakind_malloc(NUMAKIND_HBW, size);
+    ASSERT_TRUE(ptr != NULL);
+    Check check0(ptr, size);
+    memset(ptr, 0, size);
+    EXPECT_EQ(0, check0.check_node_hbw(num_bandwidth, bandwidth));
+    numakind_free(NUMAKIND_HBW, ptr);
+    ptr = numakind_malloc(NUMAKIND_HBW_HUGETLB, size);
+    ASSERT_TRUE(ptr != NULL);
+    Check check1(ptr, size);
+    memset(ptr, 0, size);
+    EXPECT_EQ(0, check1.check_node_hbw(num_bandwidth, bandwidth));
+    EXPECT_EQ(0, check1.check_page_size(2*MB));
+    numakind_free(NUMAKIND_HBW_HUGETLB, ptr);
+}
+
+TEST_F(BATest, numakind_malloc_recycle_psize_2GB)
+{
+    void *ptr = NULL;
+    size_t size = (size_t)(2*GB);
+    ptr = numakind_malloc(NUMAKIND_HBW, size);
+    ASSERT_TRUE(ptr != NULL);
+    Check check0(ptr, size);
+    memset(ptr, 0, size);
+    EXPECT_EQ(0, check0.check_node_hbw(num_bandwidth, bandwidth));
+    numakind_free(NUMAKIND_HBW, ptr);
+    ptr = numakind_malloc(NUMAKIND_HBW_HUGETLB, size);
+    ASSERT_TRUE(ptr != NULL);
+    Check check1(ptr, size);
+    memset(ptr, 0, size);
+    EXPECT_EQ(0, check1.check_node_hbw(num_bandwidth, bandwidth));
+    EXPECT_EQ(0, check1.check_page_size(2*MB));
+    numakind_free(NUMAKIND_HBW_HUGETLB, ptr);
+}
+
 int myrandom(int i) { return random() % i;}
 
 TEST_F(BATest, numakind_malloc_stress)
