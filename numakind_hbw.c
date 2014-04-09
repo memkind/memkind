@@ -54,6 +54,28 @@ int numakind_hbw_is_available(void)
     return (!err);
 }
 
+int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode)
+{
+    int cpu;
+    struct bitmask nodemask_bm = {maxnode, nodemask};
+    struct numakind_hbw_closest_numanode_t *g = 
+          &numakind_hbw_closest_numanode_g;
+    pthread_once(&numakind_hbw_closest_numanode_once_g, 
+                 numakind_hbw_closest_numanode_init);
+
+    if (!g->init_err && nodemask) {
+        numa_bitmask_clearall(&nodemask_bm);
+        cpu = sched_getcpu();
+        if (cpu < g->num_cpu) {
+            numa_bitmask_setbit(&nodemask_bm, g->closest_numanode[cpu]);
+        }
+        else {
+            return NUMAKIND_ERROR_GETCPU;
+        }
+    }
+    return g->init_err;
+}
+
 static void numakind_hbw_closest_numanode_init(void)
 {
     struct numakind_hbw_closest_numanode_t *g =
@@ -101,28 +123,6 @@ static void numakind_hbw_closest_numanode_init(void)
         }
 
     }
-}
-
-int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode)
-{
-    int cpu;
-    struct bitmask nodemask_bm = {maxnode, nodemask};
-    struct numakind_hbw_closest_numanode_t *g = 
-          &numakind_hbw_closest_numanode_g;
-    pthread_once(&numakind_hbw_closest_numanode_once_g, 
-                 numakind_hbw_closest_numanode_init);
-
-    if (!g->init_err && nodemask) {
-        numa_bitmask_clearall(&nodemask_bm);
-        cpu = sched_getcpu();
-        if (cpu < g->num_cpu) {
-            numa_bitmask_setbit(&nodemask_bm, g->closest_numanode[cpu]);
-        }
-        else {
-            return NUMAKIND_ERROR_GETCPU;
-        }
-    }
-    return g->init_err;
 }
 
 static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
