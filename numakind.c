@@ -16,10 +16,12 @@ struct numakind_arena_map_t {
     int num_cpu;
     unsigned int *arena_map;
 };
+
 static struct numakind_arena_map_t numakind_arena_map_g;
 static pthread_once_t numakind_arena_map_once_g = PTHREAD_ONCE_INIT;
 
-static void numakind_init_arena_map(void);
+static void numakind_arena_map_init(void);
+
 static int numakind_getarena(numakind_t kind, int *arena);
 
 void numakind_error_message(int err, char *msg, size_t size)
@@ -273,7 +275,7 @@ void numakind_free(numakind_t kind, void *ptr)
     je_free(ptr);
 }
 
-static void numakind_init_arena_map(void)
+static void numakind_arena_map_init(void)
 {
     struct numakind_arena_map_t *g = &numakind_arena_map_g;
     unsigned int kind_select;
@@ -314,7 +316,7 @@ static int numakind_getarena(numakind_t kind, int *arena)
     int err = 0;
     int cpu_node, arena_index;
     struct numakind_arena_map_t *g = &numakind_arena_map_g;
-    pthread_once(&numakind_arena_map_once_g, numakind_init_arena_map);
+    pthread_once(&numakind_arena_map_once_g, numakind_arena_map_init);
 
     if (!g->init_err) {
         cpu_node = numa_node_of_cpu(sched_getcpu());
