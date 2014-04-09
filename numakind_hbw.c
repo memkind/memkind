@@ -23,6 +23,17 @@ struct bandwidth_nodes_t {
     int *numanodes;
 };
 
+struct numakind_hbw_closest_numanode_t {
+    int init_err;
+    int num_cpu;
+    int *closest_numanode;
+};
+
+static struct numakind_hbw_closest_numanode_t numakind_hbw_closest_numanode_g;
+static pthread_once_t numakind_hbw_closest_numanode_once_g = PTHREAD_ONCE_INIT;
+
+static void numakind_hbw_closest_numanode_init(void);
+
 static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
                const char *bandwidth_path);
 
@@ -43,81 +54,75 @@ int numakind_hbw_is_available(void)
     return (!err);
 }
 
+static void numakind_hbw_closest_numanode_init(void)
+{
+    struct numakind_hbw_closest_numanode_t *g =
+          &numakind_hbw_closest_numanode_g;
+    int *bandwidth = NULL;
+    int num_unique = 0;
+    int high_bandwidth = 0;
+    struct bandwidth_nodes_t *bandwidth_nodes = NULL;
+
+    g->num_cpu = numa_num_configured_cpus();
+    g->closest_numanode = (int *)je_malloc(sizeof(int) * g->num_cpu);
+    bandwidth = (int *)je_malloc(sizeof(int) * NUMA_NUM_NODES);
+    if (!(g->closest_numanode && bandwidth)) {
+        g->init_err = NUMAKIND_ERROR_MALLOC;
+    }
+    if (!g->init_err) {
+        g->init_err = parse_node_bandwidth(NUMA_NUM_NODES, bandwidth,
+                                           NUMAKIND_BANDWIDTH_PATH);
+    }
+    if (!g->init_err) {
+        g->init_err = create_bandwidth_nodes(NUMA_NUM_NODES, bandwidth,
+                                             &num_unique, &bandwidth_nodes);
+    }
+    if (!g->init_err) {
+        if (num_unique == 1) {
+            g->init_err = NUMAKIND_ERROR_UNAVAILABLE;
+        }
+    }
+    if (!g->init_err) {
+         high_bandwidth = bandwidth_nodes[num_unique-1].bandwidth;
+         g->init_err = set_closest_numanode(num_unique, bandwidth_nodes,
+                                            high_bandwidth, g->num_cpu,
+                                            g->closest_numanode);
+    }
+    if (bandwidth_nodes) {
+        je_free(bandwidth_nodes);
+    }
+    if (bandwidth) {
+        je_free(bandwidth);
+    }
+    if (g->init_err) {
+        if (g->closest_numanode) {
+            je_free(g->closest_numanode);
+            g->closest_numanode = NULL;
+        }
+
+    }
+}
+
 int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode)
 {
-    static int init_err = 0;
-    static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
-    static int numcpu = 0;
-    static int *closest_numanode = NULL;
-    static int is_init = 0;
-    int *bandwidth = NULL;
-    int high_bandwidth = 0;
-    int num_unique = 0;
     int cpu;
-    struct bandwidth_nodes_t *bandwidth_nodes = NULL;
     struct bitmask nodemask_bm = {maxnode, nodemask};
+    struct numakind_hbw_closest_numanode_t *g = 
+          &numakind_hbw_closest_numanode_g;
+    pthread_once(&numakind_hbw_closest_numanode_once_g, 
+                 numakind_hbw_closest_numanode_init);
 
-    if (!init_err && !is_init) {
-        pthread_mutex_lock(&init_mutex);
-        if (!init_err && !is_init) {
-            numcpu = numa_num_configured_cpus();
-            closest_numanode = (int *)je_malloc(sizeof(int) * numcpu);
-            bandwidth = (int *)je_malloc(sizeof(int) * NUMA_NUM_NODES);
-            if (!(closest_numanode && bandwidth)) {
-                init_err = NUMAKIND_ERROR_MALLOC;
-            }
-            if (!init_err) {
-                init_err = parse_node_bandwidth(NUMA_NUM_NODES, bandwidth,
-                                                NUMAKIND_BANDWIDTH_PATH);
-            }
-            if (!init_err) {
-                init_err = create_bandwidth_nodes(NUMA_NUM_NODES, bandwidth,
-                                                  &num_unique,
-                                                  &bandwidth_nodes);
-            }
-            if (!init_err) {
-                if (num_unique == 1) {
-                    init_err = NUMAKIND_ERROR_UNAVAILABLE;
-                }
-            }
-            if (!init_err) {
-                 high_bandwidth = bandwidth_nodes[num_unique-1].bandwidth;
-                 init_err = set_closest_numanode(num_unique, bandwidth_nodes,
-                                                high_bandwidth, numcpu,
-                                                closest_numanode);
-            }
-            if (bandwidth_nodes) {
-                je_free(bandwidth_nodes);
-                bandwidth_nodes = NULL;
-            }
-            if (bandwidth) {
-                je_free(bandwidth);
-                bandwidth = NULL;
-            }
-            if (init_err) {
-                if (closest_numanode) {
-                    je_free(closest_numanode);
-                    closest_numanode = NULL;
-                }
-                is_init = 0;
-            }
-            else {
-                is_init = 1;
-            }
-        }
-        pthread_mutex_unlock(&init_mutex);
-    }
-    if (!init_err && nodemask) {
+    if (!g->init_err && nodemask) {
         numa_bitmask_clearall(&nodemask_bm);
         cpu = sched_getcpu();
-        if (cpu < numcpu) {
-            numa_bitmask_setbit(&nodemask_bm, closest_numanode[cpu]);
+        if (cpu < g->num_cpu) {
+            numa_bitmask_setbit(&nodemask_bm, g->closest_numanode[cpu]);
         }
         else {
             return NUMAKIND_ERROR_GETCPU;
         }
     }
-    return init_err;
+    return g->init_err;
 }
 
 static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
