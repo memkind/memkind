@@ -299,26 +299,13 @@ static int numanode_bandwidth_compare(const void *a, const void *b)
     *  qsort comparison function for numa_node_bandwidth structures.  Sorts in *
     *  order of bandwidth and then numanode.                                   *
     ***************************************************************************/
+    int result;
     struct numanode_bandwidth_t *aa = (struct numanode_bandwidth_t *)(a);
     struct numanode_bandwidth_t *bb = (struct numanode_bandwidth_t *)(b);
-    if (aa->bandwidth == bb->bandwidth) {
-        if (aa->numanode > bb->numanode) {
-            return 1;
-        }
-        else if (aa->numanode < bb->numanode) {
-            return -1;
-        }
-        else {
-            return 0;
-        }
+    result = (aa->bandwidth > bb->bandwidth) - (aa->bandwidth < bb->bandwidth);
+    if (result == 0) {
+        result = (aa->numanode > bb->numanode) - (aa->numanode < bb->numanode);
     }
-    else {
-        if (aa->bandwidth > bb->bandwidth) {
-            return 1;
-        }
-        else {
-            return -1;
-        }
-    }
+    return result;
 }
 
