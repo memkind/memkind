@@ -31,13 +31,14 @@ jemalloc must be compiled with the --enable-numakind option.
 
 %build
 %if ! %{defined jemalloc_prefix}
-$(make_prefix) $(MAKE)
+$(make_prefix) $(MAKE) $(make_postfix)
 %else
-$(make_prefix) $(MAKE) JEMALLOC_PREFIX=%{jemalloc_prefix}
+$(make_prefix) $(MAKE) JEMALLOC_PREFIX=%{jemalloc_prefix} $(make_postfix)
 %endif
 
 %install
 make DESTDIR=%{buildroot} VERSION=%{version} install
+$(spec_covinstall)
 
 %clean
 
@@ -66,7 +67,7 @@ fi
 %{_sbindir}/numakind-pmtt
 %{_initddir}/numakind
 %doc %{_docdir}/numakind-%{version}/README.txt
-$(coverage_file)
+$(spec_covfile)
 
 %changelog
 * Mon Mar 24 2014 mic <mic@localhost> - 
