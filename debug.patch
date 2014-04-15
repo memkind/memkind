@@ -17,8 +17,8 @@ index caadd23..7879169 100644
 +++ b/test/Makefile
 @@ -1,5 +1,5 @@
  CC=g++
--CFLAGS=-O3 -Wall -fopenmp
-+CFLAGS=-O0 -g -Wall -fopenmp
+-CFLAGS=-O3 -Wall -fopenmp -std=c++0x
++CFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
  JEMALLOC_PREFIX ?= /usr
  NUMAKIND_PREFIX ?= /usr
  INCLUDE = -I$(JEMALLOC_PREFIX)/include -I$(NUMAKIND_PREFIX)/include
