@@ -366,10 +366,13 @@ TEST_F(BATest, numakind_malloc_stress_hbw)
     size_t size;
     std::vector<void *> ptrs;
 
+    srandom(0);
+
     for (i = 0; i < num_trials; i++) {
         // choose at random to allocate or free (unless there is nothing to free)
         if (ptrs.size() == 0 || myrandom(3)) {
             size = myrandom(8*MB - 1) + 1;
+            // size = (random() & (~0ULL >> (63 - myrandom(28)))) + 1;
             // choose at random between NUMAKIND_DEFAULT and NUMAKIND_HBW
             kind = (numakind_t)myrandom(2);
             ptr = numakind_malloc(kind, size);
@@ -404,10 +407,13 @@ TEST_F(BATest, numakind_malloc_stress_all)
     size_t size;
     std::vector<void *> ptrs;
 
+    srandom(0);
+
     for (i = 0; i < num_trials; i++) {
         // choose at random to allocate or free (unless there is nothing to free)
         if (ptrs.size() == 0 || myrandom(3)) {
             size = myrandom(8*MB - 1) + 1;
+            // size = (random() & (~0ULL >> (63 - myrandom(28)))) + 1;
             // choose kind at random
             kind = (numakind_t)myrandom(NUMAKIND_NUM_KIND);
             ptr = numakind_malloc(kind, size);
