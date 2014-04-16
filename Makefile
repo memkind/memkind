@@ -17,7 +17,7 @@ OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
 all: libnumakind.so.0.0 numakind-pmtt doc
 
 clean:
-	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt numakind_pmtt.o
+	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt numakind_pmtt.o doc
 
 doc:
 	doxygen
