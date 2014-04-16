@@ -1,7 +1,7 @@
 name = numakind
 arch = $(shell uname -p)
-version = $(shell git describe | sed 's|[^0-9]*\([0-9]*\.[0-9]*\.[0-9]*\).*|\1|')
-release = $(shell git describe | sed 's|[^0-9]*[0-9]*\.[0-9]*\.[0-9]*-\([0-9]*\).*|\1|')
+version = $(shell git describe --long | sed 's|[^0-9]*\([0-9]*\.[0-9]*\.[0-9]*\).*|\1|')
+release = $(shell git describe --long | sed 's|[^0-9]*[0-9]*\.[0-9]*\.[0-9]*-\([0-9]*\).*|\1|')
 
 src = $(shell cat MANIFEST)
 
