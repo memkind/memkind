@@ -41,8 +41,8 @@ ssh root@$knlmcdram "rpm -e jemalloc >& /dev/null"
 ssh root@$knlmcdram "rpm -i ~mic/jemalloc-3.5*.rpm ~mic/numakind-0.0*.rpm"
 ssh root@$knlmcdram "install ~mic/libgtest*.so.0.0.0 /usr/lib64"
 ssh root@$knlmcdram "/sbin/ldconfig"
-ssh root@$knlmcdram "echo 1000 > /proc/sys/vm/nr_hugepages"
-ssh root@$knlmcdram "echo 1000 > /proc/sys/vm/nr_overcommit_hugepages"
+ssh root@$knlmcdram "echo 4000 > /proc/sys/vm/nr_hugepages"
+ssh root@$knlmcdram "echo 4000 > /proc/sys/vm/nr_overcommit_hugepages"
 ssh mic@$knlmcdram "./all_tests --gtest_output=xml:all_tests.xml"
 scp mic@$knlmcdram:all_tests.xml .
 if [ -f simics.pid ]
