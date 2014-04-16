@@ -3,7 +3,7 @@ define make_spec
 Summary: Extention to libnuma for kinds of memory
 Name: $(name)
 Version: $(version)
-Release: 1
+Release: $(release)
 License: See COPYING
 Group: System Environment/Libraries
 Vendor: Intel Corporation
