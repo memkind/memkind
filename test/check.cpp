@@ -114,8 +114,9 @@ string Check::skip_to_next_entry (ifstream &ip){
     
     string temp, token;
     size_t found = 0;
+    string empty ="";
     
-    while (1){
+    while (!ip.eof()){
       getline (ip, temp);
       found = temp.find("-");
       if (found != string::npos){
@@ -124,6 +125,7 @@ string Check::skip_to_next_entry (ifstream &ip){
         return token;
       }
     }
+    return empty;
 }
 
 void Check::skip_lines(ifstream &ip, int num_lines){
@@ -172,7 +174,8 @@ int Check::check_page_size(size_t page_size)
     int i;
 
     ip.open ("/proc/self/smaps");
-
+    
+    populate_smaps_table();
     if (check_page_size(page_size, address[0])) {
         err = -1;
     }
@@ -184,44 +187,79 @@ int Check::check_page_size(size_t page_size)
     return err;
 }
 
+int Check::populate_smaps_table (){
+    
+    string read;
+    size_t lpagesize;
+    smaps_entry_t lentry;
+    unsigned long long start_addr;
+    unsigned long long end_addr;
+
+    ip >> read;
+    while (!ip.eof()){
+	
+	start_addr = end_addr = 0;
+	get_address_range (read, 
+			   &start_addr,
+			   &end_addr);
+	skip_lines(ip, 11);
+	getline(ip, read);
+	lpagesize = get_kpagesize(read);
+	lpagesize *= 1024;
+	lentry.start_addr = start_addr;
+	lentry.end_addr = end_addr;
+	lentry.pagesize = lpagesize;
+	smaps_table.push_back(lentry);
+	read = skip_to_next_entry(ip);
+	if (read.empty()){
+	    break;
+	}
+    }
+    
+    if (0 == smaps_table.size()){
+	fprintf(stderr,"Empty smaps table\n");
+	return -1;
+    }
+    else{
+	return 0;
+    }
+
+}
+
 int Check::check_page_size(size_t page_size, void *vaddr){
   
-
+    
     string read;
     unsigned long long virt_addr;
     size_t lpagesize;
- 
+    list<smaps_entry_t>::iterator it;
+    unsigned long long start_addr;
+    unsigned long long end_addr;
+
     virt_addr = (unsigned long long)(vaddr);
+    
+    for (it = smaps_table.begin();
+	 it != smaps_table.end();
+	 it++){
 
-    ip >> read;  
-
-    while (!ip.eof()){
-
-      start_addr = end_addr = 0;
-      get_address_range(read, &start_addr,
-                        &end_addr);
-      if ((virt_addr >= start_addr) &&
-          (virt_addr <= end_addr)){
-      
-        skip_lines(ip, 11);
-        getline(ip, read);
-        lpagesize = get_kpagesize(read);
-        lpagesize *= 1024; 
-        if (lpagesize == page_size){
-          ip.clear();
-          ip.seekg(0, ios::beg);
-          return 0;
-        }
-        else{
-          /*The pagesize of allocation and req don't match*/
-          fprintf(stderr,"%zd does not match entry in SMAPS (%zd)\n",
-                  page_size, lpagesize);
-          return -1;
-        }
-      }
-      else{
-        read = skip_to_next_entry(ip);
-      }
+	start_addr = it->start_addr;
+	end_addr = it->end_addr;
+	
+	if ((virt_addr >= start_addr) &&
+	    (virt_addr <= end_addr)){
+	    
+	    lpagesize = it->pagesize;
+	    
+	    if (lpagesize == page_size){
+		return 0;
+	    }
+	    else{
+		 /*The pagesize of allocation and req don't match*/
+		fprintf(stderr,"%zd does not match entry in SMAPS (%zd)\n",
+			page_size, lpagesize);
+		return -1;
+	    }
+	}
     }
     /*Never found a match!*/
     return 1;
