@@ -1,4 +1,6 @@
 #!/bin/sh
 
-make JEMALLOC_PREFIX=$HOME/rpmbuild/BUILDROOT/jemalloc-3.5.1-1.x86_64/usr NUMAKIND_PREFIX=$HOME/rpmbuild/BUILDROOT/numakind-0.0.0-1.x86_64/usr
+jemalloc_prefix=`ls -dt $HOME/rpmbuild/BUILDROOT/jemalloc-*.x86_64/usr | head -n1`
+numakind_prefix=`ls -dt $HOME/rpmbuild/BUILDROOT/numakind-*.x86_64/usr | head -n1`
+make JEMALLOC_PREFIX=$jemalloc_prefix NUMAKIND_PREFIX=$numakind_prefix
 
