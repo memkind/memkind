@@ -3,7 +3,7 @@ define make_spec
 Summary: Extention to libnuma for kinds of memory
 Name: $(name)
 Version: $(version)
-Release: 1
+Release: $(release)
 License: See COPYING
 Group: System Environment/Libraries
 Vendor: Intel Corporation
@@ -33,13 +33,14 @@ jemalloc must be compiled with the --enable-numakind option.
 
 %build
 %if ! %{defined jemalloc_prefix}
-$(make_prefix) $(MAKE)
+$(make_prefix) $(MAKE) $(make_postfix)
 %else
-$(make_prefix) $(MAKE) JEMALLOC_PREFIX=%{jemalloc_prefix}
+$(make_prefix) $(MAKE) JEMALLOC_PREFIX=%{jemalloc_prefix} $(make_postfix)
 %endif
 
 %install
 make DESTDIR=%{buildroot} VERSION=%{version} install
+$(extra_install)
 
 %clean
 
@@ -71,7 +72,7 @@ fi
 %doc %{_docdir}/numakind-%{version}/numakind_refman.pdf
 %doc %{_datarootdir}/man/man3/hbwmalloc.3.gz
 %doc %{_datarootdir}/man/man3/numakind.3.gz
-$(coverage_file)
+$(extra_files)
 
 %changelog
 * Mon Mar 24 2014 mic <mic@localhost> - 

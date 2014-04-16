@@ -1,6 +1,16 @@
 #ifndef check_include_h
 #define check_include_h
 
+#include <list>
+
+
+typedef struct{
+    unsigned long start_addr;
+    unsigned long end_addr;
+    size_t pagesize;
+}smaps_entry_t;
+
+
 
 using namespace std;
 
@@ -17,8 +27,7 @@ class Check {
     const void *ptr;
     size_t size;
     void **address;
-    unsigned long long start_addr;
-    unsigned long long end_addr;
+    list<smaps_entry_t>smaps_table;
     ifstream ip;
     int smaps_fd;
     int num_address;
@@ -28,6 +37,7 @@ class Check {
                           unsigned long long *end_addr);
     size_t get_kpagesize(string line);
     int check_page_size(size_t page_size, void *vaddr);
+    int populate_smaps_table();
 };
 
 #endif
