@@ -14,10 +14,14 @@ initddir ?= /etc/rc.d/init.d
 CFLAGS_EXTRA = -fPIC -Wall -Werror -O3
 OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
 
-all: libnumakind.so.0.0 numakind-pmtt
+all: libnumakind.so.0.0 numakind-pmtt doc
 
 clean:
 	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt numakind_pmtt.o
+
+doc:
+	doxygen
+	$(MAKE) -C doc/latex
 
 numakind.o: numakind.c numakind.h numakind_hbw.h
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEMALLOC_PREFIX)/include -c numakind.c
@@ -43,9 +47,13 @@ install:
 	ln -sf libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so
 	$(INSTALL) -d $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
+	$(INSTALL) -m 644 doc/latex/refman.pdf $(DESTDIR)$(docdir)/numakind_refman.pdf
+	$(INSTALL) -d $(DESTDIR)$(datarootdir)/man/man3
+	$(INSTALL) -m 644 doc/man/man3/hbwmalloc.h.3 $(DESTDIR)$(datarootdir)/man/man3/hbwmalloc.3
+	$(INSTALL) -m 644 doc/man/man3/numakind.h.3 $(DESTDIR)$(datarootdir)/man/man3/numakind.3
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	$(INSTALL) numakind-pmtt $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)$(initddir)
 	$(INSTALL) numakind-init $(DESTDIR)$(initddir)/numakind
 
-.PHONY: all clean install
+.PHONY: all clean install doc
