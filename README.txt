@@ -13,13 +13,11 @@ jemalloc must be compiled with the --enable-numakind option.
 Vishwanth Venkatesan <vishwanath.venkatesan@intel.com>
 2014 April, 9
 
-To generate documentation use config_file 
-and type command 
-        doxygen
+To generate documentation (HTML, pdf, and man):
 
--- Generates both HTML documentation
+user_prompt> make doc
 
-To install Doxygen:
-        sudo  yum install doxygen graphviz ImageMagick
+Requires Doxygen:
 
-TODO: Add comments (example shown in numakind.h
+user_prompt> sudo  yum install doxygen texlive-latex
+
