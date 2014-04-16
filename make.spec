@@ -38,7 +38,7 @@ $(make_prefix) $(MAKE) JEMALLOC_PREFIX=%{jemalloc_prefix} $(make_postfix)
 
 %install
 make DESTDIR=%{buildroot} VERSION=%{version} install
-$(spec_install)
+$(extra_install)
 
 %clean
 
@@ -67,7 +67,7 @@ fi
 %{_sbindir}/numakind-pmtt
 %{_initddir}/numakind
 %doc %{_docdir}/numakind-%{version}/README.txt
-$(spec_files)
+$(extra_files)
 
 %changelog
 * Mon Mar 24 2014 mic <mic@localhost> - 
