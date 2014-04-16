@@ -15,7 +15,7 @@ Vishwanth Venkatesan <vishwanath.venkatesan@intel.com>
 
 To generate documentation use config_file 
 and type command 
-        doxygen config_file
+        doxygen
 
 -- Generates both HTML documentation
 
