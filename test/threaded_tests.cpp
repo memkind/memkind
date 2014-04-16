@@ -61,7 +61,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc1KB){
   #pragma omp parallel num_threads(NTHREADS)
   {
     tid = omp_get_thread_num();
-    ptr[tid] = (char *) HBW_malloc(KB);
+    ptr[tid] = (char *) hbw_malloc(KB);
     if (NULL == ptr[tid]){
       #pragma omp critical
       {
@@ -69,7 +69,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc1KB){
       }
     }
     ptr[tid][1024] ='a';
-    HBW_free(ptr[tid]);
+    hbw_free(ptr[tid]);
   }
 }
 
@@ -78,7 +78,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc4KB){
   #pragma omp parallel num_threads(NTHREADS)
   {
     tid = omp_get_thread_num();
-    ptr[tid] = (char *) HBW_malloc(4 * KB);
+    ptr[tid] = (char *) hbw_malloc(4 * KB);
     if (NULL == ptr[tid]){
       #pragma omp critical
       {
@@ -86,7 +86,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc4KB){
       }
     }
     ptr[tid][1024] ='a';
-    HBW_free(ptr[tid]);
+    hbw_free(ptr[tid]);
   }
 }
 
@@ -95,7 +95,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc2MB){
   #pragma omp parallel num_threads(NTHREADS)
   {
     int tid = omp_get_thread_num();
-    ptr[tid] = (char *) HBW_malloc(2 * MB);
+    ptr[tid] = (char *) hbw_malloc(2 * MB);
     if (NULL == ptr[tid]){
       #pragma omp critical
       {
@@ -103,7 +103,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc2MB){
       }
     }
     ptr[tid][1024] ='a';
-    HBW_free(ptr[tid]);
+    hbw_free(ptr[tid]);
   }
 }
 
@@ -112,7 +112,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc16MB){
   #pragma omp parallel num_threads(NTHREADS)
   {
     tid = omp_get_thread_num();
-    ptr[tid] = (char *) HBW_malloc(16 * MB);
+    ptr[tid] = (char *) hbw_malloc(16 * MB);
     if (NULL == ptr[tid]){
       #pragma omp critical
       {
@@ -120,7 +120,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc16MB){
       }
     }
     ptr[tid][1024] ='a';
-    HBW_free(ptr[tid]);
+    hbw_free(ptr[tid]);
   }
 }
 
@@ -128,7 +128,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc2GB){
   #pragma omp parallel num_threads(NTHREADS)
   {
     tid = omp_get_thread_num();
-    ptr[tid] = (char *) HBW_malloc(2 * GB);
+    ptr[tid] = (char *) hbw_malloc(2 * GB);
     if (NULL == ptr[tid]){
       #pragma omp critical
       {
@@ -136,7 +136,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc2GB){
       }
     }
     ptr[tid][1024] ='a';
-    HBW_free(ptr[tid]);
+    hbw_free(ptr[tid]);
   }
   ASSERT_EQ(HBW_SUCCESS, ret);
 }

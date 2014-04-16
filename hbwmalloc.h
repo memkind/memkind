@@ -14,16 +14,16 @@ typedef enum {
     HBW_PAGESIZE_2MB = 2
 } hbw_pagesize_t;
 
-int HBW_getpolicy(void);
-void HBW_setpolicy(int mode);
-int HBW_IsHBWAvailable(void);
-void *HBW_malloc(size_t size);
-void *HBW_calloc(size_t num, size_t size);
-int HBW_allocate_memalign(void **memptr, size_t alignment, size_t size);
-int HBW_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
+int hbw_get_policy(void);
+void hbw_set_policy(int mode);
+int hbw_is_available(void);
+void *hbw_malloc(size_t size);
+void *hbw_calloc(size_t num, size_t size);
+int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size);
+int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
     int pagesize);
-void *HBW_realloc(void *ptr, size_t size);
-void HBW_free(void *ptr);
+void *hbw_realloc(void *ptr, size_t size);
+void hbw_free(void *ptr);
 
 #ifdef __cplusplus
 }
