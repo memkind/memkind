@@ -1,4 +1,5 @@
 #!/bin/sh
 
-make -f make_rpm.mk JEMALLOC_PREFIX=$HOME/rpmbuild/BUILDROOT/jemalloc-3.5.1-1.x86_64/usr $1
+jemalloc_prefix=`ls -dt $HOME/rpmbuild/BUILDROOT/jemalloc-*.x86_64/usr | head -n1`
+make -f make_rpm.mk JEMALLOC_PREFIX=$jemalloc_prefix $1
 
