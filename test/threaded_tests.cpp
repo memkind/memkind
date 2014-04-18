@@ -38,7 +38,6 @@ class THREADEDMALLOC: public :: testing::Test
 protected:
   char *ptr[NTHREADS];
   int ret;
-  int tid;
 
   THREADEDMALLOC()
   {}
@@ -58,7 +57,8 @@ protected:
 
 
 TEST_F(THREADEDMALLOC, HbwMalloc1KB){
-  #pragma omp parallel num_threads(NTHREADS)
+  int tid;
+  #pragma omp parallel num_threads(NTHREADS) private(tid)
   {
     tid = omp_get_thread_num();
     ptr[tid] = (char *) hbw_malloc(KB);
@@ -75,7 +75,8 @@ TEST_F(THREADEDMALLOC, HbwMalloc1KB){
 
 
 TEST_F(THREADEDMALLOC, HbwMalloc4KB){
-  #pragma omp parallel num_threads(NTHREADS)
+  int tid;
+  #pragma omp parallel num_threads(NTHREADS) private(tid)
   {
     tid = omp_get_thread_num();
     ptr[tid] = (char *) hbw_malloc(4 * KB);
@@ -92,7 +93,8 @@ TEST_F(THREADEDMALLOC, HbwMalloc4KB){
 
 
 TEST_F(THREADEDMALLOC, HbwMalloc2MB){
-  #pragma omp parallel num_threads(NTHREADS)
+  int tid;
+  #pragma omp parallel num_threads(NTHREADS) private(tid)
   {
     int tid = omp_get_thread_num();
     ptr[tid] = (char *) hbw_malloc(2 * MB);
@@ -109,7 +111,8 @@ TEST_F(THREADEDMALLOC, HbwMalloc2MB){
 
 
 TEST_F(THREADEDMALLOC, HbwMalloc16MB){
-  #pragma omp parallel num_threads(NTHREADS)
+  int tid;
+  #pragma omp parallel num_threads(NTHREADS) private(tid)
   {
     tid = omp_get_thread_num();
     ptr[tid] = (char *) hbw_malloc(16 * MB);
@@ -125,7 +128,8 @@ TEST_F(THREADEDMALLOC, HbwMalloc16MB){
 }
 
 TEST_F(THREADEDMALLOC, HbwMalloc2GB){
-  #pragma omp parallel num_threads(NTHREADS)
+  int tid;
+  #pragma omp parallel num_threads(NTHREADS) private(tid)
   {
     tid = omp_get_thread_num();
     ptr[tid] = (char *) hbw_malloc(2 * GB);
