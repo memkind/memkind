@@ -96,13 +96,15 @@ static void numakind_hbw_closest_numanode_init(void)
     if (!g->init_err) {
         hbw_nodes_env = getenv("NUMAKIND_HBW_NODES");
         if (hbw_nodes_env) {
-            memset(bandwidth, 0, sizeof(int)*NUMA_NUM_NODES);
+            for (node = 0; node < NUMA_NUM_NODES; node++) {
+                bandwidth[node] = 1;
+            }
             node = strtol(hbw_nodes_env, &endptr, 10);
             if (endptr == hbw_nodes_env || node < 0 || node >= NUMA_NUM_NODES) {
                 g->init_err = NUMAKIND_ERROR_ENVIRON;
             }
             else {
-                bandwidth[node] = 1;
+                bandwidth[node] = 2;
             }
             while (!g->init_err && *endptr == ':') {
                 hbw_nodes_env = endptr + 1;
@@ -111,7 +113,7 @@ static void numakind_hbw_closest_numanode_init(void)
                     g->init_err = NUMAKIND_ERROR_ENVIRON;
                 }
                 else {
-                    bandwidth[node] = 1;
+                    bandwidth[node] = 2;
                 }
             }
         }
