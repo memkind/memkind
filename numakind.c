@@ -60,6 +60,9 @@ void numakind_error_message(int err, char *msg, size_t size)
         case NUMAKIND_ERROR_ALLOCM:
             strncpy(msg, "<numakind> Call to je_allocm() failed", size);
             break;
+        case NUMAKIND_ERROR_ENVIRON:
+            strncpy(msg, "<numakind> Error parsing environment variable (NUMAKIND_*)", size);
+            break;
         default:
             snprintf(msg, size, "<numakind> Undefined error number: %i", err);
             break;
