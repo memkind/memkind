@@ -7,9 +7,18 @@ extern "C" {
  *  \file hbwmalloc.h
  *  \brief Header file for the high bandwidth memory interface.
  *
+ *  ##include <hbwmalloc.h>
+ *
+ *  Link with -lnuma -lnumakind
+ *
  *  This file defines the external API's and enumerations for the
  *  hbwmalloc library.  These interfaces define a heap manager that
  *  targets the high bandwidth memory numa nodes.
+ *
+ *  \section ENVIRONMENT
+ *  \subsection NUMAKIND_HBW_NODES
+ *  Colon separated list of NUMA nodes that are treated as high
+ *  bandwidth.  Can be used if pmtt file is not present.
  */
 
 /*!
