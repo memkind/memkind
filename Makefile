@@ -1,6 +1,6 @@
 CC ?= gcc
 INSTALL ?= install
-JEMALLOC_PREFIX ?= /usr/local
+JEMALLOC_PREFIX ?= /usr
 VERSION ?= $(shell git describe --long | sed 's|^v||')
 prefix ?= /usr
 exec_prefix ?= $(prefix)
