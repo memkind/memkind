@@ -14,7 +14,7 @@ initddir ?= /etc/rc.d/init.d
 CFLAGS_EXTRA = -fPIC -Wall -Werror -O3
 OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
 
-all: libnumakind.so.0.0 numakind-pmtt doc
+all: libnumakind.so.0.0 numakind-pmtt doc test
 
 clean:
 	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt numakind_pmtt.o doc
@@ -22,6 +22,9 @@ clean:
 doc:
 	doxygen
 	$(MAKE) -C doc/latex
+
+test: libnumakind.so.0.0 numakind-pmtt
+	make -C test
 
 numakind.o: numakind.c numakind.h numakind_hbw.h
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEMALLOC_PREFIX)/include -c numakind.c
@@ -56,4 +59,4 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(initddir)
 	$(INSTALL) numakind-init $(DESTDIR)$(initddir)/numakind
 
-.PHONY: all clean install doc
+.PHONY: all clean install doc test

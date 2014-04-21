@@ -8,7 +8,7 @@ LIBS = -lnumakind -lnuma -lgtest -lpthread -ljemalloc -lgomp
 OBJECTS = main.o bat_tests.o threaded_tests.o malloc_tests.o check.o
 bin = $(shell mkdir -p bin)
 
-all:			$(bin) bin/all_tests
+all:			$(bin) bin/all_tests test
 
 bin/all_tests:		$(OBJECTS) common.h
 			$(CC) $(LDFLAGS) -o bin/all_tests $(OBJECTS) $(LIBS)
@@ -30,3 +30,5 @@ check.o:		check.cpp
 
 clean:
 			rm -f $(OBJECTS) bin/all_tests
+test: bin/all_tests bin/test.sh
+			./bin/test.sh
