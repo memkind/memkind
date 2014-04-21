@@ -33,4 +33,4 @@ clean:
 test: bin/all_tests bin/test.sh
 			./bin/test.sh
 
-.PHONY all clean test
+.PHONY: all clean test
