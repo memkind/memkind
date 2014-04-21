@@ -2,9 +2,10 @@ CC=g++
 CFLAGS=-O3 -Wall -fopenmp -std=c++0x
 JEMALLOC_PREFIX ?= /usr
 NUMAKIND_PREFIX ?= /usr
-INCLUDE = -I$(JEMALLOC_PREFIX)/include -I$(NUMAKIND_PREFIX)/include
+GOOGLETEST_PREFIX ?= /usr
+INCLUDE = -I$(JEMALLOC_PREFIX)/include -I$(NUMAKIND_PREFIX)/include -I$(GOOGLETEST_PREFIX)/include
 LDFLAGS = -L$(JEMALLOC_PREFIX)/lib64 -L$(NUMAKIND_PREFIX)/lib64
-LIBS = -lnumakind -lnuma -lgtest -lpthread -ljemalloc -lgomp
+LIBS = -lnumakind -lnuma -lpthread -ljemalloc -lgomp $(GOOGLETEST_PREFIX)/lib64/libgtest.a
 OBJECTS = main.o bat_tests.o threaded_tests.o malloc_tests.o check.o
 bin = $(shell mkdir -p bin)
 
