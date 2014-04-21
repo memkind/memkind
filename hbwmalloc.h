@@ -27,8 +27,10 @@ extern "C" {
  *
  *  \section ENVIRONMENT
  *  \subsection NUMAKIND_HBW_NODES
- *  Colon separated list of NUMA nodes that are treated as high
- *  bandwidth.  Can be used if pmtt file is not present.
+ *  Comma separated list of NUMA nodes that are treated as high
+ *  bandwidth.  Can be used if pmtt file is not present.  Uses same
+ *  parser as numactl, so logic defined in numactl man pages applies:
+ *  e.g 1-3,5 is a valid setting.
  */
 
 /*!
