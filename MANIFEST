@@ -14,3 +14,12 @@ numakind-init
 numakind_pmtt.c
 README.txt
 Doxyfile
+test/Makefile
+test/common.h
+test/check.h
+test/main.cpp
+test/check.cpp
+test/bat_tests.cpp
+test/threaded_tests.cpp
+test/malloc_tests.cpp
+test/bin/test.sh
