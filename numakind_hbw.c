@@ -95,7 +95,8 @@ static void numakind_hbw_closest_numanode_init(void)
     int high_bandwidth = 0;
     int node;
     struct bandwidth_nodes_t *bandwidth_nodes = NULL;
-    char *hbw_nodes_env, *endptr;
+    char *hbw_nodes_env;
+    struct bitmask *hbw_nodes_bm;
 
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = (int *)je_malloc(sizeof(int) * g->num_cpu);
@@ -106,25 +107,20 @@ static void numakind_hbw_closest_numanode_init(void)
     if (!g->init_err) {
         hbw_nodes_env = getenv("NUMAKIND_HBW_NODES");
         if (hbw_nodes_env) {
-            for (node = 0; node < NUMA_NUM_NODES; node++) {
-                bandwidth[node] = 1;
-            }
-            node = strtol(hbw_nodes_env, &endptr, 10);
-            if (endptr == hbw_nodes_env || node < 0 || node >= NUMA_NUM_NODES) {
+            hbw_nodes_bm = numa_parse_nodestring(hbw_nodes_env);
+            if (!hbw_nodes_bm) {
                 g->init_err = NUMAKIND_ERROR_ENVIRON;
             }
             else {
-                bandwidth[node] = 2;
-            }
-            while (!g->init_err && *endptr == ':') {
-                hbw_nodes_env = endptr + 1;
-                node = strtol(hbw_nodes_env, &endptr, 10);
-                if (endptr == hbw_nodes_env || node < 0 || node >= NUMA_NUM_NODES) {
-                    g->init_err = NUMAKIND_ERROR_ENVIRON;
+                for (node = 0; node < NUMA_NUM_NODES; ++node) {
+                    if (numa_bitmask_isbitset(hbw_nodes_bm, node)) {
+                        bandwidth[node] = 2;
+                    }
+                    else {
+                        bandwidth[node] = 1;
+                    }
                 }
-                else {
-                    bandwidth[node] = 2;
-                }
+                numa_bitmask_free(hbw_nodes_bm);
             }
         }
         else {
