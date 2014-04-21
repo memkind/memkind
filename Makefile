@@ -1,6 +1,7 @@
 CC ?= gcc
 INSTALL ?= install
 JEMALLOC_PREFIX ?= /usr
+NUMAKIND_PREFIX ?= /usr
 VERSION ?= $(shell git describe --long | sed 's|^v||')
 prefix ?= /usr
 exec_prefix ?= $(prefix)
@@ -14,17 +15,18 @@ initddir ?= /etc/rc.d/init.d
 CFLAGS_EXTRA = -fPIC -Wall -Werror -O3
 OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
 
-all: libnumakind.so.0.0 numakind-pmtt doc test
+all: libnumakind.so.0.0 numakind-pmtt doc
 
 clean:
 	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt numakind_pmtt.o doc
+	make -C test clean
 
 doc:
 	doxygen
 	$(MAKE) -C doc/latex
 
-test: libnumakind.so.0.0 numakind-pmtt
-	make -C test
+test: $(NUMAKIND_PREFIX)/lib/libnumakind.so.0 $(NUMAKIND_PREFIX)/include/numakind.h $(NUMAKIND_PREFIX)/include/hbwmalloc.h
+	make NUMAKIND_PREFIX=$(NUMAKIND_PREFIX) -C test
 
 numakind.o: numakind.c numakind.h numakind_hbw.h
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEMALLOC_PREFIX)/include -c numakind.c
