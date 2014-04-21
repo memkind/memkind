@@ -11,7 +11,7 @@ bin = $(shell mkdir -p bin)
 all:			$(bin) bin/all_tests test
 
 bin/all_tests:		$(OBJECTS) common.h
-			$(CC) $(LDFLAGS) -o bin/all_tests $(OBJECTS) $(LIBS)
+			$(CC) $(OBJECTS) $(LIBS) $(LDFLAGS) -o bin/all_tests
 
 main.o:			main.cpp common.h
 			$(CC) $(CFLAGS) $(INCLUDE) -c main.cpp -o main.o
@@ -31,6 +31,6 @@ check.o:		check.cpp
 clean:
 			rm -f $(OBJECTS) bin/all_tests
 test: bin/all_tests bin/test.sh
-			./bin/test.sh
+			LD_LIBRARY_PATH+=:$(JEMALLOC_PREFIX)/lib64:$(NUMAKIND_PREFIX)/lib64 ./bin/test.sh
 
 .PHONY: all clean test

@@ -25,7 +25,7 @@ doc:
 	doxygen
 	$(MAKE) -C doc/latex
 
-test: $(NUMAKIND_PREFIX)/lib/libnumakind.so.0 $(NUMAKIND_PREFIX)/include/numakind.h $(NUMAKIND_PREFIX)/include/hbwmalloc.h
+test: $(NUMAKIND_PREFIX)/lib64/libnumakind.so.0 $(NUMAKIND_PREFIX)/include/numakind.h $(NUMAKIND_PREFIX)/include/hbwmalloc.h
 	make NUMAKIND_PREFIX=$(NUMAKIND_PREFIX) -C test
 
 numakind.o: numakind.c numakind.h numakind_hbw.h
