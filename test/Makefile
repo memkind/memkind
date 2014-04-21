@@ -32,3 +32,5 @@ clean:
 			rm -f $(OBJECTS) bin/all_tests
 test: bin/all_tests bin/test.sh
 			./bin/test.sh
+
+.PHONY all clean test
