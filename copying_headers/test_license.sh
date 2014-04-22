@@ -17,7 +17,7 @@ tags=$(ls MANIFEST.* | sed 's|^MANIFEST.||' | grep -v EXEMPT)
 
 for tag in $tags; do
     for path in $(cat MANIFEST.$tag); do
-        $basedir/check license_$tag ../$path
+        $basedir/check header.$tag ../$path
         if [ $? -ne 0 ]; then
             echo "ERROR: $path missing license tag"
             exit -2
