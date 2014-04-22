@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+import sys
+import re
+
+class License(object):
+    def __init__(self, lic_text):
+        self.special_char = re.compile('[!@#$*/%;]')
+        self.indent = re.compile('\n\s*')
+        self.trail = re.compile('\s*\n')
+        self.search_length = 1024 + len(lic_text.splitlines())
+        self.lic = self._filter(lic_text)
+        if not self.lic:
+            raise BadLicenseError(lic_text)
+
+    def check(self, path):
+        head = open(path).readlines(self.search_length) # python 2.6
+        head = self._filter(''.join(head))
+        if self.lic in head:
+            return 0
+        return -2
+
+    def _filter(self, string):
+        result = self.special_char.sub('', string).strip()
+        result = self.indent.sub('', result)
+        return self.trail.sub('', result)
+
+if __name__ == '__main__':
+    lic = open(sys.argv[1]).read()
+    path = sys.argv[2]
+    lic = License(lic)
+    sys.exit(lic.check(path))

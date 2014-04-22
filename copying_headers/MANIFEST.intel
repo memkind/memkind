@@ -7,7 +7,6 @@ numakind_hbw.c
 numakind_hbw.h
 numakind-init
 numakind_pmtt.c
-README.txt
 Doxyfile
 test/Makefile
 test/common.h
