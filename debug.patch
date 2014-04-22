@@ -22,7 +22,7 @@ index caadd23..7879169 100644
  JEMALLOC_PREFIX ?= /usr
  NUMAKIND_PREFIX ?= /usr
  INCLUDE = -I$(JEMALLOC_PREFIX)/include -I$(NUMAKIND_PREFIX)/include
-diff --git a/test/bin/test.sh b/test/bin/test.sh
+diff --git a/test/bin/test_simics.sh b/test/bin/test_simics.sh
 index b753459..ff2d654 100755
 --- a/test/bin/test.sh
 +++ b/test/bin/test.sh
