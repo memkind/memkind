@@ -68,9 +68,9 @@ int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode)
 {
     int cpu;
     struct bitmask nodemask_bm = {maxnode, nodemask};
-    struct numakind_hbw_closest_numanode_t *g = 
+    struct numakind_hbw_closest_numanode_t *g =
           &numakind_hbw_closest_numanode_g;
-    pthread_once(&numakind_hbw_closest_numanode_once_g, 
+    pthread_once(&numakind_hbw_closest_numanode_once_g,
                  numakind_hbw_closest_numanode_init);
 
     if (!g->init_err && nodemask) {
