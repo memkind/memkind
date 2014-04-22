@@ -1,6 +1,5 @@
 #!/bin/bash
 #
-#  FILE LICENSE TAG: intel
 #
 #  Copyright (2014) Intel Corporation All Rights Reserved.
 #
