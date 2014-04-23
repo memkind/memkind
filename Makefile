@@ -60,6 +60,7 @@ install:
 	ln -sf libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so.0
 	ln -sf libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so
 	$(INSTALL) -d $(DESTDIR)$(docdir)
+	$(INSTALL) -m 644 COPYING.txt $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 doc/latex/refman.pdf $(DESTDIR)$(docdir)/numakind_refman.pdf
 	$(INSTALL) -d $(DESTDIR)$(datarootdir)/man/man3
