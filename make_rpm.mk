@@ -35,7 +35,7 @@ all: $(rpm)
 $(rpm): $(specfile) $(source_tar)
 	rpmbuild $(rpmbuild_flags) $(specfile) -ba
 
-$(source_tar): $(topdir) $(specfile) $(src)
+$(source_tar): $(topdir) $(specfile) $(src) MANIFEST
 	if [ -n "$(revision)" ]; then \
 	  git archive $(revision) -o $@; \
 	else \
