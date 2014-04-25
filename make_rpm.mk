@@ -50,4 +50,7 @@ $(topdir):
 clean:
 	-rpmbuild $(rpmclean_flags) $(specfile)
 
-.PHONY: all clean
+test:
+	$(MAKE) test
+
+.PHONY: all clean test

@@ -34,8 +34,8 @@ doc:
 	doxygen
 	$(MAKE) -C doc/latex
 
-test: $(NUMAKIND_PREFIX)/lib64/libnumakind.so.0 $(NUMAKIND_PREFIX)/include/numakind.h $(NUMAKIND_PREFIX)/include/hbwmalloc.h
-	make NUMAKIND_PREFIX=$(NUMAKIND_PREFIX) -C test
+test:
+	make -C test
 
 numakind.o: numakind.c numakind.h numakind_hbw.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEMALLOC_PREFIX)/include -c numakind.c
