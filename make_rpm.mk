@@ -21,11 +21,9 @@ specfile = $(topdir)/SPECS/$(name)-$(version).spec
 source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
 
 rpmbuild_flags = -E '%define _topdir $(topdir)'
-rpmclean_flags = -E '%define _topdir $(topdir)' \
-                 -E '%define jemalloc_prefix jemalloc_prefix' \
-                 --clean --rmsource --rmspec
-ifneq ($(JEMALLOC_PREFIX),)
-	rpmbuild_flags += -E '%define jemalloc_prefix $(JEMALLOC_PREFIX)'
+rpmclean_flags = -E '%define _topdir $(topdir)' --clean --rmsource --rmspec
+ifneq ($(JEMALLOC_INSTALLED),)
+	rpmbuild_flags += -E '%define jemalloc_installed'
 endif
 
 include make.spec

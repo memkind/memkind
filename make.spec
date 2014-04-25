@@ -23,7 +23,7 @@ BuildRequires: numactl
 BuildRequires: numactl-devel
 BuildRequires: doxygen
 BuildRequires: texlive-latex
-%if ! %{defined jemalloc_prefix}
+%if ! %{defined jemalloc_installed}
 BuildRequires: jemalloc
 %endif
 
@@ -41,11 +41,7 @@ must be compiled with the --enable-numakind option.
 %setup -D -q -c -T -a 0
 
 %build
-%if ! %{defined jemalloc_prefix}
 $(make_prefix) $(MAKE) $(make_postfix)
-%else
-$(make_prefix) $(MAKE) JEMALLOC_PREFIX=%{jemalloc_prefix} $(make_postfix)
-%endif
 
 %install
 make DESTDIR=%{buildroot} VERSION=%{version} install
