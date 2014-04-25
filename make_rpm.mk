@@ -22,8 +22,8 @@ source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
 
 rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = -E '%define _topdir $(topdir)' --clean --rmsource --rmspec
-ifneq ($(JEMALLOC_INSTALLED),)
-	rpmbuild_flags += -E '%define jemalloc_installed'
+ifeq ($(jemalloc_installed),true)
+	rpmbuild_flags += -E '%define jemalloc_installed true'
 endif
 
 include make.spec
