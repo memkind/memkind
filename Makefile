@@ -21,7 +21,7 @@ datarootdir ?= $(prefix)/share
 docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
 initddir ?= /etc/rc.d/init.d
 
-CFLAGS_EXTRA = -fPIC -Wall -Werror -O3
+EXTRA_CFLAGS = -fPIC -Wall -Werror -O3
 OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
 
 all: libnumakind.so.0.0 numakind-pmtt doc
@@ -38,19 +38,19 @@ test: $(NUMAKIND_PREFIX)/lib64/libnumakind.so.0 $(NUMAKIND_PREFIX)/include/numak
 	make NUMAKIND_PREFIX=$(NUMAKIND_PREFIX) -C test
 
 numakind.o: numakind.c numakind.h numakind_hbw.h
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEMALLOC_PREFIX)/include -c numakind.c
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind.c
 
 numakind_hbw.o: numakind_hbw.c numakind.h numakind_hbw.h
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -I $(JEMALLOC_PREFIX)/include -c numakind_hbw.c
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind_hbw.c
 
 hbwmalloc.o: hbwmalloc.c hbwmalloc.h numakind.h numakind_hbw.h
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c hbwmalloc.c
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c hbwmalloc.c
 
 libnumakind.so.0.0: $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libnumakind.so.0 -o libnumakind.so.0.0 $^
 
 numakind-pmtt: numakind_pmtt.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) $(OBJECTS) -lpthread -lnuma -L$(JEMALLOC_PREFIX)/lib64 -ljemalloc numakind_pmtt.c -o $@
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(OBJECTS) -lpthread -lnuma -L$(JEMALLOC_PREFIX)/lib64 -ljemalloc numakind_pmtt.c -o $@
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)
