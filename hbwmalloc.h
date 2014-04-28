@@ -1,4 +1,4 @@
-/*
+/*!
  * Copyright (2014) Intel Corporation All Rights Reserved.
  *
  * This software is supplied under the terms of a license
@@ -53,7 +53,19 @@ typedef enum {
     HBW_POLICY_PREFERRED = 2
 } hbw_policy_t;
 
+/*!
+ *  \brief Page size selection.
+ *
+ *  The hbw_allocate_memalign_psize() API gives the user the option to
+ *  select the page size from this enumerated list.
+ */
 typedef enum {
+/*!
+ *  The 4 kilobyte page size option, this enables the same behavior
+ *  from hbw_allocate_memalign_psize() as the hbw_allocate_memalign()
+ *  API.  Note with transparent huge pages enabled, these allocations
+ *  may be promoted by the operating system to 2 megabyte pages.
+ */
     HBW_PAGESIZE_4KB = 1,
     HBW_PAGESIZE_2MB = 2
 } hbw_pagesize_t;
