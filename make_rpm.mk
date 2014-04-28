@@ -44,6 +44,6 @@ clean:
 	-rpmbuild $(rpmclean_flags) $(specfile)
 
 test:
-	$(MAKE) test
+	$(MAKE) -C $(topdir)/BUILD/numakind-$(version)/test
 
 .PHONY: all clean test
