@@ -15,6 +15,15 @@ if [ $? -ne 0 ]; then
     echo "ERROR: $0 requires a NUMA enabled system with more than one node."
     exit -1
 fi
+hugekb=$(cat /proc/meminfo | grep AnonHugePages | awk '{print $2}')
+if [ $hugekb -lt 16777216 ]; then
+    echo "ERROR: $0 requires at least 16 GB of AnonHugePages (see /proc/meminfo)"
+    exit -1
+fi
 
-export NUMAKIND_HBW_NODES=1
-numactl --membind=0 $basedir/all_tests $@
+if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
+    export NUMAKIND_HBW_NODES=1
+    numactl --membind=0 $basedir/all_tests $@
+else
+    $basedir/all_tests $@
+fi
