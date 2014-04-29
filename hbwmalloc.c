@@ -15,7 +15,7 @@
 #include "hbwmalloc.h"
 #include "numakind.h"
 
-static int hbw_policy_g = NUMAKIND_HBW_POLICY_BIND;
+static int hbw_policy_g = HBW_POLICY_BIND;
 static pthread_once_t hbw_policy_once_g = PTHREAD_ONCE_INIT;
 static void hbw_policy_preferred_init(void);
 static void hbw_policy_bind_init(void);
@@ -27,10 +27,10 @@ int hbw_get_policy(void)
 
 void hbw_set_policy(int mode)
 {
-    if (mode == NUMAKIND_HBW_POLICY_PERFERRED) {
+    if (mode == HBW_POLICY_PREFERRED) {
         pthread_once(&hbw_policy_once_g, hbw_policy_preferred_init);
     }
-    else if (mode == NUMAKIND_HBW_POLICY_BIND) {
+    else if (mode == HBW_POLICY_BIND) {
         pthread_once(&hbw_policy_once_g, hbw_policy_bind_init);
     }
     if (mode != hbw_policy_g) {
@@ -122,10 +122,10 @@ void hbw_free(void *ptr)
 
 static inline void hbw_policy_bind_init(void)
 {
-    hbw_policy_g = NUMAKIND_HBW_BIND;
+    hbw_policy_g = HBW_POLICY_BIND;
 }
 
 static inline void hbw_policy_preferred_init(void)
 {
-    hbw_policy_g = NUMAKIND_HBW_PREFERRED;
+    hbw_policy_g = HBW_POLICY_PREFERRED;
 }
