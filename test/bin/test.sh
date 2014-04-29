@@ -15,9 +15,9 @@ if [ $? -ne 0 ]; then
     echo "ERROR: $0 requires a NUMA enabled system with more than one node."
     exit -1
 fi
-hugekb=$(cat /proc/meminfo | grep AnonHugePages | awk '{print $2}')
-if [ $hugekb -lt 16777216 ]; then
-    echo "ERROR: $0 requires at least 16 GB of AnonHugePages (see /proc/meminfo)"
+hugetot=$(cat /proc/meminfo | grep HugePages_Total | awk '{print $2}')
+if [ $hugetot -lt 4000 ]; then
+    echo "ERROR: $0 requires at least 4000 2MB pages total (see /proc/meminfo)"
     exit -1
 fi
 

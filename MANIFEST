@@ -24,3 +24,5 @@ test/bat_tests.cpp
 test/threaded_tests.cpp
 test/malloc_tests.cpp
 test/bin/test.sh
+test/bin/test_remote.sh
+test/bin/start_simics.sh
