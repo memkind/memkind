@@ -1,16 +1,23 @@
 #!/bin/bash
+#
+#
+#  Copyright (2014) Intel Corporation All Rights Reserved.
+#
+#  This software is supplied under the terms of a license
+#  agreement or nondisclosure agreement with Intel Corp.
+#  and may not be copied or disclosed except in accordance
+#  with the terms of that agreement.
+#
 
-if [ $# -ne 0 ]
-then
-    if [ $# -lt 3 ] || [ $1 == --help ] || [ $1 == -h ]
-    then
-        echo "Usage: $0 rpmdir login ip"
-        exit 1
-    fi
-    rpmdir=$1
-    remote_login=$2
-    remote_ip=$3
+if [ $# -lt 3 ] || [ $1 == --help ] || [ $1 == -h ]; then
+    echo "Usage: $0 rpmdir login ip"
+    exit 1
 fi
+rpmdir=$1
+remote_login=$2
+remote_ip=$3
+
+basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 rm -f all_tests.xml
 
@@ -28,5 +35,6 @@ ssh root@$remote_ip "rpm -i ~$remote_login/$nkrpm ~$remote_login/$jerpm"
 ssh root@$remote_ip "echo 8000 > /proc/sys/vm/nr_hugepages"
 ssh root@$remote_ip "echo 8000 > /proc/sys/vm/nr_overcommit_hugepages"
 
-ssh $remote_login@$remote_ip "./test.sh --gtest_output=xml:all_tests.xml"
+err=$(ssh $remote_login@$remote_ip "./test.sh --gtest_output=xml:all_tests.xml")
 scp $remote_login@$remote_ip:all_tests.xml .
+exit err
