@@ -15,23 +15,33 @@
 #include "hbwmalloc.h"
 #include "numakind.h"
 
-static inline int HBW_policy(int mode);
+static int hbw_policy_g = NUMAKIND_HBW_POLICY_BIND;
+static pthread_once_t hbw_policy_once_g = PTHREAD_ONCE_INIT;
+static void hbw_policy_preferred_init(void);
+static void hbw_policy_bind_init(void);
 
 int hbw_get_policy(void)
 {
-    return HBW_policy(0);
+    return hbw_policy_g;
 }
 
 void hbw_set_policy(int mode)
 {
-    HBW_policy(mode);
+    if (mode == NUMAKIND_HBW_POLICY_PERFERRED) {
+        pthread_once(&hbw_policy_once_g, hbw_policy_preferred_init);
+    }
+    else if (mode == NUMAKIND_HBW_POLICY_BIND) {
+        pthread_once(&hbw_policy_once_g, hbw_policy_bind_init);
+    }
+    if (mode != hbw_policy_g) {
+        fprintf(stderr, "WARNING: hbw_set_policy() called more than once with different values, only first call heeded.\n");
+    }
 }
 
 int hbw_is_available(void)
 {
     return numakind_is_available(NUMAKIND_HBW);
 }
-
 
 void *hbw_malloc(size_t size)
 {
@@ -109,38 +119,13 @@ void hbw_free(void *ptr)
     numakind_free(NUMAKIND_DEFAULT, ptr);
 }
 
-static inline int HBW_policy(int mode)
+
+static inline void hbw_policy_bind_init(void)
 {
-    static pthread_mutex_t policy_mutex = PTHREAD_MUTEX_INITIALIZER;
-    static int policy = HBW_POLICY_BIND;
-    static int is_set = 0; /* Policy can be set only once */
-    int err = 0;
+    hbw_policy_g = NUMAKIND_HBW_BIND;
+}
 
-    if (!mode) {
-        return policy;
-    }
-
-    if (mode == HBW_POLICY_BIND || mode == HBW_POLICY_PREFERRED) {
-        if (is_set == 0) {
-            pthread_mutex_lock(&policy_mutex);
-            if (is_set == 0) {
-                policy = mode;
-                is_set = 1;
-                pthread_mutex_unlock(&policy_mutex);
-            }
-            else {
-                err = 1;
-            }
-        }
-        else {
-            err = 1;
-        }
-        if (err) {
-            fprintf(stderr, "WARNING: hbw_set_policy() called more than once, only first call heeded.\n");
-        }
-    }
-    else {
-        fprintf(stderr, "WARNING: hbw_set_policy() called with unknown mode %i, ignored.\n", mode);
-    }
-    return policy;
+static inline void hbw_policy_preferred_init(void)
+{
+    hbw_policy_g = NUMAKIND_HBW_PREFERRED;
 }
