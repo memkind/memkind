@@ -33,7 +33,7 @@ all: $(rpm)
 $(rpm): $(specfile) $(source_tar)
 	rpmbuild $(rpmbuild_flags) $(specfile) -ba
 
-$(source_tar): $(topdir)/.topdir $(specfile) $(src) MANIFEST
+$(source_tar): $(topdir) $(specfile) $(src) MANIFEST
 	tar czvf $@ -T MANIFEST
 	rpmbuild $(rpmbuild_flags) $(specfile) -bp
 
