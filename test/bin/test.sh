@@ -17,7 +17,7 @@ if [ $? -ne 0 ]; then
 fi
 hugetot=$(cat /proc/meminfo | grep HugePages_Total | awk '{print $2}')
 if [ $hugetot -lt 4000 ]; then
-    echo "ERROR: $0 requires at least 4000 2MB pages total (see /proc/meminfo)"
+    echo "ERROR: $0 requires at least 4000 HugePages_Total total (see /proc/meminfo)"
     exit -1
 fi
 
