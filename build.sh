@@ -3,7 +3,7 @@ topdir=$HOME/rpmbuild
 if [ $# -ne 0 ]; then
     if [ $1 == --help ] || [ $1 == -h ]; then
         echo "Usage: $0 [topdir]"
-        echo "    default topdir=$HOME/rpmbuild"
+        echo "    default topdir=$topdir"
       exit 0
     fi
     topdir=$1
