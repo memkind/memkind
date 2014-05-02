@@ -21,10 +21,12 @@ class BATest: public :: testing::Test
 protected:
   size_t num_bandwidth;
   int *bandwidth;
+  TrialGenerator tgen;
   void SetUp()
   {
         int node;
         char *hbw_nodes_env, *endptr;
+        TrialGenerator tgen();
 
         hbw_nodes_env = getenv("NUMAKIND_HBW_NODES");
         if (hbw_nodes_env) {
@@ -73,6 +75,11 @@ TEST_F(BATest, hbw_policy) {
   EXPECT_EQ(1, hbw_get_policy());
   hbw_set_policy(2);
   EXPECT_EQ(2, hbw_get_policy());
+}
+
+TEST_F(BATest, hbw_malloc_incremental) {
+  tgen.generate_trials_incremental(MALLOC);
+  tgen.execute_trials(num_bandwith, bandwith);
 }
 
 TEST_F(BATest, hbw_malloc_2B) {

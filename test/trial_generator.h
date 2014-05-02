@@ -18,6 +18,16 @@ typedef struct {
     size_t free_index;
 } trial_t;
 
-void execute_trials(std::vector<trial_t> trial_vec);
+class TrialGenerator
+{
+   public:
+       TrialGenerator();
+       void generate_trials_incremental(alloc_api_t api);
+       void generate_trials_multi_api_stress(void);
+       void execute_trials(int num_bandwith, int *bandwiths);
+   private:
+       std::vector<trial_t> trial_vec;
+}
+
 
 #endif
