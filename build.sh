@@ -13,5 +13,5 @@ jemalloc_prefix=`ls -t $topdir/BUILDROOT/jemalloc-*.x86_64/usr/lib64/libjemalloc
 
 CPPFLAGS="-I $jemalloc_prefix/include"
 LDFLAGS="-L $jemalloc_prefix/lib64"
-make -f make_rpm.mk CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" JEMALLOC_INSTALLED=true
+make -f make_rpm.mk CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" jemalloc_installed=true
 
