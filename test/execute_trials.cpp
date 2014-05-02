@@ -12,6 +12,7 @@ void execute_trials(std::vector<trial_t> trial_vec, int num_bandwidth, int *band
                 if (i == num_trial - 1 || trial[i + 1].api != REALLOC) {
                     hbw_free(ptr_vec[trial[i].free_index]);
                     ptr_vec[trial[i].free_index] = NULL;
+                    prt_vec[i] = NULL;
                 }
                 else {
                     ptr_vec[i] = hbw_realloc(ptr_vec[trial[i].free_index], trial[i + 1].size);
