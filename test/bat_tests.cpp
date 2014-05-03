@@ -14,6 +14,7 @@
 #include "check.h"
 #include "omp.h"
 #include "numakind.h"
+#include "trial_generator.h"
 
 
 class BATest: public :: testing::Test
@@ -21,12 +22,12 @@ class BATest: public :: testing::Test
 protected:
   size_t num_bandwidth;
   int *bandwidth;
-  TrialGenerator tgen;
+  TrialGenerator *tgen;
   void SetUp()
   {
-        int node;
+        size_t node;
         char *hbw_nodes_env, *endptr;
-        TrialGenerator tgen();
+        tgen = new TrialGenerator();
 
         hbw_nodes_env = getenv("NUMAKIND_HBW_NODES");
         if (hbw_nodes_env) {
@@ -78,93 +79,20 @@ TEST_F(BATest, hbw_policy) {
 }
 
 TEST_F(BATest, hbw_malloc_incremental) {
-  tgen.generate_trials_incremental(MALLOC);
-  tgen.execute_trials(num_bandwith, bandwith);
+  tgen->generate_trials_incremental(MALLOC);
+  tgen->execute_trials(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_malloc_2B) {
-  size_t size = (size_t)(2);
-  char *ptr;
-  ASSERT_TRUE((ptr = (char *)hbw_malloc(size)) != NULL);
-  Check check(ptr, size);
-  memset(ptr, 0, size);
-  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  hbw_free(ptr);
+TEST_F(BATest, hbw_calloc_incremental){
+    tgen->generate_trials_incremental(CALLOC);
+    tgen->execute_trials(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_malloc_2KB) {
-  size_t size = (size_t)(2*KB);
-  char *ptr;
-  ASSERT_TRUE((ptr = (char *)hbw_malloc(size)) != NULL);
-  Check check(ptr, size);
-  memset(ptr, 0, size);
-  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  hbw_free(ptr);
+TEST_F(BATest, hbw_realloc_incremental){
+    tgen->generate_trials_incremental(REALLOC);
+    tgen->execute_trials(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_malloc_2MB) {
-  size_t size = (size_t)(2*MB);
-  char *ptr;
-  ASSERT_TRUE((ptr = (char *)hbw_malloc(size)) != NULL);
-  Check check(ptr, size);
-  memset(ptr, 0, size);
-  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  hbw_free(ptr);
-}
-
-TEST_F(BATest, hbw_malloc_2GB) {
-  size_t size = (size_t)(2*GB);
-  char *ptr;
-  ASSERT_TRUE((ptr = (char *)hbw_malloc(size)) != NULL);
-  Check check(ptr, size);
-  memset(ptr, 0, size);
-  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  hbw_free(ptr);
-}
-
-TEST_F(BATest, hbw_calloc_2B) {
-  size_t size = (size_t)(2);
-  char *ptr;
-  ASSERT_TRUE((ptr = (char *)hbw_calloc(size, 1)) != NULL);
-  Check check(ptr, size);
-  EXPECT_EQ(0, check.check_zero());
-  memset(ptr, 0, size);
-  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  hbw_free(ptr);
-}
-
-TEST_F(BATest, hbw_calloc_2KB) {
-  size_t size = (size_t)(2*KB);
-  char *ptr;
-  ASSERT_TRUE((ptr = (char *)hbw_calloc(size, 1)) != NULL);
-  Check check(ptr, size);
-  EXPECT_EQ(0, check.check_zero());
-  memset(ptr, 0, size);
-  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  hbw_free(ptr);
-}
-
-TEST_F(BATest, hbw_calloc_2MB) {
-  size_t size = (size_t)(2*MB);
-  char *ptr;
-  ASSERT_TRUE((ptr = (char *)hbw_calloc(size, 1)) != NULL);
-  Check check(ptr, size);
-  EXPECT_EQ(0, check.check_zero());
-  memset(ptr, 0, size);
-  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  hbw_free(ptr);
-}
-
-TEST_F(BATest, hbw_calloc_2GB) {
-  size_t size = (size_t)(2*GB);
-  char *ptr;
-  ASSERT_TRUE((ptr = (char *)hbw_calloc(size, 1)) != NULL);
-  Check check(ptr, size);
-  EXPECT_EQ(0, check.check_zero());
-  memset(ptr, 0, size);
-  EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-  hbw_free(ptr);
-}
 
 TEST_F(BATest, hbw_realloc_2KB_2MB_2KB) {
   size_t size0 = (size_t)(2*KB);

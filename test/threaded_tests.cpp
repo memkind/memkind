@@ -76,7 +76,7 @@ TEST_F(THREADEDMALLOC, HbwMalloc2MB){
   int tid;
   #pragma omp parallel num_threads(NTHREADS) private(tid)
   {
-    int tid = omp_get_thread_num();
+    tid = omp_get_thread_num();
     ptr[tid] = (char *) hbw_malloc(2 * MB);
     if (NULL == ptr[tid]){
       #pragma omp critical

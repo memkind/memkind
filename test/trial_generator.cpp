@@ -7,6 +7,7 @@ void TrialGenerator :: generate_trials_incremental(alloc_api_t api){
     int    psize[] = {HBW_PAGESIZE_4KB, HBW_PAGESIZE_2MB, HBW_PAGESIZE_2MB,
 		      HBW_PAGESIZE_2MB};
 
+    
     for (int i = 0; i< 4; i++){
 	trial_t ltrial;
 	ltrial.api = api;
@@ -22,7 +23,6 @@ void TrialGenerator :: generate_trials_incremental(alloc_api_t api){
 	ltrial.free_index = i;    
 	trial_vec.push_back(ltrial);
     }
-    
 }
 
 
@@ -44,14 +44,12 @@ void TrialGenerator :: print_trial_list(){
 }
 
 
-#if 0
-
 void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 
     int num_trial = trial_vec.size();
     int i, ret = 0;
     void **ptr_vec = NULL;
-    void **tptr = NULL;
+
     ptr_vec = (void **) malloc (num_trial *
 				sizeof (void *));
     if (NULL == ptr_vec){
@@ -74,21 +72,32 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
                     ++i;
                 }
                 break;
-            case MALLOC:
+	case MALLOC:
+		fprintf (stdout,"Allocating %zd bytes using hbw_malloc\n",
+			 trial_vec[i].size);
                 ptr_vec[i] = hbw_malloc(trial_vec[i].size);
                 break;
-            case CALLOC:
+	case CALLOC:
+   	        fprintf (stdout,"Allocating %zd bytes using hbw_calloc\n",
+			 trial_vec[i].size);
                 ptr_vec[i] = hbw_calloc(trial_vec[i].size, 1);
                 break;
-            case REALLOC:
+	case REALLOC:
+		fprintf (stdout,"Allocating %zd bytes using hbw_realloc\n",
+			 trial_vec[i].size);
+		fflush(stdout);
                 ptr_vec[i] = hbw_realloc(NULL, trial_vec[i].size);
                 break;
 	case MEMALIGN:
+	        fprintf (stdout,"Allocating %zd bytes using hbw_memalign\n",
+			 trial_vec[i].size); 
 	        ret =  hbw_allocate_memalign(&ptr_vec[i], 
 					     trial_vec[i].alignment,
 					     trial_vec[i].size);
                 break;
-            case MEMALIGN_PSIZE:
+	case MEMALIGN_PSIZE:
+	       fprintf (stdout,"Allocating %zd bytes using hbw_memalign_psize\n",
+			trial_vec[i].size); 
 	        ret = hbw_allocate_memalign_psize(&ptr_vec[i],
 						  trial_vec[i].alignment,
 						  trial_vec[i].size, 
@@ -97,6 +106,9 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
         }
         if (trial_vec[i].api != FREE) {
             ASSERT_TRUE(ptr_vec[i] != NULL);
+	    std::cout <<" i: "
+		      << i << "Size :" 
+		      <<trial_vec[i].size <<endl;
             memset(ptr_vec[i], 0, trial_vec[i].size);
             Check check(ptr_vec[i], trial_vec[i].size);
             EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
@@ -117,4 +129,4 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
         }
     }
 }
-#endif
+
