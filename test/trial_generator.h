@@ -1,6 +1,17 @@
 #ifndef execute_trials_include_h
 #define execute_trials_include_h
 
+#include <vector>
+#include <stdlib.h>
+#include <vector>
+#include <memory>
+#include <fstream>
+#include <iostream>
+
+#include "hbwmalloc.h"
+#include "common.h"
+
+
 typedef enum {
     MALLOC,
     CALLOC,
@@ -14,20 +25,23 @@ typedef struct {
     alloc_api_t api;
     size_t size;
     size_t alignment;
-    size_t page_size;
-    size_t free_index;
+    int page_size;
+    int free_index;
 } trial_t;
 
 class TrialGenerator
 {
    public:
-       TrialGenerator();
-       void generate_trials_incremental(alloc_api_t api);
-       void generate_trials_multi_api_stress(void);
-       void execute_trials(int num_bandwith, int *bandwiths);
+    TrialGenerator(){}
+    void generate_trials_incremental(alloc_api_t api);
+    void generate_trials_multi_api_stress(void);
+    void execute_trials(int num_bandwith, int *bandwiths);
+    void print_trial_list();
    private:
        std::vector<trial_t> trial_vec;
-}
+       int check_order_of_correctness();
+
+};
 
 
 #endif

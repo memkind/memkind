@@ -1,14 +1,64 @@
-#include <stdlib.h>
-#include <vector>
-#include "hbwmalloc.h"
 #include "trial_generator.h"
+#include "check.h"
+
+void TrialGenerator :: generate_trials_incremental(alloc_api_t api){
+
+    size_t size[] = {2, 2*KB, 2*MB, 2*GB};
+    int    psize[] = {HBW_PAGESIZE_4KB, HBW_PAGESIZE_2MB, HBW_PAGESIZE_2MB,
+		      HBW_PAGESIZE_2MB};
+
+    for (int i = 0; i< 4; i++){
+	trial_t ltrial;
+	ltrial.api = api;
+	ltrial.size = size[i];
+	ltrial.alignment = 32;
+	ltrial.page_size = psize[i];
+	ltrial.free_index = -1;
+	trial_vec.push_back(ltrial);
+	ltrial.api = FREE;
+	ltrial.size = 0;
+	ltrial.alignment = 0;
+	ltrial.page_size = 0;
+	ltrial.free_index = i;    
+	trial_vec.push_back(ltrial);
+    }
+    
+}
 
 
-void TrialGenerator::execute_trials(int num_bandwidth, int *bandwidth)
-{
+void TrialGenerator :: print_trial_list(){
+
+    std::vector<trial_t>:: iterator it;
+
+    std::cout << "SIZE PSIZE ALIGN FREE"<<std::endl;
+
+    for (it = trial_vec.begin();
+         it != trial_vec.end();
+         it++){
+	std::cout << it->size <<" "
+                  << it->page_size <<" "
+                  << it->alignment <<" "
+                  << it->free_index<<std::endl;
+    }
+
+}
+
+
+#if 0
+
+void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
+
     int num_trial = trial_vec.size();
-    int i;
-    std::vector<void *> ptr_vec(num_trial);
+    int i, ret = 0;
+    void **ptr_vec = NULL;
+    void **tptr = NULL;
+    ptr_vec = (void **) malloc (num_trial *
+				sizeof (void *));
+    if (NULL == ptr_vec){
+	fprintf (stderr, "Error in allocating ptr array\n");
+	exit(-1);
+    }
+    
 
     for (i = 0; i < num_trial; ++i) {
         switch(trial_vec[i].api) {
@@ -33,11 +83,16 @@ void TrialGenerator::execute_trials(int num_bandwidth, int *bandwidth)
             case REALLOC:
                 ptr_vec[i] = hbw_realloc(NULL, trial_vec[i].size);
                 break;
-            case MEMALIGN:
-	      ptr_vec[i] = hbw_allocate_memalign(std::addressof(ptr_vec[i]), trial_vec[i].alignment, trial_vec[i].size);
+	case MEMALIGN:
+	        ret =  hbw_allocate_memalign(&ptr_vec[i], 
+					     trial_vec[i].alignment,
+					     trial_vec[i].size);
                 break;
             case MEMALIGN_PSIZE:
-	        ptr_vec[i] = hbw_allocate_memalign_psize(std::addressof(ptr_vec[i]), trial_vec[i].alignment, trial_vec[i].size, trial_vec[i].page_size);
+	        ret = hbw_allocate_memalign_psize(&ptr_vec[i],
+						  trial_vec[i].alignment,
+						  trial_vec[i].size, 
+						  trial_vec[i].page_size);
                 break;
         }
         if (trial_vec[i].api != FREE) {
@@ -48,7 +103,7 @@ void TrialGenerator::execute_trials(int num_bandwidth, int *bandwidth)
             if (trial_vec[i].api == CALLOC) {
                 check.check_zero();
             }
-            if (trail[i].api == MEMALIGN || trail[i].api == MEMALIGN_PSIZE) {
+            if (trial_vec[i].api == MEMALIGN || trial_vec[i].api == MEMALIGN_PSIZE) {
                 check.check_align(trial_vec[i].alignment);
             }
             if (trial_vec[i].api == MEMALIGN_PSIZE) {
@@ -62,3 +117,4 @@ void TrialGenerator::execute_trials(int num_bandwidth, int *bandwidth)
         }
     }
 }
+#endif
