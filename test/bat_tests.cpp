@@ -129,6 +129,11 @@ TEST_F(BATest, hbw_numakind_malloc_recycle_psize){
     tgen->execute_trials(num_bandwidth, bandwidth);       
 }
 
+TEST_F(BATest, hbw_numakind_trials_two_kind_stress){
+    tgen->generate_trials_two_kind_stress();
+    tgen->print_trial_list();
+}
+
 int myrandom(int i) { return random() % i;}
 
 TEST_F(BATest, numakind_malloc_stress_hbw)

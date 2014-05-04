@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <memory>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 
@@ -36,18 +37,18 @@ typedef struct {
 class TrialGenerator
 {
    public:
-    TrialGenerator(){}
-    void generate_trials_incremental(alloc_api_t api);
-    void generate_trials_recycle_incremental(alloc_api_t api);
-    void generate_trials_recycle_psize_incremental(alloc_api_t api);
-    void generate_trials_multi_api_stress(void);
+     TrialGenerator(){}
+     void generate_trials_incremental(alloc_api_t api);
+     void generate_trials_recycle_incremental(alloc_api_t api);
+     void generate_trials_recycle_psize_incremental(alloc_api_t api);
+     void generate_trials_two_kind_stress();
 
-    void execute_trials(int num_bandwith, int *bandwiths);
-    void print_trial_list();
+     void execute_trials(int num_bandwith, int *bandwiths);
+     void print_trial_list();
    private:
-       std::vector<trial_t> trial_vec;
-       int check_order_of_correctness();
-
+     std::vector<trial_t> trial_vec;
+     int check_order_of_correctness();
+    
 };
 
 

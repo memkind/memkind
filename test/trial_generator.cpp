@@ -68,6 +68,48 @@ void TrialGenerator :: generate_trials_recycle_incremental(alloc_api_t api){
 
 }
 
+int n_random(int i) { return random() % i;}
+
+void TrialGenerator :: generate_trials_two_kind_stress(){
+    
+    int i;
+    int num_trials = 20;
+    int index, k = 0;
+    
+    srandom(0);
+
+    for (i = 0; i < num_trials; i++){
+	if (n_random(2)){
+	    trial_t ltrial;
+	    ltrial.api = NUMAKIND_MALLOC;
+	    ltrial.size = n_random(8*MB - 1) + 1;
+	    ltrial.numakind = (numakind_t)n_random(2);
+	    ltrial.page_size = 0;
+	    ltrial.alignment = 0;
+	    /*---- This will maintain order
+	      of allocation --------------*/
+	    ltrial.free_index = k++;
+	    trial_vec.push_back(ltrial);
+	}
+	else{
+	    fprintf (stdout,"Enters else condition\n");
+	    index = n_random(trial_vec.size());
+	    while (trial_vec[index].api == NUMAKIND_FREE ||
+		   trial_vec[index].free_index == -1)
+		index = n_random(trial_vec.size());
+	    
+	    trial_t ltrial;
+	    ltrial.api = NUMAKIND_FREE;
+	    ltrial.size = 0;
+	    ltrial.numakind = trial_vec[index].numakind;
+	    ltrial.page_size = 0;
+	    ltrial.alignment = 0;
+	    ltrial.free_index = trial_vec[index].free_index;
+	    trial_vec[index].free_index = -1;
+	    trial_vec.push_back(ltrial);
+	}
+    }
+}
 void TrialGenerator :: generate_trials_recycle_psize_incremental(alloc_api_t api){
 
     size_t size[] = {2*MB, 2*GB};
@@ -114,7 +156,7 @@ void TrialGenerator :: print_trial_list(){
     
     std::cout <<"*********** Size: "<< trial_vec.size()
 	      <<"********\n";
-    std::cout << "SIZE PSIZE ALIGN FREE"<<std::endl;
+    std::cout << "SIZE PSIZE ALIGN FREE KIND"<<std::endl;
 
     for (it = trial_vec.begin();
          it != trial_vec.end();
@@ -187,23 +229,23 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 					    trial_vec[i].alignment,
 					    trial_vec[i].size);
 	       break;
-	case MEMALIGN_PSIZE:
-   	      fprintf (stdout,"Allocating %zd bytes using hbw_memalign_psize\n",
-		       trial_vec[i].size); 
-	      hbw_pagesize_t psize;
-	      if (trial_vec[i].page_size == 4096)
+           case MEMALIGN_PSIZE:
+	       fprintf (stdout,"Allocating %zd bytes using hbw_memalign_psize\n",
+			trial_vec[i].size); 
+	       hbw_pagesize_t psize;
+	       if (trial_vec[i].page_size == 4096)
 		  psize = HBW_PAGESIZE_4KB;
 	       else
 		   psize = HBW_PAGESIZE_2MB;
-
-	      ret = hbw_allocate_memalign_psize(&ptr_vec[i],
-						trial_vec[i].alignment,
-						trial_vec[i].size, 
-						psize);
-	      
+	       
+	       ret = hbw_allocate_memalign_psize(&ptr_vec[i],
+						 trial_vec[i].alignment,
+						 trial_vec[i].size, 
+						 psize);
+	       
 	      break;
 	case NUMAKIND_MALLOC:
-	       fprintf (stdout, "Allocating %zd bytes using numakind_malloc \n",
+  	       fprintf (stdout, "Allocating %zd bytes using numakind_malloc \n",
 			trial_vec[i].size);
 	       
 	       ptr_vec[i] = numakind_malloc(trial_vec[i].numakind,
