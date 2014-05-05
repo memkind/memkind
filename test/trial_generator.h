@@ -42,7 +42,7 @@ class TrialGenerator
      void generate_trials_recycle_incremental(alloc_api_t api);
      void generate_trials_recycle_psize_incremental(alloc_api_t api);
      void generate_trials_multi_app_stress(int num_types);
-     void generate_trials_extended_size(alloc_api_t api);
+     void generate_trials_size_1KB_2GB(alloc_api_t api);
      void execute_trials(int num_bandwith, int *bandwiths);
      void print_trial_list();
    private:

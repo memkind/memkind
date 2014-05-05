@@ -167,7 +167,7 @@ void TrialGenerator :: generate_trials_recycle_psize_incremental(alloc_api_t api
     
 }
 
-void TrialGenerator :: generate_trials_extended_size(alloc_api_t api){
+void TrialGenerator :: generate_trials_size_1KB_2GB(alloc_api_t api){
 
     size_t size[] = {KB, 2*KB, 4*KB, 16*KB, 256*KB,
 		     512*KB, MB, 2*MB, 4*MB, 16*MB,
