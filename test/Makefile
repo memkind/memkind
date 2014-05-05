@@ -24,8 +24,8 @@ main.o:			main.cpp common.h
 bat_tests.o:		bat_tests.cpp common.h
 			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c bat_tests.cpp -o bat_tests.o
 
-threaded_tests.o:	threaded_tests.cpp common.h
-			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c threaded_tests.cpp -o threaded_tests.o
+threaded_tests.o:	multithreaded_tests.cpp common.h
+			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c multithreaded_tests.cpp -o threaded_tests.o
 
 extended_tests.o:	extended_tests.cpp common.h trial_generator.h
 			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c extended_tests.cpp -o extended_tests.o
@@ -37,7 +37,7 @@ trial_generator.o:	trial_generator.cpp trial_generator.h
 			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c trial_generator.cpp -o trial_generator.o
 
 clean:
-			rm -f $(OBJECTS) bin/all_tests
+			rm -f $(OBJECTS) bin/all_tests *~
 test: bin/all_tests bin/test.sh
 			LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./bin/test.sh
 
