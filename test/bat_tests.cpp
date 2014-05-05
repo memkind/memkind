@@ -19,6 +19,7 @@
 
 class BATest: public :: testing::Test
 {
+
 protected:
   size_t num_bandwidth;
   int *bandwidth;
@@ -130,98 +131,12 @@ TEST_F(BATest, hbw_numakind_malloc_recycle_psize){
 }
 
 TEST_F(BATest, hbw_numakind_trials_two_kind_stress){
-    tgen->generate_trials_two_kind_stress();
-    tgen->print_trial_list();
+    tgen->generate_trials_multi_app_stress(2);
+    tgen->execute_trials(num_bandwidth, bandwidth);
 }
 
-int myrandom(int i) { return random() % i;}
-
-TEST_F(BATest, numakind_malloc_stress_hbw)
-{
-    int i;
-    numakind_t kind;
-    int num_trials = 1000;
-    void *ptr;
-    size_t size;
-    std::vector<void *> ptrs;
-
-    srandom(0);
-
-    for (i = 0; i < num_trials; i++) {
-        // choose at random to allocate or free (unless there is nothing to free)
-        if (ptrs.size() == 0 || myrandom(3)) {
-            size = myrandom(8*MB - 1) + 1;
-            // size = (random() & (~0ULL >> (63 - myrandom(28)))) + 1;
-            // choose at random between NUMAKIND_DEFAULT and NUMAKIND_HBW
-            kind = (numakind_t)myrandom(2);
-            ptr = numakind_malloc(kind, size);
-            ASSERT_TRUE(ptr != NULL);
-            memset(ptr, 0, size);
-            if (kind == NUMAKIND_HBW) {
-                Check check(ptr, size);
-                EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-            }
-            ptrs.push_back(ptr);
-        }
-        else {
-            // free a random pointer from the list
-            std::random_shuffle(ptrs.begin(), ptrs.end(), myrandom);
-            numakind_free(NUMAKIND_DEFAULT, ptrs.back());
-            ptrs.pop_back();
-        }
-    }
-    while (ptrs.size()) {
-        // free any left overs
-        numakind_free(NUMAKIND_DEFAULT, ptrs.back());
-        ptrs.pop_back();
-    }
-}
-
-TEST_F(BATest, numakind_malloc_stress_all)
-{
-    int i;
-    numakind_t kind;
-    int num_trials = 1000;
-    void *ptr;
-    size_t size;
-    std::vector<void *> ptrs;
-
-    srandom(0);
-
-    for (i = 0; i < num_trials; i++) {
-        // choose at random to allocate or free (unless there is nothing to free)
-        if (ptrs.size() == 0 || myrandom(3)) {
-            size = myrandom(8*MB - 1) + 1;
-            // size = (random() & (~0ULL >> (63 - myrandom(28)))) + 1;
-            // choose kind at random
-            kind = (numakind_t)myrandom(NUMAKIND_NUM_KIND);
-            ptr = numakind_malloc(kind, size);
-            ASSERT_TRUE(ptr != NULL);
-            memset(ptr, 0, size);
-            Check check(ptr, size);
-            if (kind == NUMAKIND_HBW ||
-                kind == NUMAKIND_HBW_HUGETLB ||
-                kind == NUMAKIND_HBW_PREFERRED ||
-                kind == NUMAKIND_HBW_PREFERRED_HUGETLB) {
-                EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-            }
-            if (kind == NUMAKIND_HBW_HUGETLB ||
-                kind == NUMAKIND_HBW_PREFERRED_HUGETLB) {
-                EXPECT_EQ(0, check.check_page_size(2*MB));
-            }
-            ptrs.push_back(ptr);
-        }
-        else {
-            // free a random pointer from the list
-            std::random_shuffle(ptrs.begin(), ptrs.end(), myrandom);
-            numakind_free(NUMAKIND_DEFAULT, ptrs.back());
-            ptrs.pop_back();
-        }
-    }
-    while (ptrs.size()) {
-        // free any left overs
-        numakind_free(NUMAKIND_DEFAULT, ptrs.back());
-        ptrs.pop_back();
-    }
+TEST_F(BATest, hbw_numakind_trials_all_kind_stress){
+    tgen->generate_trials_multi_app_stress(NUMAKIND_NUM_KIND);
+    tgen->execute_trials(num_bandwidth, bandwidth);
 }
 
