@@ -1,0 +1,195 @@
+.\"  Copyright (2014) Intel Corporation All Rights Reserved.
+.\"
+.\"  This software is supplied under the terms of a license
+.\"  agreement or nondisclosure agreement with Intel Corp.
+.\"  and may not be copied or disclosed except in accordance
+.\"  with the terms of that agreement.
+.\"
+.TH "HBWMALLOC" 3 "8 May 2014" "Intel Corporation" "HBWMALLOC" \" -*- nroff -*-
+.SH "NAME"
+hbwmalloc \- The high bandwidth memory interface
+.SH "SYNOPSIS"
+.nf
+.B #include <hbwmalloc.h>
+.sp
+.B Link with -lnuma -lnumakind
+.sp
+.BI "void* hbw_calloc(size_t " "nmemb" ", size_t " "size" );
+.br
+.BI "void* hbw_malloc(size_t " "size" );
+.br
+.BI "void hbw_free(void " "*ptr" );
+.br
+.BI "void* hbw_realloc (void " "*ptr" ", size_t " "size" );
+.br
+.BI "int hbw_allocate_memalign(void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.br
+.BI "int hbw_allocate_memalign_psize(void " "**memptr" ", size_t " "alignment" ", size_t " "size" ", int " "pagesize" );
+.br
+.B int hbw_is_available(void);
+.br
+.B int hbw_get_policy(void);
+.br
+.BI "void hbw_set_policy(int " "mode" );
+.fi
+.SH "DESCRIPTION"
+.BR hbw_calloc ()
+allocates high bandwidth memory for an array of
+.I nmemb
+elements of
+.I size
+bytes each and returns a pointer to the allocated memory.
+The memory is set to zero.
+If
+.I nmemb
+or
+.I size
+is 0, then
+.BR hbw_calloc ()
+returns NULL.
+.PP
+.BR hbw_malloc ()
+allocates
+.I size
+bytes of high bandwidth memory and returns a pointer to the allocated memory.
+The memory is not cleared.
+If
+.I size
+is 0, then
+.BR hbw_malloc ()
+returns  NULL.
+.PP
+.BR hbw_free ()
+frees the memory space pointed to by
+.IR ptr ,
+which must have been returned by a previous call to
+.BR hbw_malloc (), 
+.BR hbw_calloc (),
+.BR hbw_realloc (),
+.BR hbw_allocate_memalign (),
+or
+.BR hbw_allocate_memalign_psize ().
+Otherwise, or if
+.I hbw_free(ptr)
+has already been called before, undefined behavior occurs.
+If
+.I ptr
+is  NULL, no operation is performed.
+.PP
+.BR hbw_realloc ()
+changes the size of the memory block pointed to by
+.I ptr
+to
+.I size
+bytes using high bandwidth memory.
+The contents will be unchanged to the minimum of the old and new sizes;
+newly allocated memory will be uninitialized.
+If
+.I ptr
+is NULL, then the call is equivalent to
+.IR hbw_malloc(size) ,
+for all values of
+.IR size ;
+if
+.I size
+is equal to zero,
+and
+.I ptr
+is not NULL, then the call is equivalent to
+.IR hbw_free(ptr) .
+Unless
+.I ptr
+is NULL, it must have been returned by an earlier call to
+.BR hbw_malloc (),
+.BR hbw_calloc (),
+.BR hbw_realloc (),
+.BR hbw_allocate_memalign (),
+or
+.BR hbw_allocate_memalign_psize ().
+If the area pointed to was moved, a
+.I hbw_free(ptr)
+is done.
+.PP
+.BR hbw_allocate_memalign ()
+allocates
+.I size
+bytes of high bandwidth memory and places the address of 
+the allocated memory in
+.IR "*memptr" .
+The address of the allocated memory will be a multiple of
+.IR "alignment" ,
+which must be a power of two and a multiple of
+.IR "sizeof(void *)".
+If
+.I size
+is 0, then
+.BR hbw_allocate_memalign ()
+returns NULL.
+.PP
+.BR hbw_allocate_memalign_psize ()
+allocates
+.I size
+bytes and places the address of the allocated memory in
+.IR "*memptr" .
+The address of the allocated memory will be a multiple of
+.IR "alignment" ,
+which must be a power of two and a multiple of
+.IR "sizeof(void *)".
+If
+.I size
+is 0, then
+.IR hbw_allocate_memalign_psize ()
+returns NULL.  The memory returned will be allocated using pages
+determined by the
+.IR "psize"
+variable which may be one of the following enumerated values:
+.TP
+.B HBW_PAGESIZE_4KB
+The four kilobyte page size option. Note that with transparent huge pages
+enabled these allocations may be promoted by the operating system to
+two megabyte pages.
+.TP
+.B HBW_PAGESIZE_2MB
+The two megabyte page size option.
+.PP
+.BR hbw_is_available ()
+returns 1 if high bandwidth memory is available and 0 otherwise.
+.PP
+.BR hbw_get_policy ()
+returns the current fallback policy when insufficient high bandwith
+memory is available.
+.PP
+.BR hbw_set_policy ()
+set the current fallback policy, this can be done only once in the
+life of an application.  
+.TP
+.B HBW_POLICY_BIND
+If insufficient high bandwidth memory pages are available a
+segmentation fault will be raised when memory is touched (default).
+.TP
+.B HBW_POLICY_PREFERRED
+If insufficient high bandwidth memory pages are available fall back on
+standard memory pages.
+.SH "RETURN VALUE"
+FIXME
+.SH "NOTES"
+The 
+.I hbwmalloc.h
+file defines the external API's and enumerations for the hbwmalloc
+library. These interfaces define a heap manager that targets the high
+bandwidth memory numa nodes.
+.SH "ENVIRONMENT"
+.PP
+.B NUMAKIND_HBW_NODES
+This environment varaible is a comma separated list of NUMA nodes that
+are treated as high bandwidth. Can be used if PMTT file is not
+present, or to override the PMTT table if it is present. Uses same
+parser as numactl, so logic defined in numactl man pages applies: e.g
+1-3,5 is a valid setting.
+.SH "SEE ALSO"
+.BR malloc (3),
+.BR numa (3),
+.BR numactl (8),
+.BR mbind (2),
+.BR mmap (2),
+.BR move_pages (2)
