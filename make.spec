@@ -74,7 +74,6 @@ fi
 %doc %{_docdir}/numakind-%{version}/README.txt
 %doc %{_docdir}/numakind-%{version}/COPYING.txt
 %doc %{_datarootdir}/man/man3/hbwmalloc.3.gz
-%doc %{_datarootdir}/man/man3/numakind.3.gz
 $(extra_files)
 
 %changelog
