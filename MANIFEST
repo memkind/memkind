@@ -4,6 +4,7 @@ actbl2.h
 actbl3.h
 actbl.h
 actypes.h
+hbwmalloc.3
 hbwmalloc.c
 hbwmalloc.h
 Makefile

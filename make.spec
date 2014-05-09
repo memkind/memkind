@@ -21,8 +21,6 @@ Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: numactl
 BuildRequires: numactl-devel
-BuildRequires: doxygen
-BuildRequires: texlive-latex
 %if ! %{defined jemalloc_installed}
 BuildRequires: jemalloc
 %endif
