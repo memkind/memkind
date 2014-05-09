@@ -63,7 +63,7 @@ returns  NULL.
 frees the memory space pointed to by
 .IR ptr ,
 which must have been returned by a previous call to
-.BR hbw_malloc (), 
+.BR hbw_malloc (),
 .BR hbw_calloc (),
 .BR hbw_realloc (),
 .BR hbw_allocate_memalign (),
@@ -113,7 +113,7 @@ is done.
 .BR hbw_allocate_memalign ()
 allocates
 .I size
-bytes of high bandwidth memory and places the address of 
+bytes of high bandwidth memory and places the address of
 the allocated memory in
 .IR "*memptr" .
 The address of the allocated memory will be a multiple of
@@ -161,7 +161,7 @@ memory is available.
 .PP
 .BR hbw_set_policy ()
 set the current fallback policy, this can be done only once in the
-life of an application.  
+life of an application.
 .TP
 .B HBW_POLICY_BIND
 If insufficient high bandwidth memory pages are available a
@@ -173,7 +173,7 @@ standard memory pages.
 .SH "RETURN VALUE"
 FIXME
 .SH "NOTES"
-The 
+The
 .I hbwmalloc.h
 file defines the external API's and enumerations for the hbwmalloc
 library. These interfaces define a heap manager that targets the high
