@@ -8,16 +8,3 @@ high level interface for heap management.  The heap management is
 implemented with an extension to the jemalloc library which dedicates
 "arenas" to each CPU node and kind of memory.  To use numakind,
 jemalloc must be compiled with the --enable-numakind option.
-
-
-Vishwanth Venkatesan <vishwanath.venkatesan@intel.com>
-2014 April, 9
-
-To generate documentation (HTML, pdf, and man):
-
-user_prompt> make doc
-
-Requires Doxygen:
-
-user_prompt> sudo  yum install doxygen texlive-latex
-
