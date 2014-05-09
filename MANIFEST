@@ -4,6 +4,7 @@ actbl2.h
 actbl3.h
 actbl.h
 actypes.h
+hbwmalloc.3
 hbwmalloc.c
 hbwmalloc.h
 Makefile
@@ -14,7 +15,6 @@ numakind_hbw.h
 numakind-init
 numakind_pmtt.c
 README.txt
-Doxyfile
 test/Makefile
 test/common.h
 test/check.h

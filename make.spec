@@ -21,8 +21,6 @@ Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: numactl
 BuildRequires: numactl-devel
-BuildRequires: doxygen
-BuildRequires: texlive-latex
 %if ! %{defined jemalloc_installed}
 BuildRequires: jemalloc
 %endif
@@ -75,9 +73,7 @@ fi
 %{_initddir}/numakind
 %doc %{_docdir}/numakind-%{version}/README.txt
 %doc %{_docdir}/numakind-%{version}/COPYING.txt
-%doc %{_docdir}/numakind-%{version}/numakind_refman.pdf
 %doc %{_datarootdir}/man/man3/hbwmalloc.3.gz
-%doc %{_datarootdir}/man/man3/numakind.3.gz
 $(extra_files)
 
 %changelog

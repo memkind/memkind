@@ -24,15 +24,11 @@ initddir ?= /etc/rc.d/init.d
 EXTRA_CFLAGS = -fPIC -Wall -Werror -O3
 OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
 
-all: libnumakind.so.0.0 numakind-pmtt doc
+all: libnumakind.so.0.0 numakind-pmtt
 
 clean:
 	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt numakind_pmtt.o doc
 	make -C test clean
-
-doc:
-	doxygen
-	$(MAKE) -C doc/latex
 
 test:
 	make -C test
@@ -62,10 +58,8 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 COPYING.txt $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
-	$(INSTALL) -m 644 doc/latex/refman.pdf $(DESTDIR)$(docdir)/numakind_refman.pdf
 	$(INSTALL) -d $(DESTDIR)$(datarootdir)/man/man3
-	$(INSTALL) -m 644 doc/man/man3/hbwmalloc.h.3 $(DESTDIR)$(datarootdir)/man/man3/hbwmalloc.3
-	$(INSTALL) -m 644 doc/man/man3/numakind.h.3 $(DESTDIR)$(datarootdir)/man/man3/numakind.3
+	$(INSTALL) -m 644 hbwmalloc.3 $(DESTDIR)$(datarootdir)/man/man3/hbwmalloc.3
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	$(INSTALL) numakind-pmtt $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)$(initddir)
