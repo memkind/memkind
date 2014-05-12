@@ -129,7 +129,8 @@ returns NULL.
 .BR hbw_allocate_memalign_psize ()
 allocates
 .I size
-bytes and places the address of the allocated memory in
+bytes of high bandwidth memory and places the address of the allocated
+memory in
 .IR "*memptr" .
 The address of the allocated memory will be a multiple of
 .IR "alignment" ,
@@ -160,8 +161,8 @@ returns the current fallback policy when insufficient high bandwith
 memory is available.
 .PP
 .BR hbw_set_policy ()
-set the current fallback policy, this can be done only once in the
-life of an application.
+set the current fallback policy, the policy can be modified only once
+in the life of an application.
 .TP
 .B HBW_POLICY_BIND
 If insufficient high bandwidth memory pages are available a
@@ -171,21 +172,72 @@ segmentation fault will be raised when memory is touched (default).
 If insufficient high bandwidth memory pages are available fall back on
 standard memory pages.
 .SH "RETURN VALUE"
-FIXME
+.BR hbw_get_policy ()
+returns
+.BR HBW_POLICY_BIND ", or" HBW_POLICY_BIND
+that represents the current high bandwidth policy.
+.BR hbw_set_policy "() , and " hbw_free ()
+do not have return values.
+.BR hbw_malloc "() , " hbw_calloc "() , and " hbw_realloc ()
+return the pointer to the allocated memory, or NULL if
+the request fails.
+.BR hbw_allocate_memalign "() and " hbw_allocate_memalign_psize ()
+return zero on success, or one of the error values listedin the
+next section on failure.  Note that
+.I errno
+is not set.
+.SH ERRORS
+.TP
+.B NUMAKIND_ERROR_UNAVAILABLE
+Requested numa kind is not available
+.TP
+.B NUMAKIND_ERROR_MBIND
+Call to mbind() failed
+.TP
+.B NUMAKIND_ERROR_MEMALIGN:
+Call to posix_memalign() failed
+.TP
+.B NUMAKIND_ERROR_MALLCTL:
+Call to je_mallctl() failed
+.TP
+.B NUMAKIND_ERROR_MALLOC:
+Call to je_malloc() failed
+.TP
+.B NUMAKIND_ERROR_GETCPU:
+Call to sched_getcpu() returned out of range
+.TP
+.B NUMAKIND_ERROR_HBW:
+Initializing for HBW failed
+.TP
+.B NUMAKIND_ERROR_PMTT:
+Unable to find parsed PMTT table in
+.I /etc/numakind/node-bandwidth
+.TP
+.B NUMAKIND_ERROR_TIEDISTANCE:
+Two NUMA memory nodes are equidistant from target cpu node
+.TP
+.B NUMAKIND_ERROR_ALIGNMENT:
+Alignment must be a power of two and larger than sizeof(void *)
+.TP
+.B NUMAKIND_ERROR_ALLOCM:
+Call to je_allocm() failed
+.TP
+.B NUMAKIND_ERROR_ENVIRON:
+Error parsing environment variable (NUMAKIND_*)
 .SH "NOTES"
 The
 .I hbwmalloc.h
 file defines the external API's and enumerations for the hbwmalloc
-library. These interfaces define a heap manager that targets the high
+library. These interfaces define a heap manager that targets high
 bandwidth memory numa nodes.
 .SH "ENVIRONMENT"
 .PP
 .B NUMAKIND_HBW_NODES
 This environment varaible is a comma separated list of NUMA nodes that
-are treated as high bandwidth. Can be used if PMTT file is not
-present, or to override the PMTT table if it is present. Uses same
-parser as numactl, so logic defined in numactl man pages applies: e.g
-1-3,5 is a valid setting.
+are treated as high bandwidth. This environment variable should be set
+if the PMTT file is not present, or to override the PMTT table if it
+is present. Uses same parser as numactl, so syntax defined in numactl
+man pages applies: e.g 1-3,5 is a valid setting.
 .SH "SEE ALSO"
 .BR malloc (3),
 .BR numa (3),
