@@ -257,8 +257,13 @@ The PMTT table parser.
 This environment varaible is a comma separated list of NUMA nodes that
 are treated as high bandwidth. This environment variable should be set
 if the PMTT file is not present, or to override the PMTT table if it
-is present. Uses same parser as numactl, so syntax defined in numactl
-man pages applies: e.g 1-3,5 is a valid setting.
+is present. Uses the
+.I libnuma
+routine
+.BR numa_parse_nodestring ()
+for parsing, so the syntax described in the
+.BR numa (3)
+man page for this routine applies: e.g 1-3,5 is a valid setting.
 .SH "SEE ALSO"
 .BR malloc (3),
 .BR numa (3),
