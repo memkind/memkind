@@ -174,15 +174,24 @@ standard memory pages.
 .SH "RETURN VALUE"
 .BR hbw_get_policy ()
 returns
-.BR HBW_POLICY_BIND ", or" HBW_POLICY_BIND
-that represents the current high bandwidth policy.
-.BR hbw_set_policy "() , and " hbw_free ()
+.B HBW_POLICY_BIND
+or
+.B HBW_POLICY_BIND
+which represents the current high bandwidth policy.
+.BR hbw_set_policy ()
+and
+.BR hbw_free ()
 do not have return values.
-.BR hbw_malloc "() , " hbw_calloc "() , and " hbw_realloc ()
-return the pointer to the allocated memory, or NULL if
-the request fails.
-.BR hbw_allocate_memalign "() and " hbw_allocate_memalign_psize ()
-return zero on success, or one of the error values listedin the
+.BR hbw_malloc ()
+.BR hbw_calloc ()
+and
+.BR hbw_realloc ()
+return the pointer to the allocated memory, or NULL if the request
+fails.
+.BR hbw_allocate_memalign ()
+and
+.BR hbw_allocate_memalign_psize ()
+return zero on success, or one of the error values listed in the
 next section on failure.  Note that
 .I errno
 is not set.
@@ -194,44 +203,56 @@ Requested numa kind is not available
 .B NUMAKIND_ERROR_MBIND
 Call to mbind() failed
 .TP
-.B NUMAKIND_ERROR_MEMALIGN:
+.B NUMAKIND_ERROR_MEMALIGN
 Call to posix_memalign() failed
 .TP
-.B NUMAKIND_ERROR_MALLCTL:
+.B NUMAKIND_ERROR_MALLCTL
 Call to je_mallctl() failed
 .TP
-.B NUMAKIND_ERROR_MALLOC:
+.B NUMAKIND_ERROR_MALLOC
 Call to je_malloc() failed
 .TP
-.B NUMAKIND_ERROR_GETCPU:
+.B NUMAKIND_ERROR_GETCPU
 Call to sched_getcpu() returned out of range
 .TP
-.B NUMAKIND_ERROR_HBW:
+.B NUMAKIND_ERROR_HBW
 Initializing for HBW failed
 .TP
-.B NUMAKIND_ERROR_PMTT:
+.B NUMAKIND_ERROR_PMTT
 Unable to find parsed PMTT table in
 .I /etc/numakind/node-bandwidth
 .TP
-.B NUMAKIND_ERROR_TIEDISTANCE:
+.B NUMAKIND_ERROR_TIEDISTANCE
 Two NUMA memory nodes are equidistant from target cpu node
 .TP
-.B NUMAKIND_ERROR_ALIGNMENT:
+.B NUMAKIND_ERROR_ALIGNMENT
 Alignment must be a power of two and larger than sizeof(void *)
 .TP
-.B NUMAKIND_ERROR_ALLOCM:
+.B NUMAKIND_ERROR_ALLOCM
 Call to je_allocm() failed
 .TP
-.B NUMAKIND_ERROR_ENVIRON:
+.B NUMAKIND_ERROR_ENVIRON
 Error parsing environment variable (NUMAKIND_*)
 .SH "NOTES"
 The
 .I hbwmalloc.h
-file defines the external API's and enumerations for the hbwmalloc
+file defines the external functions and enumerations for the hbwmalloc
 library. These interfaces define a heap manager that targets high
 bandwidth memory numa nodes.
+.SH "FILES"
+.TP
+.I /etc/numakind/node-bandwidth
+File that contains the bandwidth values for each numa node.
+.TP
+.I /etc/rc/d/init.d/numakind
+Initialization script that creates the node-bandwidth file by calling
+the PMTT table parser.
+.TP
+.I /usr/sbin/numakind-pmtt
+The PMTT table parser.
+
 .SH "ENVIRONMENT"
-.PP
+.TP
 .B NUMAKIND_HBW_NODES
 This environment varaible is a comma separated list of NUMA nodes that
 are treated as high bandwidth. This environment variable should be set
