@@ -228,18 +228,18 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 		   ++i;
 	       }
 	       break;
-  	   case NUMAKIND_FREE:
+           case NUMAKIND_FREE:
 	       numakind_free(trial_vec[i].numakind,
 			     ptr_vec[trial_vec[i].free_index]);
 	       ptr_vec[trial_vec[i].free_index] = NULL;
 	       ptr_vec[i] = NULL;
 	       break;
-    	   case MALLOC:
+	   case MALLOC:
 	       fprintf (stdout,"Allocating %zd bytes using hbw_malloc\n",
 			trial_vec[i].size);
 	       ptr_vec[i] = hbw_malloc(trial_vec[i].size);
 	       break;
-    	   case CALLOC:
+	   case CALLOC:
 	       fprintf (stdout,"Allocating %zd bytes using hbw_calloc\n",
 			trial_vec[i].size);
 	       ptr_vec[i] = hbw_calloc(trial_vec[i].size, 1);
