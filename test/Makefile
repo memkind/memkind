@@ -8,12 +8,12 @@
 #
 
 CC=g++
-EXTRA_CFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
+EXTRA_CFLAGS=-O3 -Wall -fopenmp -std=c++0x
 LIBS = -lnumakind -lnuma -lpthread -ljemalloc -lgomp -lgtest
 OBJECTS = main.o bat_tests.o threaded_tests.o check.o trial_generator.o extended_tests.o
 bin = $(shell mkdir -p bin)
 
-all:			$(bin) bin/all_tests
+all:			$(bin) bin/all_tests test
 
 bin/all_tests:		$(OBJECTS) common.h
 			$(CC) $(OBJECTS) $(LIBS) $(LDFLAGS) -o bin/all_tests
@@ -38,7 +38,7 @@ trial_generator.o:	trial_generator.cpp trial_generator.h
 
 clean:
 			rm -f $(OBJECTS) bin/all_tests *~
-test: bin/all_tests bin/test.sh
+test: 			bin/all_tests bin/test.sh
 			LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./bin/test.sh
 
 .PHONY: all clean test

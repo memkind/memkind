@@ -56,7 +56,7 @@ class TrialGenerator
 				numakind_t numakind,
 				int free_index);
 
-    
+
 };
 
 

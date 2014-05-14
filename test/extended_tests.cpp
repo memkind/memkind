@@ -29,7 +29,7 @@ protected:
         size_t node;
         char *hbw_nodes_env, *endptr;
         tgen = new TrialGenerator();
-	
+
         hbw_nodes_env = getenv("NUMAKIND_HBW_NODES");
         if (hbw_nodes_env) {
             num_bandwidth = 128;
@@ -61,7 +61,7 @@ protected:
 	}
 
     }
-    
+
     void TearDown()
     {
 	delete[] bandwidth;
@@ -70,25 +70,25 @@ protected:
 
 TEST_F(EXTendedTest, hbw_malloc_1KB_2GB_sizes){
     tgen->generate_trials_size_1KB_2GB(MALLOC);
-    tgen->execute_trials(num_bandwidth, 
+    tgen->execute_trials(num_bandwidth,
 			 bandwidth);
 }
 
 TEST_F(EXTendedTest, hbw_calloc_1KB_2GB_sizes){
     tgen->generate_trials_size_1KB_2GB(CALLOC);
-    tgen->execute_trials(num_bandwidth, 
+    tgen->execute_trials(num_bandwidth,
 			 bandwidth);
 }
 
 TEST_F(EXTendedTest, hbw_memalign_1KB_2GB_sizes){
     tgen->generate_trials_size_1KB_2GB(MEMALIGN);
-    tgen->execute_trials(num_bandwidth, 
+    tgen->execute_trials(num_bandwidth,
 			 bandwidth);
 }
 
 
 TEST_F(EXTendedTest, hbw_memalign_psize_1KB_2GB_sizes){
     tgen->generate_trials_size_1KB_2GB(MEMALIGN_PSIZE);
-    tgen->execute_trials(num_bandwidth, 
+    tgen->execute_trials(num_bandwidth,
 			 bandwidth);
 }

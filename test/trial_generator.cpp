@@ -33,7 +33,7 @@ void TrialGenerator :: generate_trials_recycle_incremental(alloc_api_t api){
 	 trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE,0,0,0,
 						NUMAKIND_HBW, k++));
      }
-     
+
 }
 
 trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
@@ -54,12 +54,12 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
 }
 
 int TrialGenerator :: check_order_of_correctness(){
-    
+
      int malloc_cnt = 0, free_cnt = 0;
      int num_trials = trial_vec.size();
 
      for (int i = 0; i < num_trials; i++){
-	 if (trial_vec[i].api == FREE || 
+	 if (trial_vec[i].api == FREE ||
 	     trial_vec[i].api == NUMAKIND_FREE){
 	     malloc_cnt--;
 	     free_cnt++;
@@ -68,13 +68,13 @@ int TrialGenerator :: check_order_of_correctness(){
 	     malloc_cnt++;
 	 }
 	 if (malloc_cnt < 0){
-	     fprintf(stderr, 
+	     fprintf(stderr,
 		     "Seq Error: More Free's and Alloc's: will result in test failure\n");
 	     return -1;
 	 }
      }
      if (malloc_cnt != 0){
-	 fprintf(stderr, 
+	 fprintf(stderr,
 		 "Seq Error: More Free's and Alloc's: will result in test failure\n");
 	 return -1;
      }
@@ -83,11 +83,11 @@ int TrialGenerator :: check_order_of_correctness(){
 
 int n_random(int i) { return random() % i;}
 void TrialGenerator :: generate_trials_multi_app_stress(int num_types){
-    
+
     int i;
     int num_trials = 1000;
     int index, k = 0;
-    
+
     srandom(0);
     trial_vec.clear();
     for (i = 0; i < num_trials; i++){
@@ -105,7 +105,7 @@ void TrialGenerator :: generate_trials_multi_app_stress(int num_types){
 		   trial_vec[index].free_index == -1){
 		index = n_random(trial_vec.size());
 	    }
-	    
+
 	    trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE,
 						   0,
 						   0, 2097152,
@@ -181,7 +181,7 @@ void TrialGenerator :: generate_trials_size_1KB_2GB(alloc_api_t api){
 void TrialGenerator :: print_trial_list(){
 
     std::vector<trial_t>:: iterator it;
-    
+
     std::cout <<"*********** Size: "<< trial_vec.size()
 	      <<"********\n";
     std::cout << "SIZE PSIZE ALIGN FREE KIND"<<std::endl;
@@ -193,7 +193,7 @@ void TrialGenerator :: print_trial_list(){
                   << it->page_size <<" "
                   << it->alignment <<" "
                   << it->free_index <<" "
-		  << it->numakind <<" " 
+		  << it->numakind <<" "
 		  <<std::endl;
     }
 
@@ -212,7 +212,7 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 	fprintf (stderr, "Error in allocating ptr array\n");
 	exit(-1);
     }
-    
+
 
     for (i = 0; i < num_trial; ++i) {
         switch(trial_vec[i].api) {
@@ -229,11 +229,11 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 	       }
 	       break;
   	   case NUMAKIND_FREE:
-	       numakind_free(trial_vec[i].numakind,  
+	       numakind_free(trial_vec[i].numakind,
 			     ptr_vec[trial_vec[i].free_index]);
 	       ptr_vec[trial_vec[i].free_index] = NULL;
 	       ptr_vec[i] = NULL;
-	       break;	    
+	       break;
     	   case MALLOC:
 	       fprintf (stdout,"Allocating %zd bytes using hbw_malloc\n",
 			trial_vec[i].size);
@@ -252,39 +252,39 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 	       break;
 	   case MEMALIGN:
 	       fprintf (stdout,"Allocating %zd bytes using hbw_memalign\n",
-			trial_vec[i].size); 
-	       ret =  hbw_allocate_memalign(&ptr_vec[i], 
+			trial_vec[i].size);
+	       ret =  hbw_allocate_memalign(&ptr_vec[i],
 					    trial_vec[i].alignment,
 					    trial_vec[i].size);
 	       break;
            case MEMALIGN_PSIZE:
 	       fprintf (stdout,"Allocating %zd bytes using hbw_memalign_psize\n",
-			trial_vec[i].size); 
+			trial_vec[i].size);
 	       hbw_pagesize_t psize;
 	       if (trial_vec[i].page_size == 4096)
 		  psize = HBW_PAGESIZE_4KB;
 	       else
 		   psize = HBW_PAGESIZE_2MB;
-	       
+
 	       ret = hbw_allocate_memalign_psize(&ptr_vec[i],
 						 trial_vec[i].alignment,
-						 trial_vec[i].size, 
+						 trial_vec[i].size,
 						 psize);
-	       
+
 	      break;
 	case NUMAKIND_MALLOC:
 	      /*  	       fprintf (stdout, "Allocating %zd bytes using numakind_malloc \n",
 			       trial_vec[i].size); */
-	       
+
 	       ptr_vec[i] = numakind_malloc(trial_vec[i].numakind,
 					    trial_vec[i].size);
 	       break;
         }
-        if (trial_vec[i].api != FREE && 
+        if (trial_vec[i].api != FREE &&
 	    trial_vec[i].api != NUMAKIND_FREE &&
 	    trial_vec[i].numakind != NUMAKIND_DEFAULT) {
 
-	    
+
             ASSERT_TRUE(ptr_vec[i] != NULL);
 	    memset(ptr_vec[i], 0, trial_vec[i].size);
 	    Check check(ptr_vec[i], trial_vec[i].size);

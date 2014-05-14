@@ -121,11 +121,11 @@ int Check::check_align(size_t align)
 }
 
 string Check::skip_to_next_entry (ifstream &ip){
-    
+
     string temp, token;
     size_t found = 0;
     string empty ="";
-    
+
     while (!ip.eof()){
       getline (ip, temp);
       found = temp.find("-");
@@ -139,7 +139,7 @@ string Check::skip_to_next_entry (ifstream &ip){
 }
 
 void Check::skip_lines(ifstream &ip, int num_lines){
-   
+
     int i;
     string temp;
     for (i = 0; i < num_lines;
@@ -153,7 +153,7 @@ void Check::get_address_range(string &line,
                               unsigned long long *end_addr){
     stringstream ss(line);
     string token;
-    
+
     getline(ss, token, '-');
     *start_addr = strtoul(token.c_str(),
                          NULL,
@@ -161,20 +161,20 @@ void Check::get_address_range(string &line,
     getline(ss, token, '-');
     *end_addr = strtoul(token.c_str(),
                         NULL,
-                        16); 
+                        16);
 }
 
 size_t Check::get_kpagesize(string line){
-  
+
     stringstream ss(line);
     string token;
     size_t pagesize;
-    
-    ss  >> token; 
+
     ss  >> token;
-    
+    ss  >> token;
+
     pagesize = atol(token.c_str());
-    
+
     return (size_t)pagesize;
 }
 
@@ -184,7 +184,7 @@ int Check::check_page_size(size_t page_size)
     int i;
 
     ip.open ("/proc/self/smaps");
-    
+
     populate_smaps_table();
     if (check_page_size(page_size, address[0])) {
         err = -1;
@@ -198,7 +198,7 @@ int Check::check_page_size(size_t page_size)
 }
 
 int Check::populate_smaps_table (){
-    
+
     string read;
     size_t lpagesize;
     smaps_entry_t lentry;
@@ -207,9 +207,9 @@ int Check::populate_smaps_table (){
 
     ip >> read;
     while (!ip.eof()){
-	
+
 	start_addr = end_addr = 0;
-	get_address_range (read, 
+	get_address_range (read,
 			   &start_addr,
 			   &end_addr);
 	skip_lines(ip, 11);
@@ -225,7 +225,7 @@ int Check::populate_smaps_table (){
 	    break;
 	}
     }
-    
+
     if (0 == smaps_table.size()){
 	fprintf(stderr,"Empty smaps table\n");
 	return -1;
@@ -237,8 +237,8 @@ int Check::populate_smaps_table (){
 }
 
 int Check::check_page_size(size_t page_size, void *vaddr){
-  
-    
+
+
     string read;
     unsigned long long virt_addr;
     size_t lpagesize;
@@ -247,19 +247,19 @@ int Check::check_page_size(size_t page_size, void *vaddr){
     unsigned long long end_addr;
 
     virt_addr = (unsigned long long)(vaddr);
-    
+
     for (it = smaps_table.begin();
 	 it != smaps_table.end();
 	 it++){
 
 	start_addr = it->start_addr;
 	end_addr = it->end_addr;
-	
+
 	if ((virt_addr >= start_addr) &&
 	    (virt_addr <= end_addr)){
-	    
+
 	    lpagesize = it->pagesize;
-	    
+
 	    if (lpagesize == page_size){
 		return 0;
 	    }
