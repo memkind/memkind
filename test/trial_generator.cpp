@@ -290,6 +290,7 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 						 psize);
 
 	      break;
+
    	   case NUMAKIND_MALLOC:
 	       /* fprintf (stdout, "Allocating %zd bytes using numakind_malloc \n",
 		  trial_vec[i].size); */

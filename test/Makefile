@@ -13,7 +13,7 @@ LIBS = -lnumakind -lnuma -lpthread -ljemalloc -lgomp -lgtest
 OBJECTS = main.o bat_tests.o check.o trial_generator.o extended_tests.o
 bin = $(shell mkdir -p bin)
 
-all:			$(bin) bin/all_tests
+all:			$(bin) bin/all_tests test
 
 bin/all_tests:		$(OBJECTS) common.h
 			$(CC) $(OBJECTS) $(LIBS) $(LDFLAGS) -o bin/all_tests

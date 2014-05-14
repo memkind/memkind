@@ -130,11 +130,6 @@ TEST_F(BATest, hbw_numakind_malloc_recycle_psize){
     tgen->execute_trials(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_numakind_malloc_recycle_psize_2GB){
-    tgen->generate_trials_recycle_psize_2GB(NUMAKIND_MALLOC);
-    tgen->execute_trials(num_bandwidth, bandwidth);
-}
-
 TEST_F(BATest, hbw_numakind_trials_two_kind_stress){
     tgen->generate_trials_multi_app_stress(2);
     tgen->execute_trials(num_bandwidth, bandwidth);
