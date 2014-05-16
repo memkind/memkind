@@ -31,7 +31,7 @@ clean:
 	make -C test clean
 
 test:
-	make -C test
+	make -C test test
 
 numakind.o: numakind.c numakind.h numakind_hbw.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind.c
