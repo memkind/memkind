@@ -10,7 +10,7 @@
 CC=g++
 EXTRA_CFLAGS=-O3 -Wall -fopenmp -std=c++0x
 LIBS = -lnumakind -lnuma -lpthread -ljemalloc -lgomp -lgtest
-OBJECTS = main.o bat_tests.o threaded_tests.o check.o trial_generator.o extended_tests.o
+OBJECTS = main.o bat_tests.o check.o trial_generator.o extended_tests.o
 bin = $(shell mkdir -p bin)
 
 all:			$(bin) bin/all_tests

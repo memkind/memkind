@@ -17,9 +17,9 @@
 #include <gtest/gtest.h>
 #include "hbwmalloc.h"
 
-#define MB 1048576L
-#define GB 1073741824L
-#define KB 1024
+#define MB 1048576ULL
+#define GB 1073741824ULL
+#define KB 1024ULL
 
 #define HBW_SUCCESS 0
 #define HBW_ERROR -1

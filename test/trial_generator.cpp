@@ -7,13 +7,17 @@ void TrialGenerator :: generate_trials_incremental(alloc_api_t api){
     size_t psize[] = {4096, 4096, 2097152,
 		      2097152};
     size_t align[] = {8, 128, 4*KB, 2*MB};
+    int k = 0;
     trial_vec.clear();
     for (int i = 0; i< 4; i++){
 	trial_vec.push_back(create_trial_tuple(api, size[i],
 					       align[i], psize[i],
 					       NUMAKIND_HBW,-1));
+	if (i > 0)
+	    k++;
 	trial_vec.push_back(create_trial_tuple(FREE,0,0,0,
-					       NUMAKIND_HBW, i));
+					       NUMAKIND_HBW, k++));
+
      }
  }
 
@@ -26,10 +30,13 @@ void TrialGenerator :: generate_trials_recycle_incremental(alloc_api_t api){
      for (int i = 0; i < 2; i++){
 	 trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
 						NUMAKIND_DEFAULT,-1));
+	 if (i > 0)
+	     k++;
 	 trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE,0,0,0,
 						NUMAKIND_DEFAULT, k++));
 	 trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
 						NUMAKIND_HBW,-1));
+	 k++;
 	 trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE,0,0,0,
 						NUMAKIND_HBW, k++));
      }
@@ -112,6 +119,7 @@ void TrialGenerator :: generate_trials_multi_app_stress(int num_types){
 						   trial_vec[index].numakind,
 						   trial_vec[index].free_index));
 	    trial_vec[index].free_index = -1;
+	    k++;
 	}
     }
 
@@ -131,6 +139,19 @@ void TrialGenerator :: generate_trials_multi_app_stress(int num_types){
     }
 }
 
+void TrialGenerator :: generate_trials_recycle_psize_2GB(alloc_api_t api){
+    
+    trial_vec.clear();
+    trial_vec.push_back(create_trial_tuple(api, 2*GB, 32, 4096,
+					   NUMAKIND_HBW,-1));
+    trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE, 0, 0, 0,
+					   NUMAKIND_HBW, 0));
+    trial_vec.push_back(create_trial_tuple(api, 2*GB, 32, 2097152,
+					   NUMAKIND_HBW_HUGETLB,-1));
+    trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE, 0, 0, 2097152,
+					   NUMAKIND_HBW_HUGETLB, 2));
+	
+}
 
 void TrialGenerator :: generate_trials_recycle_psize_incremental(alloc_api_t api){
 
@@ -141,40 +162,37 @@ void TrialGenerator :: generate_trials_recycle_psize_incremental(alloc_api_t api
     for (int i = 0; i < 2; i++){
 	trial_vec.push_back(create_trial_tuple(api, size[i], 32, 4096,
 					       NUMAKIND_HBW,-1));
+	if (i > 0)
+	    k++;
 	trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE, 0, 0, 0,
 					       NUMAKIND_HBW, k++));
+
 	trial_vec.push_back(create_trial_tuple(api, size[i], 32, 2097152,
 					       NUMAKIND_HBW_HUGETLB,-1));
-	trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE, 0, 0, 2097152,
+	k++;
+	trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE, 0, 0, 0,
 					       NUMAKIND_HBW_HUGETLB, k++));
     }
 }
 
-void TrialGenerator :: generate_trials_size_4GB_8GB(alloc_api_t api){
 
-    size_t size[] = {4*GB, 8*GB};
-
-    trial_vec.clear();
-    for (int i = 0; i < 2; i++){
-	trial_vec.push_back(create_trial_tuple(api, size[i], 32,
-					       4096,NUMAKIND_HBW,-1));
-	trial_vec.push_back(create_trial_tuple(FREE, 0, 0, 0,
-					       NUMAKIND_HBW, i));
-    }
-
-}
 
 void TrialGenerator :: generate_trials_size_1KB_2GB(alloc_api_t api){
 
     size_t size[] = {KB, 2*KB, 4*KB, 16*KB, 256*KB,
 		     512*KB, MB, 2*MB, 4*MB, 16*MB,
 		     256*MB, 512*MB, GB, 2*GB};
+    int k = 0;
     trial_vec.clear();
-    for (int i = 0; i < 14; i++){
+    for (unsigned int i = 0; i < sizeof(size)/sizeof(size_t); i++){
 	trial_vec.push_back(create_trial_tuple(api,size[i],32,
-					       4096, NUMAKIND_HBW, -1));
+					       4096, NUMAKIND_HBW,
+					       -1));
+	if (i > 0)
+	    k++;
 	trial_vec.push_back(create_trial_tuple(FREE, 0, 0, 0,
-					       NUMAKIND_HBW, i));
+					       NUMAKIND_HBW, k));
+	k++;
     }
 }
 
@@ -272,10 +290,9 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 						 psize);
 
 	      break;
-	case NUMAKIND_MALLOC:
-	      /*  	       fprintf (stdout, "Allocating %zd bytes using numakind_malloc \n",
-			       trial_vec[i].size); */
-
+   	   case NUMAKIND_MALLOC:
+	       /* fprintf (stdout, "Allocating %zd bytes using numakind_malloc \n",
+		  trial_vec[i].size); */
 	       ptr_vec[i] = numakind_malloc(trial_vec[i].numakind,
 					    trial_vec[i].size);
 	       break;

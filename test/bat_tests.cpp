@@ -64,6 +64,7 @@ protected:
   void TearDown()
   {
     delete[] bandwidth;
+    delete tgen;
   }
 
 };
@@ -75,8 +76,7 @@ TEST_F(BATest, hbw_is_available) {
 
 TEST_F(BATest, hbw_policy) {
   EXPECT_EQ(1, hbw_get_policy());
-  hbw_set_policy(2);
-  EXPECT_EQ(2, hbw_get_policy());
+
 }
 
 TEST_F(BATest, hbw_malloc_incremental) {
@@ -127,6 +127,11 @@ TEST_F(BATest, hbw_numakind_malloc_recycle){
 
 TEST_F(BATest, hbw_numakind_malloc_recycle_psize){
     tgen->generate_trials_recycle_psize_incremental(NUMAKIND_MALLOC);
+    tgen->execute_trials(num_bandwidth, bandwidth);
+}
+
+TEST_F(BATest, hbw_numakind_malloc_recycle_psize_2GB){
+    tgen->generate_trials_recycle_psize_2GB(NUMAKIND_MALLOC);
     tgen->execute_trials(num_bandwidth, bandwidth);
 }
 

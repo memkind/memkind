@@ -138,15 +138,22 @@ string Check::skip_to_next_entry (ifstream &ip){
     return empty;
 }
 
-void Check::skip_lines(ifstream &ip, int num_lines){
+string Check::skip_to_next_kpage(ifstream &ip){
 
-    int i;
-    string temp;
-    for (i = 0; i < num_lines;
-         i++){
-      getline (ip, temp);
+    string temp, token;
+    size_t found = 0;
+    string empty ="";
+    
+    while (!ip.eof()){
+	getline (ip, temp);
+	found = temp.find("KernelPageSize:");
+	if (found != string::npos){
+	    return temp;
+	}
     }
+    return empty;
 }
+
 
 void Check::get_address_range(string &line,
                               unsigned long long *start_addr,
@@ -212,7 +219,7 @@ int Check::populate_smaps_table (){
 	get_address_range (read,
 			   &start_addr,
 			   &end_addr);
-	skip_lines(ip, 11);
+	read = skip_to_next_kpage(ip);
 	getline(ip, read);
 	lpagesize = get_kpagesize(read);
 	lpagesize *= 1024;
@@ -256,7 +263,7 @@ int Check::check_page_size(size_t page_size, void *vaddr){
 	end_addr = it->end_addr;
 
 	if ((virt_addr >= start_addr) &&
-	    (virt_addr <= end_addr)){
+	    (virt_addr < end_addr)){
 
 	    lpagesize = it->pagesize;
 

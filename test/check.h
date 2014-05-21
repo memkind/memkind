@@ -41,8 +41,8 @@ class Check {
     ifstream ip;
     int smaps_fd;
     int num_address;
-    void skip_lines(ifstream &, int num_lines);
     string skip_to_next_entry(ifstream &);
+    string skip_to_next_kpage(ifstream &);
     void get_address_range(string &line, unsigned long long *start_addr,
                           unsigned long long *end_addr);
     size_t get_kpagesize(string line);

@@ -41,6 +41,7 @@ class TrialGenerator
      void generate_trials_incremental(alloc_api_t api);
      void generate_trials_recycle_incremental(alloc_api_t api);
      void generate_trials_recycle_psize_incremental(alloc_api_t api);
+     void generate_trials_recycle_psize_2GB(alloc_api_t api);
      void generate_trials_multi_app_stress(int num_types);
      void generate_trials_size_1KB_2GB(alloc_api_t api);
      void generate_trials_size_4GB_8GB(alloc_api_t api);
