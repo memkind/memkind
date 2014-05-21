@@ -138,7 +138,6 @@ string Check::skip_to_next_entry (ifstream &ip){
     return empty;
 }
 
-<<<<<<< HEAD
 string Check::skip_to_next_kpage(ifstream &ip){
 
     string temp, token;
@@ -151,15 +150,6 @@ string Check::skip_to_next_kpage(ifstream &ip){
 	if (found != string::npos){
 	    return temp;
 	}
-=======
-void Check::skip_lines(ifstream &ip, int num_lines){
-
-    int i;
-    string temp;
-    for (i = 0; i < num_lines;
-         i++){
-      getline (ip, temp);
->>>>>>> Removing trailing whites spaces from the files
     }
     return empty;
 }
@@ -274,14 +264,8 @@ int Check::check_page_size(size_t page_size, void *vaddr){
 	end_addr = it->end_addr;
 
 	if ((virt_addr >= start_addr) &&
-<<<<<<< HEAD
 	    (virt_addr < end_addr)){
-=======
-	    (virt_addr <= end_addr)){
->>>>>>> Removing trailing whites spaces from the files
-
 	    lpagesize = it->pagesize;
-
 	    if (lpagesize == page_size){
 		return 0;
 	    }
