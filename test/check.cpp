@@ -144,7 +144,7 @@ string Check::skip_to_next_kpage(ifstream &ip){
     string temp, token;
     size_t found = 0;
     string empty ="";
-    
+
     while (!ip.eof()){
 	getline (ip, temp);
 	found = temp.find("KernelPageSize:");

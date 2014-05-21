@@ -140,7 +140,7 @@ void TrialGenerator :: generate_trials_multi_app_stress(int num_types){
 }
 
 void TrialGenerator :: generate_trials_recycle_psize_2GB(alloc_api_t api){
-    
+
     trial_vec.clear();
     trial_vec.push_back(create_trial_tuple(api, 2*GB, 32, 4096,
 					   NUMAKIND_HBW,-1));
@@ -150,7 +150,7 @@ void TrialGenerator :: generate_trials_recycle_psize_2GB(alloc_api_t api){
 					   NUMAKIND_HBW_HUGETLB,-1));
     trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE, 0, 0, 2097152,
 					   NUMAKIND_HBW_HUGETLB, 2));
-	
+
 }
 
 void TrialGenerator :: generate_trials_recycle_psize_incremental(alloc_api_t api){
