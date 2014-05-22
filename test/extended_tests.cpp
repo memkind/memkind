@@ -65,6 +65,7 @@ protected:
     void TearDown()
     {
 	delete[] bandwidth;
+	delete tgen;
     }
 };
 
@@ -73,6 +74,7 @@ TEST_F(EXTendedTest, hbw_malloc_1KB_2GB_sizes){
     tgen->execute_trials(num_bandwidth,
 			 bandwidth);
 }
+
 
 TEST_F(EXTendedTest, hbw_calloc_1KB_2GB_sizes){
     tgen->generate_trials_size_1KB_2GB(CALLOC);
