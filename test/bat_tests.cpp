@@ -90,7 +90,12 @@ TEST_F(BATest, hbw_calloc_incremental){
 }
 
 
+TEST_F(BATest, hbw_realloc_incremental){
+    tgen->generate_trials_incremental(REALLOC);
+    tgen->execute_trials(num_bandwidth, bandwidth);
+}
 
+#if 0
 TEST_F(BATest, hbw_realloc_2KB_2MB_2KB) {
   size_t size0 = (size_t)(2*KB);
   size_t size1 = (size_t)(2*MB);
@@ -109,6 +114,7 @@ TEST_F(BATest, hbw_realloc_2KB_2MB_2KB) {
   EXPECT_EQ(0, check3.check_node_hbw(num_bandwidth, bandwidth));
   hbw_free(ptr);
 }
+#endif
 
 TEST_F(BATest, hbw_memalign_incremental){
     tgen->generate_trials_incremental(MEMALIGN);

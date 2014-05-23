@@ -64,7 +64,7 @@ int TrialGenerator :: check_order_of_correctness(){
 
      int malloc_cnt = 0, free_cnt = 0;
      int num_trials = trial_vec.size();
-
+     
      for (int i = 0; i < num_trials; i++){
 	 if (trial_vec[i].api == FREE ||
 	     trial_vec[i].api == NUMAKIND_FREE){
@@ -231,7 +231,9 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 	exit(-1);
     }
 
-
+    for (i = 0; i < num_trial; ++i){
+	ptr_vec[i] = NULL;
+    }
     for (i = 0; i < num_trial; ++i) {
         switch(trial_vec[i].api) {
 	   case FREE:
@@ -243,7 +245,6 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 	       else {
 		   ptr_vec[i] = hbw_realloc(ptr_vec[trial_vec[i].free_index], trial_vec[i + 1].size);
 		   ptr_vec[trial_vec[i].free_index] = NULL;
-		   ++i;
 	       }
 	       break;
   	   case NUMAKIND_FREE:
@@ -266,7 +267,9 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth){
 	       fprintf (stdout,"Allocating %zd bytes using hbw_realloc\n",
 			trial_vec[i].size);
 	       fflush(stdout);
-	       ptr_vec[i] = hbw_realloc(NULL, trial_vec[i].size);
+	       if (NULL == ptr_vec[i]){
+		   ptr_vec[i] = hbw_realloc(NULL, trial_vec[i].size);
+	       }
 	       break;
 	   case MEMALIGN:
 	       fprintf (stdout,"Allocating %zd bytes using hbw_memalign\n",

@@ -69,8 +69,15 @@ protected:
     }
 };
 
+
 TEST_F(EXTendedTest, hbw_malloc_1KB_2GB_sizes){
     tgen->generate_trials_size_1KB_2GB(MALLOC);
+    tgen->execute_trials(num_bandwidth,
+			 bandwidth);
+}
+
+TEST_F(EXTendedTest, hbw_realloc_1KB_2GB_sizes){
+    tgen->generate_trials_size_1KB_2GB(REALLOC);
     tgen->execute_trials(num_bandwidth,
 			 bandwidth);
 }
