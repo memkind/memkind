@@ -8,6 +8,7 @@ hbwmalloc.3
 hbwmalloc.c
 hbwmalloc.h
 Makefile
+numakind.3
 numakind.c
 numakind.h
 numakind_hbw.c
@@ -24,5 +25,4 @@ test/bat_tests.cpp
 test/threaded_tests.cpp
 test/malloc_tests.cpp
 test/bin/test.sh
-test/bin/test_remote.sh
-test/bin/start_simics.sh
+

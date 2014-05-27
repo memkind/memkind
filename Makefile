@@ -60,6 +60,7 @@ install:
 	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
 	$(INSTALL) -d $(DESTDIR)$(datarootdir)/man/man3
 	$(INSTALL) -m 644 hbwmalloc.3 $(DESTDIR)$(datarootdir)/man/man3/hbwmalloc.3
+	$(INSTALL) -m 644 numakind.3 $(DESTDIR)$(datarootdir)/man/man3/numakind.3
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	$(INSTALL) numakind-pmtt $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)$(initddir)

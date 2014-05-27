@@ -1,0 +1,328 @@
+.\"  Copyright (2014) Intel Corporation All Rights Reserved.
+.\"
+.\"  This software is supplied under the terms of a license
+.\"  agreement or nondisclosure agreement with Intel Corp.
+.\"  and may not be copied or disclosed except in accordance
+.\"  with the terms of that agreement.
+.\"
+.TH "NUMAKIND" 3 "25 May 2014" "Intel Corporation" "NUMAKIND" \" -*- nroff -*-
+.SH "NAME"
+numakind \- Heap manager that isolates allocations to different kinds of numa nodes.
+.SH "SYNOPSIS"
+.nf
+.B #include <numakind.h>
+.sp
+.B Link with -ljemalloc -lnuma -lnumakind -lpthread
+.sp
+.B "HEAP MANAGER:"
+.br
+.BI "void *numakind_calloc(numakind_t " "kind" ", size_t " "num" ", size_t " "size" );
+.br
+.BI "void *numakind_malloc(numakind_t " "kind" ", size_t " "size" );
+.br
+.BI "void numakind_free(numakind_t " "kind" ", void " "*ptr" );
+.br
+.BI "void *numakind_realloc(numakind_t " "kind" ", void " "*ptr" ", size_t " "size" );
+.br
+.BI "int numakind_posix_memalign(numakind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.sp
+.B "LOW LEVEL INTERFACE:"
+.br
+.BI "void numakind_error_message(int " "err" ", char " "*msg" ", size_t " "size" );
+.br
+.BI "int numakind_is_available(int " "kind" );
+.br
+.BI "int numakind_get_mmap_flags(int " "kind" ", int " "*flags" );
+.br
+.BI "int numakind_mbind(int " "kind" ", void " "*addr" ", size_t " "len" );
+.fi
+.SH "DESCRIPTION"
+.B "HEAP MANAGER:"
+.br
+The functions described in this section define a heap manager with an
+interface modeled on the ISO C standard API's, except that the user
+must specify the
+.I kind
+of memory with the first arguement to each function.  See the
+.B KINDS
+section below for a full description of the implemented kinds.
+.PP
+.BR numakind_calloc ()
+allocates memory of the specified
+.I kind
+for an array of
+.I nmemb
+elements of
+.I size
+bytes each and returns a pointer to the allocated memory.
+The memory is set to zero.
+If
+.I nmemb
+or
+.I size
+is 0, then
+.BR numakind_calloc ()
+returns NULL.
+.PP
+.BR numakind_malloc ()
+allocates
+.I size
+bytes of memory of the specified
+.I kind
+and returns a pointer to the allocated memory.
+The memory is not cleared.
+If
+.I size
+is 0, then
+.BR numakind_malloc ()
+returns  NULL.
+.PP
+.BR numakind_free ()
+frees the memory space pointed to by
+.IR ptr ,
+which must have been returned by a previous call to
+.BR numakind_malloc (),
+.BR numakind_calloc (),
+.BR numakind_realloc (),
+or
+.BR numakind_posix_memalign ().
+Otherwise, or if
+.I numakind_free(kind, ptr)
+has already been called before, undefined behavior occurs.
+If
+.I ptr
+is  NULL, no operation is performed.
+For all currently supported kinds the the value of
+.B NUMAKIND_DEFAULT
+or 0 can be given for the
+.IR kind .
+In the future there may be kinds introduced that will require that the
+.I kind
+specified to
+.BR numakind_free ()
+must match the value given when the memory to be freed was allocated.
+.PP
+.BR numakind_realloc ()
+changes the size of the memory block pointed to by
+.I ptr
+to
+.I size
+bytes of the specified
+.IR "kind" .
+The contents will be unchanged to the minimum of the old and new sizes;
+newly allocated memory will be uninitialized.
+If
+.I ptr
+is NULL, then the call is equivalent to
+.IR "numakind_malloc(kind, size)" ,
+for all values of
+.IR size ;
+if
+.I size
+is equal to zero,
+and
+.I ptr
+is not NULL, then the call is equivalent to
+.IR "numakind_free(kind, ptr)" .
+Unless
+.I ptr
+is NULL, it must have been returned by an earlier call to
+.BR numakind_malloc (),
+.BR numakind_calloc (),
+.BR numakind_realloc (),
+or
+.BR numakind_posix_memalign ()
+with the same
+.I kind
+as specified in the call to
+.BR numakind_realloc ().
+If the area pointed to was moved, a
+.I numakind_free(kind, ptr)
+is done.
+.PP
+.BR numakind_posix_memalign ()
+allocates
+.I size
+bytes of the specified
+.I kind
+of memory and places the address of the allocated memory in
+.IR "*memptr" .
+The address of the allocated memory will be a multiple of
+.IR "alignment" ,
+which must be a power of two and a multiple of
+.IR "sizeof(void *)".
+If
+.I size
+is 0, then
+.BR numakind_posix_memalign ()
+returns NULL.
+.sp
+.B "LOW LEVEL INTERFACE:"
+.br
+This section describes the numakind low level interface which is used
+internally by the heap manager interface.  For these API's the kind is
+specified as an integer, rather than the abstract
+.I numakind_t
+used by the heap manager interface.
+.PP
+.BR numakind_error_message ()
+converts an error number
+.I err
+returned by a member of the numakind
+interface to an error message
+.I msg
+where the maximium size of the message is given by the
+.I size
+parameter.
+.PP
+.BR numakind_is_available ()
+returns 1 if there is support for the specified
+.I kind
+on the system and 0 otherwise.
+.PP
+.BR numakind_get_mmap_flags ()
+sets
+.I flags
+to the value appropriate for the
+.I kind
+when calling
+.BR mmap (2).
+.PP
+.BR numakind_mbind ()
+is a wrapper around
+.BR mbind (2)
+that simplifies the interface so that the user specifies the
+.I kind
+of memory, the start address
+.I addr
+to be mapped, and the number of bytes 
+.I len
+from that address to be mapped. The memory is mapped to the nearest
+NUMA node from the CPU of the calling process that is a member of the
+specified kind.
+.SH "RETURN VALUE"
+.BR numakind_calloc (),
+.BR numakind_malloc (),
+and
+.BR numakind_realloc (),
+return the pointer to the allocated memory, or NULL if the request fails.
+.BR numakind_free ()
+and
+.BR numakind_error_message ()
+do not have return values.
+.BR numakind_is_available()
+returns 1 if there is support for the specified
+.I kind
+on the system and 0 otherwise.  All other numakind API's return 0 upon
+success, and an error code defined in the ERRORS section upon failure.
+Note that this library does not set errno.
+.SH "KINDS"
+The available kinds of memory defined by the
+.I numakind_t
+enumeration in 
+.I numakind.h
+.TP
+.B NUMAKIND_DEFAULT
+Default allocation using standard memory and default page size.
+.TP
+.B NUMAKIND_HBW
+Allocate from high bandwidth memory NUMA nodes as defined by the PMTT
+table, or the environment variable
+.BR "NUMAKIND_HBW_NODES" .
+If there is not enough high bandwidth memory to satisfy the request, a
+segmentation fault will be raised (signal 11) when the pages are
+touched.
+.TP
+.B NUMAKIND_HBW_HUGETLB
+Same as 
+.B NUMAKIND_HBW
+except the allcation uses huge pages.
+.TP
+.B NUMAKIND_HBW_PREFERRED
+Same as
+.B NUMAKIND_HBW
+except that if there is not enough high bandwidth memory to satisfy the 
+request, the allocation will fall back on standard memory.
+.TP
+.B NUMAKIND_HBW_PREFERRED_HUGETLB
+Same as
+.B NUMAKIND_HBW_PREFERRED
+except the allocation uses huge pages.
+.SH "ERRORS"
+.TP
+.B NUMAKIND_ERROR_UNAVAILABLE
+Requested numa kind is not available
+.TP
+.B NUMAKIND_ERROR_MBIND
+Call to mbind() failed
+.TP
+.B NUMAKIND_ERROR_MEMALIGN
+Call to posix_memalign() failed
+.TP
+.B NUMAKIND_ERROR_MALLCTL
+Call to je_mallctl() failed
+.TP
+.B NUMAKIND_ERROR_MALLOC
+Call to je_malloc() failed
+.TP
+.B NUMAKIND_ERROR_GETCPU
+Call to sched_getcpu() returned out of range
+.TP
+.B NUMAKIND_ERROR_HBW
+Initializing for HBW failed
+.TP
+.B NUMAKIND_ERROR_PMTT
+Unable to find parsed PMTT table in
+.I /etc/numakind/node-bandwidth
+.TP
+.B NUMAKIND_ERROR_TIEDISTANCE
+Two NUMA memory nodes are equidistant from target cpu node
+.TP
+.B NUMAKIND_ERROR_ALIGNMENT
+Alignment must be a power of two and larger than sizeof(void *)
+.TP
+.B NUMAKIND_ERROR_ALLOCM
+Call to je_allocm() failed
+.TP
+.B NUMAKIND_ERROR_ENVIRON
+Error parsing environment variable (NUMAKIND_*)
+.SH "FILES"
+.TP
+.I /etc/numakind/node-bandwidth
+File that contains the bandwidth values for each numa node.
+.TP
+.I /etc/rc/d/init.d/numakind
+Initialization script that creates the node-bandwidth file by calling
+the PMTT table parser.
+.TP
+.I /usr/sbin/numakind-pmtt
+The PMTT table parser.
+
+.SH "ENVIRONMENT"
+.TP
+.B NUMAKIND_HBW_NODES
+This environment varaible is a comma separated list of NUMA nodes that
+are treated as high bandwidth. This environment variable should be set
+if the PMTT file is not present, or to override the PMTT table if it
+is present. Uses the
+.I libnuma
+routine
+.BR numa_parse_nodestring ()
+for parsing, so the syntax described in the
+.BR numa (3)
+man page for this routine applies: e.g 1-3,5 is a valid setting.
+.SH "COPYRIGHT"
+Copyright 2014 Intel Corporation All Rights Reserved.
+
+This software is supplied under the terms of a license
+agreement or nondisclosure agreement with Intel Corp.
+and may not be copied or disclosed except in accordance
+with the terms of that agreement.
+.SH "SEE ALSO"
+.BR malloc (3),
+.BR numa (3),
+.BR numactl (8),
+.BR mbind (2),
+.BR mmap (2),
+.BR move_pages (2)
+.BR jemalloc (3)

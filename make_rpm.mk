@@ -43,9 +43,4 @@ $(specfile): $(topdir) make.spec
 clean:
 	-rpmbuild $(rpmclean_flags) $(specfile)
 
-test:
-	$(MAKE) -C $(topdir)/BUILD/numakind-$(version)/test
-	$(topdir)/BUILD/numakind-$(version)/test/bin/start_simics.sh $(simics_checkpoint)
-	$(topdir)/BUILD/numakind-$(version)/test/bin/test_remote.sh $(topdir)/RPMS/$(arch) $(simics_login) $(simics_ip)
-
-.PHONY: all clean test
+.PHONY: all clean
