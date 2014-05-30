@@ -47,62 +47,65 @@ protected:
                     bandwidth[node] = 2;
                 }
             }
-        }
-        else {
+        } else {
             const char *node_bandwidth_path = "/etc/numakind/node-bandwidth";
-	    std::ifstream nbw_file;
+            std::ifstream nbw_file;
 
-	    nbw_file.open(node_bandwidth_path, std::ifstream::binary);
-	    nbw_file.seekg(0, nbw_file.end);
-	    num_bandwidth = nbw_file.tellg()/sizeof(int);
-	    nbw_file.seekg(0, nbw_file.beg);
-	    bandwidth = new int[num_bandwidth];
-	    nbw_file.read((char *)bandwidth, num_bandwidth*sizeof(int));
-	    nbw_file.close();
-	}
+            nbw_file.open(node_bandwidth_path, std::ifstream::binary);
+            nbw_file.seekg(0, nbw_file.end);
+            num_bandwidth = nbw_file.tellg()/sizeof(int);
+            nbw_file.seekg(0, nbw_file.beg);
+            bandwidth = new int[num_bandwidth];
+            nbw_file.read((char *)bandwidth, num_bandwidth*sizeof(int));
+            nbw_file.close();
+        }
 
     }
 
     void TearDown()
     {
-	delete[] bandwidth;
+        delete[] bandwidth;
     }
 };
 
-TEST_F(MultithreadedTest, hbw_malloc_1KB_2GB_sizes){
+TEST_F(MultithreadedTest, hbw_malloc_1KB_2GB_sizes)
+{
     tgen->generate_trials_size_1KB_2GB(MALLOC);
     #pragma omp parallel num_threads(NTHREADS)
     {
-	tgen->execute_trials(num_bandwidth,
-			     bandwidth);
+        tgen->execute_trials(num_bandwidth,
+                             bandwidth);
     }
 }
 
-TEST_F(MultithreadedTest, hbw_calloc_1KB_2GB_sizes){
+TEST_F(MultithreadedTest, hbw_calloc_1KB_2GB_sizes)
+{
     tgen->generate_trials_size_1KB_2GB(CALLOC);
     #pragma omp parallel num_threads(NTHREADS)
     {
-	tgen->execute_trials(num_bandwidth,
-			     bandwidth);
+        tgen->execute_trials(num_bandwidth,
+                             bandwidth);
     }
 }
 
-TEST_F(MultithreadedTest, hbw_memalign_1KB_2GB_sizes){
+TEST_F(MultithreadedTest, hbw_memalign_1KB_2GB_sizes)
+{
     tgen->generate_trials_size_1KB_2GB(MEMALIGN);
     #pragma omp parallel num_threads(NTHREADS)
     {
-	tgen->execute_trials(num_bandwidth,
-			     bandwidth);
+        tgen->execute_trials(num_bandwidth,
+                             bandwidth);
     }
 }
 
 
-TEST_F(MultithreadedTest, hbw_memalign_psize_1KB_2GB_sizes){
+TEST_F(MultithreadedTest, hbw_memalign_psize_1KB_2GB_sizes)
+{
     tgen->generate_trials_size_1KB_2GB(MEMALIGN_PSIZE);
     #pragma omp parallel num_threads(NTHREADS)
     {
-	tgen->execute_trials(num_bandwidth,
-			     bandwidth);
+        tgen->execute_trials(num_bandwidth,
+                             bandwidth);
     }
 }
 

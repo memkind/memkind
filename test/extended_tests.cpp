@@ -46,58 +46,62 @@ protected:
                     bandwidth[node] = 2;
                 }
             }
-        }
-        else {
+        } else {
             const char *node_bandwidth_path = "/etc/numakind/node-bandwidth";
-	    std::ifstream nbw_file;
+            std::ifstream nbw_file;
 
-	    nbw_file.open(node_bandwidth_path, std::ifstream::binary);
-	    nbw_file.seekg(0, nbw_file.end);
-	    num_bandwidth = nbw_file.tellg()/sizeof(int);
-	    nbw_file.seekg(0, nbw_file.beg);
-	    bandwidth = new int[num_bandwidth];
-	    nbw_file.read((char *)bandwidth, num_bandwidth*sizeof(int));
-	    nbw_file.close();
-	}
+            nbw_file.open(node_bandwidth_path, std::ifstream::binary);
+            nbw_file.seekg(0, nbw_file.end);
+            num_bandwidth = nbw_file.tellg()/sizeof(int);
+            nbw_file.seekg(0, nbw_file.beg);
+            bandwidth = new int[num_bandwidth];
+            nbw_file.read((char *)bandwidth, num_bandwidth*sizeof(int));
+            nbw_file.close();
+        }
 
     }
 
     void TearDown()
     {
-	delete[] bandwidth;
-	delete tgen;
+        delete[] bandwidth;
+        delete tgen;
     }
 };
 
 
-TEST_F(EXTendedTest, hbw_malloc_1KB_2GB_sizes){
+TEST_F(EXTendedTest, hbw_malloc_1KB_2GB_sizes)
+{
     tgen->generate_trials_size_1KB_2GB(MALLOC);
     tgen->execute_trials(num_bandwidth,
-			 bandwidth);
+                         bandwidth);
 }
 
-TEST_F(EXTendedTest, hbw_realloc_1KB_2GB_sizes){
+TEST_F(EXTendedTest, hbw_realloc_1KB_2GB_sizes)
+{
     tgen->generate_trials_size_1KB_2GB(REALLOC);
     tgen->execute_trials(num_bandwidth,
-			 bandwidth);
+                         bandwidth);
 }
 
 
-TEST_F(EXTendedTest, hbw_calloc_1KB_2GB_sizes){
+TEST_F(EXTendedTest, hbw_calloc_1KB_2GB_sizes)
+{
     tgen->generate_trials_size_1KB_2GB(CALLOC);
     tgen->execute_trials(num_bandwidth,
-			 bandwidth);
+                         bandwidth);
 }
 
-TEST_F(EXTendedTest, hbw_memalign_1KB_2GB_sizes){
+TEST_F(EXTendedTest, hbw_memalign_1KB_2GB_sizes)
+{
     tgen->generate_trials_size_1KB_2GB(MEMALIGN);
     tgen->execute_trials(num_bandwidth,
-			 bandwidth);
+                         bandwidth);
 }
 
 
-TEST_F(EXTendedTest, hbw_memalign_psize_1KB_2GB_sizes){
+TEST_F(EXTendedTest, hbw_memalign_psize_1KB_2GB_sizes)
+{
     tgen->generate_trials_size_1KB_2GB(MEMALIGN_PSIZE);
     tgen->execute_trials(num_bandwidth,
-			 bandwidth);
+                         bandwidth);
 }

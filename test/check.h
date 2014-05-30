@@ -14,18 +14,19 @@
 #include <list>
 
 
-typedef struct{
+typedef struct {
     unsigned long start_addr;
     unsigned long end_addr;
     size_t pagesize;
-}smaps_entry_t;
+} smaps_entry_t;
 
 
 
 using namespace std;
 
-class Check {
-  public:
+class Check
+{
+public:
     Check(const void *ptr, size_t size);
     Check(const Check &);
     ~Check();
@@ -33,7 +34,7 @@ class Check {
     int check_page_size(size_t page_size);
     int check_zero(void);
     int check_align(size_t align);
-  private:
+private:
     const void *ptr;
     size_t size;
     void **address;
@@ -44,7 +45,7 @@ class Check {
     string skip_to_next_entry(ifstream &);
     string skip_to_next_kpage(ifstream &);
     void get_address_range(string &line, unsigned long long *start_addr,
-                          unsigned long long *end_addr);
+                           unsigned long long *end_addr);
     size_t get_kpagesize(string line);
     int check_page_size(size_t page_size, void *vaddr);
     int populate_smaps_table();
