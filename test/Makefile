@@ -24,8 +24,8 @@ main.o:			main.cpp common.h
 bat_tests.o:		bat_tests.cpp common.h
 			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c bat_tests.cpp -o bat_tests.o
 
-threaded_tests.o:	multithreaded_tests.cpp common.h
-			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c multithreaded_tests.cpp -o threaded_tests.o
+multithreaded_tests.o:	multithreaded_tests.cpp common.h
+			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c multithreaded_tests.cpp -o multithreaded_tests.o
 
 extended_tests.o:	extended_tests.cpp common.h trial_generator.h
 			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c extended_tests.cpp -o extended_tests.o
