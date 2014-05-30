@@ -47,5 +47,7 @@ else
     err=$?
 fi
 rm -rf /tmp/$$
-kill -9 $pid
+if [ ! -z "$pid" ]; then
+    kill -9 $pid
+fi
 exit $err
