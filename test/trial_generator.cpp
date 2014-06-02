@@ -1,37 +1,38 @@
 #include "trial_generator.h"
 #include "check.h"
 
-void TrialGenerator :: generate_trials_incremental(alloc_api_t api)
+void TrialGenerator :: generate_incremental(alloc_api_t api)
 {
 
     size_t size[] = {2, 2*KB, 2*MB, 2*GB};
     size_t psize[] = {4096, 4096, 2097152,
-                      2097152
-                     };
+                      2097152};
     size_t align[] = {8, 128, 4*KB, 2*MB};
     int k = 0;
     trial_vec.clear();
-    for (int i = 0; i< 4; i++) {
+    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
+	 i++) {
         trial_vec.push_back(create_trial_tuple(api, size[i],
                                                align[i], psize[i],
                                                NUMAKIND_HBW,-1));
         if (i > 0)
             k++;
-        trial_vec.push_back(create_trial_tuple(FREE,0,0,0,
+        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
                                                NUMAKIND_HBW, k++));
 
     }
 }
 
 
-void TrialGenerator :: generate_trials_recycle_incremental(alloc_api_t api)
+void TrialGenerator :: generate_recycle_incremental(alloc_api_t api)
 {
 
     size_t size[] = {2*MB, 2*GB};
     int k = 0;
     trial_vec.clear();
-    for (int i = 0; i < 2; i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
+    for (int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
+	 i++) {
+	trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
                                                NUMAKIND_DEFAULT,-1));
         if (i > 0)
             k++;
@@ -64,39 +65,12 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
     return ltrial;
 }
 
-int TrialGenerator :: check_order_of_correctness()
-{
-
-    int malloc_cnt = 0, free_cnt = 0;
-    int num_trials = trial_vec.size();
-
-    for (int i = 0; i < num_trials; i++) {
-        if (trial_vec[i].api == FREE ||
-            trial_vec[i].api == NUMAKIND_FREE) {
-            malloc_cnt--;
-            free_cnt++;
-        } else {
-            malloc_cnt++;
-        }
-        if (malloc_cnt < 0) {
-            fprintf(stderr,
-                    "Seq Error: More Free's and Alloc's: will result in test failure\n");
-            return -1;
-        }
-    }
-    if (malloc_cnt != 0) {
-        fprintf(stderr,
-                "Seq Error: More Free's and Alloc's: will result in test failure\n");
-        return -1;
-    }
-    return 0;
-}
-
 int n_random(int i)
 {
     return random() % i;
 }
-void TrialGenerator :: generate_trials_multi_app_stress(int num_types)
+
+void TrialGenerator :: generate_multi_app_stress(int num_types)
 {
 
     int i;
@@ -146,7 +120,7 @@ void TrialGenerator :: generate_trials_multi_app_stress(int num_types)
     }
 }
 
-void TrialGenerator :: generate_trials_recycle_psize_2GB(alloc_api_t api)
+void TrialGenerator :: generate_recycle_psize_2GB(alloc_api_t api)
 {
 
     trial_vec.clear();
@@ -161,14 +135,15 @@ void TrialGenerator :: generate_trials_recycle_psize_2GB(alloc_api_t api)
 
 }
 
-void TrialGenerator :: generate_trials_recycle_psize_incremental(alloc_api_t api)
+void TrialGenerator :: generate_recycle_psize_incremental(alloc_api_t api)
 {
 
     size_t size[] = {2*MB, 2*GB};
 
     int k = 0;
     trial_vec.clear();
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
+	 i++) {
         trial_vec.push_back(create_trial_tuple(api, size[i], 32, 4096,
                                                NUMAKIND_HBW,-1));
         if (i > 0)
@@ -186,28 +161,29 @@ void TrialGenerator :: generate_trials_recycle_psize_incremental(alloc_api_t api
 
 
 
-void TrialGenerator :: generate_trials_size_1KB_2GB(alloc_api_t api)
+void TrialGenerator :: generate_size_1KB_2GB(alloc_api_t api)
 {
 
     size_t size[] = {KB, 2*KB, 4*KB, 16*KB, 256*KB,
                      512*KB, MB, 2*MB, 4*MB, 16*MB,
-                     256*MB, 512*MB, GB, 2*GB
-                    };
+                     256*MB, 512*MB, GB, 2*GB};
+
     int k = 0;
     trial_vec.clear();
-    for (unsigned int i = 0; i < sizeof(size)/sizeof(size_t); i++) {
+    for (unsigned int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
+	 i++) {
         trial_vec.push_back(create_trial_tuple(api,size[i],32,
                                                4096, NUMAKIND_HBW,
                                                -1));
         if (i > 0)
             k++;
-        trial_vec.push_back(create_trial_tuple(FREE, 0, 0, 0,
+        trial_vec.push_back(create_trial_tuple(HBW_FREE, 0, 0, 0,
                                                NUMAKIND_HBW, k));
         k++;
     }
 }
 
-void TrialGenerator :: print_trial_list()
+void TrialGenerator :: print()
 {
 
     std::vector<trial_t>:: iterator it;
@@ -230,7 +206,7 @@ void TrialGenerator :: print_trial_list()
 }
 
 
-void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth)
+void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
 {
 
     int num_trial = trial_vec.size();
@@ -249,8 +225,8 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth)
     }
     for (i = 0; i < num_trial; ++i) {
         switch(trial_vec[i].api) {
-        case FREE:
-            if (i == num_trial - 1 || trial_vec[i + 1].api != REALLOC) {
+        case HBW_FREE:
+            if (i == num_trial - 1 || trial_vec[i + 1].api != HBW_REALLOC) {
                 hbw_free(ptr_vec[trial_vec[i].free_index]);
                 ptr_vec[trial_vec[i].free_index] = NULL;
                 ptr_vec[i] = NULL;
@@ -265,17 +241,17 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth)
             ptr_vec[trial_vec[i].free_index] = NULL;
             ptr_vec[i] = NULL;
             break;
-        case MALLOC:
+        case HBW_MALLOC:
             fprintf (stdout,"Allocating %zd bytes using hbw_malloc\n",
                      trial_vec[i].size);
             ptr_vec[i] = hbw_malloc(trial_vec[i].size);
             break;
-        case CALLOC:
+        case HBW_CALLOC:
             fprintf (stdout,"Allocating %zd bytes using hbw_calloc\n",
                      trial_vec[i].size);
             ptr_vec[i] = hbw_calloc(trial_vec[i].size, 1);
             break;
-        case REALLOC:
+        case HBW_REALLOC:
             fprintf (stdout,"Allocating %zd bytes using hbw_realloc\n",
                      trial_vec[i].size);
             fflush(stdout);
@@ -283,14 +259,14 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth)
                 ptr_vec[i] = hbw_realloc(NULL, trial_vec[i].size);
             }
             break;
-        case MEMALIGN:
+        case HBW_MEMALIGN:
             fprintf (stdout,"Allocating %zd bytes using hbw_memalign\n",
                      trial_vec[i].size);
             ret =  hbw_allocate_memalign(&ptr_vec[i],
                                          trial_vec[i].alignment,
                                          trial_vec[i].size);
             break;
-        case MEMALIGN_PSIZE:
+        case HBW_MEMALIGN_PSIZE:
             fprintf (stdout,"Allocating %zd bytes using hbw_memalign_psize\n",
                      trial_vec[i].size);
             hbw_pagesize_t psize;
@@ -307,13 +283,11 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth)
             break;
 
         case NUMAKIND_MALLOC:
-            /* fprintf (stdout, "Allocating %zd bytes using numakind_malloc \n",
-            trial_vec[i].size); */
             ptr_vec[i] = numakind_malloc(trial_vec[i].numakind,
                                          trial_vec[i].size);
             break;
         }
-        if (trial_vec[i].api != FREE &&
+        if (trial_vec[i].api != HBW_FREE &&
             trial_vec[i].api != NUMAKIND_FREE &&
             trial_vec[i].numakind != NUMAKIND_DEFAULT) {
 
@@ -322,13 +296,13 @@ void TrialGenerator :: execute_trials(int num_bandwidth, int *bandwidth)
             memset(ptr_vec[i], 0, trial_vec[i].size);
             Check check(ptr_vec[i], trial_vec[i].size);
             EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-            if (trial_vec[i].api == CALLOC) {
+            if (trial_vec[i].api == HBW_CALLOC) {
                 check.check_zero();
             }
-            if (trial_vec[i].api == MEMALIGN || trial_vec[i].api == MEMALIGN_PSIZE) {
+            if (trial_vec[i].api == HBW_MEMALIGN || trial_vec[i].api == HBW_MEMALIGN_PSIZE) {
                 EXPECT_EQ(0,check.check_align(trial_vec[i].alignment));
             }
-            if (trial_vec[i].api == MEMALIGN_PSIZE ||
+            if (trial_vec[i].api == HBW_MEMALIGN_PSIZE ||
                 (trial_vec[i].api == NUMAKIND_MALLOC &&
                  (trial_vec[i].numakind == NUMAKIND_HBW_HUGETLB ||
                   trial_vec[i].numakind == NUMAKIND_HBW_PREFERRED_HUGETLB))) {

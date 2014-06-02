@@ -71,37 +71,37 @@ protected:
 
 TEST_F(EXTendedTest, hbw_malloc_1KB_2GB_sizes)
 {
-    tgen->generate_trials_size_1KB_2GB(MALLOC);
-    tgen->execute_trials(num_bandwidth,
-                         bandwidth);
+    tgen->generate_size_1KB_2GB(HBW_MALLOC);
+    tgen->run(num_bandwidth,
+	      bandwidth);
 }
 
 TEST_F(EXTendedTest, hbw_realloc_1KB_2GB_sizes)
 {
-    tgen->generate_trials_size_1KB_2GB(REALLOC);
-    tgen->execute_trials(num_bandwidth,
-                         bandwidth);
+    tgen->generate_size_1KB_2GB(HBW_REALLOC);
+    tgen->run(num_bandwidth,
+	      bandwidth);
 }
 
 
 TEST_F(EXTendedTest, hbw_calloc_1KB_2GB_sizes)
 {
-    tgen->generate_trials_size_1KB_2GB(CALLOC);
-    tgen->execute_trials(num_bandwidth,
-                         bandwidth);
+    tgen->generate_size_1KB_2GB(HBW_CALLOC);
+    tgen->run(num_bandwidth,
+	      bandwidth);
 }
 
 TEST_F(EXTendedTest, hbw_memalign_1KB_2GB_sizes)
 {
-    tgen->generate_trials_size_1KB_2GB(MEMALIGN);
-    tgen->execute_trials(num_bandwidth,
-                         bandwidth);
+    tgen->generate_size_1KB_2GB(HBW_MEMALIGN);
+    tgen->run(num_bandwidth,
+	      bandwidth);
 }
 
 
 TEST_F(EXTendedTest, hbw_memalign_psize_1KB_2GB_sizes)
 {
-    tgen->generate_trials_size_1KB_2GB(MEMALIGN_PSIZE);
-    tgen->execute_trials(num_bandwidth,
-                         bandwidth);
+    tgen->generate_size_1KB_2GB(HBW_MEMALIGN_PSIZE);
+    tgen->run(num_bandwidth,
+	      bandwidth);
 }

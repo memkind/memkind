@@ -16,7 +16,7 @@
 #include "numakind.h"
 #include "trial_generator.h"
 
-#define NTHREADS 2
+#define NTHREADS 4
 
 class MultithreadedTest : public :: testing :: Test
 {
@@ -65,47 +65,48 @@ protected:
     void TearDown()
     {
         delete[] bandwidth;
+	delete tgen;
     }
 };
 
 TEST_F(MultithreadedTest, hbw_malloc_1KB_2GB_sizes)
 {
-    tgen->generate_trials_size_1KB_2GB(MALLOC);
+    tgen->generate_size_1KB_2GB(HBW_MALLOC);
     #pragma omp parallel num_threads(NTHREADS)
     {
-        tgen->execute_trials(num_bandwidth,
-                             bandwidth);
+        tgen->run(num_bandwidth,
+		  bandwidth);
     }
 }
 
 TEST_F(MultithreadedTest, hbw_calloc_1KB_2GB_sizes)
 {
-    tgen->generate_trials_size_1KB_2GB(CALLOC);
+    tgen->generate_size_1KB_2GB(HBW_CALLOC);
     #pragma omp parallel num_threads(NTHREADS)
     {
-        tgen->execute_trials(num_bandwidth,
-                             bandwidth);
+        tgen->run(num_bandwidth,
+		  bandwidth);
     }
 }
 
 TEST_F(MultithreadedTest, hbw_memalign_1KB_2GB_sizes)
 {
-    tgen->generate_trials_size_1KB_2GB(MEMALIGN);
+    tgen->generate_size_1KB_2GB(HBW_MEMALIGN);
     #pragma omp parallel num_threads(NTHREADS)
     {
-        tgen->execute_trials(num_bandwidth,
-                             bandwidth);
+        tgen->run(num_bandwidth,
+		  bandwidth);
     }
 }
 
 
 TEST_F(MultithreadedTest, hbw_memalign_psize_1KB_2GB_sizes)
 {
-    tgen->generate_trials_size_1KB_2GB(MEMALIGN_PSIZE);
+    tgen->generate_size_1KB_2GB(HBW_MEMALIGN_PSIZE);
     #pragma omp parallel num_threads(NTHREADS)
     {
-        tgen->execute_trials(num_bandwidth,
-                             bandwidth);
+        tgen->run(num_bandwidth,
+		  bandwidth);
     }
 }
 

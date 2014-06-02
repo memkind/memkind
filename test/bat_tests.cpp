@@ -82,78 +82,56 @@ TEST_F(BATest, hbw_policy)
 
 TEST_F(BATest, hbw_malloc_incremental)
 {
-    tgen->generate_trials_incremental(MALLOC);
-    tgen->execute_trials(num_bandwidth, bandwidth);
+    tgen->generate_incremental(HBW_MALLOC);
+    tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(BATest, hbw_calloc_incremental)
 {
-    tgen->generate_trials_incremental(CALLOC);
-    tgen->execute_trials(num_bandwidth, bandwidth);
+    tgen->generate_incremental(HBW_CALLOC);
+    tgen->run(num_bandwidth, bandwidth);
 }
 
 
 TEST_F(BATest, hbw_realloc_incremental)
 {
-    tgen->generate_trials_incremental(REALLOC);
-    tgen->execute_trials(num_bandwidth, bandwidth);
+    tgen->generate_incremental(HBW_REALLOC);
+    tgen->run(num_bandwidth, bandwidth);
 }
-
-#if 0
-TEST_F(BATest, hbw_realloc_2KB_2MB_2KB)
-{
-    size_t size0 = (size_t)(2*KB);
-    size_t size1 = (size_t)(2*MB);
-    char *ptr;
-    ASSERT_TRUE((ptr = (char *)hbw_realloc(NULL, size0)) != NULL);
-    Check check1(ptr, size0);
-    memset(ptr, 0, size0);
-    EXPECT_EQ(0, check1.check_node_hbw(num_bandwidth, bandwidth));
-    ASSERT_TRUE((ptr = (char *)hbw_realloc(ptr, size1)) != NULL);
-    Check check2(ptr, size1);
-    memset(ptr, 0, size1);
-    EXPECT_EQ(0, check2.check_node_hbw(num_bandwidth, bandwidth));
-    ASSERT_TRUE((ptr = (char *)hbw_realloc(ptr, size0)) != NULL);
-    Check check3(ptr, size0);
-    memset(ptr, 0, size0);
-    EXPECT_EQ(0, check3.check_node_hbw(num_bandwidth, bandwidth));
-    hbw_free(ptr);
-}
-#endif
 
 TEST_F(BATest, hbw_memalign_incremental)
 {
-    tgen->generate_trials_incremental(MEMALIGN);
-    tgen->execute_trials(num_bandwidth, bandwidth);
+    tgen->generate_incremental(HBW_MEMALIGN);
+    tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(BATest, hbw_memalign_psize_incremental)
 {
-    tgen->generate_trials_incremental(MEMALIGN_PSIZE);
-    tgen->execute_trials(num_bandwidth, bandwidth);
+    tgen->generate_incremental(HBW_MEMALIGN_PSIZE);
+    tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(BATest, hbw_numakind_malloc_recycle)
 {
-    tgen->generate_trials_recycle_incremental(NUMAKIND_MALLOC);
-    tgen->execute_trials(num_bandwidth, bandwidth);
+    tgen->generate_recycle_incremental(NUMAKIND_MALLOC);
+    tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(BATest, hbw_numakind_malloc_recycle_psize)
 {
-    tgen->generate_trials_recycle_psize_incremental(NUMAKIND_MALLOC);
-    tgen->execute_trials(num_bandwidth, bandwidth);
+    tgen->generate_recycle_psize_incremental(NUMAKIND_MALLOC);
+    tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(BATest, hbw_numakind_trials_two_kind_stress)
 {
-    tgen->generate_trials_multi_app_stress(2);
-    tgen->execute_trials(num_bandwidth, bandwidth);
+    tgen->generate_multi_app_stress(2);
+    tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(BATest, hbw_numakind_trials_all_kind_stress)
 {
-    tgen->generate_trials_multi_app_stress(NUMAKIND_NUM_KIND);
-    tgen->execute_trials(num_bandwidth, bandwidth);
+    tgen->generate_multi_app_stress(NUMAKIND_NUM_KIND);
+    tgen->run(num_bandwidth, bandwidth);
 }
 
