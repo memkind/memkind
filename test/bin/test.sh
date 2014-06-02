@@ -16,6 +16,10 @@ if [ $? -ne 0 ]; then
     exit -1
 fi
 
+slimit=`ulimit -s`
+if [[ "$slimit" != "unlimited" ]];then
+    ulimit -s hard
+fi
 which simics_start >& /dev/null
 if [ $? -eq 0 ]; then
     mkdir -p /tmp/$$/lib64
@@ -34,6 +38,10 @@ if [ $? -eq 0 ]; then
     popd
     scp /tmp/$$/lib64.tar.gz mic@$ip:
     ssh mic@$ip "tar xvf lib64.tar.gz"
+    slimit=`ulimit -s`
+    if [[ "$slimit" != "unlimited" ]];then
+	ssh mic@ip "ulimit -s hard"
+    fi
     scp $basedir/all_tests mic@$ip:
     ssh mic@$ip 'LD_LIBRARY_PATH=./lib64 NUMAKIND_HBW_NODES=1 ./all_tests --gtest_output=xml:all_tests.xml' $@
     err=$?
