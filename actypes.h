@@ -1122,7 +1122,7 @@ typedef struct acpi_statistics
 #define ACPI_TABLE_EVENT_UNLOAD         0x1
 #define ACPI_NUM_TABLE_EVENTS           2
 
-
+#if 0
 /*
  * Types specific to the OS service interfaces
  */
@@ -1133,7 +1133,7 @@ typedef UINT32
 typedef void
 (ACPI_SYSTEM_XFACE *ACPI_OSD_EXEC_CALLBACK) (
     void                            *Context);
-
+#endif
 /*
  * Various handlers and callback procedures
  */
