@@ -25,7 +25,14 @@
 CC=g++
 EXTRA_CFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
 LIBS = -lnumakind -lnuma -lpthread -ljemalloc -lgomp -lgtest
-OBJECTS = main.o check.o trial_generator.o multithreaded_tests.o extended_tests.o bat_tests.o
+OBJECTS = main.o \
+	  check.o \
+	  trial_generator.o \
+	  negative_tests.o \
+	  multithreaded_tests.o \
+	  extended_tests.o \
+	  bat_tests.o 
+
 bin = $(shell mkdir -p bin)
 
 all:			$(bin) bin/all_tests
@@ -44,6 +51,9 @@ multithreaded_tests.o:	multithreaded_tests.cpp common.h
 
 extended_tests.o:	extended_tests.cpp common.h trial_generator.h
 			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c extended_tests.cpp -o extended_tests.o
+
+negative_tests.o:	negative_tests.cpp common.h trial_generator.h ../numakind.h
+			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c negative_tests.cpp -o negative_tests.o
 
 check.o:		check.cpp
 			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c check.cpp -o check.o

@@ -45,7 +45,7 @@ public:
     void generate_multi_app_stress(int num_types);
     void generate_size_1KB_2GB(alloc_api_t api);
     void generate_size_4GB_8GB(alloc_api_t api);
-    void run(int num_bandwith, int *bandwiths);
+    void run(int num_bandwidth, int *bandwidths);
     /*For debugging purposes*/
     void print();
 private:
