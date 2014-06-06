@@ -327,17 +327,17 @@ static void numakind_arena_map_init(void)
 static int numakind_getarena(numakind_t kind, int *arena)
 {
     int err = 0;
-    int cpu_node, arena_index;
+    int cpu_id, arena_index;
     struct numakind_arena_map_t *g = &numakind_arena_map_g;
     pthread_once(&numakind_arena_map_once_g, numakind_arena_map_init);
 
     if (!g->init_err) {
-        cpu_node = numa_node_of_cpu(sched_getcpu());
-        if (cpu_node >= g->num_cpu) {
+        cpu_id = sched_getcpu();
+        if (cpu_id >= g->num_cpu) {
             err = NUMAKIND_ERROR_GETCPU;
         }
         else {
-            arena_index = ((int)kind - 1) * g->num_cpu + cpu_node;
+            arena_index = ((int)kind - 1) * g->num_cpu + cpu_id;
             *arena = g->arena_map[arena_index];
         }
     }
