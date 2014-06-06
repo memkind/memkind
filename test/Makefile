@@ -8,12 +8,12 @@
 #
 
 CC=g++
-EXTRA_CFLAGS=-O3 -Wall -fopenmp -std=c++0x
+EXTRA_CFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
 LIBS = -lnumakind -lnuma -lpthread -ljemalloc -lgomp -lgtest
 OBJECTS = main.o check.o trial_generator.o multithreaded_tests.o extended_tests.o bat_tests.o
 bin = $(shell mkdir -p bin)
 
-all:			$(bin) bin/all_tests test
+all:			$(bin) bin/all_tests
 
 bin/all_tests:		$(OBJECTS) common.h
 			$(CC) $(OBJECTS) $(LIBS) $(LDFLAGS) -o bin/all_tests
