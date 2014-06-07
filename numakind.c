@@ -32,6 +32,7 @@
 #include <sys/mman.h>
 #include <linux/mman.h>
 #include <jemalloc/jemalloc.h>
+#include <errno.h>
 
 #include "numakind.h"
 #include "numakind_hbw.h"
@@ -198,7 +199,12 @@ void *numakind_malloc(numakind_t kind, size_t size)
     void *result = NULL;
     int err = 0;
     int arena;
-
+    
+    if ((int)size < 0){
+	result = NULL;
+	errno = ENOMEM;
+	goto exit;
+    }
     if (kind == NUMAKIND_DEFAULT) {
         result = je_malloc(size);
     }
@@ -211,6 +217,7 @@ void *numakind_malloc(numakind_t kind, size_t size)
             result = NULL;
         }
     }
+ exit:
     return result;
 }
 
@@ -219,6 +226,14 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
     int err = 0;
     int arena;
 
+    if ((int)size < 0){
+	if (ptr != NULL){
+	    numakind_free(kind, ptr);
+	    ptr = NULL;
+	}
+	errno = ENOMEM;
+	goto exit;
+    }
     if (kind == NUMAKIND_DEFAULT) {
         ptr = je_realloc(ptr, size);
     }
@@ -242,6 +257,7 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
             }
         }
     }
+ exit:
     return ptr;
 }
 
@@ -251,6 +267,11 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
     int err = 0;
     int arena;
 
+    if ((int)size < 0){
+	result = NULL;
+	errno = ENOMEM;
+	goto exit;
+    }
     if (kind == NUMAKIND_DEFAULT) {
         result = je_calloc(num, size);
     }
@@ -264,6 +285,7 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
             result = NULL;
         }
     }
+ exit:
     return result;
 }
 
