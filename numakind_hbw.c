@@ -231,7 +231,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
         /* ignore zero bandwidths */
         num_bandwidth = j;
         if (num_bandwidth == 0) {
-            err = NUMAKIND_ERROR_HBW;
+            err = NUMAKIND_ERROR_PMTT;
         }
     }
     if (!err) {
@@ -318,7 +318,7 @@ static int set_closest_numanode(int num_unique,
         }
     }
     if (match.bandwidth == -1) {
-        err = NUMAKIND_ERROR_HBW;
+        err = NUMAKIND_ERROR_PMTT;
     }
     else {
         for (i = 0; i < num_cpunode; ++i) {
