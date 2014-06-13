@@ -71,11 +71,9 @@ void numakind_error_message(int err, char *msg, size_t size)
         case NUMAKIND_ERROR_GETCPU:
             strncpy(msg, "<numakind> Call to sched_getcpu() returned out of range", size);
             break;
-        case NUMAKIND_ERROR_HBW:
-            strncpy(msg, "<numakind> Initializing for HBW failed", size);
-            break;
         case NUMAKIND_ERROR_PMTT:
-            snprintf(msg, size, "<numakind> Unable to parse bandwidth table: %s", NUMAKIND_BANDWIDTH_PATH);
+            snprintf(msg, size, "<numakind> Unable to parse bandwidth table/Incorrect PMTT Entries: %s",
+		     NUMAKIND_BANDWIDTH_PATH);
             break;
         case NUMAKIND_ERROR_TIEDISTANCE:
             strncpy(msg, "<numakind> Two NUMA memory nodes are equidistant from target cpu node", size);
@@ -224,7 +222,7 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
     int err = 0;
     int arena;
 
-    if ((int)size < 0){
+    if ((long int)size < 0){
 	if (ptr != NULL){
 	    numakind_free(kind, ptr);
 	    ptr = NULL;
@@ -265,7 +263,7 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
     int err = 0;
     int arena;
 
-    if ((int)size < 0){
+    if ((long int)size < 0){
 	result = NULL;
 	errno = ENOMEM;
 	goto exit;
