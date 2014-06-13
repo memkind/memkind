@@ -21,50 +21,123 @@
 #  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-
-CC=g++
-EXTRA_CFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
+CPP=g++
+CC=gcc
+EXTRA_CPPFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
 LIBS = -lnumakind -lnuma -lpthread -ljemalloc -lgomp -lgtest
 OBJECTS = main.o \
 	  check.o \
 	  trial_generator.o \
-	  negative_tests.o \
 	  multithreaded_tests.o \
 	  extended_tests.o \
-	  bat_tests.o 
+	  bat_tests.o
+
+EXECS   = bin/all_tests \
+	  bin/negative_tests \
+	  bin/schedcpu_test \
+	  bin/mallocerr_test \
+	  bin/mallctlerr_test \
+	  bin/pmtterr_test \
+	  bin/environerr_test \
+	  bin/tieddisterr_test
+
+SHLIBS  = test_libs/libsched.so \
+	  test_libs/libmalloc.so \
+	  test_libs/libmallctl.so \
+	  test_libs/libfopen.so \
+	  test_libs/libnumadist.so
+
+SHOBJS  = schedcpu_test.o \
+	  malloc_err_test.o \
+	  mallctl_err_test.o \
+	  negative_tests.o \
+	  environ_err_test.o \
+	  pmtt_err_test.o \
+	  tied_dist_test.o 
 
 bin = $(shell mkdir -p bin)
+slib = $(shell mkdir -p test_libs)
 
-all:			$(bin) bin/all_tests
+all:			  $(bin) $(EXECS) $(slib) $(SHLIBS)
 
-bin/all_tests:		$(OBJECTS) common.h
-			$(CC) $(OBJECTS) $(LIBS) $(LDFLAGS) -o bin/all_tests
+bin/all_tests:		  $(OBJECTS) common.h
+			  $(CPP) $(OBJECTS) $(LIBS) $(LDFLAGS) -o bin/all_tests
 
-main.o:			main.cpp common.h
-			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c main.cpp -o main.o
+bin/negative_tests:	  main.o negative_tests.o common.h
+			  $(CPP) main.o negative_tests.o $(LIBS) $(LDFLAGS) -o bin/negative_tests
 
-bat_tests.o:		bat_tests.cpp common.h
-			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c bat_tests.cpp -o bat_tests.o
+bin/schedcpu_test:	  main.o sched_cpu_test.o common.h
+			  $(CPP) main.o sched_cpu_test.o $(LIBS) $(LDFLAGS) -o bin/schedcpu_test
 
-multithreaded_tests.o:	multithreaded_tests.cpp common.h
-			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c multithreaded_tests.cpp -o multithreaded_tests.o
+bin/mallocerr_test:	  main.o malloc_err_test.o common.h
+			  $(CPP) main.o malloc_err_test.o $(LIBS) $(LDFLAGS) -o bin/mallocerr_test
 
-extended_tests.o:	extended_tests.cpp common.h trial_generator.h
-			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c extended_tests.cpp -o extended_tests.o
+bin/mallctlerr_test:	  main.o mallctl_err_test.o common.h
+			  $(CPP) main.o mallctl_err_test.o $(LIBS) $(LDFLAGS) -o bin/mallctlerr_test
 
-negative_tests.o:	negative_tests.cpp common.h trial_generator.h ../numakind.h
-			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c negative_tests.cpp -o negative_tests.o
+bin/pmtterr_test:	  main.o pmtt_err_test.o common.h
+			  $(CPP) main.o pmtt_err_test.o $(LIBS) $(LDFLAGS) -o bin/pmtterr_test
 
-check.o:		check.cpp
-			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c check.cpp -o check.o
+bin/environerr_test:	  main.o environ_err_test.o common.h
+			  $(CPP) main.o environ_err_test.o $(LIBS) $(LDFLAGS) -o bin/environerr_test
 
-trial_generator.o:	trial_generator.cpp trial_generator.h
-			$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CPPFLAGS) -c trial_generator.cpp -o trial_generator.o
+bin/tieddisterr_test:	  main.o tied_dist_test.o common.h
+			  $(CPP) main.o tied_dist_test.o $(LIBS) $(LDFLAGS) -o bin/tieddisterr_test
 
+test_libs/libsched.so:	  sched_mock.c 
+			  $(CC) -g -Wall -fPIC -shared sched_mock.c -o test_libs/libsched.so
+
+test_libs/libnumadist.so: numadist_mock.c
+			  $(CC) -g -Wall -fPIC -shared numadist_mock.c -o test_libs/libnumadist.so
+
+test_libs/libmalloc.so:	  jemalloc_mock.c
+			  $(CC) -g -Wall -fPIC -shared jemalloc_mock.c -o test_libs/libmalloc.so
+
+test_libs/libmallctl.so:  mallctl_mock.c
+			  $(CC) -g -Wall -fPIC -shared mallctl_mock.c -o test_libs/libmallctl.so
+
+test_libs/libfopen.so:    fopen_mock.c
+			  $(CC) -g -Wall -fPIC -shared fopen_mock.c -o test_libs/libfopen.so
+
+main.o:			  main.cpp common.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c main.cpp -o main.o
+
+bat_tests.o:		  bat_tests.cpp common.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c bat_tests.cpp -o bat_tests.o
+
+multithreaded_tests.o:	  multithreaded_tests.cpp common.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c multithreaded_tests.cpp -o multithreaded_tests.o
+
+extended_tests.o:	  extended_tests.cpp common.h trial_generator.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c extended_tests.cpp -o extended_tests.o
+
+negative_tests.o:	  negative_tests.cpp common.h ../numakind.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c negative_tests.cpp -o negative_tests.o
+
+schedcpu_test.o:	  sched_cpu_test.cpp main.o common.h  ../numakind.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c sched_cpu_test.cpp -o sched_cpu_test.o
+
+malloc_err_test.o:	  malloc_err_test.cpp main.o common.h  ../numakind.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c malloc_err_test.cpp -o malloc_err_test.o
+
+mallctl_err_test.o:	  mallctl_err_test.cpp main.o common.h  ../numakind.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c mallctl_err_test.cpp -o mallctl_err_test.o
+
+pmtt_err_test.o:	  pmtt_err_test.cpp main.o common.h  ../numakind.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c pmtt_err_test.cpp -o pmtt_err_test.o
+
+tied_dist_test.o:	  tied_dist_test.cpp main.o common.h  ../numakind.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c tied_dist_test.cpp -o tied_dist_test.o
+
+check.o:		  check.cpp
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c check.cpp -o check.o
+
+trial_generator.o:	  trial_generator.cpp trial_generator.h
+			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c trial_generator.cpp -o trial_generator.o
 clean:
-			rm -f $(OBJECTS) bin/all_tests *~
+			  rm -f $(OBJECTS) negative_tests.o sched_cpu_test.o $(EXECS) $(SHLIBS) $(SHOBJS) *~
 
-test: 			bin/all_tests bin/test.sh
-			LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./bin/test.sh
+test: 			  bin/all_tests bin/test.sh
+			  LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./bin/test.sh
 
 .PHONY: all clean test
