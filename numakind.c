@@ -200,12 +200,11 @@ void *numakind_malloc(numakind_t kind, size_t size)
     int err = 0;
     int arena;
     
-    if ((int)size < 0){
+    if ((long int)size < 0){
 	result = NULL;
 	errno = ENOMEM;
-	goto exit;
     }
-    if (kind == NUMAKIND_DEFAULT) {
+    else if (kind == NUMAKIND_DEFAULT) {
         result = je_malloc(size);
     }
     else {
@@ -217,7 +216,6 @@ void *numakind_malloc(numakind_t kind, size_t size)
             result = NULL;
         }
     }
- exit:
     return result;
 }
 
