@@ -23,17 +23,18 @@
 #
 CPP=g++
 CC=gcc
-EXTRA_CPPFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
+CPPFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
 LIBS = -lnumakind -lnuma -lpthread -ljemalloc -lgomp -lgtest
+
 OBJECTS = main.o \
 	  check.o \
 	  trial_generator.o \
+	  negative_tests.o \
 	  multithreaded_tests.o \
 	  extended_tests.o \
 	  bat_tests.o
 
 EXECS   = bin/all_tests \
-	  bin/negative_tests \
 	  bin/schedcpu_test \
 	  bin/mallocerr_test \
 	  bin/mallctlerr_test \
@@ -56,15 +57,12 @@ SHOBJS  = schedcpu_test.o \
 	  tied_dist_test.o 
 
 bin = $(shell mkdir -p bin)
-slib = $(shell mkdir -p test_libs)
+slib = $(shell mkdir -p bin/test_libs)
 
 all:			  $(bin) $(EXECS) $(slib) $(SHLIBS)
 
 bin/all_tests:		  $(OBJECTS) common.h
 			  $(CPP) $(OBJECTS) $(LIBS) $(LDFLAGS) -o bin/all_tests
-
-bin/negative_tests:	  main.o negative_tests.o common.h
-			  $(CPP) main.o negative_tests.o $(LIBS) $(LDFLAGS) -o bin/negative_tests
 
 bin/schedcpu_test:	  main.o sched_cpu_test.o common.h
 			  $(CPP) main.o sched_cpu_test.o $(LIBS) $(LDFLAGS) -o bin/schedcpu_test
@@ -85,55 +83,55 @@ bin/tieddisterr_test:	  main.o tied_dist_test.o common.h
 			  $(CPP) main.o tied_dist_test.o $(LIBS) $(LDFLAGS) -o bin/tieddisterr_test
 
 test_libs/libsched.so:	  sched_mock.c 
-			  $(CC) -g -Wall -fPIC -shared sched_mock.c -o test_libs/libsched.so
+			  $(CC) -g -Wall -fPIC -shared sched_mock.c -o bin/test_libs/libsched.so
 
 test_libs/libnumadist.so: numadist_mock.c
-			  $(CC) -g -Wall -fPIC -shared numadist_mock.c -o test_libs/libnumadist.so
+			  $(CC) -g -Wall -fPIC -shared numadist_mock.c -o bin/test_libs/libnumadist.so
 
 test_libs/libmalloc.so:	  jemalloc_mock.c
-			  $(CC) -g -Wall -fPIC -shared jemalloc_mock.c -o test_libs/libmalloc.so
+			  $(CC) -g -Wall -fPIC -shared jemalloc_mock.c -o bin/test_libs/libmalloc.so
 
 test_libs/libmallctl.so:  mallctl_mock.c
-			  $(CC) -g -Wall -fPIC -shared mallctl_mock.c -o test_libs/libmallctl.so
+			  $(CC) -g -Wall -fPIC -shared mallctl_mock.c -o bin/test_libs/libmallctl.so
 
 test_libs/libfopen.so:    fopen_mock.c
-			  $(CC) -g -Wall -fPIC -shared fopen_mock.c -o test_libs/libfopen.so
+			  $(CC) -g -Wall -fPIC -shared fopen_mock.c -o bin/test_libs/libfopen.so
 
 main.o:			  main.cpp common.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c main.cpp -o main.o
+			  $(CPP) $(CPPFLAGS) -c main.cpp -o main.o
 
 bat_tests.o:		  bat_tests.cpp common.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c bat_tests.cpp -o bat_tests.o
+			  $(CPP) $(CPPFLAGS) -c bat_tests.cpp -o bat_tests.o
 
 multithreaded_tests.o:	  multithreaded_tests.cpp common.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c multithreaded_tests.cpp -o multithreaded_tests.o
+			  $(CPP) $(CPPFLAGS) -c multithreaded_tests.cpp -o multithreaded_tests.o
 
 extended_tests.o:	  extended_tests.cpp common.h trial_generator.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c extended_tests.cpp -o extended_tests.o
+			  $(CPP) $(CPPFLAGS) -c extended_tests.cpp -o extended_tests.o
 
-negative_tests.o:	  negative_tests.cpp common.h ../numakind.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c negative_tests.cpp -o negative_tests.o
+negative_tests.o:	  negative_tests.cpp common.h 
+			  $(CPP) $(CPPFLAGS) -c negative_tests.cpp -o negative_tests.o
 
-schedcpu_test.o:	  sched_cpu_test.cpp main.o common.h  ../numakind.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c sched_cpu_test.cpp -o sched_cpu_test.o
+schedcpu_test.o:	  sched_cpu_test.cpp main.o common.h 
+			  $(CPP) $(CPPFLAGS) -c sched_cpu_test.cpp -o sched_cpu_test.o
 
-malloc_err_test.o:	  malloc_err_test.cpp main.o common.h  ../numakind.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c malloc_err_test.cpp -o malloc_err_test.o
+malloc_err_test.o:	  malloc_err_test.cpp main.o common.h
+			  $(CPP) $(CPPFLAGS) -c malloc_err_test.cpp -o malloc_err_test.o
 
-mallctl_err_test.o:	  mallctl_err_test.cpp main.o common.h  ../numakind.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c mallctl_err_test.cpp -o mallctl_err_test.o
+mallctl_err_test.o:	  mallctl_err_test.cpp main.o common.h
+			  $(CPP) $(CPPFLAGS) -c mallctl_err_test.cpp -o mallctl_err_test.o
 
-pmtt_err_test.o:	  pmtt_err_test.cpp main.o common.h  ../numakind.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c pmtt_err_test.cpp -o pmtt_err_test.o
+pmtt_err_test.o:	  pmtt_err_test.cpp main.o common.h
+			  $(CPP) $(CPPFLAGS) -c pmtt_err_test.cpp -o pmtt_err_test.o
 
-tied_dist_test.o:	  tied_dist_test.cpp main.o common.h  ../numakind.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c tied_dist_test.cpp -o tied_dist_test.o
+tied_dist_test.o:	  tied_dist_test.cpp main.o common.h
+			  $(CPP) $(CPPFLAGS) -c tied_dist_test.cpp -o tied_dist_test.o
 
 check.o:		  check.cpp
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c check.cpp -o check.o
+			  $(CPP) $(CPPFLAGS) -c check.cpp -o check.o
 
 trial_generator.o:	  trial_generator.cpp trial_generator.h
-			  $(CPP) $(CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) -c trial_generator.cpp -o trial_generator.o
+			  $(CPP) $(CPPFLAGS) -c trial_generator.cpp -o trial_generator.o
 clean:
 			  rm -f $(OBJECTS) negative_tests.o sched_cpu_test.o $(EXECS) $(SHLIBS) $(SHOBJS) *~
 
