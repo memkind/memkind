@@ -200,7 +200,7 @@ void *numakind_malloc(numakind_t kind, size_t size)
     void *result = NULL;
     int err = 0;
     int arena;
-    
+
     if ((long int)size < 0){
 	result = NULL;
 	errno = ENOMEM;
