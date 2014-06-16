@@ -42,11 +42,11 @@ EXECS   = bin/all_tests \
 	  bin/environerr_test \
 	  bin/tieddisterr_test
 
-SHLIBS  = test_libs/libsched.so \
-	  test_libs/libmalloc.so \
-	  test_libs/libmallctl.so \
-	  test_libs/libfopen.so \
-	  test_libs/libnumadist.so
+SHLIBS  = bin/test_libs/libsched.so \
+	  bin/test_libs/libmalloc.so \
+	  bin/test_libs/libmallctl.so \
+	  bin/test_libs/libfopen.so \
+	  bin/test_libs/libnumadist.so
 
 SHOBJS  = schedcpu_test.o \
 	  malloc_err_test.o \
