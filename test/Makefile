@@ -54,7 +54,7 @@ SHOBJS  = schedcpu_test.o \
 	  negative_tests.o \
 		  environ_err_test.o \
 	  pmtt_err_test.o \
-	  tied_dist_test.o 
+	  tied_dist_test.o
 
 bin = $(shell mkdir -p bin)
 slib = $(shell mkdir -p bin/test_libs)
@@ -68,74 +68,74 @@ bin/schedcpu_test:	 	main.o sched_cpu_test.o common.h
 				$(CPP) main.o sched_cpu_test.o $(LIBS) $(LDFLAGS) -o bin/schedcpu_test
 
 bin/mallocerr_test:	 	main.o malloc_err_test.o common.h
-		                $(CPP) main.o malloc_err_test.o $(LIBS) $(LDFLAGS) -o bin/mallocerr_test
+				$(CPP) main.o malloc_err_test.o $(LIBS) $(LDFLAGS) -o bin/mallocerr_test
 
 bin/mallctlerr_test:	  	main.o mallctl_err_test.o common.h
-			  	$(CPP) main.o mallctl_err_test.o $(LIBS) $(LDFLAGS) -o bin/mallctlerr_test
+				$(CPP) main.o mallctl_err_test.o $(LIBS) $(LDFLAGS) -o bin/mallctlerr_test
 
 bin/pmtterr_test:	  	main.o pmtt_err_test.o common.h
-			  	$(CPP) main.o pmtt_err_test.o $(LIBS) $(LDFLAGS) -o bin/pmtterr_test
+				$(CPP) main.o pmtt_err_test.o $(LIBS) $(LDFLAGS) -o bin/pmtterr_test
 
 bin/environerr_test:	 	main.o environ_err_test.o common.h
-			  	$(CPP) main.o environ_err_test.o $(LIBS) $(LDFLAGS) -o bin/environerr_test
+				$(CPP) main.o environ_err_test.o $(LIBS) $(LDFLAGS) -o bin/environerr_test
 
 bin/tieddisterr_test:	  	main.o tied_dist_test.o common.h
-			  	$(CPP) main.o tied_dist_test.o $(LIBS) $(LDFLAGS) -o bin/tieddisterr_test
+				$(CPP) main.o tied_dist_test.o $(LIBS) $(LDFLAGS) -o bin/tieddisterr_test
 
-bin/test_libs/libsched.so:	sched_mock.c 
-			  	$(CC) -g -Wall -fPIC -shared sched_mock.c -o bin/test_libs/libsched.so
+bin/test_libs/libsched.so:	sched_mock.c
+				$(CC) -g -Wall -fPIC -shared sched_mock.c -o bin/test_libs/libsched.so
 
 bin/test_libs/libnumadist.so:   numadist_mock.c
-			  	$(CC) -g -Wall -fPIC -shared numadist_mock.c -o bin/test_libs/libnumadist.so
+				$(CC) -g -Wall -fPIC -shared numadist_mock.c -o bin/test_libs/libnumadist.so
 
 bin/test_libs/libmalloc.so:	jemalloc_mock.c
-	                        $(CC) -g -Wall -fPIC -shared jemalloc_mock.c -o bin/test_libs/libmalloc.so
+				$(CC) -g -Wall -fPIC -shared jemalloc_mock.c -o bin/test_libs/libmalloc.so
 
 bin/test_libs/libmallctl.so:    mallctl_mock.c
-			  	$(CC) -g -Wall -fPIC -shared mallctl_mock.c -o bin/test_libs/libmallctl.so
+				$(CC) -g -Wall -fPIC -shared mallctl_mock.c -o bin/test_libs/libmallctl.so
 
 bin/test_libs/libfopen.so:      fopen_mock.c
 				$(CC) -g -Wall -fPIC -shared fopen_mock.c -o bin/test_libs/libfopen.so
 
 main.o:			 	main.cpp common.h
-			  	$(CPP) $(CPPFLAGS) -c main.cpp -o main.o
+				$(CPP) $(CPPFLAGS) -c main.cpp -o main.o
 
 bat_tests.o:		  	bat_tests.cpp common.h
-			  	$(CPP) $(CPPFLAGS) -c bat_tests.cpp -o bat_tests.o
+				$(CPP) $(CPPFLAGS) -c bat_tests.cpp -o bat_tests.o
 
 multithreaded_tests.o:	  	multithreaded_tests.cpp common.h
-			  	$(CPP) $(CPPFLAGS) -c multithreaded_tests.cpp -o multithreaded_tests.o
+				$(CPP) $(CPPFLAGS) -c multithreaded_tests.cpp -o multithreaded_tests.o
 
 extended_tests.o:	  	extended_tests.cpp common.h trial_generator.h
-			  	$(CPP) $(CPPFLAGS) -c extended_tests.cpp -o extended_tests.o
+				$(CPP) $(CPPFLAGS) -c extended_tests.cpp -o extended_tests.o
 
-negative_tests.o:	  	negative_tests.cpp common.h 
-			  	$(CPP) $(CPPFLAGS) -c negative_tests.cpp -o negative_tests.o
+negative_tests.o:	  	negative_tests.cpp common.h
+				$(CPP) $(CPPFLAGS) -c negative_tests.cpp -o negative_tests.o
 
-schedcpu_test.o:	  	sched_cpu_test.cpp main.o common.h 
-			  	$(CPP) $(CPPFLAGS) -c sched_cpu_test.cpp -o sched_cpu_test.o
+schedcpu_test.o:	  	sched_cpu_test.cpp main.o common.h
+				$(CPP) $(CPPFLAGS) -c sched_cpu_test.cpp -o sched_cpu_test.o
 
 malloc_err_test.o:	  	malloc_err_test.cpp main.o common.h
-			  	$(CPP) $(CPPFLAGS) -c malloc_err_test.cpp -o malloc_err_test.o
+				$(CPP) $(CPPFLAGS) -c malloc_err_test.cpp -o malloc_err_test.o
 
 mallctl_err_test.o:	  	mallctl_err_test.cpp main.o common.h
-			  	$(CPP) $(CPPFLAGS) -c mallctl_err_test.cpp -o mallctl_err_test.o
+				$(CPP) $(CPPFLAGS) -c mallctl_err_test.cpp -o mallctl_err_test.o
 
 pmtt_err_test.o:	  	pmtt_err_test.cpp main.o common.h
-			 	$(CPP) $(CPPFLAGS) -c pmtt_err_test.cpp -o pmtt_err_test.o
+				$(CPP) $(CPPFLAGS) -c pmtt_err_test.cpp -o pmtt_err_test.o
 
 tied_dist_test.o:	  	tied_dist_test.cpp main.o common.h
-			  	$(CPP) $(CPPFLAGS) -c tied_dist_test.cpp -o tied_dist_test.o
+				$(CPP) $(CPPFLAGS) -c tied_dist_test.cpp -o tied_dist_test.o
 
 check.o:		  	check.cpp
-			 	$(CPP) $(CPPFLAGS) -c check.cpp -o check.o
+				$(CPP) $(CPPFLAGS) -c check.cpp -o check.o
 
 trial_generator.o:	  	trial_generator.cpp trial_generator.h
-			  	$(CPP) $(CPPFLAGS) -c trial_generator.cpp -o trial_generator.o
+				$(CPP) $(CPPFLAGS) -c trial_generator.cpp -o trial_generator.o
 clean:
-			  	rm -f $(OBJECTS) negative_tests.o sched_cpu_test.o $(EXECS) $(SHLIBS) $(SHOBJS) *~
+				rm -f $(OBJECTS) negative_tests.o sched_cpu_test.o $(EXECS) $(SHLIBS) $(SHOBJS) *~
 
 test: 			  	$(EXECS) bin/test.sh
-			  	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./bin/test.sh
+				LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./bin/test.sh
 
 .PHONY: all clean test
