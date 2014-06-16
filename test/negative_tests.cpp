@@ -85,6 +85,7 @@ TEST_F(NegativeTest, ErrorAlignment)
 				  &ptr, 5,
 				  100);
     EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, EINVAL);
 }
 
 
@@ -132,10 +133,27 @@ TEST_F(NegativeTest, InvalidSizeRealloc){
     ptr = hbw_realloc(ptr, -1);
     ASSERT_TRUE(ptr==NULL);
     EXPECT_EQ(errno, ENOMEM);
-
+ 
     ptr = numakind_realloc(NUMAKIND_HBW,
 			   ptr,
 			   -1);
     ASSERT_TRUE(ptr==NULL);
     EXPECT_EQ(errno, ENOMEM);
+}
+
+TEST_F(NegativeTest, InvalidSizeMemalign)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    numakind_error_t err = NUMAKIND_ERROR_INVALID;
+    ret = hbw_allocate_memalign(&ptr,1,-1);
+    ASSERT_TRUE(ptr == NULL);
+    EXPECT_EQ(errno, ENOMEM);
+    
+    ret = numakind_posix_memalign(NUMAKIND_HBW,
+				  &ptr, 5, 100);
+    err = NUMAKIND_ERROR_ALIGNMENT;
+    EXPECT_EQ(err, ret);
+    ASSERT_TRUE(ptr == NULL);
+    EXPECT_EQ(errno, EINVAL);
 }

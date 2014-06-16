@@ -87,6 +87,9 @@ void numakind_error_message(int err, char *msg, size_t size)
         case NUMAKIND_ERROR_ENVIRON:
             strncpy(msg, "<numakind> Error parsing environment variable (NUMAKIND_*)", size);
             break;
+        case NUMAKIND_ERROR_INVALID:
+            strncpy(msg, "<numakind> Invalid input arguments to numakind routine", size);
+	    break;
         default:
             snprintf(msg, size, "<numakind> Undefined error number: %i", err);
             break;
@@ -228,9 +231,8 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
 	    ptr = NULL;
 	}
 	errno = ENOMEM;
-	goto exit;
     }
-    if (kind == NUMAKIND_DEFAULT) {
+    else if (kind == NUMAKIND_DEFAULT) {
         ptr = je_realloc(ptr, size);
     }
     else {
@@ -253,7 +255,6 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
             }
         }
     }
- exit:
     return ptr;
 }
 
@@ -266,9 +267,9 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
     if ((long int)size < 0){
 	result = NULL;
 	errno = ENOMEM;
-	goto exit;
+
     }
-    if (kind == NUMAKIND_DEFAULT) {
+    else if (kind == NUMAKIND_DEFAULT) {
         result = je_calloc(num, size);
     }
     else {
@@ -281,7 +282,6 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
             result = NULL;
         }
     }
- exit:
     return result;
 }
 
@@ -293,11 +293,10 @@ int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
 
     *memptr = NULL;
     if ((long int)size < 0){
-	result = NULL;
 	errno = ENOMEM;
-	goto exit;
+	err = NUMAKIND_ERROR_INVALID;
     }
-    if (kind == NUMAKIND_DEFAULT) {
+    else if (kind == NUMAKIND_DEFAULT) {
         err = je_posix_memalign(memptr, alignment, size);
         err = err ? NUMAKIND_ERROR_MEMALIGN : 0;
     }
