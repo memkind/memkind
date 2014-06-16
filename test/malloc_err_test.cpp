@@ -25,7 +25,7 @@ class MallocErrTest: public :: testing::Test
 protected:
     void SetUp()
     {}
-    
+
     void TearDown()
     {}
 
@@ -38,7 +38,7 @@ TEST_F(MallocErrTest, ErrorMalloc)
     nodemask_t nodemask;
     NUMAKIND_BANDWIDTH_PATH=NULL;
     ret = numakind_hbw_get_nodemask(nodemask.n,
-				    NUMA_NUM_NODES);
-    
+                                    NUMA_NUM_NODES);
+
     EXPECT_EQ(err, ret);
 }

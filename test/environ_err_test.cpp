@@ -39,6 +39,6 @@ TEST_F(EnvTest, ErrorEnviron)
     NUMAKIND_BANDWIDTH_PATH=" ";
     system ("unset NUMAKIND_HBW_NODES");
     ret = numakind_hbw_get_nodemask (nodemask,
-				     NUMA_NUM_NODES);
+                                     NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
 }

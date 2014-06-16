@@ -37,8 +37,8 @@ TEST_F(MallctlTest, ErrorMallctl)
     int err = NUMAKIND_ERROR_MALLCTL;
     void *ptr = NULL;
     ret = numakind_posix_memalign(NUMAKIND_HBW,
-				  &ptr, 16,
-				  1024);
+                                  &ptr, 16,
+                                  1024);
 
     EXPECT_EQ(err, ret);
 }

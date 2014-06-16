@@ -26,7 +26,7 @@ class NegativeTest: public :: testing::Test
 protected:
     void SetUp()
     {}
-    
+
     void TearDown()
     {}
 
@@ -40,14 +40,14 @@ TEST_F(NegativeTest, ErrorUnavailable)
     unsigned long maxnodes = NUMA_NUM_NODES;
     nodemask_t nodemask;
     numakind_error_t err = NUMAKIND_ERROR_UNAVAILABLE;
-    ret = numakind_get_mmap_flags(-1, 
-				  &numakind_flags);
+    ret = numakind_get_mmap_flags(-1,
+                                  &numakind_flags);
     EXPECT_EQ(NUMAKIND_ERROR_UNAVAILABLE, ret);
     ret = numakind_get_nodemask(-1, nodemask.n, maxnodes);
-    
+
     EXPECT_EQ(err, ret);
     ret = numakind_mbind(-1, NULL, 1024);
-    
+
     EXPECT_EQ(err, ret);
 }
 
@@ -56,10 +56,10 @@ TEST_F(NegativeTest, ErrorMbind)
 {
     int ret = 0;
     numakind_error_t err = NUMAKIND_ERROR_MBIND;
-    
+
     ret = numakind_mbind(NUMAKIND_HBW,
-			 NULL,
-			 1024);
+                         NULL,
+                         1024);
     EXPECT_EQ(err, ret);
 }
 
@@ -68,10 +68,10 @@ TEST_F(NegativeTest, ErrorMemalign)
     int ret = 0;
     void *ptr = NULL;
     numakind_error_t err = NUMAKIND_ERROR_MEMALIGN;
-    
+
     ret = numakind_posix_memalign(NUMAKIND_DEFAULT,
-				  &ptr, 5,
-				  100);
+                                  &ptr, 5,
+                                  100);
     EXPECT_EQ(err, ret);
 }
 
@@ -80,10 +80,10 @@ TEST_F(NegativeTest, ErrorAlignment)
     int ret = 0;
     void *ptr = NULL;
     numakind_error_t err = NUMAKIND_ERROR_ALIGNMENT;
-    
+
     ret = numakind_posix_memalign(NUMAKIND_HBW,
-				  &ptr, 5,
-				  100);
+                                  &ptr, 5,
+                                  100);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, EINVAL);
 }
@@ -94,11 +94,11 @@ TEST_F(NegativeTest, ErrorAllocM)
     int ret = 0;
     void *ptr = NULL;
     numakind_error_t err = NUMAKIND_ERROR_ALLOCM;
-    
+
     ret = numakind_posix_memalign(NUMAKIND_HBW,
-				  &ptr,
-				  16,
-				  100*GB);
+                                  &ptr,
+                                  16,
+                                  100*GB);
     EXPECT_EQ(err, ret);
 }
 
@@ -122,21 +122,22 @@ TEST_F(NegativeTest, InvalidSizeCalloc)
     EXPECT_EQ(errno, ENOMEM);
 
     ptr = numakind_calloc(NUMAKIND_HBW, 1,
-			  -1);
+                          -1);
     ASSERT_TRUE(ptr == NULL);
     EXPECT_EQ(errno, ENOMEM);
 }
 
-TEST_F(NegativeTest, InvalidSizeRealloc){
+TEST_F(NegativeTest, InvalidSizeRealloc)
+{
 
     void *ptr = NULL;
     ptr = hbw_realloc(ptr, -1);
     ASSERT_TRUE(ptr==NULL);
     EXPECT_EQ(errno, ENOMEM);
- 
+
     ptr = numakind_realloc(NUMAKIND_HBW,
-			   ptr,
-			   -1);
+                           ptr,
+                           -1);
     ASSERT_TRUE(ptr==NULL);
     EXPECT_EQ(errno, ENOMEM);
 }
@@ -149,9 +150,9 @@ TEST_F(NegativeTest, InvalidSizeMemalign)
     ret = hbw_allocate_memalign(&ptr,1,-1);
     ASSERT_TRUE(ptr == NULL);
     EXPECT_EQ(errno, ENOMEM);
-    
+
     ret = numakind_posix_memalign(NUMAKIND_HBW,
-				  &ptr, 5, 100);
+                                  &ptr, 5, 100);
     err = NUMAKIND_ERROR_ALIGNMENT;
     EXPECT_EQ(err, ret);
     ASSERT_TRUE(ptr == NULL);

@@ -92,8 +92,7 @@ int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode)
         cpu = sched_getcpu();
         if (cpu < g->num_cpu) {
             numa_bitmask_setbit(&nodemask_bm, g->closest_numanode[cpu]);
-        }
-        else {
+        } else {
             return NUMAKIND_ERROR_GETCPU;
         }
     }
@@ -124,20 +123,17 @@ static void numakind_hbw_closest_numanode_init(void)
             hbw_nodes_bm = numa_parse_nodestring(hbw_nodes_env);
             if (!hbw_nodes_bm) {
                 g->init_err = NUMAKIND_ERROR_ENVIRON;
-            }
-            else {
+            } else {
                 for (node = 0; node < NUMA_NUM_NODES; ++node) {
                     if (numa_bitmask_isbitset(hbw_nodes_bm, node)) {
                         bandwidth[node] = 2;
-                    }
-                    else {
+                    } else {
                         bandwidth[node] = 1;
                     }
                 }
                 numa_bitmask_free(hbw_nodes_bm);
             }
-        }
-        else {
+        } else {
             g->init_err = parse_node_bandwidth(NUMA_NUM_NODES, bandwidth,
                                                NUMAKIND_BANDWIDTH_PATH);
         }
@@ -319,8 +315,7 @@ static int set_closest_numanode(int num_unique,
     }
     if (match.bandwidth == -1) {
         err = NUMAKIND_ERROR_PMTT;
-    }
-    else {
+    } else {
         for (i = 0; i < num_cpunode; ++i) {
             min_distance = INT_MAX;
             for (j = 0; j < match.num_numanodes; ++j) {
@@ -329,8 +324,7 @@ static int set_closest_numanode(int num_unique,
                 if (distance < min_distance) {
                     min_distance = distance;
                     closest_numanode[i] = match.numanodes[j];
-                }
-                else if (distance == min_distance) {
+                } else if (distance == min_distance) {
                     err = NUMAKIND_ERROR_TIEDISTANCE;
                 }
             }

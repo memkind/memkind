@@ -26,7 +26,7 @@ class PmttTest: public :: testing::Test
 protected:
     void SetUp()
     {}
-    
+
     void TearDown()
     {}
 
@@ -39,6 +39,6 @@ TEST_F(PmttTest, ErrorPMTT)
     unsigned long *nodemask=NULL;
     NUMAKIND_BANDWIDTH_PATH=" ";
     ret = numakind_hbw_get_nodemask (nodemask,
-				     NUMA_NUM_NODES);
+                                     NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
 }

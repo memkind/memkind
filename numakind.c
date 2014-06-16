@@ -53,46 +53,46 @@ static int numakind_getarena(numakind_t kind, int *arena);
 void numakind_error_message(int err, char *msg, size_t size)
 {
     switch (err) {
-        case NUMAKIND_ERROR_UNAVAILABLE:
-            strncpy(msg, "<numakind> Requested numa kind is not available", size);
-            break;
-        case NUMAKIND_ERROR_MBIND:
-            strncpy(msg, "<numakind> Call to mbind() failed", size);
-            break;
-        case NUMAKIND_ERROR_MEMALIGN:
-            strncpy(msg, "<numakind> Call to posix_memalign() failed", size);
-            break;
-        case NUMAKIND_ERROR_MALLCTL:
-            strncpy(msg, "<numakind> Call to je_mallctl() failed", size);
-            break;
-        case NUMAKIND_ERROR_MALLOC:
-            strncpy(msg, "<numakind> Call to je_malloc() failed", size);
-            break;
-        case NUMAKIND_ERROR_GETCPU:
-            strncpy(msg, "<numakind> Call to sched_getcpu() returned out of range", size);
-            break;
-        case NUMAKIND_ERROR_PMTT:
-            snprintf(msg, size, "<numakind> Unable to parse bandwidth table/Incorrect PMTT Entries: %s",
-		     NUMAKIND_BANDWIDTH_PATH);
-            break;
-        case NUMAKIND_ERROR_TIEDISTANCE:
-            strncpy(msg, "<numakind> Two NUMA memory nodes are equidistant from target cpu node", size);
-            break;
-        case NUMAKIND_ERROR_ALIGNMENT:
-            strncpy(msg, "<numakind> Alignment must be a power of two and larger than sizeof(void *)", size);
-            break;
-        case NUMAKIND_ERROR_ALLOCM:
-            strncpy(msg, "<numakind> Call to je_allocm() failed", size);
-            break;
-        case NUMAKIND_ERROR_ENVIRON:
-            strncpy(msg, "<numakind> Error parsing environment variable (NUMAKIND_*)", size);
-            break;
-        case NUMAKIND_ERROR_INVALID:
-            strncpy(msg, "<numakind> Invalid input arguments to numakind routine", size);
-	    break;
-        default:
-            snprintf(msg, size, "<numakind> Undefined error number: %i", err);
-            break;
+    case NUMAKIND_ERROR_UNAVAILABLE:
+        strncpy(msg, "<numakind> Requested numa kind is not available", size);
+        break;
+    case NUMAKIND_ERROR_MBIND:
+        strncpy(msg, "<numakind> Call to mbind() failed", size);
+        break;
+    case NUMAKIND_ERROR_MEMALIGN:
+        strncpy(msg, "<numakind> Call to posix_memalign() failed", size);
+        break;
+    case NUMAKIND_ERROR_MALLCTL:
+        strncpy(msg, "<numakind> Call to je_mallctl() failed", size);
+        break;
+    case NUMAKIND_ERROR_MALLOC:
+        strncpy(msg, "<numakind> Call to je_malloc() failed", size);
+        break;
+    case NUMAKIND_ERROR_GETCPU:
+        strncpy(msg, "<numakind> Call to sched_getcpu() returned out of range", size);
+        break;
+    case NUMAKIND_ERROR_PMTT:
+        snprintf(msg, size, "<numakind> Unable to parse bandwidth table/Incorrect PMTT Entries: %s",
+                 NUMAKIND_BANDWIDTH_PATH);
+        break;
+    case NUMAKIND_ERROR_TIEDISTANCE:
+        strncpy(msg, "<numakind> Two NUMA memory nodes are equidistant from target cpu node", size);
+        break;
+    case NUMAKIND_ERROR_ALIGNMENT:
+        strncpy(msg, "<numakind> Alignment must be a power of two and larger than sizeof(void *)", size);
+        break;
+    case NUMAKIND_ERROR_ALLOCM:
+        strncpy(msg, "<numakind> Call to je_allocm() failed", size);
+        break;
+    case NUMAKIND_ERROR_ENVIRON:
+        strncpy(msg, "<numakind> Error parsing environment variable (NUMAKIND_*)", size);
+        break;
+    case NUMAKIND_ERROR_INVALID:
+        strncpy(msg, "<numakind> Invalid input arguments to numakind routine", size);
+        break;
+    default:
+        snprintf(msg, size, "<numakind> Undefined error number: %i", err);
+        break;
     }
     if (size > 0)
         msg[size-1] = '\0';
@@ -102,19 +102,19 @@ int numakind_is_available(int kind)
 {
     int result;
     switch (kind) {
-        case NUMAKIND_HBW:
-        case NUMAKIND_HBW_HUGETLB:
-        case NUMAKIND_HBW_PREFERRED:
-        case NUMAKIND_HBW_PREFERRED_HUGETLB:
-            result = numakind_hbw_is_available();
-            break;
-        case NUMAKIND_DEFAULT:
-            result = 1;
-            break;
-        default:
-            result = 0;
-            fprintf(stderr, "WARNING: Unknown numakind_t (%i)\n", (int)kind);
-            break;
+    case NUMAKIND_HBW:
+    case NUMAKIND_HBW_HUGETLB:
+    case NUMAKIND_HBW_PREFERRED:
+    case NUMAKIND_HBW_PREFERRED_HUGETLB:
+        result = numakind_hbw_is_available();
+        break;
+    case NUMAKIND_DEFAULT:
+        result = 1;
+        break;
+    default:
+        result = 0;
+        fprintf(stderr, "WARNING: Unknown numakind_t (%i)\n", (int)kind);
+        break;
     }
     return result;
 }
@@ -123,21 +123,21 @@ int numakind_get_mmap_flags(int kind, int *flags)
 {
     int err = 0;
     switch (kind) {
-        case NUMAKIND_HBW_HUGETLB:
-        case NUMAKIND_HBW_PREFERRED_HUGETLB:
-            *flags = MAP_HUGETLB | MAP_ANON;
-            break;
-        case NUMAKIND_HBW:
-        case NUMAKIND_HBW_PREFERRED:
-            *flags = MAP_ANON;
-            break;
-        case NUMAKIND_DEFAULT:
-            *flags = 0;
-            break;
-        default:
-            *flags = 0;
-            err = NUMAKIND_ERROR_UNAVAILABLE;
-            break;
+    case NUMAKIND_HBW_HUGETLB:
+    case NUMAKIND_HBW_PREFERRED_HUGETLB:
+        *flags = MAP_HUGETLB | MAP_ANON;
+        break;
+    case NUMAKIND_HBW:
+    case NUMAKIND_HBW_PREFERRED:
+        *flags = MAP_ANON;
+        break;
+    case NUMAKIND_DEFAULT:
+        *flags = 0;
+        break;
+    default:
+        *flags = 0;
+        err = NUMAKIND_ERROR_UNAVAILABLE;
+        break;
     }
     return err;
 }
@@ -148,20 +148,20 @@ int numakind_get_nodemask(int kind, unsigned long *nodemask, unsigned long maxno
     int err = 0;
 
     switch (kind) {
-        case NUMAKIND_HBW:
-        case NUMAKIND_HBW_HUGETLB:
-        case NUMAKIND_HBW_PREFERRED:
-        case NUMAKIND_HBW_PREFERRED_HUGETLB:
-            err = numakind_hbw_get_nodemask(nodemask, maxnode);
-            break;
-        case NUMAKIND_DEFAULT:
-            numa_bitmask_clearall(&nodemask_bm);
-            numa_bitmask_setbit(&nodemask_bm, numa_preferred());
-            break;
-        default:
-            numa_bitmask_clearall(&nodemask_bm);
-            err = NUMAKIND_ERROR_UNAVAILABLE;
-            break;
+    case NUMAKIND_HBW:
+    case NUMAKIND_HBW_HUGETLB:
+    case NUMAKIND_HBW_PREFERRED:
+    case NUMAKIND_HBW_PREFERRED_HUGETLB:
+        err = numakind_hbw_get_nodemask(nodemask, maxnode);
+        break;
+    case NUMAKIND_DEFAULT:
+        numa_bitmask_clearall(&nodemask_bm);
+        numa_bitmask_setbit(&nodemask_bm, numa_preferred());
+        break;
+    default:
+        numa_bitmask_clearall(&nodemask_bm);
+        err = NUMAKIND_ERROR_UNAVAILABLE;
+        break;
     }
     return err;
 }
@@ -174,18 +174,18 @@ int numakind_mbind(int kind, void *addr, size_t size)
     err = numakind_get_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
     if (!err) {
         switch (kind) {
-            case NUMAKIND_HBW:
-            case NUMAKIND_HBW_HUGETLB:
-                mode = MPOL_BIND;
-                break;
-            case NUMAKIND_HBW_PREFERRED:
-            case NUMAKIND_HBW_PREFERRED_HUGETLB:
-            case NUMAKIND_DEFAULT:
-                mode = MPOL_PREFERRED;
-                break;
-            default:
-                err = NUMAKIND_ERROR_UNAVAILABLE;
-                break;
+        case NUMAKIND_HBW:
+        case NUMAKIND_HBW_HUGETLB:
+            mode = MPOL_BIND;
+            break;
+        case NUMAKIND_HBW_PREFERRED:
+        case NUMAKIND_HBW_PREFERRED_HUGETLB:
+        case NUMAKIND_DEFAULT:
+            mode = MPOL_PREFERRED;
+            break;
+        default:
+            err = NUMAKIND_ERROR_UNAVAILABLE;
+            break;
         }
         if (!err) {
             err = mbind(addr, size, mode, nodemask.n, NUMA_NUM_NODES, 0);
@@ -201,14 +201,12 @@ void *numakind_malloc(numakind_t kind, size_t size)
     int err = 0;
     int arena;
 
-    if ((long int)size < 0){
-	result = NULL;
-	errno = ENOMEM;
-    }
-    else if (kind == NUMAKIND_DEFAULT) {
+    if ((long int)size < 0) {
+        result = NULL;
+        errno = ENOMEM;
+    } else if (kind == NUMAKIND_DEFAULT) {
         result = je_malloc(size);
-    }
-    else {
+    } else {
         err = numakind_getarena(kind, &arena);
         if (!err) {
             err = je_allocm(&result, NULL, size, ALLOCM_ARENA(arena));
@@ -225,28 +223,24 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
     int err = 0;
     int arena;
 
-    if ((long int)size < 0){
-	if (ptr != NULL){
-	    numakind_free(kind, ptr);
-	    ptr = NULL;
-	}
-	errno = ENOMEM;
-    }
-    else if (kind == NUMAKIND_DEFAULT) {
-        ptr = je_realloc(ptr, size);
-    }
-    else {
-        if (size == 0 && ptr != NULL) {
+    if ((long int)size < 0) {
+        if (ptr != NULL) {
             numakind_free(kind, ptr);
             ptr = NULL;
         }
-        else {
+        errno = ENOMEM;
+    } else if (kind == NUMAKIND_DEFAULT) {
+        ptr = je_realloc(ptr, size);
+    } else {
+        if (size == 0 && ptr != NULL) {
+            numakind_free(kind, ptr);
+            ptr = NULL;
+        } else {
             err = numakind_getarena(kind, &arena);
             if (!err) {
                 if (ptr == NULL) {
                     err = je_allocm(&ptr, NULL, size, ALLOCM_ARENA(arena));
-                }
-                else {
+                } else {
                     err = je_rallocm(&ptr, NULL, size, 0, ALLOCM_ARENA(arena));
                 }
             }
@@ -264,15 +258,13 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
     int err = 0;
     int arena;
 
-    if ((long int)size < 0){
-	result = NULL;
-	errno = ENOMEM;
+    if ((long int)size < 0) {
+        result = NULL;
+        errno = ENOMEM;
 
-    }
-    else if (kind == NUMAKIND_DEFAULT) {
+    } else if (kind == NUMAKIND_DEFAULT) {
         result = je_calloc(num, size);
-    }
-    else {
+    } else {
         err = numakind_getarena(kind, &arena);
         if (!err) {
             err = je_allocm(&result, NULL, num * size,
@@ -292,28 +284,26 @@ int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
     int arena;
 
     *memptr = NULL;
-    if ((long int)size < 0){
-	errno = ENOMEM;
-	err = NUMAKIND_ERROR_INVALID;
-    }
-    else if (kind == NUMAKIND_DEFAULT) {
+    if ((long int)size < 0) {
+        errno = ENOMEM;
+        err = NUMAKIND_ERROR_INVALID;
+    } else if (kind == NUMAKIND_DEFAULT) {
         err = je_posix_memalign(memptr, alignment, size);
         err = err ? NUMAKIND_ERROR_MEMALIGN : 0;
-    }
-    else {
-         err = numakind_getarena(kind, &arena);
-         if (!err) {
-             if ( (alignment < sizeof(void*)) ||
-                  (((alignment - 1) & alignment) != 0) ){
-                  err = NUMAKIND_ERROR_ALIGNMENT;
-		  errno = EINVAL;
-             }
-         }
-         if (!err) {
-              err = je_allocm(memptr, NULL, size,
-                              ALLOCM_ALIGN(alignment) | ALLOCM_ARENA(arena));
-              err = err ? NUMAKIND_ERROR_ALLOCM : 0;
-         }
+    } else {
+        err = numakind_getarena(kind, &arena);
+        if (!err) {
+            if ( (alignment < sizeof(void*)) ||
+                 (((alignment - 1) & alignment) != 0) ) {
+                err = NUMAKIND_ERROR_ALIGNMENT;
+                errno = EINVAL;
+            }
+        }
+        if (!err) {
+            err = je_allocm(memptr, NULL, size,
+                            ALLOCM_ALIGN(alignment) | ALLOCM_ARENA(arena));
+            err = err ? NUMAKIND_ERROR_ALLOCM : 0;
+        }
     }
     if (err) {
         *memptr = NULL;
@@ -349,8 +339,7 @@ static void numakind_arena_map_init(void)
             }
         }
         g->init_err = g->init_err ? NUMAKIND_ERROR_MALLCTL : 0;
-    }
-    else {
+    } else {
         g->init_err = NUMAKIND_ERROR_MALLOC;
     }
     if (g->init_err) {
@@ -373,13 +362,11 @@ static int numakind_getarena(numakind_t kind, int *arena)
         cpu_id = sched_getcpu();
         if (cpu_id >= g->num_cpu) {
             err = NUMAKIND_ERROR_GETCPU;
-        }
-        else {
+        } else {
             arena_index = ((int)kind - 1) * g->num_cpu + cpu_id;
             *arena = g->arena_map[arena_index];
         }
-    }
-    else {
+    } else {
         err = g->init_err;
     }
     return err;

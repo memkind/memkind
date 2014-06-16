@@ -25,7 +25,7 @@ class SchedGeTest: public :: testing::Test
 protected:
     void SetUp()
     {}
-    
+
     void TearDown()
     {}
 
@@ -37,7 +37,7 @@ TEST_F(SchedGeTest, ErrorSchedGetCpu)
     int err = NUMAKIND_ERROR_GETCPU;
     nodemask_t nodemask;
     ret = numakind_hbw_get_nodemask(nodemask.n,
-				    NUMA_NUM_NODES);
-    
+                                    NUMA_NUM_NODES);
+
     EXPECT_EQ(err, ret);
 }

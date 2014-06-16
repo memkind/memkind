@@ -26,7 +26,7 @@ class TiedDistTest: public :: testing::Test
 protected:
     void SetUp()
     {}
-    
+
     void TearDown()
     {}
 
@@ -38,6 +38,6 @@ TEST_F(TiedDistTest, ErrorTiedDist)
     int err = NUMAKIND_ERROR_TIEDISTANCE;
     unsigned long *nodemask=NULL;
     ret = numakind_hbw_get_nodemask (nodemask,
-				     NUMA_NUM_NODES);
+                                     NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
 }
