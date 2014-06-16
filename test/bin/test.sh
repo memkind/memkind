@@ -44,12 +44,10 @@ else
 fi
 
 LD_PRELOAD=$basedir/test_libs/libsched.so $basedir/schedcpu_test
-LD_PRELOAD=$basedir/test_libs/libmallctl.so $basedir/mallctlerr_test 
+LD_PRELOAD=$basedir/test_libs/libmallctl.so $basedir/mallctlerr_test
 LD_PRELOAD=$basedir/test_libs/libmalloc.so $basedir/mallocerr_test
 LD_PRELOAD=$basedir/test_libs/libnumadist.so $basedir/tieddisterr_test
 export NUMAKIND_HBW_NODES=-1
 $basedir/environerr_test
 unset NUMAKIND_HBW_NODES
 LD_PRELOAD=$basedir/test_libs/libfopen.so $basedir/pmtterr_test
-
-   

@@ -26,7 +26,6 @@ class EnvTest: public :: testing::Test
 protected:
     void SetUp()
     {}
-    
     void TearDown()
     {}
 
