@@ -134,7 +134,8 @@ check.o:		check.cpp
 trial_generator.o:	trial_generator.cpp trial_generator.h
 			$(CPP) $(CPPFLAGS) -c trial_generator.cpp -o trial_generator.o
 clean:
-			rm -f $(OBJECTS) negative_tests.o sched_cpu_test.o $(EXECS) $(SHLIBS) $(SHOBJS) *~
+			rm -f $(OBJECTS) negative_tests.o sched_cpu_test.o $(EXECS) $(SHOBJS) *~
+			rm -rf bin/test_libs/*.so
 
 test:			$(EXECS) bin/test.sh
 			LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./bin/test.sh
