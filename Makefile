@@ -37,7 +37,7 @@ docdir ?= $(datarootdir)/doc
 mandir ?= $(datarooddir)/man
 initddir ?= /etc/rc.d/init.d
 
-EXTRA_CFLAGS = -fPIC -Wall -Werror -g -O0
+EXTRA_CFLAGS = -fPIC -Wall -Werror -O3
 OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
 
 all: libnumakind.so.0.0 numakind-pmtt
