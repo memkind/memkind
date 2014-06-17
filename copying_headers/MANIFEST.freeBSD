@@ -24,9 +24,7 @@ test/fopen_mock.c
 test/sched_cpu_test.cpp
 test/check.h
 test/Makefile
-test/bin
 test/bin/test.sh
-test/bin/test_libs
 test/bin/test_remote.sh
 test/trial_generator.h
 test/bat_tests.cpp
