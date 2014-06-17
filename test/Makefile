@@ -137,7 +137,7 @@ clean:
 			rm -f $(OBJECTS) negative_tests.o sched_cpu_test.o $(EXECS) $(SHOBJS) *~
 			rm -rf bin/test_libs/*.so
 
-test:			$(EXECS) bin/test.sh
+test:			all bin/test.sh
 			LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./bin/test.sh
 
 .PHONY: all clean test
