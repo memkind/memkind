@@ -7,7 +7,12 @@ groups of NUMA nodes into different "kinds" of memory. It provides a
 low level interface for generating inputs to mbind() and mmap(), and a
 high level interface for heap management.  The heap management is
 implemented with an extension to the jemalloc library which dedicates
-"arenas" to each CPU node and kind of memory.  To use numakind,
+"arenas" to each CPU node and kind of memory.  Additionally the heap
+is partitioned so that freed memory segments of different kinds are
+not coalesced.  To use numakind, jemalloc must be compiled with the
+--enable-numakind option.
+
+To use numakind,
 jemalloc must be compiled with the --enable-numakind option.
 
 Requires kernel patch introduced in Linux 3.12 that impacts
