@@ -12,9 +12,6 @@ is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
-To use numakind,
-jemalloc must be compiled with the --enable-numakind option.
-
 Requires kernel patch introduced in Linux 3.12 that impacts
 functionality of the NUMA system calls.
 
