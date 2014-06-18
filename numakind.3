@@ -16,13 +16,13 @@ numakind \- Heap manager that isolates allocations to different kinds of numa no
 .sp
 .B "HEAP MANAGER:"
 .br
-.BI "void *numakind_calloc(numakind_t " "kind" ", size_t " "num" ", size_t " "size" );
-.br
 .BI "void *numakind_malloc(numakind_t " "kind" ", size_t " "size" );
 .br
-.BI "void numakind_free(numakind_t " "kind" ", void " "*ptr" );
+.BI "void *numakind_calloc(numakind_t " "kind" ", size_t " "num" ", size_t " "size" );
 .br
 .BI "void *numakind_realloc(numakind_t " "kind" ", void " "*ptr" ", size_t " "size" );
+.br
+.BI "void numakind_free(numakind_t " "kind" ", void " "*ptr" );
 .br
 .BI "int numakind_posix_memalign(numakind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .sp
@@ -47,15 +47,31 @@ of memory with the first arguement to each function.  See the
 .B KINDS
 section below for a full description of the implemented kinds.
 .PP
-.BR numakind_calloc ()
-allocates memory of the specified
-.I kind
-for an array of
-.I nmemb
-elements of
+.BR numakind_malloc ()
+The malloc function allocates
 .I size
-bytes each and returns a pointer to the allocated memory.
-The memory is set to zero.
+bytes of uninitialized memory of the specified
+.IR "kind" . 
+The allocated space is suitably aligned (after possible pointer
+coercion) for storage of any type of object.  If
+.I size
+is 0, then
+.BR numakind_malloc ()
+returns  NULL.
+.PP
+.BR numakind_calloc ()
+allocates space for
+.I nmemb
+objects each
+.I size
+bytes in length in memory of the specified
+.I "kind" .
+The result is identical to calling
+.BR numakind_malloc ()
+with an argument of
+.IR nmemb * size
+, with the exception that the allocated memory is explicitly
+initialized to zero bytes.
 If
 .I nmemb
 or
@@ -64,23 +80,52 @@ is 0, then
 .BR numakind_calloc ()
 returns NULL.
 .PP
-.BR numakind_malloc ()
-allocates
+.BR numakind_realloc ()
+changes the size of the previously allocated memory referenced by
+.I ptr
+to
 .I size
-bytes of memory of the specified
-.I kind
-and returns a pointer to the allocated memory.
-The memory is not cleared.
+bytes of the specified
+.IR "kind" . 
+The contents of the memory are unchanged up to the lesser of
+the new and old sizes. If the new size is larger, the contents of the
+newly allocated portion of the memory are undefined. Upon success, the
+memory referenced by
+.I ptr
+is freed and a pointer to the newly allocated high bandwidth memory is
+returned. Note that
+.BR numakind_realloc ()
+may move the memory allocation, resulting in a different return value
+than
+.IR "ptr" .
 If
-.I size
-is 0, then
+.I ptr
+is NULL, the
+.BR numakind_realloc ()
+function behaves identically to
 .BR numakind_malloc ()
-returns  NULL.
+for the specified size.
+The address
+.IR "ptr" ,
+if not NULL, must have been returned by a previous call to
+.BR numakind_malloc (),
+.BR numakind_calloc (),
+.BR numakind_realloc (),
+or
+.BR numakind_posix_memalign ()
+with the same
+.I kind
+as specified to the call to 
+.BR numakind_realloc ().
+Otherwise, or if
+.I numakind_free(ptr)
+has been called before, undefined behavior occurs.
 .PP
 .BR numakind_free ()
-frees the memory space pointed to by
-.IR ptr ,
-which must have been returned by a previous call to
+causes the allocated memory referenced by 
+.I ptr
+to be made available for future allocations. This pointer
+must have been returned by a previous call to
 .BR numakind_malloc (),
 .BR numakind_calloc (),
 .BR numakind_realloc (),
@@ -102,55 +147,20 @@ specified to
 .BR numakind_free ()
 must match the value given when the memory to be freed was allocated.
 .PP
-.BR numakind_realloc ()
-changes the size of the memory block pointed to by
-.I ptr
-to
-.I size
-bytes of the specified
-.IR "kind" .
-The contents will be unchanged to the minimum of the old and new sizes;
-newly allocated memory will be uninitialized.
-If
-.I ptr
-is NULL, then the call is equivalent to
-.IR "numakind_malloc(kind, size)" ,
-for all values of
-.IR size ;
-if
-.I size
-is equal to zero,
-and
-.I ptr
-is not NULL, then the call is equivalent to
-.IR "numakind_free(kind, ptr)" .
-Unless
-.I ptr
-is NULL, it must have been returned by an earlier call to
-.BR numakind_malloc (),
-.BR numakind_calloc (),
-.BR numakind_realloc (),
-or
-.BR numakind_posix_memalign ()
-with the same
-.I kind
-as specified in the call to
-.BR numakind_realloc ().
-If the area pointed to was moved, a
-.I numakind_free(kind, ptr)
-is done.
-.PP
 .BR numakind_posix_memalign ()
 allocates
 .I size
-bytes of the specified
+bytes of memory of the specified
 .I kind
-of memory and places the address of the allocated memory in
-.IR "*memptr" .
-The address of the allocated memory will be a multiple of
+such that the allocation's base address
+is an even multiple of
 .IR "alignment" ,
-which must be a power of two and a multiple of
-.IR "sizeof(void *)".
+and returns the allocation in the value pointed to by
+.IR "memptr" .
+The requested
+.I alignment
+must be a power of 2 at least as large as
+.IR "sizeof(void *)" .
 If
 .I size
 is 0, then
