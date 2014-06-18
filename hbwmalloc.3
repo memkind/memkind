@@ -14,13 +14,13 @@ hbwmalloc \- The high bandwidth memory interface
 .sp
 .B Link with -ljemalloc -lnuma -lnumakind -lpthread
 .sp
-.BI "void* hbw_calloc(size_t " "nmemb" ", size_t " "size" );
-.br
 .BI "void* hbw_malloc(size_t " "size" );
 .br
-.BI "void hbw_free(void " "*ptr" );
+.BI "void* hbw_calloc(size_t " "nmemb" ", size_t " "size" );
 .br
 .BI "void* hbw_realloc (void " "*ptr" ", size_t " "size" );
+.b
+.BI "void hbw_free(void " "*ptr" );
 .br
 .BI "int hbw_allocate_memalign(void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .br
@@ -33,36 +33,69 @@ hbwmalloc \- The high bandwidth memory interface
 .BI "void hbw_set_policy(int " "mode" );
 .fi
 .SH "DESCRIPTION"
-.BR hbw_calloc ()
-allocates high bandwidth memory for an array of
-.I nmemb
-elements of
-.I size
-bytes each and returns a pointer to the allocated memory.
-The memory is set to zero.
-If
-.I nmemb
-or
-.I size
-is 0, then
-.BR hbw_calloc ()
-returns NULL.
-.PP
 .BR hbw_malloc ()
 allocates
 .I size
-bytes of high bandwidth memory and returns a pointer to the allocated memory.
-The memory is not cleared.
-If
+bytes of uninitialized high bandwidth memory. The allocated space is
+suitably aligned (after possible pointer coercion) for storage of any
+type of object.
+.PP
+.BR hbw_calloc ()
+allocates space for
+.I nmemb
+objects in high bandwidth memory, each
 .I size
-is 0, then
+bytes in length. The result is identical to calling
 .BR hbw_malloc ()
-returns  NULL.
+with an argument of
+.IR number * size
+, with the exception that the allocated memory is explicitly
+initialized to zero bytes.
+.PP
+.BR hbw_realloc ()
+changes the size of the previously allocated high bandwidth memory
+referenced by
+.I ptr
+to
+.I size
+bytes. The contents of the memory are unchanged up to the lesser of
+the new and old sizes. If the new size is larger, the contents of the
+newly allocated portion of the memory are undefined. Upon success, the
+memory referenced by ptr is freed and a pointer to the newly allocated
+high bandwidth memory is returned. Note that
+.BR hbw_realloc ()
+may move the memory allocation, resulting in a different return value
+than
+.IR "ptr" .
+If
+.I ptr
+is NULL, the
+.BR hbw_realloc ()
+function behaves identically to
+.BR hbw_malloc ()
+for the specified size.
+The address
+.I ptr
+must have been returned by a previous call to
+.BR hbw_malloc (),
+.BR hbw_calloc (),
+.BR hbw_realloc (),
+.BR hbw_allocate_memalign (),
+or
+.BR hbw_allocate_memalign_psize ().
+Otherwise, or if
+.I hbw_free(ptr)
+has been called before, undefined behavior occurs.
 .PP
 .BR hbw_free ()
-frees the memory space pointed to by
-.IR ptr ,
-which must have been returned by a previous call to
+causes the allocated high bandwidth memory referenced by
+.I ptr
+to be made available for future allocations. If
+.I ptr
+is NULL, no action occurs.
+The address
+.I ptr
+must have been returned by a previous call to
 .BR hbw_malloc (),
 .BR hbw_calloc (),
 .BR hbw_realloc (),
@@ -72,83 +105,40 @@ or
 Otherwise, or if
 .I hbw_free(ptr)
 has already been called before, undefined behavior occurs.
-If
-.I ptr
-is  NULL, no operation is performed.
-.PP
-.BR hbw_realloc ()
-changes the size of the memory block pointed to by
-.I ptr
-to
-.I size
-bytes using high bandwidth memory.
-The contents will be unchanged to the minimum of the old and new sizes;
-newly allocated memory will be uninitialized.
-If
-.I ptr
-is NULL, then the call is equivalent to
-.IR hbw_malloc(size) ,
-for all values of
-.IR size ;
-if
-.I size
-is equal to zero,
-and
-.I ptr
-is not NULL, then the call is equivalent to
-.IR hbw_free(ptr) .
-Unless
-.I ptr
-is NULL, it must have been returned by an earlier call to
-.BR hbw_malloc (),
-.BR hbw_calloc (),
-.BR hbw_realloc (),
-.BR hbw_allocate_memalign (),
-or
-.BR hbw_allocate_memalign_psize ().
-If the area pointed to was moved, a
-.I hbw_free(ptr)
-is done.
 .PP
 .BR hbw_allocate_memalign ()
 allocates
 .I size
-bytes of high bandwidth memory and places the address of
-the allocated memory in
-.IR "*memptr" .
-The address of the allocated memory will be a multiple of
+bytes of high bandwidth memory such that the allocation's base address
+is an even multiple of
 .IR "alignment" ,
-which must be a power of two and a multiple of
-.IR "sizeof(void *)".
-If
-.I size
-is 0, then
-.BR hbw_allocate_memalign ()
-returns NULL.
+and returns the allocation in the value pointed to by
+.IR "memptr" .
+The requested
+.I alignment
+must be a power of 2 at least as large as
+.IR "sizeof(void *)" .
 .PP
 .BR hbw_allocate_memalign_psize ()
 allocates
 .I size
-bytes of high bandwidth memory and places the address of the allocated
-memory in
-.IR "*memptr" .
-The address of the allocated memory will be a multiple of
+bytes of high bandwidth memory such that the allocation's base address
+is an even multiple of
 .IR "alignment" ,
-which must be a power of two and a multiple of
-.IR "sizeof(void *)".
-If
-.I size
-is 0, then
-.BR hbw_allocate_memalign_psize ()
-returns NULL.  The memory returned will be allocated using pages
-determined by the
+and returns the allocation in the value pointed to by
+.IR "memptr" .
+The requested
+.I alignment
+must be a power of 2 at least as large as
+.IR "sizeof(void *)" .
+The memory will be allocated using pages determined by the
 .IR "psize"
 variable which may be one of the following enumerated values:
 .TP
 .B HBW_PAGESIZE_4KB
-The four kilobyte page size option. Note that with transparent huge pages
-enabled these allocations may be promoted by the operating system to
-two megabyte pages.
+The four kilobyte page size option. Note that with transparent huge
+pages enabled these allocations may be promoted by the operating
+system to two megabyte pages.
 .TP
 .B HBW_PAGESIZE_2MB
 The two megabyte page size option.
@@ -192,7 +182,8 @@ fails.
 and
 .BR hbw_allocate_memalign_psize ()
 return zero on success, or one of the error values listed in the
-next section on failure.  Note that
+.B ERRORS
+section on failure.  Note that
 .I errno
 is not set.
 .SH ERRORS
