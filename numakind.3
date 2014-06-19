@@ -48,10 +48,10 @@ of memory with the first arguement to each function.  See the
 section below for a full description of the implemented kinds.
 .PP
 .BR numakind_malloc ()
-The malloc function allocates
+allocates
 .I size
 bytes of uninitialized memory of the specified
-.IR "kind" . 
+.IR "kind" .
 The allocated space is suitably aligned (after possible pointer
 coercion) for storage of any type of object.  If
 .I size
@@ -65,12 +65,12 @@ allocates space for
 objects each
 .I size
 bytes in length in memory of the specified
-.I "kind" .
+.IR "kind" .
 The result is identical to calling
 .BR numakind_malloc ()
 with an argument of
-.IR nmemb * size
-, with the exception that the allocated memory is explicitly
+.IR nmemb * size ,
+with the exception that the allocated memory is explicitly
 initialized to zero bytes.
 If
 .I nmemb
@@ -86,7 +86,7 @@ changes the size of the previously allocated memory referenced by
 to
 .I size
 bytes of the specified
-.IR "kind" . 
+.IR "kind" .
 The contents of the memory are unchanged up to the lesser of
 the new and old sizes. If the new size is larger, the contents of the
 newly allocated portion of the memory are undefined. Upon success, the
@@ -115,14 +115,14 @@ or
 .BR numakind_posix_memalign ()
 with the same
 .I kind
-as specified to the call to 
+as specified to the call to
 .BR numakind_realloc ().
 Otherwise, or if
-.I numakind_free(ptr)
+.I numakind_free(kind, ptr)
 has been called before, undefined behavior occurs.
 .PP
 .BR numakind_free ()
-causes the allocated memory referenced by 
+causes the allocated memory referenced by
 .I ptr
 to be made available for future allocations. This pointer
 must have been returned by a previous call to
@@ -205,7 +205,7 @@ that simplifies the interface so that the user specifies the
 .I kind
 of memory, the start address
 .I addr
-to be mapped, and the number of bytes 
+to be mapped, and the number of bytes
 .I len
 from that address to be mapped. The memory is mapped to the nearest
 NUMA node from the CPU of the calling process that is a member of the
@@ -229,7 +229,7 @@ Note that this library does not set errno.
 .SH "KINDS"
 The available kinds of memory defined by the
 .I numakind_t
-enumeration in 
+enumeration in
 .I numakind.h
 .TP
 .B NUMAKIND_DEFAULT
@@ -244,14 +244,14 @@ segmentation fault will be raised (signal 11) when the pages are
 touched.
 .TP
 .B NUMAKIND_HBW_HUGETLB
-Same as 
+Same as
 .B NUMAKIND_HBW
 except the allcation uses huge pages.
 .TP
 .B NUMAKIND_HBW_PREFERRED
 Same as
 .B NUMAKIND_HBW
-except that if there is not enough high bandwidth memory to satisfy the 
+except that if there is not enough high bandwidth memory to satisfy the
 request, the allocation will fall back on standard memory.
 .TP
 .B NUMAKIND_HBW_PREFERRED_HUGETLB
