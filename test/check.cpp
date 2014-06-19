@@ -33,8 +33,8 @@ and the end address additionally also
 check the end address for pagesize*/
 Check::Check(const void *ptr, size_t size)
 {
-    const int min_page_size = 4096;
-    int i;
+    const long int min_page_size = 4096;
+    long int i;
     this->ptr = ptr;
     this->size = size;
     if (ptr && size) {
@@ -63,7 +63,7 @@ Check::Check(const Check &other)
     num_address = other.num_address;
 
     address = new void* [num_address];
-    for (int i = 0; i < num_address; ++i) {
+    for (long int i = 0; i < num_address; ++i) {
         address[i] = other.address[i];
     }
 }

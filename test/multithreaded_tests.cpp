@@ -16,7 +16,7 @@
 #include "numakind.h"
 #include "trial_generator.h"
 
-#define NTHREADS 4
+#define NTHREADS 2
 
 class MultithreadedTest : public :: testing :: Test
 {
