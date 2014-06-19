@@ -38,7 +38,11 @@ allocates
 .I size
 bytes of uninitialized high bandwidth memory. The allocated space is
 suitably aligned (after possible pointer coercion) for storage of any
-type of object.
+type of object. If
+.I size
+is zero then
+.BR hbw_malloc ()
+returns NULL.
 .PP
 .BR hbw_calloc ()
 allocates space for
@@ -48,9 +52,15 @@ objects in high bandwidth memory, each
 bytes in length. The result is identical to calling
 .BR hbw_malloc ()
 with an argument of
-.IR number * size
+.IR nmemb * size
 , with the exception that the allocated memory is explicitly
-initialized to zero bytes.
+initialized to zero bytes.  If
+.I nmemb
+or
+.I size
+is 0, then
+.BR hbw_calloc ()
+returns NULL.
 .PP
 .BR hbw_realloc ()
 changes the size of the previously allocated high bandwidth memory
@@ -61,8 +71,10 @@ to
 bytes. The contents of the memory are unchanged up to the lesser of
 the new and old sizes. If the new size is larger, the contents of the
 newly allocated portion of the memory are undefined. Upon success, the
-memory referenced by ptr is freed and a pointer to the newly allocated
-high bandwidth memory is returned. Note that
+memory referenced by
+.I ptr
+is freed and a pointer to the newly allocated high bandwidth memory is
+returned. Note that
 .BR hbw_realloc ()
 may move the memory allocation, resulting in a different return value
 than
@@ -75,8 +87,8 @@ function behaves identically to
 .BR hbw_malloc ()
 for the specified size.
 The address
-.I ptr
-must have been returned by a previous call to
+.IR "ptr" ,
+if not NULL, must have been returned by a previous call to
 .BR hbw_malloc (),
 .BR hbw_calloc (),
 .BR hbw_realloc (),
@@ -94,8 +106,8 @@ to be made available for future allocations. If
 .I ptr
 is NULL, no action occurs.
 The address
-.I ptr
-must have been returned by a previous call to
+.IR "ptr" ,
+if not NULL, must have been returned by a previous call to
 .BR hbw_malloc (),
 .BR hbw_calloc (),
 .BR hbw_realloc (),
