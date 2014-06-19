@@ -41,7 +41,7 @@ private:
     list<smaps_entry_t>smaps_table;
     ifstream ip;
     int smaps_fd;
-    int num_address;
+    size_t num_address;
     string skip_to_next_entry(ifstream &);
     string skip_to_next_kpage(ifstream &);
     void get_address_range(string &line, unsigned long long *start_addr,

@@ -33,8 +33,8 @@ and the end address additionally also
 check the end address for pagesize*/
 Check::Check(const void *ptr, size_t size)
 {
-    const long int min_page_size = 4096;
-    long int i;
+    const size_t min_page_size = 4096;
+    size_t i;
     this->ptr = ptr;
     this->size = size;
     if (ptr && size) {
@@ -63,7 +63,7 @@ Check::Check(const Check &other)
     num_address = other.num_address;
 
     address = new void* [num_address];
-    for (long int i = 0; i < num_address; ++i) {
+    for (size_t i = 0; i < num_address; ++i) {
         address[i] = other.address[i];
     }
 }
@@ -71,8 +71,8 @@ Check::Check(const Check &other)
 int Check::check_node_hbw(size_t num_bandwidth, const int *bandwidth)
 {
     int err = 0;
-    int i, max_bandwidth;
-    size_t j;
+    int max_bandwidth;
+    size_t i, j;
     int *status = NULL;
 
     status = new int [num_address];
@@ -192,7 +192,7 @@ size_t Check::get_kpagesize(string line)
 int Check::check_page_size(size_t page_size)
 {
     int err = 0;
-    int i;
+    size_t i;
 
     ip.open ("/proc/self/smaps");
 
