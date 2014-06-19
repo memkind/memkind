@@ -26,6 +26,7 @@ extern "C" {
  *  kind of memory.  To use numakind, jemalloc must be compiled with
  *  the --enable-numakind option.
  */
+
 #if __STDC_VERSION__ < 199901L
 #error "<numakind> requires ISO C99 or greater"
 #endif
