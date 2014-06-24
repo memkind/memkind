@@ -78,7 +78,7 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size);
 
 /* posix_memalign from the nearest numa node of the specified kind */
 int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
-        size_t size);
+                            size_t size);
 
 /* realloc from the nearest numa node of the specified kind */
 void *numakind_realloc(numakind_t kind, void *ptr, size_t size);

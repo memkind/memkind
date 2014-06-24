@@ -41,15 +41,15 @@ extern "C" {
  *  hbw_get_policy() and hbw_set_policy().
  */
 typedef enum {
-/*!
- *  If insufficient high bandwidth memory pages are available seg
- *  fault when memory is touched (default).
- */
+    /*!
+     *  If insufficient high bandwidth memory pages are available seg
+     *  fault when memory is touched (default).
+     */
     HBW_POLICY_BIND = 1,
-/*!
- *  If insufficient high bandwidth memory pages are available fall
- *  back on standard memory pages.
- */
+    /*!
+     *  If insufficient high bandwidth memory pages are available fall
+     *  back on standard memory pages.
+     */
     HBW_POLICY_PREFERRED = 2
 } hbw_policy_t;
 
@@ -60,12 +60,12 @@ typedef enum {
  *  select the page size from this enumerated list.
  */
 typedef enum {
-/*!
- *  The 4 kilobyte page size option, this enables the same behavior
- *  from hbw_allocate_memalign_psize() as the hbw_allocate_memalign()
- *  API.  Note with transparent huge pages enabled, these allocations
- *  may be promoted by the operating system to 2 megabyte pages.
- */
+    /*!
+     *  The 4 kilobyte page size option, this enables the same behavior
+     *  from hbw_allocate_memalign_psize() as the hbw_allocate_memalign()
+     *  API.  Note with transparent huge pages enabled, these allocations
+     *  may be promoted by the operating system to 2 megabyte pages.
+     */
     HBW_PAGESIZE_4KB = 1,
     HBW_PAGESIZE_2MB = 2
 } hbw_pagesize_t;
@@ -77,7 +77,7 @@ void *hbw_malloc(size_t size);
 void *hbw_calloc(size_t num, size_t size);
 int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size);
 int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
-    int pagesize);
+                                int pagesize);
 void *hbw_realloc(void *ptr, size_t size);
 void hbw_free(void *ptr);
 
