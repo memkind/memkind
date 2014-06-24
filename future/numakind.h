@@ -45,7 +45,7 @@ enum numakind_error {
     NUMAKIND_ERROR_PMTT = -7,
     NUMAKIND_ERROR_TIEDISTANCE = -8,
     NUMAKIND_ERROR_ALIGNMENT = -9,
-    NUMAKIND_ERROR_ALLOCM = -10,
+    NUMAKIND_ERROR_MALLOCM = -10,
     NUMAKIND_ERROR_ENVIRON = -11,
     NUMAKIND_ERROR_RUNTIME = -255
 };
@@ -56,12 +56,6 @@ enum numakind_base_partition {
     NUMAKIND_PARTITION_HBW_HUGETLB = 2,
     NUMAKIND_PARTITION_HBW_PREFERRED = 3,
     NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB = 4
-};
-
-enum numakind_arena_mode {
-    NUMAKIND_ARENA_MODE_NONE,
-    NUMAKIND_ARENA_MODE_CPU,
-    NUMAKIND_ARENA_MODE_BIJECTIVE
 };
 
 struct numakind_ops;
@@ -76,7 +70,7 @@ struct numakind {
 };
 
 struct numakind_ops {
-    int (* create)(struct numakind *kind, struct numakind_ops *ops, char *name, int arena_mode);
+    int (* create)(struct numakind *kind, struct numakind_ops *ops, char *name);
     int (* destroy)(struct numakind *kind);
     void *(* malloc)(struct numakind *kind, size_t size);
     void *(* calloc)(struct numakind *kind, size_t num, size_t size);
@@ -105,11 +99,14 @@ int numakind_get_kind_by_partition(int partition, numakind_t *kind);
 /* Get kind given the name of the kind */
 int numakind_get_kind_by_name(const char *name, numakind_t *kind);
 
-/* Create a new kind */
-int numakind_create(const struct numakind_ops *ops, const char *name, int arena_mode);
+/* Get the amount in bytes of total and free memory of the NUMA nodes assciated with the kind */
+int numakind_get_size(numakind_t kind, size_t *total, size_t *free);
 
 /* returns 1 if numa kind is availble else 0 */
 int numakind_is_available(numakind_t kind);
+
+/* Create a new kind */
+int numakind_create(const struct numakind_ops *ops, const char *name);
 
 /* malloc from the numa nodes of the specified kind */
 void *numakind_malloc(numakind_t kind, size_t size);
