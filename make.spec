@@ -38,7 +38,7 @@ not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
 %prep
-%setup -D -q -c -T -a 0
+%setup
 
 %build
 $(make_prefix) $(MAKE) $(make_postfix)
