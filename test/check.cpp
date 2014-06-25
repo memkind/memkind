@@ -46,7 +46,8 @@ Check::Check(const void *ptr, size_t size)
             address[i] = (char *)ptr + i * min_page_size;
         }
         address[i] = (char *)ptr + size - 1;
-    } else {
+    }
+    else {
         address = NULL;
     }
 }
@@ -241,7 +242,8 @@ int Check::populate_smaps_table ()
     if (0 == smaps_table.size()) {
         fprintf(stderr,"Empty smaps table\n");
         return -1;
-    } else {
+    }
+    else {
         return 0;
     }
 
@@ -272,7 +274,8 @@ int Check::check_page_size(size_t page_size, void *vaddr)
             lpagesize = it->pagesize;
             if (lpagesize == page_size) {
                 return 0;
-            } else {
+            }
+            else {
                 /*The pagesize of allocation and req don't match*/
                 fprintf(stderr,"%zd does not match entry in SMAPS (%zd)\n",
                         page_size, lpagesize);

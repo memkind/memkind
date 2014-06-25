@@ -47,7 +47,8 @@ protected:
                     bandwidth[node] = 2;
                 }
             }
-        } else {
+        }
+        else {
             const char *node_bandwidth_path = "/etc/numakind/node-bandwidth";
             std::ifstream nbw_file;
 
@@ -65,7 +66,7 @@ protected:
     void TearDown()
     {
         delete[] bandwidth;
-	delete tgen;
+        delete tgen;
     }
 };
 
@@ -75,7 +76,7 @@ TEST_F(MultithreadedTest, hbw_malloc_1KB_2GB_sizes)
     #pragma omp parallel num_threads(NTHREADS)
     {
         tgen->run(num_bandwidth,
-		  bandwidth);
+                  bandwidth);
     }
 }
 
@@ -85,7 +86,7 @@ TEST_F(MultithreadedTest, hbw_calloc_1KB_2GB_sizes)
     #pragma omp parallel num_threads(NTHREADS)
     {
         tgen->run(num_bandwidth,
-		  bandwidth);
+                  bandwidth);
     }
 }
 
@@ -95,7 +96,7 @@ TEST_F(MultithreadedTest, hbw_memalign_1KB_2GB_sizes)
     #pragma omp parallel num_threads(NTHREADS)
     {
         tgen->run(num_bandwidth,
-		  bandwidth);
+                  bandwidth);
     }
 }
 
@@ -106,7 +107,7 @@ TEST_F(MultithreadedTest, hbw_memalign_psize_1KB_2GB_sizes)
     #pragma omp parallel num_threads(NTHREADS)
     {
         tgen->run(num_bandwidth,
-		  bandwidth);
+                  bandwidth);
     }
 }
 

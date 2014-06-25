@@ -46,7 +46,8 @@ protected:
                     bandwidth[node] = 2;
                 }
             }
-        } else {
+        }
+        else {
             const char *node_bandwidth_path = "/etc/numakind/node-bandwidth";
             std::ifstream nbw_file;
 
@@ -73,14 +74,14 @@ TEST_F(EXTendedTest, hbw_malloc_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_MALLOC);
     tgen->run(num_bandwidth,
-	      bandwidth);
+              bandwidth);
 }
 
 TEST_F(EXTendedTest, hbw_realloc_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_REALLOC);
     tgen->run(num_bandwidth,
-	      bandwidth);
+              bandwidth);
 }
 
 
@@ -88,14 +89,14 @@ TEST_F(EXTendedTest, hbw_calloc_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_CALLOC);
     tgen->run(num_bandwidth,
-	      bandwidth);
+              bandwidth);
 }
 
 TEST_F(EXTendedTest, hbw_memalign_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_MEMALIGN);
     tgen->run(num_bandwidth,
-	      bandwidth);
+              bandwidth);
 }
 
 
@@ -103,5 +104,5 @@ TEST_F(EXTendedTest, hbw_memalign_psize_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth,
-	      bandwidth);
+              bandwidth);
 }
