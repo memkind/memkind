@@ -20,7 +20,9 @@ URL: http://www.intel.com
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: numactl
-%if ! %{defined suse_version}
+%if %{defined suse_version}
+BuildRequires: libnuma1
+%else
 BuildRequires: numactl-devel
 %endif
 %if ! %{defined jemalloc_installed}
