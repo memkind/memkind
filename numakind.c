@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <numa.h>
 #include <numaif.h>
 #include <pthread.h>
