@@ -18,7 +18,7 @@ sbindir ?= $(exec_prefix)/sbin
 libdir ?= $(exec_prefix)/lib64
 includedir ?= $(prefix)/include
 datarootdir ?= $(prefix)/share
-docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
+docdir ?= $(datarootdir)/doc
 initddir ?= /etc/rc.d/init.d
 
 EXTRA_CFLAGS = -fPIC -Wall -Werror -O3
@@ -55,9 +55,9 @@ install:
 	$(INSTALL) libnumakind.so.0.0 $(DESTDIR)$(libdir)
 	ln -sf libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so.0
 	ln -sf libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so
-	$(INSTALL) -d $(DESTDIR)$(docdir)
-	$(INSTALL) -m 644 COPYING.txt $(DESTDIR)$(docdir)
-	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)
+	$(INSTALL) -d $(DESTDIR)$(docdir)/numakind-$(VERSION)
+	$(INSTALL) -m 644 COPYING.txt $(DESTDIR)$(docdir)/numakind-$(VERSION)
+	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)/numakind-$(VERSION)
 	$(INSTALL) -d $(DESTDIR)$(datarootdir)/man/man3
 	$(INSTALL) -m 644 hbwmalloc.3 $(DESTDIR)$(datarootdir)/man/man3/hbwmalloc.3
 	$(INSTALL) -m 644 numakind.3 $(DESTDIR)$(datarootdir)/man/man3/numakind.3
