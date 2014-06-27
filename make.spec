@@ -17,7 +17,7 @@ License: See COPYING
 Group: System Environment/Libraries
 Vendor: Intel Corporation
 URL: http://www.intel.com
-Source0: %{name}-%{version}.tar.gz
+Source0: numakind-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: numactl
 %if %{defined suse_version}
@@ -26,7 +26,7 @@ BuildRequires: libnuma-devel
 BuildRequires: numactl-devel
 %endif
 %if ! %{defined jemalloc_installed}
-BuildRequires: jemalloc
+BuildRequires: jemalloc-devel
 %endif
 
 
@@ -48,7 +48,7 @@ not coalesced.  To use numakind, jemalloc must be compiled with the
 $(make_prefix) $(MAKE) $(make_postfix)
 
 %install
-make DESTDIR=%{buildroot} VERSION=%{version} install
+make DESTDIR=%{buildroot} VERSION=%{version} includedir=%{_includedir} libdir=%{_libdir} sbinddir={%_sbinddir} initddir=%{_initddir} docdir=%{_docdir} mandir=%{_mandir} install
 $(extra_install)
 
 %clean
