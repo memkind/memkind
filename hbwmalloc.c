@@ -17,8 +17,8 @@
 
 static int hbw_policy_g = HBW_POLICY_BIND;
 static pthread_once_t hbw_policy_once_g = PTHREAD_ONCE_INIT;
-static void hbw_policy_preferred_init(void);
-static void hbw_policy_bind_init(void);
+static inline void hbw_policy_preferred_init(void);
+static inline void hbw_policy_bind_init(void);
 
 int hbw_get_policy(void)
 {
