@@ -19,6 +19,7 @@ libdir ?= $(exec_prefix)/lib64
 includedir ?= $(prefix)/include
 datarootdir ?= $(prefix)/share
 docdir ?= $(datarootdir)/doc
+mandir ?= $(datarooddir)/man
 initddir ?= /etc/rc.d/init.d
 
 EXTRA_CFLAGS = -fPIC -Wall -Werror -O3
@@ -58,9 +59,9 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(docdir)/numakind-$(VERSION)
 	$(INSTALL) -m 644 COPYING.txt $(DESTDIR)$(docdir)/numakind-$(VERSION)
 	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)/numakind-$(VERSION)
-	$(INSTALL) -d $(DESTDIR)$(datarootdir)/man/man3
-	$(INSTALL) -m 644 hbwmalloc.3 $(DESTDIR)$(datarootdir)/man/man3/hbwmalloc.3
-	$(INSTALL) -m 644 numakind.3 $(DESTDIR)$(datarootdir)/man/man3/numakind.3
+	$(INSTALL) -d $(DESTDIR)$(mandir)/man3
+	$(INSTALL) -m 644 hbwmalloc.3 $(DESTDIR)$(mandir)/man3/hbwmalloc.3
+	$(INSTALL) -m 644 numakind.3 $(DESTDIR)$(mandir)/man3/numakind.3
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	$(INSTALL) numakind-pmtt $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)$(initddir)
