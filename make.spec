@@ -21,7 +21,7 @@ Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: numactl
 %if %{defined suse_version}
-BuildRequires: libnuma1
+BuildRequires: libnuma-devel
 %else
 BuildRequires: numactl-devel
 %endif
