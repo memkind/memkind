@@ -13,6 +13,8 @@
 # bandwidth files from PMTT tables
 ### BEGIN INIT INFO
 # Provides: numakind
+# Required-Start:
+# Required-Stop:
 # Short-Description: Sets up numakind library
 # Description: Parses the PMTT table and creates the file /etc/numakind/node-bandwidth.
 #
@@ -29,15 +31,40 @@
 # Default-Stop: 0 1 2 6
 ### END INIT INFO
 
-. /etc/rc.d/init.d/functions
+# test if this is an LSB system
+if [ -d /usr/lib/lsb ]; then
+    IS_LSB=1
+else
+    IS_LSB=0
+fi
+
+if [ $IS_LSB ]; then 
+    test -s /etc/rc.status && \
+        . /etc/rc.status
+    echo_success() {
+        echo $1
+        rc_failed 0
+        rc_status -v1
+    }
+    echo_failure() {
+        echo $1
+        rc_failed 1
+        rc_status -v1
+    }
+else
+    test -s /etc/rc.d/init.d/functions && \
+        . /etc/rc.d/init.d/functions
+fi
 
 err=0
 FILE=/etc/numakind/node-bandwidth
 DIR=`dirname $FILE`
+NUMAKIND_BIN=/usr/sbin/numakind-pmtt
+umask 133
 
 start() {
     echo_success "creating bandwidth values file"
-    numakind-pmtt
+    $NUMAKIND_BIN
     err=$?
     if [ $err -eq 0 ] && [ -f $FILE ]
     then
@@ -100,7 +127,6 @@ case $1 in
         fi
         ;;
     condrestart|try-restart)
-        rh_status_q || exit 0
         restart
         ;;
     *)
