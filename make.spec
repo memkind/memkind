@@ -29,7 +29,6 @@ BuildRequires: numactl-devel
 BuildRequires: jemalloc-devel
 %endif
 
-
 %description
 The numakind library extends libnuma with the ability to categorize
 groups of NUMA nodes into different "kinds" of memory. It provides a
@@ -70,14 +69,30 @@ $(extra_install)
 
 %post
 /sbin/ldconfig
-/sbin/chkconfig --add numakind
-/sbin/service numakind force-reload >/dev/null 2>&1
+if [ -x /usr/lib/lsb/install_initd ]; then
+    /usr/lib/lsb/install_initd %{_initddir}/numakind
+elif [ -x /sbin/chkconfig ]; then
+    /sbin/chkconfig --add numakind
+else
+    for i in 3 4 5; do
+        ln -sf %{_initddir}/numakind /etc/rc.d/rc${i}.d/S90numakind
+    done
+    for i in 0 1 2 6; do
+        ln -sf %{_initddir}/numakind /etc/rc.d/rc${i}.d/K10numakind
+    done
+fi
+%{_initddir}/numakind force-reload >/dev/null 2>&1
 
 %preun
-if [ -z "$1" ] || [ "$1" == 0 ]
-then
-    /sbin/service numakind stop >/dev/null 2>&1
-    /sbin/chkconfig --del numakind
+if [ -z "$1" ] || [ "$1" == 0 ]; then
+    %{_initdir}/numakind stop >/dev/null 2>&1
+    if [ -x /usr/lib/lsb/remove_initd ]; then
+        /usr/lib/lsb/remove_initd %{_initdir}/numakind
+    elif [ -x /sbin/chkconfig ]; then
+        /sbin/chkconfig --del numakind
+    else
+        rm -f /etc/rc.d/rc?.d/???numakind
+    fi
 fi
 
 %postun
