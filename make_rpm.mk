@@ -34,7 +34,7 @@ $(rpm): $(specfile) $(source_tar)
 	rpmbuild $(rpmbuild_flags) $(specfile) -ba
 
 $(source_tar): $(topdir) $(specfile) $(src) MANIFEST
-	tar czvf $@ -T MANIFEST
+	tar czvf $@ -T MANIFEST --transform="s|^|$(name)-$(version)/|"
 	rpmbuild $(rpmbuild_flags) $(specfile) -bp
 
 $(specfile): $(topdir) make.spec

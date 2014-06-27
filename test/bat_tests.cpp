@@ -46,7 +46,8 @@ protected:
                     bandwidth[node] = 2;
                 }
             }
-        } else {
+        }
+        else {
             const char *node_bandwidth_path = "/etc/numakind/node-bandwidth";
             std::ifstream nbw_file;
 

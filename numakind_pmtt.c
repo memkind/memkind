@@ -44,14 +44,14 @@ struct memctlr_t {
 };
 
 static int parse_pmtt_memory_controllers(int num_bandwidth, int *bandwidth,
-               ACPI_PMTT_HEADER *buf, int size);
+        ACPI_PMTT_HEADER *buf, int size);
 
 static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
-               ACPI_PMTT_HEADER *buf_in, int *bytes_remaining);
+        ACPI_PMTT_HEADER *buf_in, int *bytes_remaining);
 
 
 static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
-               const char *pmtt_path)
+                                const char *pmtt_path)
 {
     /***************************************************************************
     *   num_bandwidth (IN):                                                    *
@@ -121,7 +121,7 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
 }
 
 static int parse_pmtt_memory_controllers(int num_bandwidth, int *bandwidth,
-               ACPI_PMTT_HEADER *buf, int size)
+        ACPI_PMTT_HEADER *buf, int size)
 {
     int err = 0;
     int bytes_remaining = size;
@@ -129,16 +129,17 @@ static int parse_pmtt_memory_controllers(int num_bandwidth, int *bandwidth,
 
     do {
         err = parse_pmtt_one_memory_controller(num_bandwidth, bandwidth,
-                                         pbuf, &bytes_remaining);
+                                               pbuf, &bytes_remaining);
         pbuf = (ACPI_PMTT_HEADER *)((char *)pbuf + size - bytes_remaining);
         size = bytes_remaining;
-    } while (!err && bytes_remaining > 0);
+    }
+    while (!err && bytes_remaining > 0);
 
     return err;
 }
 
 static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
-               ACPI_PMTT_HEADER *buf_in, int *bytes_remaining)
+        ACPI_PMTT_HEADER *buf_in, int *bytes_remaining)
 {
     int err = 0;
     int i, j;
@@ -166,7 +167,8 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
     return err;
 }
 
-int main (int argc, char *argv[]){
+int main (int argc, char *argv[])
+{
 
     int err = 0;
     FILE *fp = NULL;
@@ -175,7 +177,7 @@ int main (int argc, char *argv[]){
     char dir[STRLEN];
 
     bandwidth = (int *)malloc(sizeof(int) *
-                                 NUMA_NUM_NODES);
+                              NUMA_NUM_NODES);
     if (!bandwidth) {
         fprintf(stderr, "ERROR: <%s> in allocating bandwidth array\n", argv[0]);
         return -1;

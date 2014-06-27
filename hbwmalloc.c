@@ -80,7 +80,7 @@ int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
 }
 
 int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
-    int pagesize)
+                                int pagesize)
 {
     int kind;
     if (hbw_get_policy() == HBW_POLICY_BIND) {

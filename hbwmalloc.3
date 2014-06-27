@@ -164,7 +164,9 @@ memory is available.
 .PP
 .BR hbw_set_policy ()
 set the current fallback policy, the policy can be modified only once
-in the life of an application.
+in the life of an application. The policy in effect at the time when a
+buffer is allocated determines the policy for that buffer until it is
+freed.
 .TP
 .B HBW_POLICY_BIND
 If insufficient high bandwidth memory pages are available a

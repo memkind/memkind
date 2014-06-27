@@ -45,14 +45,14 @@ static pthread_once_t numakind_hbw_closest_numanode_once_g = PTHREAD_ONCE_INIT;
 static void numakind_hbw_closest_numanode_init(void);
 
 static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
-               const char *bandwidth_path);
+                                const char *bandwidth_path);
 
 static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
-               int *num_unique, struct bandwidth_nodes_t **bandwidth_nodes);
+                                  int *num_unique, struct bandwidth_nodes_t **bandwidth_nodes);
 
 static int set_closest_numanode(int num_unique,
-               const struct bandwidth_nodes_t *bandwidth_nodes,
-               int target_bandwidth, int num_cpunode, int *closest_numanode);
+                                const struct bandwidth_nodes_t *bandwidth_nodes,
+                                int target_bandwidth, int num_cpunode, int *closest_numanode);
 
 static int numanode_bandwidth_compare(const void *a, const void *b);
 
@@ -69,7 +69,7 @@ int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode)
     int cpu;
     struct bitmask nodemask_bm = {maxnode, nodemask};
     struct numakind_hbw_closest_numanode_t *g =
-          &numakind_hbw_closest_numanode_g;
+                &numakind_hbw_closest_numanode_g;
     pthread_once(&numakind_hbw_closest_numanode_once_g,
                  numakind_hbw_closest_numanode_init);
 
@@ -89,7 +89,7 @@ int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode)
 static void numakind_hbw_closest_numanode_init(void)
 {
     struct numakind_hbw_closest_numanode_t *g =
-          &numakind_hbw_closest_numanode_g;
+                &numakind_hbw_closest_numanode_g;
     int *bandwidth = NULL;
     int num_unique = 0;
     int high_bandwidth = 0;
@@ -138,10 +138,10 @@ static void numakind_hbw_closest_numanode_init(void)
         }
     }
     if (!g->init_err) {
-         high_bandwidth = bandwidth_nodes[num_unique-1].bandwidth;
-         g->init_err = set_closest_numanode(num_unique, bandwidth_nodes,
-                                            high_bandwidth, g->num_cpu,
-                                            g->closest_numanode);
+        high_bandwidth = bandwidth_nodes[num_unique-1].bandwidth;
+        g->init_err = set_closest_numanode(num_unique, bandwidth_nodes,
+                                           high_bandwidth, g->num_cpu,
+                                           g->closest_numanode);
     }
     if (bandwidth_nodes) {
         je_free(bandwidth_nodes);
@@ -158,7 +158,7 @@ static void numakind_hbw_closest_numanode_init(void)
 }
 
 static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
-               const char *bandwidth_path)
+                                const char *bandwidth_path)
 {
     FILE *fid;
     size_t nread;
@@ -170,14 +170,14 @@ static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
     if (!err) {
         nread = fread(bandwidth, sizeof(int), num_bandwidth, fid);
         if (nread != num_bandwidth) {
-           err = NUMAKIND_ERROR_PMTT;
+            err = NUMAKIND_ERROR_PMTT;
         }
     }
     return err;
 }
 
 static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
-               int *num_unique, struct bandwidth_nodes_t **bandwidth_nodes)
+                                  int *num_unique, struct bandwidth_nodes_t **bandwidth_nodes)
 {
     /***************************************************************************
     *   num_bandwidth (IN):                                                    *
@@ -234,8 +234,8 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
         }
         /* allocate output array */
         *bandwidth_nodes = (struct bandwidth_nodes_t*)je_malloc(
-            sizeof(struct bandwidth_nodes_t) * *num_unique +
-            sizeof(int) * num_bandwidth);
+                               sizeof(struct bandwidth_nodes_t) **num_unique +
+                               sizeof(int) * num_bandwidth);
         if (!*bandwidth_nodes) {
             err = NUMAKIND_ERROR_MALLOC;
         }
@@ -272,8 +272,8 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
 }
 
 static int set_closest_numanode(int num_unique,
-               const struct bandwidth_nodes_t *bandwidth_nodes,
-               int target_bandwidth, int num_cpunode, int *closest_numanode)
+                                const struct bandwidth_nodes_t *bandwidth_nodes,
+                                int target_bandwidth, int num_cpunode, int *closest_numanode)
 {
     /***************************************************************************
     *   num_unique (IN):                                                       *

@@ -254,7 +254,7 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
 }
 
 int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
-        size_t size)
+                            size_t size)
 {
     int err = 0;
     int arena;
@@ -265,18 +265,18 @@ int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
         err = err ? NUMAKIND_ERROR_MEMALIGN : 0;
     }
     else {
-         err = numakind_getarena(kind, &arena);
-         if (!err) {
-             if ( (alignment < sizeof(void*)) ||
-                  (((alignment - 1) & alignment) != 0) ){
-                  err = NUMAKIND_ERROR_ALIGNMENT;
-             }
-         }
-         if (!err) {
-              err = je_allocm(memptr, NULL, size,
-                              ALLOCM_ALIGN(alignment) | ALLOCM_ARENA(arena));
-              err = err ? NUMAKIND_ERROR_ALLOCM : 0;
-         }
+        err = numakind_getarena(kind, &arena);
+        if (!err) {
+            if ( (alignment < sizeof(void*)) ||
+                 (((alignment - 1) & alignment) != 0) ) {
+                err = NUMAKIND_ERROR_ALIGNMENT;
+            }
+        }
+        if (!err) {
+            err = je_allocm(memptr, NULL, size,
+                            ALLOCM_ALIGN(alignment) | ALLOCM_ARENA(arena));
+            err = err ? NUMAKIND_ERROR_ALLOCM : 0;
+        }
     }
     if (err) {
         *memptr = NULL;
