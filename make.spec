@@ -41,6 +41,21 @@ is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
+%package devel
+Summary: Development pacakge for extention to libnuma for kinds of memory
+Group: System Environment/Libraries
+
+%description devel
+The numakind library extends libnuma with the ability to categorize
+groups of NUMA nodes into different "kinds" of memory. It provides a
+low level interface for generating inputs to mbind() and mmap(), and a
+high level interface for heap management.  The heap management is
+implemented with an extension to the jemalloc library which dedicates
+"arenas" to each CPU node and kind of memory.  Additionally the heap
+is partitioned so that freed memory segments of different kinds are
+not coalesced.  To use numakind, jemalloc must be compiled with the
+--enable-numakind option.
+
 %prep
 %setup -D -q -c -T -a 0
 
@@ -68,7 +83,7 @@ fi
 %postun
 /sbin/ldconfig
 
-%files
+%files devel
 %defattr(-,root,root,-)
 %{_includedir}/numakind.h
 %{_includedir}/hbwmalloc.h
