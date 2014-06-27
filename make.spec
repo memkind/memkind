@@ -62,7 +62,7 @@ not coalesced.  To use numakind, jemalloc must be compiled with the
 $(make_prefix) $(MAKE) $(make_postfix)
 
 %install
-make DESTDIR=%{buildroot} VERSION=%{version} includedir=%{_includedir} libdir=%{_libdir} sbinddir={%_sbinddir} initddir=%{_initddir} docdir=%{_docdir} mandir=%{_mandir} install
+make DESTDIR=%{buildroot} VERSION=%{version} includedir=%{_includedir} libdir=%{_libdir} sbindir=%{_sbindir} initddir=%{_initddir} docdir=%{_docdir} mandir=%{_mandir} install
 $(extra_install)
 
 %clean
@@ -107,6 +107,7 @@ fi
 %{_libdir}/libnumakind.so
 %{_sbindir}/numakind-pmtt
 %{_initddir}/numakind
+%{_docdir}/numakind-%{version}
 %doc %{_docdir}/numakind-%{version}/README.txt
 %doc %{_docdir}/numakind-%{version}/COPYING.txt
 %doc %{_mandir}/man3/hbwmalloc.3.gz
