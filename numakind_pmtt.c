@@ -171,7 +171,8 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
             j = buf->domain[i].ProximityDomain;
             if (j < num_bandwidth) {
                 bandwidth[j] = buf->memctlr.ReadBandwidth;
-            } else {
+            }
+            else {
                 err = NUMAKIND_ERROR_PMTT;
             }
         }
