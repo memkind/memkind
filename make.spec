@@ -67,7 +67,7 @@ $(extra_install)
 
 %clean
 
-%post
+%post devel
 /sbin/ldconfig
 if [ -x /sbin/chkconfig ]; then
     /sbin/chkconfig --add numakind
@@ -83,7 +83,7 @@ else
 fi
 %{_initddir}/numakind force-reload >/dev/null 2>&1
 
-%preun
+%preun devel
 if [ -z "$1" ] || [ "$1" == 0 ]; then
     %{_initdir}/numakind stop >/dev/null 2>&1
     if [ -x /sbin/chkconfig ]; then
@@ -95,7 +95,7 @@ if [ -z "$1" ] || [ "$1" == 0 ]; then
     fi
 fi
 
-%postun
+%postun devel
 /sbin/ldconfig
 
 %files devel
@@ -115,8 +115,8 @@ fi
 $(extra_files)
 
 %changelog
-* Mon Mar 24 2014 mic <mic@localhost> - 
-- Initial build.
+* Tue Jul 1 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> -
+- Initial release to NDA customers
 endef
 
 export make_spec
