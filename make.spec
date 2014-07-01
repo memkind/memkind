@@ -29,10 +29,6 @@ BuildRequires: numactl-devel
 BuildRequires: jemalloc-devel
 %endif
 
-%package devel
-Summary: Development pacakge for extention to libnuma for kinds of memory
-Group: System Environment/Libraries
-
 %description
 The numakind library extends libnuma with the ability to categorize
 groups of NUMA nodes into different "kinds" of memory. It provides a
@@ -43,6 +39,10 @@ implemented with an extension to the jemalloc library which dedicates
 is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
+
+%package devel
+Summary: Development pacakge for extention to libnuma for kinds of memory
+Group: System Environment/Libraries
 
 %description devel
 The numakind library extends libnuma with the ability to categorize
@@ -55,15 +55,19 @@ is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
-%build devel
+%prep
+%setup
+
+%build
 $(make_prefix) $(MAKE) $(make_postfix)
 
-%install devel
+%install
 make DESTDIR=%{buildroot} VERSION=%{version} includedir=%{_includedir} libdir=%{_libdir} sbindir=%{_sbindir} initddir=%{_initddir} docdir=%{_docdir} mandir=%{_mandir} install
 $(extra_install)
 
-%post devel
-echo EXECUTING POST
+%clean
+
+%post
 /sbin/ldconfig
 if [ -x /sbin/chkconfig ]; then
     /sbin/chkconfig --add numakind
@@ -79,7 +83,7 @@ else
 fi
 %{_initddir}/numakind force-reload >/dev/null 2>&1
 
-%preun devel
+%preun
 if [ -z "$1" ] || [ "$1" == 0 ]; then
     %{_initdir}/numakind stop >/dev/null 2>&1
     if [ -x /sbin/chkconfig ]; then
@@ -91,7 +95,7 @@ if [ -z "$1" ] || [ "$1" == 0 ]; then
     fi
 fi
 
-%postun devel
+%postun
 /sbin/ldconfig
 
 %files devel
@@ -110,10 +114,9 @@ fi
 %doc %{_mandir}/man3/numakind.3.gz
 $(extra_files)
 
-%changelog devel
+%changelog
 * Mon Mar 24 2014 mic <mic@localhost> - 
-* Tue Jul 1 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> -
-- Initial release to NDA customers
+- Initial build.
 endef
 
 export make_spec
