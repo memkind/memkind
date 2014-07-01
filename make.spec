@@ -69,10 +69,10 @@ $(extra_install)
 
 %post
 /sbin/ldconfig
-if [ -x /usr/lib/lsb/install_initd ]; then
-    /usr/lib/lsb/install_initd %{_initddir}/numakind
-elif [ -x /sbin/chkconfig ]; then
+if [ -x /sbin/chkconfig ]; then
     /sbin/chkconfig --add numakind
+elif [ -x /usr/lib/lsb/install_initd ]; then
+    /usr/lib/lsb/install_initd %{_initddir}/numakind
 else
     for i in 3 4 5; do
         ln -sf %{_initddir}/numakind /etc/rc.d/rc${i}.d/S90numakind
