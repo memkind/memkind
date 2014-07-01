@@ -31,16 +31,8 @@
 # Default-Stop: 0 1 2 6
 ### END INIT INFO
 
-# test if this is an LSB system
-if [ -d /usr/lib/lsb ]; then
-    IS_LSB=1
-else
-    IS_LSB=0
-fi
-
-if [ $IS_LSB ]; then 
-    test -s /etc/rc.status && \
-        . /etc/rc.status
+if [ -s /etc/rc.status ]; then
+    . /etc/rc.status
     echo_success() {
         echo $1
         rc_failed 0
@@ -51,9 +43,15 @@ if [ $IS_LSB ]; then
         rc_failed 1
         rc_status -v1
     }
+elif [ -s /etc/rc.d/init.d/functions ]; then
+    . /etc/rc.d/init.d/functions
 else
-    test -s /etc/rc.d/init.d/functions && \
-        . /etc/rc.d/init.d/functions
+    echo_success() {
+        echo $1
+    }
+    echo_failure() {
+        echo ERROR: $1
+    }
 fi
 
 err=0
