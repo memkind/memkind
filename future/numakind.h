@@ -90,7 +90,12 @@ typedef struct numakind * numakind_t;
 /* Convert error number into an error message */
 void numakind_error_message(int err, char *msg, size_t size);
 
-/* Query the number of kinds availble */
+/* KIND MANAGEMENT INTERFACE */
+
+/* Create a new kind */
+int numakind_create(const struct numakind_ops *ops, const char *name);
+
+/* Query the number of kinds instantiated */
 int numakind_get_num_kind(int *num_kind);
 
 /* Get kind associated with a partition (index from 0 to num_kind - 1) */
@@ -105,8 +110,7 @@ int numakind_get_size(numakind_t kind, size_t *total, size_t *free);
 /* returns 1 if numa kind is availble else 0 */
 int numakind_is_available(numakind_t kind);
 
-/* Create a new kind */
-int numakind_create(const struct numakind_ops *ops, const char *name);
+/* HEAP MANAGEMENT INTERFACE */
 
 /* malloc from the numa nodes of the specified kind */
 void *numakind_malloc(numakind_t kind, size_t size);
@@ -123,6 +127,8 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size);
 
 /* Free memory allocated with the numakind API */
 void numakind_free(numakind_t kind, void *ptr);
+
+/* ALLOCATOR CALLBACK FUNCTIONS */
 
 /* returns 1 if numa kind associated with the partition is availble else 0 */
 int numakind_partition_is_available(int partition);
