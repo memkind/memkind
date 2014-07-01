@@ -58,7 +58,6 @@ err=0
 FILE=/etc/numakind/node-bandwidth
 DIR=`dirname $FILE`
 NUMAKIND_BIN=/usr/sbin/numakind-pmtt
-umask 133
 
 start() {
     echo_success "creating bandwidth values file"

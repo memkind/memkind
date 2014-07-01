@@ -194,21 +194,26 @@ int main (int argc, char *argv[])
     fp = fopen(NUMAKIND_BANDWIDTH_PATH, "w");
     if (!fp) {
         fprintf(stderr, "ERROR: <%s> opening %s for writing\n", argv[0], NUMAKIND_BANDWIDTH_PATH);
-        return -2;
+        return -3;
     }
     err = parse_pmtt_bandwidth(NUMA_NUM_NODES,
                                bandwidth,
                                PMTT_PATH);
     if (err) {
         fprintf(stderr, "ERROR: <%s> parsing file %s\n", argv[0], PMTT_PATH);
-        return -3;
+        return -4;
 
     }
     nwrite = fwrite(bandwidth, sizeof(int), NUMA_NUM_NODES, fp);
     if (nwrite != NUMA_NUM_NODES) {
-        return -4;
+        return -5;
     }
     fclose(fp);
+    err = chmod(NUMAKIND_BANDWIDTH_PATH, 0644);
+    if (err) {
+        fprintf(stderr, "ERROR: <%s> changing permissions on file %s\n", argv[0], NUMAKIND_BANDWIDTH_PATH);
+        return -6;
+    }
 
     free(bandwidth);
     return 0;
