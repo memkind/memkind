@@ -267,7 +267,6 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
     if ((long int)size < 0) {
         result = NULL;
         errno = ENOMEM;
-
     }
     else if (kind == NUMAKIND_DEFAULT) {
         result = je_calloc(num, size);
