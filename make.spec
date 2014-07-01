@@ -86,10 +86,10 @@ fi
 %preun
 if [ -z "$1" ] || [ "$1" == 0 ]; then
     %{_initdir}/numakind stop >/dev/null 2>&1
-    if [ -x /usr/lib/lsb/remove_initd ]; then
-        /usr/lib/lsb/remove_initd %{_initdir}/numakind
-    elif [ -x /sbin/chkconfig ]; then
+    if [ -x /sbin/chkconfig ]; then
         /sbin/chkconfig --del numakind
+    elif [ -x /usr/lib/lsb/remove_initd ]; then
+        /usr/lib/lsb/remove_initd %{_initdir}/numakind
     else
         rm -f /etc/rc.d/rc?.d/???numakind
     fi
