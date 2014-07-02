@@ -14,7 +14,7 @@ Name: $(name)
 Version: $(version)
 Release: $(release)
 License: See COPYING
-Group: Development/Libraries
+Group: System Environment/Libraries
 Vendor: Intel Corporation
 URL: http://www.intel.com
 Source0: numakind-%{version}.tar.gz
@@ -42,7 +42,7 @@ not coalesced.  To use numakind, jemalloc must be compiled with the
 
 %package devel
 Summary: Extention to libnuma for kinds of memory - development
-Group: System Environment/Libraries
+Group: Development/Libraries
 
 %description devel
 The numakind library extends libnuma with the ability to categorize
@@ -55,20 +55,20 @@ is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
-%prep devel
+%prep
 
-%setup devel
+%setup
 
-%build devel
+%build
 $(make_prefix) $(MAKE) $(make_postfix)
 
-%install devel
+%install
 make DESTDIR=%{buildroot} VERSION=%{version} includedir=%{_includedir} libdir=%{_libdir} sbindir=%{_sbindir} initddir=%{_initddir} docdir=%{_docdir} mandir=%{_mandir} install
 $(extra_install)
 
-%clean devel
+%clean
 
-%post devel
+%post
 /sbin/ldconfig
 if [ -x /sbin/chkconfig ]; then
     /sbin/chkconfig --add numakind
@@ -84,7 +84,7 @@ else
 fi
 %{_initddir}/numakind force-reload >/dev/null 2>&1 || :
 
-%preun devel
+%preun
 if [ -z "$1" ] || [ "$1" == 0 ]; then
     %{_initddir}/numakind stop >/dev/null 2>&1 || :
     if [ -x /sbin/chkconfig ]; then
@@ -96,7 +96,7 @@ if [ -z "$1" ] || [ "$1" == 0 ]; then
     fi
 fi
 
-%postun devel
+%postun
 /sbin/ldconfig
 
 %files devel
@@ -115,7 +115,7 @@ fi
 %doc %{_mandir}/man3/numakind.3.gz
 $(extra_files)
 
-%changelog devel
+%changelog
 * Tue Jul 1 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> -
 - Initial release to NDA customers
 endef
