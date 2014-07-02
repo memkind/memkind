@@ -55,20 +55,20 @@ is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
-%prep
+%prep devel
 
-%setup
+%setup devel
 
-%build
+%build devel
 $(make_prefix) $(MAKE) $(make_postfix)
 
-%install
+%install devel
 make DESTDIR=%{buildroot} VERSION=%{version} includedir=%{_includedir} libdir=%{_libdir} sbindir=%{_sbindir} initddir=%{_initddir} docdir=%{_docdir} mandir=%{_mandir} install
 $(extra_install)
 
-%clean
+%clean devel
 
-%post
+%post devel
 /sbin/ldconfig
 if [ -x /sbin/chkconfig ]; then
     /sbin/chkconfig --add numakind
@@ -84,7 +84,7 @@ else
 fi
 %{_initddir}/numakind force-reload >/dev/null 2>&1 || :
 
-%preun
+%preun devel
 if [ -z "$1" ] || [ "$1" == 0 ]; then
     %{_initddir}/numakind stop >/dev/null 2>&1 || :
     if [ -x /sbin/chkconfig ]; then
@@ -96,7 +96,7 @@ if [ -z "$1" ] || [ "$1" == 0 ]; then
     fi
 fi
 
-%postun
+%postun devel
 /sbin/ldconfig
 
 %files devel
@@ -115,7 +115,7 @@ fi
 %doc %{_mandir}/man3/numakind.3.gz
 $(extra_files)
 
-%changelog
+%changelog devel
 * Tue Jul 1 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> -
 - Initial release to NDA customers
 endef
