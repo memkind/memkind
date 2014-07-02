@@ -73,24 +73,24 @@ $(extra_install)
 if [ -x /sbin/chkconfig ]; then
     /sbin/chkconfig --add numakind
 elif [ -x /usr/lib/lsb/install_initd ]; then
-    /usr/lib/lsb/install_initd /etc/init.d/numakind
+    /usr/lib/lsb/install_initd %{_initddir}/numakind
 else
     for i in 3 4 5; do
-        ln -sf /etc/init.d/numakind /etc/rc.d/rc${i}.d/S90numakind
+        ln -sf %{_initddir}/numakind /etc/rc.d/rc${i}.d/S90numakind
     done
     for i in 0 1 2 6; do
-        ln -sf /etc/init.d/numakind /etc/rc.d/rc${i}.d/K10numakind
+        ln -sf %{_initddir}/numakind /etc/rc.d/rc${i}.d/K10numakind
     done
 fi
-/etc/init.d/numakind force-reload >/dev/null 2>&1 || :
+%{_initddir}/numakind force-reload >/dev/null 2>&1 || :
 
 %preun devel
 if [ -z "$1" ] || [ "$1" == 0 ]; then
-    /etc/init.d/numakind stop >/dev/null 2>&1 || :
+    %{_initddir}/numakind stop >/dev/null 2>&1 || :
     if [ -x /sbin/chkconfig ]; then
         /sbin/chkconfig --del numakind
     elif [ -x /usr/lib/lsb/remove_initd ]; then
-        /usr/lib/lsb/remove_initd /etc/init.d/numakind
+        /usr/lib/lsb/remove_initd %{_initddir}/numakind
     else
         rm -f /etc/rc.d/rc?.d/???numakind
     fi
