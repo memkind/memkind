@@ -59,7 +59,7 @@ is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
-%build devel
+%build
 $(make_prefix) $(MAKE) $(make_postfix)
 
 %install devel
