@@ -40,6 +40,10 @@ is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
+%prep
+
+%setup
+
 %package devel
 Summary: Extention to libnuma for kinds of memory - development
 Group: Development/Libraries
@@ -54,10 +58,6 @@ implemented with an extension to the jemalloc library which dedicates
 is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
-
-%prep devel
-
-%setup devel
 
 %build devel
 $(make_prefix) $(MAKE) $(make_postfix)
