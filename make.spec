@@ -62,11 +62,11 @@ not coalesced.  To use numakind, jemalloc must be compiled with the
 %build
 $(make_prefix) $(MAKE) $(make_postfix)
 
-%install devel
+%install
 make DESTDIR=%{buildroot} VERSION=%{version} includedir=%{_includedir} libdir=%{_libdir} sbindir=%{_sbindir} initddir=%{_initddir} docdir=%{_docdir} mandir=%{_mandir} install
 $(extra_install)
 
-%clean devel
+%clean
 
 %post devel
 /sbin/ldconfig
@@ -115,7 +115,7 @@ fi
 %doc %{_mandir}/man3/numakind.3.gz
 $(extra_files)
 
-%changelog devel
+%changelog
 * Tue Jul 1 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> -
 - Initial release to NDA customers
 endef
