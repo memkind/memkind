@@ -81,11 +81,11 @@ else
         ln -sf %{_initddir}/numakind /etc/rc.d/rc${i}.d/K10numakind
     done
 fi
-%{_initddir}/numakind force-reload >/dev/null 2>&1 || test -z
+%{_initddir}/numakind force-reload >/dev/null 2>&1 || :
 
 %preun devel
 if [ -z "$1" ] || [ "$1" == 0 ]; then
-    %{_initdir}/numakind stop >/dev/null 2>&1 || test -z
+    %{_initdir}/numakind stop >/dev/null 2>&1 || :
     if [ -x /sbin/chkconfig ]; then
         /sbin/chkconfig --del numakind
     elif [ -x /usr/lib/lsb/remove_initd ]; then
