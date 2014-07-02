@@ -85,7 +85,7 @@ fi
 
 %preun devel
 if [ -z "$1" ] || [ "$1" == 0 ]; then
-    %{_initdir}/numakind stop >/dev/null 2>&1
+    %{_initdir}/numakind stop >/dev/null 2>&1 || test -z
     if [ -x /sbin/chkconfig ]; then
         /sbin/chkconfig --del numakind
     elif [ -x /usr/lib/lsb/remove_initd ]; then
