@@ -81,7 +81,7 @@ else
         ln -sf %{_initddir}/numakind /etc/rc.d/rc${i}.d/K10numakind
     done
 fi
-%{_initddir}/numakind force-reload >/dev/null 2>&1
+%{_initddir}/numakind force-reload >/dev/null 2>&1 || test -z
 
 %preun devel
 if [ -z "$1" ] || [ "$1" == 0 ]; then
