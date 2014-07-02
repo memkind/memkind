@@ -14,7 +14,7 @@ Name: $(name)
 Version: $(version)
 Release: $(release)
 License: See COPYING
-Group: System Environment/Libraries
+Group: Development/Libraries
 Vendor: Intel Corporation
 URL: http://www.intel.com
 Source0: numakind-%{version}.tar.gz
@@ -41,7 +41,7 @@ not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
 %package devel
-Summary: Development pacakge for extention to libnuma for kinds of memory
+Summary: Extention to libnuma for kinds of memory - development
 Group: System Environment/Libraries
 
 %description devel
@@ -55,41 +55,42 @@ is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
-%prep
-%setup
+%prep devel
 
-%build
+%setup devel
+
+%build devel
 $(make_prefix) $(MAKE) $(make_postfix)
 
-%install
+%install devel
 make DESTDIR=%{buildroot} VERSION=%{version} includedir=%{_includedir} libdir=%{_libdir} sbindir=%{_sbindir} initddir=%{_initddir} docdir=%{_docdir} mandir=%{_mandir} install
 $(extra_install)
 
-%clean
+%clean devel
 
 %post devel
 /sbin/ldconfig
 if [ -x /sbin/chkconfig ]; then
     /sbin/chkconfig --add numakind
 elif [ -x /usr/lib/lsb/install_initd ]; then
-    /usr/lib/lsb/install_initd %{_initddir}/numakind
+    /usr/lib/lsb/install_initd /etc/init.d/numakind
 else
     for i in 3 4 5; do
-        ln -sf %{_initddir}/numakind /etc/rc.d/rc${i}.d/S90numakind
+        ln -sf /etc/init.d/numakind /etc/rc.d/rc${i}.d/S90numakind
     done
     for i in 0 1 2 6; do
-        ln -sf %{_initddir}/numakind /etc/rc.d/rc${i}.d/K10numakind
+        ln -sf /etc/init.d/numakind /etc/rc.d/rc${i}.d/K10numakind
     done
 fi
-%{_initddir}/numakind force-reload >/dev/null 2>&1 || :
+/etc/init.d/numakind force-reload >/dev/null 2>&1 || :
 
 %preun devel
 if [ -z "$1" ] || [ "$1" == 0 ]; then
-    %{_initdir}/numakind stop >/dev/null 2>&1 || :
+    /etc/init.d/numakind stop >/dev/null 2>&1 || :
     if [ -x /sbin/chkconfig ]; then
         /sbin/chkconfig --del numakind
     elif [ -x /usr/lib/lsb/remove_initd ]; then
-        /usr/lib/lsb/remove_initd %{_initdir}/numakind
+        /usr/lib/lsb/remove_initd /etc/init.d/numakind
     else
         rm -f /etc/rc.d/rc?.d/???numakind
     fi
@@ -114,7 +115,7 @@ fi
 %doc %{_mandir}/man3/numakind.3.gz
 $(extra_files)
 
-%changelog
+%changelog devel
 * Tue Jul 1 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> -
 - Initial release to NDA customers
 endef
