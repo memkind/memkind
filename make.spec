@@ -19,7 +19,6 @@ Vendor: Intel Corporation
 URL: http://www.intel.com
 Source0: numakind-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: numactl
 %if %{defined suse_version}
 BuildRequires: libnuma-devel
 %else
