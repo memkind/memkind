@@ -1,5 +1,5 @@
 Christopher Cantalupo <christopher.m.cantalupo@intel.com>
-2014 June 6
+2014 July 3
 
 
 The numakind library extends libnuma with the ability to categorize
@@ -12,8 +12,10 @@ is partitioned so that freed memory segments of different kinds are
 not coalesced.  To use numakind, jemalloc must be compiled with the
 --enable-numakind option.
 
-Requires kernel patch introduced in Linux 3.12 that impacts
-functionality of the NUMA system calls.
+Requires kernel patch introduced in Linux v3.11 that impacts
+functionality of the NUMA system calls.  This is patch is commit
+3964acd0dbec123aa0a621973a2a0580034b4788
+in the linux-stable git repoitory from kernel.org.
 
 To use the interfaces for obtaining 2MB pages please be sure to follow
 the instructions here:
