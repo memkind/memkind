@@ -83,6 +83,7 @@ struct numakind_ops {
     int (* get_mbind_mode)(struct numakind *kind, int *mode);
     int (* get_mbind_nodemask)(struct numakind *kind, unsigned long *nodemask, unsigned long maxnode);
     int (* get_arena) (struct numakind *kind, unsigned int *arena);
+    int (* get_size) (struct numakind *kind, size_t *total, size_t *free);
 };
 
 typedef struct numakind * numakind_t;
