@@ -101,9 +101,6 @@ void *numakind_arena_malloc(struct numakind *kind, size_t size)
     if (!err) {
         result = je_mallocx(size, MALLOCX_ARENA(arena));
     }
-    if (err) {
-        result = NULL;
-    }
     return result;
 }
 
