@@ -27,7 +27,7 @@ int numakind_hbw_preferred_get_mbind_mode(struct numakind *kind, int *mode);
 int numakind_hbw_get_mbind_nodemask(struct numakind *kind, unsigned long *nodemask, unsigned long maxnode);
 
 static const struct numakind_ops NUMAKIND_HBW_OPS = {
-    .create = numakind_default_create,
+    .create = numakind_arena_create,
     .destroy = numakind_arena_destroy,
     .malloc = numakind_arena_malloc,
     .calloc = numakind_arena_calloc,
