@@ -132,7 +132,7 @@ TEST_F(BATest, hbw_numakind_trials_two_kind_stress)
 
 TEST_F(BATest, hbw_numakind_trials_all_kind_stress)
 {
-    tgen->generate_multi_app_stress(NUMAKIND_NUM_KIND);
+    tgen->generate_multi_app_stress(NUMAKIND_NUM_BASE_KIND);
     tgen->run(num_bandwidth, bandwidth);
 }
 
