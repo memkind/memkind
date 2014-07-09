@@ -23,7 +23,7 @@ mandir ?= $(datarooddir)/man
 initddir ?= /etc/rc.d/init.d
 
 EXTRA_CFLAGS = -fPIC -Wall -Werror -O3
-OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
+OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o numakind_default.o numakind_arena.o
 
 all: libnumakind.so.0.0 numakind-pmtt
 
@@ -37,8 +37,14 @@ test:
 numakind.o: numakind.c numakind.h numakind_hbw.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind.c
 
-numakind_hbw.o: numakind_hbw.c numakind.h numakind_hbw.h
+numakind_hbw.o: numakind_hbw.c numakind.h numakind_hbw.h numakind_arena.h numakind_default.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind_hbw.c
+
+numakind_default.o: numakind_default.c numakind.h numakind_default.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind_default.c
+
+numakind_arena.o: numakind_arena.c numakind.h numakind_arena.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind_arena.c
 
 hbwmalloc.o: hbwmalloc.c hbwmalloc.h numakind.h numakind_hbw.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -c hbwmalloc.c

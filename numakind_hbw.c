@@ -12,15 +12,16 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <limits.h>
+#include <sys/mman.h>
 #include <pthread.h>
 #include <numa.h>
 #include <numaif.h>
 #include <sys/types.h>
 #include <jemalloc/jemalloc.h>
+#define _GNU_SOURCE
+#include <utmpx.h>
 
-#include "numakind.h"
 #include "numakind_hbw.h"
-
 
 struct numanode_bandwidth_t {
     int numanode;
@@ -56,15 +57,27 @@ static int set_closest_numanode(int num_unique,
 
 static int numanode_bandwidth_compare(const void *a, const void *b);
 
-
-int numakind_hbw_is_available(void)
+int numakind_hbw_is_available(struct numakind *kind)
 {
     int err;
-    err = numakind_hbw_get_nodemask(NULL, 0);
+    err = kind->ops->get_mbind_nodemask(kind, NULL, 0);
     return (!err);
 }
 
-int numakind_hbw_get_nodemask(unsigned long *nodemask, unsigned long maxnode)
+int numakind_hbw_hugetlb_get_mmap_flags(struct numakind *kind, int *flags)
+{
+    *flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB;
+    return 0;
+}
+
+int numakind_hbw_preferred_get_mbind_mode(struct numakind *kind, int *mode)
+{
+    *mode = MPOL_PREFERRED;
+    return 0;
+}
+
+int numakind_hbw_get_mbind_nodemask(struct numakind *kind,
+                                    unsigned long *nodemask, unsigned long maxnode)
 {
     int cpu;
     struct bitmask nodemask_bm = {maxnode, nodemask};
@@ -217,7 +230,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
         /* ignore zero bandwidths */
         num_bandwidth = j;
         if (num_bandwidth == 0) {
-            err = NUMAKIND_ERROR_HBW;
+            err = NUMAKIND_ERROR_PMTT;
         }
     }
     if (!err) {
@@ -304,7 +317,7 @@ static int set_closest_numanode(int num_unique,
         }
     }
     if (match.bandwidth == -1) {
-        err = NUMAKIND_ERROR_HBW;
+        err = NUMAKIND_ERROR_PMTT;
     }
     else {
         for (i = 0; i < num_cpunode; ++i) {

@@ -14,7 +14,9 @@ numakind \- Heap manager that isolates allocations to different kinds of numa no
 .sp
 .B Link with -ljemalloc -lnuma -lnumakind -lpthread
 .sp
-.B "HEAP MANAGER:"
+.BI "void numakind_error_message(int " "err" ", char " "*msg" ", size_t " "size" );
+.sp
+.B "HEAP MANAGEMENT:"
 .br
 .BI "void *numakind_malloc(numakind_t " "kind" ", size_t " "size" );
 .br
@@ -26,16 +28,28 @@ numakind \- Heap manager that isolates allocations to different kinds of numa no
 .br
 .BI "int numakind_posix_memalign(numakind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .sp
-.B "LOW LEVEL INTERFACE:"
+.B "ALLOCATOR CALLBACK FUNCTIONS:"
 .br
-.BI "void numakind_error_message(int " "err" ", char " "*msg" ", size_t " "size" );
+.BI "int numakind_partition_is_available(int " "partition" );
 .br
-.BI "int numakind_is_available(int " "kind" );
+.BI "int numakind_partition_get_mmap_flags(int " "partition" ", int " "*flags" );
 .br
-.BI "int numakind_get_mmap_flags(int " "kind" ", int " "*flags" );
+.BI "int numakind_partition_mbind(int " "partition" ", void " "*addr" ", size_t " "len" );
+.sp
+.B "KIND MANAGMENT:"
 .br
-.BI "int numakind_mbind(int " "kind" ", void " "*addr" ", size_t " "len" );
-.fi
+.BI "int numakind_create(const struct numakind_ops " "*ops" ", const char " "*name" );
+.br
+.BI "int numakind_get_num_kind(int " "*num_kind" );
+.br
+.BI "int numakind_get_kind_by_partition(int " "partition" ", numakind_t " "*kind" );
+.br
+.BI "int numakind_get_kind_by_name(const char " "*name" ", numakind_t " "*kind" );
+.br
+.BI "int numakind_get_size(numakind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
+.br
+.BI "int numakind_is_available(numakind_t " "kind" );
+.br
 .SH "DESCRIPTION"
 .B "HEAP MANAGER:"
 .br

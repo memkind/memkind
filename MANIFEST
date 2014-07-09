@@ -4,8 +4,6 @@ actbl2.h
 actbl3.h
 actbl.h
 actypes.h
-future/numakind.h
-future/README.txt
 hbwmalloc.3
 hbwmalloc.c
 hbwmalloc.h
@@ -13,6 +11,10 @@ Makefile
 numakind.3
 numakind.c
 numakind.h
+numakind_arena.c
+numakind_arena.h
+numakind_default.c
+numakind_default.h
 numakind_hbw.c
 numakind_hbw.h
 numakind-init
@@ -27,3 +29,4 @@ test/bat_tests.cpp
 test/multithreaded_tests.cpp
 test/extended_tests.cpp
 test/bin/test.sh
+

@@ -25,66 +25,132 @@ extern "C" {
  *  to the jemalloc library which dedicates "arenas" to each CPU and
  *  kind of memory.  To use numakind, jemalloc must be compiled with
  *  the --enable-numakind option.
-
  */
 
+enum numakind_const {
+    NUMAKIND_MAX_KIND = 512,
+    NUMAKIND_NUM_BASE_KIND = 5,
+    NUMAKIND_ERROR_MESSAGE_SIZE = 128
+};
 
-typedef enum {
-    NUMAKIND_DEFAULT = 0,
-    NUMAKIND_HBW,
-    NUMAKIND_HBW_HUGETLB,
-    NUMAKIND_HBW_PREFERRED,
-    NUMAKIND_HBW_PREFERRED_HUGETLB,
-    NUMAKIND_NUM_KIND
-} numakind_t;
-
-typedef enum {
+enum numakind_error {
     NUMAKIND_ERROR_UNAVAILABLE = -1,
     NUMAKIND_ERROR_MBIND = -2,
     NUMAKIND_ERROR_MEMALIGN = -3,
     NUMAKIND_ERROR_MALLCTL = -4,
     NUMAKIND_ERROR_MALLOC = -5,
     NUMAKIND_ERROR_GETCPU = -6,
-    NUMAKIND_ERROR_HBW = -7,
-    NUMAKIND_ERROR_PMTT = -8,
-    NUMAKIND_ERROR_TIEDISTANCE = -9,
-    NUMAKIND_ERROR_ALIGNMENT = -10,
-    NUMAKIND_ERROR_ALLOCM = -11,
-    NUMAKIND_ERROR_ENVIRON = -12
-} numakind_error_t;
+    NUMAKIND_ERROR_PMTT = -7,
+    NUMAKIND_ERROR_TIEDISTANCE = -8,
+    NUMAKIND_ERROR_ALIGNMENT = -9,
+    NUMAKIND_ERROR_MALLOCX = -10,
+    NUMAKIND_ERROR_ENVIRON = -11,
+    NUMAKIND_ERROR_REPNAME = -12,
+    NUMAKIND_ERROR_TOOMANY = -13,
+    NUMAKIND_ERROR_RUNTIME = -255
+};
 
-static const size_t NUMAKIND_ERROR_MESSAGE_SIZE = 128;
+enum numakind_base_partition {
+    NUMAKIND_PARTITION_DEFAULT = 0,
+    NUMAKIND_PARTITION_HBW = 1,
+    NUMAKIND_PARTITION_HBW_HUGETLB = 2,
+    NUMAKIND_PARTITION_HBW_PREFERRED = 3,
+    NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB = 4
+};
+
+struct numakind_ops;
+
+struct numakind {
+    const struct numakind_ops *ops;
+    int partition;
+    char *name;
+    int arena_mode;
+    int arena_map_len;
+    unsigned int *arena_map;
+};
+
+struct numakind_ops {
+    int (* create)(struct numakind *kind, const struct numakind_ops *ops, const char *name);
+    int (* destroy)(struct numakind *kind);
+    void *(* malloc)(struct numakind *kind, size_t size);
+    void *(* calloc)(struct numakind *kind, size_t num, size_t size);
+    int (* posix_memalign)(struct numakind *kind, void **memptr, size_t alignment, size_t size);
+    void *(* realloc)(struct numakind *kind, void *ptr, size_t size);
+    void (* free)(struct numakind *kind, void *ptr);
+    int (* is_available)(struct numakind *kind);
+    int (* mbind)(struct numakind *kind, void *ptr, size_t len);
+    int (* get_mmap_flags)(struct numakind *kind, int *flags);
+    int (* get_mbind_mode)(struct numakind *kind, int *mode);
+    int (* get_mbind_nodemask)(struct numakind *kind, unsigned long *nodemask, unsigned long maxnode);
+    int (* get_arena) (struct numakind *kind, unsigned int *arena);
+    int (* get_size) (struct numakind *kind, size_t *total, size_t *free);
+};
+
+typedef struct numakind * numakind_t;
+
+extern numakind_t NUMAKIND_DEFAULT;
+extern numakind_t NUMAKIND_HBW;
+extern numakind_t NUMAKIND_HBW_PREFERRED;
+extern numakind_t NUMAKIND_HBW_HUGETLB;
+extern numakind_t NUMAKIND_HBW_PREFERRED_HUGETLB;
 
 /* Convert error number into an error message */
 void numakind_error_message(int err, char *msg, size_t size);
 
+/* Initialize base kinds. Operation is indempotent */
+void numakind_init(void);
+
+/* Free all resources allocated by the library (must be last call to library by the process) */
+void numakind_finalize(void);
+
+/* KIND MANAGEMENT INTERFACE */
+
+/* Create a new kind */
+int numakind_create(const struct numakind_ops *ops, const char *name);
+
+/* Query the number of kinds instantiated */
+int numakind_get_num_kind(int *num_kind);
+
+/* Get kind associated with a partition (index from 0 to num_kind - 1) */
+int numakind_get_kind_by_partition(int partition, numakind_t *kind);
+
+/* Get kind given the name of the kind */
+int numakind_get_kind_by_name(const char *name, numakind_t *kind);
+
+/* Get the amount in bytes of total and free memory of the NUMA nodes assciated with the kind */
+int numakind_get_size(numakind_t kind, size_t *total, size_t *free);
+
 /* returns 1 if numa kind is availble else 0 */
-int numakind_is_available(int kind);
+int numakind_is_available(numakind_t kind);
 
-/* sets nodemask for the nearest numa node for the specified numa kind */
-int numakind_get_nodemask(int kind, unsigned long *nodemask, unsigned long maxnode);
+/* HEAP MANAGEMENT INTERFACE */
 
-/* set flags for call to mmap */
-int numakind_get_mmap_flags(int kind, int *flags);
-
-/* mbind to the nearest numa node of the specified kind */
-int numakind_mbind(int kind, void *addr, size_t len);
-
-/* malloc from the nearest numa node of the specified kind */
+/* malloc from the numa nodes of the specified kind */
 void *numakind_malloc(numakind_t kind, size_t size);
 
-/* calloc from the nearest numa node of the specified kind */
+/* calloc from the numa nodes of the specified kind */
 void *numakind_calloc(numakind_t kind, size_t num, size_t size);
 
-/* posix_memalign from the nearest numa node of the specified kind */
+/* posix_memalign from the numa nodes of the specified kind */
 int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
                             size_t size);
 
-/* realloc from the nearest numa node of the specified kind */
+/* realloc from the numa nodes of the specified kind */
 void *numakind_realloc(numakind_t kind, void *ptr, size_t size);
 
 /* Free memory allocated with the numakind API */
 void numakind_free(numakind_t kind, void *ptr);
+
+/* ALLOCATOR CALLBACK FUNCTIONS */
+
+/* returns 1 if numa kind associated with the partition is availble else 0 */
+int numakind_partition_is_available(int partition);
+
+/* get flags for call to mmap for the numa kind associated with the partition */
+int numakind_partition_get_mmap_flags(int partition, int *flags);
+
+/* mbind to the nearest numa node of the numa kind associated with the partition */
+int numakind_partition_mbind(int partition, void *addr, size_t len);
 
 #ifdef __cplusplus
 }

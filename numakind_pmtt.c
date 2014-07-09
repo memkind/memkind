@@ -75,7 +75,7 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
     memset(bandwidth, 0, sizeof(int)*num_bandwidth);
 
     if (numa_available() == -1) {
-        return NUMAKIND_ERROR_HBW;
+        return NUMAKIND_ERROR_PMTT;
     }
 
 
@@ -159,7 +159,7 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
                 bandwidth[j] = buf->memctlr.ReadBandwidth;
             }
             else {
-                err = NUMAKIND_ERROR_HBW;
+                err = NUMAKIND_ERROR_PMTT;
             }
         }
     }
