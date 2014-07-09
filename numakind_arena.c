@@ -99,7 +99,7 @@ void *numakind_arena_malloc(struct numakind *kind, size_t size)
 
     err = kind->ops->get_arena(kind, &arena);
     if (!err) {
-        err = je_allocm(&result, NULL, size, MALLOCX_ARENA(arena));
+        result = je_mallocx(size, MALLOCX_ARENA(arena));
     }
     if (err) {
         result = NULL;
@@ -120,14 +120,11 @@ void *numakind_arena_realloc(struct numakind *kind, void *ptr, size_t size)
         err = kind->ops->get_arena(kind, &arena);
         if (!err) {
             if (ptr == NULL) {
-                err = je_allocm(&ptr, NULL, size, MALLOCX_ARENA(arena));
+                ptr = je_mallocx(size, MALLOCX_ARENA(arena));
             }
             else {
-                err = je_rallocm(&ptr, NULL, size, 0, MALLOCX_ARENA(arena));
+                ptr = je_rallocx(ptr, size, MALLOCX_ARENA(arena));
             }
-        }
-        if (err) {
-            ptr = NULL;
         }
     }
     return ptr;
@@ -141,11 +138,7 @@ void *numakind_arena_calloc(struct numakind *kind, size_t num, size_t size)
 
     err = kind->ops->get_arena(kind, &arena);
     if (!err) {
-        err = je_allocm(&result, NULL, num * size,
-                        MALLOCX_ARENA(arena) | MALLOCX_ZERO);
-    }
-    if (err) {
-        result = NULL;
+        result = je_mallocx(num * size, MALLOCX_ARENA(arena) | MALLOCX_ZERO);
     }
     return result;
 }
@@ -165,12 +158,8 @@ int numakind_arena_posix_memalign(struct numakind *kind, void **memptr, size_t a
         }
     }
     if (!err) {
-        err = je_allocm(memptr, NULL, size,
-                        MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena));
-        err = err ? NUMAKIND_ERROR_MALLOCX : 0;
-    }
-    if (err) {
-         *memptr = NULL;
+        *memptr = je_mallocx(size, MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena));
+        err = *memptr ? 0 : NUMAKIND_ERROR_MALLOCX;
     }
     return err;
 }
