@@ -30,6 +30,7 @@ protected:
         char *hbw_nodes_env, *endptr;
         tgen = new TrialGenerator();
 
+        hbw_is_available();
         hbw_nodes_env = getenv("NUMAKIND_HBW_NODES");
         if (hbw_nodes_env) {
             num_bandwidth = 128;
