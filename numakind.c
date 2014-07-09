@@ -122,6 +122,7 @@ int numakind_create(const struct numakind_ops *ops, const char *name)
         }
     }
     if (!err) {
+        kind->partition = numakind_registry_g.num_kind;
         err = ops->create(kind, ops, name);
     }
     if (!err) {
