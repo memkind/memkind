@@ -11,7 +11,6 @@ numakind_hbw.h
 numakind-init
 numakind_pmtt.c
 test/multithreaded_tests.cpp
-test/build.sh
 test/environ_err_test.cpp
 test/jemalloc_mock.c
 test/pmtt_err_test.cpp
