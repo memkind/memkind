@@ -85,7 +85,7 @@ void TrialGenerator :: generate_multi_app_stress(int num_types)
     for (i = 0; i < num_trials; i++) {
 
         if (n_random(3) || num_alloc == 0) {
-            numakind_get_kind_by_partition(n_random(num_types, &kind);
+            numakind_get_kind_by_partition(n_random(num_types), &kind);
             trial_vec.push_back(create_trial_tuple(NUMAKIND_MALLOC,
                                                    n_random(8*MB - 1) + 1,
                                                    0, 2097152,
