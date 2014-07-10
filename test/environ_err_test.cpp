@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <numa.h>
 #include <errno.h>
+#include <stdlib.h>
 #include "common.h"
 #include "check.h"
 #include "omp.h"
@@ -37,7 +38,12 @@ TEST_F(EnvTest, ErrorEnviron)
     int err = NUMAKIND_ERROR_ENVIRON;
     unsigned long *nodemask=NULL;
     NUMAKIND_BANDWIDTH_PATH=" ";
-    system ("unset NUMAKIND_HBW_NODES");
+    ret = unsetenv("NUMAKIND_HBW_NODES");
+    if ( -1 == ret ){
+	fprintf (stderr, 
+		 "Error in unsetting the env variable \n");
+	EXPECT(0, ret);
+    }
     ret = numakind_hbw_get_nodemask (nodemask,
                                      NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
