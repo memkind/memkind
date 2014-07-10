@@ -61,7 +61,7 @@ void *numakind_default_realloc(struct numakind *kind, void *ptr, size_t size)
 
 void numakind_default_free(struct numakind *kind, void *ptr)
 {
-    return je_free(ptr);
+    je_free(ptr);
 }
 
 int numakind_default_is_available(struct numakind *kind)
