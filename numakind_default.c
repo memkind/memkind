@@ -105,5 +105,25 @@ int numakind_default_get_mbind_nodemask(struct numakind *kind, unsigned long *no
     return 0;
 }
 
+int numakind_default_get_size(struct numakind *kind, size_t *total, size_t *free)
+{
+    nodemask_t nodemask;
+    struct bitmask nodemask_bm = {NUMA_NUM_NODES, nodemask.n};
+    long long f;
+    int err = 0;
+    int i;
 
+    *total = 0;
+    *free = 0;
+    err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
+    if (!err) {
+        for (i = 0; i < NUMA_NUM_NODES; ++i) {
+            if (numa_bitmask_isbitset(&nodemask_bm, i)) {
+                *total += numa_node_size64(i, &f);
+                *free += f;
+            }
+        }
+    }
+    return err;
+}
 

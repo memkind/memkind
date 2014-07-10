@@ -14,8 +14,5 @@
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-    if (hbw_is_available() == 0) {
-        std.cerr << "WARNING: hbw_is_available() == 0\n";
-    }
     return RUN_ALL_TESTS();
 }

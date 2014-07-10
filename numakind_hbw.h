@@ -39,7 +39,8 @@ static const struct numakind_ops NUMAKIND_HBW_OPS = {
     .get_mmap_flags = numakind_default_get_mmap_flags,
     .get_mbind_mode = numakind_default_get_mbind_mode,
     .get_mbind_nodemask = numakind_hbw_get_mbind_nodemask,
-    .get_arena = numakind_cpu_get_arena
+    .get_arena = numakind_cpu_get_arena,
+    .get_size = numakind_default_get_size
 };
 
 static const struct numakind_ops NUMAKIND_HBW_HUGETLB_OPS = {
@@ -55,7 +56,8 @@ static const struct numakind_ops NUMAKIND_HBW_HUGETLB_OPS = {
     .get_mmap_flags = numakind_hbw_hugetlb_get_mmap_flags,
     .get_mbind_mode = numakind_default_get_mbind_mode,
     .get_mbind_nodemask = numakind_hbw_get_mbind_nodemask,
-    .get_arena = numakind_cpu_get_arena
+    .get_arena = numakind_cpu_get_arena,
+    .get_size = numakind_default_get_size
 };
 
 static const struct numakind_ops NUMAKIND_HBW_PREFERRED_OPS = {
@@ -71,7 +73,8 @@ static const struct numakind_ops NUMAKIND_HBW_PREFERRED_OPS = {
     .get_mmap_flags = numakind_default_get_mmap_flags,
     .get_mbind_mode = numakind_hbw_preferred_get_mbind_mode,
     .get_mbind_nodemask = numakind_hbw_get_mbind_nodemask,
-    .get_arena = numakind_cpu_get_arena
+    .get_arena = numakind_cpu_get_arena,
+    .get_size = numakind_default_get_size
 };
 
 static const struct numakind_ops NUMAKIND_HBW_PREFERRED_HUGETLB_OPS = {
@@ -87,7 +90,8 @@ static const struct numakind_ops NUMAKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .get_mmap_flags = numakind_hbw_hugetlb_get_mmap_flags,
     .get_mbind_mode = numakind_hbw_preferred_get_mbind_mode,
     .get_mbind_nodemask = numakind_hbw_get_mbind_nodemask,
-    .get_arena = numakind_cpu_get_arena
+    .get_arena = numakind_cpu_get_arena,
+    .get_size = numakind_default_get_size
 };
 
 #ifdef __cplusplus

@@ -122,6 +122,7 @@ int numakind_create(const struct numakind_ops *ops, const char *name)
         }
     }
     if (!err) {
+        kind->partition = numakind_registry_g.num_kind;
         err = ops->create(kind, ops, name);
     }
     if (!err) {
@@ -261,6 +262,11 @@ void *numakind_realloc(struct numakind *kind, void *ptr, size_t size)
 void numakind_free(struct numakind *kind, void *ptr)
 {
     kind->ops->free(kind, ptr);
+}
+
+int numakind_get_size(numakind_t kind, size_t *total, size_t *free)
+{
+    return kind->ops->get_size(kind, total, free);
 }
 
 static void numakind_init_once(void)
