@@ -28,6 +28,7 @@ int numakind_default_mbind(struct numakind *kind, void *ptr, size_t len);
 int numakind_default_get_mmap_flags(struct numakind *kind, int *flags);
 int numakind_default_get_mbind_mode(struct numakind *kind, int *mode);
 int numakind_default_get_mbind_nodemask(struct numakind *kind, unsigned long *nodemask, unsigned long maxnode);
+int numakind_default_get_size(struct numakind *kind, size_t *total, size_t *free);
 
 static const struct numakind_ops NUMAKIND_DEFAULT_OPS = {
     .create = numakind_default_create,
@@ -42,7 +43,8 @@ static const struct numakind_ops NUMAKIND_DEFAULT_OPS = {
     .get_mmap_flags = numakind_default_get_mmap_flags,
     .get_mbind_mode = numakind_default_get_mbind_mode,
     .get_mbind_nodemask = numakind_default_get_mbind_nodemask,
-    .get_arena = NULL
+    .get_arena = NULL,
+    .get_size = numakind_default_get_size
 };
 
 #ifdef __cplusplus
