@@ -89,7 +89,7 @@ void TrialGenerator :: generate_multi_app_stress(int num_types)
                                                    0, 2097152,
                                                    (numakind_t)n_random(num_types),
                                                    k++));
-	    num_alloc++;
+            num_alloc++;
         }
         else {
             index = n_random(trial_vec.size());
@@ -105,7 +105,7 @@ void TrialGenerator :: generate_multi_app_stress(int num_types)
                                                    trial_vec[index].free_index));
             trial_vec[index].free_index = -1;
             k++;
-	    num_alloc--;
+            num_alloc--;
         }
     }
 
