@@ -39,10 +39,10 @@ TEST_F(EnvTest, ErrorEnviron)
     unsigned long *nodemask=NULL;
     NUMAKIND_BANDWIDTH_PATH=" ";
     ret = unsetenv("NUMAKIND_HBW_NODES");
-    if ( -1 == ret ){
-	fprintf (stderr, 
-		 "Error in unsetting the env variable \n");
-	EXPECT(0, ret);
+    if ( -1 == ret ) {
+        fprintf (stderr,
+                 "Error in unsetting the env variable \n");
+        EXPECT(0, ret);
     }
     ret = numakind_hbw_get_nodemask (nodemask,
                                      NUMA_NUM_NODES);
