@@ -14,6 +14,8 @@ hbwmalloc \- The high bandwidth memory interface
 .sp
 .B Link with -ljemalloc -lnuma -lnumakind -lpthread
 .sp
+.B int hbw_is_available(void);
+.br
 .BI "void* hbw_malloc(size_t " "size" );
 .br
 .BI "void* hbw_calloc(size_t " "nmemb" ", size_t " "size" );
@@ -26,13 +28,16 @@ hbwmalloc \- The high bandwidth memory interface
 .br
 .BI "int hbw_allocate_memalign_psize(void " "**memptr" ", size_t " "alignment" ", size_t " "size" ", int " "pagesize" );
 .br
-.B int hbw_is_available(void);
-.br
 .B int hbw_get_policy(void);
 .br
 .BI "void hbw_set_policy(int " "mode" );
 .fi
 .SH "DESCRIPTION"
+.BR hbw_is_available ()
+returns 1 if high bandwidth memory is available and 0 otherwise.  This
+function must be called at least once by the process prior to calling
+any of the other hbw API's.
+.PP
 .BR hbw_malloc ()
 allocates
 .I size
@@ -154,9 +159,6 @@ system to two megabyte pages.
 .TP
 .B HBW_PAGESIZE_2MB
 The two megabyte page size option.
-.PP
-.BR hbw_is_available ()
-returns 1 if high bandwidth memory is available and 0 otherwise.
 .PP
 .BR hbw_get_policy ()
 returns the current fallback policy when insufficient high bandwith
