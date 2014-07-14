@@ -14,6 +14,8 @@ numakind \- Heap manager that isolates allocations to different kinds of numa no
 .sp
 .B Link with -ljemalloc -lnuma -lnumakind -lpthread
 .sp
+.B void numakind_init(void);
+.br
 .BI "void numakind_error_message(int " "err" ", char " "*msg" ", size_t " "size" );
 .sp
 .B "HEAP MANAGEMENT:"
@@ -241,10 +243,8 @@ on the system and 0 otherwise.  All other numakind API's return 0 upon
 success, and an error code defined in the ERRORS section upon failure.
 Note that this library does not set errno.
 .SH "KINDS"
-The available kinds of memory defined by the
-.I numakind_t
-enumeration in
-.I numakind.h
+The available kinds of memory created by calling
+.BR numakind_init ()
 .TP
 .B NUMAKIND_DEFAULT
 Default allocation using standard memory and default page size.
