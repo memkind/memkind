@@ -200,7 +200,7 @@ void *numakind_malloc(numakind_t kind, size_t size)
     int err = 0;
     int arena;
 
-    if ((long int)size < 0) {
+    if (size >= LLONG_MAX){
         result = NULL;
         errno = ENOMEM;
     }
@@ -224,7 +224,7 @@ void *numakind_realloc(numakind_t kind, void *ptr, size_t size)
     int err = 0;
     int arena;
 
-    if ((long int)size < 0) {
+    if (size >= LLONG_MAX){
         if (ptr != NULL) {
             numakind_free(kind, ptr);
             ptr = NULL;
@@ -263,7 +263,7 @@ void *numakind_calloc(numakind_t kind, size_t num, size_t size)
     int err = 0;
     int arena;
 
-    if ((long int)size < 0) {
+    if (size >= LLONG_MAX){
         result = NULL;
         errno = ENOMEM;
     }
@@ -290,7 +290,7 @@ int numakind_posix_memalign(numakind_t kind, void **memptr, size_t alignment,
     int arena;
 
     *memptr = NULL;
-    if ((long int)size < 0) {
+    if (size >= LLONG_MAX){
         errno = ENOMEM;
         err = NUMAKIND_ERROR_INVALID;
     }
