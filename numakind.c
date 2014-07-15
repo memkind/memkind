@@ -200,6 +200,11 @@ void *numakind_malloc(numakind_t kind, size_t size)
     int err = 0;
     int arena;
 
+    /* Checking for negative input
+       from -1 -> -LLONG_MAX
+       which translates to
+       ULLONG_MAX -> LLONG_MAX
+    */
     if (size >= LLONG_MAX){
         result = NULL;
         errno = ENOMEM;
