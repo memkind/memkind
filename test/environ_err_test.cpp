@@ -56,7 +56,7 @@ TEST_F(EnvTest, ErrorEnviron)
     if ( -1 == ret ) {
         fprintf (stderr,
                  "Error in unsetting the env variable \n");
-        EXPECT(0, ret);
+        EXPECT_EQ(0, ret);
     }
     ret = numakind_hbw_get_nodemask (nodemask,
                                      NUMA_NUM_NODES);
