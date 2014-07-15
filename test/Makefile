@@ -23,7 +23,7 @@
 #
 CXX=g++
 CC=gcc
-CXXFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
+EXTRA_CXXFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
 LIBS = -lnumakind -lnuma -lpthread -ljemalloc -lgomp -lgtest
 
 OBJECTS = main.o \
@@ -99,40 +99,40 @@ libfopen.so:		fopen_mock.c
 			$(CC) -g -Wall -fPIC -shared fopen_mock.c -o bin/test_libs/libfopen.so
 
 main.o:			main.cpp common.h
-			$(CXX) $(CXXFLAGS) -c main.cpp -o main.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c main.cpp -o main.o
 
 bat_tests.o:		bat_tests.cpp common.h
-			$(CXX) $(CXXFLAGS) -c bat_tests.cpp -o bat_tests.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c bat_tests.cpp -o bat_tests.o
 
 multithreaded_tests.o:	multithreaded_tests.cpp common.h
-			$(CXX) $(CXXFLAGS) -c multithreaded_tests.cpp -o multithreaded_tests.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c multithreaded_tests.cpp -o multithreaded_tests.o
 
 extended_tests.o:	extended_tests.cpp common.h trial_generator.h
-			$(CXX) $(CXXFLAGS) -c extended_tests.cpp -o extended_tests.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c extended_tests.cpp -o extended_tests.o
 
 negative_tests.o:	negative_tests.cpp common.h
-			$(CXX) $(CXXFLAGS) -c negative_tests.cpp -o negative_tests.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c negative_tests.cpp -o negative_tests.o
 
 schedcpu_test.o:	sched_cpu_test.cpp main.o common.h
-			$(CXX) $(CXXFLAGS) -c sched_cpu_test.cpp -o sched_cpu_test.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c sched_cpu_test.cpp -o sched_cpu_test.o
 
 malloc_err_test.o:	malloc_err_test.cpp main.o common.h
-			$(CXX) $(CXXFLAGS) -c malloc_err_test.cpp -o malloc_err_test.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c malloc_err_test.cpp -o malloc_err_test.o
 
 mallctl_err_test.o:	mallctl_err_test.cpp main.o common.h
-			$(CXX) $(CXXFLAGS) -c mallctl_err_test.cpp -o mallctl_err_test.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c mallctl_err_test.cpp -o mallctl_err_test.o
 
 pmtt_err_test.o:	pmtt_err_test.cpp main.o common.h
-			$(CXX) $(CXXFLAGS) -c pmtt_err_test.cpp -o pmtt_err_test.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c pmtt_err_test.cpp -o pmtt_err_test.o
 
 tied_dist_test.o:	tied_dist_test.cpp main.o common.h
-			$(CXX) $(CXXFLAGS) -c tied_dist_test.cpp -o tied_dist_test.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c tied_dist_test.cpp -o tied_dist_test.o
 
 check.o:		check.cpp
-			$(CXX) $(CXXFLAGS) -c check.cpp -o check.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c check.cpp -o check.o
 
 trial_generator.o:	trial_generator.cpp trial_generator.h
-			$(CXX) $(CXXFLAGS) -c trial_generator.cpp -o trial_generator.o
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c trial_generator.cpp -o trial_generator.o
 clean:
 			rm -f $(OBJECTS) negative_tests.o sched_cpu_test.o $(EXECS) $(SHOBJS) *~
 			rm -rf bin/test_libs/*.so
