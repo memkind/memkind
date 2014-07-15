@@ -1,3 +1,4 @@
+future/numakind.h
 hbwmalloc.3
 hbwmalloc.c
 hbwmalloc.h
@@ -5,10 +6,6 @@ Makefile
 numakind.3
 numakind.c
 numakind.h
-numakind_arena.c
-numakind_arena.h
-numakind_default.c
-numakind_default.h
 numakind_hbw.c
 numakind_hbw.h
 numakind-init
