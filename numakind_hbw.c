@@ -34,6 +34,7 @@
 #include <jemalloc/jemalloc.h>
 #define _GNU_SOURCE
 #include <utmpx.h>
+#include <sched.h>
 
 #include "numakind_hbw.h"
 
