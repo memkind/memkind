@@ -58,6 +58,6 @@ ssh root@$remote_ip "rpm -i ~$remote_login/$nkrpm ~$remote_login/$jerpm"
 ssh root@$remote_ip "echo 8000 > /proc/sys/vm/nr_hugepages"
 ssh root@$remote_ip "echo 8000 > /proc/sys/vm/nr_overcommit_hugepages"
 
-err=$(ssh $remote_login@$remote_ip "./test.sh --gtest_output=xml:all_tests.xml")
-scp $remote_login@$remote_ip:all_tests.xml .
+err=$(ssh $remote_login@$remote_ip "./test.sh --gtest_output=xml:output_xmls/")
+scp -r $remote_login@$remote_ip:output_xmls .
 exit err
