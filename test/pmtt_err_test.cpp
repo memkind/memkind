@@ -29,9 +29,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "../numakind.h"
-#include "../numakind_hbw.h"
-
+#include "numakind.h"
 
 
 class PmttTest: public :: testing::Test
@@ -52,7 +50,6 @@ TEST_F(PmttTest, ErrorPMTT)
     int err = NUMAKIND_ERROR_PMTT;
     unsigned long *nodemask=NULL;
     NUMAKIND_BANDWIDTH_PATH=" ";
-    ret = numakind_hbw_get_nodemask (nodemask,
-                                     NUMA_NUM_NODES);
+    ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBW, nodemask, NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
 }

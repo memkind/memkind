@@ -29,9 +29,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "../numakind.h"
-#include "../numakind_hbw.h"
-
+#include "numakind.h"
 
 
 class TiedDistTest: public :: testing::Test
@@ -51,7 +49,6 @@ TEST_F(TiedDistTest, ErrorTiedDist)
     int ret = 0;
     int err = NUMAKIND_ERROR_TIEDISTANCE;
     unsigned long *nodemask=NULL;
-    ret = numakind_hbw_get_nodemask (nodemask,
-                                     NUMA_NUM_NODES);
+    ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBW, nodemask, NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
 }

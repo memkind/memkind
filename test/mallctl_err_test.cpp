@@ -29,7 +29,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "../numakind.h"
+#include "numakind.h"
 
 
 

@@ -30,9 +30,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "../numakind.h"
-#include "../numakind_hbw.h"
-
+#include "numakind.h"
 
 
 class EnvTest: public :: testing::Test
@@ -58,7 +56,6 @@ TEST_F(EnvTest, ErrorEnviron)
                  "Error in setting the env variable \n");
         EXPECT_EQ(0, ret);
     }
-    ret = numakind_hbw_get_nodemask (nodemask,
-                                     NUMA_NUM_NODES);
+    ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBS, nodemask, NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
 }

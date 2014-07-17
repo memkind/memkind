@@ -29,8 +29,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "../numakind.h"
-#include "../numakind_hbw.h"
+#include "numakind.h"
 
 
 class MallocErrTest: public :: testing::Test
@@ -51,8 +50,7 @@ TEST_F(MallocErrTest, ErrorMalloc)
     int err = NUMAKIND_ERROR_MALLOC;
     nodemask_t nodemask;
     NUMAKIND_BANDWIDTH_PATH=NULL;
-    ret = numakind_hbw_get_nodemask(nodemask.n,
-                                    NUMA_NUM_NODES);
+    ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBW, nodemask.n, NUMA_NUM_NODES);
 
     EXPECT_EQ(err, ret);
 }
