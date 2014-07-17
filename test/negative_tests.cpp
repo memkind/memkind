@@ -53,14 +53,13 @@ TEST_F(NegativeTest, ErrorUnavailable)
     int numakind_flags;
     unsigned long maxnodes = NUMA_NUM_NODES;
     nodemask_t nodemask;
-    numakind_error err = NUMAKIND_ERROR_UNAVAILABLE;
-    ret = numakind_get_mmap_flags(-1,
-                                  &numakind_flags);
+    int err = NUMAKIND_ERROR_UNAVAILABLE;
+    ret = numakind_partition_get_mmap_flags(-1, &numakind_flags);
     EXPECT_EQ(NUMAKIND_ERROR_UNAVAILABLE, ret);
-    ret = numakind_get_nodemask(-1, nodemask.n, maxnodes);
+    ret = numakind_partition_get_nodemask(-1, nodemask.n, maxnodes);
 
     EXPECT_EQ(err, ret);
-    ret = numakind_mbind(-1, NULL, 1024);
+    ret = numakind_partition_mbind(-1, NULL, 1024);
 
     EXPECT_EQ(err, ret);
 }
@@ -69,7 +68,7 @@ TEST_F(NegativeTest, ErrorUnavailable)
 TEST_F(NegativeTest, ErrorMbind)
 {
     int ret = 0;
-    numakind_error err = NUMAKIND_ERROR_MBIND;
+    int err = NUMAKIND_ERROR_MBIND;
 
     ret = numakind_mbind(NUMAKIND_HBW,
                          NULL,
@@ -81,7 +80,7 @@ TEST_F(NegativeTest, ErrorMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
-    numakind_error err = NUMAKIND_ERROR_MEMALIGN;
+    int err = NUMAKIND_ERROR_MEMALIGN;
 
     ret = numakind_posix_memalign(NUMAKIND_DEFAULT,
                                   &ptr, 5,
@@ -93,7 +92,7 @@ TEST_F(NegativeTest, ErrorAlignment)
 {
     int ret = 0;
     void *ptr = NULL;
-    numakind_error err = NUMAKIND_ERROR_ALIGNMENT;
+    int err = NUMAKIND_ERROR_ALIGNMENT;
 
     ret = numakind_posix_memalign(NUMAKIND_HBW,
                                   &ptr, 5,
@@ -107,7 +106,7 @@ TEST_F(NegativeTest, ErrorAllocM)
 {
     int ret = 0;
     void *ptr = NULL;
-    numakind_error err = NUMAKIND_ERROR_ALLOCM;
+    int err = ENOMEM;
 
     ret = numakind_posix_memalign(NUMAKIND_HBW,
                                   &ptr,
@@ -160,14 +159,14 @@ TEST_F(NegativeTest, InvalidSizeMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
-    numakind_error err = NUMAKIND_ERROR_INVALID;
+    int err = NUMAKIND_ERROR_INVALID;
     ret = hbw_allocate_memalign(&ptr,1,-1);
     ASSERT_TRUE(ptr == NULL);
-    EXPECT_EQ(errno, ENOMEM);
+    EXPECT_EQ(ret, NUMAKIND_ERROR_ALIGNMENT);
 
     ret = numakind_posix_memalign(NUMAKIND_HBW,
                                   &ptr, 5, 100);
-    err = NUMAKIND_ERROR_ALIGNMENT;
+    err = EINVAL;
     EXPECT_EQ(err, ret);
     ASSERT_TRUE(ptr == NULL);
     EXPECT_EQ(errno, EINVAL);
