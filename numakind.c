@@ -27,6 +27,7 @@
 #include <string.h>
 #include <assert.h>
 #include <pthread.h>
+#include <errno.h>
 #include <jemalloc/jemalloc.h>
 
 #include "numakind.h"
@@ -82,12 +83,6 @@ void numakind_error_message(int err, char *msg, size_t size)
         case NUMAKIND_ERROR_TIEDISTANCE:
             strncpy(msg, "<numakind> Two NUMA memory nodes are equidistant from target cpu node", size);
             break;
-        case NUMAKIND_ERROR_ALIGNMENT:
-            strncpy(msg, "<numakind> Alignment must be a power of two and larger than sizeof(void *)", size);
-            break;
-        case NUMAKIND_ERROR_MALLOCX:
-            strncpy(msg, "<numakind> Call to je_mallocx() failed", size);
-            break;
         case NUMAKIND_ERROR_ENVIRON:
             strncpy(msg, "<numakind> Error parsing environment variable (NUMAKIND_*)", size);
             break;
@@ -99,6 +94,14 @@ void numakind_error_message(int err, char *msg, size_t size)
             break;
         case NUMAKIND_ERROR_RUNTIME:
             strncpy(msg, "<numakind> Unspecified run-time error", size);
+            break;
+        case NUMAKIND_ERROR_ALIGNMENT:
+        case EINVAL:
+            strncpy(msg, "<numakind> Alignment must be a power of two and larger than sizeof(void *)", size);
+            break;
+        case NUMAKIND_ERROR_MALLOCX:
+        case ENOMEM:
+            strncpy(msg, "<numakind> Call to je_mallocx() failed", size);
             break;
         default:
             snprintf(msg, size, "<numakind> Undefined error number: %i", err);

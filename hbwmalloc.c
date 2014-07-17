@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <errno.h>
 
 #include "hbwmalloc.h"
 #include "numakind.h"
@@ -84,6 +85,7 @@ void *hbw_calloc(size_t num, size_t size)
 
 int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
 {
+    int err;
     numakind_t kind;
     if (hbw_get_policy() == HBW_POLICY_BIND) {
         kind = NUMAKIND_HBW;
@@ -91,7 +93,11 @@ int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
     else {
         kind = NUMAKIND_HBW_PREFERRED;
     }
-    return numakind_posix_memalign(kind, memptr, alignment, size);
+    err = numakind_posix_memalign(kind, memptr, alignment, size);
+    if (err = EINVAL) {
+        err = NUMAKIND_ERROR_ALIGNMENT;
+    }
+    return err;
 }
 
 int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,

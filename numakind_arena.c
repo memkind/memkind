@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <errno.h>
 #include <numa.h>
 #include <numaif.h>
 #include <jemalloc/jemalloc.h>
@@ -172,13 +173,12 @@ int numakind_arena_posix_memalign(struct numakind *kind, void **memptr, size_t a
     if (!err) {
         if ( (alignment < sizeof(void*)) ||
              (((alignment - 1) & alignment) != 0) ) {
-            err = NUMAKIND_ERROR_ALIGNMENT;
-            errno = EINVAL;
+            err = EINVAL;
         }
     }
     if (!err) {
         *memptr = je_mallocx_check(size, MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena));
-        err = *memptr ? 0 : NUMAKIND_ERROR_MALLOCX;
+        err = *memptr ? 0 : ENOMEM;
     }
     return err;
 }
