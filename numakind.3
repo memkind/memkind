@@ -257,7 +257,10 @@ returns 1 if there is support for the specified
 .I kind
 on the system and 0 otherwise.  All other numakind API's return 0 upon
 success, and an error code defined in the ERRORS section upon failure.
-Note that this library does not set errno.
+The library sets
+.I errno
+to ENOMEM if requesting a negative size and
+EINVAL if the alignment is invalid.
 .SH "KINDS"
 The available kinds of memory created by calling
 .BR numakind_init ()
@@ -308,11 +311,9 @@ Call to je_malloc() failed
 .B NUMAKIND_ERROR_GETCPU
 Call to sched_getcpu() returned out of range
 .TP
-.B NUMAKIND_ERROR_HBW
-Initializing for HBW failed
-.TP
 .B NUMAKIND_ERROR_PMTT
-Unable to find parsed PMTT table in
+Unable to find parsed PMTT table or
+invalid PMTT table entries in
 .I /etc/numakind/node-bandwidth
 .TP
 .B NUMAKIND_ERROR_TIEDISTANCE
@@ -326,6 +327,9 @@ Call to je_allocm() failed
 .TP
 .B NUMAKIND_ERROR_ENVIRON
 Error parsing environment variable (NUMAKIND_*)
+.TP
+.B NUMAKIND_ERROR_INVALID
+Invalid input arguments to numakind routine
 .SH "FILES"
 .TP
 .I /etc/numakind/node-bandwidth

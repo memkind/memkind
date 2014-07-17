@@ -38,6 +38,9 @@
 
 enum {NUMAKIND_CMD_LEN = 128};
 
+static void *je_mallocx_check(size_t size, int flags);
+static void *je_rallocx_check(void *ptr, size_t size, int flags);
+
 int numakind_arena_create(struct numakind *kind, const struct numakind_ops *ops, const char *name)
 {
     int err = 0;
@@ -113,9 +116,11 @@ void *numakind_arena_malloc(struct numakind *kind, size_t size)
     int err = 0;
     unsigned int arena;
 
-    err = kind->ops->get_arena(kind, &arena);
     if (!err) {
-        result = je_mallocx(size, MALLOCX_ARENA(arena));
+        err = kind->ops->get_arena(kind, &arena);
+    }
+    if (!err) {
+        result = je_mallocx_check(size, MALLOCX_ARENA(arena));
     }
     return result;
 }
@@ -133,10 +138,10 @@ void *numakind_arena_realloc(struct numakind *kind, void *ptr, size_t size)
         err = kind->ops->get_arena(kind, &arena);
         if (!err) {
             if (ptr == NULL) {
-                ptr = je_mallocx(size, MALLOCX_ARENA(arena));
+                ptr = je_mallocx_check(size, MALLOCX_ARENA(arena));
             }
             else {
-                ptr = je_rallocx(ptr, size, MALLOCX_ARENA(arena));
+                ptr = je_rallocx_check(ptr, size, MALLOCX_ARENA(arena));
             }
         }
     }
@@ -151,7 +156,7 @@ void *numakind_arena_calloc(struct numakind *kind, size_t num, size_t size)
 
     err = kind->ops->get_arena(kind, &arena);
     if (!err) {
-        result = je_mallocx(num * size, MALLOCX_ARENA(arena) | MALLOCX_ZERO);
+        result = je_mallocx_check(num * size, MALLOCX_ARENA(arena) | MALLOCX_ZERO);
     }
     return result;
 }
@@ -168,10 +173,11 @@ int numakind_arena_posix_memalign(struct numakind *kind, void **memptr, size_t a
         if ( (alignment < sizeof(void*)) ||
              (((alignment - 1) & alignment) != 0) ) {
             err = NUMAKIND_ERROR_ALIGNMENT;
+            errno = EINVAL;
         }
     }
     if (!err) {
-        *memptr = je_mallocx(size, MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena));
+        *memptr = je_mallocx_check(size, MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena));
         err = *memptr ? 0 : NUMAKIND_ERROR_MALLOCX;
     }
     return err;
@@ -208,4 +214,43 @@ int numakind_bijective_get_arena(struct numakind *kind, unsigned int *arena)
         err = NUMAKIND_ERROR_RUNTIME;
     }
     return err;
+}
+
+static void *je_mallocx_check(size_t size, int flags)
+{
+    /*
+     * Checking for out of range size due to unhandled error in
+     * je_mallocx().  Size invalid for the range
+     * LLONG_MAX <= size <= ULLONG_MAX
+     * which is the result of passing a negative signed number as size
+     */
+    void *result = NULL;
+
+    if (size >= LLONG_MAX) {
+        errno = ENOMEM;
+    }
+    else {
+        result = je_mallocx(size, flags);
+    }
+    return result;
+}
+
+static void *je_rallocx_check(void *ptr, size_t size, int flags);
+{
+    /*
+     * Checking for out of range size due to unhandled error in
+     * je_mallocx().  Size invalid for the range
+     * LLONG_MAX <= size <= ULLONG_MAX
+     * which is the result of passing a negative signed number as size
+     */
+    void *result = NULL;
+
+    if (size >= LLONG_MAX) {
+        errno = ENOMEM;
+    }
+    else {
+        result = je_rallocx(ptr, size, flags);
+    }
+    return result;
+
 }

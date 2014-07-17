@@ -74,10 +74,10 @@ void numakind_error_message(int err, char *msg, size_t size)
             strncpy(msg, "<numakind> Call to je_malloc() failed", size);
             break;
         case NUMAKIND_ERROR_GETCPU:
-            strncpy(msg, "<numakind> Call to getcpu() or sched_getcpu() returned out of range", size);
+            strncpy(msg, "<numakind> Call to sched_getcpu() returned out of range", size);
             break;
         case NUMAKIND_ERROR_PMTT:
-            snprintf(msg, size, "<numakind> Unable to parse bandwidth table: %s", NUMAKIND_BANDWIDTH_PATH);
+            snprintf(msg, size, "<numakind> Unable to find parsed PMTT table or Invalid PMTT table entries in: %s", NUMAKIND_BANDWIDTH_PATH);
             break;
         case NUMAKIND_ERROR_TIEDISTANCE:
             strncpy(msg, "<numakind> Two NUMA memory nodes are equidistant from target cpu node", size);
@@ -90,6 +90,9 @@ void numakind_error_message(int err, char *msg, size_t size)
             break;
         case NUMAKIND_ERROR_ENVIRON:
             strncpy(msg, "<numakind> Error parsing environment variable (NUMAKIND_*)", size);
+            break;
+        case NUMAKIND_ERROR_INVALID:
+            strncpy(msg, "<numakind> Invalid input arguments to numakind routine", size);
             break;
         case NUMAKIND_ERROR_TOOMANY:
             strncpy(msg, "<numakind> Attempted to inizailze more than maximum (%i) number of kinds", NUMAKIND_MAX_KIND);

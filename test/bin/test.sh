@@ -30,46 +30,22 @@ if [ $? -ne 0 ]; then
     exit -1
 fi
 
-slimit=`ulimit -s`
-if [[ "$slimit" != "unlimited" ]];then
-    ulimit -s hard
-fi
-which simics_start >& /dev/null
-if [ $? -eq 0 ]; then
-    mkdir -p /tmp/$$/lib64
-    simics_start > /tmp/$$/simics_start.out
-    if [ $? -ne 0 ]; then
-        exit -1
-    fi
-    ip=`grep 'ip:' /tmp/$$/simics_start.out | awk '{print $2}'`
-    pid=`grep 'pid:' /tmp/$$/simics_start.out | awk '{print $2}'`
-    mkdir -p /tmp/$$/lib64
-    for dd in `echo  $LD_LIBRARY_PATH | sed 's|:|\n|g' | tac`; do
-        cp -rpL $dd/* /tmp/$$/lib64
-    done
-    pushd /tmp/$$
-    tar zcvf lib64.tar.gz lib64
-    popd
-    scp /tmp/$$/lib64.tar.gz mic@$ip:
-    ssh mic@$ip "tar xvf lib64.tar.gz"
-    slimit=`ulimit -s`
-    if [[ "$slimit" != "unlimited" ]];then
-	ssh mic@ip "ulimit -s hard"
-    fi
-    scp $basedir/all_tests mic@$ip:
-    ssh mic@$ip 'LD_LIBRARY_PATH=./lib64 NUMAKIND_HBW_NODES=1 ./all_tests --gtest_output=xml:all_tests.xml' $@
-    err=$?
-    scp mic@$ip:all_tests.xml .
-elif [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
+#hugetot=$(cat /proc/meminfo | grep HugePages_Total | awk '{print $2}')
+#if [ $hugetot -lt 4000 ]; then
+#    echo "ERROR: $0 requires at least 4000 HugePages_Total total (see /proc/meminfo)"
+#    exit -1
+#fi
+
+if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
     export NUMAKIND_HBW_NODES=1
-    numactl --membind=0 $basedir/all_tests $@ --gtest_output=xml:all_tests.xml
-    err=$?
+    numactl --membind=0 $basedir/all_tests $@
 else
-    $basedir/all_tests $@ --gtest_output=xml:all_tests.xml
-    err=$?
+    $basedir/all_tests $@
 fi
-rm -rf /tmp/$$
-if [ ! -z "$pid" ]; then
-    kill -9 $pid
-fi
-exit $err
+
+LD_PRELOAD=$basedir/test_libs/libsched.so $basedir/schedcpu_test $@
+LD_PRELOAD=$basedir/test_libs/libmallctl.so $basedir/mallctlerr_test $@
+LD_PRELOAD=$basedir/test_libs/libmalloc.so $basedir/mallocerr_test $@
+LD_PRELOAD=$basedir/test_libs/libnumadist.so $basedir/tieddisterr_test $@
+$basedir/environerr_test $@
+LD_PRELOAD=$basedir/test_libs/libfopen.so $basedir/pmtterr_test $@

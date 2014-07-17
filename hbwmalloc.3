@@ -215,9 +215,10 @@ and
 .BR hbw_allocate_memalign_psize ()
 return zero on success, or one of the error values listed in the
 .B ERRORS
-section on failure.  Note that
+section on failure.  The library sets
 .I errno
-is not set.
+to ENOMEM if requesting a negative size and
+EINVAL if the alignment is invalid.
 .SH ERRORS
 .TP
 .B NUMAKIND_ERROR_UNAVAILABLE
@@ -238,11 +239,9 @@ Call to je_malloc() failed
 .B NUMAKIND_ERROR_GETCPU
 Call to sched_getcpu() returned out of range
 .TP
-.B NUMAKIND_ERROR_HBW
-Initializing for HBW failed
-.TP
 .B NUMAKIND_ERROR_PMTT
-Unable to find parsed PMTT table in
+Unable to find parsed PMTT table or
+invalid PMTT table entries in
 .I /etc/numakind/node-bandwidth
 .TP
 .B NUMAKIND_ERROR_TIEDISTANCE
@@ -256,6 +255,9 @@ Call to je_allocm() failed
 .TP
 .B NUMAKIND_ERROR_ENVIRON
 Error parsing environment variable (NUMAKIND_*)
+.TP
+.B NUMAKIND_ERROR_INVALID
+Invalid input arguments to numakind routine
 .SH "NOTES"
 The
 .I hbwmalloc.h
