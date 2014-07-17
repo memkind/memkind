@@ -94,7 +94,7 @@ int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
         kind = NUMAKIND_HBW_PREFERRED;
     }
     err = numakind_posix_memalign(kind, memptr, alignment, size);
-    if (err = EINVAL) {
+    if (err == EINVAL) {
         err = NUMAKIND_ERROR_ALIGNMENT;
     }
     return err;
