@@ -30,8 +30,8 @@
 #include "check.h"
 #include "omp.h"
 #include "numakind.h"
-#include "numakind_hbw.h"
 
+extern int numakind_hbw_get_mbind_nodemask(struct numakind *kind, unsigned long *nodemask, unsigned long maxnode);
 
 class SchedGeTest: public :: testing::Test
 {
@@ -50,8 +50,7 @@ TEST_F(SchedGeTest, ErrorSchedGetCpu)
     int ret = 0;
     int err = NUMAKIND_ERROR_GETCPU;
     nodemask_t nodemask;
-    ret = numakind_hbw_get_nodemask(nodemask.n,
-                                    NUMA_NUM_NODES);
+    ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBW, nodemask.n, NUMA_NUM_NODES);
 
     EXPECT_EQ(err, ret);
 }
