@@ -51,8 +51,6 @@ TEST_F(NegativeTest, ErrorUnavailable)
 {
     int ret = 0;
     int numakind_flags;
-    unsigned long maxnodes = NUMA_NUM_NODES;
-    nodemask_t nodemask;
     int err = NUMAKIND_ERROR_UNAVAILABLE;
     ret = numakind_partition_get_mmap_flags(-1, &numakind_flags);
     EXPECT_EQ(NUMAKIND_ERROR_UNAVAILABLE, ret);
