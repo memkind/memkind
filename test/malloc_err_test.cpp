@@ -49,7 +49,6 @@ TEST_F(MallocErrTest, ErrorMalloc)
     int ret = 0;
     int err = NUMAKIND_ERROR_MALLOC;
     nodemask_t nodemask;
-    NUMAKIND_BANDWIDTH_PATH=NULL;
     ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBW, nodemask.n, NUMA_NUM_NODES);
 
     EXPECT_EQ(err, ret);
