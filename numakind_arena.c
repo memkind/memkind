@@ -235,7 +235,7 @@ static void *je_mallocx_check(size_t size, int flags)
     return result;
 }
 
-static void *je_rallocx_check(void *ptr, size_t size, int flags);
+static void *je_rallocx_check(void *ptr, size_t size, int flags)
 {
     /*
      * Checking for out of range size due to unhandled error in
