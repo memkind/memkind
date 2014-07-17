@@ -49,7 +49,6 @@ TEST_F(PmttTest, ErrorPMTT)
     int ret = 0;
     int err = NUMAKIND_ERROR_PMTT;
     unsigned long *nodemask=NULL;
-    NUMAKIND_BANDWIDTH_PATH=" ";
     ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBW, nodemask, NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
 }

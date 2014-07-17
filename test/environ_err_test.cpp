@@ -49,11 +49,9 @@ TEST_F(EnvTest, ErrorEnviron)
     int ret = 0;
     int err = NUMAKIND_ERROR_ENVIRON;
     unsigned long *nodemask=NULL;
-    NUMAKIND_BANDWIDTH_PATH=" ";
     ret = setenv("NUMAKIND_HBW_NODES","-1",1);
-    if ( -1 == ret ) {
-        fprintf (stderr,
-                 "Error in setting the env variable \n");
+    if (-1 == ret) {
+        fprintf (stderr, "Error in setting the env variable \n");
         EXPECT_EQ(0, ret);
     }
     ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBS, nodemask, NUMA_NUM_NODES);
