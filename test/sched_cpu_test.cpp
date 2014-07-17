@@ -29,8 +29,8 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "../numakind.h"
-#include "../numakind_hbw.h"
+#include "numakind.h"
+#include "numakind_hbw.h"
 
 
 class SchedGeTest: public :: testing::Test
