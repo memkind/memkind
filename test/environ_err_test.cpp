@@ -54,6 +54,6 @@ TEST_F(EnvTest, ErrorEnviron)
         fprintf (stderr, "Error in setting the env variable \n");
         EXPECT_EQ(0, ret);
     }
-    ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBS, nodemask, NUMA_NUM_NODES);
+    ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBW, nodemask, NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
 }
