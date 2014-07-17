@@ -31,7 +31,7 @@ extern "C" {
  *  \file hbwmalloc.h
  *  \brief Header file for the high bandwidth memory interface.
  *
- *  ##include <hbwmalloc.h>
+ *  #include <hbwmalloc.h>
  *
  *  Link with -lnuma -lnumakind
  *
