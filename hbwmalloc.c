@@ -97,6 +97,9 @@ int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
     if (err == EINVAL) {
         err = NUMAKIND_ERROR_ALIGNMENT;
     }
+    else if (err == ENOMEM) {
+        err = NUMAKIND_ERROR_MALLOCX;
+    }
     return err;
 }
 
