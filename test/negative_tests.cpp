@@ -56,11 +56,8 @@ TEST_F(NegativeTest, ErrorUnavailable)
     int err = NUMAKIND_ERROR_UNAVAILABLE;
     ret = numakind_partition_get_mmap_flags(-1, &numakind_flags);
     EXPECT_EQ(NUMAKIND_ERROR_UNAVAILABLE, ret);
-    ret = numakind_partition_get_nodemask(-1, nodemask.n, maxnodes);
 
-    EXPECT_EQ(err, ret);
     ret = numakind_partition_mbind(-1, NULL, 1024);
-
     EXPECT_EQ(err, ret);
 }
 
@@ -70,9 +67,7 @@ TEST_F(NegativeTest, ErrorMbind)
     int ret = 0;
     int err = NUMAKIND_ERROR_MBIND;
 
-    ret = numakind_mbind(NUMAKIND_HBW,
-                         NULL,
-                         1024);
+    ret = numakind_partition_mbind(NUMAKIND_PARTITION_HBW, NULL, 1024);
     EXPECT_EQ(err, ret);
 }
 
