@@ -40,9 +40,7 @@
 /*     program constitutes acceptance of these licensing restrictions.   */
 /*  5. Absolutely no warranty is expressed or implied.                   */
 /*-----------------------------------------------------------------------*/
-# include <stdlib.h>
 # include <stdio.h>
-# include <string.h>
 # include <unistd.h>
 # include <math.h>
 # include <float.h>
@@ -178,16 +176,9 @@
 #define STREAM_TYPE double
 #endif
 
-#ifndef ENABLE_DYNAMIC_ALLOC
 static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET],
 			b[STREAM_ARRAY_SIZE+OFFSET],
 			c[STREAM_ARRAY_SIZE+OFFSET];
-#else
-#include <numakind.h>
-static STREAM_TYPE *a = NULL, *b = NULL, *c = NULL;
-#endif
-
-enum {ERR_MSG_SIZE = 256};
 
 static double	avgtime[4] = {0}, maxtime[4] = {0},
 		mintime[4] = {FLT_MAX,FLT_MAX,FLT_MAX,FLT_MAX};
@@ -214,22 +205,14 @@ extern void tuned_STREAM_Triad(STREAM_TYPE scalar);
 extern int omp_get_num_threads();
 #endif
 int
-main(int argc, char **argv)
+main()
     {
     int			quantum, checktick();
     int			BytesPerWord;
     int			k;
-    int			err;
     ssize_t		j;
     STREAM_TYPE		scalar;
     double		t, times[4][NTIMES];
-    char      		err_msg[ERR_MSG_SIZE];
-
-    if (argc > 1 && (strncmp("--help", argv[1], strlen("--help")) == 0 ||
-                     strncmp("-h", argv[1], strlen("-h")) == 0)) {
-        printf("Usage: %s [numakind_name]\n", argv[0]);
-        return 0;
-    }
 
     /* --- SETUP --- determine precision and check timing --- */
 
@@ -278,29 +261,6 @@ main(int argc, char **argv)
 #pragma omp atomic 
 		k++;
     printf ("Number of Threads counted = %i\n",k);
-#endif
-
-#ifdef ENABLE_DYNAMIC_ALLOC
-    numakind_t kind;
-    numakind_init();
-    if (argc > 1) {
-        err = numakind_get_kind_by_name(argv[1], &kind);
-    }
-    else {
-        err = numakind_get_kind_by_name("numakind_default", &kind);
-    }
-    if (err) {
-        numakind_error_message(err, err_msg, ERR_MSG_SIZE);
-        fprintf(stderr, "ERROR: %s\n", err_msg);
-        return -1;
-    }
-    a = (STREAM_TYPE *)numakind_malloc(kind, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
-    b = (STREAM_TYPE *)numakind_malloc(kind, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
-    c = (STREAM_TYPE *)numakind_malloc(kind, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
-    if (!(a && b && c)) {
-        fprintf(stderr, "ERROR: Unable to allocate streams\n");
-        return -1;
-    }
 #endif
 
     /* Get initial value for system clock. */
@@ -415,11 +375,6 @@ main(int argc, char **argv)
     checkSTREAMresults();
     printf(HLINE);
 
-#ifdef ENABLE_DYNAMIC_ALLOC
-    numakind_free(kind, c);
-    numakind_free(kind, b);
-    numakind_free(kind, a);
-#endif
     return 0;
 }
 
