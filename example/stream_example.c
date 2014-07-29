@@ -1,14 +1,18 @@
 /*-----------------------------------------------------------------------*/
 /* Program: STREAM                                                       */
 /* Revision: $Id: stream.c,v 5.10 2013/01/17 16:01:06 mccalpin Exp mccalpin $ */
+/*           variant with modifications to use numakind library for      */
+/*           dynamic memory allocation.                                  */
 /* Original code developed by John D. McCalpin                           */
 /* Programmers: John D. McCalpin                                         */
 /*              Joe R. Zagar                                             */
+/*              Christopher Cantalupo <christopher.m.cantalupo@intel.com>*/
 /*                                                                       */
 /* This program measures memory transfer rates in MB/s for simple        */
 /* computational kernels coded in C.                                     */
 /*-----------------------------------------------------------------------*/
 /* Copyright 1991-2013: John D. McCalpin                                 */
+/* Copyright (C) 2014 Intel Corperation.                                 */
 /*-----------------------------------------------------------------------*/
 /* License:                                                              */
 /*  1. You are free to use this program and/or to redistribute           */
@@ -176,9 +180,17 @@
 #define STREAM_TYPE double
 #endif
 
+#ifndef ENABLE_DYNAMIC_ALLOC
 static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET],
 			b[STREAM_ARRAY_SIZE+OFFSET],
 			c[STREAM_ARRAY_SIZE+OFFSET];
+#else
+#include <stdlib.h>
+#include <string.h>
+#include <numakind.h>
+static STREAM_TYPE *a = NULL, *b = NULL, *c = NULL;
+enum {ERR_MSG_SIZE = 256};
+#endif
 
 static double	avgtime[4] = {0}, maxtime[4] = {0},
 		mintime[4] = {FLT_MAX,FLT_MAX,FLT_MAX,FLT_MAX};
@@ -205,7 +217,7 @@ extern void tuned_STREAM_Triad(STREAM_TYPE scalar);
 extern int omp_get_num_threads();
 #endif
 int
-main()
+main(int argc, char **argv)
     {
     int			quantum, checktick();
     int			BytesPerWord;
@@ -213,11 +225,24 @@ main()
     ssize_t		j;
     STREAM_TYPE		scalar;
     double		t, times[4][NTIMES];
+#ifdef ENABLE_DYNAMIC_ALLOC
+    int	err = 0;
+    numakind_t kind;
+    char err_msg[ERR_MSG_SIZE];
+    if (argc > 1 && (strncmp("--help", argv[1], strlen("--help")) == 0 ||
+                     strncmp("-h", argv[1], strlen("-h")) == 0)) {
+        printf("Usage: %s [numakind_default | numakind_hbw | numakind_hbw_hugetlb | numakind_hbw_preferred | numakind_hbw_preferred_hugetlb]\n", argv[0]);
+        return 0;
+    }
+#endif
 
     /* --- SETUP --- determine precision and check timing --- */
 
     printf(HLINE);
     printf("STREAM version $Revision: 5.10 $\n");
+#ifdef ENABLE_DYNAMIC_ALLOC
+    printf("Variant that uses the numakind library for dynamic memory allocation.\n");
+#endif
     printf(HLINE);
     BytesPerWord = sizeof(STREAM_TYPE);
     printf("This system uses %d bytes per array element.\n",
@@ -263,6 +288,36 @@ main()
     printf ("Number of Threads counted = %i\n",k);
 #endif
 
+#ifdef ENABLE_DYNAMIC_ALLOC
+    numakind_init();
+    if (argc > 1) {
+        err = numakind_get_kind_by_name(argv[1], &kind);
+    }
+    else {
+        err = numakind_get_kind_by_name("numakind_default", &kind);
+    }
+    if (err) {
+        numakind_error_message(err, err_msg, ERR_MSG_SIZE);
+        fprintf(stderr, "ERROR: %s\n", err_msg);
+        return -1;
+    }
+    err = numakind_posix_memalign(kind, (void **)&a, 2097152, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
+    if (err) {
+        fprintf(stderr, "ERROR: Unable to allocate stream array a\n");
+        return -err;
+    }
+    err = numakind_posix_memalign(kind, (void **)&b, 2097152, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
+    if (err) {
+        fprintf(stderr, "ERROR: Unable to allocate stream array b\n");
+        return -err;
+    }
+    err = numakind_posix_memalign(kind, (void **)&c, 2097152, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
+    if (err) {
+        fprintf(stderr, "ERROR: Unable to allocate stream array c\n");
+        return -err;
+    }
+
+#endif
     /* Get initial value for system clock. */
 #pragma omp parallel for
     for (j=0; j<STREAM_ARRAY_SIZE; j++) {
@@ -375,6 +430,11 @@ main()
     checkSTREAMresults();
     printf(HLINE);
 
+#ifdef ENABLE_DYNAMIC_ALLOC
+    numakind_free(kind, c);
+    numakind_free(kind, b);
+    numakind_free(kind, a);
+#endif
     return 0;
 }
 
