@@ -8,6 +8,7 @@ example/Makefile
 example/filter_example.c
 example/stream_example.c
 example/hello_example.c
+example/README.txt
 hbwmalloc.3
 hbwmalloc.c
 hbwmalloc.h
