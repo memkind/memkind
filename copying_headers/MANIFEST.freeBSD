@@ -1,6 +1,9 @@
 hbwmalloc.3
 hbwmalloc.c
 hbwmalloc.h
+example/hello_example.c
+example/filter_example.c
+example/Makefile
 Makefile
 numakind.3
 numakind_arena.c

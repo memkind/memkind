@@ -4,6 +4,10 @@ actbl3.h
 actbl.h
 actypes.h
 COPYING.txt
+example/Makefile
+example/filter_example.c
+example/stream_example.c
+example/hello_example.c
 hbwmalloc.3
 hbwmalloc.c
 hbwmalloc.h
