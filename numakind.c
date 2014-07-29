@@ -291,16 +291,34 @@ int numakind_get_size(numakind_t kind, size_t *total, size_t *free)
 
 static void numakind_init_once(void)
 {
-    numakind_create(&NUMAKIND_DEFAULT_OPS, "numakind_default");
-    numakind_create(&NUMAKIND_HBW_OPS, "numakind_hbw");
-    numakind_create(&NUMAKIND_HBW_HUGETLB_OPS, "numakind_hbw_hugetlb");
-    numakind_create(&NUMAKIND_HBW_PREFERRED_OPS, "numakind_hbw_preferred");
-    numakind_create(&NUMAKIND_HBW_PREFERRED_HUGETLB_OPS, "numakind_hbw_preferred_hugetlb");
+    int i;
 
-    numakind_get_kind_by_partition(NUMAKIND_PARTITION_DEFAULT, &NUMAKIND_DEFAULT);
-    numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW, &NUMAKIND_HBW);
-    numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW_HUGETLB, &NUMAKIND_HBW_HUGETLB);
-    numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW_PREFERRED, &NUMAKIND_HBW_PREFERRED);
-    numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB, &NUMAKIND_HBW_PREFERRED_HUGETLB);
+    for (i = 0; i < NUMAKIND_NUM_BASE_KIND; ++i) {
+        switch (i) {
+            case NUMAKIND_PARTITION_DEFAULT:
+                numakind_create(&NUMAKIND_DEFAULT_OPS, "numakind_default");
+                numakind_get_kind_by_partition(NUMAKIND_PARTITION_DEFAULT, &NUMAKIND_DEFAULT);
+                break;
+            case NUMAKIND_PARTITION_HBW:
+                numakind_create(&NUMAKIND_HBW_OPS, "numakind_hbw");
+                numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW, &NUMAKIND_HBW);
+                break;
+            case NUMAKIND_PARTITION_HBW_HUGETLB:
+                numakind_create(&NUMAKIND_HBW_HUGETLB_OPS, "numakind_hbw_hugetlb");
+                numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW_HUGETLB, &NUMAKIND_HBW_HUGETLB);
+                break;
+            case NUMAKIND_PARTITION_HBW_PREFERRED:
+                numakind_create(&NUMAKIND_HBW_PREFERRED_OPS, "numakind_hbw_preferred");
+                numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW_PREFERRED, &NUMAKIND_HBW_PREFERRED);
+                break;
+            case NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB:
+                numakind_create(&NUMAKIND_HBW_PREFERRED_HUGETLB_OPS, "numakind_hbw_preferred_hugetlb");
+                numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB, &NUMAKIND_HBW_PREFERRED_HUGETLB);
+                break;
+            default:
+                fprintf(stderr, "WARNING: Unknown base kind partition %i\n", i);
+                break;
+        }
+    }
 }
 
