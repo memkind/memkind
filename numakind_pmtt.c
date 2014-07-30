@@ -34,8 +34,9 @@
 #include <libgen.h>
 #include <sys/syscall.h>
 #include <bits/syscall.h>
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+
 
 static const int STRLEN = 512;
 // The include file actbl.h comes from acpica which is available from this URL:
@@ -183,15 +184,14 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
 
 int main (int argc, char *argv[])
 {
-
     int err = 0;
+    int fd;
     FILE *fp = NULL;
     int *bandwidth = NULL;
     size_t nwrite;
     char dir[STRLEN];
 
-    bandwidth = (int *)malloc(sizeof(int) *
-                              NUMA_NUM_NODES);
+    bandwidth = (int *)malloc(sizeof(int) * NUMA_NUM_NODES);
     if (!bandwidth) {
         fprintf(stderr, "ERROR: <%s> in allocating bandwidth array\n", argv[0]);
         return errno ? -errno : 1;
@@ -205,14 +205,18 @@ int main (int argc, char *argv[])
         return errno ? -errno : 1;
     }
 
-    fp = fopen(NUMAKIND_BANDWIDTH_PATH, "w");
-    if (!fp) {
+    fd = open(NUMAKIND_BANDWIDTH_PATH, O_CREAT | O_EXCL | O_WRONLY, 0644);
+    if (fd == -1) {
         fprintf(stderr, "ERROR: <%s> opening %s for writing\n", argv[0], NUMAKIND_BANDWIDTH_PATH);
         return errno ? -errno : 1;
     }
-    err = parse_pmtt_bandwidth(NUMA_NUM_NODES,
-                               bandwidth,
-                               PMTT_PATH);
+    fp = fdopen(fd, "w");
+    if (fp == NULL) {
+        close(fd);
+        return errno ? -errno : 1;
+    }
+
+    err = parse_pmtt_bandwidth(NUMA_NUM_NODES, bandwidth, PMTT_PATH);
     if (err) {
         fprintf(stderr, "ERROR: <%s> parsing file %s\n", argv[0], PMTT_PATH);
         return errno ? -errno : 1;
@@ -223,12 +227,6 @@ int main (int argc, char *argv[])
         return errno ? -errno : 1;
     }
     fclose(fp);
-    err = chmod(NUMAKIND_BANDWIDTH_PATH, 0644);
-    if (err) {
-        fprintf(stderr, "ERROR: <%s> changing permissions on file %s\n", argv[0], NUMAKIND_BANDWIDTH_PATH);
-        return errno ? -errno : 1;
-    }
-
     free(bandwidth);
     return 0;
 }
