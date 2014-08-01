@@ -68,10 +68,11 @@ enum numakind_error {
 
 enum numakind_base_partition {
     NUMAKIND_PARTITION_DEFAULT = 0,
-    NUMAKIND_PARTITION_HBW = 1,
-    NUMAKIND_PARTITION_HBW_HUGETLB = 2,
-    NUMAKIND_PARTITION_HBW_PREFERRED = 3,
-    NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB = 4
+    NUMAKIND_PARTITION_HUGETLB = 1,
+    NUMAKIND_PARTITION_HBW = 2,
+    NUMAKIND_PARTITION_HBW_HUGETLB = 3,
+    NUMAKIND_PARTITION_HBW_PREFERRED = 4,
+    NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB = 5
 };
 
 struct numakind_ops;
@@ -104,6 +105,7 @@ struct numakind_ops {
 typedef struct numakind * numakind_t;
 
 extern numakind_t NUMAKIND_DEFAULT;
+extern numakind_t NUMAKIND_HUGETLB;
 extern numakind_t NUMAKIND_HBW;
 extern numakind_t NUMAKIND_HBW_PREFERRED;
 extern numakind_t NUMAKIND_HBW_HUGETLB;
