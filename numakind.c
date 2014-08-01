@@ -36,18 +36,49 @@
 #include "numakind_hbw.h"
 
 
-struct numakind NUMAKIND_DEFAULT_STATIC = {&NUMAKIND_DEFAULT_OPS, NUMAKIND_PARTITION_DEFAULT, "numakind_default", 0, NULL};
-struct numakind NUMAKIND_HBW_STATIC = {&NUMAKIND_HBW_OPS, NUMAKIND_PARTITION_HBW, "numakind_hbw", 0, NULL};
-struct numakind NUMAKIND_HBW_PREFERRED_STATIC = {&NUMAKIND_HBW_PREFERRED_OPS, NUMAKIND_PARTITION_HBW_PREFERRED, "numakind_hbw_preferred", 0, NULL};
-struct numakind NUMAKIND_HBW_HUGETLB_STATIC = {&NUMAKIND_HBW_HUGETLB_OPS, NUMAKIND_PARTITION_HBW_HUGETLB, "numakind_hbw_hugetlb", 0, NULL};
-struct numakind NUMAKIND_HBW_PREFERRED_HUGETLB_STATIC = {&NUMAKIND_HBW_PREFERRED_HUGETLB_OPS, NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB, "numakind_hbw_preferred_hugetlb", 0, NULL};
+static struct numakind NUMAKIND_DEFAULT_STATIC = {
+    &NUMAKIND_DEFAULT_OPS,
+    NUMAKIND_PARTITION_DEFAULT,
+    "numakind_default",
+    0, NULL
+};
+static struct numakind NUMAKIND_HUGETLB_STATIC = {
+    &NUMAKIND_HUGETLB_OPS,
+    NUMAKIND_PARTITION_HUGETLB,
+    "numakind_hugetlb",
+    0, NULL
+};
+static struct numakind NUMAKIND_HBW_STATIC = {
+    &NUMAKIND_HBW_OPS,
+    NUMAKIND_PARTITION_HBW,
+    "numakind_hbw",
+    0, NULL
+};
+static struct numakind NUMAKIND_HBW_PREFERRED_STATIC = {
+    &NUMAKIND_HBW_PREFERRED_OPS,
+    NUMAKIND_PARTITION_HBW_PREFERRED,
+    "numakind_hbw_preferred",
+    0, NULL
+};
+static struct numakind NUMAKIND_HBW_HUGETLB_STATIC = {
+    &NUMAKIND_HBW_HUGETLB_OPS,
+    NUMAKIND_PARTITION_HBW_HUGETLB,
+    "numakind_hbw_hugetlb",
+    0, NULL
+};
+static struct numakind NUMAKIND_HBW_PREFERRED_HUGETLB_STATIC = {
+    &NUMAKIND_HBW_PREFERRED_HUGETLB_OPS,
+    NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB,
+    "numakind_hbw_preferred_hugetlb",
+    0, NULL
+};
 
 struct numakind *NUMAKIND_DEFAULT = &NUMAKIND_DEFAULT_STATIC;
+struct numakind *NUMAKIND_HUGETLB = &NUMAKIND_HUGETLB_STATIC;
 struct numakind *NUMAKIND_HBW = &NUMAKIND_HBW_STATIC;
 struct numakind *NUMAKIND_HBW_PREFERRED = &NUMAKIND_HBW_PREFERRED_STATIC;
 struct numakind *NUMAKIND_HBW_HUGETLB = &NUMAKIND_HBW_HUGETLB_STATIC;
 struct numakind *NUMAKIND_HBW_PREFERRED_HUGETLB = &NUMAKIND_HBW_PREFERRED_HUGETLB_STATIC;
-
 
 struct numakind_registry {
     struct numakind *partition_map[NUMAKIND_MAX_KIND];
@@ -327,6 +358,7 @@ int numakind_get_size(numakind_t kind, size_t *total, size_t *free)
 static void numakind_init_once(void)
 {
     numakind_arena_create_map(NUMAKIND_HBW);
+    numakind_arena_create_map(NUMAKIND_HUGETLB);
     numakind_arena_create_map(NUMAKIND_HBW_HUGETLB);
     numakind_arena_create_map(NUMAKIND_HBW_PREFERRED);
     numakind_arena_create_map(NUMAKIND_HBW_PREFERRED_HUGETLB);

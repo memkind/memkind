@@ -41,7 +41,6 @@ void numakind_arena_free(struct numakind *kind, void *ptr);
 int numakind_cpu_get_arena(struct numakind *kind, unsigned int *arena);
 int numakind_bijective_get_arena(struct numakind *kind, unsigned int *arena);
 
-
 #ifdef __cplusplus
 }
 #endif
