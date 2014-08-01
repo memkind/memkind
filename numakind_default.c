@@ -34,9 +34,8 @@ int numakind_default_create(struct numakind *kind, const struct numakind_ops *op
     int err = 0;
 
     kind->ops = ops;
-    kind->name = je_malloc(strlen(name) + 1);
-    if (!kind->name) {
-        err = NUMAKIND_ERROR_MALLOC;
+    if (strlen(name) >= NUMAKIND_NAME_LENGTH) {
+        err = NUMAKIND_ERROR_INVALID;
     }
     if (!err) {
         strcpy(kind->name, name);
@@ -46,10 +45,6 @@ int numakind_default_create(struct numakind *kind, const struct numakind_ops *op
 
 int numakind_default_destroy(struct numakind *kind)
 {
-    if (kind->name) {
-        je_free(kind->name);
-        kind->name = NULL;
-    }
     return 0;
 }
 
@@ -88,6 +83,7 @@ int numakind_default_mbind(struct numakind *kind, void *ptr, size_t len)
     nodemask_t nodemask;
     int err = 0;
     int mode;
+
     err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
     if (!err) {
         err = kind->ops->get_mbind_mode(kind, &mode);

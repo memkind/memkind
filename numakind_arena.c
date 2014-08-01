@@ -48,31 +48,30 @@ int numakind_arena_create(struct numakind *kind, const struct numakind_ops *ops,
     int i;
     size_t unsigned_size = sizeof(unsigned int);
 
-    kind->ops = ops;
-    kind->name = je_malloc(strlen(name) + 1);
-    if (!kind->name) {
+    err = numakind_default_create(kind, obs, name);
+    if (!err) {
+        numakind_arena_create_map(kind);
+    }
+    return err;
+}
+
+int numakind_arena_create_map(struct numakind *kind)
+{
+    if (kind->ops->get_arena == numakind_cpu_get_arena) {
+        kind->arena_map_len = numa_num_configured_cpus();
+        kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int) * kind->arena_map_len);
+    }
+    else if (kind->ops->get_arena == numakind_bijective_get_arena) {
+        kind->arena_map_len = 1;
+        kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int));
+    }
+    else {
+        kind->arena_map_len = 0;
+        kind->arena_map = NULL;
+    }
+    if (kind->arena_map_len && kind->arena_map == NULL) {
+        je_free(kind->name);
         err = NUMAKIND_ERROR_MALLOC;
-    }
-    if (!err) {
-        strcpy(kind->name, name);
-        if (kind->ops->get_arena == numakind_cpu_get_arena) {
-            kind->arena_map_len = numa_num_configured_cpus();
-            kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int) * kind->arena_map_len);
-        }
-        else if (kind->ops->get_arena == numakind_bijective_get_arena) {
-            kind->arena_map_len = 1;
-            kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int));
-        }
-        else {
-            kind->arena_map_len = 0;
-            kind->arena_map = NULL;
-        }
-    }
-    if (!err) {
-        if (kind->arena_map_len && kind->arena_map == NULL) {
-            je_free(kind->name);
-            err = NUMAKIND_ERROR_MALLOC;
-        }
     }
     if (!err) {
         for (i = 0; !err && i < kind->arena_map_len; ++i) {
@@ -104,10 +103,8 @@ int numakind_arena_destroy(struct numakind *kind)
         je_free(kind->arena_map);
         kind->arena_map = NULL;
     }
-    if (kind->name) {
-        je_free(kind->name);
-        kind->name = NULL;
-    }
+
+    numakind_default_destroy(kind);
     return 0;
 }
 

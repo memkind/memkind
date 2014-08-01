@@ -31,6 +31,7 @@ extern "C" {
 #include "numakind.h"
 
 int numakind_arena_create(struct numakind *kind, const struct numakind_ops *ops, const char *name);
+int numakind_arena_create_map(struct numakind *kind);
 int numakind_arena_destroy(struct numakind *kind);
 void *numakind_arena_malloc(struct numakind *kind, size_t size);
 void *numakind_arena_calloc(struct numakind *kind, size_t num, size_t size);

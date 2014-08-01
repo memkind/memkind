@@ -44,7 +44,8 @@ extern "C" {
 enum numakind_const {
     NUMAKIND_MAX_KIND = 512,
     NUMAKIND_NUM_BASE_KIND = 5,
-    NUMAKIND_ERROR_MESSAGE_SIZE = 128
+    NUMAKIND_ERROR_MESSAGE_SIZE = 128,
+    NUMAKIND_NAME_LENGTH = 64
 };
 
 enum numakind_error {
@@ -78,8 +79,7 @@ struct numakind_ops;
 struct numakind {
     const struct numakind_ops *ops;
     int partition;
-    char *name;
-    int arena_mode;
+    char name[NUMAKIND_NAME_LENGTH];
     int arena_map_len;
     unsigned int *arena_map;
 };
