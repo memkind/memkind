@@ -55,7 +55,6 @@ void hbw_set_policy(int mode)
 
 int hbw_is_available(void)
 {
-    numakind_init();
     return numakind_is_available(NUMAKIND_HBW);
 }
 

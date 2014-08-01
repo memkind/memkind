@@ -35,11 +35,11 @@
 #include "numakind_arena.h"
 #include "numakind_hbw.h"
 
-numakind_t NUMAKIND_DEFAULT = NULL;
-numakind_t NUMAKIND_HBW = NULL;
-numakind_t NUMAKIND_HBW_PREFERRED = NULL;
-numakind_t NUMAKIND_HBW_HUGETLB = NULL;
-numakind_t NUMAKIND_HBW_PREFERRED_HUGETLB = NULL;
+struct numakind NUMAKIND_DEFAULT[1] = {{&NUMAKIND_OPS_DEFAULT, NUMAKIND_PARTITION_DEFAULT, "numakind_default", 0, NULL}};
+struct numakind NUMAKIND_HBW[1] = {{&NUMAKIND_OPS_HBW, NUMAKIND_PARTITION_HBW, "numakind_hbw", 0, NULL}};
+struct numakind NUMAKIND_HBW_PREFERRED[1] = {{&NUMAKIND_OPS_HBW_PREFERRED, NUMAKIND_PARTITION_HBW_PREFERRED, "numakind_hbw_preferred", 0, NULL}};
+struct numakind NUMAKIND_HBW_HUGETLB[1] = {{&NUMAKIND_OPS_HBW_HUGETLB, NUMAKIND_PARTITION_HBW_HUGETLB, "numakind_hbw_hugetlb", 0, NULL}};
+struct numakind NUMAKIND_HBW_PREFERRED_HUGETLB[1] = {{&NUMAKIND_OPS_HBW_PREFERRED_HUGETLB, NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB, "numakind_hbw_preferred_hugetlb", 0, NULL}};
 
 struct numakind_registry {
     struct numakind *partition_map[NUMAKIND_MAX_KIND];
@@ -137,12 +137,6 @@ int numakind_create(const struct numakind_ops *ops, const char *name)
             goto exit;
         }
     }
-    assert(strcmp(name, "numakind_default") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_DEFAULT);
-    assert(strcmp(name, "numakind_hbw") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW);
-    assert(strcmp(name, "numakind_hbw_hugetlb") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW_HUGETLB);
-    assert(strcmp(name, "numakind_hbw_preferred") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW_PREFERRED);
-    assert(strcmp(name, "numakind_hbw_preferred_hugetlb") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB);
-
     kind = (struct numakind *)je_malloc(sizeof(struct numakind));
     if (!kind) {
         err = NUMAKIND_ERROR_MALLOC;
@@ -195,7 +189,6 @@ int numakind_finalize(void)
 
     return err;
 }
-
 
 int numakind_get_num_kind(int *num_kind)
 {
@@ -259,7 +252,9 @@ int numakind_partition_is_available(int partition)
 int numakind_partition_get_mmap_flags(int partition, int *flags)
 {
     struct numakind *kind;
-    int err = numakind_get_kind_by_partition(partition, &kind);
+    int err = 0;
+
+    err = numakind_get_kind_by_partition(partition, &kind);
     if (!err) {
         err = kind->ops->get_mmap_flags(kind, flags);
     }
@@ -272,7 +267,9 @@ int numakind_partition_get_mmap_flags(int partition, int *flags)
 int numakind_partition_mbind(int partition, void *addr, size_t size)
 {
     struct numakind *kind;
-    int err = numakind_get_kind_by_partition(partition, &kind);
+    int err = 0;
+
+    err = numakind_get_kind_by_partition(partition, &kind);
     if (!err) {
         err = kind->ops->mbind(kind, addr, size);
     }
@@ -286,22 +283,26 @@ int numakind_is_available(struct numakind *kind)
 
 void *numakind_malloc(struct numakind *kind, size_t size)
 {
+    pthread_once(&numakind_init_once_g, numakind_init_once);
     return kind->ops->malloc(kind, size);
 }
 
 void *numakind_calloc(struct numakind *kind, size_t num, size_t size)
 {
+    pthread_once(&numakind_init_once_g, numakind_init_once);
     return kind->ops->calloc(kind, num, size);
 }
 
 int numakind_posix_memalign(struct numakind *kind, void **memptr, size_t alignment,
                             size_t size)
 {
+    pthread_once(&numakind_init_once_g, numakind_init_once);
     return kind->ops->posix_memalign(kind, memptr, alignment, size);
 }
 
 void *numakind_realloc(struct numakind *kind, void *ptr, size_t size)
 {
+    pthread_once(&numakind_init_once_g, numakind_init_once);
     return kind->ops->realloc(kind, ptr, size);
 }
 
@@ -317,34 +318,9 @@ int numakind_get_size(numakind_t kind, size_t *total, size_t *free)
 
 static void numakind_init_once(void)
 {
-    int i;
-
-    for (i = 0; i < NUMAKIND_NUM_BASE_KIND; ++i) {
-        switch (i) {
-            case NUMAKIND_PARTITION_DEFAULT:
-                numakind_create(&NUMAKIND_DEFAULT_OPS, "numakind_default");
-                numakind_get_kind_by_partition(NUMAKIND_PARTITION_DEFAULT, &NUMAKIND_DEFAULT);
-                break;
-            case NUMAKIND_PARTITION_HBW:
-                numakind_create(&NUMAKIND_HBW_OPS, "numakind_hbw");
-                numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW, &NUMAKIND_HBW);
-                break;
-            case NUMAKIND_PARTITION_HBW_HUGETLB:
-                numakind_create(&NUMAKIND_HBW_HUGETLB_OPS, "numakind_hbw_hugetlb");
-                numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW_HUGETLB, &NUMAKIND_HBW_HUGETLB);
-                break;
-            case NUMAKIND_PARTITION_HBW_PREFERRED:
-                numakind_create(&NUMAKIND_HBW_PREFERRED_OPS, "numakind_hbw_preferred");
-                numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW_PREFERRED, &NUMAKIND_HBW_PREFERRED);
-                break;
-            case NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB:
-                numakind_create(&NUMAKIND_HBW_PREFERRED_HUGETLB_OPS, "numakind_hbw_preferred_hugetlb");
-                numakind_get_kind_by_partition(NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB, &NUMAKIND_HBW_PREFERRED_HUGETLB);
-                break;
-            default:
-                fprintf(stderr, "WARNING: Unknown base kind partition %i\n", i);
-                break;
-        }
-    }
+    numakind_arena_create_map(NUMAKIND_HBW);
+    numakind_arena_create_map(NUMAKIND_HBW_HUGETLB);
+    numakind_arena_create_map(NUMAKIND_HBW_PREFERRED);
+    numakind_arena_create_map(NUMAKIND_HBW_PERFERRED_HUGETLB);
 }
 
