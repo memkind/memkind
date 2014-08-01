@@ -35,6 +35,7 @@
 #include <sched.h>
 
 #include "numakind.h"
+#include "numakind_default.h"
 #include "numakind_arena.h"
 
 enum {NUMAKIND_CMD_LEN = 128};
@@ -45,10 +46,8 @@ static void *je_rallocx_check(void *ptr, size_t size, int flags);
 int numakind_arena_create(struct numakind *kind, const struct numakind_ops *ops, const char *name)
 {
     int err = 0;
-    int i;
-    size_t unsigned_size = sizeof(unsigned int);
 
-    err = numakind_default_create(kind, obs, name);
+    err = numakind_default_create(kind, ops, name);
     if (!err) {
         numakind_arena_create_map(kind);
     }
@@ -57,6 +56,10 @@ int numakind_arena_create(struct numakind *kind, const struct numakind_ops *ops,
 
 int numakind_arena_create_map(struct numakind *kind)
 {
+    int err = 0;
+    int i;
+    size_t unsigned_size = sizeof(unsigned int);
+
     if (kind->ops->get_arena == numakind_cpu_get_arena) {
         kind->arena_map_len = numa_num_configured_cpus();
         kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int) * kind->arena_map_len);
