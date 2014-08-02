@@ -331,10 +331,20 @@ int numakind_get_size(numakind_t kind, size_t *total, size_t *free)
 
 static void numakind_init_once(void)
 {
-    numakind_arena_create_map(NUMAKIND_HBW);
+    pthread_mutex_lock(&(numakind_registry_g.lock));
+    numakind_registry_g.partition_map[NUMAKIND_PARTITION_HUGETLB] = NUMAKIND_HUGETLB;
+    numakind_registry_g.partition_map[NUMAKIND_PARTITION_HBW] = NUMAKIND_HBW;
+    numakind_registry_g.partition_map[NUMAKIND_PARTITION_HBW_HUGETLB] = NUMAKIND_HBW_HUGETLB;
+    numakind_registry_g.partition_map[NUMAKIND_PARTITION_HBW_PREFERRED] = NUMAKIND_HBW_PREFERRED;
+    numakind_registry_g.partition_map[NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB] = NUMAKIND_HBW_PREFERRED_HUGETLB;
+    numakind_registry_g.num_kind = NUMAKIND_NUM_BASE_KIND;
+
     numakind_arena_create_map(NUMAKIND_HUGETLB);
+    numakind_arena_create_map(NUMAKIND_HBW);
     numakind_arena_create_map(NUMAKIND_HBW_HUGETLB);
     numakind_arena_create_map(NUMAKIND_HBW_PREFERRED);
     numakind_arena_create_map(NUMAKIND_HBW_PREFERRED_HUGETLB);
+    pthread_mutex_unlock(&(numakind_registry_g.lock));
+
 }
 
