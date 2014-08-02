@@ -95,6 +95,11 @@ int numakind_default_mbind(struct numakind *kind, void *ptr, size_t len)
     return err;
 }
 
+int numakind_noop_mbind(struct numakind *kind, void *ptr, size_t len)
+{
+    return 0;
+}
+
 int numakind_default_get_mmap_flags(struct numakind *kind, int *flags)
 {
     *flags = MAP_PRIVATE | MAP_ANONYMOUS;
@@ -125,7 +130,12 @@ int numakind_default_get_size(struct numakind *kind, size_t *total, size_t *free
 
     *total = 0;
     *free = 0;
-    err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
+    if (kind->ops->get_mbind_nodemask) {
+        err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
+    }
+    else {
+        copy_bitmask_to_bitmask(numa_all_nodes_ptr, &nodemask_bm);
+    }
     if (!err) {
         for (i = 0; i < NUMA_NUM_NODES; ++i) {
             if (numa_bitmask_isbitset(&nodemask_bm, i)) {

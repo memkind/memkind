@@ -39,6 +39,7 @@ void *numakind_default_realloc(struct numakind *kind, void *ptr, size_t size);
 void numakind_default_free(struct numakind *kind, void *ptr);
 int numakind_default_is_available(struct numakind *kind);
 int numakind_default_mbind(struct numakind *kind, void *ptr, size_t len);
+int numakind_noop_mbind(struct numakind *kind, void *ptr, size_t len);
 int numakind_default_get_mmap_flags(struct numakind *kind, int *flags);
 int numakind_default_get_mbind_mode(struct numakind *kind, int *mode);
 int numakind_default_get_mbind_nodemask(struct numakind *kind, unsigned long *nodemask, unsigned long maxnode);
