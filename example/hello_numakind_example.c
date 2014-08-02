@@ -29,40 +29,38 @@
 
 int main(int argc, char **argv)
 {
-    const size_t strlen = 512;
+    const size_t size = 512;
     char *default_str = NULL;
     char *hbw_str = NULL;
     char *hbw_hugetlb_str = NULL;
     char *hbw_preferred_str = NULL;
     char *hbw_preferred_hugetlb_str = NULL;
-
-    numakind_init();
     
-    default_str = (char *)numakind_malloc(NUMAKIND_DEFAULT, strlen);
+    default_str = (char *)numakind_malloc(NUMAKIND_DEFAULT, size);
     if (default_str == NULL) {
         perror("numakind_malloc()");
         fprintf(stderr, "Unable to allocate default string\n");
         return errno ? -errno : 1;
     }
-    hbw_str = (char *)numakind_malloc(NUMAKIND_HBW, strlen);
+    hbw_str = (char *)numakind_malloc(NUMAKIND_HBW, size);
     if (hbw_str == NULL) {
         perror("numakind_malloc()");
         fprintf(stderr, "Unable to allocate hbw string\n");
         return errno ? -errno : 1;
     }
-    hbw_hugetlb_str = (char *)numakind_malloc(NUMAKIND_HBW_HUGETLB, strlen);
+    hbw_hugetlb_str = (char *)numakind_malloc(NUMAKIND_HBW_HUGETLB, size);
     if (hbw_hugetlb_str == NULL) {
         perror("numakind_malloc()");
         fprintf(stderr, "Unable to allocate hbw_hugetlb string\n");
         return errno ? -errno : 1;
     }
-    hbw_preferred_str = (char *)numakind_malloc(NUMAKIND_HBW_PREFERRED, strlen);
+    hbw_preferred_str = (char *)numakind_malloc(NUMAKIND_HBW_PREFERRED, size);
     if (hbw_preferred_str == NULL) {
         perror("numakind_malloc()");
         fprintf(stderr, "Unable to allocate hbw_preferred string\n");
         return errno ? -errno : 1;
     }
-    hbw_preferred_hugetlb_str = (char *)numakind_malloc(NUMAKIND_HBW_PREFERRED_HUGETLB, strlen);
+    hbw_preferred_hugetlb_str = (char *)numakind_malloc(NUMAKIND_HBW_PREFERRED_HUGETLB, size);
     if (hbw_preferred_hugetlb_str == NULL) {
         perror("numakind_malloc()");
         fprintf(stderr, "Unable to allocate hbw_preferred_hugetlb string\n");
@@ -80,6 +78,12 @@ int main(int argc, char **argv)
     fprintf(stdout, "%s", hbw_hugetlb_str);
     fprintf(stdout, "%s", hbw_preferred_str);
     fprintf(stdout, "%s", hbw_preferred_hugetlb_str);
+
+    numakind_free(NUMAKIND_DEFAULT, hbw_preferred_hugetlb_str);
+    numakind_free(NUMAKIND_DEFAULT, hbw_preferred_str);
+    numakind_free(NUMAKIND_DEFAULT, hbw_hugetlb_str);
+    numakind_free(NUMAKIND_DEFAULT, hbw_str);
+    numakind_free(NUMAKIND_DEFAULT, default_str);
 
     return 0;
 }

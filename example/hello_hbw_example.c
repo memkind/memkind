@@ -25,58 +25,46 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <numakind.h>
+#include <hbwmalloc.h>
 
 int main(int argc, char **argv)
 {
-    const size_t stream_len = 1024 * 1024;
-    const size_t filter_len = 1024;
-    const size_t num_filter = stream_len / filter_len;
-    size_t i, j;
-    double *stream = NULL;
-    double *filter = NULL;
-    double *result = NULL;
+    const size_t size = 512;
+    char *default_str = NULL;
+    char *hbw_str = NULL;
+    char *hbw_hugetlb_str = NULL;
+    int err;
 
-    srandom(0);
-
-    stream = (double *)numakind_malloc(NUMAKIND_DEFAULT, stream_len * sizeof(double));
-    if (stream == NULL) {
-        perror("<numakind>");
-        fprintf(stderr, "Unable to allocate stream\n");
+    default_str = (char *)malloc(size);
+    if (default_str == NULL) {
+        perror("je_malloc()");
+        fprintf(stderr, "Unable to allocate default string\n");
+        return errno ? -errno : 1;
+    }
+    hbw_str = (char *)hbw_malloc(size);
+    if (hbw_str == NULL) {
+        perror("hbw_malloc()");
+        fprintf(stderr, "Unable to allocate hbw string\n");
+        return errno ? -errno : 1;
+    }
+    err = hbw_allocate_memalign_psize((void **)&hbw_hugetlb_str, 2097152, size, HBW_PAGESIZE_2MB);
+    if (err) {
+        perror("hbw_allocate_memalign()");
+        fprintf(stderr, "Unable to allocate hbw hugetlb string\n");
         return errno ? -errno : 1;
     }
 
-    filter = (double *)numakind_malloc(NUMAKIND_HBW, filter_len * sizeof(double));
-    if (filter == NULL) {
-        perror("<numakind>");
-        fprintf(stderr, "Unable to allocate filter\n");
-        return errno ? -errno : 1;
-    }
+    sprintf(default_str, "Hello world from standard memory\n");
+    sprintf(hbw_str, "Hello world from high bandwidth memory\n");
+    sprintf(hbw_hugetlb_str, "Hello world from high bandwidth 2 MB paged memory\n");
 
-    result = (double *)numakind_calloc(NUMAKIND_HBW, filter_len, sizeof(double));
-    if (result == NULL) {
-        perror("<numakind>");
-        fprintf(stderr, "Unable to allocate result\n");
-        return errno ? -errno : 1;
-    }
+    fprintf(stdout, "%s", default_str);
+    fprintf(stdout, "%s", hbw_str);
+    fprintf(stdout, "%s", hbw_hugetlb_str);
 
-    for (i = 0; i < stream_len; i++) {
-        stream[i] = (double)(random())/(double)(RAND_MAX);
-    }
-
-    for (i = 0; i < filter_len; i++) {
-        filter[i] = (double)(i)/(double)(filter_len);
-    }
-
-    for (i = 0; i < num_filter; i++) {
-        for (j = 0; j < filter_len; j++) {
-            result[j] += stream[i * filter_len + j] * filter[j];
-        }
-    }
-
-    for (i = 0; i < filter_len; i++) {
-        fprintf(stdout, "%.6e\n", result[i]);
-    }
+    hbw_free(hbw_hugetlb_str);
+    hbw_free(hbw_str);
+    free(default_str);
 
     return 0;
 }
