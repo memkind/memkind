@@ -371,6 +371,5 @@ static void numakind_init_once(void)
     numakind_arena_create_map(NUMAKIND_HBW_PREFERRED);
     numakind_arena_create_map(NUMAKIND_HBW_PREFERRED_HUGETLB);
     pthread_mutex_unlock(&(numakind_registry_g.lock));
-
 }
 
