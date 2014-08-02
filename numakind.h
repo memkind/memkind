@@ -43,7 +43,7 @@ extern "C" {
 
 enum numakind_const {
     NUMAKIND_MAX_KIND = 512,
-    NUMAKIND_NUM_BASE_KIND = 5,
+    NUMAKIND_NUM_BASE_KIND = 6,
     NUMAKIND_ERROR_MESSAGE_SIZE = 128,
     NUMAKIND_NAME_LENGTH = 64
 };
