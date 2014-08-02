@@ -23,13 +23,16 @@
 #
 
 CC = cc
-CFLAGS = -O3 -Wall -Werror
+CFLAGS = -O0 -g -Wall -Werror
 LDFLAGS = -lnumakind -ljemalloc -lnuma -lpthread
 
-all: hello_nk filter_nk stream_nk
+all: hello_nk hello_hbw filter_nk stream_nk
 
-hello_nk: hello_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_example.c -o hello_nk
+hello_nk: hello_numakind_example.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_numakind_example.c -o hello_nk
+
+hello_hbw: hello_hbw_example.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_hbw_example.c -o hello_hbw
 
 filter_nk: filter_example.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) filter_example.c -o filter_nk
@@ -41,10 +44,11 @@ stream: stream_example.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fopenmp stream_example.c -o stream
 
 clean:
-	rm -f hello_nk filter_nk stream_nk stream
+	rm -f hello_nk hello_hbw filter_nk stream_nk stream
 
 test: hello_nk filter_nk
 	./hello_nk
+	./hello_hbw
 	./filter_nk
 	./stream
 	./stream_nk

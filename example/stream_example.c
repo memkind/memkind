@@ -289,7 +289,6 @@ main(int argc, char **argv)
 #endif
 
 #ifdef ENABLE_DYNAMIC_ALLOC
-    numakind_init();
     if (argc > 1) {
         err = numakind_get_kind_by_name(argv[1], &kind);
     }
