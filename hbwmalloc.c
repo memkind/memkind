@@ -144,6 +144,14 @@ static inline numakind_t hbw_get_kind(int pagesize)
                 result = NUMAKIND_HUGETLB;
             }
         }
+        else {
+            if (numakind_is_available(NUMAKIND_HBW_PREFERRED)) {
+                result = NUMAKIND_HBW_PREFERRED;
+            }
+            else {
+                result = NUMAKIND_DEFAULT;
+            }
+        }
     }
     return result;
 }
