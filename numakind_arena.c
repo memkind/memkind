@@ -37,8 +37,6 @@
 #include "numakind.h"
 #include "numakind_arena.h"
 
-enum {NUMAKIND_CMD_LEN = 128};
-
 static void *je_mallocx_check(size_t size, int flags);
 static void *je_rallocx_check(void *ptr, size_t size, int flags);
 
@@ -93,12 +91,12 @@ int numakind_arena_create(struct numakind *kind, const struct numakind_ops *ops,
 
 int numakind_arena_destroy(struct numakind *kind)
 {
-    char cmd[NUMAKIND_CMD_LEN] = {0};
+    char cmd[128];
     int i;
 
     if (kind->arena_map) {
         for (i = 0; i < kind->arena_map_len; ++i) {
-            snprintf(cmd, NUMAKIND_CMD_LEN, "arena.%u.purge", kind->arena_map[i]);
+            snprintf(cmd, 128, "arena.%u.purge", kind->arena_map[i]);
             je_mallctl(cmd, NULL, NULL, NULL, 0);
         }
         je_free(kind->arena_map);

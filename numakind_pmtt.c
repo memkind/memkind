@@ -79,13 +79,13 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
     *   RETURNS zero on success, error code on failure                         *
     ***************************************************************************/
     const size_t PMTT_BUF_SIZE = 2000;
-    int mfd;
+    FILE *mfp;
     ACPI_TABLE_PMTT hdr;
     unsigned char buf[PMTT_BUF_SIZE];
     ACPI_PMTT_HEADER *pbuf = (ACPI_PMTT_HEADER *)&buf;
-    int size;
-    int nread;
-    int pmtt_socket_size;
+    size_t size;
+    size_t nread;
+    size_t pmtt_socket_size;
 
     memset(bandwidth, 0, sizeof(int)*num_bandwidth);
 
@@ -94,24 +94,24 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
     }
 
 
-    mfd = open(pmtt_path, O_RDONLY);
-    if (mfd == -1) {
+    mfp = fopen(pmtt_path, "r");
+    if (mfp == NULL) {
         return NUMAKIND_ERROR_PMTT;
     }
-    nread = read(mfd, &hdr, sizeof(ACPI_TABLE_PMTT));
-    if (nread != sizeof(ACPI_TABLE_PMTT) ||
+
+    nread = fread(&hdr, sizeof(ACPI_TABLE_PMTT), 1, mfp);
+    if (nread != 1 ||
         memcmp(hdr.Header.Signature, "PMTT", 4) != 0) {
         /* PMTT signature failure */
         return NUMAKIND_ERROR_PMTT;
     }
-    size = hdr.Header.Length;
-    if (size < sizeof(ACPI_TABLE_PMTT) ||
-        size > PMTT_BUF_SIZE + sizeof(ACPI_TABLE_PMTT)) {
+    size = hdr.Header.Length - sizeof(ACPI_TABLE_PMTT);
+    if (size < 0 || size > PMTT_BUF_SIZE) {
         /* PMTT byte count failure */
         return NUMAKIND_ERROR_PMTT;
     }
-    nread = read(mfd, &buf, size);
-    if (nread != size - sizeof(ACPI_TABLE_PMTT)) {
+    nread = fread(buf, size, 1, mfp);
+    if (nread != 1 || !feof(mfp)) {
         /* PMTT incorrect number of bytes read */
         return NUMAKIND_ERROR_PMTT;
     }
@@ -132,6 +132,7 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
                                       pmtt_socket_size - sizeof(ACPI_PMTT_SOCKET))) {
         return NUMAKIND_ERROR_PMTT;
     }
+    fclose(mfp);
     return 0;
 }
 
@@ -197,7 +198,8 @@ int main (int argc, char *argv[])
         return errno ? -errno : 1;
     }
 
-    strncpy(dir, NUMAKIND_BANDWIDTH_PATH, STRLEN);
+    dir[STRLEN-1] = '\0';
+    strncpy(dir, NUMAKIND_BANDWIDTH_PATH, STRLEN - 1);
     dirname(dir);
     err = mkdir(dir, 0755);
     if (err && err != EEXIST) {
