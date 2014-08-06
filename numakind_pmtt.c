@@ -193,42 +193,52 @@ int main (int argc, char *argv[])
     char dir[STRLEN];
 
     bandwidth = (int *)malloc(sizeof(int) * NUMA_NUM_NODES);
-    if (!bandwidth) {
+    if (bandwidth == NULL) {
         fprintf(stderr, "ERROR: <%s> in allocating bandwidth array\n", argv[0]);
-        return errno ? -errno : 1;
+        err = errno ? -errno : 1;
     }
-
-    dir[STRLEN-1] = '\0';
-    strncpy(dir, NUMAKIND_BANDWIDTH_PATH, STRLEN - 1);
-    dirname(dir);
-    err = mkdir(dir, 0755);
-    if (err && err != EEXIST) {
-        fprintf(stderr, "ERROR: <%s> creating output directory %s\n", argv[0], dir);
-        return errno ? -errno : 1;
+    if (!err) {
+        dir[STRLEN-1] = '\0';
+        strncpy(dir, NUMAKIND_BANDWIDTH_PATH, STRLEN - 1);
+        dirname(dir);
+        err = mkdir(dir, 0755);
+        if (err && err != EEXIST) {
+            fprintf(stderr, "ERROR: <%s> creating output directory %s\n", argv[0], dir);
+            err = errno ? -errno : 1;
+        }
     }
-
-    fd = open(NUMAKIND_BANDWIDTH_PATH, O_CREAT | O_EXCL | O_WRONLY, 0644);
-    if (fd == -1) {
-        fprintf(stderr, "ERROR: <%s> opening %s for writing\n", argv[0], NUMAKIND_BANDWIDTH_PATH);
-        return errno ? -errno : 1;
+    if (!err) {
+        fd = open(NUMAKIND_BANDWIDTH_PATH, O_CREAT | O_EXCL | O_WRONLY, 0644);
+        if (fd == -1) {
+            fprintf(stderr, "ERROR: <%s> opening %s for writing\n", argv[0], NUMAKIND_BANDWIDTH_PATH);
+            err = errno ? -errno : 1;
+        }
     }
-    fp = fdopen(fd, "w");
-    if (fp == NULL) {
-        close(fd);
-        return errno ? -errno : 1;
+    if (!err) {
+        fp = fdopen(fd, "w");
+        if (fp == NULL) {
+            close(fd);
+            err = errno ? -errno : 1;
+        }
     }
-
-    err = parse_pmtt_bandwidth(NUMA_NUM_NODES, bandwidth, PMTT_PATH);
-    if (err) {
-        fprintf(stderr, "ERROR: <%s> parsing file %s\n", argv[0], PMTT_PATH);
-        return errno ? -errno : 1;
-
+    if (!err) {
+        err = parse_pmtt_bandwidth(NUMA_NUM_NODES, bandwidth, PMTT_PATH);
+        if (err) {
+            fprintf(stderr, "ERROR: <%s> parsing file %s\n", argv[0], PMTT_PATH);
+            err = errno ? -errno : 1;
+        }
     }
-    nwrite = fwrite(bandwidth, sizeof(int), NUMA_NUM_NODES, fp);
-    if (nwrite != NUMA_NUM_NODES) {
-        return errno ? -errno : 1;
+    if (!err) {
+        nwrite = fwrite(bandwidth, sizeof(int), NUMA_NUM_NODES, fp);
+        if (nwrite != NUMA_NUM_NODES) {
+            err = errno ? -errno : 1;
+        }
     }
-    fclose(fp);
-    free(bandwidth);
-    return 0;
+    if (fp != NULL) {
+        fclose(fp);
+    }
+    if (bandwidth != NULL) {
+        free(bandwidth);
+    }
+    return err;
 }
