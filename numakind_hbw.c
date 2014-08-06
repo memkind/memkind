@@ -201,6 +201,7 @@ static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
             err = NUMAKIND_ERROR_PMTT;
         }
     }
+    fclose(fid);
     return err;
 }
 
