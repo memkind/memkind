@@ -79,7 +79,8 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
     *   RETURNS zero on success, error code on failure                         *
     ***************************************************************************/
     const size_t PMTT_BUF_SIZE = 2000;
-    FILE *mfp;
+    int err = 0;
+    FILE *mfp = NULL;
     ACPI_TABLE_PMTT hdr;
     unsigned char buf[PMTT_BUF_SIZE];
     ACPI_PMTT_HEADER *pbuf = (ACPI_PMTT_HEADER *)&buf;
@@ -90,50 +91,59 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
     memset(bandwidth, 0, sizeof(int)*num_bandwidth);
 
     if (numa_available() == -1) {
-        return NUMAKIND_ERROR_PMTT;
+        err = NUMAKIND_ERROR_PMTT;
+        goto exit;
     }
-
-
     mfp = fopen(pmtt_path, "r");
     if (mfp == NULL) {
-        return NUMAKIND_ERROR_PMTT;
+        err = NUMAKIND_ERROR_PMTT;
+        goto exit;
     }
-
     nread = fread(&hdr, sizeof(ACPI_TABLE_PMTT), 1, mfp);
     if (nread != 1 ||
         memcmp(hdr.Header.Signature, "PMTT", 4) != 0) {
         /* PMTT signature failure */
-        return NUMAKIND_ERROR_PMTT;
+        err = NUMAKIND_ERROR_PMTT;
+        goto exit;
     }
     size = hdr.Header.Length - sizeof(ACPI_TABLE_PMTT);
     if (size < 0 || size > PMTT_BUF_SIZE) {
         /* PMTT byte count failure */
-        return NUMAKIND_ERROR_PMTT;
+        err = NUMAKIND_ERROR_PMTT;
+        goto exit;
     }
     nread = fread(buf, size, 1, mfp);
     if (nread != 1 || !feof(mfp)) {
         /* PMTT incorrect number of bytes read */
-        return NUMAKIND_ERROR_PMTT;
+        err = NUMAKIND_ERROR_PMTT;
+        goto exit;
     }
 
     if (pbuf->Type != ACPI_PMTT_TYPE_SOCKET) { /* SOCKET */
         /* PMTT did not find socket record first */
-        return NUMAKIND_ERROR_PMTT;
+        err = NUMAKIND_ERROR_PMTT;
+        goto exit;
     }
     pmtt_socket_size = pbuf->Length;
 
     if (pmtt_socket_size != nread) {
         /* PMTT extra bytes after socket record */
-        return NUMAKIND_ERROR_PMTT;
+        err = NUMAKIND_ERROR_PMTT;
+        goto exit;
     }
 
     if (parse_pmtt_memory_controllers(num_bandwidth, bandwidth,
                                       (ACPI_PMTT_HEADER *)&buf[sizeof(ACPI_PMTT_SOCKET)],
                                       pmtt_socket_size - sizeof(ACPI_PMTT_SOCKET))) {
-        return NUMAKIND_ERROR_PMTT;
+        err = NUMAKIND_ERROR_PMTT;
+        goto exit;
     }
-    fclose(mfp);
-    return 0;
+
+    exit:
+    if (mfp != NULL) {
+        fclose(mfp);
+    }
+    return err;
 }
 
 static int parse_pmtt_memory_controllers(int num_bandwidth, int *bandwidth,
@@ -196,44 +206,42 @@ int main (int argc, char *argv[])
     if (bandwidth == NULL) {
         fprintf(stderr, "ERROR: <%s> in allocating bandwidth array\n", argv[0]);
         err = errno ? -errno : 1;
+        goto exit;
     }
-    if (!err) {
-        dir[STRLEN-1] = '\0';
-        strncpy(dir, NUMAKIND_BANDWIDTH_PATH, STRLEN - 1);
-        dirname(dir);
-        err = mkdir(dir, 0755);
-        if (err && err != EEXIST) {
-            fprintf(stderr, "ERROR: <%s> creating output directory %s\n", argv[0], dir);
-            err = errno ? -errno : 1;
-        }
+    dir[STRLEN-1] = '\0';
+    strncpy(dir, NUMAKIND_BANDWIDTH_PATH, STRLEN - 1);
+    dirname(dir);
+    err = mkdir(dir, 0755);
+    if (err && err != EEXIST) {
+        fprintf(stderr, "ERROR: <%s> creating output directory %s\n", argv[0], dir);
+        err = errno ? -errno : 1;
+        goto exit;
     }
-    if (!err) {
-        fd = open(NUMAKIND_BANDWIDTH_PATH, O_CREAT | O_EXCL | O_WRONLY, 0644);
-        if (fd == -1) {
-            fprintf(stderr, "ERROR: <%s> opening %s for writing\n", argv[0], NUMAKIND_BANDWIDTH_PATH);
-            err = errno ? -errno : 1;
-        }
+    fd = open(NUMAKIND_BANDWIDTH_PATH, O_CREAT | O_EXCL | O_WRONLY, 0644);
+    if (fd == -1) {
+        fprintf(stderr, "ERROR: <%s> opening %s for writing\n", argv[0], NUMAKIND_BANDWIDTH_PATH);
+        err = errno ? -errno : 1;
+        goto exit;
     }
-    if (!err) {
-        fp = fdopen(fd, "w");
-        if (fp == NULL) {
-            close(fd);
-            err = errno ? -errno : 1;
-        }
+    fp = fdopen(fd, "w");
+    if (fp == NULL) {
+        close(fd);
+        err = errno ? -errno : 1;
+        goto exit;
     }
-    if (!err) {
-        err = parse_pmtt_bandwidth(NUMA_NUM_NODES, bandwidth, PMTT_PATH);
-        if (err) {
-            fprintf(stderr, "ERROR: <%s> parsing file %s\n", argv[0], PMTT_PATH);
-            err = errno ? -errno : 1;
-        }
+    err = parse_pmtt_bandwidth(NUMA_NUM_NODES, bandwidth, PMTT_PATH);
+    if (err) {
+        fprintf(stderr, "ERROR: <%s> parsing file %s\n", argv[0], PMTT_PATH);
+        err = errno ? -errno : 1;
+        goto exit;
     }
-    if (!err) {
-        nwrite = fwrite(bandwidth, sizeof(int), NUMA_NUM_NODES, fp);
-        if (nwrite != NUMA_NUM_NODES) {
-            err = errno ? -errno : 1;
-        }
+    nwrite = fwrite(bandwidth, sizeof(int), NUMA_NUM_NODES, fp);
+    if (nwrite != NUMA_NUM_NODES) {
+        err = errno ? -errno : 1;
+        goto exit;
     }
+
+    exit:
     if (fp != NULL) {
         fclose(fp);
     }

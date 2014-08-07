@@ -188,18 +188,22 @@ static void numakind_hbw_closest_numanode_init(void)
 static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
                                 const char *bandwidth_path)
 {
-    FILE *fid;
-    size_t nread;
+    FILE *fid = NULL;
+    size_t nread = 0;
     int err = 0;
     fid = fopen(bandwidth_path, "r");
-    if (!fid) {
-        err = NUMAKIND_ERROR_PMTT;
+    if (fid == NULL) {
+        err = NUMAKIND_ERROR_PMTT ? NUMAKIND_ERROR_PMTT : -1;
+        goto exit;
     }
-    if (!err) {
-        nread = fread(bandwidth, sizeof(int), num_bandwidth, fid);
-        if (nread != num_bandwidth) {
-            err = NUMAKIND_ERROR_PMTT;
-        }
+    nread = fread(bandwidth, sizeof(int), num_bandwidth, fid);
+    if (nread != num_bandwidth) {
+        err = NUMAKIND_ERROR_PMTT;
+        goto exit;
+    }
+
+    exit:
+    if (fid != NULL) {
         fclose(fid);
     }
     return err;
