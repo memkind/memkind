@@ -159,9 +159,7 @@ int numakind_create(const struct numakind_ops *ops, const char *name)
     exit:
     if (err != NUMAKIND_ERROR_PTHREAD) {
         tmp = pthread_mutex_unlock(&(numakind_registry_g.lock));
-        if (!err && tmp) {
-            err = tmp;
-        }
+        err = err ? err : tmp;
     }
     return err;
 }
