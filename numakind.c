@@ -103,6 +103,9 @@ void numakind_error_message(int err, char *msg, size_t size)
         case ENOMEM:
             strncpy(msg, "<numakind> Call to je_mallocx() failed", size);
             break;
+        case NUMAKIND_ERROR_PTHREAD:
+            strncpy(msg, "<numakind> Call to pthread library failed", size);
+            break;
         default:
             snprintf(msg, size, "<numakind> Undefined error number: %i", err);
             break;
@@ -115,59 +118,84 @@ void numakind_error_message(int err, char *msg, size_t size)
 int numakind_create(const struct numakind_ops *ops, const char *name)
 {
     int err = 0;
+    int tmp = 0;
     int i;
     struct numakind *kind;
 
-    pthread_mutex_lock(&(numakind_registry_g.lock));
+    err = pthread_mutex_lock(&(numakind_registry_g.lock));
+    if (err) {
+        err = NUMAKIND_ERROR_PTHREAD;
+        goto exit;
+    }
     if (numakind_registry_g.num_kind == NUMAKIND_MAX_KIND) {
         err = NUMAKIND_ERROR_TOOMANY;
+        goto exit;
     }
-    if (!err) {
-        for (i = 0; i < numakind_registry_g.num_kind; ++i) {
-            if (strcmp(name, numakind_registry_g.partition_map[i]->name) == 0) {
-                err = NUMAKIND_ERROR_REPNAME;
-            }
+    for (i = 0; i < numakind_registry_g.num_kind; ++i) {
+        if (strcmp(name, numakind_registry_g.partition_map[i]->name) == 0) {
+            err = NUMAKIND_ERROR_REPNAME;
+            goto exit;
         }
     }
-    if (!err) {
-        assert(strcmp(name, "numakind_default") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_DEFAULT);
-        assert(strcmp(name, "numakind_hbw") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW);
-        assert(strcmp(name, "numakind_hbw_hugetlb") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW_HUGETLB);
-        assert(strcmp(name, "numakind_hbw_preferred") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW_PREFERRED);
-        assert(strcmp(name, "numakind_hbw_preferred_hugetlb") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB);
+    assert(strcmp(name, "numakind_default") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_DEFAULT);
+    assert(strcmp(name, "numakind_hbw") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW);
+    assert(strcmp(name, "numakind_hbw_hugetlb") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW_HUGETLB);
+    assert(strcmp(name, "numakind_hbw_preferred") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW_PREFERRED);
+    assert(strcmp(name, "numakind_hbw_preferred_hugetlb") || numakind_registry_g.num_kind == NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB);
 
-        kind = (struct numakind *)je_malloc(sizeof(struct numakind));
-        if (!kind) {
-            err = NUMAKIND_ERROR_MALLOC;
+    kind = (struct numakind *)je_malloc(sizeof(struct numakind));
+    if (!kind) {
+        err = NUMAKIND_ERROR_MALLOC;
+        goto exit;
+    }
+    kind->partition = numakind_registry_g.num_kind;
+    err = ops->create(kind, ops, name);
+    if (err) {
+        goto exit;
+    }
+    numakind_registry_g.partition_map[numakind_registry_g.num_kind] = kind;
+    ++numakind_registry_g.num_kind;
+
+    exit:
+    if (err != NUMAKIND_ERROR_PTHREAD) {
+        tmp = pthread_mutex_unlock(&(numakind_registry_g.lock));
+        if (!err && tmp) {
+            err = tmp;
         }
     }
-    if (!err) {
-        kind->partition = numakind_registry_g.num_kind;
-        err = ops->create(kind, ops, name);
-    }
-    if (!err) {
-        numakind_registry_g.partition_map[numakind_registry_g.num_kind] = kind;
-        ++numakind_registry_g.num_kind;
-    }
-    pthread_mutex_unlock(&(numakind_registry_g.lock));
     return err;
 }
 
-void numakind_finalize(void)
+int numakind_finalize(void)
 {
     struct numakind *kind;
     int i;
+    int err;
 
-    pthread_mutex_lock(&(numakind_registry_g.lock));
+    err = pthread_mutex_lock(&(numakind_registry_g.lock));
+    if (err) {
+        err = NUMAKIND_ERROR_PTHREAD;
+        goto exit;
+    }
+
     for (i = 0; i < numakind_registry_g.num_kind; ++i) {
         kind = numakind_registry_g.partition_map[i];
         if (kind) {
-            kind->ops->destroy(kind);
+            err = kind->ops->destroy(kind);
+            if (err) {
+                goto exit;
+            }
             je_free(kind);
             numakind_registry_g.partition_map[i] = NULL;
         }
     }
-    pthread_mutex_unlock(&(numakind_registry_g.lock));
+
+    exit:
+    if (err != NUMAKIND_ERROR_PTHREAD) {
+        err = pthread_mutex_unlock(&(numakind_registry_g.lock)) ? NUMAKIND_ERROR_PTHREAD : 0;
+    }
+
+    return err;
 }
 
 

@@ -62,6 +62,7 @@ enum numakind_error {
     NUMAKIND_ERROR_INVALID = -12,
     NUMAKIND_ERROR_REPNAME = -13,
     NUMAKIND_ERROR_TOOMANY = -14,
+    NUMAKIND_ERROR_PTHREAD = -15,
     NUMAKIND_ERROR_RUNTIME = -255
 };
 
@@ -116,7 +117,7 @@ void numakind_error_message(int err, char *msg, size_t size);
 void numakind_init(void);
 
 /* Free all resources allocated by the library (must be last call to library by the process) */
-void numakind_finalize(void);
+int numakind_finalize(void);
 
 /* KIND MANAGEMENT INTERFACE */
 
