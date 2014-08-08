@@ -107,7 +107,7 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
         goto exit;
     }
     size = hdr.Header.Length - sizeof(ACPI_TABLE_PMTT);
-    if (size < 0 || size > PMTT_BUF_SIZE) {
+    if (size > PMTT_BUF_SIZE) {
         /* PMTT byte count failure */
         err = NUMAKIND_ERROR_PMTT;
         goto exit;
