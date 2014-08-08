@@ -30,8 +30,6 @@ numakind \- Heap manager that isolates allocations to different kinds of numa no
 .sp
 .B Link with -ljemalloc -lnuma -lnumakind -lpthread
 .sp
-.B void numakind_init(void);
-.br
 .BI "void numakind_error_message(int " "err" ", char " "*msg" ", size_t " "size" );
 .sp
 .B "HEAP MANAGEMENT:"
@@ -262,8 +260,7 @@ The library sets
 to ENOMEM if requesting a negative size and
 EINVAL if the alignment is invalid.
 .SH "KINDS"
-The available kinds of memory created by calling
-.BR numakind_init ()
+The available kinds of memory
 .TP
 .B NUMAKIND_DEFAULT
 Default allocation using standard memory and default page size.
