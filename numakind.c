@@ -40,36 +40,47 @@ static struct numakind NUMAKIND_DEFAULT_STATIC = {
     &NUMAKIND_DEFAULT_OPS,
     NUMAKIND_PARTITION_DEFAULT,
     "numakind_default",
+    PTHREAD_ONCE_INIT,
     0, NULL
 };
+
 static struct numakind NUMAKIND_HUGETLB_STATIC = {
     &NUMAKIND_HUGETLB_OPS,
     NUMAKIND_PARTITION_HUGETLB,
     "numakind_hugetlb",
+    PTHREAD_ONCE_INIT,
     0, NULL
 };
+
 static struct numakind NUMAKIND_HBW_STATIC = {
     &NUMAKIND_HBW_OPS,
     NUMAKIND_PARTITION_HBW,
     "numakind_hbw",
+    PTHREAD_ONCE_INIT,
     0, NULL
 };
+
 static struct numakind NUMAKIND_HBW_PREFERRED_STATIC = {
     &NUMAKIND_HBW_PREFERRED_OPS,
     NUMAKIND_PARTITION_HBW_PREFERRED,
     "numakind_hbw_preferred",
+    PTHREAD_ONCE_INIT,
     0, NULL
 };
+
 static struct numakind NUMAKIND_HBW_HUGETLB_STATIC = {
     &NUMAKIND_HBW_HUGETLB_OPS,
     NUMAKIND_PARTITION_HBW_HUGETLB,
     "numakind_hbw_hugetlb",
+    PTHREAD_ONCE_INIT,
     0, NULL
 };
+
 static struct numakind NUMAKIND_HBW_PREFERRED_HUGETLB_STATIC = {
     &NUMAKIND_HBW_PREFERRED_HUGETLB_OPS,
     NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB,
     "numakind_hbw_preferred_hugetlb",
+    PTHREAD_ONCE_INIT,
     0, NULL
 };
 
@@ -86,14 +97,16 @@ struct numakind_registry {
     pthread_mutex_t lock;
 };
 
-static struct numakind_registry numakind_registry_g = {{0}, 0, PTHREAD_MUTEX_INITIALIZER};
-static pthread_once_t numakind_init_once_g = PTHREAD_ONCE_INIT;
-static void numakind_init_once(void);
-
-void numakind_init(void)
-{
-    pthread_once(&numakind_init_once_g, numakind_init_once);
-}
+static struct numakind_registry numakind_registry_g = {
+    {[NUMAKIND_PARTITION_DEFAULT] = &NUMAKIND_DEFAULT_STATIC,
+     [NUMAKIND_PARTITION_HUGETLB] = &NUMAKIND_HUGETLB_STATIC,
+     [NUMAKIND_PARTITION_HBW] = &NUMAKIND_HBW_STATIC,
+     [NUMAKIND_PARTITION_HBW_PREFERRED] = &NUMAKIND_HBW_PREFERRED_STATIC,
+     [NUMAKIND_PARTITION_HBW_HUGETLB] = &NUMAKIND_HBW_HUGETLB_STATIC,
+     [NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB] = &NUMAKIND_HBW_PREFERRED_HUGETLB_STATIC},
+    NUMAKIND_NUM_BASE_KIND,
+    PTHREAD_MUTEX_INITIALIZER
+};
 
 void numakind_error_message(int err, char *msg, size_t size)
 {
@@ -216,8 +229,10 @@ int numakind_finalize(void)
             if (err) {
                 goto exit;
             }
-            je_free(kind);
             numakind_registry_g.partition_map[i] = NULL;
+        }
+        if (i >= NUMAKIND_NUM_BASE_KIND) {
+            je_free(kind);
         }
     }
 
@@ -239,10 +254,6 @@ int numakind_get_kind_by_partition(int partition, struct numakind **kind)
 {
     int err = 0;
 
-    if (partition < NUMAKIND_NUM_BASE_KIND &&
-        numakind_registry_g.partition_map[partition] == NULL) {
-        numakind_init();
-    }
     if (partition < NUMAKIND_MAX_KIND &&
         numakind_registry_g.partition_map[partition] != NULL) {
         *kind = numakind_registry_g.partition_map[partition];
@@ -322,26 +333,34 @@ int numakind_is_available(struct numakind *kind)
 
 void *numakind_malloc(struct numakind *kind, size_t size)
 {
-    pthread_once(&numakind_init_once_g, numakind_init_once);
+    if (kind->ops->init_once) {
+        pthread_once(&(kind->init_once), kind->ops->init_once);
+    }
     return kind->ops->malloc(kind, size);
 }
 
 void *numakind_calloc(struct numakind *kind, size_t num, size_t size)
 {
-    pthread_once(&numakind_init_once_g, numakind_init_once);
+    if (kind->ops->init_once) {
+        pthread_once(&(kind->init_once), kind->ops->init_once);
+    }
     return kind->ops->calloc(kind, num, size);
 }
 
 int numakind_posix_memalign(struct numakind *kind, void **memptr, size_t alignment,
                             size_t size)
 {
-    pthread_once(&numakind_init_once_g, numakind_init_once);
+    if (kind->ops->init_once) {
+        pthread_once(&(kind->init_once), kind->ops->init_once);
+    }
     return kind->ops->posix_memalign(kind, memptr, alignment, size);
 }
 
 void *numakind_realloc(struct numakind *kind, void *ptr, size_t size)
 {
-    pthread_once(&numakind_init_once_g, numakind_init_once);
+    if (kind->ops->init_once) {
+        pthread_once(&(kind->init_once), kind->ops->init_once);
+    }
     return kind->ops->realloc(kind, ptr, size);
 }
 
@@ -354,22 +373,3 @@ int numakind_get_size(numakind_t kind, size_t *total, size_t *free)
 {
     return kind->ops->get_size(kind, total, free);
 }
-
-static void numakind_init_once(void)
-{
-    pthread_mutex_lock(&(numakind_registry_g.lock));
-    numakind_registry_g.partition_map[NUMAKIND_PARTITION_HUGETLB] = NUMAKIND_HUGETLB;
-    numakind_registry_g.partition_map[NUMAKIND_PARTITION_HBW] = NUMAKIND_HBW;
-    numakind_registry_g.partition_map[NUMAKIND_PARTITION_HBW_HUGETLB] = NUMAKIND_HBW_HUGETLB;
-    numakind_registry_g.partition_map[NUMAKIND_PARTITION_HBW_PREFERRED] = NUMAKIND_HBW_PREFERRED;
-    numakind_registry_g.partition_map[NUMAKIND_PARTITION_HBW_PREFERRED_HUGETLB] = NUMAKIND_HBW_PREFERRED_HUGETLB;
-    numakind_registry_g.num_kind = NUMAKIND_NUM_BASE_KIND;
-
-    numakind_arena_create_map(NUMAKIND_HUGETLB);
-    numakind_arena_create_map(NUMAKIND_HBW);
-    numakind_arena_create_map(NUMAKIND_HBW_HUGETLB);
-    numakind_arena_create_map(NUMAKIND_HBW_PREFERRED);
-    numakind_arena_create_map(NUMAKIND_HBW_PREFERRED_HUGETLB);
-    pthread_mutex_unlock(&(numakind_registry_g.lock));
-}
-

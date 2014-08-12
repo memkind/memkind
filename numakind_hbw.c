@@ -374,3 +374,28 @@ static int numanode_bandwidth_compare(const void *a, const void *b)
     return result;
 }
 
+void numakind_hugetlb_init_once(void)
+{
+    numakind_arena_create_map(NUMAKIND_HUGETLB);
+}
+
+void numakind_hbw_init_once(void)
+{
+    numakind_arena_create_map(NUMAKIND_HBW);
+}
+
+void numakind_hbw_hugetlb_init_once(void)
+{
+    numakind_arena_create_map(NUMAKIND_HBW_HUGETLB);
+}
+
+void numakind_hbw_preferred_init_once(void)
+{
+    numakind_arena_create_map(NUMAKIND_HBW_PREFERRED);
+}
+
+void numakind_hbw_preferred_hugetlb_init_once(void)
+{
+    numakind_arena_create_map(NUMAKIND_HBW_PREFERRED_HUGETLB);
+}
+

@@ -82,6 +82,7 @@ struct numakind {
     const struct numakind_ops *ops;
     int partition;
     char name[NUMAKIND_NAME_LENGTH];
+    pthread_once_t init_once;
     int arena_map_len;
     unsigned int *arena_map;
 };
@@ -101,6 +102,7 @@ struct numakind_ops {
     int (* get_mbind_nodemask)(struct numakind *kind, unsigned long *nodemask, unsigned long maxnode);
     int (* get_arena) (struct numakind *kind, unsigned int *arena);
     int (* get_size) (struct numakind *kind, size_t *total, size_t *free);
+    void (*init_once)(void);
 };
 
 typedef struct numakind * numakind_t;
