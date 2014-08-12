@@ -58,7 +58,6 @@ static const struct numakind_ops NUMAKIND_DEFAULT_OPS = {
     .get_mmap_flags = numakind_default_get_mmap_flags,
     .get_mbind_mode = numakind_default_get_mbind_mode,
     .get_mbind_nodemask = numakind_default_get_mbind_nodemask,
-    .get_arena = NULL,
     .get_size = numakind_default_get_size
 };
 
