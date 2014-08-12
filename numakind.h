@@ -117,9 +117,6 @@ extern numakind_t NUMAKIND_HBW_PREFERRED_HUGETLB;
 /* Convert error number into an error message */
 void numakind_error_message(int err, char *msg, size_t size);
 
-/* Initialize base kinds. Operation is indempotent */
-void numakind_init(void);
-
 /* Free all resources allocated by the library (must be last call to library by the process) */
 int numakind_finalize(void);
 
