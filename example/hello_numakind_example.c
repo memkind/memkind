@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     char *hbw_hugetlb_str = NULL;
     char *hbw_preferred_str = NULL;
     char *hbw_preferred_hugetlb_str = NULL;
-    
+
     default_str = (char *)numakind_malloc(NUMAKIND_DEFAULT, size);
     if (default_str == NULL) {
         perror("numakind_malloc()");
