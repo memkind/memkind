@@ -55,8 +55,8 @@ scp $basedir/test.sh $remote_login@$remote_ip:
 ssh root@$remote_ip "rpm -e numakind >& /dev/null"
 ssh root@$remote_ip "rpm -e jemalloc >& /dev/null"
 ssh root@$remote_ip "rpm -i ~$remote_login/$nkrpm ~$remote_login/$jerpm"
-ssh root@$remote_ip "echo 8000 > /proc/sys/vm/nr_hugepages"
-ssh root@$remote_ip "echo 8000 > /proc/sys/vm/nr_overcommit_hugepages"
+ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_hugepages"
+ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_overcommit_hugepages"
 
 err=$(ssh $remote_login@$remote_ip "./test.sh --gtest_output=xml:output_xmls/")
 scp -r $remote_login@$remote_ip:output_xmls .
