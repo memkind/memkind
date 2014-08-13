@@ -38,9 +38,8 @@ class EnvTest: public :: testing::Test
 
 protected:
     void SetUp()
-    {
-        hbw_is_available();
-    }
+    {}
+
     void TearDown()
     {}
 

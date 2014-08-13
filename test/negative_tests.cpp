@@ -39,9 +39,7 @@ class NegativeTest: public :: testing::Test
 
 protected:
     void SetUp()
-    {
-        hbw_is_available();
-    }
+    {}
 
     void TearDown()
     {}
@@ -54,7 +52,7 @@ TEST_F(NegativeTest, ErrorUnavailable)
     int numakind_flags;
     int err = NUMAKIND_ERROR_UNAVAILABLE;
     ret = numakind_partition_get_mmap_flags(-1, &numakind_flags);
-    EXPECT_EQ(NUMAKIND_ERROR_UNAVAILABLE, ret);
+    EXPECT_EQ(err, ret);
 
     ret = numakind_partition_mbind(-1, NULL, 1024);
     EXPECT_EQ(err, ret);
