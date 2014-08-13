@@ -126,7 +126,7 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
     }
     pmtt_socket_size = pbuf->Length;
 
-    if (pmtt_socket_size != nread) {
+    if (pmtt_socket_size != size) {
         /* PMTT extra bytes after socket record */
         err = NUMAKIND_ERROR_PMTT;
         goto exit;
