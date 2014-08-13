@@ -113,7 +113,7 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
         goto exit;
     }
     nread = fread(buf, size, 1, mfp);
-    if (nread != 1 || !feof(mfp)) {
+    if (nread != 1 || fgetc(mfp) != EOF) {
         /* PMTT incorrect number of bytes read */
         err = NUMAKIND_ERROR_PMTT;
         goto exit;
