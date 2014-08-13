@@ -320,19 +320,21 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 break;
         }
         if (trial_vec[i].api != HBW_FREE &&
-            trial_vec[i].api != NUMAKIND_FREE &&
-            trial_vec[i].numakind != NUMAKIND_DEFAULT) {
-
-
+            trial_vec[i].api != NUMAKIND_FREE) {
+            
             ASSERT_TRUE(ptr_vec[i] != NULL);
             memset(ptr_vec[i], 0, trial_vec[i].size);
             Check check(ptr_vec[i], trial_vec[i].size);
-            EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
-            if (trial_vec[i].api == HBW_CALLOC) {
-                check.check_zero();
+            if (trial_vec[i].numakind != NUMAKIND_DEFAULT &&
+                trial_vec[i].numakind != NUMAKIND_HUGETLB) {
+                EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
             }
-            if (trial_vec[i].api == HBW_MEMALIGN || trial_vec[i].api == HBW_MEMALIGN_PSIZE) {
-                EXPECT_EQ(0,check.check_align(trial_vec[i].alignment));
+            if (trial_vec[i].api == HBW_CALLOC) {
+                EXPECT_EQ(0, check.check_zero());
+            }
+            if (trial_vec[i].api == HBW_MEMALIGN ||
+                trial_vec[i].api == HBW_MEMALIGN_PSIZE) {
+                EXPECT_EQ(0, check.check_align(trial_vec[i].alignment));
             }
             if (trial_vec[i].api == HBW_MEMALIGN_PSIZE ||
                 (trial_vec[i].api == NUMAKIND_MALLOC &&
