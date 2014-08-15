@@ -15,7 +15,7 @@ not coalesced.  To use numakind, jemalloc must be compiled with the
 Requires kernel patch introduced in Linux v3.11 that impacts
 functionality of the NUMA system calls.  This is patch is commit
 3964acd0dbec123aa0a621973a2a0580034b4788
-in the linux-stable git repoitory from kernel.org.
+in the linux-stable git repository from kernel.org.
 
 To use the interfaces for obtaining 2MB pages please be sure to follow
 the instructions here:
