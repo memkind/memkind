@@ -48,8 +48,8 @@ static const int STRLEN = 512;
 #include "actypes.h"
 #include "actbl.h"
 
-#include "numakind.h"
-#include "numakind_hbw.h"
+#include "memkind.h"
+#include "memkind_hbw.h"
 
 static const char *PMTT_PATH = "/sys/firmware/acpi/tables/PMTT";
 
@@ -91,51 +91,51 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
     memset(bandwidth, 0, sizeof(int)*num_bandwidth);
 
     if (numa_available() == -1) {
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
         goto exit;
     }
     mfp = fopen(pmtt_path, "r");
     if (mfp == NULL) {
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
         goto exit;
     }
     nread = fread(&hdr, sizeof(ACPI_TABLE_PMTT), 1, mfp);
     if (nread != 1 ||
         memcmp(hdr.Header.Signature, "PMTT", 4) != 0) {
         /* PMTT signature failure */
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
         goto exit;
     }
     size = hdr.Header.Length - sizeof(ACPI_TABLE_PMTT);
     if (size > PMTT_BUF_SIZE) {
         /* PMTT byte count failure */
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
         goto exit;
     }
     nread = fread(buf, size, 1, mfp);
     if (nread != 1 || fgetc(mfp) != EOF) {
         /* PMTT incorrect number of bytes read */
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
         goto exit;
     }
 
     if (pbuf->Type != ACPI_PMTT_TYPE_SOCKET) { /* SOCKET */
         /* PMTT did not find socket record first */
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
         goto exit;
     }
     pmtt_socket_size = pbuf->Length;
 
     if (pmtt_socket_size != size) {
         /* PMTT extra bytes after socket record */
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
         goto exit;
     }
 
     if (parse_pmtt_memory_controllers(num_bandwidth, bandwidth,
                                       (ACPI_PMTT_HEADER *)&buf[sizeof(ACPI_PMTT_SOCKET)],
                                       pmtt_socket_size - sizeof(ACPI_PMTT_SOCKET))) {
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
         goto exit;
     }
 
@@ -172,10 +172,10 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
     struct memctlr_t *buf = (struct memctlr_t *)buf_in;
 
     if (buf->memctlr.Header.Type != ACPI_PMTT_TYPE_CONTROLLER) {
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
     }
     if (buf->memctlr.Header.Flags != 2 && buf->memctlr.Header.Flags != 0) {
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
     }
     if (!err) {
         /* Read bandwidth */
@@ -185,7 +185,7 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
                 bandwidth[j] = buf->memctlr.ReadBandwidth;
             }
             else {
-                err = NUMAKIND_ERROR_PMTT;
+                err = MEMKIND_ERROR_PMTT;
             }
         }
     }
@@ -209,7 +209,7 @@ int main (int argc, char *argv[])
         goto exit;
     }
     dir[STRLEN-1] = '\0';
-    strncpy(dir, NUMAKIND_BANDWIDTH_PATH, STRLEN - 1);
+    strncpy(dir, MEMKIND_BANDWIDTH_PATH, STRLEN - 1);
     dirname(dir);
     err = mkdir(dir, 0755);
     if (err && err != EEXIST) {
@@ -217,9 +217,9 @@ int main (int argc, char *argv[])
         err = errno ? -errno : 1;
         goto exit;
     }
-    fd = open(NUMAKIND_BANDWIDTH_PATH, O_CREAT | O_EXCL | O_WRONLY, 0644);
+    fd = open(MEMKIND_BANDWIDTH_PATH, O_CREAT | O_EXCL | O_WRONLY, 0644);
     if (fd == -1) {
-        fprintf(stderr, "ERROR: <%s> opening %s for writing\n", argv[0], NUMAKIND_BANDWIDTH_PATH);
+        fprintf(stderr, "ERROR: <%s> opening %s for writing\n", argv[0], MEMKIND_BANDWIDTH_PATH);
         err = errno ? -errno : 1;
         goto exit;
     }

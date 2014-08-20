@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <numakind.h>
+#include <memkind.h>
 
 int main(int argc, char **argv)
 {
@@ -36,33 +36,33 @@ int main(int argc, char **argv)
     char *hbw_preferred_str = NULL;
     char *hbw_preferred_hugetlb_str = NULL;
 
-    default_str = (char *)numakind_malloc(NUMAKIND_DEFAULT, size);
+    default_str = (char *)memkind_malloc(MEMKIND_DEFAULT, size);
     if (default_str == NULL) {
-        perror("numakind_malloc()");
+        perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate default string\n");
         return errno ? -errno : 1;
     }
-    hbw_str = (char *)numakind_malloc(NUMAKIND_HBW, size);
+    hbw_str = (char *)memkind_malloc(MEMKIND_HBW, size);
     if (hbw_str == NULL) {
-        perror("numakind_malloc()");
+        perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate hbw string\n");
         return errno ? -errno : 1;
     }
-    hbw_hugetlb_str = (char *)numakind_malloc(NUMAKIND_HBW_HUGETLB, size);
+    hbw_hugetlb_str = (char *)memkind_malloc(MEMKIND_HBW_HUGETLB, size);
     if (hbw_hugetlb_str == NULL) {
-        perror("numakind_malloc()");
+        perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate hbw_hugetlb string\n");
         return errno ? -errno : 1;
     }
-    hbw_preferred_str = (char *)numakind_malloc(NUMAKIND_HBW_PREFERRED, size);
+    hbw_preferred_str = (char *)memkind_malloc(MEMKIND_HBW_PREFERRED, size);
     if (hbw_preferred_str == NULL) {
-        perror("numakind_malloc()");
+        perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate hbw_preferred string\n");
         return errno ? -errno : 1;
     }
-    hbw_preferred_hugetlb_str = (char *)numakind_malloc(NUMAKIND_HBW_PREFERRED_HUGETLB, size);
+    hbw_preferred_hugetlb_str = (char *)memkind_malloc(MEMKIND_HBW_PREFERRED_HUGETLB, size);
     if (hbw_preferred_hugetlb_str == NULL) {
-        perror("numakind_malloc()");
+        perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate hbw_preferred_hugetlb string\n");
         return errno ? -errno : 1;
     }
@@ -79,11 +79,11 @@ int main(int argc, char **argv)
     fprintf(stdout, "%s", hbw_preferred_str);
     fprintf(stdout, "%s", hbw_preferred_hugetlb_str);
 
-    numakind_free(NUMAKIND_DEFAULT, hbw_preferred_hugetlb_str);
-    numakind_free(NUMAKIND_DEFAULT, hbw_preferred_str);
-    numakind_free(NUMAKIND_DEFAULT, hbw_hugetlb_str);
-    numakind_free(NUMAKIND_DEFAULT, hbw_str);
-    numakind_free(NUMAKIND_DEFAULT, default_str);
+    memkind_free(MEMKIND_DEFAULT, hbw_preferred_hugetlb_str);
+    memkind_free(MEMKIND_DEFAULT, hbw_preferred_str);
+    memkind_free(MEMKIND_DEFAULT, hbw_hugetlb_str);
+    memkind_free(MEMKIND_DEFAULT, hbw_str);
+    memkind_free(MEMKIND_DEFAULT, default_str);
 
     return 0;
 }

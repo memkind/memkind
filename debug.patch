@@ -3,14 +3,14 @@ index 1051389..17d395e 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -11,7 +11,7 @@ datarootdir ?= $(prefix)/share
- docdir ?= $(datarootdir)/doc/numakind-$(VERSION)
+ docdir ?= $(datarootdir)/doc/memkind-$(VERSION)
  initddir ?= /etc/rc.d/init.d
  
 -CFLAGS_EXTRA = -fPIC -Wall -Werror -O3
 +CFLAGS_EXTRA = -fPIC -Wall -Werror -O0 -g
- OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o
+ OBJECTS = memkind.o memkind_hbw.o hbwmalloc.o
  
- all: libnumakind.so.0.0 numakind-pmtt
+ all: libmemkind.so.0.0 memkind-pmtt
 diff --git a/test/Makefile b/test/Makefile
 index caadd23..7879169 100644
 --- a/test/Makefile
@@ -20,8 +20,8 @@ index caadd23..7879169 100644
 -CFLAGS=-O3 -Wall -fopenmp -std=c++0x
 +CFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
  JEMALLOC_PREFIX ?= /usr
- NUMAKIND_PREFIX ?= /usr
- INCLUDE = -I$(JEMALLOC_PREFIX)/include -I$(NUMAKIND_PREFIX)/include
+ MEMKIND_PREFIX ?= /usr
+ INCLUDE = -I$(JEMALLOC_PREFIX)/include -I$(MEMKIND_PREFIX)/include
 diff --git a/test/bin/test_simics.sh b/test/bin/test_simics.sh
 index b753459..ff2d654 100755
 --- a/test/bin/test.sh
@@ -30,18 +30,18 @@ index b753459..ff2d654 100755
      rm askpass.sh
   fi
  
--scp ~/rpmbuild/RPMS/x86_64/numakind-0.0*.rpm mic@$knlmcdram:
+-scp ~/rpmbuild/RPMS/x86_64/memkind-0.0*.rpm mic@$knlmcdram:
 -scp ~/rpmbuild/RPMS/x86_64/jemalloc-3.5*.rpm mic@$knlmcdram:
-+scp ~/rpmbuild/RPMS/x86_64/numakind*.rpm mic@$knlmcdram:
++scp ~/rpmbuild/RPMS/x86_64/memkind*.rpm mic@$knlmcdram:
 +scp ~/rpmbuild/RPMS/x86_64/jemalloc*.rpm mic@$knlmcdram:
  scp /usr/lib64/libgtest*.so.0.0.0 mic@$knlmcdram:
  scp $basedir/all_tests mic@$knlmcdram:
- ssh root@$knlmcdram "rpm -e numakind >& /dev/null"
+ ssh root@$knlmcdram "rpm -e memkind >& /dev/null"
  ssh root@$knlmcdram "rpm -e jemalloc >& /dev/null"
--ssh root@$knlmcdram "rpm -i ~mic/jemalloc-3.5*.rpm ~mic/numakind-0.0*.rpm"
-+ssh root@$knlmcdram "rpm -e numakind-debuginfo >& /dev/null"
+-ssh root@$knlmcdram "rpm -i ~mic/jemalloc-3.5*.rpm ~mic/memkind-0.0*.rpm"
++ssh root@$knlmcdram "rpm -e memkind-debuginfo >& /dev/null"
 +ssh root@$knlmcdram "rpm -e jemalloc-debuginfo >& /dev/null"
-+ssh root@$knlmcdram "rpm -i ~mic/jemalloc*.rpm ~mic/numakind*.rpm"
++ssh root@$knlmcdram "rpm -i ~mic/jemalloc*.rpm ~mic/memkind*.rpm"
  ssh root@$knlmcdram "install ~mic/libgtest*.so.0.0.0 /usr/lib64"
  ssh root@$knlmcdram "/sbin/ldconfig"
  ssh root@$knlmcdram "echo 1000 > /proc/sys/vm/nr_hugepages"

@@ -30,7 +30,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "numakind.h"
+#include "memkind.h"
 
 
 class EnvTest: public :: testing::Test
@@ -48,13 +48,13 @@ protected:
 TEST_F(EnvTest, ErrorEnviron)
 {
     int ret = 0;
-    int err = NUMAKIND_ERROR_ENVIRON;
+    int err = MEMKIND_ERROR_ENVIRON;
     unsigned long *nodemask=NULL;
-    ret = setenv("NUMAKIND_HBW_NODES","-1",1);
+    ret = setenv("MEMKIND_HBW_NODES","-1",1);
     if (-1 == ret) {
         fprintf (stderr, "Error in setting the env variable \n");
         EXPECT_EQ(0, ret);
     }
-    ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBW, nodemask, NUMA_NUM_NODES);
+    ret = MEMKIND_HBW->ops->get_mbind_nodemask(MEMKIND_HBW, nodemask, NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
 }

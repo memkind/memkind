@@ -29,7 +29,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "numakind.h"
+#include "memkind.h"
 
 
 
@@ -48,9 +48,9 @@ protected:
 TEST_F(MallctlTest, ErrorMallctl)
 {
     int ret = 0;
-    int err = NUMAKIND_ERROR_MALLCTL;
+    int err = MEMKIND_ERROR_MALLCTL;
     void *ptr = NULL;
-    ret = numakind_posix_memalign(NUMAKIND_HBW,
+    ret = memkind_posix_memalign(MEMKIND_HBW,
                                   &ptr, 16,
                                   1024);
 

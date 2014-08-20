@@ -28,11 +28,11 @@
 #include <errno.h>
 
 #include "hbwmalloc.h"
-#include "numakind.h"
+#include "memkind.h"
 
 static int hbw_policy_g = HBW_POLICY_PREFERRED;
 static pthread_once_t hbw_policy_once_g = PTHREAD_ONCE_INIT;
-static inline numakind_t hbw_get_kind(int pagesize);
+static inline memkind_t hbw_get_kind(int pagesize);
 static inline void hbw_policy_preferred_init(void);
 static inline void hbw_policy_bind_init(void);
 
@@ -56,38 +56,38 @@ void hbw_set_policy(int mode)
 
 int hbw_is_available(void)
 {
-    return numakind_is_available(NUMAKIND_HBW);
+    return memkind_is_available(MEMKIND_HBW);
 }
 
 void *hbw_malloc(size_t size)
 {
-    numakind_t kind;
+    memkind_t kind;
 
     kind = hbw_get_kind(HBW_PAGESIZE_4KB);
-    return numakind_malloc(kind, size);
+    return memkind_malloc(kind, size);
 }
 
 void *hbw_calloc(size_t num, size_t size)
 {
-    numakind_t kind;
+    memkind_t kind;
 
     kind = hbw_get_kind(HBW_PAGESIZE_4KB);
-    return numakind_calloc(kind, num, size);
+    return memkind_calloc(kind, num, size);
 }
 
 int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
 {
     int err;
-    numakind_t kind;
+    memkind_t kind;
 
     kind = hbw_get_kind(HBW_PAGESIZE_4KB);
-    err = numakind_posix_memalign(kind, memptr, alignment, size);
+    err = memkind_posix_memalign(kind, memptr, alignment, size);
 
     if (err == EINVAL) {
-        err = NUMAKIND_ERROR_ALIGNMENT;
+        err = MEMKIND_ERROR_ALIGNMENT;
     }
     else if (err == ENOMEM) {
-        err = NUMAKIND_ERROR_MALLOCX;
+        err = MEMKIND_ERROR_MALLOCX;
     }
     return err;
 }
@@ -96,60 +96,60 @@ int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
                                 int pagesize)
 {
     int err;
-    numakind_t kind;
+    memkind_t kind;
 
     kind = hbw_get_kind(pagesize);
-    err = numakind_posix_memalign(kind, memptr, alignment, size);
+    err = memkind_posix_memalign(kind, memptr, alignment, size);
 
     if (err == EINVAL) {
-        err = NUMAKIND_ERROR_ALIGNMENT;
+        err = MEMKIND_ERROR_ALIGNMENT;
     }
     else if (err == ENOMEM) {
-        err = NUMAKIND_ERROR_MALLOCX;
+        err = MEMKIND_ERROR_MALLOCX;
     }
     return err;
 }
 
 void *hbw_realloc(void *ptr, size_t size)
 {
-    numakind_t kind;
+    memkind_t kind;
 
     kind = hbw_get_kind(HBW_PAGESIZE_4KB);
-    return numakind_realloc(kind, ptr, size);
+    return memkind_realloc(kind, ptr, size);
 }
 
 void hbw_free(void *ptr)
 {
-    numakind_free(NUMAKIND_DEFAULT, ptr);
+    memkind_free(MEMKIND_DEFAULT, ptr);
 }
 
-static inline numakind_t hbw_get_kind(int pagesize)
+static inline memkind_t hbw_get_kind(int pagesize)
 {
-    numakind_t result = NULL;
+    memkind_t result = NULL;
 
     if (hbw_get_policy() == HBW_POLICY_BIND) {
         if (pagesize == HBW_PAGESIZE_2MB) {
-            result = NUMAKIND_HBW_HUGETLB;
+            result = MEMKIND_HBW_HUGETLB;
         }
         else {
-            result = NUMAKIND_HBW;
+            result = MEMKIND_HBW;
         }
     }
     else {
         if (pagesize == HBW_PAGESIZE_2MB) {
-            if (numakind_is_available(NUMAKIND_HBW_PREFERRED_HUGETLB)) {
-                result = NUMAKIND_HBW_PREFERRED_HUGETLB;
+            if (memkind_is_available(MEMKIND_HBW_PREFERRED_HUGETLB)) {
+                result = MEMKIND_HBW_PREFERRED_HUGETLB;
             }
             else {
-                result = NUMAKIND_HUGETLB;
+                result = MEMKIND_HUGETLB;
             }
         }
         else {
-            if (numakind_is_available(NUMAKIND_HBW_PREFERRED)) {
-                result = NUMAKIND_HBW_PREFERRED;
+            if (memkind_is_available(MEMKIND_HBW_PREFERRED)) {
+                result = MEMKIND_HBW_PREFERRED;
             }
             else {
-                result = NUMAKIND_DEFAULT;
+                result = MEMKIND_DEFAULT;
             }
         }
     }

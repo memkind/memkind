@@ -26,15 +26,15 @@
 # This shell script takes care creating and deleting accesible
 # bandwidth files from PMTT tables
 ### BEGIN INIT INFO
-# Provides: numakind
+# Provides: memkind
 # Required-Start:
 # Required-Stop:
-# Short-Description: Sets up numakind library
-# Description: Parses the PMTT table and creates the file /etc/numakind/node-bandwidth.
+# Short-Description: Sets up memkind library
+# Description: Parses the PMTT table and creates the file /etc/memkind/node-bandwidth.
 #
 #              start - Create bandwidth file from PMTT table.
 #
-#              stop  - Delete bandwidth file from /etc/numakind.
+#              stop  - Delete bandwidth file from /etc/memkind.
 #
 #              restart - Delete and recreate bandwidth file from PMTT table.
 #
@@ -69,13 +69,13 @@ else
 fi
 
 err=0
-FILE=/etc/numakind/node-bandwidth
+FILE=/etc/memkind/node-bandwidth
 DIR=`dirname $FILE`
-NUMAKIND_BIN=/usr/sbin/numakind-pmtt
+MEMKIND_BIN=/usr/sbin/memkind-pmtt
 
 start() {
     echo_success "creating bandwidth values file"
-    $NUMAKIND_BIN
+    $MEMKIND_BIN
     err=$?
     if [ $err -eq 0 ] && [ -f $FILE ]
     then

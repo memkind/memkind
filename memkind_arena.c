@@ -34,35 +34,35 @@
 #include <utmpx.h>
 #include <sched.h>
 
-#include "numakind.h"
-#include "numakind_default.h"
-#include "numakind_arena.h"
+#include "memkind.h"
+#include "memkind_default.h"
+#include "memkind_arena.h"
 
 static void *je_mallocx_check(size_t size, int flags);
 static void *je_rallocx_check(void *ptr, size_t size, int flags);
 
-int numakind_arena_create(struct numakind *kind, const struct numakind_ops *ops, const char *name)
+int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
 {
     int err = 0;
 
-    err = numakind_default_create(kind, ops, name);
+    err = memkind_default_create(kind, ops, name);
     if (!err) {
-        numakind_arena_create_map(kind);
+        memkind_arena_create_map(kind);
     }
     return err;
 }
 
-int numakind_arena_create_map(struct numakind *kind)
+int memkind_arena_create_map(struct memkind *kind)
 {
     int err = 0;
     int i;
     size_t unsigned_size = sizeof(unsigned int);
 
-    if (kind->ops->get_arena == numakind_cpu_get_arena) {
+    if (kind->ops->get_arena == memkind_cpu_get_arena) {
         kind->arena_map_len = numa_num_configured_cpus();
         kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int) * kind->arena_map_len);
     }
-    else if (kind->ops->get_arena == numakind_bijective_get_arena) {
+    else if (kind->ops->get_arena == memkind_bijective_get_arena) {
         kind->arena_map_len = 1;
         kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int));
     }
@@ -72,7 +72,7 @@ int numakind_arena_create_map(struct numakind *kind)
     }
     if (kind->arena_map_len && kind->arena_map == NULL) {
         je_free(kind->name);
-        err = NUMAKIND_ERROR_MALLOC;
+        err = MEMKIND_ERROR_MALLOC;
     }
     if (!err) {
         for (i = 0; !err && i < kind->arena_map_len; ++i) {
@@ -85,13 +85,13 @@ int numakind_arena_create_map(struct numakind *kind)
             if (kind->arena_map) {
                 je_free(kind->arena_map);
             }
-            err = NUMAKIND_ERROR_MALLCTL;
+            err = MEMKIND_ERROR_MALLCTL;
         }
     }
     return err;
 }
 
-int numakind_arena_destroy(struct numakind *kind)
+int memkind_arena_destroy(struct memkind *kind)
 {
     char cmd[128];
     int i;
@@ -105,11 +105,11 @@ int numakind_arena_destroy(struct numakind *kind)
         kind->arena_map = NULL;
     }
 
-    numakind_default_destroy(kind);
+    memkind_default_destroy(kind);
     return 0;
 }
 
-void *numakind_arena_malloc(struct numakind *kind, size_t size)
+void *memkind_arena_malloc(struct memkind *kind, size_t size)
 {
     void *result = NULL;
     int err = 0;
@@ -124,13 +124,13 @@ void *numakind_arena_malloc(struct numakind *kind, size_t size)
     return result;
 }
 
-void *numakind_arena_realloc(struct numakind *kind, void *ptr, size_t size)
+void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size)
 {
     int err = 0;
     unsigned int arena;
 
     if (size == 0 && ptr != NULL) {
-        numakind_free(kind, ptr);
+        memkind_free(kind, ptr);
         ptr = NULL;
     }
     else {
@@ -147,7 +147,7 @@ void *numakind_arena_realloc(struct numakind *kind, void *ptr, size_t size)
     return ptr;
 }
 
-void *numakind_arena_calloc(struct numakind *kind, size_t num, size_t size)
+void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size)
 {
     void *result = NULL;
     int err = 0;
@@ -160,7 +160,7 @@ void *numakind_arena_calloc(struct numakind *kind, size_t num, size_t size)
     return result;
 }
 
-int numakind_arena_posix_memalign(struct numakind *kind, void **memptr, size_t alignment,
+int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t alignment,
                                   size_t size)
 {
     int err = 0;
@@ -181,12 +181,12 @@ int numakind_arena_posix_memalign(struct numakind *kind, void **memptr, size_t a
     return err;
 }
 
-void numakind_arena_free(struct numakind *kind, void *ptr)
+void memkind_arena_free(struct memkind *kind, void *ptr)
 {
     je_free(ptr);
 }
 
-int numakind_cpu_get_arena(struct numakind *kind, unsigned int *arena)
+int memkind_cpu_get_arena(struct memkind *kind, unsigned int *arena)
 {
     int err = 0;
     int cpu_id;
@@ -196,12 +196,12 @@ int numakind_cpu_get_arena(struct numakind *kind, unsigned int *arena)
         *arena = kind->arena_map[cpu_id];
     }
     else {
-        err = NUMAKIND_ERROR_GETCPU;
+        err = MEMKIND_ERROR_GETCPU;
     }
     return err;
 }
 
-int numakind_bijective_get_arena(struct numakind *kind, unsigned int *arena)
+int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena)
 {
     int err = 0;
 
@@ -209,7 +209,7 @@ int numakind_bijective_get_arena(struct numakind *kind, unsigned int *arena)
         *arena = *(kind->arena_map);
     }
     else {
-        err = NUMAKIND_ERROR_RUNTIME;
+        err = MEMKIND_ERROR_RUNTIME;
     }
     return err;
 }

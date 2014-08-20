@@ -29,7 +29,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "numakind.h"
+#include "memkind.h"
 
 
 class TiedDistTest: public :: testing::Test
@@ -47,8 +47,8 @@ protected:
 TEST_F(TiedDistTest, ErrorTiedDist)
 {
     int ret = 0;
-    int err = NUMAKIND_ERROR_TIEDISTANCE;
+    int err = MEMKIND_ERROR_TIEDISTANCE;
     unsigned long *nodemask=NULL;
-    ret = NUMAKIND_HBW->ops->get_mbind_nodemask(NUMAKIND_HBW, nodemask, NUMA_NUM_NODES);
+    ret = MEMKIND_HBW->ops->get_mbind_nodemask(MEMKIND_HBW, nodemask, NUMA_NUM_NODES);
     EXPECT_EQ(err, ret);
 }

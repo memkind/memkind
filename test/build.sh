@@ -19,8 +19,8 @@ if [ $# -ne 0 ]; then
 fi
 
 jemalloc_prefix=`ls -t $topdir/BUILDROOT/jemalloc-*.x86_64/usr/lib64/libjemalloc.so | head -n1 | sed 's|/lib64/libjemalloc.so||'`
-numakind_prefix=`ls -t $topdir/BUILDROOT/numakind-*.x86_64/usr/lib64/libnumakind.so | head -n1 | sed 's|/lib64/libnumakind.so||'`
+memkind_prefix=`ls -t $topdir/BUILDROOT/memkind-*.x86_64/usr/lib64/libmemkind.so | head -n1 | sed 's|/lib64/libmemkind.so||'`
 googletest_prefix=`ls -t $topdir/BUILDROOT/googletest-*.x86_64/usr/lib64/libgtest.a | head -n1 | sed 's|/lib64/libgtest.a||'`
-CPPFLAGS="-I $jemalloc_prefix/include -I $numakind_prefix/include -I $googletest_prefix/include"
-LDFLAGS="-L $jemalloc_prefix/lib64 -L $numakind_prefix/lib64 -L $googletest_prefix/lib64"
-make CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$jemalloc_prefix/lib64:$numakind_prefix/lib64:$LD_LIBRARY_PATH"
+CPPFLAGS="-I $jemalloc_prefix/include -I $memkind_prefix/include -I $googletest_prefix/include"
+LDFLAGS="-L $jemalloc_prefix/lib64 -L $memkind_prefix/lib64 -L $googletest_prefix/lib64"
+make CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$jemalloc_prefix/lib64:$memkind_prefix/lib64:$LD_LIBRARY_PATH"

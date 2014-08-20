@@ -34,7 +34,7 @@
 #include <iostream>
 
 #include "hbwmalloc.h"
-#include "numakind.h"
+#include "memkind.h"
 #include "common.h"
 
 
@@ -45,8 +45,8 @@ typedef enum {
     HBW_MEMALIGN,
     HBW_MEMALIGN_PSIZE,
     HBW_FREE,
-    NUMAKIND_MALLOC,
-    NUMAKIND_FREE
+    MEMKIND_MALLOC,
+    MEMKIND_FREE
 } alloc_api_t;
 
 typedef struct {
@@ -54,7 +54,7 @@ typedef struct {
     size_t size;
     size_t alignment;
     int page_size;
-    numakind_t numakind;
+    memkind_t memkind;
     int free_index;
 } trial_t;
 
@@ -78,7 +78,7 @@ private:
                                size_t size,
                                size_t alignment,
                                int page_size,
-                               numakind_t numakind,
+                               memkind_t memkind,
                                int free_index);
 
 

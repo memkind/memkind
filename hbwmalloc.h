@@ -33,14 +33,14 @@ extern "C" {
  *
  *  #include <hbwmalloc.h>
  *
- *  Link with -lnuma -lnumakind
+ *  Link with -lnuma -lmemkind
  *
  *  This file defines the external API's and enumerations for the
  *  hbwmalloc library.  These interfaces define a heap manager that
  *  targets the high bandwidth memory numa nodes.
  *
  *  \section ENVIRONMENT
- *  \subsection NUMAKIND_HBW_NODES
+ *  \subsection MEMKIND_HBW_NODES
  *  Comma separated list of NUMA nodes that are treated as high
  *  bandwidth.  Can be used if pmtt file is not present.  Uses same
  *  parser as numactl, so logic defined in numactl man pages applies:

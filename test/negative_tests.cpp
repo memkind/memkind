@@ -29,7 +29,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "numakind.h"
+#include "memkind.h"
 
 #include "trial_generator.h"
 
@@ -49,12 +49,12 @@ protected:
 TEST_F(NegativeTest, ErrorUnavailable)
 {
     int ret = 0;
-    int numakind_flags;
-    int err = NUMAKIND_ERROR_UNAVAILABLE;
-    ret = numakind_partition_get_mmap_flags(-1, &numakind_flags);
+    int memkind_flags;
+    int err = MEMKIND_ERROR_UNAVAILABLE;
+    ret = memkind_partition_get_mmap_flags(-1, &memkind_flags);
     EXPECT_EQ(err, ret);
 
-    ret = numakind_partition_mbind(-1, NULL, 1024);
+    ret = memkind_partition_mbind(-1, NULL, 1024);
     EXPECT_EQ(err, ret);
 }
 
@@ -62,9 +62,9 @@ TEST_F(NegativeTest, ErrorUnavailable)
 TEST_F(NegativeTest, ErrorMbind)
 {
     int ret = 0;
-    int err = NUMAKIND_ERROR_MBIND;
+    int err = MEMKIND_ERROR_MBIND;
 
-    ret = numakind_partition_mbind(NUMAKIND_PARTITION_HBW, NULL, 1024);
+    ret = memkind_partition_mbind(MEMKIND_PARTITION_HBW, NULL, 1024);
     EXPECT_EQ(err, ret);
 }
 
@@ -72,9 +72,9 @@ TEST_F(NegativeTest, ErrorMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
-    int err = NUMAKIND_ERROR_MEMALIGN;
+    int err = MEMKIND_ERROR_MEMALIGN;
 
-    ret = numakind_posix_memalign(NUMAKIND_DEFAULT,
+    ret = memkind_posix_memalign(MEMKIND_DEFAULT,
                                   &ptr, 5,
                                   100);
     EXPECT_EQ(err, ret);
@@ -84,9 +84,9 @@ TEST_F(NegativeTest, ErrorAlignment)
 {
     int ret = 0;
     void *ptr = NULL;
-    int err = NUMAKIND_ERROR_ALIGNMENT;
+    int err = MEMKIND_ERROR_ALIGNMENT;
 
-    ret = numakind_posix_memalign(NUMAKIND_HBW,
+    ret = memkind_posix_memalign(MEMKIND_HBW,
                                   &ptr, 5,
                                   100);
     EXPECT_EQ(err, ret);
@@ -100,7 +100,7 @@ TEST_F(NegativeTest, ErrorAllocM)
     void *ptr = NULL;
     int err = ENOMEM;
 
-    ret = numakind_posix_memalign(NUMAKIND_HBW,
+    ret = memkind_posix_memalign(MEMKIND_HBW,
                                   &ptr,
                                   16,
                                   100*GB);
@@ -114,7 +114,7 @@ TEST_F(NegativeTest, InvalidSizeMalloc)
     ASSERT_TRUE(ptr == NULL);
     EXPECT_EQ(errno, ENOMEM);
 
-    ptr = numakind_malloc(NUMAKIND_HBW, -1);
+    ptr = memkind_malloc(MEMKIND_HBW, -1);
     ASSERT_TRUE(ptr == NULL);
     EXPECT_EQ(errno, ENOMEM);
 }
@@ -126,7 +126,7 @@ TEST_F(NegativeTest, InvalidSizeCalloc)
     ASSERT_TRUE(ptr == NULL);
     EXPECT_EQ(errno, ENOMEM);
 
-    ptr = numakind_calloc(NUMAKIND_HBW, 1,
+    ptr = memkind_calloc(MEMKIND_HBW, 1,
                           -1);
     ASSERT_TRUE(ptr == NULL);
     EXPECT_EQ(errno, ENOMEM);
@@ -140,7 +140,7 @@ TEST_F(NegativeTest, InvalidSizeRealloc)
     ASSERT_TRUE(ptr==NULL);
     EXPECT_EQ(errno, ENOMEM);
 
-    ptr = numakind_realloc(NUMAKIND_HBW,
+    ptr = memkind_realloc(MEMKIND_HBW,
                            ptr,
                            -1);
     ASSERT_TRUE(ptr==NULL);
@@ -151,12 +151,12 @@ TEST_F(NegativeTest, InvalidSizeMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
-    int err = NUMAKIND_ERROR_INVALID;
+    int err = MEMKIND_ERROR_INVALID;
     ret = hbw_allocate_memalign(&ptr,1,-1);
     ASSERT_TRUE(ptr == NULL);
-    EXPECT_EQ(ret, NUMAKIND_ERROR_ALIGNMENT);
+    EXPECT_EQ(ret, MEMKIND_ERROR_ALIGNMENT);
 
-    ret = numakind_posix_memalign(NUMAKIND_HBW,
+    ret = memkind_posix_memalign(MEMKIND_HBW,
                                   &ptr, 5, 100);
     err = EINVAL;
     EXPECT_EQ(err, ret);

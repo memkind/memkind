@@ -36,7 +36,7 @@ basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 rm -f all_tests.xml
 
 pushd $rpmdir
-nkrpm=`ls -t numakind*.rpm | grep -v debuginfo | head -n1`
+nkrpm=`ls -t memkind*.rpm | grep -v debuginfo | head -n1`
 jerpm=`ls -t jemalloc*.rpm | grep -v debuginfo | head -n1`
 scp $nkrpm $jerpm $remote_login@$remote_ip:
 popd
@@ -52,7 +52,7 @@ scp $basedir/pmtterr_test $remote_login@$remote_ip:
 scp -r  $basedir/test_libs $remote_login@$remote_ip:
 scp $basedir/test.sh $remote_login@$remote_ip:
 
-ssh root@$remote_ip "rpm -e numakind >& /dev/null"
+ssh root@$remote_ip "rpm -e memkind >& /dev/null"
 ssh root@$remote_ip "rpm -e jemalloc >& /dev/null"
 ssh root@$remote_ip "rpm -i ~$remote_login/$nkrpm ~$remote_login/$jerpm"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_hugepages"

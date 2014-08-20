@@ -23,7 +23,7 @@
 CXX=g++
 CC=gcc
 EXTRA_CXXFLAGS=-O0 -g -Wall -fopenmp -std=c++0x
-LIBS = -lnumakind -lnuma -lpthread -ljemalloc -lgomp -lgtest
+LIBS = -lmemkind -lnuma -lpthread -ljemalloc -lgomp -lgtest
 
 OBJECTS = main.o \
 	  check.o \

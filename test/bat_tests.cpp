@@ -27,7 +27,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "numakind.h"
+#include "memkind.h"
 #include "trial_generator.h"
 
 
@@ -44,7 +44,7 @@ protected:
         char *hbw_nodes_env, *endptr;
         tgen = new TrialGenerator();
 
-        hbw_nodes_env = getenv("NUMAKIND_HBW_NODES");
+        hbw_nodes_env = getenv("MEMKIND_HBW_NODES");
         if (hbw_nodes_env) {
             num_bandwidth = 128;
             bandwidth = new int[num_bandwidth];
@@ -62,7 +62,7 @@ protected:
             }
         }
         else {
-            const char *node_bandwidth_path = "/etc/numakind/node-bandwidth";
+            const char *node_bandwidth_path = "/etc/memkind/node-bandwidth";
             std::ifstream nbw_file;
 
             nbw_file.open(node_bandwidth_path, std::ifstream::binary);
@@ -126,27 +126,27 @@ TEST_F(BATest, hbw_memalign_psize_incremental)
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_numakind_malloc_recycle)
+TEST_F(BATest, hbw_memkind_malloc_recycle)
 {
-    tgen->generate_recycle_incremental(NUMAKIND_MALLOC);
+    tgen->generate_recycle_incremental(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_numakind_malloc_recycle_psize)
+TEST_F(BATest, hbw_memkind_malloc_recycle_psize)
 {
-    tgen->generate_recycle_psize_incremental(NUMAKIND_MALLOC);
+    tgen->generate_recycle_psize_incremental(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_numakind_trials_two_kind_stress)
+TEST_F(BATest, hbw_memkind_trials_two_kind_stress)
 {
     tgen->generate_multi_app_stress(2);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_numakind_trials_all_kind_stress)
+TEST_F(BATest, hbw_memkind_trials_all_kind_stress)
 {
-    tgen->generate_multi_app_stress(NUMAKIND_NUM_BASE_KIND);
+    tgen->generate_multi_app_stress(MEMKIND_NUM_BASE_KIND);
     tgen->run(num_bandwidth, bandwidth);
 }
 

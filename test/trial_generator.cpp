@@ -39,11 +39,11 @@ void TrialGenerator :: generate_incremental(alloc_api_t api)
          i++) {
         trial_vec.push_back(create_trial_tuple(api, size[i],
                                                align[i], psize[i],
-                                               NUMAKIND_HBW,-1));
+                                               MEMKIND_HBW,-1));
         if (i > 0)
             k++;
         trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
-                                               NUMAKIND_HBW, k++));
+                                               MEMKIND_HBW, k++));
 
     }
 }
@@ -58,16 +58,16 @@ void TrialGenerator :: generate_recycle_incremental(alloc_api_t api)
     for (int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
          i++) {
         trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
-                                               NUMAKIND_DEFAULT,-1));
+                                               MEMKIND_DEFAULT,-1));
         if (i > 0)
             k++;
-        trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE,0,0,0,
-                                               NUMAKIND_DEFAULT, k++));
+        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
+                                               MEMKIND_DEFAULT, k++));
         trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
-                                               NUMAKIND_HBW,-1));
+                                               MEMKIND_HBW,-1));
         k++;
-        trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE,0,0,0,
-                                               NUMAKIND_HBW, k++));
+        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
+                                               MEMKIND_HBW, k++));
     }
 
 }
@@ -76,7 +76,7 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
         size_t size,
         size_t alignment,
         int page_size,
-        numakind_t numakind,
+        memkind_t memkind,
         int free_index)
 {
     trial_t ltrial;
@@ -84,7 +84,7 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
     ltrial.size = size;
     ltrial.alignment = alignment;
     ltrial.page_size = page_size;
-    ltrial.numakind = numakind;
+    ltrial.memkind = memkind;
     ltrial.free_index = free_index;
 
     return ltrial;
@@ -102,14 +102,14 @@ void TrialGenerator :: generate_multi_app_stress(int num_types)
     int num_trials = 1000;
     int index, k = 0;
     int num_alloc = 0;
-    numakind_t kind;
+    memkind_t kind;
 
     srandom(0);
     trial_vec.clear();
     for (i = 0; i < num_trials; i++) {
         if (n_random(3) || num_alloc == 0) {
-            numakind_get_kind_by_partition(n_random(num_types), &kind);
-            trial_vec.push_back(create_trial_tuple(NUMAKIND_MALLOC,
+            memkind_get_kind_by_partition(n_random(num_types), &kind);
+            trial_vec.push_back(create_trial_tuple(MEMKIND_MALLOC,
                                                    n_random(8*MB - 1) + 1,
                                                    0, 2097152,
                                                    kind,
@@ -118,15 +118,15 @@ void TrialGenerator :: generate_multi_app_stress(int num_types)
         }
         else {
             index = n_random(trial_vec.size());
-            while (trial_vec[index].api == NUMAKIND_FREE ||
+            while (trial_vec[index].api == MEMKIND_FREE ||
                    trial_vec[index].free_index == -1) {
                 index = n_random(trial_vec.size());
             }
 
-            trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE,
+            trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,
                                                    0,
                                                    0, 2097152,
-                                                   trial_vec[index].numakind,
+                                                   trial_vec[index].memkind,
                                                    trial_vec[index].free_index));
             trial_vec[index].free_index = -1;
             k++;
@@ -136,12 +136,12 @@ void TrialGenerator :: generate_multi_app_stress(int num_types)
 
     /* Adding free's for remaining malloc's*/
     for (i = 0; i <(int) trial_vec.size(); i++) {
-        if (trial_vec[i].api != NUMAKIND_FREE &&
+        if (trial_vec[i].api != MEMKIND_FREE &&
             trial_vec[i].free_index > 0) {
 
-            trial_t ltrial = create_trial_tuple(NUMAKIND_FREE,
+            trial_t ltrial = create_trial_tuple(MEMKIND_FREE,
                                                 0, 0, 2097152,
-                                                trial_vec[i].numakind,
+                                                trial_vec[i].memkind,
                                                 trial_vec[i].free_index);
 
             trial_vec[i].free_index = -1;
@@ -155,13 +155,13 @@ void TrialGenerator :: generate_recycle_psize_2GB(alloc_api_t api)
 
     trial_vec.clear();
     trial_vec.push_back(create_trial_tuple(api, 2*GB, 32, 4096,
-                                           NUMAKIND_HBW,-1));
-    trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE, 0, 0, 0,
-                                           NUMAKIND_HBW, 0));
+                                           MEMKIND_HBW,-1));
+    trial_vec.push_back(create_trial_tuple(MEMKIND_FREE, 0, 0, 0,
+                                           MEMKIND_HBW, 0));
     trial_vec.push_back(create_trial_tuple(api, 2*GB, 32, 2097152,
-                                           NUMAKIND_HBW_HUGETLB,-1));
-    trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE, 0, 0, 2097152,
-                                           NUMAKIND_HBW_HUGETLB, 2));
+                                           MEMKIND_HBW_HUGETLB,-1));
+    trial_vec.push_back(create_trial_tuple(MEMKIND_FREE, 0, 0, 2097152,
+                                           MEMKIND_HBW_HUGETLB, 2));
 
 }
 
@@ -175,17 +175,17 @@ void TrialGenerator :: generate_recycle_psize_incremental(alloc_api_t api)
     for (int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
          i++) {
         trial_vec.push_back(create_trial_tuple(api, size[i], 32, 4096,
-                                               NUMAKIND_HBW,-1));
+                                               MEMKIND_HBW,-1));
         if (i > 0)
             k++;
-        trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE, 0, 0, 0,
-                                               NUMAKIND_HBW, k++));
+        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE, 0, 0, 0,
+                                               MEMKIND_HBW, k++));
 
         trial_vec.push_back(create_trial_tuple(api, size[i], 32, 2097152,
-                                               NUMAKIND_HBW_HUGETLB,-1));
+                                               MEMKIND_HBW_HUGETLB,-1));
         k++;
-        trial_vec.push_back(create_trial_tuple(NUMAKIND_FREE, 0, 0, 0,
-                                               NUMAKIND_HBW_HUGETLB, k++));
+        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE, 0, 0, 0,
+                                               MEMKIND_HBW_HUGETLB, k++));
     }
 }
 
@@ -204,12 +204,12 @@ void TrialGenerator :: generate_size_1KB_2GB(alloc_api_t api)
     for (unsigned int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
          i++) {
         trial_vec.push_back(create_trial_tuple(api,size[i],32,
-                                               4096, NUMAKIND_HBW,
+                                               4096, MEMKIND_HBW,
                                                -1));
         if (i > 0)
             k++;
         trial_vec.push_back(create_trial_tuple(HBW_FREE, 0, 0, 0,
-                                               NUMAKIND_HBW, k));
+                                               MEMKIND_HBW, k));
         k++;
     }
 }
@@ -230,7 +230,7 @@ void TrialGenerator :: print()
                   << it->page_size <<" "
                   << it->alignment <<" "
                   << it->free_index <<" "
-                  << it->numakind <<" "
+                  << it->memkind <<" "
                   <<std::endl;
     }
 
@@ -267,8 +267,8 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                     ptr_vec[trial_vec[i].free_index] = NULL;
                 }
                 break;
-            case NUMAKIND_FREE:
-                numakind_free(trial_vec[i].numakind,
+            case MEMKIND_FREE:
+                memkind_free(trial_vec[i].memkind,
                               ptr_vec[trial_vec[i].free_index]);
                 ptr_vec[trial_vec[i].free_index] = NULL;
                 ptr_vec[i] = NULL;
@@ -314,19 +314,19 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
 
                 break;
 
-            case NUMAKIND_MALLOC:
-                ptr_vec[i] = numakind_malloc(trial_vec[i].numakind,
+            case MEMKIND_MALLOC:
+                ptr_vec[i] = memkind_malloc(trial_vec[i].memkind,
                                              trial_vec[i].size);
                 break;
         }
         if (trial_vec[i].api != HBW_FREE &&
-            trial_vec[i].api != NUMAKIND_FREE) {
+            trial_vec[i].api != MEMKIND_FREE) {
             
             ASSERT_TRUE(ptr_vec[i] != NULL);
             memset(ptr_vec[i], 0, trial_vec[i].size);
             Check check(ptr_vec[i], trial_vec[i].size);
-            if (trial_vec[i].numakind != NUMAKIND_DEFAULT &&
-                trial_vec[i].numakind != NUMAKIND_HUGETLB) {
+            if (trial_vec[i].memkind != MEMKIND_DEFAULT &&
+                trial_vec[i].memkind != MEMKIND_HUGETLB) {
                 EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
             }
             if (trial_vec[i].api == HBW_CALLOC) {
@@ -337,9 +337,9 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 EXPECT_EQ(0, check.check_align(trial_vec[i].alignment));
             }
             if (trial_vec[i].api == HBW_MEMALIGN_PSIZE ||
-                (trial_vec[i].api == NUMAKIND_MALLOC &&
-                 (trial_vec[i].numakind == NUMAKIND_HBW_HUGETLB ||
-                  trial_vec[i].numakind == NUMAKIND_HBW_PREFERRED_HUGETLB))) {
+                (trial_vec[i].api == MEMKIND_MALLOC &&
+                 (trial_vec[i].memkind == MEMKIND_HBW_HUGETLB ||
+                  trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_HUGETLB))) {
                 EXPECT_EQ(0, check.check_page_size(trial_vec[i].page_size));
             }
         }

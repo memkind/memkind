@@ -36,7 +36,7 @@
 #include <utmpx.h>
 #include <sched.h>
 
-#include "numakind_hbw.h"
+#include "memkind_hbw.h"
 
 struct numanode_bandwidth_t {
     int numanode;
@@ -49,16 +49,16 @@ struct bandwidth_nodes_t {
     int *numanodes;
 };
 
-struct numakind_hbw_closest_numanode_t {
+struct memkind_hbw_closest_numanode_t {
     int init_err;
     int num_cpu;
     int *closest_numanode;
 };
 
-static struct numakind_hbw_closest_numanode_t numakind_hbw_closest_numanode_g;
-static pthread_once_t numakind_hbw_closest_numanode_once_g = PTHREAD_ONCE_INIT;
+static struct memkind_hbw_closest_numanode_t memkind_hbw_closest_numanode_g;
+static pthread_once_t memkind_hbw_closest_numanode_once_g = PTHREAD_ONCE_INIT;
 
-static void numakind_hbw_closest_numanode_init(void);
+static void memkind_hbw_closest_numanode_init(void);
 
 static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
                                 const char *bandwidth_path);
@@ -72,34 +72,34 @@ static int set_closest_numanode(int num_unique,
 
 static int numanode_bandwidth_compare(const void *a, const void *b);
 
-int numakind_hbw_is_available(struct numakind *kind)
+int memkind_hbw_is_available(struct memkind *kind)
 {
     int err;
     err = kind->ops->get_mbind_nodemask(kind, NULL, 0);
     return (!err);
 }
 
-int numakind_hbw_hugetlb_get_mmap_flags(struct numakind *kind, int *flags)
+int memkind_hbw_hugetlb_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB;
     return 0;
 }
 
-int numakind_hbw_preferred_get_mbind_mode(struct numakind *kind, int *mode)
+int memkind_hbw_preferred_get_mbind_mode(struct memkind *kind, int *mode)
 {
     *mode = MPOL_PREFERRED;
     return 0;
 }
 
-int numakind_hbw_get_mbind_nodemask(struct numakind *kind,
+int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
                                     unsigned long *nodemask, unsigned long maxnode)
 {
     int cpu;
     struct bitmask nodemask_bm = {maxnode, nodemask};
-    struct numakind_hbw_closest_numanode_t *g =
-                &numakind_hbw_closest_numanode_g;
-    pthread_once(&numakind_hbw_closest_numanode_once_g,
-                 numakind_hbw_closest_numanode_init);
+    struct memkind_hbw_closest_numanode_t *g =
+                &memkind_hbw_closest_numanode_g;
+    pthread_once(&memkind_hbw_closest_numanode_once_g,
+                 memkind_hbw_closest_numanode_init);
 
     if (!g->init_err && nodemask) {
         numa_bitmask_clearall(&nodemask_bm);
@@ -108,16 +108,16 @@ int numakind_hbw_get_mbind_nodemask(struct numakind *kind,
             numa_bitmask_setbit(&nodemask_bm, g->closest_numanode[cpu]);
         }
         else {
-            return NUMAKIND_ERROR_GETCPU;
+            return MEMKIND_ERROR_GETCPU;
         }
     }
     return g->init_err;
 }
 
-static void numakind_hbw_closest_numanode_init(void)
+static void memkind_hbw_closest_numanode_init(void)
 {
-    struct numakind_hbw_closest_numanode_t *g =
-                &numakind_hbw_closest_numanode_g;
+    struct memkind_hbw_closest_numanode_t *g =
+                &memkind_hbw_closest_numanode_g;
     int *bandwidth = NULL;
     int num_unique = 0;
     int high_bandwidth = 0;
@@ -130,14 +130,14 @@ static void numakind_hbw_closest_numanode_init(void)
     g->closest_numanode = (int *)je_malloc(sizeof(int) * g->num_cpu);
     bandwidth = (int *)je_malloc(sizeof(int) * NUMA_NUM_NODES);
     if (!(g->closest_numanode && bandwidth)) {
-        g->init_err = NUMAKIND_ERROR_MALLOC;
+        g->init_err = MEMKIND_ERROR_MALLOC;
     }
     if (!g->init_err) {
-        hbw_nodes_env = getenv("NUMAKIND_HBW_NODES");
+        hbw_nodes_env = getenv("MEMKIND_HBW_NODES");
         if (hbw_nodes_env) {
             hbw_nodes_bm = numa_parse_nodestring(hbw_nodes_env);
             if (!hbw_nodes_bm) {
-                g->init_err = NUMAKIND_ERROR_ENVIRON;
+                g->init_err = MEMKIND_ERROR_ENVIRON;
             }
             else {
                 for (node = 0; node < NUMA_NUM_NODES; ++node) {
@@ -153,7 +153,7 @@ static void numakind_hbw_closest_numanode_init(void)
         }
         else {
             g->init_err = parse_node_bandwidth(NUMA_NUM_NODES, bandwidth,
-                                               NUMAKIND_BANDWIDTH_PATH);
+                                               MEMKIND_BANDWIDTH_PATH);
         }
     }
     if (!g->init_err) {
@@ -162,7 +162,7 @@ static void numakind_hbw_closest_numanode_init(void)
     }
     if (!g->init_err) {
         if (num_unique == 1) {
-            g->init_err = NUMAKIND_ERROR_UNAVAILABLE;
+            g->init_err = MEMKIND_ERROR_UNAVAILABLE;
         }
     }
     if (!g->init_err) {
@@ -193,12 +193,12 @@ static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
     int err = 0;
     fid = fopen(bandwidth_path, "r");
     if (fid == NULL) {
-        err = NUMAKIND_ERROR_PMTT ? NUMAKIND_ERROR_PMTT : -1;
+        err = MEMKIND_ERROR_PMTT ? MEMKIND_ERROR_PMTT : -1;
         goto exit;
     }
     nread = fread(bandwidth, sizeof(int), num_bandwidth, fid);
     if (nread != num_bandwidth) {
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
         goto exit;
     }
 
@@ -235,7 +235,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
     numanode_bandwidth = je_malloc(sizeof(struct numanode_bandwidth_t) *
                                    num_bandwidth);
     if (!numanode_bandwidth) {
-        err = NUMAKIND_ERROR_MALLOC;
+        err = MEMKIND_ERROR_MALLOC;
     }
     if (!err) {
         /* set sorting array */
@@ -250,7 +250,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
         /* ignore zero bandwidths */
         num_bandwidth = j;
         if (num_bandwidth == 0) {
-            err = NUMAKIND_ERROR_PMTT;
+            err = MEMKIND_ERROR_PMTT;
         }
     }
     if (!err) {
@@ -270,7 +270,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
                                sizeof(struct bandwidth_nodes_t) **num_unique +
                                sizeof(int) * num_bandwidth);
         if (!*bandwidth_nodes) {
-            err = NUMAKIND_ERROR_MALLOC;
+            err = MEMKIND_ERROR_MALLOC;
         }
     }
     if (!err) {
@@ -337,7 +337,7 @@ static int set_closest_numanode(int num_unique,
         }
     }
     if (match.bandwidth == -1) {
-        err = NUMAKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_PMTT;
     }
     else {
         for (i = 0; i < num_cpunode; ++i) {
@@ -350,7 +350,7 @@ static int set_closest_numanode(int num_unique,
                     closest_numanode[i] = match.numanodes[j];
                 }
                 else if (distance == min_distance) {
-                    err = NUMAKIND_ERROR_TIEDISTANCE;
+                    err = MEMKIND_ERROR_TIEDISTANCE;
                 }
             }
         }
@@ -374,28 +374,28 @@ static int numanode_bandwidth_compare(const void *a, const void *b)
     return result;
 }
 
-void numakind_hugetlb_init_once(void)
+void memkind_hugetlb_init_once(void)
 {
-    numakind_arena_create_map(NUMAKIND_HUGETLB);
+    memkind_arena_create_map(MEMKIND_HUGETLB);
 }
 
-void numakind_hbw_init_once(void)
+void memkind_hbw_init_once(void)
 {
-    numakind_arena_create_map(NUMAKIND_HBW);
+    memkind_arena_create_map(MEMKIND_HBW);
 }
 
-void numakind_hbw_hugetlb_init_once(void)
+void memkind_hbw_hugetlb_init_once(void)
 {
-    numakind_arena_create_map(NUMAKIND_HBW_HUGETLB);
+    memkind_arena_create_map(MEMKIND_HBW_HUGETLB);
 }
 
-void numakind_hbw_preferred_init_once(void)
+void memkind_hbw_preferred_init_once(void)
 {
-    numakind_arena_create_map(NUMAKIND_HBW_PREFERRED);
+    memkind_arena_create_map(MEMKIND_HBW_PREFERRED);
 }
 
-void numakind_hbw_preferred_hugetlb_init_once(void)
+void memkind_hbw_preferred_hugetlb_init_once(void)
 {
-    numakind_arena_create_map(NUMAKIND_HBW_PREFERRED_HUGETLB);
+    memkind_arena_create_map(MEMKIND_HBW_PREFERRED_HUGETLB);
 }
 

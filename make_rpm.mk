@@ -7,7 +7,7 @@
 #  with the terms of that agreement.
 #
 
-name = numakind
+name = memkind
 arch = $(shell uname -p)
 version = $(shell git describe --long | sed 's|[^0-9]*\([0-9]*\.[0-9]*\.[0-9]*\).*|\1|')
 release = $(shell git describe --long | sed 's|[^0-9]*[0-9]*\.[0-9]*\.[0-9]*-\([0-9]*\).*|\1|')

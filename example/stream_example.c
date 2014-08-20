@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------*/
 /* Program: STREAM                                                       */
 /* Revision: $Id: stream.c,v 5.10 2013/01/17 16:01:06 mccalpin Exp mccalpin $ */
-/*           variant with modifications to use numakind library for      */
+/*           variant with modifications to use memkind library for      */
 /*           dynamic memory allocation.                                  */
 /* Original code developed by John D. McCalpin                           */
 /* Programmers: John D. McCalpin                                         */
@@ -187,7 +187,7 @@ static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET],
 #else
 #include <stdlib.h>
 #include <string.h>
-#include <numakind.h>
+#include <memkind.h>
 static STREAM_TYPE *a = NULL, *b = NULL, *c = NULL;
 enum {ERR_MSG_SIZE = 256};
 #endif
@@ -227,11 +227,11 @@ main(int argc, char **argv)
     double		t, times[4][NTIMES];
 #ifdef ENABLE_DYNAMIC_ALLOC
     int	err = 0;
-    numakind_t kind;
+    memkind_t kind;
     char err_msg[ERR_MSG_SIZE];
     if (argc > 1 && (strncmp("--help", argv[1], strlen("--help")) == 0 ||
                      strncmp("-h", argv[1], strlen("-h")) == 0)) {
-        printf("Usage: %s [numakind_default | numakind_hbw | numakind_hbw_hugetlb | numakind_hbw_preferred | numakind_hbw_preferred_hugetlb]\n", argv[0]);
+        printf("Usage: %s [memkind_default | memkind_hbw | memkind_hbw_hugetlb | memkind_hbw_preferred | memkind_hbw_preferred_hugetlb]\n", argv[0]);
         return 0;
     }
 #endif
@@ -241,7 +241,7 @@ main(int argc, char **argv)
     printf(HLINE);
     printf("STREAM version $Revision: 5.10 $\n");
 #ifdef ENABLE_DYNAMIC_ALLOC
-    printf("Variant that uses the numakind library for dynamic memory allocation.\n");
+    printf("Variant that uses the memkind library for dynamic memory allocation.\n");
 #endif
     printf(HLINE);
     BytesPerWord = sizeof(STREAM_TYPE);
@@ -290,27 +290,27 @@ main(int argc, char **argv)
 
 #ifdef ENABLE_DYNAMIC_ALLOC
     if (argc > 1) {
-        err = numakind_get_kind_by_name(argv[1], &kind);
+        err = memkind_get_kind_by_name(argv[1], &kind);
     }
     else {
-        err = numakind_get_kind_by_name("numakind_default", &kind);
+        err = memkind_get_kind_by_name("memkind_default", &kind);
     }
     if (err) {
-        numakind_error_message(err, err_msg, ERR_MSG_SIZE);
+        memkind_error_message(err, err_msg, ERR_MSG_SIZE);
         fprintf(stderr, "ERROR: %s\n", err_msg);
         return -1;
     }
-    err = numakind_posix_memalign(kind, (void **)&a, 2097152, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
+    err = memkind_posix_memalign(kind, (void **)&a, 2097152, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
     if (err) {
         fprintf(stderr, "ERROR: Unable to allocate stream array a\n");
         return -err;
     }
-    err = numakind_posix_memalign(kind, (void **)&b, 2097152, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
+    err = memkind_posix_memalign(kind, (void **)&b, 2097152, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
     if (err) {
         fprintf(stderr, "ERROR: Unable to allocate stream array b\n");
         return -err;
     }
-    err = numakind_posix_memalign(kind, (void **)&c, 2097152, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
+    err = memkind_posix_memalign(kind, (void **)&c, 2097152, BytesPerWord * (STREAM_ARRAY_SIZE + OFFSET));
     if (err) {
         fprintf(stderr, "ERROR: Unable to allocate stream array c\n");
         return -err;
@@ -430,9 +430,9 @@ main(int argc, char **argv)
     printf(HLINE);
 
 #ifdef ENABLE_DYNAMIC_ALLOC
-    numakind_free(kind, c);
-    numakind_free(kind, b);
-    numakind_free(kind, a);
+    memkind_free(kind, c);
+    memkind_free(kind, b);
+    memkind_free(kind, a);
 #endif
     return 0;
 }

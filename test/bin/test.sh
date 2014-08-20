@@ -37,7 +37,7 @@ fi
 #fi
 
 if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
-    export NUMAKIND_HBW_NODES=1
+    export MEMKIND_HBW_NODES=1
     numactl --membind=0 $basedir/all_tests $@
 else
     $basedir/all_tests $@

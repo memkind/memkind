@@ -28,7 +28,7 @@ hbwmalloc \- The high bandwidth memory interface
 .nf
 .B #include <hbwmalloc.h>
 .sp
-.B Link with -ljemalloc -lnuma -lnumakind -lpthread
+.B Link with -ljemalloc -lnuma -lmemkind -lpthread
 .sp
 .B int hbw_is_available(void);
 .br
@@ -219,43 +219,43 @@ to ENOMEM if requesting a negative size and
 EINVAL if the alignment is invalid.
 .SH ERRORS
 .TP
-.B NUMAKIND_ERROR_UNAVAILABLE
+.B MEMKIND_ERROR_UNAVAILABLE
 Requested numa kind is not available
 .TP
-.B NUMAKIND_ERROR_MBIND
+.B MEMKIND_ERROR_MBIND
 Call to mbind() failed
 .TP
-.B NUMAKIND_ERROR_MEMALIGN
+.B MEMKIND_ERROR_MEMALIGN
 Call to posix_memalign() failed
 .TP
-.B NUMAKIND_ERROR_MALLCTL
+.B MEMKIND_ERROR_MALLCTL
 Call to je_mallctl() failed
 .TP
-.B NUMAKIND_ERROR_MALLOC
+.B MEMKIND_ERROR_MALLOC
 Call to je_malloc() failed
 .TP
-.B NUMAKIND_ERROR_GETCPU
+.B MEMKIND_ERROR_GETCPU
 Call to sched_getcpu() returned out of range
 .TP
-.B NUMAKIND_ERROR_PMTT
+.B MEMKIND_ERROR_PMTT
 Unable to find parsed PMTT table or
 invalid PMTT table entries in
-.I /etc/numakind/node-bandwidth
+.I /etc/memkind/node-bandwidth
 .TP
-.B NUMAKIND_ERROR_TIEDISTANCE
+.B MEMKIND_ERROR_TIEDISTANCE
 Two NUMA memory nodes are equidistant from target cpu node
 .TP
-.B NUMAKIND_ERROR_ALIGNMENT
+.B MEMKIND_ERROR_ALIGNMENT
 Alignment must be a power of two and larger than sizeof(void *)
 .TP
-.B NUMAKIND_ERROR_ALLOCM
+.B MEMKIND_ERROR_ALLOCM
 Call to je_allocm() failed
 .TP
-.B NUMAKIND_ERROR_ENVIRON
-Error parsing environment variable (NUMAKIND_*)
+.B MEMKIND_ERROR_ENVIRON
+Error parsing environment variable (MEMKIND_*)
 .TP
-.B NUMAKIND_ERROR_INVALID
-Invalid input arguments to numakind routine
+.B MEMKIND_ERROR_INVALID
+Invalid input arguments to memkind routine
 .SH "NOTES"
 The
 .I hbwmalloc.h
@@ -264,19 +264,19 @@ library. These interfaces define a heap manager that targets high
 bandwidth memory numa nodes.
 .SH "FILES"
 .TP
-.I /etc/numakind/node-bandwidth
+.I /etc/memkind/node-bandwidth
 File that contains the bandwidth values for each numa node.
 .TP
-.I /etc/rc/d/init.d/numakind
+.I /etc/rc/d/init.d/memkind
 Initialization script that creates the node-bandwidth file by calling
 the PMTT table parser.
 .TP
-.I /usr/sbin/numakind-pmtt
+.I /usr/sbin/memkind-pmtt
 The PMTT table parser.
 
 .SH "ENVIRONMENT"
 .TP
-.B NUMAKIND_HBW_NODES
+.B MEMKIND_HBW_NODES
 This environment varaible is a comma separated list of NUMA nodes that
 are treated as high bandwidth. This environment variable should be set
 if the PMTT file is not present, or to override the PMTT table if it

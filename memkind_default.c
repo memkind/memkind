@@ -26,16 +26,16 @@
 #include <numaif.h>
 #include <sys/mman.h>
 #include <jemalloc/jemalloc.h>
-#include "numakind_default.h"
+#include "memkind_default.h"
 
 
-int numakind_default_create(struct numakind *kind, const struct numakind_ops *ops, const char *name)
+int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
 {
     int err = 0;
 
     kind->ops = ops;
-    if (strlen(name) >= NUMAKIND_NAME_LENGTH) {
-        err = NUMAKIND_ERROR_INVALID;
+    if (strlen(name) >= MEMKIND_NAME_LENGTH) {
+        err = MEMKIND_ERROR_INVALID;
     }
     if (!err) {
         strcpy(kind->name, name);
@@ -43,42 +43,42 @@ int numakind_default_create(struct numakind *kind, const struct numakind_ops *op
     return err;
 }
 
-int numakind_default_destroy(struct numakind *kind)
+int memkind_default_destroy(struct memkind *kind)
 {
     return 0;
 }
 
-void *numakind_default_malloc(struct numakind *kind, size_t size)
+void *memkind_default_malloc(struct memkind *kind, size_t size)
 {
     return je_malloc(size);
 }
 
-void *numakind_default_calloc(struct numakind *kind, size_t num, size_t size)
+void *memkind_default_calloc(struct memkind *kind, size_t num, size_t size)
 {
     return je_calloc(num, size);
 }
 
-int numakind_default_posix_memalign(struct numakind *kind, void **memptr, size_t alignment, size_t size)
+int memkind_default_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size)
 {
     return je_posix_memalign(memptr, alignment, size);
 }
 
-void *numakind_default_realloc(struct numakind *kind, void *ptr, size_t size)
+void *memkind_default_realloc(struct memkind *kind, void *ptr, size_t size)
 {
     return je_realloc(ptr, size);
 }
 
-void numakind_default_free(struct numakind *kind, void *ptr)
+void memkind_default_free(struct memkind *kind, void *ptr)
 {
     je_free(ptr);
 }
 
-int numakind_default_is_available(struct numakind *kind)
+int memkind_default_is_available(struct memkind *kind)
 {
     return 1;
 }
 
-int numakind_default_mbind(struct numakind *kind, void *ptr, size_t len)
+int memkind_default_mbind(struct memkind *kind, void *ptr, size_t len)
 {
     nodemask_t nodemask;
     int err = 0;
@@ -90,29 +90,29 @@ int numakind_default_mbind(struct numakind *kind, void *ptr, size_t len)
     }
     if (!err) {
         err = mbind(ptr, len, mode, nodemask.n, NUMA_NUM_NODES, 0);
-        err = err ? NUMAKIND_ERROR_MBIND : 0;
+        err = err ? MEMKIND_ERROR_MBIND : 0;
     }
     return err;
 }
 
-int numakind_noop_mbind(struct numakind *kind, void *ptr, size_t len)
+int memkind_noop_mbind(struct memkind *kind, void *ptr, size_t len)
 {
     return 0;
 }
 
-int numakind_default_get_mmap_flags(struct numakind *kind, int *flags)
+int memkind_default_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_PRIVATE | MAP_ANONYMOUS;
     return 0;
 }
 
-int numakind_default_get_mbind_mode(struct numakind *kind, int *mode)
+int memkind_default_get_mbind_mode(struct memkind *kind, int *mode)
 {
     *mode = MPOL_BIND;
     return 0;
 }
 
-int numakind_default_get_mbind_nodemask(struct numakind *kind, unsigned long *nodemask, unsigned long maxnode)
+int memkind_default_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};
     numa_bitmask_clearall(&nodemask_bm);
@@ -120,7 +120,7 @@ int numakind_default_get_mbind_nodemask(struct numakind *kind, unsigned long *no
     return 0;
 }
 
-int numakind_default_get_size(struct numakind *kind, size_t *total, size_t *free)
+int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free)
 {
     nodemask_t nodemask;
     struct bitmask nodemask_bm = {NUMA_NUM_NODES, nodemask.n};

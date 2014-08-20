@@ -27,7 +27,7 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "numakind.h"
+#include "memkind.h"
 #include "trial_generator.h"
 
 #define NTHREADS 2
@@ -45,7 +45,7 @@ protected:
         char *hbw_nodes_env, *endptr;
         tgen = new TrialGenerator();
 
-        hbw_nodes_env = getenv("NUMAKIND_HBW_NODES");
+        hbw_nodes_env = getenv("MEMKIND_HBW_NODES");
         if (hbw_nodes_env) {
             num_bandwidth = 128;
             bandwidth = new int[num_bandwidth];
@@ -63,7 +63,7 @@ protected:
             }
         }
         else {
-            const char *node_bandwidth_path = "/etc/numakind/node-bandwidth";
+            const char *node_bandwidth_path = "/etc/memkind/node-bandwidth";
             std::ifstream nbw_file;
 
             nbw_file.open(node_bandwidth_path, std::ifstream::binary);

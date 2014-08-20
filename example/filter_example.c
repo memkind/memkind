@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <numakind.h>
+#include <memkind.h>
 
 int main(int argc, char **argv)
 {
@@ -39,23 +39,23 @@ int main(int argc, char **argv)
 
     srandom(0);
 
-    stream = (double *)numakind_malloc(NUMAKIND_DEFAULT, stream_len * sizeof(double));
+    stream = (double *)memkind_malloc(MEMKIND_DEFAULT, stream_len * sizeof(double));
     if (stream == NULL) {
-        perror("<numakind>");
+        perror("<memkind>");
         fprintf(stderr, "Unable to allocate stream\n");
         return errno ? -errno : 1;
     }
 
-    filter = (double *)numakind_malloc(NUMAKIND_HBW, filter_len * sizeof(double));
+    filter = (double *)memkind_malloc(MEMKIND_HBW, filter_len * sizeof(double));
     if (filter == NULL) {
-        perror("<numakind>");
+        perror("<memkind>");
         fprintf(stderr, "Unable to allocate filter\n");
         return errno ? -errno : 1;
     }
 
-    result = (double *)numakind_calloc(NUMAKIND_HBW, filter_len, sizeof(double));
+    result = (double *)memkind_calloc(MEMKIND_HBW, filter_len, sizeof(double));
     if (result == NULL) {
-        perror("<numakind>");
+        perror("<memkind>");
         fprintf(stderr, "Unable to allocate result\n");
         return errno ? -errno : 1;
     }

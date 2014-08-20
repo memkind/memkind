@@ -25,7 +25,7 @@
 CC ?= gcc
 INSTALL ?= install
 JEMALLOC_PREFIX ?= /usr
-NUMAKIND_PREFIX ?= /usr
+MEMKIND_PREFIX ?= /usr
 VERSION ?= $(shell git describe --long | sed 's|^v||')
 prefix ?= /usr
 exec_prefix ?= $(prefix)
@@ -38,54 +38,54 @@ mandir ?= $(datarooddir)/man
 initddir ?= /etc/rc.d/init.d
 
 EXTRA_CFLAGS = -fPIC -Wall -Werror -O3
-OBJECTS = numakind.o numakind_hbw.o hbwmalloc.o numakind_default.o numakind_arena.o
+OBJECTS = memkind.o memkind_hbw.o hbwmalloc.o memkind_default.o memkind_arena.o
 
-all: libnumakind.so.0.0 numakind-pmtt
+all: libmemkind.so.0.0 memkind-pmtt
 
 clean:
-	rm -rf $(OBJECTS) libnumakind.so.0.0 numakind-pmtt numakind_pmtt.o doc
+	rm -rf $(OBJECTS) libmemkind.so.0.0 memkind-pmtt memkind_pmtt.o doc
 	make -C test clean
 
 test:
 	make -C test test
 
-numakind.o: numakind.c numakind.h numakind_hbw.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind.c
+memkind.o: memkind.c memkind.h memkind_hbw.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind.c
 
-numakind_hbw.o: numakind_hbw.c numakind.h numakind_hbw.h numakind_arena.h numakind_default.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind_hbw.c
+memkind_hbw.o: memkind_hbw.c memkind.h memkind_hbw.h memkind_arena.h memkind_default.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind_hbw.c
 
-numakind_default.o: numakind_default.c numakind.h numakind_default.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind_default.c
+memkind_default.o: memkind_default.c memkind.h memkind_default.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind_default.c
 
-numakind_arena.o: numakind_arena.c numakind.h numakind_arena.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c numakind_arena.c
+memkind_arena.o: memkind_arena.c memkind.h memkind_arena.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind_arena.c
 
-hbwmalloc.o: hbwmalloc.c hbwmalloc.h numakind.h numakind_hbw.h
+hbwmalloc.o: hbwmalloc.c hbwmalloc.h memkind.h memkind_hbw.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -c hbwmalloc.c
 
-libnumakind.so.0.0: $(OBJECTS)
-	$(CC) -shared -Wl,-soname,libnumakind.so.0 -o libnumakind.so.0.0 $^
+libmemkind.so.0.0: $(OBJECTS)
+	$(CC) -shared -Wl,-soname,libmemkind.so.0 -o libmemkind.so.0.0 $^
 
-numakind-pmtt: numakind_pmtt.c $(OBJECTS)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(OBJECTS) $(LDFLAGS) -lpthread -lnuma -L$(JEMALLOC_PREFIX)/lib64 -ljemalloc numakind_pmtt.c -o $@
+memkind-pmtt: memkind_pmtt.c $(OBJECTS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(OBJECTS) $(LDFLAGS) -lpthread -lnuma -L$(JEMALLOC_PREFIX)/lib64 -ljemalloc memkind_pmtt.c -o $@
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)
-	$(INSTALL) -m 644 numakind.h hbwmalloc.h $(DESTDIR)$(includedir)
+	$(INSTALL) -m 644 memkind.h hbwmalloc.h $(DESTDIR)$(includedir)
 	$(INSTALL) -d $(DESTDIR)$(libdir)
-	$(INSTALL) libnumakind.so.0.0 $(DESTDIR)$(libdir)
-	ln -sf libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so.0
-	ln -sf libnumakind.so.0.0 $(DESTDIR)$(libdir)/libnumakind.so
-	$(INSTALL) -d $(DESTDIR)$(docdir)/numakind-$(VERSION)
-	$(INSTALL) -m 644 COPYING.txt $(DESTDIR)$(docdir)/numakind-$(VERSION)
-	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)/numakind-$(VERSION)
+	$(INSTALL) libmemkind.so.0.0 $(DESTDIR)$(libdir)
+	ln -sf libmemkind.so.0.0 $(DESTDIR)$(libdir)/libmemkind.so.0
+	ln -sf libmemkind.so.0.0 $(DESTDIR)$(libdir)/libmemkind.so
+	$(INSTALL) -d $(DESTDIR)$(docdir)/memkind-$(VERSION)
+	$(INSTALL) -m 644 COPYING.txt $(DESTDIR)$(docdir)/memkind-$(VERSION)
+	$(INSTALL) -m 644 README.txt $(DESTDIR)$(docdir)/memkind-$(VERSION)
 	$(INSTALL) -d $(DESTDIR)$(mandir)/man3
 	$(INSTALL) -m 644 hbwmalloc.3 $(DESTDIR)$(mandir)/man3/hbwmalloc.3
-	$(INSTALL) -m 644 numakind.3 $(DESTDIR)$(mandir)/man3/numakind.3
+	$(INSTALL) -m 644 memkind.3 $(DESTDIR)$(mandir)/man3/memkind.3
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
-	$(INSTALL) numakind-pmtt $(DESTDIR)$(sbindir)
+	$(INSTALL) memkind-pmtt $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)$(initddir)
-	$(INSTALL) numakind-init $(DESTDIR)$(initddir)/numakind
+	$(INSTALL) memkind-init $(DESTDIR)$(initddir)/memkind
 
 .PHONY: all clean install doc test

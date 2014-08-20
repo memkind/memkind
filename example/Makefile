@@ -24,12 +24,12 @@
 
 CC = cc
 CFLAGS = -O0 -g -Wall -Werror
-LDFLAGS = -lnumakind -ljemalloc -lnuma -lpthread
+LDFLAGS = -lmemkind -ljemalloc -lnuma -lpthread
 
 all: hello_nk hello_hbw filter_nk stream_nk
 
-hello_nk: hello_numakind_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_numakind_example.c -o hello_nk
+hello_nk: hello_memkind_example.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_memkind_example.c -o hello_nk
 
 hello_hbw: hello_hbw_example.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_hbw_example.c -o hello_hbw
