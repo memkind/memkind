@@ -210,6 +210,9 @@ int numakind_create(const struct numakind_ops *ops, const char *name)
     return err;
 }
 
+#ifdef __GNUC__
+__attribute__((destructor))
+#endif
 int numakind_finalize(void)
 {
     struct numakind *kind;
