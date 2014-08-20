@@ -26,29 +26,29 @@ CC = cc
 CFLAGS = -O0 -g -Wall -Werror
 LDFLAGS = -lmemkind -ljemalloc -lnuma -lpthread
 
-all: hello_kind hello_hbw filter_kind stream_kind
+all: hello_memkind hello_hbw filter_memkind stream_memkind
 
-hello_kind: hello_memkind_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_memkind_example.c -o hello_kind
+hello_memkind: hello_memkind_example.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_memkind_example.c -o hello_memkind
 
 hello_hbw: hello_hbw_example.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_hbw_example.c -o hello_hbw
 
-filter_kind: filter_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) filter_example.c -o filter_kind
+filter_memkind: filter_example.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) filter_example.c -o filter_memkind
 
-stream_kind: stream_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -DENABLE_DYNAMIC_ALLOC -fopenmp stream_example.c -o stream_kind
+stream_memkind: stream_example.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -DENABLE_DYNAMIC_ALLOC -fopenmp stream_example.c -o stream_memkind
 
 stream: stream_example.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fopenmp stream_example.c -o stream
 
 clean:
-	rm -f hello_kind hello_hbw filter_kind stream_kind stream
+	rm -f hello_memkind hello_hbw filter_memkind stream_memkind stream
 
-test: hello_kind filter_kind
-	./hello_kind
+test: hello_memkind filter_memkind
+	./hello_memkind
 	./hello_hbw
-	./filter_kind
+	./filter_memkind
 	./stream
-	./stream_kind
+	./stream_memkind
