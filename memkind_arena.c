@@ -71,7 +71,6 @@ int memkind_arena_create_map(struct memkind *kind)
         kind->arena_map = NULL;
     }
     if (kind->arena_map_len && kind->arena_map == NULL) {
-        je_free(kind->name);
         err = MEMKIND_ERROR_MALLOC;
     }
     if (!err) {
@@ -81,7 +80,6 @@ int memkind_arena_create_map(struct memkind *kind)
                              unsigned_size);
         }
         if (err) {
-            je_free(kind->name);
             if (kind->arena_map) {
                 je_free(kind->arena_map);
             }
