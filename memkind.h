@@ -137,7 +137,7 @@ int memkind_get_kind_by_name(const char *name, memkind_t *kind);
 /* Get the amount in bytes of total and free memory of the NUMA nodes assciated with the kind */
 int memkind_get_size(memkind_t kind, size_t *total, size_t *free);
 
-/* returns 1 if numa kind is availble else 0 */
+/* returns 1 if memory kind is availble else 0 */
 int memkind_is_available(memkind_t kind);
 
 /* HEAP MANAGEMENT INTERFACE */
@@ -160,13 +160,13 @@ void memkind_free(memkind_t kind, void *ptr);
 
 /* ALLOCATOR CALLBACK FUNCTIONS */
 
-/* returns 1 if numa kind associated with the partition is availble else 0 */
+/* returns 1 if memory kind associated with the partition is availble else 0 */
 int memkind_partition_is_available(int partition);
 
-/* get flags for call to mmap for the numa kind associated with the partition */
+/* get flags for call to mmap for the memory kind associated with the partition */
 int memkind_partition_get_mmap_flags(int partition, int *flags);
 
-/* mbind to the nearest numa node of the numa kind associated with the partition */
+/* mbind to the nearest numa node of the memory kind associated with the partition */
 int memkind_partition_mbind(int partition, void *addr, size_t len);
 
 #ifdef __cplusplus

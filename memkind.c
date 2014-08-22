@@ -112,7 +112,7 @@ void memkind_error_message(int err, char *msg, size_t size)
 {
     switch (err) {
         case MEMKIND_ERROR_UNAVAILABLE:
-            strncpy(msg, "<memkind> Requested numa kind is not available", size);
+            strncpy(msg, "<memkind> Requested memory kind is not available", size);
             break;
         case MEMKIND_ERROR_MBIND:
             strncpy(msg, "<memkind> Call to mbind() failed", size);
