@@ -10,7 +10,7 @@
 define make_spec
 
 Summary: Extention to libnuma for kinds of memory
-Name: $(name)
+Name: memkind
 Version: $(version)
 Release: $(release)
 License: See COPYING
