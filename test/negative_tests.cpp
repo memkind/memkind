@@ -72,19 +72,20 @@ TEST_F(NegativeTest, ErrorMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
-    int err = MEMKIND_ERROR_MEMALIGN;
+    int err = EINVAL;
 
     ret = memkind_posix_memalign(MEMKIND_DEFAULT,
                                   &ptr, 5,
                                   100);
     EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, EINVAL);
 }
 
 TEST_F(NegativeTest, ErrorAlignment)
 {
     int ret = 0;
     void *ptr = NULL;
-    int err = MEMKIND_ERROR_ALIGNMENT;
+    int err = EINVAL;
 
     ret = memkind_posix_memalign(MEMKIND_HBW,
                                   &ptr, 5,
@@ -151,7 +152,7 @@ TEST_F(NegativeTest, InvalidSizeMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
-    int err = MEMKIND_ERROR_INVALID;
+    int err = EINVAL;
     ret = hbw_allocate_memalign(&ptr,1,-1);
     ASSERT_TRUE(ptr == NULL);
     EXPECT_EQ(ret, MEMKIND_ERROR_ALIGNMENT);
