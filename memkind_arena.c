@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
@@ -61,10 +62,14 @@ int memkind_arena_create_map(struct memkind *kind)
     if (kind->ops->get_arena == memkind_cpu_get_arena) {
         kind->arena_map_len = numa_num_configured_cpus();
         kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int) * kind->arena_map_len);
+        for (i = 0; i < kind->arena_map_len; ++i) {
+            kind->arena_map[i] = UINT_MAX;
+        }
     }
     else if (kind->ops->get_arena == memkind_bijective_get_arena) {
         kind->arena_map_len = 1;
         kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int));
+        *(kind->arena_map) = UINT_MAX;
     }
     else {
         kind->arena_map_len = 0;
@@ -197,6 +202,9 @@ int memkind_cpu_get_arena(struct memkind *kind, unsigned int *arena)
     cpu_id = sched_getcpu();
     if (cpu_id < kind->arena_map_len) {
         *arena = kind->arena_map[cpu_id];
+        if (*arena == UINT_MAX) {
+            err = MEMKIND_ERROR_MALLCTL;
+        }
     }
     else {
         err = MEMKIND_ERROR_GETCPU;
@@ -210,6 +218,9 @@ int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena)
 
     if (kind->arena_map != NULL) {
         *arena = *(kind->arena_map);
+        if (*arena == UINT_MAX) {
+            err = MEMKIND_ERROR_MALLCTL;
+        }
     }
     else {
         err = MEMKIND_ERROR_RUNTIME;
