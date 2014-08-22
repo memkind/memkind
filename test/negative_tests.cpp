@@ -74,11 +74,12 @@ TEST_F(NegativeTest, ErrorMemalign)
     void *ptr = NULL;
     int err = EINVAL;
 
+    errno = 0;
     ret = memkind_posix_memalign(MEMKIND_DEFAULT,
                                   &ptr, 5,
                                   100);
     EXPECT_EQ(err, ret);
-    EXPECT_EQ(errno, EINVAL);
+    EXPECT_EQ(errno, 0);
 }
 
 TEST_F(NegativeTest, ErrorAlignment)
@@ -87,11 +88,12 @@ TEST_F(NegativeTest, ErrorAlignment)
     void *ptr = NULL;
     int err = EINVAL;
 
+    errno = 0;
     ret = memkind_posix_memalign(MEMKIND_HBW,
                                   &ptr, 5,
                                   100);
     EXPECT_EQ(err, ret);
-    EXPECT_EQ(errno, EINVAL);
+    EXPECT_EQ(errno, 0);
 }
 
 
@@ -101,11 +103,13 @@ TEST_F(NegativeTest, ErrorAllocM)
     void *ptr = NULL;
     int err = ENOMEM;
 
+    errno = 0;
     ret = memkind_posix_memalign(MEMKIND_HBW,
                                   &ptr,
                                   16,
                                   100*GB);
     EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
 }
 
 TEST_F(NegativeTest, InvalidSizeMalloc)
@@ -152,15 +156,16 @@ TEST_F(NegativeTest, InvalidSizeMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
-    int err = EINVAL;
+    int err = MEMKIND_ERROR_ALIGNMENT;
     ret = hbw_allocate_memalign(&ptr,1,-1);
     ASSERT_TRUE(ptr == NULL);
-    EXPECT_EQ(ret, MEMKIND_ERROR_ALIGNMENT);
+    EXPECT_EQ(ret, err);
 
+    errno = 0;
+    err = EINVAL;
     ret = memkind_posix_memalign(MEMKIND_HBW,
                                   &ptr, 5, 100);
-    err = EINVAL;
     EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
     ASSERT_TRUE(ptr == NULL);
-    EXPECT_EQ(errno, EINVAL);
 }
