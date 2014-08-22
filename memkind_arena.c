@@ -47,7 +47,7 @@ int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, co
 
     err = memkind_default_create(kind, ops, name);
     if (!err) {
-        memkind_arena_create_map(kind);
+        err = memkind_arena_create_map(kind);
     }
     return err;
 }
