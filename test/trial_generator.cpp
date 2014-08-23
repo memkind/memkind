@@ -182,10 +182,10 @@ void TrialGenerator :: generate_recycle_psize_incremental(alloc_api_t api)
                                                MEMKIND_HBW, k++));
 
         trial_vec.push_back(create_trial_tuple(api, size[i], 32, 2097152,
-                                               MEMKIND_HBW_HUGETLB,-1));
+                                               MEMKIND_HBW_PREFERRED_HUGETLB,-1));
         k++;
         trial_vec.push_back(create_trial_tuple(MEMKIND_FREE, 0, 0, 0,
-                                               MEMKIND_HBW_HUGETLB, k++));
+                                               MEMKIND_HBW_PREFERRED_HUGETLB, k++));
     }
 }
 
