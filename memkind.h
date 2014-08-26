@@ -28,6 +28,8 @@
 extern "C" {
 #endif
 
+#include <pthread.h>
+
 /*!
  *  \mainpage
  *

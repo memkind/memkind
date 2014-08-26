@@ -38,7 +38,7 @@ mandir ?= $(datarooddir)/man
 initddir ?= /etc/rc.d/init.d
 
 EXTRA_CFLAGS = -fPIC -Wall -Werror -O3
-OBJECTS = memkind.o memkind_hbw.o hbwmalloc.o memkind_default.o memkind_arena.o
+OBJECTS = memkind.o memkind_hugetlb.o memkind_hbw.o hbwmalloc.o memkind_default.o memkind_arena.o
 
 all: libmemkind.so.0.0 memkind-pmtt
 
@@ -49,19 +49,22 @@ clean:
 test:
 	make -C test test
 
-memkind.o: memkind.c memkind.h memkind_hbw.h
+memkind.o: memkind.c memkind.h memkind_default.h memkind_hugetlb.h memkind_arena.h memkind_hbw.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind.c
 
-memkind_hbw.o: memkind_hbw.c memkind.h memkind_hbw.h memkind_arena.h memkind_default.h
+memkind_hugetlb.o: memkind_hugetlb.c memkind.h memkind_default.h memkind_hugetlb.h memkind_arena.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind_hugetlb.c
+
+memkind_hbw.o: memkind_hbw.c memkind.h memkind_default.h memkind_hugetlb.h memkind_arena.h memkind_hbw.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind_hbw.c
 
 memkind_default.o: memkind_default.c memkind.h memkind_default.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind_default.c
 
-memkind_arena.o: memkind_arena.c memkind.h memkind_arena.h
+memkind_arena.o: memkind_arena.c memkind.h memkind_default.h memkind_arena.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind_arena.c
 
-hbwmalloc.o: hbwmalloc.c hbwmalloc.h memkind.h memkind_hbw.h
+hbwmalloc.o: hbwmalloc.c hbwmalloc.h memkind.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -c hbwmalloc.c
 
 libmemkind.so.0.0: $(OBJECTS)

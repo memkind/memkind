@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <limits.h>
-#include <sys/mman.h>
 #include <pthread.h>
 #include <numa.h>
 #include <numaif.h>
@@ -77,12 +76,6 @@ int memkind_hbw_is_available(struct memkind *kind)
     int err;
     err = kind->ops->get_mbind_nodemask(kind, NULL, 0);
     return (!err);
-}
-
-int memkind_hbw_hugetlb_get_mmap_flags(struct memkind *kind, int *flags)
-{
-    *flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB;
-    return 0;
 }
 
 int memkind_hbw_preferred_get_mbind_mode(struct memkind *kind, int *mode)
@@ -372,11 +365,6 @@ static int numanode_bandwidth_compare(const void *a, const void *b)
         result = (aa->numanode > bb->numanode) - (aa->numanode < bb->numanode);
     }
     return result;
-}
-
-void memkind_hugetlb_init_once(void)
-{
-    memkind_arena_create_map(MEMKIND_HUGETLB);
 }
 
 void memkind_hbw_init_once(void)

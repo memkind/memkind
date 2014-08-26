@@ -28,7 +28,6 @@
 #include <limits.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <pthread.h>
 #include <numa.h>
 #include <numaif.h>
 #include <libgen.h>

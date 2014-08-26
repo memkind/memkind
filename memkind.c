@@ -32,6 +32,7 @@
 
 #include "memkind.h"
 #include "memkind_default.h"
+#include "memkind_hugetlb.h"
 #include "memkind_arena.h"
 #include "memkind_hbw.h"
 

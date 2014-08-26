@@ -30,36 +30,19 @@ extern "C" {
 
 #include "memkind.h"
 #include "memkind_default.h"
+#include "memkind_hugetlb.h"
 #include "memkind_arena.h"
 
 static const char * const MEMKIND_BANDWIDTH_PATH = "/etc/memkind/node-bandwidth";
 
 void memkind_hbw_init(void);
 int memkind_hbw_is_available(struct memkind *kind);
-int memkind_hbw_hugetlb_get_mmap_flags(struct memkind *kind, int *flags);
 int memkind_hbw_preferred_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_hbw_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
-void memkind_hugetlb_init_once(void);
 void memkind_hbw_init_once(void);
 void memkind_hbw_hugetlb_init_once(void);
 void memkind_hbw_preferred_init_once(void);
 void memkind_hbw_preferred_hugetlb_init_once(void);
-
-static const struct memkind_ops MEMKIND_HUGETLB_OPS = {
-    .create = memkind_arena_create,
-    .destroy = memkind_arena_destroy,
-    .malloc = memkind_arena_malloc,
-    .calloc = memkind_arena_calloc,
-    .posix_memalign = memkind_arena_posix_memalign,
-    .realloc = memkind_arena_realloc,
-    .free = memkind_default_free,
-    .is_available = memkind_default_is_available,
-    .mbind = memkind_noop_mbind,
-    .get_mmap_flags = memkind_hbw_hugetlb_get_mmap_flags,
-    .get_arena = memkind_cpu_get_arena,
-    .get_size = memkind_default_get_size,
-    .init_once = memkind_hugetlb_init_once
-};
 
 static const struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
@@ -89,7 +72,7 @@ static const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .free = memkind_default_free,
     .is_available = memkind_hbw_is_available,
     .mbind = memkind_default_mbind,
-    .get_mmap_flags = memkind_hbw_hugetlb_get_mmap_flags,
+    .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_mbind_mode = memkind_default_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_cpu_get_arena,
@@ -125,7 +108,7 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .free = memkind_default_free,
     .is_available = memkind_hbw_is_available,
     .mbind = memkind_default_mbind,
-    .get_mmap_flags = memkind_hbw_hugetlb_get_mmap_flags,
+    .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_mbind_mode = memkind_hbw_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_cpu_get_arena,
