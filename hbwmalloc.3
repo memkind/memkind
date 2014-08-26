@@ -185,14 +185,14 @@ buffer is allocated determines the policy for that buffer until it is
 freed.
 .TP
 .B HBW_POLICY_BIND
-If insufficient high bandwidth memory pages are available to satisfy
-a request the allocated pointer is set to NULL and
+If insufficient high bandwidth memory is available to satisfy
+a request, the allocated pointer is set to NULL and
 .I errno
 is set to ENOMEM.
 .TP
 .B HBW_POLICY_PREFERRED
-If insufficient high bandwidth memory pages are available fall back on
-standard memory pages (default).
+If insufficient high bandwidth memory is available, fall back to
+standard memory (default).
 .SH "RETURN VALUE"
 .BR hbw_get_policy ()
 returns
