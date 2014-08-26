@@ -31,6 +31,7 @@ int main(int argc, char **argv)
 {
     const size_t size = 512;
     char *default_str = NULL;
+    char *hugetlb_str = NULL;
     char *hbw_str = NULL;
     char *hbw_hugetlb_str = NULL;
     char *hbw_preferred_str = NULL;
@@ -40,6 +41,12 @@ int main(int argc, char **argv)
     if (default_str == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate default string\n");
+        return errno ? -errno : 1;
+    }
+    hugetlb_str = (char *)memkind_malloc(MEMKIND_HUGETLB, size);
+    if (default_str == NULL) {
+        perror("memkind_malloc()");
+        fprintf(stderr, "Unable to allocate hugetlb string\n");
         return errno ? -errno : 1;
     }
     hbw_str = (char *)memkind_malloc(MEMKIND_HBW, size);
@@ -68,12 +75,14 @@ int main(int argc, char **argv)
     }
 
     sprintf(default_str, "Hello world from standard memory\n");
+    sprintf(hugetlb_str, "Hello world from standard memory with 2 MB pages\n");
     sprintf(hbw_str, "Hello world from high bandwidth memory\n");
     sprintf(hbw_hugetlb_str, "Hello world from high bandwidth 2 MB paged memory\n");
     sprintf(hbw_preferred_str, "Hello world from high bandwidth memory if sufficient resources exist\n");
     sprintf(hbw_preferred_hugetlb_str, "Hello world from high bandwidth 2 MB paged memory if sufficient resources exist\n");
 
     fprintf(stdout, "%s", default_str);
+    fprintf(stdout, "%s", hugetlb_str);
     fprintf(stdout, "%s", hbw_str);
     fprintf(stdout, "%s", hbw_hugetlb_str);
     fprintf(stdout, "%s", hbw_preferred_str);
@@ -83,6 +92,7 @@ int main(int argc, char **argv)
     memkind_free(MEMKIND_DEFAULT, hbw_preferred_str);
     memkind_free(MEMKIND_DEFAULT, hbw_hugetlb_str);
     memkind_free(MEMKIND_DEFAULT, hbw_str);
+    memkind_free(MEMKIND_DEFAULT, hugetlb_str);
     memkind_free(MEMKIND_DEFAULT, default_str);
 
     return 0;

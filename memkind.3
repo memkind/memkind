@@ -265,6 +265,9 @@ The available kinds of memory
 .B MEMKIND_DEFAULT
 Default allocation using standard memory and default page size.
 .TP
+.B MEMKIND_HUGETLB
+Allocate from standard memory using huge pages.  
+.TP
 .B MEMKIND_HBW
 Allocate from high bandwidth memory NUMA nodes as defined by the PMTT
 table, or the environment variable
