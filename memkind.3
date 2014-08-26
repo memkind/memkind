@@ -257,8 +257,10 @@ on the system and 0 otherwise.  All other memkind API's return 0 upon
 success, and an error code defined in the ERRORS section upon failure.
 The library sets
 .I errno
-to ENOMEM if requesting a negative size and
-EINVAL if the alignment is invalid.
+to ENOMEM if the request could not be satisfied or when requesting a
+negative size.  The library sets
+.I errno
+to EINVAL if the alignment is invalid.
 .SH "KINDS"
 The available kinds of memory
 .TP
@@ -272,9 +274,9 @@ Allocate from standard memory using huge pages.
 Allocate from high bandwidth memory NUMA nodes as defined by the PMTT
 table, or the environment variable
 .BR "MEMKIND_HBW_NODES" .
-If there is not enough high bandwidth memory to satisfy the request, a
-segmentation fault will be raised (signal 11) when the pages are
-touched.
+If there is not enough high bandwidth memory to satisfy the request
+.I errno
+is set to ENOMEM and the allocated poitner is set to NULL.
 .TP
 .B MEMKIND_HBW_HUGETLB
 Same as

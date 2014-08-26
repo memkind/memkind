@@ -185,8 +185,10 @@ buffer is allocated determines the policy for that buffer until it is
 freed.
 .TP
 .B HBW_POLICY_BIND
-If insufficient high bandwidth memory pages are available a
-segmentation fault will be raised when memory is touched.
+If insufficient high bandwidth memory pages are available to satisfy
+a request the allocated pointer is set to NULL and
+.I errno
+is set to ENOMEM.
 .TP
 .B HBW_POLICY_PREFERRED
 If insufficient high bandwidth memory pages are available fall back on
