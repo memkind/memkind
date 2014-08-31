@@ -38,10 +38,31 @@ fi
 
 if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
     export MEMKIND_HBW_NODES=1
-    numactl --membind=0 $basedir/all_tests $@
+    $basedir/all_tests --gtest_list_tests > .tmp $@
+    cat .tmp | while read line
+    do
+        if [[ $line == *. ]]; then
+            test_main=$line;
+        else
+            numactl --membind=0 $basedir/all_tests --gtest_filter="$test_main$line" $@
+            $basedir/all_tests
+        fi
+    done
+    rm -f .tmp
+
 else
-    $basedir/all_tests $@
+    $basedir/all_tests --gtest_list_tests > .tmp $@
+    cat .tmp | while read line
+    do
+	    if [[ $line == *. ]]; then
+	        test_main=$line;
+	    else
+	        $basedir/all_tests --gtest_filter="$test_main$line"
+	    fi
+    done
+    rm -f .tmp
 fi
+
 
 LD_PRELOAD=$basedir/test_libs/libsched.so $basedir/schedcpu_test $@
 LD_PRELOAD=$basedir/test_libs/libmallctl.so $basedir/mallctlerr_test $@
