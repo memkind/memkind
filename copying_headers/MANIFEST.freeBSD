@@ -13,6 +13,8 @@ memkind.c
 memkind_default.c
 memkind_default.h
 memkind.h
+memkind_gbtlb.c
+memkind_gbtlb.h
 memkind_hbw.c
 memkind_hbw.h
 memkind_hugetlb.c
