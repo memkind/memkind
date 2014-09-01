@@ -241,8 +241,7 @@ void TrialGenerator :: generate_size_1KB_2GB(alloc_api_t api)
 
     size_t size[] = {KB, 2*KB, 4*KB, 16*KB, 256*KB,
                      512*KB, MB, 2*MB, 4*MB, 16*MB,
-                     256*MB, 512*MB, GB, 2*GB, 4*GB
-                    };
+                     256*MB, 512*MB, GB, 2*GB};
 
     int k = 0;
     trial_vec.clear();
