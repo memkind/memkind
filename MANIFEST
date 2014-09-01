@@ -24,7 +24,9 @@ memkind.h
 memkind_hbw.c
 memkind_hbw.h
 memkind_hugetlb.c
+memkind_gbtlb.c
 memkind_hugetlb.h
+memkind_gbtlb.h
 memkind-init
 memkind_pmtt.c
 README.txt
