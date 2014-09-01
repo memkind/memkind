@@ -41,6 +41,7 @@ test/extended_tests.cpp
 test/fopen_mock.c
 test/jemalloc_mock.c
 test/main.cpp
+test/gb_page_tests.cpp
 test/Makefile
 test/mallctl_err_test.cpp
 test/mallctl_mock.c
