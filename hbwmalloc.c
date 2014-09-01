@@ -98,9 +98,15 @@ int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
     int err;
     memkind_t kind;
 
-    kind = hbw_get_kind(pagesize);
+    if (pagesize == HBW_PAGESIZE_1GB){
+        kind = MEMKIND_HBW_PREFERRED_GBTLB;
+    }
+    else {
+        kind = hbw_get_kind(pagesize);
+    }
+    
     err = memkind_posix_memalign(kind, memptr, alignment, size);
-
+    
     if (err == EINVAL) {
         err = MEMKIND_ERROR_ALIGNMENT;
     }
