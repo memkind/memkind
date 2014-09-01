@@ -35,6 +35,7 @@
 #include "memkind_hugetlb.h"
 #include "memkind_arena.h"
 #include "memkind_hbw.h"
+#include "memkind_gbtlb.h"
 
 
 static struct memkind MEMKIND_DEFAULT_STATIC = {
@@ -85,12 +86,31 @@ static struct memkind MEMKIND_HBW_PREFERRED_HUGETLB_STATIC = {
     0, NULL
 };
 
+static struct memkind MEMKIND_HBW_GBTLB_STATIC = {
+    &MEMKIND_HBW_GBTLB_OPS,
+    MEMKIND_PARTITION_HBW_GBTLB,
+    "memkind_hbw_gbtlb",
+    PTHREAD_ONCE_INIT,
+    0, NULL
+};
+
+static struct memkind MEMKIND_HBW_PREFERRED_GBTLB_STATIC = {
+    &MEMKIND_HBW_PREFERRED_GBTLB_OPS,
+    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB,
+    "memkind_hbw_preferred_gbtlb",
+    PTHREAD_ONCE_INIT,
+    0, NULL
+};
+
+
 struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
 struct memkind *MEMKIND_HUGETLB = &MEMKIND_HUGETLB_STATIC;
 struct memkind *MEMKIND_HBW = &MEMKIND_HBW_STATIC;
 struct memkind *MEMKIND_HBW_PREFERRED = &MEMKIND_HBW_PREFERRED_STATIC;
 struct memkind *MEMKIND_HBW_HUGETLB = &MEMKIND_HBW_HUGETLB_STATIC;
 struct memkind *MEMKIND_HBW_PREFERRED_HUGETLB = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC;
+struct memkind *MEMKIND_HBW_GBTLB = &MEMKIND_HBW_GBTLB_STATIC;
+struct memkind *MEMKIND_HBW_PREFERRED_GBTLB = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC;
 
 struct memkind_registry {
     struct memkind *partition_map[MEMKIND_MAX_KIND];
@@ -104,7 +124,9 @@ static struct memkind_registry memkind_registry_g = {
      [MEMKIND_PARTITION_HBW_PREFERRED] = &MEMKIND_HBW_PREFERRED_STATIC,
      [MEMKIND_PARTITION_HBW_HUGETLB] = &MEMKIND_HBW_HUGETLB_STATIC,
      [MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB] = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
-     [MEMKIND_PARTITION_HUGETLB] = &MEMKIND_HUGETLB_STATIC},
+     [MEMKIND_PARTITION_HUGETLB] = &MEMKIND_HUGETLB_STATIC,
+     [MEMKIND_PARTITION_HBW_GBTLB] = &MEMKIND_HBW_GBTLB_STATIC,
+     [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC},
     MEMKIND_NUM_BASE_KIND,
     PTHREAD_MUTEX_INITIALIZER
 };
@@ -117,6 +139,9 @@ void memkind_error_message(int err, char *msg, size_t size)
             break;
         case MEMKIND_ERROR_MBIND:
             strncpy(msg, "<memkind> Call to mbind() failed", size);
+            break;
+        case MEMKIND_ERROR_MMAP:
+            strncpy(msg, "<memkind> Call to mmap() failed", size);
             break;
         case MEMKIND_ERROR_MEMALIGN:
             strncpy(msg, "<memkind> Call to posix_memalign() failed", size);

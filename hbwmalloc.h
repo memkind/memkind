@@ -81,7 +81,8 @@ typedef enum {
      *  may be promoted by the operating system to 2 megabyte pages.
      */
     HBW_PAGESIZE_4KB = 1,
-    HBW_PAGESIZE_2MB = 2
+    HBW_PAGESIZE_2MB = 2,
+    HBW_PAGESIZE_1GB = 3
 } hbw_pagesize_t;
 
 int hbw_get_policy(void);

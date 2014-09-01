@@ -37,8 +37,8 @@ docdir ?= $(datarootdir)/doc
 mandir ?= $(datarooddir)/man
 initddir ?= /etc/rc.d/init.d
 
-EXTRA_CFLAGS = -fPIC -Wall -Werror -O3
-OBJECTS = memkind.o memkind_hugetlb.o memkind_hbw.o hbwmalloc.o memkind_default.o memkind_arena.o
+EXTRA_CFLAGS = -fPIC -Wall -Werror -O3 -msse4.2
+OBJECTS = memkind.o memkind_hugetlb.o memkind_gbtlb.o memkind_hbw.o hbwmalloc.o memkind_default.o memkind_arena.o
 
 all: libmemkind.so.0.0 memkind-pmtt
 
@@ -54,6 +54,9 @@ memkind.o: memkind.c memkind.h memkind_default.h memkind_hugetlb.h memkind_arena
 
 memkind_hugetlb.o: memkind_hugetlb.c memkind.h memkind_default.h memkind_hugetlb.h memkind_arena.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind_hugetlb.c
+
+memkind_gbtlb.o: memkind_gbtlb.c memkind.h memkind_default.h memkind_gbtlb.h memkind_arena.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind_gbtlb.c
 
 memkind_hbw.o: memkind_hbw.c memkind.h memkind_default.h memkind_hugetlb.h memkind_arena.h memkind_hbw.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -I $(JEMALLOC_PREFIX)/include -c memkind_hbw.c
