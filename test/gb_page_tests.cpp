@@ -89,25 +89,25 @@ TEST_F(GBPagesTest, hbw_memalign_psize_incremental)
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, numakind_malloc)
+TEST_F(GBPagesTest, memkind_malloc)
 {
     tgen->generate_gb_incremental(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, numakind_calloc)
+TEST_F(GBPagesTest, memkind_calloc)
 {
     tgen->generate_gb_incremental(MEMKIND_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, numakind_realloc)
+TEST_F(GBPagesTest, memkind_realloc)
 {
     tgen->generate_gb_incremental(MEMKIND_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, numakind_posix_memalign)
+TEST_F(GBPagesTest, memkind_posix_memalign)
 {
     tgen->generate_gb_incremental(MEMKIND_POSIX_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
