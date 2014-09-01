@@ -37,7 +37,7 @@ docdir ?= $(datarootdir)/doc
 mandir ?= $(datarooddir)/man
 initddir ?= /etc/rc.d/init.d
 
-EXTRA_CFLAGS = -fPIC -Wall -Werror -O3 -msse4.2
+EXTRA_CFLAGS = -fPIC -Wall -Werror -O0 -g -msse4.2
 OBJECTS = memkind.o memkind_hugetlb.o memkind_gbtlb.o memkind_hbw.o hbwmalloc.o memkind_default.o memkind_arena.o
 
 all: libmemkind.so.0.0 memkind-pmtt
