@@ -28,7 +28,7 @@
 
 int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags)
 {
-    *flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB;
+    *flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_2MB;
     return 0;
 }
 
