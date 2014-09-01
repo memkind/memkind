@@ -46,6 +46,9 @@ typedef enum {
     HBW_MEMALIGN_PSIZE,
     HBW_FREE,
     MEMKIND_MALLOC,
+    MEMKIND_CALLOC,
+    MEMKIND_REALLOC,
+    MEMKIND_POSIX_MEMALIGN,
     MEMKIND_FREE
 } alloc_api_t;
 
@@ -68,6 +71,8 @@ public:
     void generate_recycle_psize_2GB(alloc_api_t api);
     void generate_multi_app_stress(int num_types);
     void generate_size_1KB_2GB(alloc_api_t api);
+    void generate_hbw_gb_incremental(alloc_api_t api);
+    void generate_gb_incremental(alloc_api_t api);
     void generate_size_4GB_8GB(alloc_api_t api);
     void run(int num_bandwidth, int *bandwidths);
     /*For debugging purposes*/

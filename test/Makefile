@@ -29,6 +29,7 @@ OBJECTS = main.o \
 	  check.o \
 	  trial_generator.o \
 	  negative_tests.o \
+	  gb_page_tests.o \
 	  multithreaded_tests.o \
 	  extended_tests.o \
 	  bat_tests.o
@@ -102,6 +103,9 @@ main.o:			main.cpp common.h
 
 bat_tests.o:		bat_tests.cpp common.h
 			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c bat_tests.cpp -o bat_tests.o
+
+gb_page_tests.o:	gb_page_tests.cpp common.h trial_generator.h
+			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c gb_page_tests.cpp -o gb_page_tests.o
 
 multithreaded_tests.o:	multithreaded_tests.cpp common.h
 			$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(CPPFLAGS) -c multithreaded_tests.cpp -o multithreaded_tests.o
