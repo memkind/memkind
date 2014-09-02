@@ -66,27 +66,6 @@ size_t memkind_noop_set_size (size_t size)
     return size;
 }
 
-
-int memkind_gbtlb_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
-{
-    int err = 0;
-
-    kind->ops = ops;
-    if (strlen(name) >= MEMKIND_NAME_LENGTH) {
-        err = MEMKIND_ERROR_INVALID;
-    }
-    if (!err) {
-        strcpy(kind->name, name);
-    }
-    return err;
-}
-
-int memkind_gbtlb_destroy(struct memkind *kind)
-{
-    return 0;
-}
-
-
 void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 {
 
@@ -210,38 +189,9 @@ void memkind_gbtlb_free(struct memkind *kind, void *ptr)
     }
 }
 
-int memkind_gbtlb_mbind(struct memkind *kind, void *ptr, size_t len)
-{
-    nodemask_t nodemask;
-    int err = 0;
-    int mode;
-
-    err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
-    if (!err) {
-        err = kind->ops->get_mbind_mode(kind, &mode);
-    }
-    if (!err) {
-        err = mbind(ptr, len, mode, nodemask.n, NUMA_NUM_NODES, 0);
-        err = err ? MEMKIND_ERROR_MBIND : 0;
-    }
-    return err;
-}
-
 int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_PRIVATE | MAP_HUGETLB | MAP_HUGE_1GB | MAP_ANONYMOUS;
-    return 0;
-}
-
-int memkind_gbtlb_get_mbind_mode(struct memkind *kind, int *mode)
-{
-    *mode = MPOL_BIND;
-    return 0;
-}
-
-int memkind_gbtlb_preferred_get_mbind_mode(struct memkind *kind, int *mode)
-{
-    *mode = MPOL_PREFERRED;
     return 0;
 }
 
