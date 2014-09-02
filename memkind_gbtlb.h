@@ -39,13 +39,12 @@ void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size);
 int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
 void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size);
 void memkind_gbtlb_free(struct memkind *kind, void *ptr);
-int memkind_gbtlb_is_available(struct memkind *kind);
 int memkind_gbtlb_mbind(struct memkind *kind, void *ptr, size_t len);
-int memkind_noop_mbind(struct memkind *kind, void *ptr, size_t len);
 int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags);
 int memkind_gbtlb_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_gbtlb_preferred_get_mbind_mode(struct memkind *kind, int *mode);
-
+size_t memkind_gbro_set_size(size_t size);
+size_t memkind_noop_set_size(size_t size);
 
 static const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .create = memkind_gbtlb_create,
@@ -59,7 +58,8 @@ static const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
     .get_mbind_mode = memkind_gbtlb_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
-    .get_size = memkind_default_get_size
+    .get_size = memkind_default_get_size,
+    .set_size = memkind_noop_set_size
 };
 
 static const struct memkind_ops MEMKIND_HBW_GBRO_OPS = {
@@ -74,7 +74,8 @@ static const struct memkind_ops MEMKIND_HBW_GBRO_OPS = {
     .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
     .get_mbind_mode = memkind_gbtlb_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
-    .get_size = memkind_default_get_size
+    .get_size = memkind_default_get_size,
+    .set_size = memkind_gbro_set_size
 };
 
 static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBRO_OPS = {
@@ -89,7 +90,8 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBRO_OPS = {
     .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
     .get_mbind_mode = memkind_gbtlb_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
-    .get_size = memkind_default_get_size
+    .get_size = memkind_default_get_size,
+    .set_size = memkind_gbro_set_size
 };
 
 static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
@@ -104,7 +106,8 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
     .get_mbind_mode = memkind_gbtlb_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
-    .get_size = memkind_default_get_size
+    .get_size = memkind_default_get_size,
+    .set_size = memkind_noop_set_size
 };
 
 

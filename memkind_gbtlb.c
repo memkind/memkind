@@ -50,16 +50,7 @@ static int ptr_hash(void *ptr, int table_len);
 static int memkind_store(void *ptr, void **mmapptr, size_t *size);
 static int memkind_gb_mmap(void **result, memkind_t kind, size_t size);
 static int memkind_gb_mbind(void *result, memkind_t kind, size_t size);
-static size_t ceil_size (size_t size);
 
-static size_t ceil_size (size_t size)
-{
-    size_t gb_size = 1024*1024*1024UL;
-    if (size % gb_size > 0){
-        size = ((size / gb_size) + 1) * gb_size;
-    }
-    return size;
-}
 
 static int ptr_hash(void *ptr, int table_len)
 {
@@ -76,8 +67,6 @@ static int memkind_gb_mmap(void **result, memkind_t kind, size_t size){
     if (ret != 0) {
         return ret;
     }
-    
-    printf ("size from MMAP: %zd\n", size);
     
     addr = mmap (NULL, size, PROT_READ | PROT_WRITE,
                  MAP_PRIVATE | MAP_ANONYMOUS | flags,
@@ -107,6 +96,21 @@ static int memkind_gb_mbind(void *result, memkind_t kind, size_t size){
     return ret;
 }
 
+size_t memkind_gbro_set_size (size_t size)
+{
+    size_t gb_size = 1024*1024*1024UL;
+    if (size % gb_size > 0){
+        size = ((size / gb_size) + 1) * gb_size;
+    }
+    return size;
+}
+
+size_t memkind_noop_set_size (size_t size)
+{
+    return size;
+}
+
+
 int memkind_gbtlb_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
 {
     int err = 0;
@@ -126,17 +130,15 @@ int memkind_gbtlb_destroy(struct memkind *kind)
     return 0;
 }
 
+
 void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 {
-    
+
     void *result = NULL;
     int err = 0;
     
-    if (kind == MEMKIND_HBW_GBRO || 
-        kind == MEMKIND_HBW_PREFERRED_GBRO){
-        size = ceil_size(size);
-    }
-    
+    size = kind->ops->set_size(size);
+        
     err = memkind_gb_mmap(&result, kind, size);
     if (err != 0){
         result = NULL;
@@ -160,11 +162,7 @@ void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size)
 
 
     t_size = num * size;
-
-    if (kind == MEMKIND_HBW_GBRO || 
-        kind == MEMKIND_HBW_PREFERRED_GBRO){
-        t_size = ceil_size(t_size);
-    }
+    t_size = kind->ops->set_size(t_size);
 
     err = memkind_gb_mmap(&result, kind, t_size);
     if (err != 0){
@@ -188,13 +186,9 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 {
     int err = 0;
     void *mmapptr;
+   
+    size = kind->ops->set_size(size); 
 
-    if (kind == MEMKIND_HBW_GBRO || 
-        kind == MEMKIND_HBW_PREFERRED_GBRO){
-        size = ceil_size(size);
-    }
-    
- 
     err = memkind_gb_mmap(&mmapptr, kind, size);
     if (err != 0){
         memptr = NULL;
@@ -238,10 +232,7 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
         else {
             tmp_ptr = NULL;
             tmp_size  += size;
-            if (kind == MEMKIND_HBW_GBRO || 
-                kind == MEMKIND_HBW_PREFERRED_GBRO){
-                tmp_size = ceil_size(tmp_size);
-            }
+            tmp_size = kind->ops->set_size(tmp_size); 
             tmp_ptr = kind->ops->malloc(kind, tmp_size);
             memcpy(tmp_ptr, ptr, size);
             munmap(ptr, size);
