@@ -37,7 +37,6 @@ static const char * const MEMKIND_BANDWIDTH_PATH = "/etc/memkind/node-bandwidth"
 
 void memkind_hbw_init(void);
 int memkind_hbw_is_available(struct memkind *kind);
-int memkind_hbw_preferred_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_hbw_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
 void memkind_hbw_init_once(void);
 void memkind_hbw_hugetlb_init_once(void);
@@ -91,7 +90,7 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .is_available = memkind_hbw_is_available,
     .mbind = memkind_default_mbind,
     .get_mmap_flags = memkind_default_get_mmap_flags,
-    .get_mbind_mode = memkind_hbw_preferred_get_mbind_mode,
+    .get_mbind_mode = memkind_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_cpu_get_arena,
     .get_size = memkind_default_get_size,
@@ -109,7 +108,7 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .is_available = memkind_hbw_is_available,
     .mbind = memkind_default_mbind,
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
-    .get_mbind_mode = memkind_hbw_preferred_get_mbind_mode,
+    .get_mbind_mode = memkind_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_cpu_get_arena,
     .get_size = memkind_default_get_size,

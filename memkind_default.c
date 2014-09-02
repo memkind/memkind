@@ -112,6 +112,12 @@ int memkind_default_get_mbind_mode(struct memkind *kind, int *mode)
     return 0;
 }
 
+int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode)
+{
+    *mode = MPOL_PREFERRED;
+    return 0;
+}
+
 int memkind_default_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};

@@ -78,12 +78,6 @@ int memkind_hbw_is_available(struct memkind *kind)
     return (!err);
 }
 
-int memkind_hbw_preferred_get_mbind_mode(struct memkind *kind, int *mode)
-{
-    *mode = MPOL_PREFERRED;
-    return 0;
-}
-
 int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
                                     unsigned long *nodemask, unsigned long maxnode)
 {
