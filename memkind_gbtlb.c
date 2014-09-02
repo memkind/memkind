@@ -77,6 +77,8 @@ static int memkind_gb_mmap(void **result, memkind_t kind, size_t size){
         return ret;
     }
     
+    printf ("size from MMAP: %zd\n", size);
+    
     addr = mmap (NULL, size, PROT_READ | PROT_WRITE,
                  MAP_PRIVATE | MAP_ANONYMOUS | flags,
                  -1, 0);
@@ -163,7 +165,7 @@ void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size)
         kind == MEMKIND_HBW_PREFERRED_GBRO){
         t_size = ceil_size(t_size);
     }
-    printf ("tsize: %zd\n", t_size);
+
     err = memkind_gb_mmap(&result, kind, t_size);
     if (err != 0){
         result = NULL;
