@@ -268,7 +268,7 @@ The available kinds of memory
 Default allocation using standard memory and default page size.
 .TP
 .B MEMKIND_HUGETLB
-Allocate from standard memory using huge pages.  
+Allocate from standard memory using huge pages.
 .TP
 .B MEMKIND_HBW
 Allocate from high bandwidth memory NUMA nodes as defined by the PMTT
@@ -295,22 +295,22 @@ Same as
 except the allocation uses huge pages.
 .TP
 .B MEMKIND_HBW_GBTLB
-Same as 
-.B MEMKIND_HBW_HUGETLB 
+Same as
+.B MEMKIND_HBW_HUGETLB
 except the allocation uses one gigabyte huge pages.
 .TP
 .B MEMKIND_HBW_PREFERRED_GBTLB
-Same as 
-.B MEMKIND_HBW_PREFERRED_HUGETLB 
+Same as
+.B MEMKIND_HBW_PREFERRED_HUGETLB
 except the allocation uses one gigabyte huge pages.
-Both 
+Both
 .B MEMKIND_HBW_GBTLB
 and
 .B MEMKIND_HBW_PREFERRED_GBTLB
 require size which should be a multiple of 1GB.
 .TP
 .B MEMKIND_HBW_GBRO
-Same as 
+Same as
 .B MEMKIND_HBW_GBTLB
 except it allow the user to specify random sizes
 backed by one gigabyte pages.
@@ -319,8 +319,8 @@ backed by one gigabyte pages.
 Same as
 .B MEMKIND_HBW_GBRO
 except that if there is not enough high bandwidth memory one gigabyte pages
-to satisfy the request, the allocation will fall back 
-on standard memory. 
+to satisfy the request, the allocation will fall back
+on standard memory.
 .PP
 .SH "ERRORS"
 .TP

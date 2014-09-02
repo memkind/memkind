@@ -58,16 +58,16 @@ static int ptr_hash(void *ptr, int table_len)
 }
 
 static int memkind_gb_mmap(void **result, memkind_t kind, size_t size){
-    
+
     void *addr=NULL;
     int ret = 0;
     int flags;
-    
+
     ret = kind->ops->get_mmap_flags(kind, &flags);
     if (ret != 0) {
         return ret;
     }
-    
+
     addr = mmap (NULL, size, PROT_READ | PROT_WRITE,
                  MAP_PRIVATE | MAP_ANONYMOUS | flags,
                  -1, 0);
@@ -75,7 +75,7 @@ static int memkind_gb_mmap(void **result, memkind_t kind, size_t size){
     if (addr == MAP_FAILED){
         ret = MEMKIND_ERROR_MMAP;
     }
-    
+
     *result  = addr;
     return ret;
 }
@@ -83,7 +83,7 @@ static int memkind_gb_mmap(void **result, memkind_t kind, size_t size){
 static int memkind_gb_mbind(void *result, memkind_t kind, size_t size){
 
     int ret = 0;
-    
+
     ret = kind->ops->mbind(kind, result, size);
     if (!ret){
         memkind_store(result, &result, &size);
@@ -136,9 +136,9 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 
     void *result = NULL;
     int err = 0;
-    
+
     size = kind->ops->set_size(size);
-        
+
     err = memkind_gb_mmap(&result, kind, size);
     if (err != 0){
         result = NULL;
@@ -186,8 +186,8 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 {
     int err = 0;
     void *mmapptr;
-   
-    size = kind->ops->set_size(size); 
+
+    size = kind->ops->set_size(size);
 
     err = memkind_gb_mmap(&mmapptr, kind, size);
     if (err != 0){
@@ -198,7 +198,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
         err = kind->ops->mbind(kind, mmapptr, size);
         if (!err) {
             if (alignment) {
-                *memptr = (void *) ((char *)mmapptr + 
+                *memptr = (void *) ((char *)mmapptr +
                                     (size_t)(mmapptr) % alignment);
             }
             else {
@@ -215,12 +215,12 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 
 void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
 {
-   
+
     size_t tmp_size;
     void *tmp_ptr = NULL;
 
     tmp_size = 0;
- 
+
     if (NULL == ptr){
         ptr = kind->ops->malloc(kind, size);
     }
@@ -232,7 +232,7 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
         else {
             tmp_ptr = NULL;
             tmp_size  += size;
-            tmp_size = kind->ops->set_size(tmp_size); 
+            tmp_size = kind->ops->set_size(tmp_size);
             tmp_ptr = kind->ops->malloc(kind, tmp_size);
             memcpy(tmp_ptr, ptr, size);
             munmap(ptr, size);
@@ -247,7 +247,7 @@ void memkind_gbtlb_free(struct memkind *kind, void *ptr)
     int err;
     void *mmapptr = NULL;
     size_t size = 0;
-    
+
     err = memkind_store(ptr, &mmapptr, &size);
     if (!err) {
         munmap(mmapptr, size);
