@@ -122,25 +122,25 @@ TEST_F(GBPagesTest, hbw_memalign_psize_ro)
 
 TEST_F(GBPagesTest, memkind_ro_malloc)
 {
-    tgen->generate_hbw_gb_ro(MEMKIND_MALLOC);
+    tgen->generate_gb_ro(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(GBPagesTest, memkind_ro_calloc)
 {
-    tgen->generate_hbw_gb_ro(MEMKIND_CALLOC);
+    tgen->generate_gb_ro(MEMKIND_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(GBPagesTest, memkind_ro_realloc)
 {
-    tgen->generate_hbw_gb_ro(MEMKIND_REALLOC);
+    tgen->generate_gb_ro(MEMKIND_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(GBPagesTest, memkind_ro_posix_memalign)
 {
-    tgen->generate_hbw_gb_ro(MEMKIND_POSIX_MEMALIGN);
+    tgen->generate_gb_ro(MEMKIND_POSIX_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
 }
 

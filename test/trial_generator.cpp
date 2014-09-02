@@ -134,6 +134,28 @@ void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
     }
 }
 
+void TrialGenerator :: generate_gb_ro(alloc_api_t api)
+{
+
+    size_t size[] = {GB+1,(2*GB)+1};
+    size_t psize[] = {GB, GB};
+    size_t align[] = {GB, GB};
+    int k = 0;
+    trial_vec.clear();
+    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
+         i++) {
+        trial_vec.push_back(create_trial_tuple(api, size[i],
+                                               align[i], psize[i],
+                                               MEMKIND_HBW_GBRO,-1));
+        if (i > 0)
+            k++;
+        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
+                                               MEMKIND_HBW_GBRO,
+                                               k++));
+
+    }
+}
+
 
 void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
 {
@@ -393,7 +415,7 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                              trial_vec[i].size);
                 }
                 ptr_vec[i] = memkind_malloc(trial_vec[i].memkind,
-                                             trial_vec[i].size);
+                                            trial_vec[i].size);
                 break;
             case MEMKIND_CALLOC:
                 fprintf (stdout,"Allocating %zd bytes using memkind_calloc\n",
