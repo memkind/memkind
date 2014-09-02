@@ -48,53 +48,9 @@ typedef struct {
 
 static int ptr_hash(void *ptr, int table_len);
 static int memkind_store(void *ptr, void **mmapptr, size_t *size);
-static int memkind_gb_mmap(void **result, memkind_t kind, size_t size);
-static int memkind_gb_mbind(void *result, memkind_t kind, size_t size);
+static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result);
+static int memkind_gbtlb_mbind(struct memkind *kind, size_t size, void *result);
 
-
-static int ptr_hash(void *ptr, int table_len)
-{
-    return _mm_crc32_u64(0, (size_t)ptr) % table_len;
-}
-
-static int memkind_gb_mmap(void **result, memkind_t kind, size_t size){
-
-    void *addr=NULL;
-    int ret = 0;
-    int flags;
-
-    ret = kind->ops->get_mmap_flags(kind, &flags);
-    if (ret != 0) {
-        return ret;
-    }
-
-    addr = mmap (NULL, size, PROT_READ | PROT_WRITE,
-                 MAP_PRIVATE | MAP_ANONYMOUS | flags,
-                 -1, 0);
-
-    if (addr == MAP_FAILED){
-        ret = MEMKIND_ERROR_MMAP;
-    }
-
-    *result  = addr;
-    return ret;
-}
-
-static int memkind_gb_mbind(void *result, memkind_t kind, size_t size){
-
-    int ret = 0;
-
-    ret = kind->ops->mbind(kind, result, size);
-    if (!ret){
-        memkind_store(result, &result, &size);
-    }
-    else {
-        munmap(result, size);
-        ret = MEMKIND_ERROR_MBIND;
-    }
-
-    return ret;
-}
 
 size_t memkind_gbro_set_size (size_t size)
 {
@@ -139,13 +95,13 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 
     size = kind->ops->set_size(size);
 
-    err = memkind_gb_mmap(&result, kind, size);
+    err = memkind_gbtlb_mmap(kind, size, &result);
     if (err != 0){
         result = NULL;
         return result;
     }
     else{
-        err = memkind_gb_mbind(result, kind, size);
+        err = memkind_gbtlb_mbind(kind, size, result);
         if (err != 0){
             result = NULL;
             return result;
@@ -164,13 +120,13 @@ void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size)
     t_size = num * size;
     t_size = kind->ops->set_size(t_size);
 
-    err = memkind_gb_mmap(&result, kind, t_size);
+    err = memkind_gbtlb_mmap(kind, t_size, &result);
     if (err != 0){
         result = NULL;
         return result;
     }
     else {
-        err = memkind_gb_mbind(result, kind, t_size);
+        err = memkind_gbtlb_mbind(kind, t_size, result);
         if (err != 0){
             result = NULL;
             return result;
@@ -189,7 +145,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 
     size = kind->ops->set_size(size);
 
-    err = memkind_gb_mmap(&mmapptr, kind, size);
+    err = memkind_gbtlb_mmap(kind, size, &mmapptr);
     if (err != 0){
         memptr = NULL;
         return err;
@@ -353,3 +309,46 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size)
     return err;
 }
 
+static int ptr_hash(void *ptr, int table_len)
+{
+    return _mm_crc32_u64(0, (size_t)ptr) % table_len;
+}
+
+static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)
+{
+    void *addr=NULL;
+    int ret = 0;
+    int flags;
+
+    ret = kind->ops->get_mmap_flags(kind, &flags);
+    if (ret != 0) {
+        return ret;
+    }
+
+    addr = mmap (NULL, size, PROT_READ | PROT_WRITE,
+                 MAP_PRIVATE | MAP_ANONYMOUS | flags,
+                 -1, 0);
+
+    if (addr == MAP_FAILED){
+        ret = MEMKIND_ERROR_MMAP;
+    }
+
+    *result  = addr;
+    return ret;
+}
+
+static int memkind_gbtlb_mbind(struct memkind *kind, size_t size, void *result)
+{
+    int ret = 0;
+
+    ret = kind->ops->mbind(kind, result, size);
+    if (!ret){
+        memkind_store(result, &result, &size);
+    }
+    else {
+        munmap(result, size);
+        ret = MEMKIND_ERROR_MBIND;
+    }
+
+    return ret;
+}
