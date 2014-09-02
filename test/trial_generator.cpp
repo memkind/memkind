@@ -410,7 +410,9 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
 
             case MEMKIND_MALLOC:
                 if (trial_vec[i].memkind == MEMKIND_HBW_GBTLB ||
-                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB){
+                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB ||
+                    trial_vec[i].memkind == MEMKIND_HBW_GBRO || 
+                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBRO){
                     fprintf (stdout,"Allocating %zd bytes using memkind_malloc\n",
                              trial_vec[i].size);
                 }
