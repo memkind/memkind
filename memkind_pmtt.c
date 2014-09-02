@@ -138,7 +138,7 @@ static int parse_pmtt_bandwidth(int num_bandwidth, int *bandwidth,
         goto exit;
     }
 
-    exit:
+exit:
     if (mfp != NULL) {
         fclose(mfp);
     }
@@ -240,7 +240,7 @@ int main (int argc, char *argv[])
         goto exit;
     }
 
-    exit:
+exit:
     if (fp != NULL) {
         fclose(fp);
     }

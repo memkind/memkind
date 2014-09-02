@@ -164,7 +164,7 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size);
 
 /* posix_memalign from the numa nodes of the specified kind */
 int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment,
-                            size_t size);
+                           size_t size);
 
 /* realloc from the numa nodes of the specified kind */
 void *memkind_realloc(memkind_t kind, void *ptr, size_t size);

@@ -79,7 +79,7 @@ int memkind_hbw_is_available(struct memkind *kind)
 }
 
 int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
-                                    unsigned long *nodemask, unsigned long maxnode)
+                                   unsigned long *nodemask, unsigned long maxnode)
 {
     int cpu;
     struct bitmask nodemask_bm = {maxnode, nodemask};
@@ -189,7 +189,7 @@ static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
         goto exit;
     }
 
-    exit:
+exit:
     if (fid != NULL) {
         fclose(fid);
     }

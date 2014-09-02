@@ -55,7 +55,7 @@ static int memkind_gbtlb_mbind(struct memkind *kind, size_t size, void *result);
 size_t memkind_gbro_set_size (size_t size)
 {
     size_t gb_size = 1024*1024*1024UL;
-    if (size % gb_size > 0){
+    if (size % gb_size > 0) {
         size = ((size / gb_size) + 1) * gb_size;
     }
     return size;
@@ -75,13 +75,13 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
     size = kind->ops->set_size(size);
 
     err = memkind_gbtlb_mmap(kind, size, &result);
-    if (err != 0){
+    if (err != 0) {
         result = NULL;
         return result;
     }
-    else{
+    else {
         err = memkind_gbtlb_mbind(kind, size, result);
-        if (err != 0){
+        if (err != 0) {
             result = NULL;
             return result;
         }
@@ -100,17 +100,17 @@ void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size)
     t_size = kind->ops->set_size(t_size);
 
     err = memkind_gbtlb_mmap(kind, t_size, &result);
-    if (err != 0){
+    if (err != 0) {
         result = NULL;
         return result;
     }
     else {
         err = memkind_gbtlb_mbind(kind, t_size, result);
-        if (err != 0){
+        if (err != 0) {
             result = NULL;
             return result;
         }
-        else{
+        else {
             memset(result, 0x0, t_size);
         }
     }
@@ -125,7 +125,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     size = kind->ops->set_size(size);
 
     err = memkind_gbtlb_mmap(kind, size, &mmapptr);
-    if (err != 0){
+    if (err != 0) {
         memptr = NULL;
         return err;
     }
@@ -156,12 +156,12 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
 
     tmp_size = 0;
 
-    if (NULL == ptr){
+    if (NULL == ptr) {
         ptr = kind->ops->malloc(kind, size);
     }
     else {
         memkind_store (ptr, &tmp_ptr, &tmp_size);
-        if (NULL == tmp_ptr){
+        if (NULL == tmp_ptr) {
             ptr = tmp_ptr;
         }
         else {
@@ -279,7 +279,7 @@ static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)
                  MAP_PRIVATE | MAP_ANONYMOUS | flags,
                  -1, 0);
 
-    if (addr == MAP_FAILED){
+    if (addr == MAP_FAILED) {
         ret = MEMKIND_ERROR_MMAP;
     }
 
@@ -292,7 +292,7 @@ static int memkind_gbtlb_mbind(struct memkind *kind, size_t size, void *result)
     int ret = 0;
 
     ret = kind->ops->mbind(kind, result, size);
-    if (!ret){
+    if (!ret) {
         memkind_store(result, &result, &size);
     }
     else {

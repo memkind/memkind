@@ -138,16 +138,18 @@ struct memkind_registry {
 };
 
 static struct memkind_registry memkind_registry_g = {
-    {[MEMKIND_PARTITION_DEFAULT] = &MEMKIND_DEFAULT_STATIC,
-     [MEMKIND_PARTITION_HBW] = &MEMKIND_HBW_STATIC,
-     [MEMKIND_PARTITION_HBW_PREFERRED] = &MEMKIND_HBW_PREFERRED_STATIC,
-     [MEMKIND_PARTITION_HBW_HUGETLB] = &MEMKIND_HBW_HUGETLB_STATIC,
-     [MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB] = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
-     [MEMKIND_PARTITION_HUGETLB] = &MEMKIND_HUGETLB_STATIC,
-     [MEMKIND_PARTITION_HBW_GBTLB] = &MEMKIND_HBW_GBTLB_STATIC,
-     [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC,
-     [MEMKIND_PARTITION_HBW_GBRO] = &MEMKIND_HBW_GBRO_STATIC,
-     [MEMKIND_PARTITION_HBW_PREFERRED_GBRO] = &MEMKIND_HBW_PREFERRED_GBRO_STATIC},
+    {
+        [MEMKIND_PARTITION_DEFAULT] = &MEMKIND_DEFAULT_STATIC,
+        [MEMKIND_PARTITION_HBW] = &MEMKIND_HBW_STATIC,
+        [MEMKIND_PARTITION_HBW_PREFERRED] = &MEMKIND_HBW_PREFERRED_STATIC,
+        [MEMKIND_PARTITION_HBW_HUGETLB] = &MEMKIND_HBW_HUGETLB_STATIC,
+        [MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB] = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
+        [MEMKIND_PARTITION_HUGETLB] = &MEMKIND_HUGETLB_STATIC,
+        [MEMKIND_PARTITION_HBW_GBTLB] = &MEMKIND_HBW_GBTLB_STATIC,
+        [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC,
+        [MEMKIND_PARTITION_HBW_GBRO] = &MEMKIND_HBW_GBRO_STATIC,
+        [MEMKIND_PARTITION_HBW_PREFERRED_GBRO] = &MEMKIND_HBW_PREFERRED_GBRO_STATIC
+    },
     MEMKIND_NUM_BASE_KIND,
     PTHREAD_MUTEX_INITIALIZER
 };
@@ -249,7 +251,7 @@ int memkind_create(const struct memkind_ops *ops, const char *name)
     memkind_registry_g.partition_map[memkind_registry_g.num_kind] = kind;
     ++memkind_registry_g.num_kind;
 
-    exit:
+exit:
     if (err != MEMKIND_ERROR_PTHREAD) {
         tmp = pthread_mutex_unlock(&(memkind_registry_g.lock));
         err = err ? err : tmp;
@@ -286,7 +288,7 @@ int memkind_finalize(void)
         }
     }
 
-    exit:
+exit:
     if (err != MEMKIND_ERROR_PTHREAD) {
         err = pthread_mutex_unlock(&(memkind_registry_g.lock)) ? MEMKIND_ERROR_PTHREAD : 0;
     }
@@ -398,7 +400,7 @@ void *memkind_calloc(struct memkind *kind, size_t num, size_t size)
 }
 
 int memkind_posix_memalign(struct memkind *kind, void **memptr, size_t alignment,
-                            size_t size)
+                           size_t size)
 {
     if (kind->ops->init_once) {
         pthread_once(&(kind->init_once), kind->ops->init_once);

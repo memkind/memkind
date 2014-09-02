@@ -100,12 +100,12 @@ int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
     int err;
     memkind_t kind;
 
-    if (pagesize == HBW_PAGESIZE_1GB){
+    if (pagesize == HBW_PAGESIZE_1GB) {
         kind = MEMKIND_HBW_PREFERRED_GBTLB;
         free_gb = 1;
         err  = kind->ops->posix_memalign(kind, memptr, alignment, size);
     }
-    else if (pagesize == HBW_PAGESIZE_RS_1GB){
+    else if (pagesize == HBW_PAGESIZE_RS_1GB) {
         kind = MEMKIND_HBW_PREFERRED_GBRO;
         free_gb = 1;
         err  = kind->ops->posix_memalign(kind, memptr, alignment, size);
@@ -134,7 +134,7 @@ void *hbw_realloc(void *ptr, size_t size)
 
 void hbw_free(void *ptr)
 {
-    if (free_gb){
+    if (free_gb) {
         memkind_free(MEMKIND_HBW_PREFERRED_GBTLB, ptr);
     }
     else

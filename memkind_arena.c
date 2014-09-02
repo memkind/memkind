@@ -164,7 +164,7 @@ void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size)
 }
 
 int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t alignment,
-                                  size_t size)
+                                 size_t size)
 {
     int err = 0;
     unsigned int arena;
