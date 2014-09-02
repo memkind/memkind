@@ -281,7 +281,7 @@ is set to ENOMEM and the allocated poitner is set to NULL.
 .B MEMKIND_HBW_HUGETLB
 Same as
 .B MEMKIND_HBW
-except the allcation uses huge pages.
+except the allocation uses huge pages.
 .TP
 .B MEMKIND_HBW_PREFERRED
 Same as
@@ -293,6 +293,35 @@ request, the allocation will fall back on standard memory.
 Same as
 .B MEMKIND_HBW_PREFERRED
 except the allocation uses huge pages.
+.TP
+.B MEMKIND_HBW_GBTLB
+Same as 
+.B MEMKIND_HBW_HUGETLB 
+except the allocation uses one gigabyte huge pages.
+.TP
+.B MEMKIND_HBW_PREFERRED_GBTLB
+Same as 
+.B MEMKIND_HBW_PREFERRED_HUGETLB 
+except the allocation uses one gigabyte huge pages.
+Both 
+.B MEMKIND_HBW_GBTLB
+and
+.B MEMKIND_HBW_PREFERRED_GBTLB
+require size which should be a multiple of 1GB.
+.TP
+.B MEMKIND_HBW_GBRO
+Same as 
+.B MEMKIND_HBW_GBTLB
+except it allow the user to specify random sizes
+backed by one gigabyte pages.
+.TP
+.B MEMKIND_HBW_PREFERRED_GBRO
+Same as
+.B MEMKIND_HBW_GBRO
+except that if there is not enough high bandwidth memory one gigabyte pages
+to satisfy the request, the allocation will fall back 
+on standard memory. 
+.PP
 .SH "ERRORS"
 .TP
 .B MEMKIND_ERROR_UNAVAILABLE
@@ -300,6 +329,9 @@ Requested memory kind is not available
 .TP
 .B MEMKIND_ERROR_MBIND
 Call to mbind() failed
+.TP
+.B MEMKIND_ERROR_MMAP
+Call to mmap() failed
 .TP
 .B MEMKIND_ERROR_MEMALIGN
 Call to posix_memalign() failed
