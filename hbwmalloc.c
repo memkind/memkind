@@ -105,6 +105,11 @@ int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
         free_gb = 1;
         err  = kind->ops->posix_memalign(kind, memptr, alignment, size);
     }
+    else if (pagesize == HBW_PAGESIZE_RS_1GB){
+        kind = MEMKIND_HBW_PREFERRED_GBRO;
+        free_gb = 1;
+        err  = kind->ops->posix_memalign(kind, memptr, alignment, size);
+    }
     else {
         kind = hbw_get_kind(pagesize);
         err = memkind_posix_memalign(kind, memptr, alignment, size);

@@ -90,10 +90,32 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
     return ltrial;
 }
 
+void TrialGenerator :: generate_hbw_gb_ro(alloc_api_t api)
+{
+
+    size_t size[] = {GB+1,(2*GB)+1};
+    size_t psize[] = {GB, GB};
+    size_t align[] = {GB, GB};
+    int k = 0;
+    trial_vec.clear();
+    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
+         i++) {
+        trial_vec.push_back(create_trial_tuple(api, size[i],
+                                               align[i], psize[i],
+                                               MEMKIND_HBW_PREFERRED_GBRO,
+                                               -1));
+        if (i > 0)
+            k++;
+        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
+                                               MEMKIND_HBW_PREFERRED_GBRO,
+                                               k++));
+    }
+}
+
 void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
 {
 
-    size_t size[] = {GB,2*GB,3*GB};
+    size_t size[] = {GB,(2*GB), 3*GB};
     size_t psize[] = {GB, GB, GB};
     size_t align[] = {GB, GB, GB};
     int k = 0;
@@ -111,6 +133,7 @@ void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
                                                k++));
     }
 }
+
 
 void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
 {
@@ -350,6 +373,9 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                     psize = HBW_PAGESIZE_4KB;
                 else if (trial_vec[i].page_size == 2097152)
                     psize = HBW_PAGESIZE_2MB;
+                else if (trial_vec[i].size %
+                         trial_vec[i].page_size > 0)
+                    psize = HBW_PAGESIZE_RS_1GB;
                 else
                     psize = HBW_PAGESIZE_1GB;
 
@@ -373,7 +399,7 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 fprintf (stdout,"Allocating %zd bytes using memkind_calloc\n",
                          trial_vec[i].size);
                 ptr_vec[i] = memkind_calloc(trial_vec[i].memkind,
-                                             trial_vec[i].size, 1);
+                                            trial_vec[i].size, 1);
                 break;
             case MEMKIND_REALLOC:
                 fprintf (stdout,"Allocating %zd bytes using memkind_realloc\n",

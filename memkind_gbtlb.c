@@ -26,6 +26,7 @@
 #include <numaif.h>
 #include <sys/mman.h>
 #include <smmintrin.h>
+#include <stdio.h>
 
 #include "memkind_gbtlb.h"
 
@@ -49,7 +50,16 @@ static int ptr_hash(void *ptr, int table_len);
 static int memkind_store(void *ptr, void **mmapptr, size_t *size);
 static int memkind_gb_mmap(void **result, memkind_t kind, size_t size);
 static int memkind_gb_mbind(void *result, memkind_t kind, size_t size);
+static size_t ceil_size (size_t size);
 
+static size_t ceil_size (size_t size)
+{
+    size_t gb_size = 1024*1024*1024UL;
+    if (size % gb_size > 0){
+        size = ((size / gb_size) + 1) * gb_size;
+    }
+    return size;
+}
 
 static int ptr_hash(void *ptr, int table_len)
 {
@@ -120,6 +130,11 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
     void *result = NULL;
     int err = 0;
     
+    if (kind == MEMKIND_HBW_GBRO || 
+        kind == MEMKIND_HBW_PREFERRED_GBRO){
+        size = ceil_size(size);
+    }
+    
     err = memkind_gb_mmap(&result, kind, size);
     if (err != 0){
         result = NULL;
@@ -140,9 +155,15 @@ void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size)
     void *result = NULL;
     int err = 0;
     size_t t_size;
-    
+
+
     t_size = num * size;
-    
+
+    if (kind == MEMKIND_HBW_GBRO || 
+        kind == MEMKIND_HBW_PREFERRED_GBRO){
+        t_size = ceil_size(t_size);
+    }
+    printf ("tsize: %zd\n", t_size);
     err = memkind_gb_mmap(&result, kind, t_size);
     if (err != 0){
         result = NULL;
@@ -165,7 +186,13 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 {
     int err = 0;
     void *mmapptr;
+
+    if (kind == MEMKIND_HBW_GBRO || 
+        kind == MEMKIND_HBW_PREFERRED_GBRO){
+        size = ceil_size(size);
+    }
     
+ 
     err = memkind_gb_mmap(&mmapptr, kind, size);
     if (err != 0){
         memptr = NULL;
@@ -197,9 +224,9 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
     void *tmp_ptr = NULL;
 
     tmp_size = 0;
-    
+ 
     if (NULL == ptr){
-        kind->ops->malloc(kind, size);
+        ptr = kind->ops->malloc(kind, size);
     }
     else {
         memkind_store (ptr, &tmp_ptr, &tmp_size);
@@ -209,6 +236,10 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
         else {
             tmp_ptr = NULL;
             tmp_size  += size;
+            if (kind == MEMKIND_HBW_GBRO || 
+                kind == MEMKIND_HBW_PREFERRED_GBRO){
+                tmp_size = ceil_size(tmp_size);
+            }
             tmp_ptr = kind->ops->malloc(kind, tmp_size);
             memcpy(tmp_ptr, ptr, size);
             munmap(ptr, size);

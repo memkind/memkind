@@ -78,7 +78,9 @@ enum memkind_base_partition {
     MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB = 4,
     MEMKIND_PARTITION_HUGETLB = 5,
     MEMKIND_PARTITION_HBW_GBTLB = 6,
-    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 7
+    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 7,
+    MEMKIND_PARTITION_HBW_GBRO = 8,
+    MEMKIND_PARTITION_HBW_PREFERRED_GBRO = 9
 };
 
 struct memkind_ops;
@@ -120,6 +122,9 @@ extern memkind_t MEMKIND_HBW_HUGETLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_HUGETLB;
 extern memkind_t MEMKIND_HBW_GBTLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
+extern memkind_t MEMKIND_HBW_GBRO;
+extern memkind_t MEMKIND_HBW_PREFERRED_GBRO;
+
 
 
 /* Convert error number into an error message */

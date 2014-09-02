@@ -44,7 +44,7 @@ int memkind_gbtlb_mbind(struct memkind *kind, void *ptr, size_t len);
 int memkind_noop_mbind(struct memkind *kind, void *ptr, size_t len);
 int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags);
 int memkind_gbtlb_get_mbind_mode(struct memkind *kind, int *mode);
-int memkind_gbtlb_preffered_get_mbind_mode(struct memkind *kind, int *mode);
+int memkind_gbtlb_preferred_get_mbind_mode(struct memkind *kind, int *mode);
 
 
 static const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
@@ -62,7 +62,7 @@ static const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .get_size = memkind_default_get_size
 };
 
-static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
+static const struct memkind_ops MEMKIND_HBW_GBRO_OPS = {
     .create = memkind_gbtlb_create,
     .destroy = memkind_gbtlb_destroy,
     .malloc = memkind_gbtlb_malloc,
@@ -73,6 +73,36 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .mbind = memkind_gbtlb_mbind,
     .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
     .get_mbind_mode = memkind_gbtlb_get_mbind_mode,
+    .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
+    .get_size = memkind_default_get_size
+};
+
+static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBRO_OPS = {
+    .create = memkind_gbtlb_create,
+    .destroy = memkind_gbtlb_destroy,
+    .malloc = memkind_gbtlb_malloc,
+    .calloc = memkind_gbtlb_calloc,
+    .posix_memalign = memkind_gbtlb_posix_memalign,
+    .realloc = memkind_gbtlb_realloc,
+    .free = memkind_gbtlb_free,
+    .mbind = memkind_gbtlb_mbind,
+    .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
+    .get_mbind_mode = memkind_gbtlb_preferred_get_mbind_mode,
+    .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
+    .get_size = memkind_default_get_size
+};
+
+static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
+    .create = memkind_gbtlb_create,
+    .destroy = memkind_gbtlb_destroy,
+    .malloc = memkind_gbtlb_malloc,
+    .calloc = memkind_gbtlb_calloc,
+    .posix_memalign = memkind_gbtlb_posix_memalign,
+    .realloc = memkind_gbtlb_realloc,
+    .free = memkind_gbtlb_free,
+    .mbind = memkind_gbtlb_mbind,
+    .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
+    .get_mbind_mode = memkind_gbtlb_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size
 };
