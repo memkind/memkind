@@ -44,8 +44,13 @@ if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
         if [[ $line == *. ]]; then
             test_main=$line;
         else
-            numactl --membind=0 $basedir/all_tests --gtest_filter="$test_main$line" $@
-            $basedir/all_tests
+            if [[ $test_main == GBPagesTest. ]]; then
+                if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then 
+                    numactl --membind=0 $basedir/all_tests --gtest_filter="$test_main$line" $@
+                fi
+            else
+                numactl --membind=0 $basedir/all_tests --gtest_filter="$test_main$line" $@
+            fi
         fi
     done
     rm -f .tmp
@@ -57,8 +62,14 @@ else
 	    if [[ $line == *. ]]; then
 	        test_main=$line;
 	    else
-	        $basedir/all_tests --gtest_filter="$test_main$line"
-	    fi
+            if [[ $test_main == GBPagesTest. ]]; then
+                if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then 
+                    $basedir/all_tests --gtest_filter="$test_main$line" $@
+                fi
+            else
+                $basedir/all_tests --gtest_filter="$test_main$line" $@
+            fi
+        fi
     done
     rm -f .tmp
 fi
