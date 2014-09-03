@@ -61,7 +61,7 @@ int memkind_gbtlb_check_size (struct memkind *kind, size_t size)
     return 0;
 }
 
-int memkind_noop_check_size (struct memkind *kind, size_t *size)
+int memkind_noop_check_size (struct memkind *kind, size_t size)
 {
     return 0;
 }
