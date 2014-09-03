@@ -34,6 +34,8 @@
 # define MAP_HUGE_1GB (30 << 26)
 #endif
 
+#define LENGTH (1*1024*1024*1024UL)
+
 typedef struct memkind_list_node_s {
     void *ptr;
     void *mmapptr;
@@ -49,17 +51,17 @@ typedef struct {
 static int ptr_hash(void *ptr, int table_len);
 static int memkind_store(void *ptr, void **mmapptr, size_t *size, int query_save);
 static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result);
+static int memkind_gbtlb_ceil_size(size_t *size);
 
-int memkind_gbtlb_test_size (struct memkind *kind, size_t *size)
+int memkind_gbtlb_check_size (struct memkind *kind, size_t size)
 {
-    size_t gb_size = 1024*1024*1024UL;
-    if (*size % gb_size > 0) {
-        *size = ((*size / gb_size) + 1) * gb_size;
+    if (size % LENGTH > 0) {
+        return 1;
     }
     return 0;
 }
 
-int memkind_noop_test_size (struct memkind *kind, size_t *size)
+int memkind_noop_check_size (struct memkind *kind, size_t *size)
 {
     return 0;
 }
@@ -69,7 +71,9 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
     void *result = NULL;
     int err = 0;
 
-    kind->ops->test_size(kind, &size);
+    if(kind->ops->check_size(kind, size)){
+        memkind_gbtlb_ceil_size(&size);
+    }
 
     err = memkind_gbtlb_mmap(kind, size, &result);
     if (err != 0) {
@@ -93,7 +97,9 @@ void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size)
     size_t t_size;
 
     t_size = num * size;
-    kind->ops->test_size(kind, &t_size);
+    if(kind->ops->check_size(kind, t_size)){
+        memkind_gbtlb_ceil_size(&t_size);
+    }
 
     return kind->ops->malloc(kind, t_size);
 
@@ -104,7 +110,9 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     int err = 0;
     void *mmapptr;
 
-    kind->ops->test_size(kind, &size);
+    if(kind->ops->check_size(kind, size)){
+        memkind_gbtlb_ceil_size(&size);
+    }
 
     err = memkind_gbtlb_mmap(kind, size, &mmapptr);
     if (err != 0) {
@@ -148,7 +156,9 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
         else {
             tmp_ptr = NULL;
             tmp_size  += size;
-            kind->ops->test_size(kind, &tmp_size);
+            if (kind->ops->check_size(kind, tmp_size)){
+                memkind_gbtlb_ceil_size(&size);
+            }
             tmp_ptr = kind->ops->malloc(kind, tmp_size);
             memcpy(tmp_ptr, ptr, size);
             munmap(ptr, size);
@@ -266,6 +276,12 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int query_s
 static int ptr_hash(void *ptr, int table_len)
 {
     return _mm_crc32_u64(0, (size_t)ptr) % table_len;
+}
+
+static int memkind_gbtlb_ceil_size(size_t *size)
+{
+    *size = ((*size / LENGTH) + 1) * LENGTH;
+    return 0;
 }
 
 static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)
