@@ -38,8 +38,8 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size);
 void memkind_gbtlb_free(struct memkind *kind, void *ptr);
 int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags);
-int memkind_gbtlb_test_size(size_t *size);
-int memkind_noop_test_size(size_t *size);
+int memkind_gbtlb_test_size(struct memkind *kind, size_t *size);
+int memkind_noop_test_size(struct memkind *kind, size_t *size);
 int memkind_gbtlb_check_addr(void *addr);
 
 static const struct memkind_ops MEMKIND_HBW_GBTLB_STRICT_OPS = {

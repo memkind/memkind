@@ -50,7 +50,7 @@ static int ptr_hash(void *ptr, int table_len);
 static int memkind_store(void *ptr, void **mmapptr, size_t *size, int query_save);
 static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result);
 
-int memkind_gbtlb_test_size (size_t *size)
+int memkind_gbtlb_test_size (struct memkind *kind, size_t *size)
 {
     size_t gb_size = 1024*1024*1024UL;
     if (*size % gb_size > 0) {
@@ -59,7 +59,7 @@ int memkind_gbtlb_test_size (size_t *size)
     return 0;
 }
 
-int memkind_noop_test_size (size_t *size)
+int memkind_noop_test_size (struct memkind *kind, size_t *size)
 {
     return 0;
 }
@@ -69,19 +69,17 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
     void *result = NULL;
     int err = 0;
 
-    kind->ops->test_size(&size);
+    kind->ops->test_size(kind, &size);
 
     err = memkind_gbtlb_mmap(kind, size, &result);
     if (err != 0) {
         result = NULL;
-        return result;
     }
     else {
         err = kind->ops->mbind(kind, result, size);
         if (err != 0) {
             munmap(result, size);
             result = NULL;
-            return result;
         }
         else{
             memkind_store(result, &result, &size, 0);
@@ -95,7 +93,7 @@ void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size)
     size_t t_size;
 
     t_size = num * size;
-    kind->ops->test_size(&t_size);
+    kind->ops->test_size(kind, &t_size);
 
     return kind->ops->malloc(kind, t_size);
 
@@ -106,12 +104,11 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     int err = 0;
     void *mmapptr;
 
-    kind->ops->test_size(&size);
+    kind->ops->test_size(kind, &size);
 
     err = memkind_gbtlb_mmap(kind, size, &mmapptr);
     if (err != 0) {
         memptr = NULL;
-        return err;
     }
     else {
         err = kind->ops->mbind(kind, mmapptr, size);
@@ -151,7 +148,7 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
         else {
             tmp_ptr = NULL;
             tmp_size  += size;
-            kind->ops->test_size(&tmp_size);
+            kind->ops->test_size(kind, &tmp_size);
             tmp_ptr = kind->ops->malloc(kind, tmp_size);
             memcpy(tmp_ptr, ptr, size);
             munmap(ptr, size);

@@ -109,7 +109,7 @@ struct memkind_ops {
     int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
     int (* get_arena) (struct memkind *kind, unsigned int *arena);
     int (* get_size) (struct memkind *kind, size_t *total, size_t *free);
-    int (* test_size) (size_t *size);
+    int (* test_size) (struct memkind *kind, size_t *size);
     void (*init_once)(void);
 };
 
