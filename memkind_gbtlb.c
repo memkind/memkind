@@ -49,30 +49,27 @@ typedef struct {
 static int ptr_hash(void *ptr, int table_len);
 static int memkind_store(void *ptr, void **mmapptr, size_t *size);
 static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result);
-static int memkind_gbtlb_mbind(struct memkind *kind, size_t size, void *result);
 
-
-size_t memkind_gbro_set_size (size_t size)
+int memkind_gbtlb_test_size (size_t *size)
 {
     size_t gb_size = 1024*1024*1024UL;
-    if (size % gb_size > 0) {
-        size = ((size / gb_size) + 1) * gb_size;
+    if (*size % gb_size > 0) {
+        *size = ((*size / gb_size) + 1) * gb_size;
     }
-    return size;
+    return 0;
 }
 
-size_t memkind_noop_set_size (size_t size)
+int memkind_noop_test_size (size_t *size)
 {
-    return size;
+    return 0;
 }
 
 void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 {
-
     void *result = NULL;
     int err = 0;
 
-    size = kind->ops->set_size(size);
+    kind->ops->test_size(&size);
 
     err = memkind_gbtlb_mmap(kind, size, &result);
     if (err != 0) {
@@ -80,10 +77,14 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
         return result;
     }
     else {
-        err = memkind_gbtlb_mbind(kind, size, result);
+        err = kind->ops->mbind(kind, result, size);
         if (err != 0) {
+            munmap(result, size);
             result = NULL;
             return result;
+        }
+        else{
+            memkind_store(result, &result, &size);
         }
     }
     return result;
@@ -91,30 +92,13 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 
 void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size)
 {
-    void *result = NULL;
-    int err = 0;
     size_t t_size;
 
-
     t_size = num * size;
-    t_size = kind->ops->set_size(t_size);
+    kind->ops->test_size(&t_size);
 
-    err = memkind_gbtlb_mmap(kind, t_size, &result);
-    if (err != 0) {
-        result = NULL;
-        return result;
-    }
-    else {
-        err = memkind_gbtlb_mbind(kind, t_size, result);
-        if (err != 0) {
-            result = NULL;
-            return result;
-        }
-        else {
-            memset(result, 0x0, t_size);
-        }
-    }
-    return result;
+    return kind->ops->malloc(kind, t_size);
+
 }
 
 int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size)
@@ -122,7 +106,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     int err = 0;
     void *mmapptr;
 
-    size = kind->ops->set_size(size);
+    kind->ops->test_size(&size);
 
     err = memkind_gbtlb_mmap(kind, size, &mmapptr);
     if (err != 0) {
@@ -167,7 +151,7 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
         else {
             tmp_ptr = NULL;
             tmp_size  += size;
-            tmp_size = kind->ops->set_size(tmp_size);
+            kind->ops->test_size(&tmp_size);
             tmp_ptr = kind->ops->malloc(kind, tmp_size);
             memcpy(tmp_ptr, ptr, size);
             munmap(ptr, size);
@@ -193,6 +177,19 @@ int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_PRIVATE | MAP_HUGETLB | MAP_HUGE_1GB | MAP_ANONYMOUS;
     return 0;
+}
+
+int memkind_gbtlb_check_addr(void *addr){
+
+    int err;
+    void *mmapptr = NULL;
+    size_t size = 0;
+
+    err = memkind_store(addr, &mmapptr, &size);
+    if (!err){
+        return 0;
+    }
+    return -1;
 }
 
 static int memkind_store(void *memptr, void **mmapptr, size_t *size)
@@ -259,6 +256,7 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size)
     return err;
 }
 
+
 static int ptr_hash(void *ptr, int table_len)
 {
     return _mm_crc32_u64(0, (size_t)ptr) % table_len;
@@ -284,21 +282,5 @@ static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)
     }
 
     *result  = addr;
-    return ret;
-}
-
-static int memkind_gbtlb_mbind(struct memkind *kind, size_t size, void *result)
-{
-    int ret = 0;
-
-    ret = kind->ops->mbind(kind, result, size);
-    if (!ret) {
-        memkind_store(result, &result, &size);
-    }
-    else {
-        munmap(result, size);
-        ret = MEMKIND_ERROR_MBIND;
-    }
-
     return ret;
 }

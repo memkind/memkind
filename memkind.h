@@ -77,10 +77,10 @@ enum memkind_base_partition {
     MEMKIND_PARTITION_HBW_PREFERRED = 3,
     MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB = 4,
     MEMKIND_PARTITION_HUGETLB = 5,
-    MEMKIND_PARTITION_HBW_GBTLB = 6,
-    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 7,
-    MEMKIND_PARTITION_HBW_GBRO = 8,
-    MEMKIND_PARTITION_HBW_PREFERRED_GBRO = 9
+    MEMKIND_PARTITION_HBW_GBTLB_STRICT = 6,
+    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB_STRICT = 7,
+    MEMKIND_PARTITION_HBW_GBTLB = 8,
+    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 9
 };
 
 struct memkind_ops;
@@ -109,7 +109,7 @@ struct memkind_ops {
     int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
     int (* get_arena) (struct memkind *kind, unsigned int *arena);
     int (* get_size) (struct memkind *kind, size_t *total, size_t *free);
-    size_t (* set_size) (size_t size);
+    int (* test_size) (size_t *size);
     void (*init_once)(void);
 };
 
@@ -121,10 +121,10 @@ extern memkind_t MEMKIND_HBW;
 extern memkind_t MEMKIND_HBW_PREFERRED;
 extern memkind_t MEMKIND_HBW_HUGETLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_HUGETLB;
+extern memkind_t MEMKIND_HBW_GBTLB_STRICT;
+extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB_STRICT;
 extern memkind_t MEMKIND_HBW_GBTLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
-extern memkind_t MEMKIND_HBW_GBRO;
-extern memkind_t MEMKIND_HBW_PREFERRED_GBRO;
 
 
 
@@ -147,6 +147,9 @@ int memkind_get_kind_by_partition(int partition, memkind_t *kind);
 
 /* Get kind given the name of the kind */
 int memkind_get_kind_by_name(const char *name, memkind_t *kind);
+
+/* Get the kind associated with an virtual address which could be used for free */
+int memkind_get_kind_for_free(void *addr, memkind_t *kind);
 
 /* Get the amount in bytes of total and free memory of the NUMA nodes assciated with the kind */
 int memkind_get_size(memkind_t kind, size_t *total, size_t *free);

@@ -90,7 +90,7 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
     return ltrial;
 }
 
-void TrialGenerator :: generate_hbw_gb_ro(alloc_api_t api)
+void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
 {
 
     size_t size[] = {GB+1,(2*GB)+1};
@@ -102,17 +102,17 @@ void TrialGenerator :: generate_hbw_gb_ro(alloc_api_t api)
          i++) {
         trial_vec.push_back(create_trial_tuple(api, size[i],
                                                align[i], psize[i],
-                                               MEMKIND_HBW_PREFERRED_GBRO,
+                                               MEMKIND_HBW_PREFERRED_GBTLB,
                                                -1));
         if (i > 0)
             k++;
         trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
-                                               MEMKIND_HBW_PREFERRED_GBRO,
+                                               MEMKIND_HBW_PREFERRED_GBTLB,
                                                k++));
     }
 }
 
-void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
+void TrialGenerator :: generate_hbw_gb_strict_incremental(alloc_api_t api)
 {
 
     size_t size[] = {GB,(2*GB), 3*GB};
@@ -124,17 +124,17 @@ void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
          i++) {
         trial_vec.push_back(create_trial_tuple(api, size[i],
                                                align[i], psize[i],
-                                               MEMKIND_HBW_PREFERRED_GBTLB,
+                                               MEMKIND_HBW_PREFERRED_GBTLB_STRICT,
                                                -1));
         if (i > 0)
             k++;
         trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
-                                               MEMKIND_HBW_PREFERRED_GBTLB,
+                                               MEMKIND_HBW_PREFERRED_GBTLB_STRICT,
                                                k++));
     }
 }
 
-void TrialGenerator :: generate_gb_ro(alloc_api_t api)
+void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
 {
 
     size_t size[] = {GB+1,(2*GB)+1};
@@ -146,18 +146,18 @@ void TrialGenerator :: generate_gb_ro(alloc_api_t api)
          i++) {
         trial_vec.push_back(create_trial_tuple(api, size[i],
                                                align[i], psize[i],
-                                               MEMKIND_HBW_GBRO,-1));
+                                               MEMKIND_HBW_GBTLB,-1));
         if (i > 0)
             k++;
         trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
-                                               MEMKIND_HBW_GBRO,
+                                               MEMKIND_HBW_GBTLB,
                                                k++));
 
     }
 }
 
 
-void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
+void TrialGenerator :: generate_gb_strict_incremental(alloc_api_t api)
 {
 
     size_t size[] = {GB,2*GB,3*GB};
@@ -169,11 +169,11 @@ void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
          i++) {
         trial_vec.push_back(create_trial_tuple(api, size[i],
                                                align[i], psize[i],
-                                               MEMKIND_HBW_GBTLB,-1));
+                                               MEMKIND_HBW_GBTLB_STRICT,-1));
         if (i > 0)
             k++;
         trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
-                                               MEMKIND_HBW_GBTLB,
+                                               MEMKIND_HBW_GBTLB_STRICT,
                                                k++));
 
     }
@@ -397,9 +397,9 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                     psize = HBW_PAGESIZE_2MB;
                 else if (trial_vec[i].size %
                          trial_vec[i].page_size > 0)
-                    psize = HBW_PAGESIZE_RS_1GB;
-                else
                     psize = HBW_PAGESIZE_1GB;
+                else
+                    psize = HBW_PAGESIZE_1GB_STRICT;
 
                 ret = hbw_allocate_memalign_psize(&ptr_vec[i],
                                                   trial_vec[i].alignment,
@@ -409,10 +409,10 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 break;
 
             case MEMKIND_MALLOC:
-                if (trial_vec[i].memkind == MEMKIND_HBW_GBTLB ||
-                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB ||
-                    trial_vec[i].memkind == MEMKIND_HBW_GBRO ||
-                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBRO){
+                if (trial_vec[i].memkind == MEMKIND_HBW_GBTLB_STRICT ||
+                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB_STRICT ||
+                    trial_vec[i].memkind == MEMKIND_HBW_GBTLB ||
+                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB){
                     fprintf (stdout,"Allocating %zd bytes using memkind_malloc\n",
                              trial_vec[i].size);
                 }

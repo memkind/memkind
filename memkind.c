@@ -86,6 +86,22 @@ static struct memkind MEMKIND_HBW_PREFERRED_HUGETLB_STATIC = {
     0, NULL
 };
 
+static struct memkind MEMKIND_HBW_GBTLB_STRICT_STATIC = {
+    &MEMKIND_HBW_GBTLB_STRICT_OPS,
+    MEMKIND_PARTITION_HBW_GBTLB_STRICT,
+    "memkind_hbw_gbtlb_strict",
+    PTHREAD_ONCE_INIT,
+    0, NULL
+};
+
+static struct memkind MEMKIND_HBW_PREFERRED_GBTLB_STRICT_STATIC = {
+    &MEMKIND_HBW_PREFERRED_GBTLB_STRICT_OPS,
+    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB_STRICT,
+    "memkind_hbw_preferred_gbtlb_strict",
+    PTHREAD_ONCE_INIT,
+    0, NULL
+};
+
 static struct memkind MEMKIND_HBW_GBTLB_STATIC = {
     &MEMKIND_HBW_GBTLB_OPS,
     MEMKIND_PARTITION_HBW_GBTLB,
@@ -102,22 +118,6 @@ static struct memkind MEMKIND_HBW_PREFERRED_GBTLB_STATIC = {
     0, NULL
 };
 
-static struct memkind MEMKIND_HBW_GBRO_STATIC = {
-    &MEMKIND_HBW_GBRO_OPS,
-    MEMKIND_PARTITION_HBW_GBRO,
-    "memkind_hbw_gbro",
-    PTHREAD_ONCE_INIT,
-    0, NULL
-};
-
-static struct memkind MEMKIND_HBW_PREFERRED_GBRO_STATIC = {
-    &MEMKIND_HBW_PREFERRED_GBRO_OPS,
-    MEMKIND_PARTITION_HBW_PREFERRED_GBRO,
-    "memkind_hbw_preferred_gbro",
-    PTHREAD_ONCE_INIT,
-    0, NULL
-};
-
 
 struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
 struct memkind *MEMKIND_HUGETLB = &MEMKIND_HUGETLB_STATIC;
@@ -125,10 +125,10 @@ struct memkind *MEMKIND_HBW = &MEMKIND_HBW_STATIC;
 struct memkind *MEMKIND_HBW_PREFERRED = &MEMKIND_HBW_PREFERRED_STATIC;
 struct memkind *MEMKIND_HBW_HUGETLB = &MEMKIND_HBW_HUGETLB_STATIC;
 struct memkind *MEMKIND_HBW_PREFERRED_HUGETLB = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC;
+struct memkind *MEMKIND_HBW_GBTLB_STRICT = &MEMKIND_HBW_GBTLB_STRICT_STATIC;
+struct memkind *MEMKIND_HBW_PREFERRED_GBTLB_STRICT = &MEMKIND_HBW_PREFERRED_GBTLB_STRICT_STATIC;
 struct memkind *MEMKIND_HBW_GBTLB = &MEMKIND_HBW_GBTLB_STATIC;
 struct memkind *MEMKIND_HBW_PREFERRED_GBTLB = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC;
-struct memkind *MEMKIND_HBW_GBRO = &MEMKIND_HBW_GBRO_STATIC;
-struct memkind *MEMKIND_HBW_PREFERRED_GBRO = &MEMKIND_HBW_PREFERRED_GBRO_STATIC;
 
 
 struct memkind_registry {
@@ -145,10 +145,10 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_HBW_HUGETLB] = &MEMKIND_HBW_HUGETLB_STATIC,
         [MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB] = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
         [MEMKIND_PARTITION_HUGETLB] = &MEMKIND_HUGETLB_STATIC,
+        [MEMKIND_PARTITION_HBW_GBTLB_STRICT] = &MEMKIND_HBW_GBTLB_STRICT_STATIC,
+        [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB_STRICT] = &MEMKIND_HBW_PREFERRED_GBTLB_STRICT_STATIC,
         [MEMKIND_PARTITION_HBW_GBTLB] = &MEMKIND_HBW_GBTLB_STATIC,
-        [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC,
-        [MEMKIND_PARTITION_HBW_GBRO] = &MEMKIND_HBW_GBRO_STATIC,
-        [MEMKIND_PARTITION_HBW_PREFERRED_GBRO] = &MEMKIND_HBW_PREFERRED_GBRO_STATIC
+        [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC
     },
     MEMKIND_NUM_BASE_KIND,
     PTHREAD_MUTEX_INITIALIZER
@@ -389,6 +389,20 @@ void *memkind_malloc(struct memkind *kind, size_t size)
         pthread_once(&(kind->init_once), kind->ops->init_once);
     }
     return kind->ops->malloc(kind, size);
+}
+
+int memkind_get_kind_for_free(void *addr, 
+                              struct memkind **kind)
+{
+    int err;
+   
+    err = memkind_gbtlb_check_addr(addr);
+    if (!err)
+        *kind = MEMKIND_HBW_GBTLB_STRICT;
+    else
+        *kind = MEMKIND_DEFAULT;
+    
+    return 0;
 }
 
 void *memkind_calloc(struct memkind *kind, size_t num, size_t size)

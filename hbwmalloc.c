@@ -35,7 +35,7 @@ static pthread_once_t hbw_policy_once_g = PTHREAD_ONCE_INIT;
 static inline memkind_t hbw_get_kind(int pagesize);
 static inline void hbw_policy_preferred_init(void);
 static inline void hbw_policy_bind_init(void);
-int free_gb = 0;
+
 
 
 int hbw_get_policy(void)
@@ -100,14 +100,12 @@ int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
     int err;
     memkind_t kind;
 
-    if (pagesize == HBW_PAGESIZE_1GB) {
-        kind = MEMKIND_HBW_PREFERRED_GBTLB;
-        free_gb = 1;
+    if (pagesize == HBW_PAGESIZE_1GB_STRICT) {
+        kind = MEMKIND_HBW_PREFERRED_GBTLB_STRICT;
         err  = kind->ops->posix_memalign(kind, memptr, alignment, size);
     }
-    else if (pagesize == HBW_PAGESIZE_RS_1GB) {
-        kind = MEMKIND_HBW_PREFERRED_GBRO;
-        free_gb = 1;
+    else if (pagesize == HBW_PAGESIZE_1GB) {
+        kind = MEMKIND_HBW_PREFERRED_GBTLB;
         err  = kind->ops->posix_memalign(kind, memptr, alignment, size);
     }
     else {
@@ -134,11 +132,9 @@ void *hbw_realloc(void *ptr, size_t size)
 
 void hbw_free(void *ptr)
 {
-    if (free_gb) {
-        memkind_free(MEMKIND_HBW_PREFERRED_GBTLB, ptr);
-    }
-    else
-        memkind_free(MEMKIND_DEFAULT, ptr);
+    memkind_t kind;
+    memkind_get_kind_for_free(ptr, &kind);
+    memkind_free(kind, ptr);
 }
 
 static inline memkind_t hbw_get_kind(int pagesize)
