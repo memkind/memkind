@@ -294,30 +294,30 @@ Same as
 .B MEMKIND_HBW_PREFERRED
 except the allocation uses huge pages.
 .TP
-.B MEMKIND_HBW_GBTLB
+.B MEMKIND_HBW_GBTLB_STRICT
 Same as
 .B MEMKIND_HBW_HUGETLB
 except the allocation uses one gigabyte huge pages.
 .TP
-.B MEMKIND_HBW_PREFERRED_GBTLB
+.B MEMKIND_HBW_PREFERRED_GBTLB_STRICT
 Same as
 .B MEMKIND_HBW_PREFERRED_HUGETLB
 except the allocation uses one gigabyte huge pages.
 Both
-.B MEMKIND_HBW_GBTLB
+.B MEMKIND_HBW_GBTLB_STRICT
 and
-.B MEMKIND_HBW_PREFERRED_GBTLB
+.B MEMKIND_HBW_PREFERRED_GBTLB_STRICT
 require size which should be a multiple of 1GB.
 .TP
-.B MEMKIND_HBW_GBRO
-Same as
 .B MEMKIND_HBW_GBTLB
+Same as
+.B MEMKIND_HBW_GBTLB_STRICT
 except it allow the user to specify random sizes
 backed by one gigabyte pages.
 .TP
-.B MEMKIND_HBW_PREFERRED_GBRO
+.B MEMKIND_HBW_PREFERRED_GBTLB
 Same as
-.B MEMKIND_HBW_GBRO
+.B MEMKIND_HBW_GBTLB
 except that if there is not enough high bandwidth memory one gigabyte pages
 to satisfy the request, the allocation will fall back
 on standard memory.

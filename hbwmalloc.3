@@ -174,12 +174,12 @@ system to two megabyte pages.
 .B HBW_PAGESIZE_2MB
 The two megabyte page size option.
 .TP
-.B HBW_PAGESIZE_1GB
+.B HBW_PAGESIZE_1GB_STRICT
 The one gigabyte page size option. The size of the allocation should
 always be a multiple of 1GB with this option.
 .TP
-.B HBW_PAGESIZE_RS_1GB
-This option allows the user to specify random sizes backed by
+.B HBW_PAGESIZE_1GB
+This option allows the user to specify arbitrary sizes backed by
 one gigabytes pages.
 .PP
 .BR hbw_get_policy ()
