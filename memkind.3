@@ -224,8 +224,12 @@ on the system and 0 otherwise.
 Get the kind associated with an address
 which could be used for freeing the
 memory. This function takes two arguments
-the addr and adderss of the kind. On success 0
-is returned with the appropriate kind.
+the 
+.I addr 
+and pointer to the
+.I  kind.
+On success 0 is returned with the 
+appropriate kind.
 .PP
 .BR memkind_get_mmap_flags ()
 sets
@@ -319,7 +323,7 @@ require size which should be a multiple of 1GB.
 .B MEMKIND_HBW_GBTLB
 Same as
 .B MEMKIND_HBW_GBTLB_STRICT
-except it allow the user to specify random sizes
+except it allow the user to specify arbitrary sizes
 backed by one gigabyte pages.
 .TP
 .B MEMKIND_HBW_PREFERRED_GBTLB
