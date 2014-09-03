@@ -47,7 +47,7 @@ typedef struct {
 } memkind_table_node_t;
 
 static int ptr_hash(void *ptr, int table_len);
-static int memkind_store(void *ptr, void **mmapptr, size_t *size);
+static int memkind_store(void *ptr, void **mmapptr, size_t *size, int query_save);
 static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result);
 
 int memkind_gbtlb_test_size (size_t *size)
@@ -84,7 +84,7 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
             return result;
         }
         else{
-            memkind_store(result, &result, &size);
+            memkind_store(result, &result, &size, 0);
         }
     }
     return result;
@@ -123,7 +123,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
             else {
                 *memptr = mmapptr;
             }
-            memkind_store (*memptr, &mmapptr, &size);
+            memkind_store (*memptr, &mmapptr, &size, 0);
         }
         else {
             munmap (mmapptr, size);
@@ -144,7 +144,7 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
         ptr = kind->ops->malloc(kind, size);
     }
     else {
-        memkind_store (ptr, &tmp_ptr, &tmp_size);
+        memkind_store (ptr, &tmp_ptr, &tmp_size, 0);
         if (NULL == tmp_ptr) {
             ptr = tmp_ptr;
         }
@@ -167,7 +167,7 @@ void memkind_gbtlb_free(struct memkind *kind, void *ptr)
     void *mmapptr = NULL;
     size_t size = 0;
 
-    err = memkind_store(ptr, &mmapptr, &size);
+    err = memkind_store(ptr, &mmapptr, &size, 0);
     if (!err) {
         munmap(mmapptr, size);
     }
@@ -185,14 +185,14 @@ int memkind_gbtlb_check_addr(void *addr){
     void *mmapptr = NULL;
     size_t size = 0;
 
-    err = memkind_store(addr, &mmapptr, &size);
+    err = memkind_store(addr, &mmapptr, &size, 1);
     if (!err){
         return 0;
     }
     return -1;
 }
 
-static int memkind_store(void *memptr, void **mmapptr, size_t *size)
+static int memkind_store(void *memptr, void **mmapptr, size_t *size, int query_save)
 {
     static int table_len = 0;
     static int is_init = 0;
@@ -222,7 +222,12 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size)
 
     hash = ptr_hash(memptr, table_len);
     pthread_mutex_lock(&(table[hash].mutex));
-    if (*mmapptr == NULL) { /* memkind_store() call is a query */
+    if (*mmapptr == NULL) {
+        /* memkind_store() call is a query
+           query_save : 0 -> Query if found remove and
+           return the address and size;
+           query_save : 1 -> Query if found and return;
+        */
         storeptr = table[hash].list;
         lastptr = NULL;
         while (storeptr && storeptr->ptr != memptr) {
@@ -230,6 +235,10 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size)
             storeptr = storeptr->next;
         }
         if (storeptr) {
+            if (query_save){
+                pthread_mutex_unlock(&(table[hash].mutex));
+                return err; /* Query without removing entry*/
+            }
             *mmapptr = storeptr->mmapptr;
             *size = storeptr->size;
             if (lastptr) {
