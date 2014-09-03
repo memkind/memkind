@@ -37,7 +37,6 @@ static inline void hbw_policy_preferred_init(void);
 static inline void hbw_policy_bind_init(void);
 
 
-
 int hbw_get_policy(void)
 {
     return hbw_policy_g;
