@@ -292,46 +292,48 @@ is set to ENOMEM and the allocated poitner is set to NULL.
 .B MEMKIND_HBW_HUGETLB
 Same as
 .B MEMKIND_HBW
-except the allocation uses huge pages.
+except the allocation is backed by huge pages.
 .TP
 .B MEMKIND_HBW_PREFERRED
 Same as
 .B MEMKIND_HBW
-except that if there is not enough high bandwidth memory to satisfy the
-request, the allocation will fall back on standard memory.
+except that if there is not enough high bandwidth memory to satisfy
+the request, the allocation will fall back on standard memory.
 .TP
 .B MEMKIND_HBW_PREFERRED_HUGETLB
 Same as
 .B MEMKIND_HBW_PREFERRED
-except the allocation uses huge pages.
-.TP
-.B MEMKIND_HBW_GBTLB_STRICT
-Same as
-.B MEMKIND_HBW_HUGETLB
-except the allocation uses one gigabyte huge pages.
-.TP
-.B MEMKIND_HBW_PREFERRED_GBTLB_STRICT
-Same as
-.B MEMKIND_HBW_PREFERRED_HUGETLB
-except the allocation uses one gigabyte huge pages.
-Both
-.B MEMKIND_HBW_GBTLB_STRICT
-and
-.B MEMKIND_HBW_PREFERRED_GBTLB_STRICT
-require size which should be a multiple of 1GB.
+except the allocation is backed by huge pages.
 .TP
 .B MEMKIND_HBW_GBTLB
 Same as
-.B MEMKIND_HBW_GBTLB_STRICT
-except it allow the user to specify arbitrary sizes
-backed by one gigabyte pages.
+.B MEMKIND_HBW
+except the allocation is backed by one gigabyte huge pages.  Note that
+.I size
+can take on any value, but full gigabyte pages will allocated for each
+request, so remainder of the last page will be wasted.
 .TP
 .B MEMKIND_HBW_PREFERRED_GBTLB
 Same as
+.B MEMKIND_HBW_PREFERRED
+except the allocation is backed by one gigabyte huge pages.  Note that
+.I size
+can take on any value, but full gigabyte pages will allocated for each
+request, so remainder of the last page will be wasted.
+.TP
+.B MEMKIND_HBW_GBTLB_STRICT
+Same as
 .B MEMKIND_HBW_GBTLB
-except that if there is not enough high bandwidth memory one gigabyte pages
-to satisfy the request, the allocation will fall back
-on standard memory.
+except that allocations will fail if
+.I size
+is not a multiple of one gigabyte.
+.TP
+.B MEMKIND_HBW_PREFERRED_GBTLB_STRICT
+Same as
+.B MEMKIND_HBW_PREFERRED_GBTLB
+except that allocations will fail if
+.I size
+is not a multiple of one gigabyte.
 .PP
 .SH "ERRORS"
 .TP
