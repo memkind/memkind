@@ -87,7 +87,7 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size,
-    .check_size = memkind_gbtlb_check_size
+    .check_size = memkind_noop_check_size
 };
 
 static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_STRICT_OPS = {
@@ -103,7 +103,7 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_STRICT_OPS = {
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size,
-    .check_size = memkind_noop_check_size
+    .check_size = memkind_gbtlb_check_size
 };
 
 
