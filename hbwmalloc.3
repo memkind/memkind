@@ -174,13 +174,14 @@ system to two megabyte pages.
 .B HBW_PAGESIZE_2MB
 The two megabyte page size option.
 .TP
-.B HBW_PAGESIZE_1GB_STRICT
-The one gigabyte page size option. The size of the allocation should
-always be a multiple of 1GB with this option.
-.TP
 .B HBW_PAGESIZE_1GB
 This option allows the user to specify arbitrary sizes backed by
 one gigabytes pages.
+.TP
+.B HBW_PAGESIZE_1GB_STRICT
+The one gigabyte page size option. The total size of the allocation
+must be a multiple of 1GB with this option, otherwise the allocation
+will fail.
 .PP
 .BR hbw_get_policy ()
 returns the current fallback policy when insufficient high bandwith
@@ -234,6 +235,9 @@ Requested memory kind is not available
 .TP
 .B MEMKIND_ERROR_MBIND
 Call to mbind() failed
+.TP
+.B MEMKIND_ERROR_MMAP
+Call to mmap() failed
 .TP
 .B MEMKIND_ERROR_MEMALIGN
 Call to posix_memalign() failed
