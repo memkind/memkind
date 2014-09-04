@@ -398,7 +398,7 @@ int memkind_get_kind_for_free(void *addr,
 
     err = memkind_gbtlb_check_addr(addr);
     if (!err)
-        *kind = MEMKIND_HBW_GBTLB_STRICT;
+        *kind = MEMKIND_HBW_GBTLB;
     else
         *kind = MEMKIND_DEFAULT;
 
