@@ -24,13 +24,16 @@
 
 #include <numa.h>
 #include <numaif.h>
-#include <sys/mman.h>
 #include <smmintrin.h>
 #include <stdio.h>
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
 
+#define __USE_GNU
+#include <sys/mman.h>
+
 #include "memkind_gbtlb.h"
+
 
 #ifndef MAP_HUGE_1GB
 # define MAP_HUGE_1GB (30 << 26)
@@ -140,21 +143,31 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     return err;
 }
 
+/*FIXME : Handle scenario when 2MB and 1GB pages are mixed with realloc*/
 void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
 {
     void *result = NULL;
     void *mmap_ptr = NULL;
     size_t orig_size, copy_size;
+    int flags, err;
 
     result = kind->ops->malloc(kind, size);
-    if (ptr) {
-        memkind_store(ptr, &mmap_ptr, &orig_size, GBTLB_STORE_INSERT);
-        copy_size = orig_size - ((size_t)(ptr) - (size_t)(mmap_ptr));
-        if (copy_size > size) {
-            copy_size = size;
+    if (result != NULL && ptr != NULL) {
+        err = memkind_store(ptr, &mmap_ptr, &orig_size, GBTLB_STORE_QUERY);
+        if (!err) {
+            err = kind->ops->get_mmap_flags(kind, &flags);
         }
-        memcpy(result, ptr, copy_size);
-        kind->ops->free(kind, ptr);
+        if (!err) {
+            /*Tried using mremap : Failed for 1GB Pages: Err - Did not unmap*/
+            /* result = mremap(ptr, orig_size, size, MREMAP_MAYMOVE|flags);*/
+            copy_size = size > orig_size ? orig_size : size;
+            memcpy(result, ptr, copy_size);
+            kind->ops->free(kind, ptr);
+        }
+        if (err) {
+            kind->ops->free(kind, result);
+            result = NULL;
+        }
     }
     return result;
 }
@@ -183,7 +196,7 @@ int memkind_gbtlb_check_addr(struct memkind *kind, void *addr){
     void *mmapptr = NULL;
     size_t size = 0;
 
-    err = memkind_store(addr, &mmapptr, &size, 1);
+    err = memkind_store(addr, &mmapptr, &size, GBTLB_STORE_QUERY);
     if (!err){
         return 0;
     }
@@ -268,7 +281,7 @@ static int ptr_hash(void *ptr, int table_len)
 
 static int memkind_gbtlb_ceil_size(size_t *size)
 {
-    *size = ((*size / ONE_GB) + 1) * ONE_GB;
+    *size = *size % ONE_GB ? ((*size / ONE_GB) + 1) * ONE_GB : *size;
     return 0;
 }
 
