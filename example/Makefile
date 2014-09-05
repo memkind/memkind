@@ -26,7 +26,7 @@ CC = cc
 CFLAGS = -O0 -g -Wall -Werror
 LDFLAGS = -lmemkind -ljemalloc -lnuma -lpthread
 
-all: hello_memkind hello_hbw filter_memkind stream_memkind
+all: hello_memkind hello_hbw filter_memkind stream_memkind new_kind
 
 hello_memkind: hello_memkind_example.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_memkind_example.c -o hello_memkind
@@ -43,8 +43,11 @@ stream_memkind: stream_example.c
 stream: stream_example.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fopenmp stream_example.c -o stream
 
+new_kind: new_kind_example.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) new_kind_example.c -o new_kind
+
 clean:
-	rm -f hello_memkind hello_hbw filter_memkind stream_memkind stream
+	rm -f hello_memkind hello_hbw filter_memkind stream_memkind stream new_kind
 
 test: hello_memkind filter_memkind
 	./hello_memkind
@@ -52,3 +55,4 @@ test: hello_memkind filter_memkind
 	./filter_memkind
 	./stream
 	./stream_memkind
+	./new_kind

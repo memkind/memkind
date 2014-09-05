@@ -39,6 +39,7 @@ initddir ?= /etc/rc.d/init.d
 
 EXTRA_CFLAGS = -fPIC -Wall -Werror -O3 -msse4.2
 OBJECTS = memkind.o memkind_hugetlb.o memkind_gbtlb.o memkind_hbw.o hbwmalloc.o memkind_default.o memkind_arena.o
+HEADERS = memkind.h hbwmalloc.h memkind_arena.h memkind_default.h memkind_gbtlb.h memkind_hbw.h memkind_hugetlb.h
 
 all: libmemkind.so.0.0 memkind-pmtt
 
@@ -82,7 +83,7 @@ rpm:
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)
-	$(INSTALL) -m 644 memkind.h hbwmalloc.h $(DESTDIR)$(includedir)
+	$(INSTALL) -m 644 $(HEADERS) $(DESTDIR)$(includedir)
 	$(INSTALL) -d $(DESTDIR)$(libdir)
 	$(INSTALL) libmemkind.so.0.0 $(DESTDIR)$(libdir)
 	ln -sf libmemkind.so.0.0 $(DESTDIR)$(libdir)/libmemkind.so.0

@@ -102,6 +102,11 @@ fi
 %defattr(-,root,root,-)
 %{_includedir}/memkind.h
 %{_includedir}/hbwmalloc.h
+%{_includedir}/memkind_arena.h
+%{_includedir}/memkind_default.h
+%{_includedir}/memkind_gbtlb.h
+%{_includedir}/memkind_hbw.h
+%{_includedir}/memkind_hugetlb.h
 %{_libdir}/libmemkind.so.0.0
 %{_libdir}/libmemkind.so.0
 %{_libdir}/libmemkind.so
