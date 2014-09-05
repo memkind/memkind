@@ -28,8 +28,6 @@
 #include <stdio.h>
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
-
-#define __USE_GNU
 #include <sys/mman.h>
 
 #include "memkind_gbtlb.h"
