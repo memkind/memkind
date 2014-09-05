@@ -146,7 +146,7 @@ TEST_F(BATest, hbw_memkind_trials_two_kind_stress)
 
 TEST_F(BATest, hbw_memkind_trials_all_kind_stress)
 {
-    tgen->generate_multi_app_stress(MEMKIND_NUM_BASE_KIND);
+    tgen->generate_multi_app_stress(6);
     tgen->run(num_bandwidth, bandwidth);
 }
 
