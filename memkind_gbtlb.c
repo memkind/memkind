@@ -109,8 +109,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 {
     int err = 0;
     int do_shift = 0;
-    size_t tmp_size;
-    void *mmapptr = NULL, *tmpptr = NULL;
+    void *mmapptr = NULL;
 
     *memptr = NULL;
 
