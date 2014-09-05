@@ -111,7 +111,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
         do_shift = 1;
         size += alignment;
     }
-    err = kind->check_alignment(kind, alignment);
+    err = kind->ops->check_alignment(kind, alignment);
     if (!err) {
         mmapptr = memkind_gbtlb_malloc(kind, size);
         if (mmapptr == NULL) {
@@ -170,7 +170,7 @@ int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags)
     return 0;
 }
 
-int memkind_gbtlb_check_addr(void *addr){
+int memkind_gbtlb_check_addr(struct memkind *kind, void *addr){
 
     int err;
     void *mmapptr = NULL;

@@ -393,7 +393,6 @@ void *memkind_malloc(struct memkind *kind, size_t size)
 
 int memkind_get_kind_for_free(void *addr, struct memkind **kind)
 {
-    int err;
     int i, num_kind;
     struct memkind *test_kind;
 

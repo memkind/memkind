@@ -45,6 +45,7 @@ int memkind_default_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_default_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
 int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free);
+int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
 
 static const struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .create = memkind_default_create,

@@ -25,6 +25,7 @@
 #include <numa.h>
 #include <numaif.h>
 #include <sys/mman.h>
+#include <errno.h>
 #include <jemalloc/jemalloc.h>
 #include "memkind_default.h"
 
