@@ -352,7 +352,7 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                     ptr_vec[i] = NULL;
                 }
                 else {
-                    ptr_vec[i] = hbw_realloc(ptr_vec[trial_vec[i].free_index], trial_vec[i + 1].size);
+                    ptr_vec[i + 1] = hbw_realloc(ptr_vec[trial_vec[i].free_index], trial_vec[i + 1].size);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                 }
                 break;
@@ -364,7 +364,9 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                     ptr_vec[i] = NULL;
                 }
                 else {
-                    ptr_vec[i] = memkind_realloc(ptr_vec[trial_vec[i].free_index], trial_vec[i + 1].size);
+                    ptr_vec[i + 1] = memkind_realloc(trial_vec[i].memkind, 
+                                                 ptr_vec[trial_vec[i].free_index], 
+                                                 trial_vec[i + 1].size);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                 }
                 break;
@@ -436,7 +438,7 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                          trial_vec[i].size);
                 if (NULL == ptr_vec[i]) {
                     ptr_vec[i] = memkind_realloc(trial_vec[i].memkind,
-                                                 ptr_vec[i - 1],
+                                                 ptr_vec[i],
                                                  trial_vec[i].size);
                 }
                 break;
