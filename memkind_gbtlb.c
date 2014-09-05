@@ -112,7 +112,6 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     size_t tmp_size;
     void *mmapptr = NULL, *tmpptr = NULL;
 
-
     *memptr = NULL;
 
     if (alignment > ONE_GB) {
@@ -121,26 +120,19 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     }
     err = kind->ops->check_alignment(kind, alignment);
     if (!err) {
-        mmapptr = memkind_gbtlb_malloc(kind, size);
-        if (mmapptr == NULL) {
+        *memptr = memkind_gbtlb_malloc(kind, size);
+        if (*memptr == NULL) {
             err = ENOMEM;
         }
     }
-    if (!err) {
-        if (do_shift) {
-            /*Retrieve the size after the existing malloc*/
-            err = memkind_store(*memptr, &tmpptr, &tmp_size, GBTLB_STORE_REMOVE);
-            if (!err) {
-                /*Adjust for alignment*/
-                *memptr = (void *) ((char *)mmapptr + (size_t)(mmapptr) % alignment);
-                /*Adjust the size*/
-                tmp_size += alignment;
-                /*Store the modified size and pointer*/
-                err = memkind_store(*memptr, &mmapptr, &tmp_size, GBTLB_STORE_INSERT);
-            }
-        }
-        else {
-            *memptr = mmapptr;
+    if (!err && do_shift) {
+        /* Remove the entry from the store */
+        err = memkind_store(*memptr, &mmapptr, &size, GBTLB_STORE_REMOVE);
+        if (!err) {
+            /* Adjust for alignment */
+            *memptr = (void *) ((char *)mmapptr + (size_t)(mmapptr) % alignment);
+            /* Store the modified pointer */
+            err = memkind_store(*memptr, &mmapptr, &size, GBTLB_STORE_INSERT);
         }
     }
     if (err && mmapptr) {
