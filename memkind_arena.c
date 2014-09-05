@@ -173,10 +173,7 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     *memptr = NULL;
     err = kind->ops->get_arena(kind, &arena);
     if (!err) {
-        if ( (alignment < sizeof(void*)) ||
-             (((alignment - 1) & alignment) != 0) ) {
-            err = EINVAL;
-        }
+        err = kind->ops->check_alignment(kind, alignment);
     }
     if (!err) {
         /* posix_memalign should not change errno.

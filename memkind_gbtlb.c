@@ -109,12 +109,9 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 
     if (alignment > ONE_GB && alignment % ONE_GB) {
         do_shift = 1;
-        size += ONE_GB;
+        size += alignment;
     }
-    if ((alignment < sizeof(void*)) ||
-        (((alignment - 1) & alignment) != 0)) {
-            err = EINVAL;
-    }
+    err = kind->check_alignment(kind, alignment);
     if (!err) {
         mmapptr = memkind_gbtlb_malloc(kind, size);
         if (mmapptr == NULL) {

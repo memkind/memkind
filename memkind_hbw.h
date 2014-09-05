@@ -58,7 +58,8 @@ static const struct memkind_ops MEMKIND_HBW_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_cpu_get_arena,
     .get_size = memkind_default_get_size,
-    .init_once = memkind_hbw_init_once
+    .init_once = memkind_hbw_init_once,
+    .check_alignment = memkind_posix_check_alignment
 };
 
 static const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
@@ -76,7 +77,8 @@ static const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_cpu_get_arena,
     .get_size = memkind_default_get_size,
-    .init_once = memkind_hbw_hugetlb_init_once
+    .init_once = memkind_hbw_hugetlb_init_once,
+    .check_alignment = memkind_posix_check_alignment
 };
 
 static const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
@@ -94,7 +96,8 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_cpu_get_arena,
     .get_size = memkind_default_get_size,
-    .init_once = memkind_hbw_preferred_init_once
+    .init_once = memkind_hbw_preferred_init_once,
+    .check_alignment = memkind_posix_check_alignment
 };
 
 static const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
@@ -112,7 +115,8 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_cpu_get_arena,
     .get_size = memkind_default_get_size,
-    .init_once = memkind_hbw_preferred_hugetlb_init_once
+    .init_once = memkind_hbw_preferred_hugetlb_init_once,
+    .check_alignment = memkind_posix_check_alignment
 };
 
 #ifdef __cplusplus

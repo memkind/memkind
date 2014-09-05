@@ -391,17 +391,22 @@ void *memkind_malloc(struct memkind *kind, size_t size)
     return kind->ops->malloc(kind, size);
 }
 
-int memkind_get_kind_for_free(void *addr,
-                              struct memkind **kind)
+int memkind_get_kind_for_free(void *addr, struct memkind **kind)
 {
     int err;
+    int i, num_kind;
+    struct memkind *test_kind;
 
-    err = memkind_gbtlb_check_addr(addr);
-    if (!err)
-        *kind = MEMKIND_HBW_GBTLB;
-    else
-        *kind = MEMKIND_DEFAULT;
-
+    *kind = MEMKIND_DEFAULT;
+    memkind_get_num_kind(&num_kind);
+    for (i = 0; i < num_kind; ++i) {
+        memkind_get_kind_by_partition(i, &test_kind);
+        if (test_kind->ops->check_addr &&
+            test_kind->ops->check_addr(test_kind, addr) == 0) {
+            *kind = test_kind;
+            break;
+        }
+    }
     return 0;
 }
 

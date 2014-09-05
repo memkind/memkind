@@ -29,8 +29,8 @@ extern "C" {
 #endif
 
 #include "memkind.h"
-#include "memkind_hbw.h"
 #include "memkind_default.h"
+#include "memkind_hbw.h"
 
 void *memkind_gbtlb_malloc(struct memkind *kind, size_t size);
 void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size);
@@ -55,7 +55,8 @@ static const struct memkind_ops MEMKIND_HBW_GBTLB_STRICT_OPS = {
     .get_mbind_mode = memkind_default_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size,
-    .check_size = memkind_gbtlb_check_size
+    .check_size = memkind_gbtlb_check_size,
+    .check_alignment = memkind_posix_check_alignment,
 };
 
 static const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
@@ -72,6 +73,8 @@ static const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size,
     .check_size = memkind_noop_check_size
+    .check_alignment = memkind_posix_check_alignment,
+    .check_addr = memkind_gbtlb_check_addr
 };
 
 static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
@@ -88,6 +91,7 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size,
     .check_size = memkind_noop_check_size
+    .check_alignment = memkind_posix_check_alignment,
 };
 
 static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_STRICT_OPS = {
@@ -104,6 +108,7 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_STRICT_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size,
     .check_size = memkind_gbtlb_check_size
+    .check_alignment = memkind_posix_check_alignment,
 };
 
 
