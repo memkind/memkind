@@ -103,7 +103,9 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 {
     int err = 0;
     int do_shift = 0;
-    void *mmapptr;
+    size_t tmp_size;
+    void *mmapptr = NULL, *tmpptr = NULL;
+
 
     *memptr = NULL;
 
@@ -120,12 +122,18 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     }
     if (!err) {
         if(do_shift) {
+            /*Retrieve the size after the existing malloc*/
+            err = memkind_store(*memptr, &tmpptr, &tmp_size, 0);
+            /*Adjust for alignment*/
             *memptr = (void *) ((char *)mmapptr + (size_t)(mmapptr) % alignment);
+            /*Adjust the size*/
+            tmp_size += alignment;
+            /*Store the modified size and pointer*/
+            err = memkind_store(*memptr, &mmapptr, &tmp_size, 0);
         }
         else {
             *memptr = mmapptr;
         }
-        err = memkind_store(*memptr, &mmapptr, &size, 0);
     }
     if (err && mmapptr) {
         munmap(mmapptr, size);
@@ -136,7 +144,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
 {
     void *result = NULL;
-    void *mmap_ptr;
+    void *mmap_ptr = NULL;
     size_t orig_size, copy_size;
 
     result = kind->ops->malloc(kind, size);

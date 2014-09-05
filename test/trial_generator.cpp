@@ -357,10 +357,16 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 }
                 break;
             case MEMKIND_FREE:
-                memkind_free(trial_vec[i].memkind,
-                              ptr_vec[trial_vec[i].free_index]);
-                ptr_vec[trial_vec[i].free_index] = NULL;
-                ptr_vec[i] = NULL;
+                if (i == num_trial - 1 || trial_vec[i + 1].api != MEMKIND_REALLOC) {
+                    memkind_free(trial_vec[i].memkind,
+                                 ptr_vec[trial_vec[i].free_index]);
+                    ptr_vec[trial_vec[i].free_index] = NULL;
+                    ptr_vec[i] = NULL;
+                }
+                else {
+                    ptr_vec[i] = memkind_realloc(ptr_vec[trial_vec[i].free_index], trial_vec[i + 1].size);
+                    ptr_vec[trial_vec[i].free_index] = NULL;
+                }
                 break;
             case HBW_MALLOC:
                 fprintf (stdout,"Allocating %zd bytes using hbw_malloc\n",
@@ -428,11 +434,11 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
             case MEMKIND_REALLOC:
                 fprintf (stdout,"Allocating %zd bytes using memkind_realloc\n",
                          trial_vec[i].size);
-
-                ptr_vec[i] = memkind_realloc(trial_vec[i].memkind,
-                                              ptr_vec[i],
-                                              trial_vec[i].size);
-
+                if (NULL == ptr_vec[i]) {
+                    ptr_vec[i] = memkind_realloc(trial_vec[i].memkind,
+                                                 ptr_vec[i - 1],
+                                                 trial_vec[i].size);
+                }
                 break;
             case MEMKIND_POSIX_MEMALIGN:
                 fprintf (stdout,
