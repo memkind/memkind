@@ -109,7 +109,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 
     *memptr = NULL;
 
-    if (alignment > ONE_GB && alignment % ONE_GB) {
+    if (alignment > ONE_GB) {
         do_shift = 1;
         size += alignment;
     }
@@ -121,15 +121,17 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
         }
     }
     if (!err) {
-        if(do_shift) {
+        if (do_shift) {
             /*Retrieve the size after the existing malloc*/
             err = memkind_store(*memptr, &tmpptr, &tmp_size, 0);
-            /*Adjust for alignment*/
-            *memptr = (void *) ((char *)mmapptr + (size_t)(mmapptr) % alignment);
-            /*Adjust the size*/
-            tmp_size += alignment;
-            /*Store the modified size and pointer*/
-            err = memkind_store(*memptr, &mmapptr, &tmp_size, 0);
+            if (!err) {
+                /*Adjust for alignment*/
+                *memptr = (void *) ((char *)mmapptr + (size_t)(mmapptr) % alignment);
+                /*Adjust the size*/
+                tmp_size += alignment;
+                /*Store the modified size and pointer*/
+                err = memkind_store(*memptr, &mmapptr, &tmp_size, 0);
+            }
         }
         else {
             *memptr = mmapptr;
@@ -249,7 +251,7 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int query_s
             free(storeptr);
         }
         else {
-            err = -2;
+            err = MEMKIND_ERROR_RUNTIME;
         }
     }
     else { /* memkind_store() call is a store */
