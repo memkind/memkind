@@ -28,6 +28,7 @@
 #include <smmintrin.h>
 #include <stdio.h>
 #include <errno.h>
+#include <jemalloc/jemalloc.h>
 
 #include "memkind_gbtlb.h"
 
@@ -36,6 +37,11 @@
 #endif
 
 const size_t ONE_GB = 1073741824ULL;
+enum {
+    GBTLB_STORE_INSERT,
+    GBTLB_STORE_REMOVE,
+    GBTLB_STORE_QUERY
+};
 
 typedef struct memkind_list_node_s {
     void *ptr;
@@ -50,7 +56,7 @@ typedef struct {
 } memkind_table_node_t;
 
 static int ptr_hash(void *ptr, int table_len);
-static int memkind_store(void *ptr, void **mmapptr, size_t *size, int query_save);
+static int memkind_store(void *ptr, void **mmapptr, size_t *size, int mode);
 static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result);
 static int memkind_gbtlb_ceil_size(size_t *size);
 
@@ -85,7 +91,7 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
         err = kind->ops->mbind(kind, result, size);
     }
     if (!err) {
-        err = memkind_store(result, &result, &size, 0);
+        err = memkind_store(result, &result, &size, GBTLB_STORE_INSERT);
     }
     if (err && result) {
         munmap(result, size);
@@ -123,14 +129,14 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     if (!err) {
         if (do_shift) {
             /*Retrieve the size after the existing malloc*/
-            err = memkind_store(*memptr, &tmpptr, &tmp_size, 0);
+            err = memkind_store(*memptr, &tmpptr, &tmp_size, GBTLB_STORE_REMOVE);
             if (!err) {
                 /*Adjust for alignment*/
                 *memptr = (void *) ((char *)mmapptr + (size_t)(mmapptr) % alignment);
                 /*Adjust the size*/
                 tmp_size += alignment;
                 /*Store the modified size and pointer*/
-                err = memkind_store(*memptr, &mmapptr, &tmp_size, 0);
+                err = memkind_store(*memptr, &mmapptr, &tmp_size, GBTLB_STORE_INSERT);
             }
         }
         else {
@@ -151,7 +157,7 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
 
     result = kind->ops->malloc(kind, size);
     if (ptr) {
-        memkind_store(ptr, &mmap_ptr, &orig_size, 0);
+        memkind_store(ptr, &mmap_ptr, &orig_size, GBTLB_STORE_INSERT);
         copy_size = orig_size - ((size_t)(ptr) - (size_t)(mmap_ptr));
         if (copy_size > size) {
             copy_size = size;
@@ -168,7 +174,7 @@ void memkind_gbtlb_free(struct memkind *kind, void *ptr)
     void *mmapptr = NULL;
     size_t size = 0;
 
-    err = memkind_store(ptr, &mmapptr, &size, 0);
+    err = memkind_store(ptr, &mmapptr, &size, GBTLB_STORE_REMOVE);
     if (!err) {
         munmap(mmapptr, size);
     }
@@ -193,7 +199,7 @@ int memkind_gbtlb_check_addr(struct memkind *kind, void *addr){
     return -1;
 }
 
-static int memkind_store(void *memptr, void **mmapptr, size_t *size, int query_save)
+static int memkind_store(void *memptr, void **mmapptr, size_t *size, int mode)
 {
     static int table_len = 0;
     static int is_init = 0;
@@ -211,7 +217,7 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int query_s
         pthread_mutex_lock(&init_mutex);
         if (!is_init) {
             table_len = numa_num_configured_cpus();
-            table = malloc(sizeof(memkind_table_node_t) * table_len);
+            table = je_malloc(sizeof(memkind_table_node_t) * table_len);
             for (i = 0; i < table_len; ++i) {
                 pthread_mutex_init(&(table[i].mutex), NULL);
                 table[i].list = NULL;
@@ -223,11 +229,12 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int query_s
 
     hash = ptr_hash(memptr, table_len);
     pthread_mutex_lock(&(table[hash].mutex));
-    if (*mmapptr == NULL) {
-        /* memkind_store() call is a query
-           query_save : 0 -> Query if found remove and
+    if (mode == GBTLB_STORE_REMOVE || mode == GBTLB_STORE_QUERY) {
+        /*
+           memkind_store() call is a query
+           GBTLB_STORE_REMOVE -> Query if found remove and
            return the address and size;
-           query_save : 1 -> Query if found and return;
+           GBTLB_STORE_QUERTY -> Query if found and return;
         */
         storeptr = table[hash].list;
         lastptr = NULL;
@@ -235,11 +242,10 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int query_s
             lastptr = storeptr;
             storeptr = storeptr->next;
         }
-        if (storeptr) {
-            if (query_save){
-                pthread_mutex_unlock(&(table[hash].mutex));
-                return err; /* Query without removing entry*/
-            }
+        if (storeptr == NULL) {
+            err = MEMKIND_ERROR_RUNTIME;
+        }
+        if (!err && mode == GBTLB_STORE_REMOVE) {
             *mmapptr = storeptr->mmapptr;
             *size = storeptr->size;
             if (lastptr) {
@@ -248,15 +254,12 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int query_s
             else {
                 table[hash].list = storeptr->next;
             }
-            free(storeptr);
-        }
-        else {
-            err = MEMKIND_ERROR_RUNTIME;
+            je_free(storeptr);
         }
     }
     else { /* memkind_store() call is a store */
         storeptr = table[hash].list;
-        table[hash].list = (memkind_list_node_t*)malloc(sizeof(memkind_list_node_t));
+        table[hash].list = (memkind_list_node_t*)je_malloc(sizeof(memkind_list_node_t));
         table[hash].list->ptr = memptr;
         table[hash].list->mmapptr = *mmapptr;
         table[hash].list->size = *size;
