@@ -88,7 +88,7 @@ typedef enum {
 
 int hbw_get_policy(void);
 void hbw_set_policy(int mode);
-int hbw_is_available(void);
+int hbw_check_available(void);
 void *hbw_malloc(size_t size);
 void *hbw_calloc(size_t num, size_t size);
 int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);

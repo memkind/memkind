@@ -71,11 +71,9 @@ static int set_closest_numanode(int num_unique,
 
 static int numanode_bandwidth_compare(const void *a, const void *b);
 
-int memkind_hbw_is_available(struct memkind *kind)
+int memkind_hbw_check_available(struct memkind *kind)
 {
-    int err;
-    err = kind->ops->get_mbind_nodemask(kind, NULL, 0);
-    return (!err);
+    return kind->ops->get_mbind_nodemask(kind, NULL, 0); 
 }
 
 int memkind_hbw_get_mbind_nodemask(struct memkind *kind,

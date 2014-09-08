@@ -74,9 +74,9 @@ void memkind_default_free(struct memkind *kind, void *ptr)
     je_free(ptr);
 }
 
-int memkind_default_is_available(struct memkind *kind)
+int memkind_default_check_available(struct memkind *kind)
 {
-    return 1;
+    return 0;
 }
 
 int memkind_default_mbind(struct memkind *kind, void *ptr, size_t len)

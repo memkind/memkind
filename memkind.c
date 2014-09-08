@@ -335,20 +335,16 @@ int memkind_get_kind_by_name(const char *name, struct memkind **kind)
     return err;
 }
 
-int memkind_partition_is_available(int partition)
+int memkind_partition_check_available(int partition)
 {
     struct memkind *kind;
     int err;
-    int result;
 
     err = memkind_get_kind_by_partition(partition, &kind);
     if (!err) {
-        result = kind->ops->is_available(kind);
+        err = kind->ops->check_available(kind);
     }
-    else {
-        result = 0;
-    }
-    return result;
+    return err;
 }
 
 int memkind_partition_get_mmap_flags(int partition, int *flags)
@@ -378,9 +374,9 @@ int memkind_partition_mbind(int partition, void *addr, size_t size)
     return err;
 }
 
-int memkind_is_available(struct memkind *kind)
+int memkind_check_available(struct memkind *kind)
 {
-    return kind->ops->is_available(kind);
+    return kind->ops->check_available(kind);
 }
 
 void *memkind_malloc(struct memkind *kind, size_t size)

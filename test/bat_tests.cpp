@@ -84,9 +84,9 @@ protected:
 };
 
 
-TEST_F(BATest, hbw_is_available)
+TEST_F(BATest, hbw_check_available)
 {
-    ASSERT_EQ(1, hbw_is_available());
+    ASSERT_EQ(0, hbw_check_available());
 }
 
 TEST_F(BATest, hbw_policy)

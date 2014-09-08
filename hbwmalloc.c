@@ -55,9 +55,9 @@ void hbw_set_policy(int mode)
     }
 }
 
-int hbw_is_available(void)
+int hbw_check_available(void)
 {
-    return memkind_is_available(MEMKIND_HBW);
+    return memkind_check_available(MEMKIND_HBW);
 }
 
 void *hbw_malloc(size_t size)
@@ -76,7 +76,7 @@ void *hbw_calloc(size_t num, size_t size)
     return memkind_calloc(kind, num, size);
 }
 
-int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
+int hbw_posix_memalign(void **memptr, size_t alignment, size_t size)
 {
     int err;
     memkind_t kind;
@@ -93,7 +93,7 @@ int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size)
     return err;
 }
 
-int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
+int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
                                 int pagesize)
 {
     int err;
@@ -150,7 +150,7 @@ static inline memkind_t hbw_get_kind(int pagesize)
     }
     else {
         if (pagesize == HBW_PAGESIZE_2MB) {
-            if (memkind_is_available(MEMKIND_HBW_PREFERRED_HUGETLB)) {
+            if (memkind_check_available(MEMKIND_HBW_PREFERRED_HUGETLB) == 0) {
                 result = MEMKIND_HBW_PREFERRED_HUGETLB;
             }
             else {
@@ -158,7 +158,7 @@ static inline memkind_t hbw_get_kind(int pagesize)
             }
         }
         else {
-            if (memkind_is_available(MEMKIND_HBW_PREFERRED)) {
+            if (memkind_check_available(MEMKIND_HBW_PREFERRED) == 0) {
                 result = MEMKIND_HBW_PREFERRED;
             }
             else {

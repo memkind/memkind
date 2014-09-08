@@ -102,13 +102,13 @@ struct memkind_ops {
     int (* posix_memalign)(struct memkind *kind, void **memptr, size_t alignment, size_t size);
     void *(* realloc)(struct memkind *kind, void *ptr, size_t size);
     void (* free)(struct memkind *kind, void *ptr);
-    int (* is_available)(struct memkind *kind);
     int (* mbind)(struct memkind *kind, void *ptr, size_t len);
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
     int (* get_mbind_mode)(struct memkind *kind, int *mode);
     int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
     int (* get_arena)(struct memkind *kind, unsigned int *arena);
     int (* get_size)(struct memkind *kind, size_t *total, size_t *free);
+    int (* check_available)(struct memkind *kind);
     int (* check_size)(struct memkind *kind, size_t size);
     int (* check_alignment)(struct memkind *kind, size_t alignment);
     int (* check_addr)(struct memkind *kind, void *addr);
@@ -156,8 +156,8 @@ int memkind_get_kind_for_free(void *addr, memkind_t *kind);
 /* Get the amount in bytes of total and free memory of the NUMA nodes assciated with the kind */
 int memkind_get_size(memkind_t kind, size_t *total, size_t *free);
 
-/* returns 1 if memory kind is availble else 0 */
-int memkind_is_available(memkind_t kind);
+/* returns 0 if memory kind is availble else returns error code */
+int memkind_check_available(memkind_t kind);
 
 /* HEAP MANAGEMENT INTERFACE */
 
@@ -179,8 +179,8 @@ void memkind_free(memkind_t kind, void *ptr);
 
 /* ALLOCATOR CALLBACK FUNCTIONS */
 
-/* returns 1 if memory kind associated with the partition is availble else 0 */
-int memkind_partition_is_available(int partition);
+/* returns 0 if memory kind associated with the partition is availble else returns error code */
+int memkind_partition_check_available(int partition);
 
 /* get flags for call to mmap for the memory kind associated with the partition */
 int memkind_partition_get_mmap_flags(int partition, int *flags);
