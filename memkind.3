@@ -349,7 +349,7 @@ then
 is returned.  If there was insufficient memory to satisfy the request then
 .B ENOMEM
 is returned.
-.TP 
+.TP
 .B MEMKIND ERRORS
 All memkind API's not part of the
 .B HEAP MANAGEMENT
@@ -357,13 +357,13 @@ set return one of the error codes as defined in
 .I <memkind.h>
 and described below (with the exception of
 .BR memkind_error_message ()
-which has no return value).  
+which has no return value).
 .TP
 .B MEMKIND_ERROR_UNAVAILABLE
 Requested memory kind is not available
 .TP
 .B MEMKIND_ERROR_MBIND
-Call to 
+Call to
 .BR mbind ()
 failed
 .TP
@@ -373,7 +373,7 @@ Call to
 failed
 .TP
 .B MEMKIND_ERROR_MEMALIGN
-Call to 
+Call to
 .BR je_posix_memalign ()
 failed
 .TP
@@ -404,7 +404,7 @@ Two NUMA memory nodes are equidistant from target cpu node
 Alignment must be a power of two and larger than sizeof(void *)
 .TP
 .B MEMKIND_ERROR_ALLOCM
-Call to 
+Call to
 .BR je_allocm ()
 failed
 .TP
