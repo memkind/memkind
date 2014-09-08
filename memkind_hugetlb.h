@@ -32,10 +32,6 @@ extern "C" {
 #include "memkind_default.h"
 #include "memkind_arena.h"
 
-#ifndef MAP_HUGE_2MB
-# define MAP_HUGE_2MB (21 << 26)
-#endif
-
 int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags);
 void memkind_hugetlb_init_once(void);
 

@@ -23,6 +23,9 @@
  */
 
 #include <sys/mman.h>
+#ifndef MAP_HUGE_2MB
+#define MAP_HUGE_2MB (21 << 26)
+#endif
 
 #include "memkind_hugetlb.h"
 

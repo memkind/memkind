@@ -30,14 +30,14 @@
 #include <jemalloc/jemalloc.h>
 #include <sys/mman.h>
 
-#include "memkind_gbtlb.h"
-
-
 #ifndef MAP_HUGE_1GB
-# define MAP_HUGE_1GB (30 << 26)
+#define MAP_HUGE_1GB (30 << 26)
 #endif
 
+#include "memkind_gbtlb.h"
+
 const size_t ONE_GB = 1073741824ULL;
+
 enum {
     GBTLB_STORE_INSERT,
     GBTLB_STORE_REMOVE,
