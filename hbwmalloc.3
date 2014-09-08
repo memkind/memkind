@@ -30,7 +30,7 @@ hbwmalloc \- The high bandwidth memory interface
 .sp
 .B Link with -ljemalloc -lnuma -lmemkind -lpthread
 .sp
-.B int hbw_is_available(void);
+.B int hbw_check_available(void);
 .br
 .BI "void* hbw_malloc(size_t " "size" );
 .br
@@ -49,8 +49,11 @@ hbwmalloc \- The high bandwidth memory interface
 .BI "void hbw_set_policy(int " "mode" );
 .fi
 .SH "DESCRIPTION"
-.BR hbw_is_available ()
-returns 1 if high bandwidth memory is available and 0 otherwise.
+.BR hbw_check_available ()
+returns 0 if high bandwidth memory is available and an error code
+described in the
+.B ERRORS
+section otherwise.
 .PP
 .BR hbw_malloc ()
 allocates
@@ -222,54 +225,34 @@ fails.
 .BR hbw_posix_memalign ()
 and
 .BR hbw_posix_memalign_psize ()
-return zero on success, or one of the error values listed in the
+return zero on success and return an error code
+as described in the
 .B ERRORS
-section on failure.  The library sets
-.I errno
-to ENOMEM if requesting a negative size and
-EINVAL if the alignment is invalid.
+section below on failure.
 .SH ERRORS
 .TP
-.B MEMKIND_ERROR_UNAVAILABLE
-Requested memory kind is not available
+.BR hbw_check_available ()
+returns one of the error codes described in
+.BR memkind (3)
+if high bandwidth memory is not available.
 .TP
-.B MEMKIND_ERROR_MBIND
-Call to mbind() failed
-.TP
-.B MEMKIND_ERROR_MMAP
-Call to mmap() failed
-.TP
-.B MEMKIND_ERROR_MEMALIGN
-Call to posix_memalign() failed
-.TP
-.B MEMKIND_ERROR_MALLCTL
-Call to je_mallctl() failed
-.TP
-.B MEMKIND_ERROR_MALLOC
-Call to je_malloc() failed
-.TP
-.B MEMKIND_ERROR_GETCPU
-Call to sched_getcpu() returned out of range
-.TP
-.B MEMKIND_ERROR_PMTT
-Unable to find parsed PMTT table or
-invalid PMTT table entries in
-.I /etc/memkind/node-bandwidth
-.TP
-.B MEMKIND_ERROR_TIEDISTANCE
-Two NUMA memory nodes are equidistant from target cpu node
-.TP
-.B MEMKIND_ERROR_ALIGNMENT
-Alignment must be a power of two and larger than sizeof(void *)
-.TP
-.B MEMKIND_ERROR_ALLOCM
-Call to je_allocm() failed
-.TP
-.B MEMKIND_ERROR_ENVIRON
-Error parsing environment variable (MEMKIND_*)
-.TP
-.B MEMKIND_ERROR_INVALID
-Invalid input arguments to memkind routine
+.BR "hbw_posix_memalign" "() and " "hbw_posix_memalign_psize" "()"
+return the one of the POSIX standard error codes
+.B EINVAL
+or
+.B ENOMEM
+as defined in
+.IR <errno.h>
+if an error occurs.
+If the
+.I alignment
+parameter is not a power of two, or was not a multiple of
+.IR "sizoeof(void *)" ,
+then
+.B EINVAL
+is returned.  If there was insufficient memory to satisfy the request then
+.B ENOMEM
+is returned.
 .SH "NOTES"
 The
 .I hbwmalloc.h

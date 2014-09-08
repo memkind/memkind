@@ -46,7 +46,7 @@ memkind \- Heap manager that isolates allocations to different kinds of numa nod
 .sp
 .B "ALLOCATOR CALLBACK FUNCTIONS:"
 .br
-.BI "int memkind_partition_is_available(int " "partition" );
+.BI "int memkind_partition_check_available(int " "partition" );
 .br
 .BI "int memkind_partition_get_mmap_flags(int " "partition" ", int " "*flags" );
 .br
@@ -64,7 +64,7 @@ memkind \- Heap manager that isolates allocations to different kinds of numa nod
 .br
 .BI "int memkind_get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
 .br
-.BI "int memkind_is_available(memkind_t " "kind" );
+.BI "int memkind_check_available(memkind_t " "kind" );
 .br
 .SH "DESCRIPTION"
 .B "HEAP MANAGER:"
@@ -215,10 +215,10 @@ where the maximium size of the message is given by the
 .I size
 parameter.
 .PP
-.BR memkind_is_available ()
-returns 1 if there is support for the specified
+.BR memkind_check_available ()
+returns 0 if there is support for the specified
 .I kind
-on the system and 0 otherwise.
+on the system and an error code otherwise.
 .PP
 .BR memkind_get_kind_for_free ()
 Get the kind associated with an address
@@ -261,17 +261,12 @@ return the pointer to the allocated memory, or NULL if the request fails.
 and
 .BR memkind_error_message ()
 do not have return values.
-.BR memkind_is_available()
-returns 1 if there is support for the specified
-.I kind
-on the system and 0 otherwise.  All other memkind API's return 0 upon
+All other memkind API's return 0 upon
 success, and an error code defined in the ERRORS section upon failure.
-The library sets
+The memkind library avoids setting
 .I errno
-to ENOMEM if the request could not be satisfied or when requesting a
-negative size.  The library sets
-.I errno
-to EINVAL if the alignment is invalid.
+directly, but calls to underlying libraries and system calls may set
+.IR errno .
 .SH "KINDS"
 The available kinds of memory
 .TP
@@ -337,26 +332,65 @@ is not a multiple of one gigabyte.
 .PP
 .SH "ERRORS"
 .TP
+.BR memkind_posix_memalign ()
+returns the one of the POSIX standard error codes
+.B EINVAL
+or
+.B ENOMEM
+as defined in
+.I <errno.h>
+if an error occurs.
+If the
+.I alignment
+parameter is not a power of two, or was not a multiple of
+.IR "sizoeof(void *)" ,
+then
+.B EINVAL
+is returned.  If there was insufficient memory to satisfy the request then
+.B ENOMEM
+is returned.
+.TP 
+.B MEMKIND ERRORS
+All memkind API's not part of the
+.B HEAP MANAGEMENT
+set return one of the error codes as defined in
+.I <memkind.h>
+and described below (with the exception of
+.BR memkind_error_message ()
+which has no return value).  
+.TP
 .B MEMKIND_ERROR_UNAVAILABLE
 Requested memory kind is not available
 .TP
 .B MEMKIND_ERROR_MBIND
-Call to mbind() failed
+Call to 
+.BR mbind ()
+failed
 .TP
 .B MEMKIND_ERROR_MMAP
-Call to mmap() failed
+Call to
+.BR mmap ()
+failed
 .TP
 .B MEMKIND_ERROR_MEMALIGN
-Call to posix_memalign() failed
+Call to 
+.BR je_posix_memalign ()
+failed
 .TP
 .B MEMKIND_ERROR_MALLCTL
-Call to je_mallctl() failed
+Call to
+.BR je_mallctl ()
+failed
 .TP
 .B MEMKIND_ERROR_MALLOC
-Call to je_malloc() failed
+Call to
+.BR je_malloc ()
+failed
 .TP
 .B MEMKIND_ERROR_GETCPU
-Call to sched_getcpu() returned out of range
+Call to
+.BR sched_getcpu ()
+returned out of range
 .TP
 .B MEMKIND_ERROR_PMTT
 Unable to find parsed PMTT table or
@@ -370,7 +404,9 @@ Two NUMA memory nodes are equidistant from target cpu node
 Alignment must be a power of two and larger than sizeof(void *)
 .TP
 .B MEMKIND_ERROR_ALLOCM
-Call to je_allocm() failed
+Call to 
+.BR je_allocm ()
+failed
 .TP
 .B MEMKIND_ERROR_ENVIRON
 Error parsing environment variable (MEMKIND_*)
