@@ -78,47 +78,19 @@ void *hbw_calloc(size_t num, size_t size)
 
 int hbw_posix_memalign(void **memptr, size_t alignment, size_t size)
 {
-    int err;
     memkind_t kind;
 
     kind = hbw_get_kind(HBW_PAGESIZE_4KB);
-    err = memkind_posix_memalign(kind, memptr, alignment, size);
-
-    if (err == EINVAL) {
-        err = MEMKIND_ERROR_ALIGNMENT;
-    }
-    else if (err == ENOMEM) {
-        err = MEMKIND_ERROR_MALLOCX;
-    }
-    return err;
+    return memkind_posix_memalign(kind, memptr, alignment, size);
 }
 
 int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
                                 int pagesize)
 {
-    int err;
     memkind_t kind;
 
-    if (pagesize == HBW_PAGESIZE_1GB_STRICT) {
-        kind = MEMKIND_HBW_PREFERRED_GBTLB_STRICT;
-        err  = kind->ops->posix_memalign(kind, memptr, alignment, size);
-    }
-    else if (pagesize == HBW_PAGESIZE_1GB) {
-        kind = MEMKIND_HBW_PREFERRED_GBTLB;
-        err  = kind->ops->posix_memalign(kind, memptr, alignment, size);
-    }
-    else {
-        kind = hbw_get_kind(pagesize);
-        err = memkind_posix_memalign(kind, memptr, alignment, size);
-    }
-
-    if (err == EINVAL) {
-        err = MEMKIND_ERROR_ALIGNMENT;
-    }
-    else if (err == ENOMEM) {
-        err = MEMKIND_ERROR_MALLOCX;
-    }
-    return err;
+    kind = hbw_get_kind(pagesize);
+    return memkind_posix_memalign(kind, memptr, alignment, size);
 }
 
 void *hbw_realloc(void *ptr, size_t size)
@@ -141,29 +113,51 @@ static inline memkind_t hbw_get_kind(int pagesize)
     memkind_t result = NULL;
 
     if (hbw_get_policy() == HBW_POLICY_BIND) {
-        if (pagesize == HBW_PAGESIZE_2MB) {
-            result = MEMKIND_HBW_HUGETLB;
+        switch (pagesize) {
+            case HBW_PAGESIZE_2MB:
+                result = MEMKIND_HBW_HUGETLB;
+                break;
+            case HBW_PAGESIZE_1GB:
+                result = MEMKIND_HBW_GBTLB;
+                break;
+            case HBW_PAGESIZE_1GB_STRICT:
+                result = MEMKIND_HBW_GBTLB_STRICT;
+                break;
+            default:
+                result = MEMKIND_HBW;
+                break;
         }
-        else {
-            result = MEMKIND_HBW;
+    }
+    else if (memkind_check_available(MEMKIND_HBW) == 0) {
+        switch (pagesize) {
+            case HBW_PAGESIZE_2MB:
+                result = MEMKIND_HBW_PREFERRED_HUGETLB;
+                break;
+            case HBW_PAGESIZE_1GB:
+                result = MEMKIND_HBW_PREFERRED_GBTLB;
+                break;
+            case HBW_PAGESIZE_1GB_STRICT:
+                result = MEMKIND_HBW_PREFERRED_GBTLB_STRICT;
+                break;
+            default:
+                result = MEMKIND_HBW_PREFERRED;
+                break;
         }
     }
     else {
-        if (pagesize == HBW_PAGESIZE_2MB) {
-            if (memkind_check_available(MEMKIND_HBW_PREFERRED_HUGETLB) == 0) {
-                result = MEMKIND_HBW_PREFERRED_HUGETLB;
-            }
-            else {
+        switch (pagesize) {
+            case HBW_PAGESIZE_2MB:
                 result = MEMKIND_HUGETLB;
-            }
-        }
-        else {
-            if (memkind_check_available(MEMKIND_HBW_PREFERRED) == 0) {
-                result = MEMKIND_HBW_PREFERRED;
-            }
-            else {
+                break;
+            case HBW_PAGESIZE_1GB:
+                result = NULL;/* FIXME MEMKIND_GBTLB; */
+                break;
+            case HBW_PAGESIZE_1GB_STRICT:
+                result = NULL;/* FIXME MEMKIND_GBTLB_STRICT; */
+                break;
+            default:
                 result = MEMKIND_DEFAULT;
-            }
+                break;
         }
     }
     return result;
