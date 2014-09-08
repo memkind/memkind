@@ -127,12 +127,12 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     }
     if (!err && do_shift) {
         /* Remove the entry from the store */
-        err = memkind_store(*memptr, &mmapptr, &size, GBTLB_STORE_REMOVE);
+        err = memkind_store(*memptr, &mmapptr, &size, GBTLB_STORE_REMOVE) ? ENOMEM : 0;
         if (!err) {
             /* Adjust for alignment */
             *memptr = (void *) ((char *)mmapptr + (size_t)(mmapptr) % alignment);
             /* Store the modified pointer */
-            err = memkind_store(*memptr, &mmapptr, &size, GBTLB_STORE_INSERT);
+            err = memkind_store(*memptr, &mmapptr, &size, GBTLB_STORE_INSERT) ? ENOMEM : 0;
         }
     }
     if (err && mmapptr) {

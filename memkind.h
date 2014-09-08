@@ -80,6 +80,8 @@ enum memkind_base_partition {
     MEMKIND_PARTITION_HBW_PREFERRED_GBTLB_STRICT = 7,
     MEMKIND_PARTITION_HBW_GBTLB = 8,
     MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 9,
+    MEMKIND_PARTITION_GBTLB = 10,
+    MEMKIND_PARTITION_GBTLB_STRICT = 11,
     MEMKIND_NUM_BASE_KIND
 };
 
@@ -127,7 +129,8 @@ extern memkind_t MEMKIND_HBW_GBTLB_STRICT;
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB_STRICT;
 extern memkind_t MEMKIND_HBW_GBTLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
-
+extern memkind_t MEMKIND_GBTLB;
+extern memkind_t MEMKIND_GBTLB_STRICT;
 
 
 /* Convert error number into an error message */

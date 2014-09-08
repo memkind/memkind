@@ -150,10 +150,10 @@ static inline memkind_t hbw_get_kind(int pagesize)
                 result = MEMKIND_HUGETLB;
                 break;
             case HBW_PAGESIZE_1GB:
-                result = NULL;/* FIXME MEMKIND_GBTLB; */
+                result = MEMKIND_GBTLB;
                 break;
             case HBW_PAGESIZE_1GB_STRICT:
-                result = NULL;/* FIXME MEMKIND_GBTLB_STRICT; */
+                result = MEMKIND_GBTLB_STRICT;
                 break;
             default:
                 result = MEMKIND_DEFAULT;
