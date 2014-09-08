@@ -24,20 +24,33 @@
 #
 
 if [ $# -lt 3 ] || [ $1 == --help ] || [ $1 == -h ]; then
-    echo "Usage: $0 rpmdir login ip"
+    echo "Usage: $0 rpmdir login ip [outdir] [identity]"
     exit 1
 fi
 rpmdir=$1
 remote_login=$2
 remote_ip=$3
+if [ $# -gt 3 ]; then
+    outdir=$4
+    mkdir -p $outdir
+else
+    outdir=.
+fi
+if [ $# -gt 4 ]; then
+    identity=$5
+else
+    identity=$HOME/.ssh/id_rsa
+fi
+alias ssh='ssh -i $identity'
+alias scp='scp -i $identity'
 
 basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 rm -f all_tests.xml
 
 pushd $rpmdir
-nkrpm=`ls -t memkind*.rpm | grep -v debuginfo | head -n1`
-jerpm=`ls -t jemalloc*.rpm | grep -v debuginfo | head -n1`
+nkrpm=`ls -t memkind-devel*.rpm | head -n1`
+jerpm=`ls -t jemalloc-devel*.rpm | head -n1`
 scp $nkrpm $jerpm $remote_login@$remote_ip:
 popd
 
@@ -52,12 +65,12 @@ scp $basedir/pmtterr_test $remote_login@$remote_ip:
 scp -r  $basedir/test_libs $remote_login@$remote_ip:
 scp $basedir/test.sh $remote_login@$remote_ip:
 
-ssh root@$remote_ip "rpm -e memkind >& /dev/null"
-ssh root@$remote_ip "rpm -e jemalloc >& /dev/null"
+ssh root@$remote_ip "rpm -e memkind-devel >& /dev/null"
+ssh root@$remote_ip "rpm -e jemalloc-devel >& /dev/null"
 ssh root@$remote_ip "rpm -i ~$remote_login/$nkrpm ~$remote_login/$jerpm"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_hugepages"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_overcommit_hugepages"
 
-err=$(ssh $remote_login@$remote_ip "./test.sh --gtest_output=xml:output_xmls/")
-scp -r $remote_login@$remote_ip:output_xmls .
-exit err
+err=$(ssh $remote_login@$remote_ip "./test.sh --gtest_output=xml:gtest_output/")
+scp $remote_login@$remote_ip:gtest_output/\* $outdir
+exit $err
