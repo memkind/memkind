@@ -29,7 +29,9 @@
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
 #include <sys/mman.h>
-
+#ifndef MAP_HUGETLB
+#define MAP_HUGETLB 0x40000
+#endif
 #ifndef MAP_HUGE_1GB
 #define MAP_HUGE_1GB (30 << 26)
 #endif
