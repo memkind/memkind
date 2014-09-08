@@ -391,7 +391,7 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
             case HBW_MEMALIGN:
                 fprintf (stdout,"Allocating %zd bytes using hbw_memalign\n",
                          trial_vec[i].size);
-                ret =  hbw_allocate_memalign(&ptr_vec[i],
+                ret =  hbw_posix_memalign(&ptr_vec[i],
                                              trial_vec[i].alignment,
                                              trial_vec[i].size);
                 break;
@@ -409,7 +409,7 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 else
                     psize = HBW_PAGESIZE_1GB_STRICT;
 
-                ret = hbw_allocate_memalign_psize(&ptr_vec[i],
+                ret = hbw_posix_memalign_psize(&ptr_vec[i],
                                                   trial_vec[i].alignment,
                                                   trial_vec[i].size,
                                                   psize);

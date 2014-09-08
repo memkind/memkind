@@ -47,9 +47,9 @@ int main(int argc, char **argv)
         fprintf(stderr, "Unable to allocate hbw string\n");
         return errno ? -errno : 1;
     }
-    err = hbw_allocate_memalign_psize((void **)&hbw_hugetlb_str, 2097152, size, HBW_PAGESIZE_2MB);
+    err = hbw_posix_memalign_psize((void **)&hbw_hugetlb_str, 2097152, size, HBW_PAGESIZE_2MB);
     if (err) {
-        perror("hbw_allocate_memalign()");
+        perror("hbw_posix_memalign()");
         fprintf(stderr, "Unable to allocate hbw hugetlb string\n");
         return errno ? -errno : 1;
     }

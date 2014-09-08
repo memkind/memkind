@@ -40,9 +40,9 @@ hbwmalloc \- The high bandwidth memory interface
 .br
 .BI "void hbw_free(void " "*ptr" );
 .br
-.BI "int hbw_allocate_memalign(void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.BI "int hbw_posix_memalign(void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .br
-.BI "int hbw_allocate_memalign_psize(void " "**memptr" ", size_t " "alignment" ", size_t " "size" ", int " "pagesize" );
+.BI "int hbw_posix_memalign_psize(void " "**memptr" ", size_t " "alignment" ", size_t " "size" ", int " "pagesize" );
 .br
 .B int hbw_get_policy(void);
 .br
@@ -111,9 +111,9 @@ if not NULL, must have been returned by a previous call to
 .BR hbw_malloc (),
 .BR hbw_calloc (),
 .BR hbw_realloc (),
-.BR hbw_allocate_memalign (),
+.BR hbw_posix_memalign (),
 or
-.BR hbw_allocate_memalign_psize ().
+.BR hbw_posix_memalign_psize ().
 Otherwise, or if
 .I hbw_free(ptr)
 has been called before, undefined behavior occurs.
@@ -130,14 +130,14 @@ if not NULL, must have been returned by a previous call to
 .BR hbw_malloc (),
 .BR hbw_calloc (),
 .BR hbw_realloc (),
-.BR hbw_allocate_memalign (),
+.BR hbw_posix_memalign (),
 or
-.BR hbw_allocate_memalign_psize ().
+.BR hbw_posix_memalign_psize ().
 Otherwise, or if
 .I hbw_free(ptr)
 has already been called before, undefined behavior occurs.
 .PP
-.BR hbw_allocate_memalign ()
+.BR hbw_posix_memalign ()
 allocates
 .I size
 bytes of high bandwidth memory such that the allocation's base address
@@ -150,7 +150,7 @@ The requested
 must be a power of 2 at least as large as
 .IR "sizeof(void *)" .
 .PP
-.BR hbw_allocate_memalign_psize ()
+.BR hbw_posix_memalign_psize ()
 allocates
 .I size
 bytes of high bandwidth memory such that the allocation's base address
@@ -219,9 +219,9 @@ and
 .BR hbw_realloc ()
 return the pointer to the allocated memory, or NULL if the request
 fails.
-.BR hbw_allocate_memalign ()
+.BR hbw_posix_memalign ()
 and
-.BR hbw_allocate_memalign_psize ()
+.BR hbw_posix_memalign_psize ()
 return zero on success, or one of the error values listed in the
 .B ERRORS
 section on failure.  The library sets

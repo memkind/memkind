@@ -70,13 +70,13 @@ typedef enum {
 /*!
  *  \brief Page size selection.
  *
- *  The hbw_allocate_memalign_psize() API gives the user the option to
+ *  The hbw_posix_memalign_psize() API gives the user the option to
  *  select the page size from this enumerated list.
  */
 typedef enum {
     /*!
      *  The 4 kilobyte page size option, this enables the same behavior
-     *  from hbw_allocate_memalign_psize() as the hbw_allocate_memalign()
+     *  from hbw_posix_memalign_psize() as the hbw_posix_memalign()
      *  API.  Note with transparent huge pages enabled, these allocations
      *  may be promoted by the operating system to 2 megabyte pages.
      */
@@ -91,8 +91,8 @@ void hbw_set_policy(int mode);
 int hbw_is_available(void);
 void *hbw_malloc(size_t size);
 void *hbw_calloc(size_t num, size_t size);
-int hbw_allocate_memalign(void **memptr, size_t alignment, size_t size);
-int hbw_allocate_memalign_psize(void **memptr, size_t alignment, size_t size,
+int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
+int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
                                 int pagesize);
 void *hbw_realloc(void *ptr, size_t size);
 void hbw_free(void *ptr);

@@ -157,7 +157,7 @@ TEST_F(NegativeTest, InvalidSizeMemalign)
     int ret = 0;
     void *ptr = NULL;
     int err = MEMKIND_ERROR_ALIGNMENT;
-    ret = hbw_allocate_memalign(&ptr,1,-1);
+    ret = hbw_posix_memalign(&ptr,1,-1);
     ASSERT_TRUE(ptr == NULL);
     EXPECT_EQ(ret, err);
 
