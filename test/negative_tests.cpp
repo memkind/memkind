@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <numa.h>
 #include <errno.h>
+#include <limits.h>
 #include "common.h"
 #include "check.h"
 #include "omp.h"
@@ -156,16 +157,17 @@ TEST_F(NegativeTest, InvalidSizeMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
-    int err = MEMKIND_ERROR_ALIGNMENT;
-    ret = hbw_posix_memalign(&ptr,1,-1);
-    ASSERT_TRUE(ptr == NULL);
-    EXPECT_EQ(ret, err);
+    int err = ENOMEM;
 
     errno = 0;
-    err = EINVAL;
-    ret = memkind_posix_memalign(MEMKIND_HBW,
-                                  &ptr, 5, 100);
+    ret = hbw_posix_memalign(&ptr,4096,ULLONG_MAX);
+    EXPECT_TRUE(ptr == NULL);
+    EXPECT_EQ(ret, err);
+    EXPECT_EQ(errno, 0);
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_HBW, &ptr, 4096, ULLONG_MAX);
+    EXPECT_TRUE(ptr == NULL);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
-    ASSERT_TRUE(ptr == NULL);
 }
