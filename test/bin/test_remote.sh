@@ -71,6 +71,7 @@ ssh root@$remote_ip "rpm -i ~$remote_login/$nkrpm ~$remote_login/$jerpm"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_hugepages"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_overcommit_hugepages"
 
-err=$(ssh $remote_login@$remote_ip "./test.sh --gtest_output=xml:gtest_output/")
+ssh $remote_login@$remote_ip "./test.sh --gtest_output=xml:gtest_output/" | tee $outdir/test.out
+err=$?
 scp $remote_login@$remote_ip:gtest_output/\* $outdir
 exit $err
