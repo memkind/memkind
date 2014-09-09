@@ -29,6 +29,7 @@
 #include <pthread.h>
 #include <numa.h>
 #include <numaif.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <jemalloc/jemalloc.h>
 #define _GNU_SOURCE
@@ -309,7 +310,7 @@ static int set_closest_numanode(int num_unique,
     ***************************************************************************/
 
     int err = 0;
-    int min_distance, distance, i, j;
+    int min_distance, distance, i, j, old_errno;
     struct bandwidth_nodes_t match;
     match.bandwidth = -1;
     for (i = 0; i < num_cpunode; ++i) {
@@ -328,8 +329,10 @@ static int set_closest_numanode(int num_unique,
         for (i = 0; i < num_cpunode; ++i) {
             min_distance = INT_MAX;
             for (j = 0; j < match.num_numanodes; ++j) {
+                old_errno = errno;
                 distance = numa_distance(numa_node_of_cpu(i),
                                          match.numanodes[j]);
+                errno = old_errno;
                 if (distance < min_distance) {
                     min_distance = distance;
                     closest_numanode[i] = match.numanodes[j];
