@@ -325,7 +325,8 @@ int memkind_get_kind_by_partition(int partition, struct memkind **kind)
 {
     int err = 0;
 
-    if (partition < MEMKIND_MAX_KIND &&
+    if (partition >= 0 &&
+        partition < MEMKIND_MAX_KIND &&
         memkind_registry_g.partition_map[partition] != NULL) {
         *kind = memkind_registry_g.partition_map[partition];
     }
