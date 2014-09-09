@@ -300,9 +300,9 @@ int memkind_finalize(void)
                 goto exit;
             }
             memkind_registry_g.partition_map[i] = NULL;
-        }
-        if (i >= MEMKIND_NUM_BASE_KIND) {
-            je_free(kind);
+            if (i >= MEMKIND_NUM_BASE_KIND) {
+                je_free(kind);
+            }
         }
     }
 
@@ -310,7 +310,6 @@ exit:
     if (err != MEMKIND_ERROR_PTHREAD) {
         err = pthread_mutex_unlock(&(memkind_registry_g.lock)) ? MEMKIND_ERROR_PTHREAD : 0;
     }
-
     return err;
 }
 
