@@ -142,7 +142,7 @@ int memkind_finalize(void);
 /* KIND MANAGEMENT INTERFACE */
 
 /* Create a new kind */
-int memkind_create(const struct memkind_ops *ops, const char *name);
+int memkind_create(const struct memkind_ops *ops, const char *name, memkind_t *kind);
 
 /* Query the number of kinds instantiated */
 int memkind_get_num_kind(int *num_kind);
