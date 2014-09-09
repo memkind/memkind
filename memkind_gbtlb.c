@@ -196,11 +196,7 @@ int memkind_gbtlb_check_addr(struct memkind *kind, void *addr){
     void *mmapptr = NULL;
     size_t size = 0;
 
-    err = memkind_store(addr, &mmapptr, &size, GBTLB_STORE_QUERY);
-    if (!err){
-        return 0;
-    }
-    return -1;
+    return memkind_store(addr, &mmapptr, &size, GBTLB_STORE_QUERY);
 }
 
 static int memkind_store(void *memptr, void **mmapptr, size_t *size, int mode)
