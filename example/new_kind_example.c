@@ -114,28 +114,35 @@ int node3_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsi
 
 int main(int argc, char **argv)
 {
+    const size_t SIZE = 1024;
+    char err_msg[SIZE];
     memkind_t node_kind[4];
-    size_t size = 1024;
     char *str;
-    int i, max;
+    int i, max, err;
 
     max = numa_num_configured_nodes();
     if (max > 4) {
         max = 4;
     }
 
-    memkind_create(&NODE0_OPS, "node0");
-    memkind_create(&NODE1_OPS, "node1");
-    memkind_create(&NODE2_OPS, "node2");
-    memkind_create(&NODE3_OPS, "node3");
-
-    memkind_get_kind_by_name("node0", node_kind + 0);
-    memkind_get_kind_by_name("node1", node_kind + 1);
-    memkind_get_kind_by_name("node2", node_kind + 2);
-    memkind_get_kind_by_name("node3", node_kind + 3);
+    err = memkind_create(&NODE0_OPS, "node0", node_kind + 0);
+    if (!err) {
+        err = memkind_create(&NODE1_OPS, "node1", node_kind + 1);
+    }
+    if (!err) {
+        err = memkind_create(&NODE2_OPS, "node2", node_kind + 2);
+    }
+    if (!err) {
+        err = memkind_create(&NODE3_OPS, "node3", node_kind + 3);
+    }
+    if (err) {
+        memkind_error_message(err, err_msg, SIZE);
+        fprintf(stderr, err_msg);
+        return 1;
+    }
 
     for (i = 0; i < max; ++i) {
-        str = (char *)memkind_malloc(node_kind[i], size);
+        str = (char *)memkind_malloc(node_kind[i], SIZE);
         if (str == NULL) {
             perror("memkind_malloc()");
             fprintf(stderr, "Unable to allocate string on node %d\n", i);
@@ -145,5 +152,7 @@ int main(int argc, char **argv)
         fprintf(stdout, str);
         memkind_free(node_kind[i], str);
     }
+
+    memkind_finalize();
     return 0;
 }
