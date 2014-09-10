@@ -405,7 +405,7 @@ void *memkind_malloc(struct memkind *kind, size_t size)
     return kind->ops->malloc(kind, size);
 }
 
-int memkind_get_kind_for_free(void *addr, struct memkind **kind)
+int memkind_get_kind_for_free(void *ptr, struct memkind **kind)
 {
     int i, num_kind;
     struct memkind *test_kind;
@@ -415,7 +415,7 @@ int memkind_get_kind_for_free(void *addr, struct memkind **kind)
     for (i = 0; i < num_kind; ++i) {
         memkind_get_kind_by_partition(i, &test_kind);
         if (test_kind->ops->check_addr &&
-            test_kind->ops->check_addr(test_kind, addr) == 0) {
+            test_kind->ops->check_addr(test_kind, ptr) == 0) {
             *kind = test_kind;
             break;
         }
