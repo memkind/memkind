@@ -40,9 +40,12 @@ memkind \- Heap manager that isolates allocations to different kinds of numa nod
 .br
 .BI "void *memkind_realloc(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" );
 .br
+.BI "int memkind_posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.br
 .BI "void memkind_free(memkind_t " "kind" ", void " "*ptr" );
 .br
-.BI "int memkind_posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.BI "int memkind_get_kind_for_free(void " "*ptr" ", memkind_t " "*kind" );
+.br
 .sp
 .B "ALLOCATOR CALLBACK FUNCTIONS:"
 .br
@@ -54,7 +57,9 @@ memkind \- Heap manager that isolates allocations to different kinds of numa nod
 .sp
 .B "KIND MANAGMENT:"
 .br
-.BI "int memkind_create(const struct memkind_ops " "*ops" ", const char " "*name" );
+.BI "int memkind_create(const struct memkind_ops " "*ops" ", const char " "*name " ", memkind_t " "*kind" );
+.br
+.BI "int memkind_finalize(void);"
 .br
 .BI "int memkind_get_num_kind(int " "*num_kind" );
 .br
@@ -67,7 +72,18 @@ memkind \- Heap manager that isolates allocations to different kinds of numa nod
 .BI "int memkind_check_available(memkind_t " "kind" );
 .br
 .SH "DESCRIPTION"
-.B "HEAP MANAGER:"
+.PP
+.BR memkind_error_message ()
+converts an error number
+.I err
+returned by a member of the memkind
+interface to an error message
+.I msg
+where the maximium size of the message is given by the
+.I size
+parameter.
+
+.B "HEAP MANAGMENT:"
 .br
 The functions described in this section define a heap manager with an
 interface modeled on the ISO C standard API's, except that the user
@@ -151,6 +167,26 @@ Otherwise, or if
 .I memkind_free(kind, ptr)
 has been called before, undefined behavior occurs.
 .PP
+.BR memkind_posix_memalign ()
+allocates
+.I size
+bytes of memory of the specified
+.I kind
+such that the allocation's base address
+is an even multiple of
+.IR "alignment" ,
+and returns the allocation in the value pointed to by
+.IR "memptr" .
+The requested
+.I alignment
+must be a power of 2 at least as large as
+.IR "sizeof(void *)" .
+If
+.I size
+is 0, then
+.BR memkind_posix_memalign ()
+returns NULL.
+.PP
 .BR memkind_free ()
 causes the allocated memory referenced by
 .I ptr
@@ -177,80 +213,129 @@ specified to
 .BR memkind_free ()
 must match the value given when the memory to be freed was allocated.
 .PP
-.BR memkind_posix_memalign ()
-allocates
-.I size
-bytes of memory of the specified
-.I kind
-such that the allocation's base address
-is an even multiple of
-.IR "alignment" ,
-and returns the allocation in the value pointed to by
-.IR "memptr" .
-The requested
-.I alignment
-must be a power of 2 at least as large as
-.IR "sizeof(void *)" .
-If
-.I size
-is 0, then
-.BR memkind_posix_memalign ()
-returns NULL.
-.sp
-.B "LOW LEVEL INTERFACE:"
-.br
-This section describes the memkind low level interface which is used
-internally by the heap manager interface.  For these API's the kind is
-specified as an integer, rather than the abstract
-.I memkind_t
-used by the heap manager interface.
-.PP
-.BR memkind_error_message ()
-converts an error number
-.I err
-returned by a member of the memkind
-interface to an error message
-.I msg
-where the maximium size of the message is given by the
-.I size
-parameter.
-.PP
-.BR memkind_check_available ()
-returns 0 if there is support for the specified
-.I kind
-on the system and an error code otherwise.
-.PP
 .BR memkind_get_kind_for_free ()
-Get the kind associated with an address
-which could be used for freeing the
-memory. This function takes two arguments
-the
-.I addr
+gets the kind associated with an address which could be used for
+freeing the memory. This function takes two arguments the
+.I ptr
 and pointer to the
 .I  kind.
-On success 0 is returned with the
-appropriate kind.
+On success 0 is returned with the appropriate kind. This method can be
+used in the case where the kind is unknown in the context of the call
+to
+.BR memkind_free ().
+.sp
+.B "ALLOCATOR CALLBACK FUNCTIONS:"
+.br
+This section describes the memkind interface which is used internally
+by the heap manager interface.  For these API's the kind is determined
+by the partition index.  This enables the underlying heap manager to
+call routines with standard type arguments, and allows the heap
+manager implementation to be independent of the the specifics of the
+.I memkind_t
+implementation.
 .PP
-.BR memkind_get_mmap_flags ()
+.BR memkind_partition_check_available ()
+returns 0 if there is support on the system for the kind
+associated with the
+.I partition
+and an error code otherwise.
+.PP
+.BR memkind_partition_get_mmap_flags ()
 sets
 .I flags
-to the value appropriate for the
-.I kind
+to the value appropriate for the kind associated with the
+.I partition
 when calling
 .BR mmap (2).
 .PP
-.BR memkind_mbind ()
+.BR memkind_partition_mbind ()
 is a wrapper around
 .BR mbind (2)
 that simplifies the interface so that the user specifies the
-.I kind
-of memory, the start address
+.I partition
+associated with the kind of memory, the start address
 .I addr
 to be mapped, and the number of bytes
 .I len
-from that address to be mapped. The memory is mapped to the nearest
-NUMA node from the CPU of the calling process that is a member of the
-specified kind.
+from that address to be mapped. This call is made after
+.BR mmap (2)
+by the heap manager on the memory that was mapped.
+.sp
+.B "KIND MANAGEMENT:"
+.br
+There are built-in kinds that are always available, and these are enumerated in the
+.B KINDS
+section.  The user can also create their own kinds of memory.  This
+section describes the API's that enable the tracking of the different
+kinds of memory and determining their properties.
+.PP
+.BR memkind_create ()
+is used to create a new kind of memory.  It takes as input a pointer
+to a vtable called
+.I ops
+that determines the operations that define the kind of memory.  These
+operations can be taken from one of the memkind built-in implementations
+defined in the memkind headers, or it can be user implemented.  The requirements
+for each of the operations is defined in the
+.B MEMKIND OPERATIONS
+section.  See the
+.B SEE ALSO
+section for the list of memkind header files that implement the built-in
+operations: each header has a man page.
+.PP
+.BR memkind_finalize ()
+releases all resources associated with the memkind library including
+the resouces used by all of the kinds that have been created
+(statically and dynamically).
+.PP
+.BR memkind_get_num_kind ()
+.PP
+.BR memkind_get_kind_by_partition ()
+.PP
+.BR memkind_get_kind_by_name ()
+.PP
+.BR memkind_get_size ()
+.PP
+.BR memkind_check_available ()
+.sp
+.B "MEMKIND OPERATIONS:"
+.br
+.B int create(memkind_t kind, const struct memkind_ops *ops, const char *name);
+.br
+.B int destroy(memkind_t kind);
+.br
+.B void *malloc(memkind_t kind, size_t size);
+.br
+.B void *calloc(memkind_t kind, size_t num, size_t size);
+.br
+.B int posix_memalign(memkind_t kind, void **memptr, size_t alignment, size_t size);
+.br
+.B void *realloc(memkind_t kind, void *ptr, size_t size);
+.br
+.B void free(memkind_t kind, void *ptr);
+.br
+.B int mbind(memkind_t kind, void *ptr, size_t len);
+.br
+.B int get_mmap_flags(memkind_t kind, int *flags);
+.br
+.B int get_mbind_mode(memkind_t kind, int *mode);
+.br
+.B int get_mbind_nodemask(memkind_t kind, unsigned long *nodemask, unsigned long maxnode);
+.br
+.B int get_arena(memkind_t kind, unsigned int *arena);
+.br
+.B int get_size(memkind_t kind, size_t *total, size_t *free);
+.br
+.B int check_available(memkind_t kind);
+.br
+.B int check_size(memkind_t kind, size_t size);
+.br
+.B int check_alignment(memkind_t kind, size_t alignment);
+.br
+.B int check_addr(memkind_t kind, void *addr);
+.br
+.B void init_once(void);
+.br
 .SH "RETURN VALUE"
 .BR memkind_calloc (),
 .BR memkind_malloc (),
@@ -441,10 +526,15 @@ man page for this routine applies: e.g 1-3,5 is a valid setting.
 .SH "COPYRIGHT"
 Copyright (C) 2014 Intel Corperation. All rights reserved.
 .SH "SEE ALSO"
+.BR memkind_default.h (3),
+.BR memkind_arena.h (3),
+.BR memkind_hbw.h (3),
+.BR memkind_hugetlb.h (3),
+.BR memkind_gbtlb.h (3),
 .BR malloc (3),
 .BR numa (3),
 .BR numactl (8),
 .BR mbind (2),
 .BR mmap (2),
-.BR move_pages (2)
+.BR move_pages (2),
 .BR jemalloc (3)
