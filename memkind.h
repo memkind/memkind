@@ -154,7 +154,7 @@ int memkind_get_kind_by_partition(int partition, memkind_t *kind);
 int memkind_get_kind_by_name(const char *name, memkind_t *kind);
 
 /* Get the kind associated with an virtual address which could be used for free */
-int memkind_get_kind_for_free(void *addr, memkind_t *kind);
+int memkind_get_kind_for_free(void *ptr, memkind_t *kind);
 
 /* Get the amount in bytes of total and free memory of the NUMA nodes assciated with the kind */
 int memkind_get_size(memkind_t kind, size_t *total, size_t *free);
