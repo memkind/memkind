@@ -149,14 +149,11 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
     void *result = NULL;
     void *mmap_ptr = NULL;
     size_t orig_size, copy_size;
-    int flags, err;
+    int err;
 
     result = kind->ops->malloc(kind, size);
     if (result != NULL && ptr != NULL) {
         err = memkind_store(ptr, &mmap_ptr, &orig_size, GBTLB_STORE_QUERY);
-        if (!err) {
-            err = kind->ops->get_mmap_flags(kind, &flags);
-        }
         if (!err) {
             /*Tried using mremap : Failed for 1GB Pages: Err - Did not unmap*/
             /* result = mremap(ptr, orig_size, size, MREMAP_MAYMOVE|flags);*/
@@ -225,7 +222,6 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int mode)
         }
         pthread_mutex_unlock(&init_mutex);
     }
-
     hash = ptr_hash(memptr, table_len);
     pthread_mutex_lock(&(table[hash].mutex));
     if (mode == GBTLB_STORE_REMOVE || mode == GBTLB_STORE_QUERY) {
@@ -244,9 +240,9 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int mode)
         if (storeptr == NULL) {
             err = MEMKIND_ERROR_RUNTIME;
         }
+        *mmapptr = storeptr->mmapptr;
+        *size = storeptr->size;
         if (!err && mode == GBTLB_STORE_REMOVE) {
-            *mmapptr = storeptr->mmapptr;
-            *size = storeptr->size;
             if (lastptr) {
                 lastptr->next = storeptr->next;
             }
