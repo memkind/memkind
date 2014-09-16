@@ -144,98 +144,50 @@ TEST_F(GBPagesTest, memkind_posix_memalign)
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_malloc)
+TEST_F(GBPagesTest, memkind_malloc_default_strict)
 {
     tgen->generate_gb_default_strict(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_calloc)
+TEST_F(GBPagesTest, memkind_calloc_default_strict)
 {
     tgen->generate_gb_default_strict(MEMKIND_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_realloc)
+TEST_F(GBPagesTest, memkind_realloc_default_strict)
 {
     tgen->generate_gb_default_strict(MEMKIND_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_posix_memalign)
+TEST_F(GBPagesTest, memkind_posix_memalign_default_strict)
 {
     tgen->generate_gb_default_strict(MEMKIND_POSIX_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_malloc)
+TEST_F(GBPagesTest, memkind_malloc_default)
 {
-    tgen->generate_gb_default_strict(MEMKIND_MALLOC);
+    tgen->generate_gb_default(MEMKIND_MALLOC);
+    tgen->run(num_bandwidth, bandwidth);
+
+
+TEST_F(GBPagesTest, memkind_calloc_default)
+{
+    tgen->generate_gb_default(MEMKIND_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_calloc)
+TEST_F(GBPagesTest, memkind_realloc_default)
 {
-    tgen->generate_gb_default_strict(MEMKIND_CALLOC);
+    tgen->generate_gb_default(MEMKIND_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_realloc)
+TEST_F(GBPagesTest, memkind_posix_memalign_default)
 {
-    tgen->generate_gb_default_strict(MEMKIND_REALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_posix_memalign)
-{
-    tgen->generate_gb_default_strict(MEMKIND_POSIX_MEMALIGN);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_malloc)
-{
-    tgen->generate_gb_default_strict(MEMKIND_MALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_calloc)
-{
-    tgen->generate_gb_default_strict(MEMKIND_CALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_realloc)
-{
-    tgen->generate_gb_default_strict(MEMKIND_REALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_posix_memalign)
-{
-    tgen->generate_gb_default_strict(MEMKIND_POSIX_MEMALIGN);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_malloc)
-{
-    tgen->generate_gb_default_strict(MEMKIND_MALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_calloc)
-{
-    tgen->generate_gb_default_strict(MEMKIND_CALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_realloc)
-{
-    tgen->generate_gb_default_strict(MEMKIND_REALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_posix_memalign)
-{
-    tgen->generate_gb_default_strict(MEMKIND_POSIX_MEMALIGN);
+    tgen->generate_gb_default(MEMKIND_POSIX_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
 }
