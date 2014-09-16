@@ -157,6 +157,50 @@ void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
 }
 
 
+void TrialGenerator :: generate_gb_default_strict(alloc_api_t api)
+{
+
+    size_t size[] = {GB,2*GB,3*GB};
+    size_t psize[] = {GB, GB, GB};
+    size_t align[] = {GB, GB, GB};
+    int k = 0;
+    trial_vec.clear();
+    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
+         i++) {
+        trial_vec.push_back(create_trial_tuple(api, size[i],
+                                               align[i], psize[i],
+                                               MEMKIND_GBTLB_STRICT,-1));
+        if (i > 0)
+            k++;
+        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
+                                               MEMKIND_GBTLB_STRICT,
+                                               k++));
+
+    }
+}
+
+void TrialGenerator :: generate_gb_default(alloc_api_t api)
+{
+
+    size_t size[] = {GB+1,(2*GB)+1};
+    size_t psize[] = {GB, GB};
+    size_t align[] = {GB, GB};
+    int k = 0;
+    trial_vec.clear();
+    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
+         i++) {
+        trial_vec.push_back(create_trial_tuple(api, size[i],
+                                               align[i], psize[i],
+                                               MEMKIND_GBTLB,-1));
+        if (i > 0)
+            k++;
+        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
+                                               MEMKIND_GBTLB,
+                                               k++));
+
+    }
+}
+
 void TrialGenerator :: generate_gb_strict_incremental(alloc_api_t api)
 {
 
@@ -364,8 +408,8 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                     ptr_vec[i] = NULL;
                 }
                 else {
-                    ptr_vec[i + 1] = memkind_realloc(trial_vec[i].memkind, 
-                                                 ptr_vec[trial_vec[i].free_index], 
+                    ptr_vec[i + 1] = memkind_realloc(trial_vec[i].memkind,
+                                                 ptr_vec[trial_vec[i].free_index],
                                                  trial_vec[i + 1].size);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                 }
