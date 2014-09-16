@@ -45,7 +45,6 @@ int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
 
 static const struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
     .malloc = memkind_default_malloc,
     .calloc = memkind_default_calloc,
     .posix_memalign = memkind_default_posix_memalign,

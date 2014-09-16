@@ -61,17 +61,15 @@ typedef struct {
 static int ptr_hash(void *ptr, int table_len);
 static int memkind_store(void *ptr, void **mmapptr, size_t *size, int mode);
 static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result);
-static int memkind_gbtlb_ceil_size(size_t *size);
+static void memkind_gbtlb_ceil_size(size_t *size);
 
 void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 {
     void *result = NULL;
     int err = 0;
 
-    err = memkind_gbtlb_ceil_size(&size);
-    if (!err) {
-        err = memkind_gbtlb_mmap(kind, size, &result);
-    }
+    memkind_gbtlb_ceil_size(&size);
+    err = memkind_gbtlb_mmap(kind, size, &result);
     if (!err) {
         err = kind->ops->mbind(kind, result, size);
     }

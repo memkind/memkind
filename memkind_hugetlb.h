@@ -43,7 +43,6 @@ static const struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .posix_memalign = memkind_arena_posix_memalign,
     .realloc = memkind_arena_realloc,
     .free = memkind_default_free,
-    .check_available = memkind_default_check_available,
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_arena = memkind_cpu_get_arena,
     .get_size = memkind_default_get_size,
