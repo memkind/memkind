@@ -157,7 +157,7 @@ void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
 }
 
 
-void TrialGenerator :: generate_gb_default_strict(alloc_api_t api)
+void TrialGenerator :: generate_gb_regular_strict(alloc_api_t api)
 {
 
     size_t size[] = {GB,2*GB,3*GB};
@@ -179,7 +179,7 @@ void TrialGenerator :: generate_gb_default_strict(alloc_api_t api)
     }
 }
 
-void TrialGenerator :: generate_gb_default(alloc_api_t api)
+void TrialGenerator :: generate_gb_regular(alloc_api_t api)
 {
 
     size_t size[] = {GB+1,(2*GB)+1};
