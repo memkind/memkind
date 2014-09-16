@@ -230,7 +230,7 @@ int memkind_create(const struct memkind_ops *ops, const char *name, struct memki
         err = MEMKIND_ERROR_MALLOC;
         goto exit;
     }
-    *kind->partition = memkind_registry_g.num_kind;
+    (*kind)->partition = memkind_registry_g.num_kind;
     err = ops->create(*kind, ops, name);
     if (err) {
         goto exit;
