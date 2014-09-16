@@ -63,30 +63,12 @@ static int memkind_store(void *ptr, void **mmapptr, size_t *size, int mode);
 static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result);
 static int memkind_gbtlb_ceil_size(size_t *size);
 
-int memkind_gbtlb_check_size (struct memkind *kind, size_t size)
-{
-    int err = 0;
-
-    if (size % ONE_GB != 0) {
-        err = MEMKIND_ERROR_INVALID;
-    }
-    return err;
-}
-
-int memkind_noop_check_size (struct memkind *kind, size_t size)
-{
-    return 0;
-}
-
 void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 {
     void *result = NULL;
     int err = 0;
 
-    err = kind->ops->check_size(kind, size);
-    if (!err) {
-        err = memkind_gbtlb_ceil_size(&size);
-    }
+    err = memkind_gbtlb_ceil_size(&size);
     if (!err) {
         err = memkind_gbtlb_mmap(kind, size, &result);
     }
@@ -274,10 +256,9 @@ static int ptr_hash(void *ptr, int table_len)
     return _mm_crc32_u64(0, (size_t)ptr) % table_len;
 }
 
-static int memkind_gbtlb_ceil_size(size_t *size)
+static void memkind_gbtlb_ceil_size(size_t *size)
 {
     *size = *size % ONE_GB ? ((*size / ONE_GB) + 1) * ONE_GB : *size;
-    return 0;
 }
 
 static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)

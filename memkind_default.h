@@ -31,19 +31,15 @@ extern "C" {
 #include "memkind.h"
 
 int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
-int memkind_default_destroy(struct memkind *kind);
 void *memkind_default_malloc(struct memkind *kind, size_t size);
 void *memkind_default_calloc(struct memkind *kind, size_t num, size_t size);
 int memkind_default_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
 void *memkind_default_realloc(struct memkind *kind, void *ptr, size_t size);
 void memkind_default_free(struct memkind *kind, void *ptr);
-int memkind_default_check_available(struct memkind *kind);
 int memkind_default_mbind(struct memkind *kind, void *ptr, size_t len);
-int memkind_noop_mbind(struct memkind *kind, void *ptr, size_t len);
 int memkind_default_get_mmap_flags(struct memkind *kind, int *flags);
 int memkind_default_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode);
-int memkind_default_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
 int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free);
 int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
 
@@ -55,11 +51,6 @@ static const struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .posix_memalign = memkind_default_posix_memalign,
     .realloc = memkind_default_realloc,
     .free = memkind_default_free,
-    .check_available = memkind_default_check_available,
-    .mbind = memkind_default_mbind,
-    .get_mmap_flags = memkind_default_get_mmap_flags,
-    .get_mbind_mode = memkind_default_get_mbind_mode,
-    .get_mbind_nodemask = memkind_default_get_mbind_nodemask,
     .get_size = memkind_default_get_size
 };
 
