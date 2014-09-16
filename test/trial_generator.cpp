@@ -504,7 +504,9 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
             memset(ptr_vec[i], 0, trial_vec[i].size);
             Check check(ptr_vec[i], trial_vec[i].size);
             if (trial_vec[i].memkind != MEMKIND_DEFAULT &&
-                trial_vec[i].memkind != MEMKIND_HUGETLB) {
+                trial_vec[i].memkind != MEMKIND_HUGETLB &&
+                trial_vec[i].memkind != MEMKIND_GBTLB &&
+                trial_vec[i].memkind != MEMKIND_GBTLB_STRICT) {
                 EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
             }
             if (trial_vec[i].api == HBW_CALLOC) {
