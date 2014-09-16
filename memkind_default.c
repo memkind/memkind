@@ -44,11 +44,6 @@ int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, 
     return err;
 }
 
-int memkind_default_destroy(struct memkind *kind)
-{
-    return 0;
-}
-
 void *memkind_default_malloc(struct memkind *kind, size_t size)
 {
     return je_malloc(size);
@@ -72,59 +67,6 @@ void *memkind_default_realloc(struct memkind *kind, void *ptr, size_t size)
 void memkind_default_free(struct memkind *kind, void *ptr)
 {
     je_free(ptr);
-}
-
-int memkind_default_check_available(struct memkind *kind)
-{
-    return 0;
-}
-
-int memkind_default_mbind(struct memkind *kind, void *ptr, size_t len)
-{
-    nodemask_t nodemask;
-    int err = 0;
-    int mode;
-
-    err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
-    if (!err) {
-        err = kind->ops->get_mbind_mode(kind, &mode);
-    }
-    if (!err) {
-        err = mbind(ptr, len, mode, nodemask.n, NUMA_NUM_NODES, 0);
-        err = err ? MEMKIND_ERROR_MBIND : 0;
-    }
-    return err;
-}
-
-int memkind_noop_mbind(struct memkind *kind, void *ptr, size_t len)
-{
-    return 0;
-}
-
-int memkind_default_get_mmap_flags(struct memkind *kind, int *flags)
-{
-    *flags = MAP_PRIVATE | MAP_ANONYMOUS;
-    return 0;
-}
-
-int memkind_default_get_mbind_mode(struct memkind *kind, int *mode)
-{
-    *mode = MPOL_BIND;
-    return 0;
-}
-
-int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode)
-{
-    *mode = MPOL_PREFERRED;
-    return 0;
-}
-
-int memkind_default_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode)
-{
-    struct bitmask nodemask_bm = {maxnode, nodemask};
-    numa_bitmask_clearall(&nodemask_bm);
-    numa_bitmask_setbit(&nodemask_bm, numa_preferred());
-    return 0;
 }
 
 int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free)
@@ -152,6 +94,41 @@ int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free)
         }
     }
     return err;
+}
+
+int memkind_default_mbind(struct memkind *kind, void *ptr, size_t len)
+{
+    nodemask_t nodemask;
+    int err = 0;
+    int mode;
+
+    err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
+    if (!err) {
+        err = kind->ops->get_mbind_mode(kind, &mode);
+    }
+    if (!err) {
+        err = mbind(ptr, len, mode, nodemask.n, NUMA_NUM_NODES, 0);
+        err = err ? MEMKIND_ERROR_MBIND : 0;
+    }
+    return err;
+}
+
+int memkind_default_get_mmap_flags(struct memkind *kind, int *flags)
+{
+    *flags = MAP_PRIVATE | MAP_ANONYMOUS;
+    return 0;
+}
+
+int memkind_default_get_mbind_mode(struct memkind *kind, int *mode)
+{
+    *mode = MPOL_BIND;
+    return 0;
+}
+
+int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode)
+{
+    *mode = MPOL_PREFERRED;
+    return 0;
 }
 
 int memkind_posix_check_alignment(struct memkind *kind, size_t alignment)

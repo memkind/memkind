@@ -90,7 +90,14 @@ int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
     memkind_t kind;
 
     kind = hbw_get_kind(pagesize);
-    return memkind_posix_memalign(kind, memptr, alignment, size);
+    if (pagesize == HBW_PAGESIZE_1GB_STRICT &&
+        size % 1073741824) {
+        err = EINVAL;
+    }
+    if (!err) {
+        err = memkind_posix_memalign(kind, memptr, alignment, size);
+    }
+    return err;
 }
 
 void *hbw_realloc(void *ptr, size_t size)
@@ -118,10 +125,8 @@ static inline memkind_t hbw_get_kind(int pagesize)
                 result = MEMKIND_HBW_HUGETLB;
                 break;
             case HBW_PAGESIZE_1GB:
-                result = MEMKIND_HBW_GBTLB;
-                break;
             case HBW_PAGESIZE_1GB_STRICT:
-                result = MEMKIND_HBW_GBTLB_STRICT;
+                result = MEMKIND_HBW_GBTLB;
                 break;
             default:
                 result = MEMKIND_HBW;
@@ -134,10 +139,8 @@ static inline memkind_t hbw_get_kind(int pagesize)
                 result = MEMKIND_HBW_PREFERRED_HUGETLB;
                 break;
             case HBW_PAGESIZE_1GB:
-                result = MEMKIND_HBW_PREFERRED_GBTLB;
-                break;
             case HBW_PAGESIZE_1GB_STRICT:
-                result = MEMKIND_HBW_PREFERRED_GBTLB_STRICT;
+                result = MEMKIND_HBW_PREFERRED_GBTLB;
                 break;
             default:
                 result = MEMKIND_HBW_PREFERRED;
@@ -150,10 +153,8 @@ static inline memkind_t hbw_get_kind(int pagesize)
                 result = MEMKIND_HUGETLB;
                 break;
             case HBW_PAGESIZE_1GB:
-                result = MEMKIND_GBTLB;
-                break;
             case HBW_PAGESIZE_1GB_STRICT:
-                result = MEMKIND_GBTLB_STRICT;
+                result = MEMKIND_GBTLB;
                 break;
             default:
                 result = MEMKIND_DEFAULT;

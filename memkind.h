@@ -76,12 +76,9 @@ enum memkind_base_partition {
     MEMKIND_PARTITION_HBW_PREFERRED = 3,
     MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB = 4,
     MEMKIND_PARTITION_HUGETLB = 5,
-    MEMKIND_PARTITION_HBW_GBTLB_STRICT = 6,
-    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB_STRICT = 7,
-    MEMKIND_PARTITION_HBW_GBTLB = 8,
-    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 9,
-    MEMKIND_PARTITION_GBTLB = 10,
-    MEMKIND_PARTITION_GBTLB_STRICT = 11,
+    MEMKIND_PARTITION_HBW_GBTLB = 6,
+    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 7,
+    MEMKIND_PARTITION_GBTLB = 8,
     MEMKIND_NUM_BASE_KIND
 };
 
@@ -111,7 +108,6 @@ struct memkind_ops {
     int (* get_arena)(struct memkind *kind, unsigned int *arena);
     int (* get_size)(struct memkind *kind, size_t *total, size_t *free);
     int (* check_available)(struct memkind *kind);
-    int (* check_size)(struct memkind *kind, size_t size);
     int (* check_alignment)(struct memkind *kind, size_t alignment);
     int (* check_addr)(struct memkind *kind, void *addr);
     void (*init_once)(void);
@@ -125,12 +121,9 @@ extern memkind_t MEMKIND_HBW;
 extern memkind_t MEMKIND_HBW_PREFERRED;
 extern memkind_t MEMKIND_HBW_HUGETLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_HUGETLB;
-extern memkind_t MEMKIND_HBW_GBTLB_STRICT;
-extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB_STRICT;
 extern memkind_t MEMKIND_HBW_GBTLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
 extern memkind_t MEMKIND_GBTLB;
-extern memkind_t MEMKIND_GBTLB_STRICT;
 
 
 /* Convert error number into an error message */
