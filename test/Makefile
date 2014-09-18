@@ -141,8 +141,8 @@ clean:
 			rm -rf bin/test_libs/*.so
 
 test:			all bin/test.sh
-			if [ ! -z "$(TEST_HOST)" ] && [ ! -z "$(TEST_LOGIN)" ] && [ ! -z "$(RPMDIR)" ]; then \
-				./bin/test_remote.sh $(RPMDIR) $(TEST_LOGIN) $(TEST_HOST) $(TEST_OUTDIR) $(TEST_SSHID); \
+			if [ ! -z "$(TEST_HOST)" ] && [ ! -z "$(TEST_LOGIN)" ] && [ ! -z "$(TEST_RPMDIR)" ]; then \
+				./bin/test_remote.sh $(TEST_RPMDIR) $(TEST_LOGIN) $(TEST_HOST) $(TEST_OUTDIR) $(TEST_SSHID); \
 			else \
 				LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./bin/test.sh; \
 			fi
