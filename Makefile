@@ -76,6 +76,10 @@ libmemkind.so.0.0: $(OBJECTS)
 memkind-pmtt: memkind_pmtt.c $(OBJECTS)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) $(OBJECTS) $(LDFLAGS) -lpthread -lnuma -L$(JEMALLOC_PREFIX)/lib64 -ljemalloc memkind_pmtt.c -o $@
 
+rpm:
+	git archive HEAD --prefix=memkind-$(VERSION)/ | gzip > memkind-$(VERSION).tar.gz
+	rpmbuild -ta memkind-$(VERSION).tar.gz
+
 install:
 	$(INSTALL) -d $(DESTDIR)$(includedir)
 	$(INSTALL) -m 644 memkind.h hbwmalloc.h $(DESTDIR)$(includedir)
