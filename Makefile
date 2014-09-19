@@ -98,4 +98,4 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(initddir)
 	$(INSTALL) memkind-init $(DESTDIR)$(initddir)/memkind
 
-.PHONY: all clean install doc test
+.PHONY: all clean install doc test rpm
