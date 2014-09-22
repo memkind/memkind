@@ -10,7 +10,7 @@ implemented with an extension to the jemalloc library which dedicates
 "arenas" to each CPU and kind of memory.  Additionally the heap is
 partitioned so that freed memory segments of different kinds are not
 coalesced.  To use memkind, jemalloc must be compiled with the
---enable-memkind option.
+"--enable-memkind" option.
 
 Requires kernel patch introduced in Linux v3.11 that impacts
 functionality of the NUMA system calls.  This is patch is commit

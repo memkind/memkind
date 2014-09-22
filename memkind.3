@@ -79,7 +79,7 @@ converts an error number
 returned by a member of the memkind
 interface to an error message
 .I msg
-where the maximium size of the message is given by the
+where the maximium size of the message is passed by the
 .I size
 parameter.
 
@@ -139,11 +139,14 @@ newly allocated portion of the memory are undefined. Upon success, the
 memory referenced by
 .I ptr
 is freed and a pointer to the newly allocated high bandwidth memory is
-returned. Note that
+returned.
+
+.BR Note:
 .BR memkind_realloc ()
 may move the memory allocation, resulting in a different return value
-than
+than"
 .IR "ptr" .
+
 If
 .I ptr
 is NULL, the
@@ -163,14 +166,14 @@ with the same
 .I kind
 as specified to the call to
 .BR memkind_realloc ().
-Otherwise, or if
+Otherwise, if
 .I memkind_free(kind, ptr)
-has been called before, undefined behavior occurs.
+was called before, undefined behavior occurs.
 .PP
 .BR memkind_posix_memalign ()
 allocates
 .I size
-bytes of memory of the specified
+bytes of memory of a specified
 .I kind
 such that the allocation's base address
 is an even multiple of
@@ -197,13 +200,13 @@ must have been returned by a previous call to
 .BR memkind_realloc (),
 or
 .BR memkind_posix_memalign ().
-Otherwise, or if
+Otherwise, if
 .I memkind_free(kind, ptr)
-has already been called before, undefined behavior occurs.
+was already called before, undefined behavior occurs.
 If
 .I ptr
 is  NULL, no operation is performed.
-For all currently supported kinds the the value of
+For all currently supported kinds the value of
 .B MEMKIND_DEFAULT
 or 0 can be given for the
 .IR kind .
@@ -211,7 +214,7 @@ In the future there may be kinds introduced that will require that the
 .I kind
 specified to
 .BR memkind_free ()
-must match the value given when the memory to be freed was allocated.
+match the value given when the memory to be freed was allocated.
 .PP
 .BR memkind_get_kind_for_free ()
 sets the parameter
@@ -220,7 +223,7 @@ to a value appropriate for passing to
 .BR memkind_free ()
 for the address
 .IR ptr .
-This method can be used in the case where the
+This method can be used in a case where the
 .I kind
 is unknown in the context of the call to
 .BR memkind_free ().
@@ -277,7 +280,7 @@ to a vtable called
 that determines the operations that define the kind of memory.  These
 operations can be taken from one of the memkind built-in implementations
 defined in the memkind headers, or it can be user implemented.  The requirements
-for each of the operations is defined in the
+for each operation is defined in the
 .B MEMKIND OPERATIONS
 section.  See the
 .B SEE ALSO
@@ -286,7 +289,7 @@ operations: each header has a man page.
 .PP
 .BR memkind_finalize ()
 releases all resources associated with the memkind library including
-the resouces used by all of the kinds that have been created, but it does
+the resouces used by all of the kinds that were created, but it does
 not free memory allocated with the
 .B HEAP MANAGEMENT
 interface.  This must be the last call to the memkind library before
@@ -319,7 +322,7 @@ to the memory kind associated with the
 string specified.  All of the built in kinds have name strings that are the lower-case version of name
 given in the
 .B KINDS
-section (e.g. MEMKIND_DEFAULT has
+section (for example: MEMKIND_DEFAULT has
 .I name
 "memkind_default")
 .PP
@@ -332,18 +335,20 @@ and sets
 .I free
 to the number of unallocated bytes available of memory with the
 specified
-.IR kind .
-Note that these numbers may be specific to the CPU of the calling
+.IR kind.
+
+.BR Note:
+These numbers may be specific to the CPU of the calling
 thread if the
 .I kind
 binds memory to NUMA nodes associated with the CPU.
 .PP
 .BR memkind_check_available ()
-Returns zero if the specified
+Returns a zero if the specified
 .I kind
-is available and an error code from the
+is available or an error code from the
 .B ERRORS
-section otherwise.
+section if it is not.
 .sp
 .B "MEMKIND OPERATIONS:"
 .br
@@ -427,7 +432,7 @@ see description above.
 .br
 wraps the
 .BR mbind ()
-system call and passes through 
+system call and passes through
 the start address
 .I ptr
 to be mapped, and the number of bytes
@@ -477,13 +482,13 @@ API.
 .br
 is the underlying implementation of
 .BR memkind_get_size (),
-see description above. 
+see description above.
 .PP
 .BI "int .check_available(memkind_t " "kind" );
 .br
 returns 0 if the
 .I kind
-is available on the system, and an error code otherwise.
+is available on the system, and an error code if not.
 .PP
 .BI "int .check_alignment(memkind_t " "kind" ", size_t " "alignment" );
 .br
@@ -491,7 +496,7 @@ returns 0 if the
 .I alignment
 is appropriate for the
 .I kind
-and an error code otherwise.
+and an error code if not.
 .PP
 .BI "int .check_addr(memkind_t " "kind" ", void " "*addr" );
 .br
@@ -582,7 +587,7 @@ or
 .B ENOMEM
 as defined in
 .I <errno.h>
-if an error occurs (note these have positive values).
+if an error occurs (these have positive values).
 If the
 .I alignment
 parameter is not a power of two, or is not a multiple of

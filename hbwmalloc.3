@@ -53,7 +53,7 @@ hbwmalloc \- The high bandwidth memory interface
 returns 0 if high bandwidth memory is available and an error code
 described in the
 .B ERRORS
-section otherwise.
+section if not.
 .PP
 .BR hbw_malloc ()
 allocates
@@ -96,11 +96,14 @@ newly allocated portion of the memory are undefined. Upon success, the
 memory referenced by
 .I ptr
 is freed and a pointer to the newly allocated high bandwidth memory is
-returned. Note that
+returned.
+
+.BR Note:
 .BR hbw_realloc ()
 may move the memory allocation, resulting in a different return value
 than
 .IR "ptr" .
+
 If
 .I ptr
 is NULL, the
@@ -110,7 +113,7 @@ function behaves identically to
 for the specified size.
 The address
 .IR "ptr" ,
-if not NULL, must have been returned by a previous call to
+if not NULL, was returned by a previous call to
 .BR hbw_malloc (),
 .BR hbw_calloc (),
 .BR hbw_realloc (),
@@ -119,7 +122,7 @@ or
 .BR hbw_posix_memalign_psize ().
 Otherwise, or if
 .I hbw_free(ptr)
-has been called before, undefined behavior occurs.
+was called before, undefined behavior occurs.
 .PP
 .BR hbw_free ()
 causes the allocated high bandwidth memory referenced by
@@ -136,9 +139,9 @@ if not NULL, must have been returned by a previous call to
 .BR hbw_posix_memalign (),
 or
 .BR hbw_posix_memalign_psize ().
-Otherwise, or if
+Otherwise, if
 .I hbw_free(ptr)
-has already been called before, undefined behavior occurs.
+was called before, undefined behavior occurs.
 .PP
 .BR hbw_posix_memalign ()
 allocates
@@ -283,7 +286,7 @@ routine
 .BR numa_parse_nodestring ()
 for parsing, so the syntax described in the
 .BR numa (3)
-man page for this routine applies: e.g 1-3,5 is a valid setting.
+man page for this routine applies for example: 1-3,5 is a valid setting.
 .SH "COPYRIGHT"
 Copyright (C) 2014 Intel Corperation. All rights reserved.
 .SH "SEE ALSO"
