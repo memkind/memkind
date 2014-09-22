@@ -42,6 +42,7 @@ int memkind_gbtlb_check_addr(struct memkind *kind, void *addr);
 
 static const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .create = memkind_default_create,
+    .destroy = memkind_default_destroy,
     .malloc = memkind_gbtlb_malloc,
     .calloc = memkind_gbtlb_calloc,
     .posix_memalign = memkind_gbtlb_posix_memalign,
@@ -59,6 +60,7 @@ static const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
 
 static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .create = memkind_default_create,
+    .destroy = memkind_default_destroy,
     .malloc = memkind_gbtlb_malloc,
     .calloc = memkind_gbtlb_calloc,
     .posix_memalign = memkind_gbtlb_posix_memalign,
@@ -75,6 +77,7 @@ static const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
 
 static const struct memkind_ops MEMKIND_GBTLB_OPS = {
     .create = memkind_default_create,
+    .destroy = memkind_default_destroy,
     .malloc = memkind_gbtlb_malloc,
     .calloc = memkind_gbtlb_calloc,
     .posix_memalign = memkind_gbtlb_posix_memalign,

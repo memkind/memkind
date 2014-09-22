@@ -31,6 +31,7 @@ extern "C" {
 #include "memkind.h"
 
 int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
+int memkind_default_destroy(struct memkind *kind);
 void *memkind_default_malloc(struct memkind *kind, size_t size);
 void *memkind_default_calloc(struct memkind *kind, size_t num, size_t size);
 int memkind_default_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
@@ -45,6 +46,7 @@ int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
 
 static const struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .create = memkind_default_create,
+    .destroy = memkind_default_destroy,
     .malloc = memkind_default_malloc,
     .calloc = memkind_default_calloc,
     .posix_memalign = memkind_default_posix_memalign,

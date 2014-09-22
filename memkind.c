@@ -195,6 +195,9 @@ void memkind_error_message(int err, char *msg, size_t size)
         case MEMKIND_ERROR_PTHREAD:
             strncpy(msg, "<memkind> Call to pthread library failed", size);
             break;
+        case MEMKIND_ERROR_BADOPS:
+            strncpy(msg, "<memkind> memkind_ops structure is poorly formed (missing or incorrect functions)", size);
+            break;
         default:
             snprintf(msg, size, "<memkind> Undefined error number: %i", err);
             break;
@@ -217,6 +220,18 @@ int memkind_create(const struct memkind_ops *ops, const char *name, struct memki
     }
     if (memkind_registry_g.num_kind == MEMKIND_MAX_KIND) {
         err = MEMKIND_ERROR_TOOMANY;
+        goto exit;
+    }
+    if (ops->create == NULL ||
+        ops->destroy == NULL ||
+        ops->malloc == NULL ||
+        ops->calloc == NULL ||
+        ops->realloc == NULL ||
+        ops->posix_memalign == NULL ||
+        ops->free == NULL ||
+        ops->get_size == NULL ||
+        ops->init_once != NULL) {
+        err = MEMKIND_ERROR_BADOPS;
         goto exit;
     }
     for (i = 0; i < memkind_registry_g.num_kind; ++i) {
@@ -264,9 +279,7 @@ int memkind_finalize(void)
     for (i = 0; i < memkind_registry_g.num_kind; ++i) {
         kind = memkind_registry_g.partition_map[i];
         if (kind) {
-            if (kind->ops->destroy) {
-                err = kind->ops->destroy(kind);
-            }
+            err = kind->ops->destroy(kind);
             if (err) {
                 goto exit;
             }
@@ -331,7 +344,7 @@ int memkind_partition_check_available(int partition)
 
     err = memkind_get_kind_by_partition(partition, &kind);
     if (!err) {
-        err = kind->ops->check_available(kind);
+        err = memkind_check_available(kind);
     }
     return err;
 }
@@ -342,8 +355,13 @@ int memkind_partition_get_mmap_flags(int partition, int *flags)
     int err = 0;
 
     err = memkind_get_kind_by_partition(partition, &kind);
-    if (!err) {
-        err = kind->ops->get_mmap_flags(kind, flags);
+    if (!err)
+        if (kind->ops->get_mmap_flags) {
+            err = kind->ops->get_mmap_flags(kind, flags);
+        }
+        else {
+            err = memkind_default_get_mmap_flags(kind, flags);
+        }
     }
     else {
         *flags = 0;
@@ -372,14 +390,6 @@ int memkind_check_available(struct memkind *kind)
     return err;
 }
 
-void *memkind_malloc(struct memkind *kind, size_t size)
-{
-    if (kind->ops->init_once) {
-        pthread_once(&(kind->init_once), kind->ops->init_once);
-    }
-    return kind->ops->malloc(kind, size);
-}
-
 int memkind_get_kind_for_free(void *ptr, struct memkind **kind)
 {
     int i, num_kind;
@@ -396,6 +406,14 @@ int memkind_get_kind_for_free(void *ptr, struct memkind **kind)
         }
     }
     return 0;
+}
+
+void *memkind_malloc(struct memkind *kind, size_t size)
+{
+    if (kind->ops->init_once) {
+        pthread_once(&(kind->init_once), kind->ops->init_once);
+    }
+    return kind->ops->malloc(kind, size);
 }
 
 void *memkind_calloc(struct memkind *kind, size_t num, size_t size)

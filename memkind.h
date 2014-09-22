@@ -30,19 +30,6 @@ extern "C" {
 
 #include <pthread.h>
 
-/*!
- *  \mainpage
- *
- *  The memkind library extends libnuma with the ability to
- *  categorize groups of numa nodes into different "kinds" of
- *  memory. It provides a low level interface for generating inputs to
- *  mbind() and mmap(), and a high level interface for heap
- *  management.  The heap management is implemented with an extension
- *  to the jemalloc library which dedicates "arenas" to each CPU and
- *  kind of memory.  To use memkind, jemalloc must be compiled with
- *  the --enable-memkind option.
- */
-
 enum memkind_const {
     MEMKIND_MAX_KIND = 512,
     MEMKIND_ERROR_MESSAGE_SIZE = 128,
@@ -66,6 +53,7 @@ enum memkind_error {
     MEMKIND_ERROR_REPNAME = -14,
     MEMKIND_ERROR_TOOMANY = -15,
     MEMKIND_ERROR_PTHREAD = -16,
+    MEMKIND_ERROR_BADOPS = -17,
     MEMKIND_ERROR_RUNTIME = -255
 };
 

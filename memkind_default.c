@@ -44,6 +44,12 @@ int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, 
     return err;
 }
 
+int memkind_default_destroy(struct memkind *kind)
+{
+    kind->name[0] = '\0';
+    return 0;
+}
+
 void *memkind_default_malloc(struct memkind *kind, size_t size)
 {
     return je_malloc(size);

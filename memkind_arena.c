@@ -107,6 +107,7 @@ int memkind_arena_destroy(struct memkind *kind)
         je_free(kind->arena_map);
         kind->arena_map = NULL;
     }
+    memkind_default_destroy(kind);
     return 0;
 }
 
