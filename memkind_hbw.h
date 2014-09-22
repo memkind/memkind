@@ -35,7 +35,6 @@ extern "C" {
 
 static const char * const MEMKIND_BANDWIDTH_PATH = "/etc/memkind/node-bandwidth";
 
-void memkind_hbw_init(void);
 int memkind_hbw_check_available(struct memkind *kind);
 int memkind_hbw_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
 void memkind_hbw_init_once(void);
