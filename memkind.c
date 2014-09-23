@@ -355,7 +355,7 @@ int memkind_partition_get_mmap_flags(int partition, int *flags)
     int err = 0;
 
     err = memkind_get_kind_by_partition(partition, &kind);
-    if (!err)
+    if (!err) {
         if (kind->ops->get_mmap_flags) {
             err = kind->ops->get_mmap_flags(kind, flags);
         }
