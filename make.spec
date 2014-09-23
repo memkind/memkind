@@ -117,10 +117,10 @@ fi
 %doc %{_docdir}/memkind-%{version}/COPYING.txt
 %doc %{_mandir}/man3/hbwmalloc.3.gz
 %doc %{_mandir}/man3/memkind.3.gz
-%doc %{_mandir}/man3/memkind_default.3
-%doc %{_mandir}/man3/memkind_gbtlb.3
-%doc %{_mandir}/man3/memkind_hbw.3
-%doc %{_mandir}/man3/memkind_hugetlb.3
+%doc %{_mandir}/man3/memkind_default.3.gz
+%doc %{_mandir}/man3/memkind_gbtlb.3.gz
+%doc %{_mandir}/man3/memkind_hbw.3.gz
+%doc %{_mandir}/man3/memkind_hugetlb.3.gz
 $(extra_files)
 
 %changelog
