@@ -36,10 +36,12 @@ int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, 
 
     kind->ops = ops;
     if (strlen(name) >= MEMKIND_NAME_LENGTH) {
+        kind->name[0] = '\0';
         err = MEMKIND_ERROR_INVALID;
     }
     if (!err) {
-        strcpy(kind->name, name);
+        kind->name[MEMKIND_NAME_LENGTH-1] = '\0';
+        strncpy(kind->name, name, MEMKIND_NAME_LENGTH-1);
     }
     return err;
 }

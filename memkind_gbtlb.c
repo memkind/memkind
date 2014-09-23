@@ -220,8 +220,10 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int mode)
         if (storeptr == NULL) {
             err = MEMKIND_ERROR_RUNTIME;
         }
-        *mmapptr = storeptr->mmapptr;
-        *size = storeptr->size;
+        if (!err) {
+            *mmapptr = storeptr->mmapptr;
+            *size = storeptr->size;
+        }
         if (!err && mode == GBTLB_STORE_REMOVE) {
             if (lastptr) {
                 lastptr->next = storeptr->next;

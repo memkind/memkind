@@ -399,7 +399,8 @@ int memkind_get_kind_for_free(void *ptr, struct memkind **kind)
     memkind_get_num_kind(&num_kind);
     for (i = 0; i < num_kind; ++i) {
         memkind_get_kind_by_partition(i, &test_kind);
-        if (test_kind->ops->check_addr &&
+        if (test_kind &&
+            test_kind->ops->check_addr &&
             test_kind->ops->check_addr(test_kind, ptr) == 0) {
             *kind = test_kind;
             break;
