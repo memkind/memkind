@@ -94,6 +94,11 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(mandir)/man3
 	$(INSTALL) -m 644 hbwmalloc.3 $(DESTDIR)$(mandir)/man3/hbwmalloc.3
 	$(INSTALL) -m 644 memkind.3 $(DESTDIR)$(mandir)/man3/memkind.3
+	$(INSTALL) -m 644 memkind_arena.3 $(DESTDIR)$(mandir)/man3/memkind_arena.3
+	$(INSTALL) -m 644 memkind_default.3 $(DESTDIR)$(mandir)/man3/memkind_default.3
+	$(INSTALL) -m 644 memkind_gbtlb.3 $(DESTDIR)$(mandir)/man3/memkind_gbtlb.3
+	$(INSTALL) -m 644 memkind_hbw.3 $(DESTDIR)$(mandir)/man3/memkind_hbw.3
+	$(INSTALL) -m 644 memkind_hugetlb.3 $(DESTDIR)$(mandir)/man3/memkind_hugetlb.3
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	$(INSTALL) memkind-pmtt $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)$(initddir)
