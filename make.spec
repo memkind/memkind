@@ -112,11 +112,12 @@ fi
 %{_libdir}/libmemkind.so
 %{_sbindir}/memkind-pmtt
 %{_initddir}/memkind
-%{_docdir}/memkind-%{version}
+%dir %{_docdir}/memkind-%{version}
 %doc %{_docdir}/memkind-%{version}/README.txt
 %doc %{_docdir}/memkind-%{version}/COPYING.txt
 %doc %{_mandir}/man3/hbwmalloc.3.gz
 %doc %{_mandir}/man3/memkind.3.gz
+%doc %{_mandir}/man3/memkind_arena.3.gz
 %doc %{_mandir}/man3/memkind_default.3.gz
 %doc %{_mandir}/man3/memkind_gbtlb.3.gz
 %doc %{_mandir}/man3/memkind_hbw.3.gz
