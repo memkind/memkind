@@ -71,10 +71,7 @@ public:
     void generate_recycle_psize_2GB(alloc_api_t api);
     void generate_multi_app_stress(int num_types);
     void generate_size_1KB_2GB(alloc_api_t api);
-    void generate_hbw_gb_strict_incremental(alloc_api_t api);
     void generate_hbw_gb_incremental(alloc_api_t api);
-    void generate_gb_strict_incremental(alloc_api_t api);
-    void generate_gb_regular_strict(alloc_api_t api);
     void generate_gb_regular(alloc_api_t api);
     void generate_gb_incremental(alloc_api_t api);
     void generate_size_4GB_8GB(alloc_api_t api);

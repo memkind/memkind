@@ -112,28 +112,6 @@ void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
     }
 }
 
-void TrialGenerator :: generate_hbw_gb_strict_incremental(alloc_api_t api)
-{
-
-    size_t size[] = {GB,(2*GB), 3*GB};
-    size_t psize[] = {GB, GB, GB};
-    size_t align[] = {GB, GB, GB};
-    int k = 0;
-    trial_vec.clear();
-    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i],
-                                               align[i], psize[i],
-                                               MEMKIND_HBW_PREFERRED_GBTLB_STRICT,
-                                               -1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
-                                               MEMKIND_HBW_PREFERRED_GBTLB_STRICT,
-                                               k++));
-    }
-}
-
 void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
 {
 
@@ -151,29 +129,6 @@ void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
             k++;
         trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
                                                MEMKIND_HBW_GBTLB,
-                                               k++));
-
-    }
-}
-
-
-void TrialGenerator :: generate_gb_regular_strict(alloc_api_t api)
-{
-
-    size_t size[] = {GB,2*GB,3*GB};
-    size_t psize[] = {GB, GB, GB};
-    size_t align[] = {GB, GB, GB};
-    int k = 0;
-    trial_vec.clear();
-    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i],
-                                               align[i], psize[i],
-                                               MEMKIND_GBTLB_STRICT,-1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
-                                               MEMKIND_GBTLB_STRICT,
                                                k++));
 
     }
@@ -200,29 +155,6 @@ void TrialGenerator :: generate_gb_regular(alloc_api_t api)
 
     }
 }
-
-void TrialGenerator :: generate_gb_strict_incremental(alloc_api_t api)
-{
-
-    size_t size[] = {GB,2*GB,3*GB};
-    size_t psize[] = {GB, GB, GB};
-    size_t align[] = {GB, GB, GB};
-    int k = 0;
-    trial_vec.clear();
-    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i],
-                                               align[i], psize[i],
-                                               MEMKIND_HBW_GBTLB_STRICT,-1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
-                                               MEMKIND_HBW_GBTLB_STRICT,
-                                               k++));
-
-    }
-}
-
 
 int n_random(int i)
 {
@@ -461,9 +393,7 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 break;
 
             case MEMKIND_MALLOC:
-                if (trial_vec[i].memkind == MEMKIND_HBW_GBTLB_STRICT ||
-                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB_STRICT ||
-                    trial_vec[i].memkind == MEMKIND_HBW_GBTLB ||
+                if (trial_vec[i].memkind == MEMKIND_HBW_GBTLB ||
                     trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB){
                     fprintf (stdout,"Allocating %zd bytes using memkind_malloc\n",
                              trial_vec[i].size);
@@ -505,8 +435,7 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
             Check check(ptr_vec[i], trial_vec[i].size);
             if (trial_vec[i].memkind != MEMKIND_DEFAULT &&
                 trial_vec[i].memkind != MEMKIND_HUGETLB &&
-                trial_vec[i].memkind != MEMKIND_GBTLB &&
-                trial_vec[i].memkind != MEMKIND_GBTLB_STRICT) {
+                trial_vec[i].memkind != MEMKIND_GBTLB) {
                 EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
             }
             if (trial_vec[i].api == HBW_CALLOC) {
