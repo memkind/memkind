@@ -23,6 +23,7 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+err=0
 basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 numactl --hardware | grep "^node 1" > /dev/null
 if [ $? -ne 0 ]; then
@@ -38,7 +39,7 @@ fi
 
 if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
     export MEMKIND_HBW_NODES=1
-    $basedir/all_tests --gtest_list_tests > .tmp $@
+    $basedir/all_tests --gtest_list_tests > .tmp
     cat .tmp | while read line
     do
         if [[ $line == *. ]]; then
@@ -47,16 +48,18 @@ if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
             if [[ $test_main == GBPagesTest. ]]; then
                 if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then
                     numactl --membind=0 $basedir/all_tests --gtest_filter="$test_main$line" $@
+                    if [ $err == 0 ]; then err=$?; fi
                 fi
             else
                 numactl --membind=0 $basedir/all_tests --gtest_filter="$test_main$line" $@
+                if [ $err == 0 ]; then err=$?; fi
             fi
         fi
     done
     rm -f .tmp
 
 else
-    $basedir/all_tests --gtest_list_tests > .tmp $@
+    $basedir/all_tests --gtest_list_tests > .tmp
     cat .tmp | while read line
     do
 	    if [[ $line == *. ]]; then
@@ -65,9 +68,11 @@ else
             if [[ $test_main == GBPagesTest. ]]; then
                 if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then
                     $basedir/all_tests --gtest_filter="$test_main$line" $@
+                    if [ $err == 0 ]; then err=$?; fi
                 fi
             else
                 $basedir/all_tests --gtest_filter="$test_main$line" $@
+                if [ $err == 0 ]; then err=$?; fi
             fi
         fi
     done
@@ -76,8 +81,16 @@ fi
 
 
 LD_PRELOAD=$basedir/test_libs/libsched.so $basedir/schedcpu_test $@
+if [ $err == 0 ]; then err=$?; fi
 LD_PRELOAD=$basedir/test_libs/libmallctl.so $basedir/mallctlerr_test $@
+if [ $err == 0 ]; then err=$?; fi
 LD_PRELOAD=$basedir/test_libs/libmalloc.so $basedir/mallocerr_test $@
+if [ $err == 0 ]; then err=$?; fi
 LD_PRELOAD=$basedir/test_libs/libnumadist.so $basedir/tieddisterr_test $@
+if [ $err == 0 ]; then err=$?; fi
 $basedir/environerr_test $@
+if [ $err == 0 ]; then err=$?; fi
 LD_PRELOAD=$basedir/test_libs/libfopen.so $basedir/pmtterr_test $@
+if [ $err == 0 ]; then err=$?; fi
+
+exit $err

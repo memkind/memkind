@@ -71,7 +71,8 @@ ssh root@$remote_ip "rpm -i ~$remote_login/$nkrpm ~$remote_login/$jerpm"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_hugepages"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_overcommit_hugepages"
 
-ssh $remote_login@$remote_ip "./test.sh --gtest_output=xml:gtest_output/" | tee $outdir/test.out
+ssh $remote_login@$remote_ip "if [ -e /opt/mpss/coverage/memkind.cov ]; then mkdir -p gtest_output; cp /opt/mpss/coverage/memkind.cov gtest_output; fi"
+ssh $remote_login@$remote_ip "COVFILE=gtest_output/memkind.cov ./test.sh --gtest_output=xml:gtest_output/" | tee $outdir/test.out
 err=$?
 scp $remote_login@$remote_ip:gtest_output/\* $outdir
 exit $err
