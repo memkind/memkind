@@ -9,8 +9,8 @@
 
 name = memkind
 arch = $(shell uname -p)
-version = $(shell git describe --long | sed 's|[^0-9]*\([0-9]*\.[0-9]*\.[0-9]*\).*|\1|')
-release = $(shell git describe --long | sed 's|[^0-9]*[0-9]*\.[0-9]*\.[0-9]*-\([0-9]*\).*|\1|')
+version = 0.0.0
+release = 1
 
 src = $(shell cat MANIFEST)
 
