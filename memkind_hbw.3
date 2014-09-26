@@ -21,6 +21,35 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-static const char * const MEMKIND_BANDWIDTH_PATH = "/etc/memkind/node-bandwidth";
-int memkind_hbw_check_available(struct memkind *kind);
-int memkind_hbw_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
+.TH "MEMKIND_HBW" 3 "2014-09-22" "Intel Corporation" "MEMKIND_HBW" \" -*- nroff -*-
+.SH "NAME"
+memkind_hbw.h \- high bandwidth memory memkind operations.
+.SH "SYNOPSIS"
+.nf
+.B #include <memkind_hbw.h>
+.sp
+.B Link with -ljemalloc -lnuma -lpthread -lmemkind
+.sp
+.BI "int memkind_hbw_check_available(struct memkind " "*kind" );
+.BI "int memkind_hbw_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
+.SH DESCRIPTION
+High bandwidth memory memkind operations.
+.TP
+.B MEMKIND_BANDWIDTH_PATH
+Constant string that contains path to binary file that lists the
+bandwidths of all NUMA nodes.  Flat binary file containing
+.B NUMA_NUM_NODES
+integers of type
+.BR int ,
+where the value is set to zero for undetermined nodes.
+.SH "COPYRIGHT"
+Copyright (C) 2014 Intel Corperation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3),
+.BR memkind_arena (3),
+.BR memkind_default (3),
+.BR memkind_gbtlb (3),
+.BR memkind_hugetlb (3),
+.BR jemalloc (3),
+.BR mbind (2),
+.BR mmap (2)

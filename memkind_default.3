@@ -21,17 +21,39 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-
-int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
-int memkind_default_destroy(struct memkind *kind);
-void *memkind_default_malloc(struct memkind *kind, size_t size);
-void *memkind_default_calloc(struct memkind *kind, size_t num, size_t size);
-int memkind_default_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
-void *memkind_default_realloc(struct memkind *kind, void *ptr, size_t size);
-void memkind_default_free(struct memkind *kind, void *ptr);
-int memkind_default_mbind(struct memkind *kind, void *ptr, size_t len);
-int memkind_default_get_mmap_flags(struct memkind *kind, int *flags);
-int memkind_default_get_mbind_mode(struct memkind *kind, int *mode);
-int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode);
-int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free);
-int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
+.TH "MEMKIND_DEFAULT" 3 "2014-09-22" "Intel Corporation" "MEMKIND_DEFAULT" \" -*- nroff -*-
+.SH "NAME"
+memkind_default.h \- default implementations for memkind operations.
+.SH "SYNOPSIS"
+.nf
+.B #include <memkind_default.h>
+.sp
+.B Link with -ljemalloc -lnuma -lpthread -lmemkind
+.sp
+.BI "int memkind_default_create(struct memkind " "*kind" ", const struct memkind_ops " "*ops" ", const char " "*name" );
+.BI "int memkind_default_destroy(struct memkind " "*kind" );
+.BI "void *memkind_default_malloc(struct memkind " "*kind" ", size_t " "size" );
+.BI "void *memkind_default_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" );
+.BI "int memkind_default_posix_memalign(struct memkind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.BI "void *memkind_default_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
+.BI "void memkind_default_free(struct memkind " "*kind" ", void " "*ptr" );
+.BI "int memkind_default_mbind(struct memkind " "*kind" ", void " "*ptr" ", size_t " "len" );
+.BI "int memkind_default_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
+.BI "int memkind_default_get_mbind_mode(struct memkind " "*kind" ", int " "*mode" );
+.BI "int memkind_preferred_get_mbind_mode(struct memkind " "*kind" ", int " "*mode" );
+.BI "int memkind_default_get_size(struct memkind " "*kind" ", size_t " "*total" ", size_t " "*free" );
+.BI "int memkind_posix_check_alignment(struct memkind " "*kind" ", size_t " "alignment" );
+.br
+.SH DESCRIPTION
+Default implementations for memkind operations.
+.SH "COPYRIGHT"
+Copyright (C) 2014 Intel Corperation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3),
+.BR memkind_arena (3),
+.BR memkind_hbw (3),
+.BR memkind_hugetlb (3),
+.BR memkind_gbtlb (3),
+.BR jemalloc (3),
+.BR mbind (2),
+.BR mmap (2)

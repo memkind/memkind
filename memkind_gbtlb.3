@@ -21,10 +21,32 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-void *memkind_gbtlb_malloc(struct memkind *kind, size_t size);
-void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size);
-int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
-void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size);
-void memkind_gbtlb_free(struct memkind *kind, void *ptr);
-int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags);
-int memkind_gbtlb_check_addr(struct memkind *kind, void *addr);
+.TH "MEMKIND_GBTLB" 3 "2014-09-22" "Intel Corporation" "MEMKIND_GBTLB" \" -*- nroff -*-
+.SH "NAME"
+memkind_gbtlb.h \- gigabyte tlb memkind operations.
+.SH "SYNOPSIS"
+.nf
+.B #include <memkind_gbtlb.h>
+.sp
+.B Link with -ljemalloc -lnuma -lpthread -lmemkind
+.sp
+.BI "void *memkind_gbtlb_malloc(struct memkind " "*kind" ", size_t " "size" );
+.BI "void *memkind_gbtlb_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" );
+.BI "int memkind_gbtlb_posix_memalign(struct memkind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.BI "void *memkind_gbtlb_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
+.BI "void memkind_gbtlb_free(struct memkind " "*kind" ", void " "*ptr" );
+.BI "int memkind_gbtlb_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
+.BI "int memkind_gbtlb_check_addr(struct memkind " "*kind" ", void " "*addr" );
+.SH DESCRIPTION
+Gigabyte tlb implementations for memkind operations.
+.SH "COPYRIGHT"
+Copyright (C) 2014 Intel Corperation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3),
+.BR memkind_arena (3),
+.BR memkind_default (3),
+.BR memkind_hbw (3),
+.BR memkind_hugetlb (3),
+.BR jemalloc (3),
+.BR mbind (2),
+.BR mmap (2)

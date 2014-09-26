@@ -21,5 +21,26 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags);
-
+.TH "MEMKIND_HUGETLB" 3 "2014-09-22" "Intel Corporation" "MEMKIND_HUGETLB" \" -*- nroff -*-
+.SH "NAME"
+memkind_hugetlb.h \- huge tlb memory memkind operations.
+.SH "SYNOPSIS"
+.nf
+.B #include <memkind_hugetlb.h>
+.sp
+.B Link with -ljemalloc -lnuma -lpthread -lmemkind
+.sp
+.BI "int memkind_hugetlb_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
+.SH DESCRIPTION
+Huge tlb memory memkind operations.
+.SH "COPYRIGHT"
+Copyright (C) 2014 Intel Corperation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3),
+.BR memkind_arena (3),
+.BR memkind_default (3),
+.BR memkind_gbtlb (3),
+.BR memkind_hbw (3),
+.BR jemalloc (3),
+.BR mbind (2),
+.BR mmap (2)
