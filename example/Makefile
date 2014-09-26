@@ -37,11 +37,11 @@ hello_hbw: hello_hbw_example.c
 filter_memkind: filter_example.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) filter_example.c -o filter_memkind
 
-stream_memkind: stream_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -DENABLE_DYNAMIC_ALLOC -fopenmp stream_example.c -o stream_memkind
-
 stream: stream_example.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fopenmp stream_example.c -o stream
+
+stream_memkind: stream_example.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -DENABLE_DYNAMIC_ALLOC -fopenmp stream_example.c -o stream_memkind
 
 new_kind: new_kind_example.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) new_kind_example.c -o new_kind
@@ -49,7 +49,7 @@ new_kind: new_kind_example.c
 clean:
 	rm -f hello_memkind hello_hbw filter_memkind stream_memkind stream new_kind
 
-test: hello_memkind filter_memkind
+test: all
 	./hello_memkind
 	./hello_hbw
 	./filter_memkind
