@@ -125,8 +125,7 @@ fi
 $(extra_files)
 
 %changelog
-* Tue Jul 1 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> -
-- Initial release to NDA customers
+$(shell cat CHANGES.txt)
 endef
 
 export make_spec

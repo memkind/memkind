@@ -3,6 +3,7 @@ actbl2.h
 actbl3.h
 actbl.h
 actypes.h
+CHANGES.txt
 COPYING.txt
 example/filter_example.c
 example/hello_hbw_example.c
