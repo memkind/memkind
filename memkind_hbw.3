@@ -31,8 +31,11 @@ memkind_hbw.h \- high bandwidth memory memkind operations.
 .B Link with -ljemalloc -lnuma -lpthread -lmemkind
 .sp
 .BI "int memkind_hbw_check_available(struct memkind " "*kind" );
+.br
 .BI "int memkind_hbw_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
+.br
 .SH DESCRIPTION
+.PP
 High bandwidth memory memkind operations.  The ACPICA specification
 provides the PMTT table which defines a bandwidth value for each
 NUMA node.  This table is used to idenify the set of NUMA nodes

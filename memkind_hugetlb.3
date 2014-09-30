@@ -23,7 +23,7 @@
 .\"
 .TH "MEMKIND_HUGETLB" 3 "2014-09-22" "Intel Corporation" "MEMKIND_HUGETLB" \" -*- nroff -*-
 .SH "NAME"
-memkind_hugetlb.h \- huge tlb memory memkind operations.
+memkind_hugetlb.h \- hugetlb memory memkind operations.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind_hugetlb.h>
@@ -31,8 +31,19 @@ memkind_hugetlb.h \- huge tlb memory memkind operations.
 .B Link with -ljemalloc -lnuma -lpthread -lmemkind
 .sp
 .BI "int memkind_hugetlb_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
+.br
 .SH DESCRIPTION
-Huge tlb memory memkind operations.
+.PP
+The hugetlb memory memkind operations enable memory kinds which use
+the Linux hugetlbfs file system.  For more information about the
+hugetlbfs see link below.
+.br
+.IR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+.PP
+.BR memkind_hugetlb_get_mmap_flags ()
+Sets the flags for the
+.BR mmap ()
+system call such that the hugetlbfs is utilized for allocations.
 .SH "COPYRIGHT"
 Copyright (C) 2014 Intel Corperation. All rights reserved.
 .SH "SEE ALSO"

@@ -45,7 +45,64 @@ memkind_default.h \- default implementations for memkind operations.
 .BI "int memkind_posix_check_alignment(struct memkind " "*kind" ", size_t " "alignment" );
 .br
 .SH DESCRIPTION
-Default implementations for memkind operations.
+Default implementations for memkind operations which include a several
+useful methods that are not part of the
+.B MEMKIND_DEFAULT
+kind which is a fall through to the jemalloc implementation.
+.PP
+.BR memkind_default_create ()
+implements the required start up for every kind.  If a kind does not
+point to this function directly for its
+.BR .create ()
+operation, then the function that it points to must call
+.PP
+.BR memkind_default_create ()
+at its start.
+.BR memkind_default_destroy ()
+implements the required shutdown for every kind.  If a kind does not
+point to this function directly for its
+.BR .destroy ()
+operation, then the function that it points to must call
+.BR memkind_default_destroy ()
+at its end.
+.PP
+.BR memkind_default_malloc ()
+is a direct call through to
+.BR je_malloc ().
+.PP
+.BR memkind_default_calloc ()
+is a direct call through to
+.BR je_calloc ().
+.PP
+.BR memkind_default_posix_memalign ()
+is a direct call through to
+.BR je_posix_memalign ().
+.PP
+.BR memkind_default_realloc ()
+is a direct call through to
+.BR je_realloc ().
+.PP
+.BR memkind_default_free ().
+is a direct call through to
+.BR je_free ().
+Note that this method can be called on any pointer returned by a
+jemalloc allocation, and in particular, all of the arena
+allocations described in
+.BR memkind_arena (3)
+can use this function for freeing.
+.PP
+.BR memkind_default_mbind ()
+.PP
+.BR memkind_default_get_mmap_flags ()
+.PP
+.BR memkind_default_get_mbind_mode ()
+.PP
+.BR memkind_preferred_get_mbind_mode ()
+.PP
+.BR memkind_default_get_size ()
+.PP
+.BR memkind_posix_check_alignment ()
+
 .SH "COPYRIGHT"
 Copyright (C) 2014 Intel Corperation. All rights reserved.
 .SH "SEE ALSO"
