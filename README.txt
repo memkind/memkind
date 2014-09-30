@@ -3,7 +3,7 @@ COLLABORATION AND WAS NOT ISSUED AS A RELEASED PRODUCT BY INTEL.
 DOCUMENTATION AND TEST CODE COVERAGE ARE INCOMPLETE.
 
 Christopher Cantalupo <christopher.m.cantalupo@intel.com>
-2014 July 3
+2014 September 29
 
 
 The memkind library extends libnuma with the ability to categorize
