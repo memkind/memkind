@@ -125,7 +125,12 @@ fi
 $(extra_files)
 
 %changelog
-$(shell cat CHANGES.txt)
+* Tue Sep 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.0.8
+- Added GBTLB functionality, code clean up, documentation updates,
+  examples directory.  Examples includes stream modified to use
+  memkind interface.  Code coverage still lacking, and documentation
+  incomplete.
+
 endef
 
 export make_spec
