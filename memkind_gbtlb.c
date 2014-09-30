@@ -70,7 +70,7 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 
     memkind_gbtlb_ceil_size(&size);
     err = memkind_gbtlb_mmap(kind, size, &result);
-    if (!err && kind->ops->mbind)
+    if (!err && kind->ops->mbind) {
         err = kind->ops->mbind(kind, result, size);
     }
     if (!err) {
