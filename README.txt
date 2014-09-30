@@ -35,9 +35,8 @@ environment variable is used in conjunction with "numactl --membind"
 to force standard allocations to one NUMA node and high bandwidth
 allocations through a different NUMA node.
 
-This software is being made available for early evaluation for
-customers under non-disclosure agreements with Intel.  The memkind
-library should be considered pre-alpha: bugs may exist and the
+This software is being made available for early evaluation.  The
+memkind library should be considered pre-alpha: bugs may exist and the
 interfaces may be subject to change prior to alpha release.  Feedback
 on design or implementation is greatly appreciated.
 
