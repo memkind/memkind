@@ -231,7 +231,10 @@ main(int argc, char **argv)
     char err_msg[ERR_MSG_SIZE];
     if (argc > 1 && (strncmp("--help", argv[1], strlen("--help")) == 0 ||
                      strncmp("-h", argv[1], strlen("-h")) == 0)) {
-        printf("Usage: %s [memkind_default | memkind_hbw | memkind_hbw_hugetlb | memkind_hbw_preferred | memkind_hbw_preferred_hugetlb]\n", argv[0]);
+        printf("Usage: %s [memkind_default | memkind_hbw | memkind_hbw_hugetlb | \n" 
+               "           memkind_hbw_preferred | memkind_hbw_preferred_hugetlb | \n"
+               "           memkind_hbw_gbtlb | memkind_hbw_preferred_gbtlb | memkind_gbtlb]\n",
+               argv[0]);
         return 0;
     }
 #endif
