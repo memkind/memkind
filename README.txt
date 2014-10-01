@@ -21,8 +21,8 @@ functionality of the NUMA system calls.  This is patch is commit
 3964acd0dbec123aa0a621973a2a0580034b4788
 in the linux-stable git repository from kernel.org.
 
-To use the interfaces for obtaining 2MB pages please be sure to follow
-the instructions here:
+To use the interfaces for obtaining 2MB and 1GB pages please be sure
+to follow the instructions here:
     https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
 and pay particular attention to the use of the proc files:
     /proc/sys/vm/nr_hugepages
