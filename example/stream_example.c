@@ -232,8 +232,8 @@ main(int argc, char **argv)
     if (argc > 1 && (strncmp("--help", argv[1], strlen("--help")) == 0 ||
                      strncmp("-h", argv[1], strlen("-h")) == 0)) {
         printf("Usage: %s [memkind_default | memkind_hbw | memkind_hbw_hugetlb | \n" 
-               "           memkind_hbw_preferred | memkind_hbw_preferred_hugetlb | \n"
-               "           memkind_hbw_gbtlb | memkind_hbw_preferred_gbtlb | memkind_gbtlb]\n",
+               "    memkind_hbw_preferred | memkind_hbw_preferred_hugetlb | \n"
+               "    memkind_hbw_gbtlb | memkind_hbw_preferred_gbtlb | memkind_gbtlb]\n",
                argv[0]);
         return 0;
     }
