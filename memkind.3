@@ -319,7 +319,7 @@ sets
 .I kind
 to the memory kind associated with the
 .I name
-string specified.  All of the built in kinds have name strings that are the lower-case version of name
+string specified.  All of the built-in kinds have name strings that are the lower-case version of name
 given in the
 .B KINDS
 section (for example: MEMKIND_DEFAULT has
@@ -362,7 +362,13 @@ outputs and responsiblities of each function pointer enumerated in the
 .I memkind_ops
 structure.  Each of these methods takes a
 .B memkind_t
-argument as its first parameter which shall be self referencing.
+argument as its first parameter which shall be self referencing.  In this
+documentation the function pointers in the
+.I memkind_ops
+structure will be prepended with
+.RB """" ops. """"
+and should be considered the operation associated with the
+.IR kind .
 .PP
 .BI "int ops.create(memkind_t " "kind" ", const struct memkind_ops " "*ops" ", const char " "*name" );
 .br
@@ -400,39 +406,39 @@ method, this pointer can be set to
 .PP
 .BI "void *ops.malloc(memkind_t " "kind" ", size_t " "size" );
 .br
-is the underlying implementation of
+shall implement
 .BR memkind_malloc (),
-see description above.
+as described above.
 .PP
 .BI "void *ops.calloc(memkind_t " "kind" ", size_t " "num" ", size_t " "size" );
 .br
-is the underlying implementation of
+shall implement
 .BR memkind_calloc (),
-see description above.
+as described above.
 .PP
 .BI "int ops.posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .br
-is the underlying implementation of
+shall implement
 .BR memkind_posix_memalign (),
-see description above.
+as described above.
 .PP
 .BI "void *ops.realloc(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" );
 .br
-is the underlying implementation of
+shall implement
 .BR memkind_realloc (),
-see description above.
+as described above.
 .PP
 .BI "void ops.free(memkind_t " "kind" ", void " "*ptr" );
 .br
-is the underlying implementation of
+shall implement
 .BR memkind_free (),
-see description above.
+as described above.
 .PP
 .BI "int ops.mbind(memkind_t " "kind" ", void " "*ptr" ", size_t " "len" );
 .br
-wraps the
+shall wrap the
 .BR mbind ()
-system call and passes through
+system call and pass through
 the start address
 .I ptr
 to be mapped, and the number of bytes
@@ -441,7 +447,7 @@ from that address to be mapped.
 .PP
 .BI "int ops.get_mmap_flags(memkind_t " "kind" ", int " "*flags" );
 .br
-sets
+shall set
 .I flags
 to a value appropriate for passing to the
 .IR mmap ()
@@ -450,7 +456,7 @@ system call for the
 .PP
 .BI "int ops.get_mbind_mode(memkind_t " "kind" ", int " "*mode" );
 .br
-sets
+shall set
 .I mode
 to a value appropriate for passing to the
 .IR mmap ()
@@ -459,7 +465,7 @@ system call for the
 .PP
 .BI "int ops.get_mbind_nodemask(memkind_t " "kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
 .br
-sets the
+shall set the
 .I nodemask
 of length
 .I maxnode
@@ -470,7 +476,7 @@ system call for the
 .PP
 .BI "int ops.get_arena(memkind_t " "kind" ", unsigned int " "*arena" );
 .br
-sets
+shall set
 .I arena
 to an index appropriate for the
 .I kind
@@ -480,19 +486,19 @@ API.
 .PP
 .BI "int ops.get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
 .br
-is the underlying implementation of
+shall implement
 .BR memkind_get_size (),
-see description above.
+as described above.
 .PP
 .BI "int ops.check_available(memkind_t " "kind" );
 .br
-returns 0 if the
+shall return 0 if the
 .I kind
 is available on the system, and an error code if not.
 .PP
 .BI "int ops.check_alignment(memkind_t " "kind" ", size_t " "alignment" );
 .br
-returns 0 if the
+shall return 0 if the
 .I alignment
 is appropriate for the
 .I kind
@@ -500,7 +506,7 @@ and an error code if not.
 .PP
 .BI "int ops.check_addr(memkind_t " "kind" ", void " "*addr" );
 .br
-returns 0 if the
+shall return 0 if the
 .I addr
 can be freed with the specified
 .I kind
@@ -511,9 +517,9 @@ freeing.
 .PP
 .BI "void ops.init_once(void);"
 .br
-is set to NULL for any kind that is not built in.  The method is used
-to allocate dynamic resources for built in kinds without requiring and
-initialization routine.
+this function pointer shall be set to NULL for any kind that is not
+built-in.  The method is used to allocate dynamic resources for
+built-in kinds without requiring and initialization routine.
 .SH "RETURN VALUE"
 .BR memkind_calloc (),
 .BR memkind_malloc (),
