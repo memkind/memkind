@@ -66,7 +66,7 @@ kind which is a fall through to the jemalloc implementation.
 .BR memkind_default_create ()
 implements the required start up for every kind.  If a kind does not
 point to this function directly for its
-.BR .create ()
+.BR ops.create ()
 operation, then the function that it points to must call
 .BR memkind_default_create ()
 at its start.
@@ -74,7 +74,7 @@ at its start.
 .BR memkind_default_destroy ()
 implements the required shutdown for every kind.  If a kind does not
 point to this function directly for its
-.BR .destroy ()
+.BR ops.destroy ()
 operation, then the function that it points to must call
 .BR memkind_default_destroy ()
 at its end.
@@ -106,9 +106,9 @@ can use this function for freeing.
 .PP
 .BR memkind_default_mbind ()
 makes calls the kind's
-.BR .get_mbind_nodemask ()
+.BR ops.get_mbind_nodemask ()
 and
-.BR .get_mbind_mode ()
+.BR ops.get_mbind_mode ()
 operations to gather inputs and then calls the
 .BR mbind (2)
 system call using the results along with and user input

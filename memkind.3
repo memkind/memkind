@@ -364,7 +364,7 @@ structure.  Each of these methods takes a
 .B memkind_t
 argument as its first parameter which shall be self referencing.
 .PP
-.BI "int .create(memkind_t " "kind" ", const struct memkind_ops " "*ops" ", const char " "*name" );
+.BI "int ops.create(memkind_t " "kind" ", const struct memkind_ops " "*ops" ", const char " "*name" );
 .br
 shall instantiate all of the dynamic resources associated with the
 .IR kind .
@@ -389,46 +389,46 @@ or a function that calls
 .BR memkind_default_create ()
 before performing other setup.
 .PP
-.BI "int .destroy(memkind_t " "kind" );
+.BI "int ops.destroy(memkind_t " "kind" );
 .br
 shall free all of the dynamic resources reserved by the
-.BR .create ()
+.BR ops.create ()
 method.  If no dynamic resources were explicitly allocated in the
-.IR .create ()
+.IR ops.create ()
 method, this pointer can be set to
 .BR NULL .
 .PP
-.BI "void *.malloc(memkind_t " "kind" ", size_t " "size" );
+.BI "void *ops.malloc(memkind_t " "kind" ", size_t " "size" );
 .br
 is the underlying implementation of
 .BR memkind_malloc (),
 see description above.
 .PP
-.BI "void *.calloc(memkind_t " "kind" ", size_t " "num" ", size_t " "size" );
+.BI "void *ops.calloc(memkind_t " "kind" ", size_t " "num" ", size_t " "size" );
 .br
 is the underlying implementation of
 .BR memkind_calloc (),
 see description above.
 .PP
-.BI "int .posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.BI "int ops.posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .br
 is the underlying implementation of
 .BR memkind_posix_memalign (),
 see description above.
 .PP
-.BI "void *.realloc(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" );
+.BI "void *ops.realloc(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" );
 .br
 is the underlying implementation of
 .BR memkind_realloc (),
 see description above.
 .PP
-.BI "void .free(memkind_t " "kind" ", void " "*ptr" );
+.BI "void ops.free(memkind_t " "kind" ", void " "*ptr" );
 .br
 is the underlying implementation of
 .BR memkind_free (),
 see description above.
 .PP
-.BI "int .mbind(memkind_t " "kind" ", void " "*ptr" ", size_t " "len" );
+.BI "int ops.mbind(memkind_t " "kind" ", void " "*ptr" ", size_t " "len" );
 .br
 wraps the
 .BR mbind ()
@@ -439,7 +439,7 @@ to be mapped, and the number of bytes
 .I len
 from that address to be mapped.
 .PP
-.BI "int .get_mmap_flags(memkind_t " "kind" ", int " "*flags" );
+.BI "int ops.get_mmap_flags(memkind_t " "kind" ", int " "*flags" );
 .br
 sets
 .I flags
@@ -448,7 +448,7 @@ to a value appropriate for passing to the
 system call for the
 .IR kind .
 .PP
-.BI "int .get_mbind_mode(memkind_t " "kind" ", int " "*mode" );
+.BI "int ops.get_mbind_mode(memkind_t " "kind" ", int " "*mode" );
 .br
 sets
 .I mode
@@ -457,7 +457,7 @@ to a value appropriate for passing to the
 system call for the
 .IR kind .
 .PP
-.BI "int .get_mbind_nodemask(memkind_t " "kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
+.BI "int ops.get_mbind_nodemask(memkind_t " "kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
 .br
 sets the
 .I nodemask
@@ -468,7 +468,7 @@ bits to a value appropriate for passing to the
 system call for the
 .IR kind .
 .PP
-.BI "int .get_arena(memkind_t " "kind" ", unsigned int " "*arena" );
+.BI "int ops.get_arena(memkind_t " "kind" ", unsigned int " "*arena" );
 .br
 sets
 .I arena
@@ -478,19 +478,19 @@ and CPU when using the jemalloc arena allocation through the
 .BR je_mallocx ()
 API.
 .PP
-.BI "int .get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
+.BI "int ops.get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
 .br
 is the underlying implementation of
 .BR memkind_get_size (),
 see description above.
 .PP
-.BI "int .check_available(memkind_t " "kind" );
+.BI "int ops.check_available(memkind_t " "kind" );
 .br
 returns 0 if the
 .I kind
 is available on the system, and an error code if not.
 .PP
-.BI "int .check_alignment(memkind_t " "kind" ", size_t " "alignment" );
+.BI "int ops.check_alignment(memkind_t " "kind" ", size_t " "alignment" );
 .br
 returns 0 if the
 .I alignment
@@ -498,7 +498,7 @@ is appropriate for the
 .I kind
 and an error code if not.
 .PP
-.BI "int .check_addr(memkind_t " "kind" ", void " "*addr" );
+.BI "int ops.check_addr(memkind_t " "kind" ", void " "*addr" );
 .br
 returns 0 if the
 .I addr
@@ -509,7 +509,7 @@ and an error code otherwise.  If the memory cannot be freed with
 then at least one of the instantiated kinds must return 0 to enable
 freeing.
 .PP
-.BI "void .init_once(void);"
+.BI "void ops.init_once(void);"
 .br
 is set to NULL for any kind that is not built in.  The method is used
 to allocate dynamic resources for built in kinds without requiring and
