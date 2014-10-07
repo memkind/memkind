@@ -31,20 +31,33 @@ memkind_default.h \- default implementations for memkind operations.
 .B Link with -ljemalloc -lnuma -lpthread -lmemkind
 .sp
 .BI "int memkind_default_create(struct memkind " "*kind" ", const struct memkind_ops " "*ops" ", const char " "*name" );
+.br
 .BI "int memkind_default_destroy(struct memkind " "*kind" );
+.br
 .BI "void *memkind_default_malloc(struct memkind " "*kind" ", size_t " "size" );
+.br
 .BI "void *memkind_default_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" );
+.br
 .BI "int memkind_default_posix_memalign(struct memkind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.br
 .BI "void *memkind_default_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
+.br
 .BI "void memkind_default_free(struct memkind " "*kind" ", void " "*ptr" );
+.br
 .BI "int memkind_default_mbind(struct memkind " "*kind" ", void " "*ptr" ", size_t " "len" );
+.br
 .BI "int memkind_default_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
+.br
 .BI "int memkind_default_get_mbind_mode(struct memkind " "*kind" ", int " "*mode" );
+.br
 .BI "int memkind_preferred_get_mbind_mode(struct memkind " "*kind" ", int " "*mode" );
+.br
 .BI "int memkind_default_get_size(struct memkind " "*kind" ", size_t " "*total" ", size_t " "*free" );
+.br
 .BI "int memkind_posix_check_alignment(struct memkind " "*kind" ", size_t " "alignment" );
 .br
 .SH DESCRIPTION
+.PP
 Default implementations for memkind operations which include a several
 useful methods that are not part of the
 .B MEMKIND_DEFAULT
@@ -55,9 +68,9 @@ implements the required start up for every kind.  If a kind does not
 point to this function directly for its
 .BR .create ()
 operation, then the function that it points to must call
-.PP
 .BR memkind_default_create ()
 at its start.
+.PP
 .BR memkind_default_destroy ()
 implements the required shutdown for every kind.  If a kind does not
 point to this function directly for its
@@ -92,17 +105,61 @@ allocations described in
 can use this function for freeing.
 .PP
 .BR memkind_default_mbind ()
+makes calls the kind's
+.BR .get_mbind_nodemask ()
+and
+.BR .get_mbind_mode ()
+operations to gather inputs and then calls the
+.BR mbind (2)
+system call using the results along with and user input
+.I ptr
+and
+.IR len .
 .PP
 .BR memkind_default_get_mmap_flags ()
+sets
+.I flags
+to
+.BR "MAP_PRIVATE | MAP_ANONYMOUS" .
+See
+.BR mmap (2)
+for more information about these flags.
 .PP
 .BR memkind_default_get_mbind_mode ()
+sets
+.I mode
+to
+.BR MPOL_BIND .
+See
+.BR mbind (2)
+for more information about this flag.
 .PP
 .BR memkind_preferred_get_mbind_mode ()
+sets
+.I mode
+to
+.BR MPOL_PREFERRED .
+See
+.BR mbind (2)
+for more information about this flag.
 .PP
 .BR memkind_default_get_size ()
+sums the values returned by
+.BR numa_node_size64 ()
+function for every NUMA node set by the
+.BR .get_node_mask ()
+operation.  If the 
+.I .get_node_mask
+pointer is 
+.B NULL
+then the values are summed for all NUMA nodes.
 .PP
 .BR memkind_posix_check_alignment ()
-
+can be used to check the alignment value for
+.BR memkind_posix_memalign ()
+to ensure that is abides by the POSIX requirements:
+alignment must be a power of 2 at least as large as
+.RB sizeof( "void *" ).
 .SH "COPYRIGHT"
 Copyright (C) 2014 Intel Corperation. All rights reserved.
 .SH "SEE ALSO"
