@@ -12,7 +12,7 @@
 /* computational kernels coded in C.                                     */
 /*-----------------------------------------------------------------------*/
 /* Copyright 1991-2013: John D. McCalpin                                 */
-/* Copyright (C) 2014 Intel Corperation.                                 */
+/* Copyright (C) 2014 Intel Corporation.                                 */
 /*-----------------------------------------------------------------------*/
 /* License:                                                              */
 /*  1. You are free to use this program and/or to redistribute           */
