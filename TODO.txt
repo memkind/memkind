@@ -1,0 +1,49 @@
+Backlog
+=======
+
+Testing
+-------
+    * Major gaps in code coverage exist in memkind_pmtt.c and the bind
+    mode for the hbw interface.
+
+    * Currently testing on simics with KNL BIOS configured for flat
+    mode all-to-all.  Need to test with all other supported BIOS
+    configurations.
+
+    * Need to test GB pages on a range of kernel versions.
+
+    * More robust tests for out of memory and spill over conditions.
+
+    * Need fast running unit tests that have no external requirements
+    and provide decent code coverage.
+
+    * Need to expand performance testing significantly.
+
+Documentation
+-------------
+    * Complete all man pages.
+
+    * Better documentation for how NULL pointers in obs structure are
+    handled.
+
+    * Provide an architectural overview document.
+
+Features
+--------
+    * Support for non-standard x86 page sizes like 128 MB (request
+    from Cray).
+
+    * Use autotools for configure and make.
+
+    * Support for verbose mode by setting environment variable which
+    will log debug diagnostic information.
+
+    * Use atexit() rather than __attribute__((destructor)) to support
+    compilers other than gcc.
+
+Issues
+------
+    * ifort's FASTMEM mark up does not work.
+
+    * Error message when starting memkind service when it is already
+    started is very cryptic.
