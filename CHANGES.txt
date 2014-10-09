@@ -1,3 +1,4 @@
+- Updated documentation.
 * Tue Sep 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.0.8
 - Added GBTLB functionality, code clean up, documentation updates,
   examples directory.  Examples includes stream modified to use
