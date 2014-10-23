@@ -30,6 +30,7 @@
 #include <numa.h>
 #include <numaif.h>
 #include <errno.h>
+#include <assert.h>
 #include <sys/types.h>
 #include <jemalloc/jemalloc.h>
 #define _GNU_SOURCE
@@ -364,21 +365,25 @@ static int numanode_bandwidth_compare(const void *a, const void *b)
 
 void memkind_hbw_init_once(void)
 {
-    memkind_arena_create_map(MEMKIND_HBW);
+    int err = memkind_arena_create_map(MEMKIND_HBW);
+    assert(err == 0);
 }
 
 void memkind_hbw_hugetlb_init_once(void)
 {
-    memkind_arena_create_map(MEMKIND_HBW_HUGETLB);
+    int err = memkind_arena_create_map(MEMKIND_HBW_HUGETLB);
+    assert(err == 0);
 }
 
 void memkind_hbw_preferred_init_once(void)
 {
-    memkind_arena_create_map(MEMKIND_HBW_PREFERRED);
+    int err = memkind_arena_create_map(MEMKIND_HBW_PREFERRED);
+    assert(err == 0);
 }
 
 void memkind_hbw_preferred_hugetlb_init_once(void)
 {
-    memkind_arena_create_map(MEMKIND_HBW_PREFERRED_HUGETLB);
+    int err = memkind_arena_create_map(MEMKIND_HBW_PREFERRED_HUGETLB);
+    assert(err == 0);
 }
 

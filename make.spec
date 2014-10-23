@@ -19,6 +19,7 @@ Vendor: Intel Corporation
 URL: http://www.intel.com
 Source0: memkind-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildRequires:  gcc-c++
 %if %{defined suse_version}
 BuildRequires: libnuma-devel
 %else
@@ -34,10 +35,11 @@ groups of NUMA nodes into different "kinds" of memory. It provides a
 low level interface for generating inputs to mbind() and mmap(), and a
 high level interface for heap management.  The heap management is
 implemented with an extension to the jemalloc library which dedicates
-"arenas" to each CPU and kind of memory.  Additionally the heap
-is partitioned so that freed memory segments of different kinds are
-not coalesced.  To use memkind, jemalloc must be compiled with the
---enable-memkind option.
+"arenas" to each CPU and kind of memory.  Additionally the heap is
+partitioned so that freed memory segments of different kinds are not
+coalesced.  The memkind library enables page size selection at
+allocationt time.  To use memkind, jemalloc must be compiled with the
+--enable-memkind and --with-jemalloc-prefix=je_ options.
 
 %prep
 
@@ -53,16 +55,31 @@ groups of NUMA nodes into different "kinds" of memory. It provides a
 low level interface for generating inputs to mbind() and mmap(), and a
 high level interface for heap management.  The heap management is
 implemented with an extension to the jemalloc library which dedicates
-"arenas" to each CPU and kind of memory.  Additionally the heap
-is partitioned so that freed memory segments of different kinds are
-not coalesced.  To use memkind, jemalloc must be compiled with the
---enable-memkind option.
+"arenas" to each CPU and kind of memory.  Additionally the heap is
+partitioned so that freed memory segments of different kinds are not
+coalesced.  The memkind library enables page size selection at
+allocationt time.  To use memkind, jemalloc must be compiled with the
+--enable-memkind and --with-jemalloc-prefix=je_ options.
 
 %build
-$(make_prefix) $(MAKE) $(make_postfix)
+./autogen.sh
+%if %{defined suse_version}
+./configure --prefix=%{_prefix} --libdir=%{_libdir} \
+    --includedir=%{_includedir} --sbindir=%{_sbindir} \
+    --mandir=%{_mandir} --docdir=%{_docdir}/memkind
+%else
+./configure --prefix=%{_prefix} --libdir=%{_libdir} \
+    --includedir=%{_includedir} --sbindir=%{_sbindir} \
+    --mandir=%{_mandir} --docdir=%{_docdir}/memkind-%{version}
+%endif
+$(make_prefix)%{__make} $(make_postfix)
 
 %install
-make DESTDIR=%{buildroot} VERSION=%{version} includedir=%{_includedir} libdir=%{_libdir} sbindir=%{_sbindir} initddir=%{_initddir} docdir=%{_docdir} mandir=%{_mandir} install
+%{__make} DESTDIR=%{buildroot} install
+%{__install} -d %{buildroot}/%{_initddir}
+%{__install} init.d/memkind %{buildroot}/%{_initddir}/memkind
+rm -f %{buildroot}/%{_libdir}/libmemkind.a
+rm -f %{buildroot}/%{_libdir}/libmemkind.la
 $(extra_install)
 
 %clean
@@ -107,14 +124,22 @@ fi
 %{_includedir}/memkind_gbtlb.h
 %{_includedir}/memkind_hbw.h
 %{_includedir}/memkind_hugetlb.h
-%{_libdir}/libmemkind.so.0.0
+%{_libdir}/libmemkind.so.0.0.0
 %{_libdir}/libmemkind.so.0
 %{_libdir}/libmemkind.so
 %{_sbindir}/memkind-pmtt
 %{_initddir}/memkind
+%if %{defined suse_version}
+%dir %{_docdir}/memkind
+%doc %{_docdir}/memkind/README
+%doc %{_docdir}/memkind/COPYING
+%doc %{_docdir}/memkind/VERSION
+%else
 %dir %{_docdir}/memkind-%{version}
-%doc %{_docdir}/memkind-%{version}/README.txt
-%doc %{_docdir}/memkind-%{version}/COPYING.txt
+%doc %{_docdir}/memkind-%{version}/README
+%doc %{_docdir}/memkind-%{version}/COPYING
+%doc %{_docdir}/memkind-%{version}/VERSION
+%endif
 %doc %{_mandir}/man3/hbwmalloc.3.gz
 %doc %{_mandir}/man3/memkind.3.gz
 %doc %{_mandir}/man3/memkind_arena.3.gz
@@ -125,6 +150,11 @@ fi
 $(extra_files)
 
 %changelog
+* Thu Oct 23 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.1
+- Now building with autotools.
+- Updated documentation.
+- Fixed typo in copyright.
+- Fixed test scripts to properly handle return code of each test.
 * Tue Sep 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.0.8
 - Added GBTLB functionality, code clean up, documentation updates,
   examples directory.  Examples includes stream modified to use

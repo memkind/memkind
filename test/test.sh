@@ -48,11 +48,13 @@ if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
             if [[ $test_main == GBPagesTest. ]]; then
                 if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then
                     numactl --membind=0 $basedir/all_tests --gtest_filter="$test_main$line" $@
-                    if [ $err == 0 ]; then err=$?; fi
+                    ret=$?
+                    if [ $err -eq 0 ]; then err=$ret; fi
                 fi
             else
                 numactl --membind=0 $basedir/all_tests --gtest_filter="$test_main$line" $@
-                if [ $err == 0 ]; then err=$?; fi
+                ret=$?
+                if [ $err -eq 0 ]; then err=$ret; fi
             fi
         fi
     done
@@ -68,11 +70,13 @@ else
             if [[ $test_main == GBPagesTest. ]]; then
                 if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then
                     $basedir/all_tests --gtest_filter="$test_main$line" $@
-                    if [ $err == 0 ]; then err=$?; fi
+                    ret=$?
+                    if [ $err -eq 0 ]; then err=$ret; fi
                 fi
             else
                 $basedir/all_tests --gtest_filter="$test_main$line" $@
-                if [ $err == 0 ]; then err=$?; fi
+                ret=$?
+                if [ $err -eq 0 ]; then err=$ret; fi
             fi
         fi
     done
@@ -80,17 +84,28 @@ else
 fi
 
 
-LD_PRELOAD=$basedir/test_libs/libsched.so $basedir/schedcpu_test $@
-if [ $err == 0 ]; then err=$?; fi
-LD_PRELOAD=$basedir/test_libs/libmallctl.so $basedir/mallctlerr_test $@
-if [ $err == 0 ]; then err=$?; fi
-LD_PRELOAD=$basedir/test_libs/libmalloc.so $basedir/mallocerr_test $@
-if [ $err == 0 ]; then err=$?; fi
-LD_PRELOAD=$basedir/test_libs/libnumadist.so $basedir/tieddisterr_test $@
-if [ $err == 0 ]; then err=$?; fi
+LD_PRELOAD=$basedir/libsched.so $basedir/schedcpu_test $@
+ret=$?
+if [ $err -eq 0 ]; then err=$ret; fi
+#
+# These tests are broken.  Will avoid using LD_PRELOAD in future test
+# implementation.
+#
+# LD_PRELOAD=$basedir/libmallctl.so $basedir/mallctlerr_test $@
+# ret=$?
+# if [ $err -eq 0 ]; then err=$ret; fi
+# LD_PRELOAD=$basedir/libmalloc.so $basedir/mallocerr_test $@
+# ret=$?
+# if [ $err -eq 0 ]; then err=$ret; fi
+#
+LD_PRELOAD=$basedir/libnumadist.so $basedir/tieddisterr_test $@
+ret=$?
+if [ $err -eq 0 ]; then err=$ret; fi
 $basedir/environerr_test $@
-if [ $err == 0 ]; then err=$?; fi
-LD_PRELOAD=$basedir/test_libs/libfopen.so $basedir/pmtterr_test $@
-if [ $err == 0 ]; then err=$?; fi
+ret=$?
+if [ $err -eq 0 ]; then err=$ret; fi
+LD_PRELOAD=$basedir/libfopen.so $basedir/pmtterr_test $@
+ret=$?
+if [ $err -eq 0 ]; then err=$ret; fi
 
 exit $err

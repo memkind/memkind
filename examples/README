@@ -12,3 +12,11 @@ specifies which memkind to use.  Pass --help to stream_memkind for the
 available options.  There is also an example of how to create user
 defined kinds.  This example creates kinds which isolate allocations
 to a single NUMA node each backed by a single arena.
+
+If memkind or jemalloc were installed to non-standard locations use
+the MEMKIND_PREFIX and JEMALLOC_PREFIX variables to enable the
+Makefile.  For example, if you configured jemalloc with
+--prefix=$HOME/jemalloc and memkind with --prefix=$HOME/memkind, then
+you can build the examples as follows:
+
+make MEMKIND_PREFIX=$HOME/memkind JEMALLOC_PREFIX=$HOME/jemalloc

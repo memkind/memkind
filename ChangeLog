@@ -1,4 +1,8 @@
+* Thu Oct 23 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.1
+- Now building with autotools.
 - Updated documentation.
+- Fixed typo in copyright.
+- Fixed test scripts to properly handle return code of each test.
 * Tue Sep 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.0.8
 - Added GBTLB functionality, code clean up, documentation updates,
   examples directory.  Examples includes stream modified to use

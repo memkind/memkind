@@ -98,7 +98,7 @@ memory referenced by
 is freed and a pointer to the newly allocated high bandwidth memory is
 returned.
 
-.BR Note:
+.B Note:
 .BR hbw_realloc ()
 may move the memory allocation, resulting in a different return value
 than
@@ -117,12 +117,18 @@ if not NULL, was returned by a previous call to
 .BR hbw_malloc (),
 .BR hbw_calloc (),
 .BR hbw_realloc (),
-.BR hbw_posix_memalign (),
 or
-.BR hbw_posix_memalign_psize ().
+.BR hbw_posix_memalign ().
 Otherwise, or if
 .I hbw_free(ptr)
 was called before, undefined behavior occurs.
+
+
+.B Note:
+.BR hbw_realloc ()
+cannot be used with a pointer returned by
+.BR hbw_posix_memalign_psize ().
+
 .PP
 .BR hbw_free ()
 causes the allocated high bandwidth memory referenced by

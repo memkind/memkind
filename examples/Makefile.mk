@@ -22,37 +22,26 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-CC = cc
-CFLAGS = -O0 -g -Wall -Werror
-LDFLAGS = -lmemkind -ljemalloc -lnuma -lpthread
+noinst_PROGRAMS += examples/hello_memkind \
+                  examples/hello_hbw \
+                  examples/filter_memkind \
+                  examples/stream \
+                  examples/stream_memkind \
+                  examples/new_kind \
+                  # end
 
-all: hello_memkind hello_hbw filter_memkind stream stream_memkind new_kind
+examples_hello_memkind_LDADD = libmemkind.la
+examples_hello_hbw_LDADD = libmemkind.la
+examples_filter_memkind_LDADD = libmemkind.la
+examples_stream_LDADD = libmemkind.la
+examples_stream_memkind_LDADD = libmemkind.la
+examples_new_kind_LDADD = libmemkind.la
 
-hello_memkind: hello_memkind_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_memkind_example.c -o hello_memkind
+examples_hello_memkind_SOURCES = examples/hello_memkind_example.c
+examples_hello_hbw_SOURCES = examples/hello_hbw_example.c
+examples_filter_memkind_SOURCES = examples/filter_example.c
+examples_stream_SOURCES = examples/stream_example.c
+examples_stream_memkind_SOURCES = examples/stream_example.c
+examples_new_kind_SOURCES = examples/new_kind_example.c
 
-hello_hbw: hello_hbw_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) hello_hbw_example.c -o hello_hbw
-
-filter_memkind: filter_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) filter_example.c -o filter_memkind
-
-stream: stream_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fopenmp stream_example.c -o stream
-
-stream_memkind: stream_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -DENABLE_DYNAMIC_ALLOC -fopenmp stream_example.c -o stream_memkind
-
-new_kind: new_kind_example.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) new_kind_example.c -o new_kind
-
-clean:
-	rm -f hello_memkind hello_hbw filter_memkind stream_memkind stream new_kind
-
-test: all
-	./hello_memkind
-	./hello_hbw
-	./filter_memkind
-	./stream
-	./stream_memkind
-	./new_kind
+examples_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC

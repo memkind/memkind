@@ -22,6 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <assert.h>
 #include <sys/mman.h>
 #ifndef MAP_HUGETLB
 #define MAP_HUGETLB 0x40000
@@ -40,6 +41,7 @@ int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags)
 
 void memkind_hugetlb_init_once(void)
 {
-    memkind_arena_create_map(MEMKIND_HUGETLB);
+    int err = memkind_arena_create_map(MEMKIND_HUGETLB);
+    assert(err == 0);
 }
 

@@ -54,15 +54,19 @@ jerpm=`ls -t jemalloc-devel*.rpm | head -n1`
 scp $nkrpm $jerpm $remote_login@$remote_ip:
 popd
 
-scp $basedir/all_tests $remote_login@$remote_ip:
-scp $basedir/environerr_test $remote_login@$remote_ip:
-scp $basedir/mallctlerr_test $remote_login@$remote_ip:
-scp $basedir/mallocerr_test $remote_login@$remote_ip:
-scp $basedir/pmtterr_test $remote_login@$remote_ip:
-scp $basedir/schedcpu_test $remote_login@$remote_ip:
-scp $basedir/tieddisterr_test $remote_login@$remote_ip:
-scp $basedir/pmtterr_test $remote_login@$remote_ip:
-scp -r  $basedir/test_libs $remote_login@$remote_ip:
+scp $basedir/.libs/all_tests $remote_login@$remote_ip:
+scp $basedir/.libs/environerr_test $remote_login@$remote_ip:
+scp $basedir/.libs/mallctlerr_test $remote_login@$remote_ip:
+scp $basedir/.libs/mallocerr_test $remote_login@$remote_ip:
+scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
+scp $basedir/.libs/schedcpu_test $remote_login@$remote_ip:
+scp $basedir/.libs/tieddisterr_test $remote_login@$remote_ip:
+scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
+scp $basedir/libfopen.so $remote_login@$remote_ip:
+scp $basedir/libmallctl.so $remote_login@$remote_ip:
+scp $basedir/libmalloc.so $remote_login@$remote_ip:
+scp $basedir/libnumadist.so $remote_login@$remote_ip:
+scp $basedir/libsched.so $remote_login@$remote_ip:
 scp $basedir/test.sh $remote_login@$remote_ip:
 
 ssh root@$remote_ip "rpm -e memkind-devel >& /dev/null"
@@ -73,6 +77,6 @@ ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_overcommit_hugepages"
 
 ssh $remote_login@$remote_ip "if [ -e /opt/mpss/coverage/memkind.cov ]; then mkdir -p gtest_output; cp /opt/mpss/coverage/memkind.cov gtest_output; fi"
 ssh $remote_login@$remote_ip "COVFILE=gtest_output/memkind.cov ./test.sh --gtest_output=xml:gtest_output/" | tee $outdir/test.out
-err=$?
+err=${PIPESTATUS[0]}
 scp $remote_login@$remote_ip:gtest_output/\* $outdir
 exit $err

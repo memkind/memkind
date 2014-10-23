@@ -62,14 +62,10 @@ int memkind_arena_create_map(struct memkind *kind)
     if (kind->ops->get_arena == memkind_cpu_get_arena) {
         kind->arena_map_len = numa_num_configured_cpus();
         kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int) * kind->arena_map_len);
-        for (i = 0; i < kind->arena_map_len; ++i) {
-            kind->arena_map[i] = UINT_MAX;
-        }
     }
     else if (kind->ops->get_arena == memkind_bijective_get_arena) {
         kind->arena_map_len = 1;
         kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int));
-        *(kind->arena_map) = UINT_MAX;
     }
     else {
         kind->arena_map_len = 0;
@@ -79,6 +75,9 @@ int memkind_arena_create_map(struct memkind *kind)
         err = MEMKIND_ERROR_MALLOC;
     }
     if (!err) {
+        for (i = 0; i < kind->arena_map_len; ++i) {
+            kind->arena_map[i] = UINT_MAX;
+        }
         for (i = 0; !err && i < kind->arena_map_len; ++i) {
             err = je_mallctl("arenas.extendk", kind->arena_map + i,
                              &unsigned_size, &(kind->partition),

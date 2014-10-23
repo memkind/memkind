@@ -1,5 +1,10 @@
-example/README.txt
-CHANGES.txt
-COPYING.txt
-README.txt
-TODO.txt
+.gitignore
+AUTHORS
+COPYING
+INSTALL
+NEWS
+README
+TODO
+VERSION
+ChangeLog
+examples/README
