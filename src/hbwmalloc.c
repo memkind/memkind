@@ -85,7 +85,7 @@ int hbw_posix_memalign(void **memptr, size_t alignment, size_t size)
 }
 
 int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
-                                int pagesize)
+                             int pagesize)
 {
     memkind_t kind;
     int err = 0;

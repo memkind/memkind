@@ -75,7 +75,7 @@ static int numanode_bandwidth_compare(const void *a, const void *b);
 
 int memkind_hbw_check_available(struct memkind *kind)
 {
-    return kind->ops->get_mbind_nodemask(kind, NULL, 0); 
+    return kind->ops->get_mbind_nodemask(kind, NULL, 0);
 }
 
 int memkind_hbw_get_mbind_nodemask(struct memkind *kind,

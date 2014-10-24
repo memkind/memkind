@@ -144,7 +144,7 @@ int memkind_posix_check_alignment(struct memkind *kind, size_t alignment)
     int err = 0;
     if ((alignment < sizeof(void*)) ||
         (((alignment - 1) & alignment) != 0)) {
-            err = EINVAL;
+        err = EINVAL;
     }
     return err;
 }

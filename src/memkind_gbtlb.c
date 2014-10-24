@@ -167,7 +167,8 @@ int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags)
     return 0;
 }
 
-int memkind_gbtlb_check_addr(struct memkind *kind, void *addr){
+int memkind_gbtlb_check_addr(struct memkind *kind, void *addr)
+{
 
     void *mmapptr = NULL;
     size_t size = 0;
