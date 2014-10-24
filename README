@@ -21,7 +21,7 @@ Christopher Cantalupo <christopher.m.cantalupo@intel.com>
 SUMMARY
 -------
 The memkind library is a user extensible heap manager built on top of
-jemalloc which enables control of memory charateristics and a
+jemalloc which enables control of memory characteristics and a
 partitioning of the heap between kinds of memory.  The kinds of memory
 implemented within the library enable the control of NUMA and page
 size features.  The jemalloc heap manager has been extended to include
@@ -43,17 +43,17 @@ command:
 
     sudo zypper install libnuma-devel gcc-c++
 
-The jemalloc package must be versioned with the +mk extention.
+The jemalloc package must be versioned with the +mk extension.
 Minimum version 3.5.1+mk2 of jemalloc is required.  To use memkind,
 jemalloc must be configured with the options below:
 
     configure --enable-memkind --with-jemalloc-prefix=je_
 
 The memkind supported source of jemalloc contains a spec file that can
-be used with rpmbuild to configure jemalloc for SuSE and RHEL
+be used with rpmbuild to configure jemalloc for SLES and RHEL
 distributions.  Install this RPM if possible, otherwise, you can
-direct the memkind configure command at a locally installed version
-of jemalloc with the option
+direct the memkind configure command at a locally installed version of
+jemalloc with the option
 
     configure --with-jemalloc=/path/to/jemalloc/prefix
 
@@ -68,8 +68,8 @@ RUN REQUIREMENTS
 ----------------
 Requires kernel patch introduced in Linux v3.11 that impacts
 functionality of the NUMA system calls.  This is patch is commit
-3964acd0dbec123aa0a621973a2a0580034b4788
-in the linux-stable git repository from kernel.org.
+3964acd0dbec123aa0a621973a2a0580034b4788 in the linux-stable git
+repository from kernel.org.
 
 To use the interfaces for obtaining 2MB and 1GB pages please be sure
 to follow the instructions here:
@@ -98,7 +98,7 @@ This is not an accurate model of the bandwidth and latency
 characteristics of the KNL on package memory, but is a reasonable way
 to determine which data structures rely critically on bandwidth.
 
-If the application a.out has been modified to use high bandwitdth
+If the application a.out has been modified to use high bandwidth
 memory with the memkind library then this can be done with numactl as
 follows with the bash shell:
 
