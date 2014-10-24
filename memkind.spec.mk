@@ -60,16 +60,15 @@ BuildRequires: jemalloc-devel
 %endif
 
 %description
-The memkind library extends libnuma with the ability to categorize
-groups of NUMA nodes into different "kinds" of memory. It provides a
-low level interface for generating inputs to mbind() and mmap(), and a
-high level interface for heap management.  The heap management is
-implemented with an extension to the jemalloc library which dedicates
-"arenas" to each CPU and kind of memory.  Additionally the heap is
-partitioned so that freed memory segments of different kinds are not
-coalesced.  The memkind library enables page size selection at
-allocationt time.  To use memkind, jemalloc must be compiled with the
---enable-memkind and --with-jemalloc-prefix=je_ options.
+The memkind library is a user extensible heap manager built on top of
+jemalloc which enables control of memory characteristics and a
+partitioning of the heap between kinds of memory.  The kinds of memory
+implemented within the library enable the control of NUMA and page
+size features.  The jemalloc heap manager has been extended to include
+callbacks which modify the parameters for the mmap() system call and
+provide a wrapper around the mbind() system call.  The callbacks are
+managed by the memkind library which provides both a heap manager and
+functions to create new user defined kinds of memory.
 
 %prep
 
@@ -80,16 +79,16 @@ Summary: Extention to libnuma for kinds of memory - development
 Group: Development/Libraries
 
 %description devel
-The memkind library extends libnuma with the ability to categorize
-groups of NUMA nodes into different "kinds" of memory. It provides a
-low level interface for generating inputs to mbind() and mmap(), and a
-high level interface for heap management.  The heap management is
-implemented with an extension to the jemalloc library which dedicates
-"arenas" to each CPU and kind of memory.  Additionally the heap is
-partitioned so that freed memory segments of different kinds are not
-coalesced.  The memkind library enables page size selection at
-allocationt time.  To use memkind, jemalloc must be compiled with the
---enable-memkind and --with-jemalloc-prefix=je_ options.
+The memkind library is a user extensible heap manager built on top of
+jemalloc which enables control of memory characteristics and a
+partitioning of the heap between kinds of memory.  The kinds of memory
+implemented within the library enable the control of NUMA and page
+size features.  The jemalloc heap manager has been extended to include
+callbacks which modify the parameters for the mmap() system call and
+provide a wrapper around the mbind() system call.  The callbacks are
+managed by the memkind library which provides both a heap manager and
+functions to create new user defined kinds of memory.  The devel 
+package installs header files.
 
 %build
 if [ ! -f configure ]; then
