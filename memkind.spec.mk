@@ -91,9 +91,7 @@ functions to create new user defined kinds of memory.  The devel
 package installs header files.
 
 %build
-if [ ! -f configure ]; then
-    ./autogen.sh
-fi
+test -f configure || ./autogen.sh
 %if %{defined suse_version}
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} \
     --includedir=%{_includedir} --sbindir=%{_sbindir} \
