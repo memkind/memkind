@@ -1,32 +1,71 @@
+=======
 MEMKIND
 =======
 
+
 DISCLAIMER
 ----------
+SEE COPYING FILE FOR LICENSE INFORMATION.
+
 THIS SOFTWARE IS PROVIDED AS A DEVELOPMENT SNAPSHOT TO AID
 COLLABORATION AND WAS NOT ISSUED AS A RELEASED PRODUCT BY INTEL.
 DOCUMENTATION AND TEST CODE COVERAGE ARE INCOMPLETE.
 
+
 LAST UPDATE
 -----------
 Christopher Cantalupo <christopher.m.cantalupo@intel.com>
-2014 October 20
+2014 October 23
+
 
 SUMMARY
 -------
-The memkind library extends libnuma with the ability to categorize
-groups of NUMA nodes into different "kinds" of memory. It provides a
-low level interface for generating inputs to mbind() and mmap(), and a
-high level interface for heap management.  The heap management is
-implemented with an extension to the jemalloc library which dedicates
-"arenas" to each CPU and kind of memory.  Additionally the heap is
-partitioned so that freed memory segments of different kinds are not
-coalesced.  The memkind library enables page size selection at
-allocationt time.  To use memkind, jemalloc must be compiled with the
---enable-memkind and --with-jemalloc-prefix=je_ options.
+The memkind library is a user extensible heap manager built on top of
+jemalloc which enables control of memory charateristics and a
+partitioning of the heap between kinds of memory.  The kinds of memory
+implemented within the library enable the control of NUMA and page
+size features.  The jemalloc heap manager has been extended to include
+callbacks which modify the parameters for the mmap() system call and
+provide a wrapper around the mbind() system call.  The callbacks are
+managed by the memkind library which provides both a heap manager and
+functions to create new user defined kinds of memory.
 
-REQUIREMENTS
-------------
+
+BUILD REQUIREMENTS
+------------------
+To build the memkind libraries on a RHEL Linux system first install
+the required packages with the following command:
+
+    sudo yum install numactl-devel gcc-c++
+
+On a SLES Linux system install the dependencies with the following
+command:
+
+    sudo zypper install libnuma-devel gcc-c++
+
+The jemalloc package must be versioned with the +mk extention.
+Minimum version 3.5.1+mk2 of jemalloc is required.  To use memkind,
+jemalloc must be configured with the options below:
+
+    configure --enable-memkind --with-jemalloc-prefix=je_
+
+The memkind supported source of jemalloc contains a spec file that can
+be used with rpmbuild to configure jemalloc for SuSE and RHEL
+distributions.  Install this RPM if possible, otherwise, you can
+direct the memkind configure command at a locally installed version
+of jemalloc with the option
+
+    configure --with-jemalloc=/path/to/jemalloc/prefix
+
+There are similar options for linking libnuma.  See
+
+    configure --help
+
+and the INSTALL file for more options.  
+
+
+RUN REQUIREMENTS
+----------------
 Requires kernel patch introduced in Linux v3.11 that impacts
 functionality of the NUMA system calls.  This is patch is commit
 3964acd0dbec123aa0a621973a2a0580034b4788
@@ -40,27 +79,36 @@ and pay particular attention to the use of the proc files:
     /proc/sys/vm/nr_overcommit_hugepages
 for enabling the kernel's huge page pool.
 
+
 TESTING
 -------
 All existing tests pass both within the simics simulation environment
 of KNL and when run on Xeon.  When run on Xeon the MEMKIND_HBW_NODES
 environment variable is used in conjunction with "numactl --membind"
 to force standard allocations to one NUMA node and high bandwidth
-allocations through a different NUMA node.
+allocations through a different NUMA node.  See next section for more
+details.
 
+
+SIMULATE HIGH BANDWIDTH MEMORY
+------------------------------
 A method for testing for the benefit of high bandwidth memory on a
 dual socket Xeon system is to use the QPI bus to simulate slow memory.
+This is not an accurate model of the bandwidth and latency
+characteristics of the KNL on package memory, but is a reasonable way
+to determine which data structures rely critically on bandwidth.
+
 If the application a.out has been modified to use high bandwitdth
 memory with the memkind library then this can be done with numactl as
 follows with the bash shell:
 
-export MEMKIND_HBW_NODES=0
-numactl --membind=1 --cpunodebind=0 a.out
+    export MEMKIND_HBW_NODES=0
+    numactl --membind=1 --cpunodebind=0 a.out
 
 or with csh:
 
-setenv MEMKIND_HBW_NODES 0
-numactl --membind=1 --cpunodebind=0 a.out
+    setenv MEMKIND_HBW_NODES 0
+    numactl --membind=1 --cpunodebind=0 a.out
 
 The MEMKIND_HBW_NODES environment variable set to zero will bind high
 bandwidth allocations to NUMA node 0.  The --membind=1 flag to numactl
@@ -70,12 +118,14 @@ associated with NUMA node 0.  With this configuration standard
 allocations will be fetched across the QPI bus, and high bandwidth
 allocations will be local to the process CPU.
 
+
 STATUS
 ------
 This software is being made available for early evaluation.  The
 memkind library should be considered pre-alpha: bugs may exist and the
 interfaces may be subject to change prior to alpha release.  Feedback
-on design or implementation is greatly appreciated.
+on design or implementation is greatly appreciated.  Please see the
+TODO file for more information about future work.
 
 The memkind interface detailed in the memkind.3 man page should be
 considered experimental, and is not necessarily going to be exposed to
