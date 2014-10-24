@@ -70,7 +70,6 @@ dist_man_MANS = man/hbwmalloc.3 \
 DISTCLEANFILES = VERSION
 
 bin_PROGRAMS =
-pkglibexec_PROGRAMS =
 check_PROGRAMS =
 noinst_PROGRAMS =
 
