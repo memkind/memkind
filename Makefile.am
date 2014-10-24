@@ -93,4 +93,4 @@ rpm: dist
 		jemalloc_installed=true -f memkind.spec.mk $@
 
 include test/Makefile.mk
-include examples/Makefile.mk 
+include examples/Makefile.mk
