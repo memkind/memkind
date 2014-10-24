@@ -67,6 +67,7 @@ dist_man_MANS = man/hbwmalloc.3 \
                 man/memkind_hugetlb.3 \
                 # end
 
+CLEANFILES = memkind-$(VERSION).spec
 DISTCLEANFILES = VERSION
 
 bin_PROGRAMS =
@@ -85,10 +86,11 @@ AM_CXXFLAGS = -Wall -Werror -msse4.2 -std=c++0x -fopenmp
 checkprogs: $(check_PROGRAMS)
 
 memkind-$(VERSION).spec:
-	make version=$(VERSION) -f memkind.spec.mk $@
+	make version="$(VERSION)" -f memkind.spec.mk $@
 
 rpm: dist
-	make version=$(VERSION) -f memkind.spec.mk $@
+	make version="$(VERSION)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
+		jemalloc_installed=true -f memkind.spec.mk $@
 
 include test/Makefile.mk
 include examples/Makefile.mk 

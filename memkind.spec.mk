@@ -29,7 +29,6 @@ arch = $(shell uname -p)
 topdir = $(HOME)/rpmbuild
 rpm = $(topdir)/RPMS/$(arch)/memkind-$(version)-$(release)-$(arch).rpm
 rpmbuild_flags = -E '%define _topdir $(topdir)'
-rpmclean_flags = -E '%define _topdir $(topdir)' --clean --rmsource --rmspec
 ifeq ($(jemalloc_installed),true)
 	rpmbuild_flags += -E '%define jemalloc_installed true'
 endif
@@ -37,7 +36,7 @@ endif
 rpm: $(rpm)
 
 $(rpm): memkind-$(version).tar.gz
-	rpmbuild $(rpmbuild_flags) memkind-$(version).tar.gz -ta
+	rpmbuild $(rpmbuild_flags) $^ -ta
 
 memkind-$(version).spec:
 	@echo "$$memkind_spec" > $@
