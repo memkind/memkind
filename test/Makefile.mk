@@ -64,6 +64,8 @@ test_environerr_test_SOURCES = test/main.cpp test/environ_err_test.cpp
 test_tieddisterr_test_SOURCES = test/main.cpp test/tied_dist_test.cpp
 
 # All of the non-standard requirements for testing (gtest and mock .so)
+.PHONY: test clean-local-gtest clean-local-mock
+
 test: check-am
 
 check-am: libgtest.a test/libsched.so test/libnumadist.so test/libmalloc.so test/libmallctl.so test/libfopen.so

@@ -14,6 +14,7 @@ man/memkind_default.3
 man/memkind_gbtlb.3
 man/memkind_hbw.3
 man/memkind_hugetlb.3
+memkind.spec.mk
 src/hbwmalloc.c
 src/hbwmalloc.h
 src/memkind.c

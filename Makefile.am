@@ -56,7 +56,7 @@ sbin_PROGRAMS = memkind-pmtt
 memkind_pmtt_SOURCES = src/memkind_pmtt.c
 memkind_pmtt_LDADD = libmemkind.la
 
-EXTRA_DIST = autogen.sh init.d/memkind gtest-1.7.0.zip examples test/check.sh test/test.sh test/test_remote.sh test/*_mock.c VERSION
+EXTRA_DIST = autogen.sh init.d/memkind gtest-1.7.0.zip examples test/check.sh test/test.sh test/test_remote.sh test/*_mock.c VERSION memkind-$(VERSION).spec memkind.spec.mk
 dist_doc_DATA = README COPYING VERSION
 dist_man_MANS = man/hbwmalloc.3 \
                 man/memkind.3 \
@@ -79,8 +79,16 @@ XFAIL_TESTS =
 AM_CFLAGS = -Wall -Werror -msse4.2 -fopenmp
 AM_CXXFLAGS = -Wall -Werror -msse4.2 -std=c++0x -fopenmp
 
-include test/Makefile.mk
-include examples/Makefile.mk
+.PHONY: checkprogs
 
-.PHONY: checkprogs test
+# build check programs without running tests
 checkprogs: $(check_PROGRAMS)
+
+memkind-$(VERSION).spec:
+	make version=$(VERSION) -f memkind.spec.mk $@
+
+rpm: dist
+	make version=$(VERSION) -f memkind.spec.mk $@
+
+include test/Makefile.mk
+include examples/Makefile.mk 
