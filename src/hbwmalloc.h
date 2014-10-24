@@ -93,11 +93,89 @@ void *hbw_malloc(size_t size);
 void *hbw_calloc(size_t num, size_t size);
 int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
 int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
-                                int pagesize);
+                             int pagesize);
 void *hbw_realloc(void *ptr, size_t size);
 void hbw_free(void *ptr);
 
 #ifdef __cplusplus
 }
+
+#include <new>
+
+namespace hbwmalloc
+{
+template <class T>
+class hbwmalloc_allocator
+{
+public:
+    typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    typedef T& reference;
+    typedef const T& const_reference;
+    typedef T value_type;
+
+    template <class U>
+    struct rebind {
+        typedef hbwmalloc_allocator<U> other;
+    };
+
+    hbwmalloc_allocator() throw() { }
+
+    hbwmalloc_allocator(const hbwmalloc_allocator&) throw() { }
+
+    template <class U>
+    hbwmalloc_allocator(const hbwmalloc_allocator<U>&) throw() { }
+
+    ~hbwmalloc_allocator() throw() { }
+
+    pointer
+    address(reference x) const
+    {
+        return &x;
+    }
+
+    const_pointer
+    address(const_reference x) const
+    {
+        return &x;
+    }
+
+    pointer allocate(size_type n, const void * = 0)
+    {
+        if (n > this->max_size()) {
+            throw std::bad_alloc();
+        }
+        pointer result = static_cast<T*>(hbw_malloc(n * sizeof(T)));
+        if (!result) {
+            throw std::bad_alloc();
+        }
+        return result;
+    }
+
+    void deallocate(pointer p, size_type n)
+    {
+        hbw_free(static_cast<void*>(p));
+    }
+
+    size_type max_size() const throw()
+    {
+        return size_t(-1) / sizeof(T);
+    }
+
+    void construct(pointer p, const T& val)
+    {
+        ::new(p) value_type(val);
+    }
+
+    void destroy(pointer p)
+    {
+        p->~T();
+    }
+};
+
+}
+
 #endif
 #endif
