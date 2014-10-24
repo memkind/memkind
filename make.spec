@@ -155,6 +155,7 @@ $(extra_files)
 - Updated documentation.
 - Fixed typo in copyright.
 - Fixed test scripts to properly handle return code of each test.
+- Added C++03 standard allocator that uses hbw_malloc and hbw_free.
 * Tue Sep 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.0.8
 - Added GBTLB functionality, code clean up, documentation updates,
   examples directory.  Examples includes stream modified to use

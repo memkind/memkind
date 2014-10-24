@@ -30,13 +30,10 @@ Documentation
 
 Features
 --------
-    * Support for non-standard x86 page sizes like 128 MB (request
-      from Cray).
+    * Support for non-standard x86 page sizes like 128 MB.
 
     * Support for verbose mode by setting environment variable which
       will log debug diagnostic information.
-
-    * Add --enable-debug configure option.
 
     * Use atexit() rather than __attribute__((destructor)) to support
       compilers other than gcc.
@@ -47,4 +44,4 @@ Issues
       started is very cryptic.
 
     * Calling hbw_realloc() on a vector that was originally allocated
-      with gigabyte pages is not handled properly.
+      with pages from hugetlbfs is not handled properly.
