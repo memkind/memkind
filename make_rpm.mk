@@ -22,25 +22,30 @@ source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
 
 rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = -E '%define _topdir $(topdir)' --clean --rmsource --rmspec
-ifeq ($(jemalloc_installed),true)
-	rpmbuild_flags += -E '%define jemalloc_installed true'
-endif
-
-include make.spec
 
 all: $(rpm)
+
+$(topdir)/.setup:
+	mkdir -p $(topdir)/SOURCES
+	mkdir -p $(topdir)/RPMS/$(arch)
+	mkdir -p $(topdir)/SRPMS
+	mkdir -p $(topdir)/SPECS
+	touch $(topdir)/.setup
 
 $(rpm): $(specfile) $(source_tar)
 	rpmbuild $(rpmbuild_flags) $(specfile) -ba
 
-$(source_tar): $(topdir) $(specfile) $(src) MANIFEST
+$(source_tar): $(topdir)/.setup $(specfile) $(src) MANIFEST
 	tar czvf $@ -T MANIFEST --transform="s|^|$(name)-$(version)/|"
 	rpmbuild $(rpmbuild_flags) $(specfile) -bp
 
-$(specfile): $(topdir) make.spec
-	@echo "$$make_spec" > $@
+$(specfile): $(topdir)/.setup memkind.spec.mk
+	echo "$$memkind_spec" > $@
 
 clean:
 	-rpmbuild $(rpmclean_flags) $(specfile)
 
 .PHONY: all clean
+
+include memkind.spec.mk
+

@@ -23,19 +23,14 @@
 #
 
 # targets for building rpm
-version = 0.0.0
-release = 1
+version ?= 0.0.0
+release ?= 1
 arch = $(shell uname -p)
-topdir = $(HOME)/rpmbuild
-rpm = $(topdir)/RPMS/$(arch)/memkind-$(version)-$(release)-$(arch).rpm
-rpmbuild_flags = -E '%define _topdir $(topdir)'
 ifeq ($(jemalloc_installed),true)
 	rpmbuild_flags += -E '%define jemalloc_installed true'
 endif
 
-rpm: $(rpm)
-
-$(rpm): memkind-$(version).tar.gz
+rpm: memkind-$(version).tar.gz
 	rpmbuild $(rpmbuild_flags) $^ -ta
 
 memkind-$(version).spec:
@@ -97,7 +92,7 @@ allocationt time.  To use memkind, jemalloc must be compiled with the
 --enable-memkind and --with-jemalloc-prefix=je_ options.
 
 %build
-if [ ! -f VERSION ]; then
+if [ ! -f configure ]; then
     ./autogen.sh
 fi
 %if %{defined suse_version}
