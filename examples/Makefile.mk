@@ -23,12 +23,12 @@
 #
 
 noinst_PROGRAMS += examples/hello_memkind \
-                  examples/hello_hbw \
-                  examples/filter_memkind \
-                  examples/stream \
-                  examples/stream_memkind \
-                  examples/new_kind \
-                  # end
+                   examples/hello_hbw \
+                   examples/filter_memkind \
+                   examples/stream \
+                   examples/stream_memkind \
+                   examples/new_kind \
+                   # end
 
 examples_hello_memkind_LDADD = libmemkind.la
 examples_hello_hbw_LDADD = libmemkind.la
