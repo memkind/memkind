@@ -51,8 +51,8 @@ TEST_F(MallctlTest, ErrorMallctl)
     int err = MEMKIND_ERROR_MALLCTL;
     void *ptr = NULL;
     ret = memkind_posix_memalign(MEMKIND_HBW,
-                                  &ptr, 16,
-                                  1024);
+                                 &ptr, 16,
+                                 1024);
 
     EXPECT_EQ(err, ret);
 }

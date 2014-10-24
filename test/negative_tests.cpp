@@ -77,8 +77,8 @@ TEST_F(NegativeTest, ErrorMemalign)
 
     errno = 0;
     ret = memkind_posix_memalign(MEMKIND_DEFAULT,
-                                  &ptr, 5,
-                                  100);
+                                 &ptr, 5,
+                                 100);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
 }
@@ -91,8 +91,8 @@ TEST_F(NegativeTest, ErrorAlignment)
 
     errno = 0;
     ret = memkind_posix_memalign(MEMKIND_HBW,
-                                  &ptr, 5,
-                                  100);
+                                 &ptr, 5,
+                                 100);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
 }
@@ -106,9 +106,9 @@ TEST_F(NegativeTest, ErrorAllocM)
 
     errno = 0;
     ret = memkind_posix_memalign(MEMKIND_HBW,
-                                  &ptr,
-                                  16,
-                                  100*GB);
+                                 &ptr,
+                                 16,
+                                 100*GB);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
 }
@@ -133,7 +133,7 @@ TEST_F(NegativeTest, InvalidSizeCalloc)
     EXPECT_EQ(errno, ENOMEM);
 
     ptr = memkind_calloc(MEMKIND_HBW, 1,
-                          -1);
+                         -1);
     ASSERT_TRUE(ptr == NULL);
     EXPECT_EQ(errno, ENOMEM);
 }
@@ -147,8 +147,8 @@ TEST_F(NegativeTest, InvalidSizeRealloc)
     EXPECT_EQ(errno, ENOMEM);
 
     ptr = memkind_realloc(MEMKIND_HBW,
-                           ptr,
-                           -1);
+                          ptr,
+                          -1);
     ASSERT_TRUE(ptr==NULL);
     EXPECT_EQ(errno, ENOMEM);
 }

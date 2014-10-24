@@ -262,7 +262,8 @@ void TrialGenerator :: generate_size_1KB_2GB(alloc_api_t api)
 
     size_t size[] = {KB, 2*KB, 4*KB, 16*KB, 256*KB,
                      512*KB, MB, 2*MB, 4*MB, 16*MB,
-                     256*MB, 512*MB, GB, 2*GB};
+                     256*MB, 512*MB, GB, 2*GB
+                    };
 
     int k = 0;
     trial_vec.clear();
@@ -341,8 +342,8 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 }
                 else {
                     ptr_vec[i + 1] = memkind_realloc(trial_vec[i].memkind,
-                                                 ptr_vec[trial_vec[i].free_index],
-                                                 trial_vec[i + 1].size);
+                                                     ptr_vec[trial_vec[i].free_index],
+                                                     trial_vec[i + 1].size);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                 }
                 break;
@@ -368,8 +369,8 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 fprintf (stdout,"Allocating %zd bytes using hbw_memalign\n",
                          trial_vec[i].size);
                 ret =  hbw_posix_memalign(&ptr_vec[i],
-                                             trial_vec[i].alignment,
-                                             trial_vec[i].size);
+                                          trial_vec[i].alignment,
+                                          trial_vec[i].size);
                 break;
             case HBW_MEMALIGN_PSIZE:
                 fprintf (stdout,"Allocating %zd bytes using hbw_memalign_psize\n",
@@ -386,15 +387,15 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                     psize = HBW_PAGESIZE_1GB_STRICT;
 
                 ret = hbw_posix_memalign_psize(&ptr_vec[i],
-                                                  trial_vec[i].alignment,
-                                                  trial_vec[i].size,
-                                                  psize);
+                                               trial_vec[i].alignment,
+                                               trial_vec[i].size,
+                                               psize);
 
                 break;
 
             case MEMKIND_MALLOC:
                 if (trial_vec[i].memkind == MEMKIND_HBW_GBTLB ||
-                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB){
+                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB) {
                     fprintf (stdout,"Allocating %zd bytes using memkind_malloc\n",
                              trial_vec[i].size);
                 }
@@ -422,9 +423,9 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                          trial_vec[i].size);
 
                 ret = memkind_posix_memalign(trial_vec[i].memkind,
-                                              &ptr_vec[i],
-                                              trial_vec[i].alignment,
-                                              trial_vec[i].size);
+                                             &ptr_vec[i],
+                                             trial_vec[i].alignment,
+                                             trial_vec[i].size);
                 break;
         }
         if (trial_vec[i].api != HBW_FREE &&
