@@ -20,6 +20,8 @@
 /libtool
 /ltmain.sh
 /m4/
+/memkind-*.spec
+/memkind-*.tar.gz
 /Makefile
 /Makefile.in
 /memkind-pmtt
