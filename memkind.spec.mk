@@ -46,7 +46,7 @@ Release: $(release)
 License: See COPYING
 Group: System Environment/Libraries
 Vendor: Intel Corporation
-URL: http://github.com/memkind/memkind
+URL: https://github.com/memkind/memkind
 Source0: memkind-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires:  gcc-c++
