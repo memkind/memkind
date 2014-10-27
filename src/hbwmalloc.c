@@ -104,8 +104,14 @@ int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
 void *hbw_realloc(void *ptr, size_t size)
 {
     memkind_t kind;
+    memkind_get_kind_for_free(ptr, &kind);
 
-    kind = hbw_get_kind(HBW_PAGESIZE_4KB);
+    if (kind != MEMKIND_HBW_GBTLB &&
+        kind != MEMKIND_HBW_PREFERRED_GBTLB &&
+        kind != MEMKIND_GBTLB) {
+        kind = hbw_get_kind(HBW_PAGESIZE_4KB);
+    }
+
     return memkind_realloc(kind, ptr, size);
 }
 

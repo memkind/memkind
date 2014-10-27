@@ -49,7 +49,9 @@ enum {
 typedef struct memkind_list_node_s {
     void *ptr;
     void *mmapptr;
+    size_t requested_size;
     size_t size;
+    struct memkind *kind;
     struct memkind_list_node_s *next;
 } memkind_list_node_t;
 
@@ -59,14 +61,17 @@ typedef struct {
 } memkind_table_node_t;
 
 static int ptr_hash(void *ptr, int table_len);
-static int memkind_store(void *ptr, void **mmapptr, size_t *size, int mode);
-static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result);
+static int memkind_store(void *ptr, void **mmapptr, struct memkind **kind,
+                         size_t *req_size, size_t *size, int mode);
+static int memkind_gbtlb_mmap(struct memkind *kind, size_t size,
+                              void **result);
 static void memkind_gbtlb_ceil_size(size_t *size);
 
 void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 {
     void *result = NULL;
     int err = 0;
+    size_t req_size = size;
 
     memkind_gbtlb_ceil_size(&size);
     err = memkind_gbtlb_mmap(kind, size, &result);
@@ -74,7 +79,8 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
         err = kind->ops->mbind(kind, result, size);
     }
     if (!err) {
-        err = memkind_store(result, &result, &size, GBTLB_STORE_INSERT);
+        err = memkind_store(result, &result, &kind,
+                            &req_size, &size, GBTLB_STORE_INSERT);
     }
     if (err && result) {
         munmap(result, size);
@@ -93,6 +99,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     int err = 0;
     int do_shift = 0;
     void *mmapptr = NULL;
+    size_t req_size = size;
 
     *memptr = NULL;
 
@@ -109,12 +116,15 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     }
     if (!err && do_shift) {
         /* Remove the entry from the store */
-        err = memkind_store(*memptr, &mmapptr, &size, GBTLB_STORE_REMOVE) ? ENOMEM : 0;
+        err = memkind_store(*memptr, &mmapptr, &kind,
+                            &req_size, &size, GBTLB_STORE_REMOVE) ? ENOMEM : 0;
         if (!err) {
             /* Adjust for alignment */
-            *memptr = (void *) ((char *)mmapptr + (size_t)(mmapptr) % alignment);
+            *memptr = (void *) ((char *)mmapptr +
+                                (size_t)(mmapptr) % alignment);
             /* Store the modified pointer */
-            err = memkind_store(*memptr, &mmapptr, &size, GBTLB_STORE_INSERT) ? ENOMEM : 0;
+            err = memkind_store(*memptr, &mmapptr, &kind,
+                                &req_size, &size, GBTLB_STORE_INSERT) ? ENOMEM : 0;
         }
     }
     if (err && mmapptr) {
@@ -129,22 +139,41 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
     void *result = NULL;
     void *mmap_ptr = NULL;
     size_t orig_size, copy_size;
+    size_t req_size;
     int err;
 
-    result = kind->ops->malloc(kind, size);
-    if (result != NULL && ptr != NULL) {
-        err = memkind_store(ptr, &mmap_ptr, &orig_size, GBTLB_STORE_QUERY);
+    if (ptr != NULL) {
+        err = memkind_store(ptr, &mmap_ptr, &kind, &req_size,
+                            &orig_size, GBTLB_STORE_QUERY);
         if (!err) {
-            /*Tried using mremap : Failed for 1GB Pages: Err - Did not unmap*/
-            /* result = mremap(ptr, orig_size, size, MREMAP_MAYMOVE|flags);*/
-            copy_size = size > orig_size ? orig_size : size;
-            memcpy(result, ptr, copy_size);
-            kind->ops->free(kind, ptr);
+            /*Optimization when we grow the array
+              with Realloc*/
+            if ((req_size < orig_size) &&
+                (req_size < size) &&
+                (req_size + size < orig_size)) {
+                /*There is no need to allocate*/
+                result = ptr;
+            }
+            else {
+                result = kind->ops->malloc(kind, size);
+                if (result != NULL) {
+                    /*Tried using mremap : Failed for 1GB Pages: Err - Did not unmap*/
+                    /* result = mremap(ptr, orig_size, size, MREMAP_MAYMOVE|flags);*/
+                    copy_size = size > orig_size ? orig_size : size;
+                    memcpy(result, ptr, copy_size);
+                }
+                kind->ops->free(kind, ptr);
+            }
         }
-        if (err) {
-            kind->ops->free(kind, result);
-            result = NULL;
+        else {
+            if (result != NULL) {
+                kind->ops->free(kind, result);
+                result = NULL;
+            }
         }
+    }
+    else {
+        result = kind->ops->malloc(kind, size);
     }
     return result;
 }
@@ -153,9 +182,10 @@ void memkind_gbtlb_free(struct memkind *kind, void *ptr)
 {
     int err;
     void *mmapptr = NULL;
-    size_t size = 0;
+    size_t size = 0, req_size = 0;
 
-    err = memkind_store(ptr, &mmapptr, &size, GBTLB_STORE_REMOVE);
+    err = memkind_store(ptr, &mmapptr, &kind, &req_size,
+                        &size, GBTLB_STORE_REMOVE);
     if (!err) {
         munmap(mmapptr, size);
     }
@@ -172,11 +202,23 @@ int memkind_gbtlb_check_addr(struct memkind *kind, void *addr)
 
     void *mmapptr = NULL;
     size_t size = 0;
+    size_t req_size = 0;
+    int err = 0;
+    struct memkind *ptr_kind;
+    int ret = MEMKIND_ERROR_INVALID;
 
-    return memkind_store(addr, &mmapptr, &size, GBTLB_STORE_QUERY);
+    err = memkind_store(addr, &mmapptr, &ptr_kind, &req_size,
+                        &size, GBTLB_STORE_QUERY);
+
+    if ((!err) && (kind == ptr_kind)) {
+        ret = 0;
+    }
+
+    return ret;
 }
 
-static int memkind_store(void *memptr, void **mmapptr, size_t *size, int mode)
+static int memkind_store(void *memptr, void **mmapptr, struct memkind **kind,
+                         size_t *req_size, size_t *size, int mode)
 {
     static int table_len = 0;
     static int is_init = 0;
@@ -224,6 +266,8 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int mode)
         if (!err) {
             *mmapptr = storeptr->mmapptr;
             *size = storeptr->size;
+            *req_size = storeptr->requested_size;
+            *kind = storeptr->kind;
         }
         if (!err && mode == GBTLB_STORE_REMOVE) {
             if (lastptr) {
@@ -241,6 +285,8 @@ static int memkind_store(void *memptr, void **mmapptr, size_t *size, int mode)
         table[hash].list->ptr = memptr;
         table[hash].list->mmapptr = *mmapptr;
         table[hash].list->size = *size;
+        table[hash].list->requested_size = *req_size;
+        table[hash].list->kind = *kind;
         table[hash].list->next = storeptr;
     }
     pthread_mutex_unlock(&(table[hash].mutex));

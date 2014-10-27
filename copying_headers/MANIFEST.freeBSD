@@ -6,6 +6,7 @@ examples/filter_example.c
 examples/hello_hbw_example.c
 examples/hello_memkind_example.c
 examples/new_kind_example.c
+examples/gb_realloc_example.c
 init.d/memkind
 man/hbwmalloc.3
 man/memkind.3
