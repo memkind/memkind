@@ -104,8 +104,8 @@ if [ $err -eq 0 ]; then err=$ret; fi
 $basedir/environerr_test $@
 ret=$?
 if [ $err -eq 0 ]; then err=$ret; fi
-LD_PRELOAD=$basedir/libfopen.so $basedir/pmtterr_test $@
-ret=$?
-if [ $err -eq 0 ]; then err=$ret; fi
+#LD_PRELOAD=$basedir/libfopen.so $basedir/pmtterr_test $@
+#ret=$?
+#if [ $err -eq 0 ]; then err=$ret; fi
 
 exit $err
