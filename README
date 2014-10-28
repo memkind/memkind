@@ -61,7 +61,7 @@ There are similar options for linking libnuma.  See
 
     configure --help
 
-and the INSTALL file for more options.  
+and the INSTALL file for more options.
 
 
 RUN REQUIREMENTS

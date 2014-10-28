@@ -56,7 +56,19 @@ sbin_PROGRAMS = memkind-pmtt
 memkind_pmtt_SOURCES = src/memkind_pmtt.c
 memkind_pmtt_LDADD = libmemkind.la
 
-EXTRA_DIST = autogen.sh init.d/memkind gtest-1.7.0.zip examples/README test/check.sh test/test.sh test/test_remote.sh test/*_mock.c VERSION memkind-$(VERSION).spec memkind.spec.mk
+EXTRA_DIST = autogen.sh \
+             init.d/memkind \
+             gtest-1.7.0.zip \
+             examples/README \
+             test/check.sh \
+             test/test.sh \
+             test/test_remote.sh \
+             test/*_mock.c \
+             VERSION \
+             memkind-$(VERSION).spec \
+             memkind.spec.mk \
+             # end
+
 dist_doc_DATA = README COPYING VERSION
 dist_man_MANS = man/hbwmalloc.3 \
                 man/memkind.3 \
