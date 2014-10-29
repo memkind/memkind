@@ -443,8 +443,10 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 EXPECT_EQ(0, check.check_zero());
             }
             if (trial_vec[i].api == HBW_MEMALIGN ||
-                trial_vec[i].api == HBW_MEMALIGN_PSIZE) {
+                trial_vec[i].api == HBW_MEMALIGN_PSIZE ||
+                trial_vec[i].api == MEMKIND_POSIX_MEMALIGN) {
                 EXPECT_EQ(0, check.check_align(trial_vec[i].alignment));
+                EXPECT_EQ(0, ret);
             }
             if (trial_vec[i].api == HBW_MEMALIGN_PSIZE ||
                 (trial_vec[i].api == MEMKIND_MALLOC &&
