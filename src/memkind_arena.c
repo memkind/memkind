@@ -22,6 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
@@ -31,7 +32,6 @@
 #include <numa.h>
 #include <numaif.h>
 #include <jemalloc/jemalloc.h>
-#define _GNU_SOURCE
 #include <utmpx.h>
 #include <sched.h>
 
