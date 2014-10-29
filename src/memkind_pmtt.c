@@ -216,11 +216,12 @@ int memkind_pmtt(char *pmtt_path, char *bandwidth_path)
     strncpy(dir, bandwidth_path, STRLEN - 1);
     dirname(dir);
     err = mkdir(dir, 0755);
-    if (err && err != EEXIST) {
+    if (err && errno != EEXIST) {
         fprintf(stderr, "ERROR: <memkind_pmtt> creating output directory %s\n", dir);
         err = errno ? -errno : 1;
         goto exit;
     }
+    unlink(bandwidth_path);
     fd = open(bandwidth_path, O_CREAT | O_EXCL | O_WRONLY, 0644);
     if (fd == -1) {
         fprintf(stderr, "ERROR: <memkind_pmtt> opening %s for writing\n", bandwidth_path);
