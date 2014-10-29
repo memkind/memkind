@@ -192,9 +192,8 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
     return err;
 }
 
-int main (int argc, char *argv[])
+int memkind_pmtt(char *pmtt_path, char *bandwidth_path)
 {
-    int err = 0;
     int fd;
     FILE *fp = NULL;
     int *bandwidth = NULL;
@@ -207,18 +206,23 @@ int main (int argc, char *argv[])
         err = errno ? -errno : 1;
         goto exit;
     }
+    if (strlen(bandwidth_path) > STRLEN - 1) {
+        fprintf(stderr, "ERROR <memkind_pmtt> bandwidth path too long:\n    %s\n", bandwidth_path);
+        err = 1;
+        goto exit;
+    }
     dir[STRLEN-1] = '\0';
-    strncpy(dir, MEMKIND_BANDWIDTH_PATH, STRLEN - 1);
+    strncpy(dir, bandwidth_path, STRLEN - 1);
     dirname(dir);
     err = mkdir(dir, 0755);
     if (err && err != EEXIST) {
-        fprintf(stderr, "ERROR: <%s> creating output directory %s\n", argv[0], dir);
+        fprintf(stderr, "ERROR: <memkind_pmtt> creating output directory %s\n", argv[0], dir);
         err = errno ? -errno : 1;
         goto exit;
     }
-    fd = open(MEMKIND_BANDWIDTH_PATH, O_CREAT | O_EXCL | O_WRONLY, 0644);
+    fd = open(bandwidth_path, O_CREAT | O_EXCL | O_WRONLY, 0644);
     if (fd == -1) {
-        fprintf(stderr, "ERROR: <%s> opening %s for writing\n", argv[0], MEMKIND_BANDWIDTH_PATH);
+        fprintf(stderr, "ERROR: <memkind_pmtt> opening %s for writing\n", argv[0], bandwidth_path);
         err = errno ? -errno : 1;
         goto exit;
     }
@@ -228,9 +232,9 @@ int main (int argc, char *argv[])
         err = errno ? -errno : 1;
         goto exit;
     }
-    err = parse_pmtt_bandwidth(NUMA_NUM_NODES, bandwidth, PMTT_PATH);
+    err = parse_pmtt_bandwidth(NUMA_NUM_NODES, bandwidth, pmtt_path);
     if (err) {
-        fprintf(stderr, "ERROR: <%s> parsing file %s\n", argv[0], PMTT_PATH);
+        fprintf(stderr, "ERROR: <memkind_pmtt> parsing file %s\n", argv[0], pmtt_path);
         err = errno ? -errno : 1;
         goto exit;
     }
@@ -248,4 +252,27 @@ exit:
         free(bandwidth);
     }
     return err;
+}
+
+int main (int argc, char *argv[])
+{
+    char *pmtt_path = PMTT_PATH;
+    char *bandwidth_path = MEMKIND_BANDWIDTH_PATH;
+
+    if ((argc > 1 &&
+        (strncmp("--help", argv[1], strlen("--help")) == 0 ||
+         strncmp("-h", argv[1], strlen("-h")) == 0) ||
+        argc > 3) {
+            fprintf(stdout, "Usage: %s [pmtt_path] [bandwidth_path]\n", argv[0]);
+            fprintf(stdout, "    pmtt_path: path to input pmtt file (default %s)\n", pmtt_path);
+            fprintf(stdout, "    bandwidth_path: path to output bandwidth file (default %s)\n", bandwidth_path);
+            return 0;
+    }
+    if (argc > 1) {
+        pmtt_path = argv[1];
+    }
+    if (argc > 2) {
+        bandwidth_path = argv[2];
+    }
+    return memkind_pmtt(pmtt_path, bandwidth_path);
 }
