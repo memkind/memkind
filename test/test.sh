@@ -31,6 +31,8 @@ if [ $? -ne 0 ]; then
     exit -1
 fi
 
+unset MEMKIND_HBW_NODES
+
 #hugetot=$(cat /proc/meminfo | grep HugePages_Total | awk '{print $2}')
 #if [ $hugetot -lt 4000 ]; then
 #    echo "ERROR: $0 requires at least 4000 HugePages_Total total (see /proc/meminfo)"
