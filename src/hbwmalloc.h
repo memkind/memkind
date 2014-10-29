@@ -100,6 +100,7 @@ void hbw_free(void *ptr);
 #ifdef __cplusplus
 }
 
+#include <stddef.h>
 #include <new>
 
 namespace hbwmalloc
