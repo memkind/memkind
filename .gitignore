@@ -62,4 +62,5 @@
 /examples/stream
 /examples/stream_example.o
 /examples/stream_memkind
-
+/examples/gb_realloc
+/examples/gb_realloc_example.o
