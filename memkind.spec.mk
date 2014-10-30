@@ -179,7 +179,7 @@ fi
 $(extra_files)
 
 %changelog
-* Thu Oct 23 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.1
+* Thu Oct 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.0.9
 - Now building with autotools.
 - Updated documentation.
 - Fixed typo in copyright.
