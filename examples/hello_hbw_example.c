@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 
     default_str = (char *)malloc(size);
     if (default_str == NULL) {
-        perror("je_malloc()");
+        perror("malloc()");
         fprintf(stderr, "Unable to allocate default string\n");
         err = errno ? -errno : 1;
         goto exit;
