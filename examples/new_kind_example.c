@@ -157,7 +157,7 @@ int main(int argc, char **argv)
     }
     if (err) {
         memkind_error_message(err, err_msg, SIZE);
-        fprintf(stderr, err_msg);
+        fprintf(stderr, "%s", err_msg);
         return 1;
     }
 
@@ -169,7 +169,7 @@ int main(int argc, char **argv)
             return errno ? -errno : 1;
         }
         sprintf(str, "Hello from node %d\n", i);
-        fprintf(stdout, str);
+        fprintf(stdout, "%s", str);
         memkind_free(node_kind[i], str);
     }
 
