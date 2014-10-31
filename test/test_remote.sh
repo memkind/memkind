@@ -62,11 +62,21 @@ scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
 scp $basedir/.libs/schedcpu_test $remote_login@$remote_ip:
 scp $basedir/.libs/tieddisterr_test $remote_login@$remote_ip:
 scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
+
 scp $basedir/libfopen.so $remote_login@$remote_ip:
 scp $basedir/libmallctl.so $remote_login@$remote_ip:
 scp $basedir/libmalloc.so $remote_login@$remote_ip:
 scp $basedir/libnumadist.so $remote_login@$remote_ip:
 scp $basedir/libsched.so $remote_login@$remote_ip:
+
+scp $basedir/.libs/hello_memkind $remote_login@$remote_ip:
+scp $basedir/.libs/hello_hbw $remote_login@$remote_ip:
+scp $basedir/.libs/filter_memkind $remote_login@$remote_ip:
+scp $basedir/.libs/stream $remote_login@$remote_ip:
+scp $basedir/.libs/stream_memkind $remote_login@$remote_ip:
+scp $basedir/.libs/new_kind $remote_login@$remote_ip:
+scp $basedir/.libs/gb_realloc $remote_login@$remote_ip:
+
 scp $basedir/test.sh $remote_login@$remote_ip:
 
 ssh root@$remote_ip "rpm -e memkind-devel >& /dev/null"

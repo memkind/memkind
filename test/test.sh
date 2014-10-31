@@ -108,4 +108,56 @@ if [ $err -eq 0 ]; then err=$ret; fi
 #ret=$?
 #if [ $err -eq 0 ]; then err=$ret; fi
 
+#
+# Run the examples as tests
+#
+$basedir/hello_memkind
+ret=$?
+if [ $ret -ne 0 ]; then echo "FAILED: hello_memkind 1>&2"; fi
+if [ $err -eq 0 ]; then err=$ret; fi
+
+$basedir/hello_hbw
+ret=$?
+if [ $ret -ne 0 ]; then echo "FAILED: hello_hbw 1>&2"; fi
+if [ $err -eq 0 ]; then err=$ret; fi
+
+$basedir/filter_memkind
+ret=$?
+if [ $ret -ne 0 ]; then echo "FAILED: filter_memkind 1>&2"; fi
+if [ $err -eq 0 ]; then err=$ret; fi
+
+$basedir/stream
+ret=$?
+if [ $ret -ne 0 ]; then echo "FAILED: stream 1>&2"; fi
+if [ $err -eq 0 ]; then err=$ret; fi
+
+for kind in memkind_default \
+            memkind_hbw \
+            memkind_hbw_hugetlb \
+            memkind_hbw_preferred \
+            memkind_hbw_preferred_hugetlb; do
+    $basedir/stream_memkind $kind
+    ret=$?
+    if [ $ret -ne 0 ]; then echo "FAILED: stream_memkind $kind 1>&2"; fi
+    if [ $err -eq 0 ]; then err=$ret; fi
+done
+if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then
+    for kind in memkind_gbtlb \
+                memkind_hbw_gbtlb \
+                memkind_hbw_preferred_gbtlb; do
+        $basedir/stream_memkind $kind
+        ret=$?
+        if [ $ret -ne 0 ]; then echo "FAILED: stream_memkind $kind 1>&2"; fi
+        if [ $err -eq 0 ]; then err=$ret; fi
+    done
+fi
+
+$basedir/new_kind
+ret=$?
+if [ $err -eq 0 ]; then err=$ret; fi
+
+$basedir/gb_realloc
+ret=$?
+if [ $err -eq 0 ]; then err=$ret; fi
+
 exit $err

@@ -63,6 +63,35 @@ test_pmtterr_test_SOURCES = test/main.cpp test/pmtt_err_test.cpp
 test_environerr_test_SOURCES = test/main.cpp test/environ_err_test.cpp
 test_tieddisterr_test_SOURCES = test/main.cpp test/tied_dist_test.cpp
 
+# Examples as tests
+test_PROGRAMS += test/hello_memkind \
+                 test/hello_hbw \
+                 test/filter_memkind \
+                 test/stream \
+                 test/stream_memkind \
+                 test/new_kind \
+                 test/gb_realloc \
+                 # end
+
+test_hello_memkind_LDADD = libmemkind.la
+test_hello_hbw_LDADD = libmemkind.la
+test_filter_memkind_LDADD = libmemkind.la
+test_stream_LDADD = libmemkind.la
+test_stream_memkind_LDADD = libmemkind.la
+test_new_kind_LDADD = libmemkind.la
+test_gb_realloc_LDADD = libmemkind.la
+
+test_hello_memkind_SOURCES = examples/hello_memkind_example.c
+test_hello_hbw_SOURCES = examples/hello_hbw_example.c
+test_filter_memkind_SOURCES = examples/filter_example.c
+test_stream_SOURCES = examples/stream_example.c
+test_stream_memkind_SOURCES = examples/stream_example.c
+test_new_kind_SOURCES = examples/new_kind_example.c
+test_gb_realloc_SOURCES = examples/gb_realloc_example.c
+
+test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
+
+
 # All of the non-standard requirements for testing (gtest and mock .so)
 .PHONY: test clean-local-gtest clean-local-mock
 
