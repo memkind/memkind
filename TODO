@@ -30,6 +30,9 @@ Documentation
 
 Features
 --------
+    * Add gcc malloc hooks for hbwmalloc interface.
+      http://www.gnu.org/software/libc/manual/html_node/Hooks-for-Malloc.html
+
     * Support for non-standard x86 page sizes like 128 MB.
 
     * Support for verbose mode by setting environment variable which
