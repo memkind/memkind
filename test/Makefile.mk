@@ -64,14 +64,14 @@ test_environerr_test_SOURCES = test/main.cpp test/environ_err_test.cpp
 test_tieddisterr_test_SOURCES = test/main.cpp test/tied_dist_test.cpp
 
 # Examples as tests
-test_PROGRAMS += test/hello_memkind \
-                 test/hello_hbw \
-                 test/filter_memkind \
-                 test/stream \
-                 test/stream_memkind \
-                 test/new_kind \
-                 test/gb_realloc \
-                 # end
+check_PROGRAMS += test/hello_memkind \
+                  test/hello_hbw \
+                  test/filter_memkind \
+                  test/stream \
+                  test/stream_memkind \
+                  test/new_kind \
+                  test/gb_realloc \
+                  # end
 
 test_hello_memkind_LDADD = libmemkind.la
 test_hello_hbw_LDADD = libmemkind.la
