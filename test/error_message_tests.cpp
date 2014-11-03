@@ -1,36 +1,42 @@
 #include <memkind.h>
-#include <gtest.h>
+#include <gtest/gtest.h>
 
 
-class ErrorMessage: public :: testing::Test {
+class ErrorMessage: public :: testing :: Test {
 protected:
-    int all_error_code[] = {
-        MEMKIND_ERROR_UNAVAILABLE,
-        MEMKIND_ERROR_MBIND,
-        MEMKIND_ERROR_MMAP,
-        MEMKIND_ERROR_MEMALIGN,
-        MEMKIND_ERROR_MALLCTL,
-        MEMKIND_ERROR_MALLOC,
-        MEMKIND_ERROR_GETCPU,
-        MEMKIND_ERROR_PMTT,
-        MEMKIND_ERROR_TIEDISTANCE,
-        MEMKIND_ERROR_ALIGNMENT,
-        MEMKIND_ERROR_MALLOCX,
-        MEMKIND_ERROR_ENVIRON,
-        MEMKIND_ERROR_INVALID,
-        MEMKIND_ERROR_REPNAME,
-        MEMKIND_ERROR_TOOMANY,
-        MEMKIND_ERROR_PTHREAD,
-        MEMKIND_ERROR_BADOPS,
-        MEMKIND_ERROR_RUNTIME
-    };
-    int num_error_code = sizeof(all_error_code);
- };
+    int num_error_code;
+    int *all_error_code;
+
+    void SetUp() {
+        num_error_code = 18;
+        all_error_code = new int[num_error_code];
+        all_error_code[0] = MEMKIND_ERROR_UNAVAILABLE;
+        all_error_code[1] = MEMKIND_ERROR_MBIND;
+        all_error_code[2] = MEMKIND_ERROR_MMAP;
+        all_error_code[3] = MEMKIND_ERROR_MEMALIGN;
+        all_error_code[4] = MEMKIND_ERROR_MALLCTL;
+        all_error_code[5] = MEMKIND_ERROR_MALLOC;
+        all_error_code[6] = MEMKIND_ERROR_GETCPU;
+        all_error_code[7] = MEMKIND_ERROR_PMTT;
+        all_error_code[8] = MEMKIND_ERROR_TIEDISTANCE;
+        all_error_code[9] = MEMKIND_ERROR_ALIGNMENT;
+        all_error_code[10] = MEMKIND_ERROR_MALLOCX;
+        all_error_code[11] = MEMKIND_ERROR_ENVIRON;
+        all_error_code[12] = MEMKIND_ERROR_INVALID;
+        all_error_code[13] = MEMKIND_ERROR_REPNAME;
+        all_error_code[14] = MEMKIND_ERROR_TOOMANY;
+        all_error_code[15] = MEMKIND_ERROR_PTHREAD;
+        all_error_code[16] = MEMKIND_ERROR_BADOPS;
+        all_error_code[17] = MEMKIND_ERROR_RUNTIME;
+    }
+    void TearDown() {
+        delete all_error_code;
+    }
+};
 
 TEST_F(ErrorMessage, message_length)
 {
     int i;
-    int max_len = MEMKIND_ERROR_MESSAGE_SIZE - 1;
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
     for (i = 0; i < num_error_code; i++) {
         memkind_error_message(all_error_code[i], error_message, MEMKIND_ERROR_MESSAGE_SIZE);
@@ -41,7 +47,6 @@ TEST_F(ErrorMessage, message_length)
 TEST_F(ErrorMessage, message_format)
 {
     int i;
-    int max_len = MEMKIND_ERROR_MESSAGE_SIZE - 1;
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
     for (i = 0; i < num_error_code; i++) {
         memkind_error_message(all_error_code[i], error_message, MEMKIND_ERROR_MESSAGE_SIZE);
@@ -49,7 +54,7 @@ TEST_F(ErrorMessage, message_format)
     }
 }
 
-TEST_F(ErrorMEssage, undefined_message)
+TEST_F(ErrorMessage, undefined_message)
 {
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
     memkind_error_message(-0xdeadbeef, error_message, MEMKIND_ERROR_MESSAGE_SIZE);

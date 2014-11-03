@@ -1,5 +1,5 @@
 #include <memkind.h>
-#include <gtest.h>
+#include <gtest/gtest.h>
 
 class GetSize: public :: testing::Test { };
 
