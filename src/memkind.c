@@ -213,6 +213,7 @@ int memkind_create(const struct memkind_ops *ops, const char *name, struct memki
     int tmp = 0;
     int i;
 
+    *kind = NULL;
     err = pthread_mutex_lock(&(memkind_registry_g.lock));
     if (err) {
         err = MEMKIND_ERROR_PTHREAD;
