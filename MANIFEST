@@ -73,3 +73,4 @@ test/common.h
 test/numadist_mock.c
 test/check.cpp
 test/test_remote.sh
+test/memkind_default_tests.cpp

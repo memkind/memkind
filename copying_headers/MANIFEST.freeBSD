@@ -57,3 +57,4 @@ test/test_remote.sh
 test/tied_dist_test.cpp
 test/trial_generator.cpp
 test/trial_generator.h
+test/memkind_default_tests.cpp
