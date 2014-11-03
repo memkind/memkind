@@ -46,7 +46,7 @@ TEST_F(MemkindDefaultTests, DefaultCalloc) {
     char *default_str = NULL;
     
     default_str = (char *)memkind_calloc(MEMKIND_DEFAULT, num, size);
-    EXPECT_NE(NULL, default_str);
+    EXPECT_TRUE(NULL != default_str);
     
     sprintf(default_str, "memkind_calloc MEMKIND_DEFAULT\n");
     fprintf(stdout, "%s", default_str);
@@ -60,10 +60,12 @@ TEST_F(MemkindDefaultTests, DefaultGetSize) {
     const size_t size = 512;
     char *default_str = NULL;
     int err = 0;
-    size_t total, free;
-    
+    size_t *total, *free;
+    total = (size_t*) malloc(sizeof(size_t));
+    free = (size_t*) malloc(sizeof(size_t));
+        
     default_str = (char *)memkind_malloc(MEMKIND_DEFAULT, size);
-    EXPECT_NE(NULL, default_str);
+    EXPECT_TRUE(NULL != default_str);
 
     err = memkind_get_size(MEMKIND_DEFAULT, total, free);
 
@@ -73,40 +75,22 @@ TEST_F(MemkindDefaultTests, DefaultGetSize) {
      
 }
 
-TEST_F(MemkindDefaultTests, DefaultRealloc) {
-    const size_t size = 512;
-    char *default_str = NULL;
-    int err = 0;
-    size_t total, free;
-    
-    default_str = (char *)memkind_malloc(MEMKIND_DEFAULT, size);
-    EXPECT_NE(NULL, default_str);
-
-    err = memkind_get_size(MEMKIND_DEFAULT, total, free);
-
-    EXPECT_EQ(0,err);
-
-    memkind_free(MEMKIND_DEFAULT, default_str);
-     
-}
 
 TEST_F(MemkindDefaultTests, DefaultRealloc) {
     const size_t size1 = 512;
     const size_t size2 = 1024;
     char *default_str = NULL;
-    int err = 0;
-    size_t total, free;
     
-    default_str = (char *)memkind_realloc(MEMKIND_DEFAULT, size1);
-    EXPECT_NE(NULL, default_str);
+    default_str = (char *)memkind_realloc(MEMKIND_DEFAULT, default_str, size1);
+    EXPECT_TRUE(NULL != default_str);
 
-    sprintf(default_str, "memkind_realloc MEMKIND_DEFAULT with size %s\n", size1);
+    sprintf(default_str, "memkind_realloc MEMKIND_DEFAULT with size %zu\n", size1);
     fprintf(stdout, "%s", default_str);
     
-    default_str = (char *)memkind_realloc(MEMKIND_DEFAULT, size2);
-    EXPECT_NE(NULL, default_str);
+    default_str = (char *)memkind_realloc(MEMKIND_DEFAULT, default_str, size2);
+    EXPECT_TRUE(NULL != default_str);
 
-    sprintf(default_str, "memkind_realloc MEMKIND_DEFAULT with size %s\n", size2);
+    sprintf(default_str, "memkind_realloc MEMKIND_DEFAULT with size %zu\n", size2);
     fprintf(stdout, "%s", default_str);
     
     memkind_free(MEMKIND_DEFAULT, default_str);
