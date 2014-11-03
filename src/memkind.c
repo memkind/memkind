@@ -179,7 +179,7 @@ void memkind_error_message(int err, char *msg, size_t size)
             strncpy(msg, "<memkind> Invalid input arguments to memkind routine", size);
             break;
         case MEMKIND_ERROR_TOOMANY:
-            strncpy(msg, "<memkind> Attempted to inizailze more than maximum (%i) number of kinds", MEMKIND_MAX_KIND);
+            snprintf(msg, size, "<memkind> Attempted to inizailze more than maximum (%i) number of kinds", MEMKIND_MAX_KIND);
             break;
         case MEMKIND_ERROR_RUNTIME:
             strncpy(msg, "<memkind> Unspecified run-time error", size);
