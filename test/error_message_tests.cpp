@@ -62,7 +62,7 @@ TEST_F(ErrorMessage, message_length)
 {
     int i;
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    for (i = 0; i < num_error_code; i++) {
+    for (i = 0; i < num_error_code; ++i) {
         memkind_error_message(all_error_code[i], error_message, MEMKIND_ERROR_MESSAGE_SIZE);
         EXPECT_TRUE(strlen(error_message) < MEMKIND_ERROR_MESSAGE_SIZE - 1);
     }
@@ -72,7 +72,7 @@ TEST_F(ErrorMessage, message_format)
 {
     int i;
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    for (i = 0; i < num_error_code; i++) {
+    for (i = 0; i < num_error_code; ++i) {
         memkind_error_message(all_error_code[i], error_message, MEMKIND_ERROR_MESSAGE_SIZE);
         EXPECT_TRUE(strncmp(error_message, "<memkind>", strlen("<memkind>")) == 0);
     }
