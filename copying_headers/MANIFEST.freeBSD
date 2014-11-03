@@ -57,3 +57,6 @@ test/test_remote.sh
 test/tied_dist_test.cpp
 test/trial_generator.cpp
 test/trial_generator.h
+test/partition_tests.cpp
+test/get_size_tests.cpp
+test/error_message_tests.cpp

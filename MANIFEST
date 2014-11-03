@@ -73,3 +73,7 @@ test/common.h
 test/numadist_mock.c
 test/check.cpp
 test/test_remote.sh
+test/extended_tests.cpp
+test/partition_tests.cpp
+test/get_size_tests.cpp
+test/error_message_tests.cpp
