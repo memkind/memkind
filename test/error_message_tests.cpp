@@ -23,6 +23,7 @@
  */
 
 #include <memkind.h>
+#include <errno.h>
 #include <gtest/gtest.h>
 
 
@@ -32,7 +33,7 @@ protected:
     int *all_error_code;
 
     void SetUp() {
-        num_error_code = 18;
+        num_error_code = 20;
         all_error_code = new int[num_error_code];
         all_error_code[0] = MEMKIND_ERROR_UNAVAILABLE;
         all_error_code[1] = MEMKIND_ERROR_MBIND;
@@ -52,6 +53,8 @@ protected:
         all_error_code[15] = MEMKIND_ERROR_PTHREAD;
         all_error_code[16] = MEMKIND_ERROR_BADOPS;
         all_error_code[17] = MEMKIND_ERROR_RUNTIME;
+        all_error_code[18] = EINVAL;
+        all_error_code[19] = ENOMEM;
     }
     void TearDown() {
         delete all_error_code;
@@ -66,6 +69,7 @@ TEST_F(ErrorMessage, message_length)
         memkind_error_message(all_error_code[i], error_message, MEMKIND_ERROR_MESSAGE_SIZE);
         EXPECT_TRUE(strlen(error_message) < MEMKIND_ERROR_MESSAGE_SIZE - 1);
     }
+    memkind_error_message(MEMKIND_ERROR_UNAVAILABLE, NULL, 0);
 }
 
 TEST_F(ErrorMessage, message_format)
