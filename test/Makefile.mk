@@ -54,6 +54,7 @@ test_all_tests_SOURCES = test/common.h \
                          test/check.h \
                          test/extended_tests.cpp \
                          test/negative_tests.cpp \
+                         test/error_message_tests.cpp \
                          # end
 
 test_schedcpu_test_SOURCES = test/main.cpp test/sched_cpu_test.cpp
