@@ -27,8 +27,19 @@
 #include <sys/mman.h>
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
+
 #include "memkind_default.h"
 
+const struct memkind_ops MEMKIND_DEFAULT_OPS = {
+    .create = memkind_default_create,
+    .destroy = memkind_default_destroy,
+    .malloc = memkind_default_malloc,
+    .calloc = memkind_default_calloc,
+    .posix_memalign = memkind_default_posix_memalign,
+    .realloc = memkind_default_realloc,
+    .free = memkind_default_free,
+    .get_size = memkind_default_get_size
+};
 
 int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
 {

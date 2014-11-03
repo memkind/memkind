@@ -38,6 +38,56 @@
 
 #include "memkind_gbtlb.h"
 
+const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
+    .create = memkind_default_create,
+    .destroy = memkind_default_destroy,
+    .malloc = memkind_gbtlb_malloc,
+    .calloc = memkind_gbtlb_calloc,
+    .posix_memalign = memkind_gbtlb_posix_memalign,
+    .realloc = memkind_gbtlb_realloc,
+    .free = memkind_gbtlb_free,
+    .check_available = memkind_hbw_check_available,
+    .mbind = memkind_default_mbind,
+    .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
+    .get_mbind_mode = memkind_default_get_mbind_mode,
+    .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
+    .get_size = memkind_default_get_size,
+    .check_alignment = memkind_posix_check_alignment,
+    .check_addr = memkind_gbtlb_check_addr
+};
+
+const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
+    .create = memkind_default_create,
+    .destroy = memkind_default_destroy,
+    .malloc = memkind_gbtlb_malloc,
+    .calloc = memkind_gbtlb_calloc,
+    .posix_memalign = memkind_gbtlb_posix_memalign,
+    .realloc = memkind_gbtlb_realloc,
+    .free = memkind_gbtlb_free,
+    .check_available = memkind_hbw_check_available,
+    .mbind = memkind_default_mbind,
+    .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
+    .get_mbind_mode = memkind_preferred_get_mbind_mode,
+    .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
+    .get_size = memkind_default_get_size,
+    .check_alignment = memkind_posix_check_alignment,
+    .check_addr = memkind_gbtlb_check_addr
+};
+
+const struct memkind_ops MEMKIND_GBTLB_OPS = {
+    .create = memkind_default_create,
+    .destroy = memkind_default_destroy,
+    .malloc = memkind_gbtlb_malloc,
+    .calloc = memkind_gbtlb_calloc,
+    .posix_memalign = memkind_gbtlb_posix_memalign,
+    .realloc = memkind_gbtlb_realloc,
+    .free = memkind_gbtlb_free,
+    .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
+    .get_size = memkind_default_get_size,
+    .check_alignment = memkind_posix_check_alignment,
+    .check_addr = memkind_gbtlb_check_addr
+};
+
 const size_t ONE_GB = 1073741824ULL;
 
 enum {

@@ -39,6 +39,82 @@
 
 #include "memkind_hbw.h"
 
+const struct memkind_ops MEMKIND_HBW_OPS = {
+    .create = memkind_arena_create,
+    .destroy = memkind_arena_destroy,
+    .malloc = memkind_arena_malloc,
+    .calloc = memkind_arena_calloc,
+    .posix_memalign = memkind_arena_posix_memalign,
+    .realloc = memkind_arena_realloc,
+    .free = memkind_default_free,
+    .check_available = memkind_hbw_check_available,
+    .mbind = memkind_default_mbind,
+    .get_mmap_flags = memkind_default_get_mmap_flags,
+    .get_mbind_mode = memkind_default_get_mbind_mode,
+    .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
+    .get_arena = memkind_cpu_get_arena,
+    .get_size = memkind_default_get_size,
+    .init_once = memkind_hbw_init_once,
+    .check_alignment = memkind_posix_check_alignment
+};
+
+const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
+    .create = memkind_arena_create,
+    .destroy = memkind_arena_destroy,
+    .malloc = memkind_arena_malloc,
+    .calloc = memkind_arena_calloc,
+    .posix_memalign = memkind_arena_posix_memalign,
+    .realloc = memkind_arena_realloc,
+    .free = memkind_default_free,
+    .check_available = memkind_hbw_check_available,
+    .mbind = memkind_default_mbind,
+    .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
+    .get_mbind_mode = memkind_default_get_mbind_mode,
+    .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
+    .get_arena = memkind_cpu_get_arena,
+    .get_size = memkind_default_get_size,
+    .init_once = memkind_hbw_hugetlb_init_once,
+    .check_alignment = memkind_posix_check_alignment
+};
+
+const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
+    .create = memkind_arena_create,
+    .destroy = memkind_arena_destroy,
+    .malloc = memkind_arena_malloc,
+    .calloc = memkind_arena_calloc,
+    .posix_memalign = memkind_arena_posix_memalign,
+    .realloc = memkind_arena_realloc,
+    .free = memkind_default_free,
+    .check_available = memkind_hbw_check_available,
+    .mbind = memkind_default_mbind,
+    .get_mmap_flags = memkind_default_get_mmap_flags,
+    .get_mbind_mode = memkind_preferred_get_mbind_mode,
+    .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
+    .get_arena = memkind_cpu_get_arena,
+    .get_size = memkind_default_get_size,
+    .init_once = memkind_hbw_preferred_init_once,
+    .check_alignment = memkind_posix_check_alignment
+};
+
+const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
+    .create = memkind_arena_create,
+    .destroy = memkind_arena_destroy,
+    .malloc = memkind_arena_malloc,
+    .calloc = memkind_arena_calloc,
+    .posix_memalign = memkind_arena_posix_memalign,
+    .realloc = memkind_arena_realloc,
+    .free = memkind_default_free,
+    .check_available = memkind_hbw_check_available,
+    .mbind = memkind_default_mbind,
+    .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
+    .get_mbind_mode = memkind_preferred_get_mbind_mode,
+    .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
+    .get_arena = memkind_cpu_get_arena,
+    .get_size = memkind_default_get_size,
+    .init_once = memkind_hbw_preferred_hugetlb_init_once,
+    .check_alignment = memkind_posix_check_alignment
+};
+
 struct numanode_bandwidth_t {
     int numanode;
     int bandwidth;

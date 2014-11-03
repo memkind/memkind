@@ -35,19 +35,7 @@ extern "C" {
 int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags);
 void memkind_hugetlb_init_once(void);
 
-static const struct memkind_ops MEMKIND_HUGETLB_OPS = {
-    .create = memkind_arena_create,
-    .destroy = memkind_arena_destroy,
-    .malloc = memkind_arena_malloc,
-    .calloc = memkind_arena_calloc,
-    .posix_memalign = memkind_arena_posix_memalign,
-    .realloc = memkind_arena_realloc,
-    .free = memkind_default_free,
-    .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
-    .get_arena = memkind_cpu_get_arena,
-    .get_size = memkind_default_get_size,
-    .init_once = memkind_hugetlb_init_once
-};
+extern const struct memkind_ops MEMKIND_HUGETLB_OPS;
 
 #ifdef __cplusplus
 }
