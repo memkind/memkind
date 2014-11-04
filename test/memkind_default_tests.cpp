@@ -27,8 +27,6 @@
 #include "common.h"
 #include "memkind.h"
 
-
-
 class MemkindDefaultTests: public :: testing::Test {
 
 protected:
@@ -37,7 +35,7 @@ protected:
 
     void TearDown()
     {}
-    
+
 
 };
 
@@ -47,15 +45,15 @@ TEST_F(MemkindDefaultTests, DefaultCalloc) {
     const size_t size = 1024;
     const size_t num = 1;
     char *default_str = NULL;
-    
+
     default_str = (char *)memkind_calloc(MEMKIND_DEFAULT, num, size);
     EXPECT_TRUE(NULL != default_str);
-    
+
     sprintf(default_str, "memkind_calloc MEMKIND_DEFAULT\n");
     fprintf(stdout, "%s", default_str);
-    
+
     memkind_free(MEMKIND_DEFAULT, default_str);
-    
+
 }
 
 
@@ -66,7 +64,7 @@ TEST_F(MemkindDefaultTests, DefaultGetSize) {
     size_t *total, *free;
     total = (size_t*) malloc(sizeof(size_t));
     free = (size_t*) malloc(sizeof(size_t));
-        
+
     default_str = (char *)memkind_malloc(MEMKIND_DEFAULT, size);
     EXPECT_TRUE(NULL != default_str);
 
@@ -75,7 +73,7 @@ TEST_F(MemkindDefaultTests, DefaultGetSize) {
     EXPECT_EQ(0,err);
 
     memkind_free(MEMKIND_DEFAULT, default_str);
-     
+
 }
 
 
@@ -83,23 +81,19 @@ TEST_F(MemkindDefaultTests, DefaultRealloc) {
     const size_t size1 = 512;
     const size_t size2 = 1024;
     char *default_str = NULL;
-    
+
     default_str = (char *)memkind_realloc(MEMKIND_DEFAULT, default_str, size1);
     EXPECT_TRUE(NULL != default_str);
 
     sprintf(default_str, "memkind_realloc MEMKIND_DEFAULT with size %zu\n", size1);
     fprintf(stdout, "%s", default_str);
-    
+
     default_str = (char *)memkind_realloc(MEMKIND_DEFAULT, default_str, size2);
     EXPECT_TRUE(NULL != default_str);
 
     sprintf(default_str, "memkind_realloc MEMKIND_DEFAULT with size %zu\n", size2);
     fprintf(stdout, "%s", default_str);
-    
+
     memkind_free(MEMKIND_DEFAULT, default_str);
-    
+
 }
-
-
-
-
