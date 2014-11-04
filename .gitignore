@@ -64,3 +64,12 @@
 /examples/stream_memkind
 /examples/gb_realloc
 /examples/gb_realloc_example.o
+/examples/test_stream_memkind-stream_example.o
+/test/filter_memkind
+/test/gb_realloc
+/test/hello_hbw
+/test/hello_memkind
+/test/new_kind
+/test/stream
+/test/stream_memkind
+
