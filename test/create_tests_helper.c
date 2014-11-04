@@ -109,3 +109,5 @@ const struct memkind_ops MEMKIND_BAD_OPS[] = {{
     .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_init_once
 }};
+
+const size_t MEMKIND_BAD_OPS_LEN = sizeof(MEMKIND_BAD_OPS)/sizeof(struct memkind_ops);

@@ -26,16 +26,17 @@
 #include <memkind_default.h>
 #include <gtest/gtest.h>
 
-extern const struct memkind_ops *MEMKIND_BAD_OPS;
+extern const struct memkind_ops MEMKIND_BAD_OPS[];
+extern const size_t MEMKIND_BAD_OPS_LEN;
 
 class MemkindCreate: public :: testing :: Test { };
 
 TEST_F(MemkindCreate, bad_ops)
 {
-    int i, err;
-    int num_bad_ops = sizeof(MEMKIND_BAD_OPS)/sizeof(memkind_ops);
+    size_t i;
+    int err;
     memkind_t kind;
-    for (i = 0; i < num_bad_ops; ++i) {
+    for (i = 0; i < MEMKIND_BAD_OPS_LEN; ++i) {
         err = memkind_create(MEMKIND_BAD_OPS + i, "bad_ops", &kind);
         EXPECT_TRUE(err == MEMKIND_ERROR_BADOPS);
         EXPECT_TRUE(kind == NULL);
@@ -45,7 +46,7 @@ TEST_F(MemkindCreate, bad_ops)
 TEST_F(MemkindCreate, rep_name)
 {
     int i, err;
-    int num_bad_ops = sizeof(MEMKIND_BAD_OPS)/sizeof(memkind_ops);
+    int num_bad_ops = sizeof(*MEMKIND_BAD_OPS)/sizeof(memkind_ops);
     memkind_t kind;
     for (i = 0; i < num_bad_ops; ++i) {
         err = memkind_create(&MEMKIND_DEFAULT_OPS, "memkind_default", &kind);
