@@ -90,6 +90,30 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
     return ltrial;
 }
 
+void TrialGenerator :: generate_hbw_gb_strict (alloc_api_t api)
+{
+
+    size_t size[] = {GB,(2*GB), 3*GB};
+    size_t psize[] = {GB, GB, GB};
+    size_t align[] = {GB, GB, GB};
+    int k = 0;
+    trial_vec.clear();
+
+    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
+         i++) {
+        trial_vec.push_back(create_trial_tuple(api, size[i],
+                                               align[i], psize[i],
+                                               MEMKIND_HBW_PREFERRED_GBTLB,
+                                               -1));
+        if (i > 0)
+            k++;
+        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
+                                               MEMKIND_HBW_PREFERRED_GBTLB,
+                                               k++));
+    }
+}
+
+
 void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
 {
 

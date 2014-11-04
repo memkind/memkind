@@ -33,6 +33,7 @@ src/memkind_hugetlb.h
 src/memkind_pmtt.c
 test/Makefile.mk
 test/bat_tests.cpp
+test/bat_bind_tests.cpp
 test/check.cpp
 test/check.h
 test/check.sh

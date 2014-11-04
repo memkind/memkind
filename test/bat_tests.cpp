@@ -91,7 +91,6 @@ TEST_F(BATest, hbw_check_available)
 
 TEST_F(BATest, hbw_policy)
 {
-    hbw_set_policy(1);
     hbw_set_policy(2);
     EXPECT_EQ(2, hbw_get_policy());
 }

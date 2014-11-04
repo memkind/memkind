@@ -171,3 +171,36 @@ TEST_F(NegativeTest, InvalidSizeMemalign)
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
 }
+
+TEST_F(NegativeTest, GBFailureTestMemalign)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = EINVAL;
+
+    ret = hbw_posix_memalign_psize (&ptr, 1073741824, 1073741826,
+                                    HBW_PAGESIZE_1GB_STRICT);
+    EXPECT_EQ(ret, err);
+    EXPECT_TRUE(ptr == NULL);
+}
+
+TEST_F(NegativeTest, RegularReallocWithMemalign)
+{
+    int ret = 0;
+    int err = 0;
+    void *ptr = NULL;
+
+    ret = hbw_posix_memalign_psize (&ptr, 4096, 4096,
+                                    HBW_PAGESIZE_4KB);
+    ASSERT_TRUE(ptr != NULL);
+    memset(ptr, 0, 4096);
+    ptr = hbw_realloc (ptr, 8192);
+    memset(ptr, 0, 8192);
+    hbw_free(ptr);
+}
+
+TEST_F(NegativeTest, SetPolicyTest)
+{
+    hbw_set_policy(2);
+    hbw_set_policy(1);
+}
