@@ -23,102 +23,21 @@
  */
 
 #include <memkind.h>
+#include <memkind_default.h>
 #include <gtest/gtest.h>
 
-static const int NUM_BAD_OPS = 9;
-static const struct memkind_ops MEMKIND_BAD_OPS[NUM_BAD_OPS]= {{
-    .create = NULL,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = NULL,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = NULL,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = NULL,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = NULL,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = NULL,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = NULL,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = NULL
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size,
-    .init_once = memkind_hbw_init_once
-}};
+extern const struct memkind_ops *MEMKIND_BAD_OPS;
 
 class MemkindCreate: public :: testing :: Test { };
 
 TEST_F(MemkindCreate, bad_ops)
 {
     int i, err;
-    memkind_t *kind;
-    for (i = 0; i < NUM_BAD_OPS; ++i) {
+    int num_bad_ops = sizeof(MEMKIND_BAD_OPS)/sizeof(memkind_ops);
+    memkind_t kind;
+    for (i = 0; i < num_bad_ops; ++i) {
         err = memkind_create(MEMKIND_BAD_OPS + i, "bad_ops", &kind);
-        EXPECT_TRUE(err = MEMKIND_ERROR_BADOPS);
+        EXPECT_TRUE(err == MEMKIND_ERROR_BADOPS);
         EXPECT_TRUE(kind == NULL);
     }
 }
@@ -126,10 +45,11 @@ TEST_F(MemkindCreate, bad_ops)
 TEST_F(MemkindCreate, rep_name)
 {
     int i, err;
-    memkind_t *kind;
-    for (i = 0; i < NUM_BAD_OPS; ++i) {
-        err = memkind_create(MEMKIND_DEFAULT_OPS, "memkind_default", &kind);
-        EXPECT_TRUE(err = MEMKIND_ERROR_REPNAME);
+    int num_bad_ops = sizeof(MEMKIND_BAD_OPS)/sizeof(memkind_ops);
+    memkind_t kind;
+    for (i = 0; i < num_bad_ops; ++i) {
+        err = memkind_create(&MEMKIND_DEFAULT_OPS, "memkind_default", &kind);
+        EXPECT_TRUE(err == MEMKIND_ERROR_REPNAME);
         EXPECT_TRUE(kind == NULL);
     }
 }

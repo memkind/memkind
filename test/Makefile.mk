@@ -58,6 +58,7 @@ test_all_tests_SOURCES = test/common.h \
                          test/partition_tests.cpp \
                          test/get_size_tests.cpp \
                          test/create_tests.cpp \
+                         test/create_tests_helper.c \
                          # end
 
 test_schedcpu_test_SOURCES = test/main.cpp test/sched_cpu_test.cpp
