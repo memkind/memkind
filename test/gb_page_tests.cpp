@@ -119,29 +119,6 @@ TEST_F(GBPagesTest, hbw_memalign_psize_incremental_strict)
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_malloc_strict)
-{
-    tgen->generate_gb_strict(MEMKIND_MALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_calloc_strict)
-{
-    tgen->generate_gb_strict(MEMKIND_CALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_realloc_strict)
-{
-    tgen->generate_gb_strict(MEMKIND_REALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, memkind_posix_memalign_strict)
-{
-    tgen->generate_gb_strict(MEMKIND_POSIX_MEMALIGN);
-    tgen->run(num_bandwidth, bandwidth);
-}
 
 TEST_F(GBPagesTest, memkind_malloc_regular)
 {
@@ -169,7 +146,7 @@ TEST_F(GBPagesTest, memkind_posix_memalign_regular)
 
 TEST_F(GBPagesTest, hbw_memalign_psize_incremental_bind)
 {
-    hbw_set_policy(1)
+    hbw_set_policy(1);
     EXPECT_EQ(1, hbw_get_policy());
     tgen->generate_hbw_gb_incremental(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);

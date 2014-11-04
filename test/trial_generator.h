@@ -73,6 +73,8 @@ public:
     void generate_size_1KB_2GB(alloc_api_t api);
     void generate_hbw_gb_incremental(alloc_api_t api);
     void generate_gb_regular(alloc_api_t api);
+    void generate_hbw_gb_strict(alloc_api_t api);
+    void generate_gb_strict(alloc_api_t api);
     void generate_gb_incremental(alloc_api_t api);
     void generate_size_4GB_8GB(alloc_api_t api);
     void run(int num_bandwidth, int *bandwidths);

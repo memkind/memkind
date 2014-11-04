@@ -187,7 +187,6 @@ TEST_F(NegativeTest, GBFailureTestMemalign)
 TEST_F(NegativeTest, RegularReallocWithMemalign)
 {
     int ret = 0;
-    int err = 0;
     void *ptr = NULL;
 
     ret = hbw_posix_memalign_psize (&ptr, 4096, 4096,
