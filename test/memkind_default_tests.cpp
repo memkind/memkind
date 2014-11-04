@@ -22,10 +22,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+#include <numa.h>
+#include <stdio.h>
 #include "common.h"
 #include "memkind.h"
 
+
+int node0_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
+
+static const struct memkind_ops NODE0_OPS = {
+   
+};
+
+int node0_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode) {
+    struct bitmask nodemask_bm = {maxnode, nodemask};
+    numa_bitmask_clearall(&nodemask_bm);
+    numa_bitmask_setbit(&nodemask_bm, 0);
+    return 0;
+}
 
 class MemkindDefaultTests: public :: testing::Test {
 
@@ -35,6 +49,7 @@ protected:
 
     void TearDown()
     {}
+    
 
 };
 
@@ -96,5 +111,17 @@ TEST_F(MemkindDefaultTests, DefaultRealloc) {
     memkind_free(MEMKIND_DEFAULT, default_str);
     
 }
+
+
+TEST_F(MemkindDefaultTests, DefaultCreate) {
+    memkind_t node_kind[1];
+    int err = 0;
+    
+    err = memkind_create(&NODE0_OPS, "node0", node_kind+0);
+    EXPECT_EQ(0,err);
+    
+    memkind_finalize();
+}
+
 
 
