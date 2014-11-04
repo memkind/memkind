@@ -37,7 +37,6 @@ memkind_arena.h \- jemalloc arena allocation memkind operations.
 .BI "void *memkind_arena_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" );
 .BI "int memkind_arena_posix_memalign(struct memkind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .BI "void *memkind_arena_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
-.BI "void memkind_arena_free(struct memkind " "*kind" ", void " "*ptr" );
 .BI "int memkind_cpu_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" );
 .BI "int memkind_bijective_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" );
 .br
@@ -124,11 +123,6 @@ though the jemalloc
 .BR je_mallocx ()
 interface.  It uses the memkind "get_arena" operation to select the
 arena.
-.PP
-.BR memkind_arena_free ()
-is an implementation of the memkind "free" operation for memory
-kinds that use jemalloc.  This is a wrapper for
-.BR je_free ().
 .PP
 .BR memkind_cpu_arena_get_arena ()
 Retrieves the

@@ -37,7 +37,6 @@ void *memkind_arena_malloc(struct memkind *kind, size_t size);
 void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size);
 int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
 void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size);
-void memkind_arena_free(struct memkind *kind, void *ptr);
 int memkind_cpu_get_arena(struct memkind *kind, unsigned int *arena);
 int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena);
 

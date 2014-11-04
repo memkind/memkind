@@ -184,11 +184,6 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     return err;
 }
 
-void memkind_arena_free(struct memkind *kind, void *ptr)
-{
-    je_free(ptr);
-}
-
 int memkind_cpu_get_arena(struct memkind *kind, unsigned int *arena)
 {
     int err = 0;
