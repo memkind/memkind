@@ -63,6 +63,16 @@ if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
     rm -f .tmp
 
 else
+    which memkind-pmtt >/dev/null
+    if [ $? -eq 0 ]; then
+        memkind-pmtt /sys/firmware/acpi/tables/PMTT /tmp/node-bandwidth
+        ret=$?
+    else
+        $basedir/../memkind-pmtt /sys/firmware/acpi/tables/PMTT /tmp/node-bandwidth
+        ret=$?
+    fi
+    if [ $err -eq 0 ]; then err=$ret; fi
+
     $basedir/all_tests --gtest_list_tests > .tmp
     cat .tmp | while read line
     do
