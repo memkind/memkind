@@ -220,7 +220,7 @@ TEST_F(NegativeTest, GBMemalignPsizeAlign)
 TEST_F(NegativeTest, GBNullRealloc)
 {
     void *ptr = NULL;
-    ptr = memkind_gbtlb_realloc(MEMKIND_HBW_GBTLB, NULL, 1024);
+    ptr = memkind_gbtlb_realloc(MEMKIND_HBW_GBTLB, NULL, -1);
     EXPECT_TRUE(ptr == NULL);
 }
 
