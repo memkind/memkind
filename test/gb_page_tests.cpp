@@ -154,6 +154,7 @@ TEST_F(GBPagesTest, hbw_memalign_psize_incremental_bind)
 
 TEST_F(GBPagesTest, hbw_memalign_psize_strict_bind)
 {
+    hbw_set_policy(1);
     tgen->generate_hbw_gb_strict(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
 }
