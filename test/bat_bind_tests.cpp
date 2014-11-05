@@ -97,12 +97,14 @@ TEST_F(BABindTest, hbw_policy)
 
 TEST_F(BABindTest, hbw_malloc_incremental)
 {
+    hbw_set_policy(1);
     tgen->generate_incremental(HBW_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(BABindTest, hbw_calloc_incremental)
 {
+    hbw_set_policy(1);
     tgen->generate_incremental(HBW_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
@@ -110,18 +112,21 @@ TEST_F(BABindTest, hbw_calloc_incremental)
 
 TEST_F(BABindTest, hbw_realloc_incremental)
 {
+    hbw_set_policy(1);
     tgen->generate_incremental(HBW_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(BABindTest, hbw_memalign_incremental)
 {
+    hbw_set_policy(1);
     tgen->generate_incremental(HBW_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(BABindTest, hbw_memalign_psize_incremental)
 {
+    hbw_set_policy(1);
     tgen->generate_incremental(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
 }
