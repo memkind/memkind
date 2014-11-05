@@ -206,3 +206,24 @@ TEST_F(NegativeTest, SetPolicyTest)
 
 }
 
+TEST_F(NegativeTest, GBMemalignPsizeAlign)
+{
+    void *ptr = NULL;
+    int ret = 0;
+    int err = EINVAL;
+
+    ret = hbw_posix_memalign_psize(&ptr, -1, 1024, HBW_PAGESIZE_1GB);
+    EXPECT_EQ(err, ret);
+}
+
+TEST_F(NegativeTest, GBNullRealloc)
+{
+    void *ptr = NULL;
+    ptr = memkind_gbtlb_realloc(MEMKIND_HBW_GBTLB, NULL, 1024);
+    EXPECT_TRUE(ptr == NULL);
+}
+
+TEST_F(NegativeTest, GBNullFree)
+{
+    memkind_free(MEMKIND_GBTLB,NULL);
+}

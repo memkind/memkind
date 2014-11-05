@@ -159,6 +159,17 @@ TEST_F(GBPagesTest, hbw_memalign_psize_strict_bind)
     tgen->run(num_bandwidth, bandwidth);
 }
 
+TEST_F(GBPagesTest, generate_gb_misalign_preferred)
+{
+    tgen->generate_gb_regular(HBW_MEMALIGN_PSIZE,
+                              2147483648);
+    tgen->run(num_bandwidth, bandwidth);
+}
 
-
-
+TEST_F(GBPagesTest, generate_gb_misalign_bind)
+{
+    hbw_set_policy(1);
+    tgen->generate_gb_regular(HBW_MEMALIGN_PSIZE,
+                              2147483648);
+    tgen->run(num_bandwidth, bandwidth);
+}

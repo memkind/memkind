@@ -76,6 +76,7 @@ public:
     void generate_hbw_gb_strict(alloc_api_t api);
     void generate_gb_strict(alloc_api_t api);
     void generate_gb_incremental(alloc_api_t api);
+    void generate_gb_misalign(alloc_api_t api, size_t align);
     void generate_size_4GB_8GB(alloc_api_t api);
     void run(int num_bandwidth, int *bandwidths);
     /*For debugging purposes*/

@@ -90,6 +90,23 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
     return ltrial;
 }
 
+void TrialGenerator :: generate_gb_misalign (alloc_api_t api,
+                                             size_t talign)
+{
+
+    int k = 0;
+    trial_vec.clear();
+    trial_vec.push_back(create_trial_tuple(api,
+                                           GB, talign, GB,
+                                           MEMKIND_HBW_PREFERRED_GBTLB,
+                                           -1));
+    trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
+                                           MEMKIND_HBW_PREFERRED_GBTLB,
+                                           0));
+
+}
+
+
 void TrialGenerator :: generate_hbw_gb_strict (alloc_api_t api)
 {
 
