@@ -31,6 +31,7 @@
 #include "check.h"
 #include "omp.h"
 #include "memkind.h"
+#include "memkind_gbtlb.h"
 
 #include "trial_generator.h"
 
