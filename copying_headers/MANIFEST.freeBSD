@@ -62,3 +62,5 @@ test/get_size_tests.cpp
 test/error_message_tests.cpp
 test/create_tests.cpp
 test/create_tests_helper.c
+test/memkind_default_tests.cpp
+

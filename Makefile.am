@@ -88,6 +88,7 @@ noinst_PROGRAMS =
 
 TESTS =
 XFAIL_TESTS =
+TESTS_ENVIRONMENT =
 
 AM_CFLAGS = -Wall -Werror -msse4.2 -fopenmp
 AM_CXXFLAGS = -Wall -Werror -msse4.2 -std=c++0x -fopenmp
