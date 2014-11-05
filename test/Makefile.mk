@@ -60,7 +60,6 @@ test_all_tests_SOURCES = test/common.h \
                          test/create_tests.cpp \
                          test/create_tests_helper.c \
                          test/memkind_default_tests.cpp \
-
                          # end
 
 test_schedcpu_test_SOURCES = test/main.cpp test/sched_cpu_test.cpp
