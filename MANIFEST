@@ -50,6 +50,7 @@ src/memkind_pmtt.c
 test/Makefile.mk
 test/check.sh
 test/test.sh
+test/mock-pmtt.aml
 test/multithreaded_tests.cpp
 test/gb_page_tests.cpp
 test/environ_err_test.cpp
@@ -81,4 +82,3 @@ test/error_message_tests.cpp
 test/create_tests.cpp
 test/create_tests_helper.c
 test/memkind_default_tests.cpp
-
