@@ -202,4 +202,7 @@ TEST_F(NegativeTest, SetPolicyTest)
 {
     hbw_set_policy(2);
     hbw_set_policy(1);
+    hbw_set_policy(3);
+
 }
+
