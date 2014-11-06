@@ -545,6 +545,9 @@ Default allocation using standard memory and default page size.
 .B MEMKIND_HUGETLB
 Allocate from standard memory using huge pages.
 .TP
+.B MEMKIND_GBTLB
+Allocate from standard memory using giga byte huge pages.
+.TP
 .B MEMKIND_HBW
 Allocate from high bandwidth memory NUMA nodes as defined by the PMTT
 table, or the environment variable
@@ -575,15 +578,17 @@ Same as
 except the allocation is backed by one gigabyte huge pages.  Note that
 .I size
 can take on any value, but full gigabyte pages will allocated for each
-request, so remainder of the last page will be wasted.
+request, so remainder of the last page will be wasted. A good use case
+scenario is to grow a buffer in the course of an application with reallocs.
+In this case, if there is enough memory available within in already allocated
+gigabyte page, newer pages are not fetched. This is demonstrated in the
+examples directory with gb_realloc_example.c
 .TP
 .B MEMKIND_HBW_PREFERRED_GBTLB
 Same as
-.B MEMKIND_HBW_PREFERRED
-except the allocation is backed by one gigabyte huge pages.  Note that
-.I size
-can take on any value, but full gigabyte pages will allocated for each
-request, so remainder of the last page will be wasted.
+.B MEMKIND_HBW_GBTLB
+except that if there is not enough high bandwidth memory to satisfy
+the request, the allocation will fall back on standard memory.
 .SH "ERRORS"
 .TP
 .BR memkind_posix_memalign ()
