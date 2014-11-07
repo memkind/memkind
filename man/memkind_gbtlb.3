@@ -150,16 +150,17 @@ store the virtual address for retrieval and freeing. The table,
 stores the requested size, allocated size, the virtual address pointer
 and the mmap'ed address pointer information.
 .PP
-.BR memkind_gbtlb_ceil_size  differentiates between STRICT and REGULAR
-gbtlb implementations n which ceil the size if the requested size is not a modulo
-of 1GB.
+.BR memkind_gbtlb_ceil_size
+differentiates between STRICT and REGULAR gbtlb implementations by
+getting the ceil of the size if the requested size is not a modulo
+of a gigabyte.
 .PP
 .BR memkind_gbtlb_check_addr
 function looks in the gbtlb hash table to see if the virtual address
 was allocated with GB pages. This feature is used in determining the
 kind for realloc'ing in the hbw_realloc implementation.
 
-.SH NOTE:
+.SH NOTE
 .BR memkind_gbtlb_realloc
 is special, as it allows to use the same
 page that was fetched. Since this implementation of gigabyte pages
@@ -170,6 +171,7 @@ a GB page which has not been completely used, and if the current
 request including previous request does not exceed a GB, no more
 pages are allocated. To summarize, realloc implementation of MEMKIND_GBTLB
 guarantees that gigabyte pages get allocated when its actually needed.
+.PP
 .BR memkind_gbtlb_free
 is a little different from the free of the other kinds. Since the other
 kinds are backed by jemalloc, a free will recycle the pages in recycle
