@@ -82,3 +82,4 @@ test/error_message_tests.cpp
 test/create_tests.cpp
 test/create_tests_helper.c
 test/memkind_default_tests.cpp
+test/policy_tests.cpp
