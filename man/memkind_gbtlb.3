@@ -23,7 +23,7 @@
 .\"
 .TH "MEMKIND_GBTLB" 3 "2014-09-22" "Intel Corporation" "MEMKIND_GBTLB" \" -*- nroff -*-
 .SH "NAME"
-memkind_gbtlb.h \- gigabyte tlb memkind operations.
+memkind_gbtlb.h \- gigabyte TLB memkind operations.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind_gbtlb.h>
@@ -49,7 +49,7 @@ determine the extent that should be passed to
 The reason for using such a simplified implementation instead of
 using a heap is:
 .br
-That a heap manager is intented to mitigate the overhead
+That a heap manager is indented to mitigate the overhead
 of the
 .BR mmap (2)
 system call by calling it less frequently than the allocation requests
@@ -78,7 +78,7 @@ and later kernels, users can allocate gigabyte pages like its done for
 2MB pages. i.e
 .BI "echo no_pages > /proc/sys/vm/nr_hugepages"
 
-.SH IMPLEMENATION
+.SH IMPLEMENTATION
 .BR memkind_gbtlb_malloc ()
 calls
 .BR mmap (2)
@@ -104,7 +104,7 @@ as
 .BR memkind_gbtlb_malloc ()
 since the
 .BR mmap (2)
-system call is guarunteed to return memory of
+system call is guaranteed to return memory of
 .IR size
 bytes which has been zeroed.
 .PP
@@ -122,7 +122,7 @@ can be used to extend or shrink an allocation previously created by
 one of the other interfaces defined here. Implementation reuses
 .BR memkind_gbtlb_malloc
 for allocating the new size of memory if needed.
-There is an optimization in place so that if a partial page was previously allocated then it can be extened to the end of the page transparently. (Details in NOTE)
+There is an optimization in place so that if a partial page was previously allocated then it can be extended to the end of the page transparently. (Details in NOTE)
 .PP
 .BR memkind_gbtlb_free ()
 queries the hash table to find the extent of the memory associated
@@ -138,7 +138,7 @@ appropriately for requesting anonymous gigabyte pages.
 .BR memkind_gbtlb_check_addr ()
 queries the hash table to determine if the address reflects an
 extent previously allocated with one of the interfaces defined
-here, and returned ths exact kind associated with the address.
+here, and returned 03 exact kind associated with the address.
 .PP
 .BR memkind_store()
 implements a hash table with a hash value calculated using the
@@ -146,23 +146,23 @@ implements a hash table with a hash value calculated using the
 SIMD instruction which returns
 .BI crc + CRC-32C(v)
 where v is the virtual address pointer. This hash table is used to
-store the virtual address for retieval and freeing. The table,
+store the virtual address for retrieval and freeing. The table,
 stores the requested size, allocated size, the virtual address pointer
-and the mmaped address pointer information.
+and the mmap'ed address pointer information.
 .PP
 .BR memkind_gbtlb_ceil_size  differentiates between STRICT and REGULAR
-gbtlb implementations n which ceils the size if the requested size is not a modulo
+gbtlb implementations n which ceil the size if the requested size is not a modulo
 of 1GB.
 .PP
 .BR memkind_gbtlb_check_addr
 function looks in the gbtlb hash table to see if the virtual address
 was allocated with GB pages. This feature is used in determining the
-kind for reallocing in the hbw_realloc implementation.
+kind for realloc'ing in the hbw_realloc implementation.
 
 .SH NOTE:
 .BR memkind_gbtlb_realloc
 is special, as it allows to use the same
-page that was fetched. Since this implemetation of gigabyte pages
+page that was fetched. Since this implementation of gigabyte pages
 is not backed by an actual heap manager like other kinds (which
 use jemalloc), each allocation request would fetch a gigabyte page.
 So when a realloc is called on a virtual address pointer backed by
