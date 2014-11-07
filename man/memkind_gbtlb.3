@@ -38,20 +38,35 @@ memkind_gbtlb.h \- gigabyte tlb memkind operations.
 .BI "int memkind_gbtlb_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
 .BI "int memkind_gbtlb_check_addr(struct memkind " "*kind" ", void " "*addr" );
 .SH DESCRIPTION
-Gigabyte tlb implementations for memkind operations.
-Hugetlbfs provides a way to allocate a pool of gigabyte pages from the
-operating system. These routines help to allocate memory using
-gigabyte pages.
+Gigabyte TLB implementations for memkind operations.  These are
+implemented without using the jemalloc library. The implementation is
+a wrapper around
+.BR mmap (2)
+with a hash table for storing the address and extent of the mapped
+memory. The hash table is queried when freeing memory in order to
+determine the extent that should be passed to
+.BR munmap (2)
+The reason for using such a simplified implementation instead of
+using a heap is:
 .br
-The main difference in the implementation of gigabyte pages in comparison
-to the other memkind kinds, is that it is not backed by a heap manager like
-jemalloc. There are two reasons we chose this approach.
-.br
-1. Gigabyte pages are expensive and limited and buffering with a heap manager, will not be helpful.
-.br
-2. Atleast currently, its mostly for power users who understand the advantage of using large gigabyte pages, no strong motivation for making it a general purpose solution.
-.br
-.br
+That a heap manager is intented to mitigate the overhead
+of the
+.BR mmap (2)
+system call by calling it less frequently than the allocation requests
+that is services.  Since there is a large amount of memory being
+allocated with each call in the case where there are gigabyte pages
+backing the allocation, the frequency of requests is assumed to be
+low.  For this reason the traditional requirements of a heap manager
+to be faster than directly mapping memory from the operating system is
+relaxed.
+.PP
+.BR memkind_gbtlb_malloc ()
+calls
+.BR mmap (2)
+with flags that enable gigabyte pages and stores the returned address
+in the internal hash table which can be queried to support the
+.BR memkind_gbtlb_free ()
+operation.
 .TP
 .BR REQUIRED:
 To allocated gigabyte pages from the operating system. This can be done
@@ -62,42 +77,87 @@ on  the kernel commandline. From
 and later kernels, users can allocate gigabyte pages like its done for
 2MB pages. i.e
 .BI "echo no_pages > /proc/sys/vm/nr_hugepages"
-.br
-.br
-.SH IMPLEMENTATION DETAILS:
-The Gigabyte pages are fetched with the help of the
-.BR MAP_HUGE_1GB
-flag of mmap. Since the implementation is not backed by an allocator.
 
-.br
-.br
+.SH IMPLEMENATION
+.BR memkind_gbtlb_malloc ()
+calls
+.BR mmap (2)
+with
+.BR MAP_HUGE_1GB
+mmap flag for allocating gigabyte pages for
+.I size
+bytes and
+.I kind
+can take
+.BI MEMKIND_GBTLB,
+.BI MEMKIND_HBW_GBTLB,
+.BI MEMKIND_HBW_GBTLB_PREFERRED
+and stores the returned address
+in the internal hash table which can be queried to support the
+.BR memkind_gbtlb_free ()
+operation.
+.PP
+.BR memkind_gbtlb_calloc ()
+is exactly the same implementation and supports the same
+.I kind
+as
+.BR memkind_gbtlb_malloc ()
+since the
+.BR mmap (2)
+system call is guarunteed to return memory of
+.IR size
+bytes which has been zeroed.
+.PP
+.BR memkind_gbtlb_posix_memalign ()
+is a similar implementation to
+.BR memkind_gbtlb_malloc ()
+except that the returned address will be aligned as requested, and the
+error code returned will reflect the POSIX standard defined in
+.IR errno.h.
+.BR memkind_gbtlb_posix_memalign
+the return pointer for the allocated memory
+.PP
+.BR memkind_gbtlb_realloc ()
+can be used to extend or shrink an allocation previously created by
+one of the other interfaces defined here. Implementation reuses
+.BR memkind_gbtlb_malloc
+for allocating the new size of memory if needed.
+There is an optimization in place so that if a partial page was previously allocated then it can be extened to the end of the page transparently. (Details in NOTE)
+.PP
+.BR memkind_gbtlb_free ()
+queries the hash table to find the extent of the memory associated
+with the address passed by the user. It then calls
+.BR munmap (2)
+on that extent.
+.PP
+.BR memkind_gbtlb_get_mmap_flags ()
+Sets the
+.I flags
+appropriately for requesting anonymous gigabyte pages.
+.PP
+.BR memkind_gbtlb_check_addr ()
+queries the hash table to determine if the address reflects an
+extent previously allocated with one of the interfaces defined
+here, and returned ths exact kind associated with the address.
+.PP
 .BR memkind_store()
 implements a hash table with a hash value calculated using the
-.BR crc32
+.BI crc32
 SIMD instruction which returns
 .BI crc + CRC-32C(v)
 where v is the virtual address pointer. This hash table is used to
 store the virtual address for retieval and freeing. The table,
 stores the requested size, allocated size, the virtual address pointer
 and the mmaped address pointer information.
-
-.br
-Implementation of all the memkind apis are done by using mmap, mbind
-and allocation information is saved in the hash store.
-
-.br
-Differentiation between STRICT and REGULAR gbtlb implementation are
-done with the help of the
-.BR memkind_gbtlb_ceil_size
-function which ceils the size if the requested size is not a modulo
+.PP
+.BR memkind_gbtlb_ceil_size  differentiates between STRICT and REGULAR
+gbtlb implementations n which ceils the size if the requested size is not a modulo
 of 1GB.
-
-.br
+.PP
 .BR memkind_gbtlb_check_addr
 function looks in the gbtlb hash table to see if the virtual address
 was allocated with GB pages. This feature is used in determining the
 kind for reallocing in the hbw_realloc implementation.
-
 
 .SH NOTE:
 .BR memkind_gbtlb_realloc
@@ -110,15 +170,12 @@ a GB page which has not been completely used, and if the current
 request including previous request does not exceed a GB, no more
 pages are allocated. To summarize, realloc implementation of MEMKIND_GBTLB
 guarantees that gigabyte pages get allocated when its actually needed.
-
-.br
-.br
-
 .BR memkind_gbtlb_free
 is a little different from the free of the other kinds. Since the other
 kinds are backed by jemalloc, a free will recycle the pages in recycle
 pools maintained by jemalloc, in the case of the gbtlb, the pages are actually
 returned to the operating system.
+
 .SH "COPYRIGHT"
 Copyright (C) 2014 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
