@@ -91,7 +91,7 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
 }
 
 void TrialGenerator :: generate_gb_misalign (alloc_api_t api,
-                                             size_t talign)
+        size_t talign)
 {
 
     trial_vec.clear();

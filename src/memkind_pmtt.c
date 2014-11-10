@@ -268,13 +268,13 @@ int main (int argc, char *argv[])
     strncpy(bandwidth_path, MEMKIND_BANDWIDTH_PATH, STRLEN - 1);
 
     if ((argc > 1 &&
-        (strncmp("--help", argv[1], strlen("--help")) == 0 ||
-         strncmp("-h", argv[1], strlen("-h")) == 0)) ||
+         (strncmp("--help", argv[1], strlen("--help")) == 0 ||
+          strncmp("-h", argv[1], strlen("-h")) == 0)) ||
         argc > 3) {
-            fprintf(stdout, "Usage: %s [pmtt_path] [bandwidth_path]\n", argv[0]);
-            fprintf(stdout, "    pmtt_path: path to input pmtt file (default %s)\n", pmtt_path);
-            fprintf(stdout, "    bandwidth_path: path to output bandwidth file (default %s)\n", bandwidth_path);
-            return 0;
+        fprintf(stdout, "Usage: %s [pmtt_path] [bandwidth_path]\n", argv[0]);
+        fprintf(stdout, "    pmtt_path: path to input pmtt file (default %s)\n", pmtt_path);
+        fprintf(stdout, "    bandwidth_path: path to output bandwidth file (default %s)\n", bandwidth_path);
+        return 0;
     }
     if (argc > 1) {
         strncpy(pmtt_path, argv[1], STRLEN - 1);

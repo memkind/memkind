@@ -27,12 +27,14 @@
 #include <gtest/gtest.h>
 
 
-class ErrorMessage: public :: testing :: Test {
+class ErrorMessage: public :: testing :: Test
+{
 protected:
     int num_error_code;
     int *all_error_code;
 
-    void SetUp() {
+    void SetUp()
+    {
         num_error_code = 20;
         all_error_code = new int[num_error_code];
         all_error_code[0] = MEMKIND_ERROR_UNAVAILABLE;
@@ -56,7 +58,8 @@ protected:
         all_error_code[18] = EINVAL;
         all_error_code[19] = ENOMEM;
     }
-    void TearDown() {
+    void TearDown()
+    {
         delete all_error_code;
     }
 };

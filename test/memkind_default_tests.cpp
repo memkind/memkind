@@ -27,7 +27,8 @@
 #include "common.h"
 #include "memkind.h"
 
-class MemkindDefaultTests: public :: testing::Test {
+class MemkindDefaultTests: public :: testing::Test
+{
 
 protected:
     void SetUp()
@@ -41,7 +42,8 @@ protected:
 
 
 
-TEST_F(MemkindDefaultTests, DefaultCalloc) {
+TEST_F(MemkindDefaultTests, DefaultCalloc)
+{
     const size_t size = 1024;
     const size_t num = 1;
     char *default_str = NULL;
@@ -57,7 +59,8 @@ TEST_F(MemkindDefaultTests, DefaultCalloc) {
 }
 
 
-TEST_F(MemkindDefaultTests, DefaultGetSize) {
+TEST_F(MemkindDefaultTests, DefaultGetSize)
+{
     const size_t size = 512;
     char *default_str = NULL;
     int err = 0;
@@ -77,7 +80,8 @@ TEST_F(MemkindDefaultTests, DefaultGetSize) {
 }
 
 
-TEST_F(MemkindDefaultTests, DefaultRealloc) {
+TEST_F(MemkindDefaultTests, DefaultRealloc)
+{
     const size_t size1 = 512;
     const size_t size2 = 1024;
     char *default_str = NULL;

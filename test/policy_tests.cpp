@@ -38,8 +38,8 @@
 class PolicyTest : public :: testing :: Test
 {
 protected:
-  void SetUp(){}
-  void TearDown(){}
+    void SetUp() {}
+    void TearDown() {}
 };
 
 int execute_policy(int set_policy, int size_in_megas)
@@ -52,25 +52,26 @@ int execute_policy(int set_policy, int size_in_megas)
     NUMBER_OF_ELEMENTS = size_in_megas;
     NUMBER_OF_ELEMENTS *= 1024*1024/8;
 
-    // Check if memory is available 
+    // Check if memory is available
     if (hbw_check_available() != 0) {
-      printf("No hbw memory available \n");
-      return -1;
+        printf("No hbw memory available \n");
+        return -1;
     }
 
     //Verify that policy is set to bind
     if (hbw_get_policy() != DESIRED_POLICY) {
         printf("hbw policy default is NOT HBW_POLICY_BIND, changing it...");
-    }else{
+    }
+    else {
         printf("hbw policy default is NOT HBW_POLICY_PREFERRED, changing it...");
     }
 
     //set memory policy to bind
     hbw_set_policy(DESIRED_POLICY);
     if (hbw_get_policy() == DESIRED_POLICY)
-      printf(" done\n");
+        printf(" done\n");
     else
-      printf(" failed\n");
+        printf(" failed\n");
 
     // Make some memory allocations
     printf("Calling hbw_malloc with %ld bytes...",NUMBER_OF_ELEMENTS * sizeof(double));
@@ -99,7 +100,7 @@ int execute_policy(int set_policy, int size_in_megas)
 
     A[0]=0.0;
     uint64_t next_dot = NUMBER_OF_ELEMENTS/10;
-    for (uint64_t i=1;i<NUMBER_OF_ELEMENTS; i++) {
+    for (uint64_t i=1; i<NUMBER_OF_ELEMENTS; i++) {
         A[i] = (double)i;
         sum[i] += A[i-1]+sum[i-1];
         if (i==next_dot) {
@@ -112,7 +113,7 @@ int execute_policy(int set_policy, int size_in_megas)
 
     // Do a realloc to store everythin on a single buffer
     printf("Calling hbw_realloc from %ld to %ld bytes...",
-	   NUMBER_OF_ELEMENTS * sizeof(double), 2*NUMBER_OF_ELEMENTS * sizeof(double));
+           NUMBER_OF_ELEMENTS * sizeof(double), 2*NUMBER_OF_ELEMENTS * sizeof(double));
     fflush(stdout);
 
     double *newA = (double*)hbw_realloc(A, 2*NUMBER_OF_ELEMENTS * sizeof(double));
@@ -129,13 +130,13 @@ int execute_policy(int set_policy, int size_in_megas)
     fflush(stdout);
     A = newA;
     next_dot = NUMBER_OF_ELEMENTS/10;
-    for (uint64_t i=0;i<NUMBER_OF_ELEMENTS; i++) {
+    for (uint64_t i=0; i<NUMBER_OF_ELEMENTS; i++) {
         newA[i+NUMBER_OF_ELEMENTS] = sum[i];
         if (i==next_dot) {
             printf(".");
             fflush(stdout);
             next_dot+=NUMBER_OF_ELEMENTS/10;
-        }       
+        }
     }
     printf("done\n");
 
@@ -151,15 +152,15 @@ int execute_policy(int set_policy, int size_in_megas)
 
     double expected = 0.0;
     next_dot = NUMBER_OF_ELEMENTS/10;
-    for (uint64_t i = 0; i<NUMBER_OF_ELEMENTS;i++) {
+    for (uint64_t i = 0; i<NUMBER_OF_ELEMENTS; i++) {
         double current = (double)i;
         if (A[i]!=current) {
             printf("Value written and reallocated differ from expected value on position A[%ld] (%lf, %lf)\n",
-		   i, A[i], current);
+                   i, A[i], current);
         }
         if (A[i+NUMBER_OF_ELEMENTS]!=expected) {
             printf("Value copied to reallocated region is not what is expected on position A[%ld] (%lf, %lf)\n",
-		   i, A[i+NUMBER_OF_ELEMENTS], expected);
+                   i, A[i+NUMBER_OF_ELEMENTS], expected);
         }
         expected+=current;
         if (i==next_dot) {
@@ -182,20 +183,20 @@ int execute_policy(int set_policy, int size_in_megas)
 
 TEST_F(PolicyTest, change_bind_1MB)
 {
-  EXPECT_EQ(0, execute_policy(HBW_POLICY_BIND, 1));
+    EXPECT_EQ(0, execute_policy(HBW_POLICY_BIND, 1));
 }
 
 TEST_F(PolicyTest, change_preferred_1MB)
 {
-  EXPECT_EQ(0, execute_policy(HBW_POLICY_PREFERRED, 1));
+    EXPECT_EQ(0, execute_policy(HBW_POLICY_PREFERRED, 1));
 }
 
 TEST_F(PolicyTest, change_bind_1GB)
 {
-  EXPECT_EQ(0, execute_policy(HBW_POLICY_BIND, 1024));
+    EXPECT_EQ(0, execute_policy(HBW_POLICY_BIND, 1024));
 }
 
 TEST_F(PolicyTest, change_preferred_1GB)
 {
-  EXPECT_EQ(0, execute_policy(HBW_POLICY_PREFERRED, 1024));
+    EXPECT_EQ(0, execute_policy(HBW_POLICY_PREFERRED, 1024));
 }
