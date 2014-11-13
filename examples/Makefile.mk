@@ -30,15 +30,6 @@ noinst_PROGRAMS += examples/hello_memkind \
                    examples/new_kind \
                    examples/gb_realloc \
                    # end
-TESTS += examples/hello_memkind \
-         examples/hello_hbw \
-         examples/filter_memkind \
-         examples/stream \
-         examples/stream_memkind \
-         examples/new_kind \
-         # end
-
-TESTS_ENVIRONMENT += MEMKIND_HBW_NODES=0 COVFILE=${TEST_OUTDIR}/memkind.cov
 
 examples_hello_memkind_LDADD = libmemkind.la
 examples_hello_hbw_LDADD = libmemkind.la
