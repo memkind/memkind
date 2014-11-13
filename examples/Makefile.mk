@@ -36,7 +36,6 @@ TESTS += examples/hello_memkind \
          examples/stream \
          examples/stream_memkind \
          examples/new_kind \
-         examples/gb_realloc \
          # end
 
 TESTS_ENVIRONMENT += MEMKIND_HBW_NODES=0 COVFILE=${TEST_OUTDIR}/memkind.cov
