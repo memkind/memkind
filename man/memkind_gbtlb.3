@@ -46,11 +46,9 @@ with a hash table for storing the address and extent of the mapped
 memory. The hash table is queried when freeing memory in order to
 determine the extent that should be passed to
 .BR munmap (2)
-The reason for using such a simplified implementation instead of
-using a heap is:
-.br
-That a heap manager is indented to mitigate the overhead
-of the
+The reason for using such a simplified implementation instead of using
+a heap is that a heap manager is intended to mitigate the overhead of
+the
 .BR mmap (2)
 system call by calling it less frequently than the allocation requests
 that is services.  Since there is a large amount of memory being
@@ -67,18 +65,7 @@ with flags that enable gigabyte pages and stores the returned address
 in the internal hash table which can be queried to support the
 .BR memkind_gbtlb_free ()
 operation.
-.TP
-.BR REQUIRED:
-To allocated gigabyte pages from the operating system. This can be done
-by specifying
-.BI "hugepagesz=1G nr_hugepages=N"
-on  the kernel commandline. From
-.BR 3.16
-and later kernels, users can allocate gigabyte pages like its done for
-2MB pages. i.e
-.BI "echo no_pages > /proc/sys/vm/nr_hugepages"
 
-.SH IMPLEMENTATION
 .BR memkind_gbtlb_malloc ()
 calls
 .BR mmap (2)
@@ -120,7 +107,7 @@ the return pointer for the allocated memory
 .BR memkind_gbtlb_realloc ()
 can be used to extend or shrink an allocation previously created by
 one of the other interfaces defined here. Implementation reuses
-.BR memkind_gbtlb_malloc
+.BR memkind_gbtlb_malloc ()
 for allocating the new size of memory if needed.
 There is an optimization in place so that if a partial page was previously allocated then it can be extended to the end of the page transparently. (Details in NOTE)
 .PP
@@ -139,8 +126,8 @@ appropriately for requesting anonymous gigabyte pages.
 queries the hash table to determine if the address reflects an
 extent previously allocated with one of the interfaces defined
 here, and returned 03 exact kind associated with the address.
-.PP
-.BR memkind_store()
+.SH INTERNAL STATIC FUNCTIONS
+.BR memkind_store ()
 implements a hash table with a hash value calculated using the
 .BI crc32
 SIMD instruction which returns
@@ -150,18 +137,18 @@ store the virtual address for retrieval and freeing. The table,
 stores the requested size, allocated size, the virtual address pointer
 and the mmap'ed address pointer information.
 .PP
-.BR memkind_gbtlb_ceil_size
+.BR memkind_gbtlb_ceil_size ()
 differentiates between STRICT and REGULAR gbtlb implementations by
 getting the ceil of the size if the requested size is not a modulo
 of a gigabyte.
 .PP
-.BR memkind_gbtlb_check_addr
+.BR memkind_gbtlb_check_addr ()
 function looks in the gbtlb hash table to see if the virtual address
 was allocated with GB pages. This feature is used in determining the
 kind for realloc'ing in the hbw_realloc implementation.
 
-.SH NOTE
-.BR memkind_gbtlb_realloc
+.SH NOTES
+.BR memkind_gbtlb_realloc ()
 is special, as it allows to use the same
 page that was fetched. Since this implementation of gigabyte pages
 is not backed by an actual heap manager like other kinds (which
@@ -172,11 +159,20 @@ request including previous request does not exceed a GB, no more
 pages are allocated. To summarize, realloc implementation of MEMKIND_GBTLB
 guarantees that gigabyte pages get allocated when its actually needed.
 .PP
-.BR memkind_gbtlb_free
+.BR memkind_gbtlb_free ()
 is a little different from the free of the other kinds. Since the other
 kinds are backed by jemalloc, a free will recycle the pages in recycle
 pools maintained by jemalloc, in the case of the gbtlb, the pages are actually
 returned to the operating system.
+.SH REQUIREMENTS
+To allocated gigabyte pages from the operating system. This can be done
+by specifying
+.BI "hugepagesz=1G nr_hugepages=N"
+on  the kernel commandline. From
+.BR 3.16
+and later kernels, users can allocate gigabyte pages like its done for
+2MB pages. i.e
+.BI "echo no_pages > /proc/sys/vm/nr_hugepages"
 
 .SH "COPYRIGHT"
 Copyright (C) 2014 Intel Corporation. All rights reserved.
