@@ -3,24 +3,21 @@ Backlog
 
 Testing
 -------
-    * Major gaps in code coverage exist in memkind_pmtt.c and the bind
-      mode for the hbw interface.
-
     * Test with more BIOS configurations.
 
     * Need to test GB pages on a range of kernel versions.
 
     * More robust tests for out of memory and spill over conditions.
 
-    * Need fast running unit tests that have no external requirements
-      and provide decent code coverage.
+    * Need to more carefully split out tests based on requirements,
+      and run those cases supported by the system.  Examples include
+      kernel version greater than 3.11, sufficient 2 MB pages in
+      hugetlbfs, and support for 1 GB pages.
 
     * Need to expand performance testing significantly.
 
 Documentation
 -------------
-    * Complete gbtlb man page.
-
     * Document the memkind_ops structure in a man page.
 
     * Better documentation for how NULL pointers in ops structure are
@@ -33,7 +30,26 @@ Features
     * Add gcc malloc hooks for hbwmalloc interface.
       http://www.gnu.org/software/libc/manual/html_node/Hooks-for-Malloc.html
 
+    * Consider redefining the meaning of memkind_free(0, ptr) so that
+      it is calls memkind_get_kind_for_free() internally.
+
+    * Extend huge page support using libhugetlbfs.
+
     * Support for non-standard x86 page sizes like 128 MB.
+
+    * Implement the use of thread local storage for arena index.  If a
+      thread is pinned, then this can be used to avoid calling
+      sched_getcpu() more than once.  It would also benefit cases
+      where thread location is unimportant, and the arena index can
+      be derived from a hash of the thread ID.
+
+    * Add support in jemalloc and memkind for modifying the file
+      descriptor and offset values passed to mmap() to enable file
+      backed memory allocations.
+
+    * Consider overriding the je_chunk_alloc_mmap() routine rather
+      than modifying it. This would be the the entry point for a
+      single memkind callback.
 
     * Support for verbose mode by setting environment variable which
       will log debug diagnostic information.
@@ -43,8 +59,11 @@ Features
 
 Issues
 ------
-    * Error message when starting memkind service when it is already
+    * Error message when starting memkind service after it is already
       started is very cryptic.
 
-    * Calling hbw_realloc() on a vector that was originally allocated
-      with pages from hugetlbfs is not handled properly.
+    * The supporting jemalloc library is a fork of version 3.5.1.
+      Need to rebase changes for supporting memkind to the head of
+      jeamlloc's dev branch.  Since version 3.6.0 uses arenas for huge
+      allocations, this will simplify the modifications required to
+      enable memkind.
