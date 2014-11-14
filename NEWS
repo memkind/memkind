@@ -1,0 +1,12 @@
+INITIAL RELEASE
+===============
+
+Initial public release of memkind and jemalloc libraries to github at
+URL below.
+
+    https://github.com/memkind
+
+Code coverage on a fully enabled system are at 100% functional and 71%
+decision.  All tests are passing.  Static analysis by klocwork shows
+zero critical bugs exist.
+

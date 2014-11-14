@@ -1,0 +1,57 @@
+.\"
+.\" Copyright (C) 2014 Intel Corporation.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\" 1. Redistributions of source code must retain the above copyright notice(s),
+.\"    this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright notice(s),
+.\"    this list of conditions and the following disclaimer in the documentation
+.\"    and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY EXPRESS
+.\" OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+.\" EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+.\" LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+.\" PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+.\" LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+.\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.TH "MEMKIND_HUGETLB" 3 "2014-09-22" "Intel Corporation" "MEMKIND_HUGETLB" \" -*- nroff -*-
+.SH "NAME"
+memkind_hugetlb.h \- hugetlb memory memkind operations.
+.SH "SYNOPSIS"
+.nf
+.B #include <memkind_hugetlb.h>
+.sp
+.B Link with -ljemalloc -lnuma -lpthread -lmemkind
+.sp
+.BI "int memkind_hugetlb_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
+.br
+.SH DESCRIPTION
+.PP
+The hugetlb memory memkind operations enable memory kinds which use
+the Linux hugetlbfs file system.  For more information about the
+hugetlbfs see link below.
+.br
+.IR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+.PP
+.BR memkind_hugetlb_get_mmap_flags ()
+Sets the flags for the
+.BR mmap ()
+system call such that the hugetlbfs is utilized for allocations.
+.SH "COPYRIGHT"
+Copyright (C) 2014 Intel Corporation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3),
+.BR memkind_arena (3),
+.BR memkind_default (3),
+.BR memkind_gbtlb (3),
+.BR memkind_hbw (3),
+.BR jemalloc (3),
+.BR mbind (2),
+.BR mmap (2)

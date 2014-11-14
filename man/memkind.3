@@ -1,0 +1,711 @@
+.\"
+.\" Copyright (C) 2014 Intel Corporation.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\" 1. Redistributions of source code must retain the above copyright notice(s),
+.\"    this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright notice(s),
+.\"    this list of conditions and the following disclaimer in the documentation
+.\"    and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY EXPRESS
+.\" OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+.\" EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+.\" LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+.\" PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+.\" LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+.\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.TH "MEMKIND" 3 "2014-09-22" "Intel Corporation" "MEMKIND" \" -*- nroff -*-
+.SH "NAME"
+memkind \- Heap manager that enables allocations to memory with different properties.
+.SH "SYNOPSIS"
+.nf
+.B #include <memkind.h>
+.sp
+.B Link with -ljemalloc -lnuma -lpthread -lmemkind
+.sp
+.BI "void memkind_error_message(int " "err" ", char " "*msg" ", size_t " "size" );
+.sp
+.B "HEAP MANAGEMENT:"
+.br
+.BI "void *memkind_malloc(memkind_t " "kind" ", size_t " "size" );
+.br
+.BI "void *memkind_calloc(memkind_t " "kind" ", size_t " "num" ", size_t " "size" );
+.br
+.BI "void *memkind_realloc(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" );
+.br
+.BI "int memkind_posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.br
+.BI "void memkind_free(memkind_t " "kind" ", void " "*ptr" );
+.br
+.BI "int memkind_get_kind_for_free(void " "*ptr" ", memkind_t " "*kind" );
+.br
+.sp
+.B "ALLOCATOR CALLBACK FUNCTIONS:"
+.br
+.BI "int memkind_partition_check_available(int " "partition" );
+.br
+.BI "int memkind_partition_get_mmap_flags(int " "partition" ", int " "*flags" );
+.br
+.BI "int memkind_partition_mbind(int " "partition" ", void " "*addr" ", size_t " "len" );
+.sp
+.B "KIND MANAGMENT:"
+.br
+.BI "int memkind_create(const struct memkind_ops " "*ops" ", const char " "*name " ", memkind_t " "*kind" );
+.br
+.BI "int memkind_finalize(void);"
+.br
+.BI "int memkind_get_num_kind(int " "*num_kind" );
+.br
+.BI "int memkind_get_kind_by_partition(int " "partition" ", memkind_t " "*kind" );
+.br
+.BI "int memkind_get_kind_by_name(const char " "*name" ", memkind_t " "*kind" );
+.br
+.BI "int memkind_get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
+.br
+.BI "int memkind_check_available(memkind_t " "kind" );
+.br
+.SH "DESCRIPTION"
+.PP
+.BR memkind_error_message ()
+converts an error number
+.I err
+returned by a member of the memkind
+interface to an error message
+.I msg
+where the maximium size of the message is passed by the
+.I size
+parameter.
+
+.B "HEAP MANAGMENT:"
+.br
+The functions described in this section define a heap manager with an
+interface modeled on the ISO C standard API's, except that the user
+must specify the
+.I kind
+of memory with the first arguement to each function.  See the
+.B KINDS
+section below for a full description of the implemented kinds.
+.PP
+.BR memkind_malloc ()
+allocates
+.I size
+bytes of uninitialized memory of the specified
+.IR "kind" .
+The allocated space is suitably aligned (after possible pointer
+coercion) for storage of any type of object.  If
+.I size
+is 0, then
+.BR memkind_malloc ()
+returns  NULL.
+.PP
+.BR memkind_calloc ()
+allocates space for
+.I nmemb
+objects each
+.I size
+bytes in length in memory of the specified
+.IR "kind" .
+The result is identical to calling
+.BR memkind_malloc ()
+with an argument of
+.IR nmemb * size ,
+with the exception that the allocated memory is explicitly
+initialized to zero bytes.
+If
+.I nmemb
+or
+.I size
+is 0, then
+.BR memkind_calloc ()
+returns NULL.
+.PP
+.BR memkind_realloc ()
+changes the size of the previously allocated memory referenced by
+.I ptr
+to
+.I size
+bytes of the specified
+.IR "kind" .
+The contents of the memory are unchanged up to the lesser of
+the new and old sizes. If the new size is larger, the contents of the
+newly allocated portion of the memory are undefined. Upon success, the
+memory referenced by
+.I ptr
+is freed and a pointer to the newly allocated high bandwidth memory is
+returned.
+
+.BR Note:
+.BR memkind_realloc ()
+may move the memory allocation, resulting in a different return value
+than
+.IR "ptr" .
+
+If
+.I ptr
+is NULL, the
+.BR memkind_realloc ()
+function behaves identically to
+.BR memkind_malloc ()
+for the specified size.
+The address
+.IR "ptr" ,
+if not NULL, must have been returned by a previous call to
+.BR memkind_malloc (),
+.BR memkind_calloc (),
+.BR memkind_realloc (),
+or
+.BR memkind_posix_memalign ()
+with the same
+.I kind
+as specified to the call to
+.BR memkind_realloc ().
+Otherwise, if
+.I memkind_free(kind, ptr)
+was called before, undefined behavior occurs.
+.PP
+.BR memkind_posix_memalign ()
+allocates
+.I size
+bytes of memory of a specified
+.I kind
+such that the allocation's base address
+is an even multiple of
+.IR "alignment" ,
+and returns the allocation in the value pointed to by
+.IR "memptr" .
+The requested
+.I alignment
+must be a power of 2 at least as large as
+.IR "sizeof(void *)" .
+If
+.I size
+is 0, then
+.BR memkind_posix_memalign ()
+returns NULL.
+.PP
+.BR memkind_free ()
+causes the allocated memory referenced by
+.I ptr
+to be made available for future allocations. This pointer
+must have been returned by a previous call to
+.BR memkind_malloc (),
+.BR memkind_calloc (),
+.BR memkind_realloc (),
+or
+.BR memkind_posix_memalign ().
+Otherwise, if
+.I memkind_free(kind, ptr)
+was already called before, undefined behavior occurs.
+If
+.I ptr
+is  NULL, no operation is performed.
+For all currently supported kinds the value of
+.B MEMKIND_DEFAULT
+or 0 can be given for the
+.IR kind .
+In the future there may be kinds introduced that will require that the
+.I kind
+specified to
+.BR memkind_free ()
+match the value given when the memory to be freed was allocated.
+.PP
+.BR memkind_get_kind_for_free ()
+sets the parameter
+.I kind
+to a value appropriate for passing to
+.BR memkind_free ()
+for the address
+.IR ptr .
+This method can be used in a case where the
+.I kind
+is unknown in the context of the call to
+.BR memkind_free ().
+.sp
+.B "ALLOCATOR CALLBACK FUNCTIONS:"
+.br
+This section describes the memkind interface which is used internally
+by the heap manager interface.  For these API's the kind is determined
+by the partition index.  This enables the underlying heap manager to
+call routines with standard type arguments, and allows the heap
+manager implementation to be independent of the the specifics of the
+.I memkind_t
+implementation.
+.PP
+.BR memkind_partition_check_available ()
+returns 0 if there is support on the system for the kind
+associated with the
+.I partition
+and an error code otherwise.
+.PP
+.BR memkind_partition_get_mmap_flags ()
+sets
+.I flags
+to the value appropriate for the kind associated with the
+.I partition
+when calling
+.BR mmap (2).
+.PP
+.BR memkind_partition_mbind ()
+is a wrapper around
+.BR mbind (2)
+that simplifies the interface so that the user specifies the
+.I partition
+associated with the kind of memory, the start address
+.I addr
+to be mapped, and the number of bytes
+.I len
+from that address to be mapped. This call is made after
+.BR mmap (2)
+by the heap manager on the memory that was mapped.
+.sp
+.B "KIND MANAGEMENT:"
+.br
+There are built-in kinds that are always available, and these are enumerated in the
+.B KINDS
+section.  The user can also create their own kinds of memory.  This
+section describes the API's that enable the tracking of the different
+kinds of memory and determining their properties.
+.PP
+.BR memkind_create ()
+is used to create a new kind of memory.  It takes as input a pointer
+to a vtable called
+.I ops
+that determines the operations that define the kind of memory.  These
+operations can be taken from one of the memkind built-in implementations
+defined in the memkind headers, or it can be user implemented.  The requirements
+for each operation is defined in the
+.B MEMKIND OPERATIONS
+section.  See the
+.B SEE ALSO
+section for the list of memkind header files that implement the built-in
+operations: each header has a man page.
+.PP
+.BR memkind_finalize ()
+releases all resources associated with the memkind library including
+the resouces used by all of the kinds that were created, but it does
+not free memory allocated with the
+.B HEAP MANAGEMENT
+interface.  This must be the last call to the memkind library before
+application termination, but it can be called more than once.
+.PP
+.BR memkind_get_num_kind ()
+sets
+.I num_kind
+to the number of available kinds of memory.  This accounts for
+the built-in static kinds and any dynamically created kinds.
+Since there is a one-to-one mapping between partitions and kinds,
+this is also the number of partitions.
+.PP
+.BR memkind_get_kind_by_partition ()
+sets
+.I kind
+to the memory kind associated with the
+.I partition
+index which must be in the range [0,
+.IR "num_kind" " - 1]"
+where num_kind can be retrieved with the
+.BR memkind_get_num_kind ()
+function.
+.PP
+.BR memkind_get_kind_by_name ()
+sets
+.I kind
+to the memory kind associated with the
+.I name
+string specified.  All of the built-in kinds have name strings that are the lower-case version of name
+given in the
+.B KINDS
+section (for example: MEMKIND_DEFAULT has
+.I name
+"memkind_default")
+.PP
+.BR memkind_get_size ()
+sets
+.I total
+to the number of bytes on the system which can be allocated with the specified
+.IR kind ,
+and sets
+.I free
+to the number of unallocated bytes available of memory with the
+specified
+.IR kind.
+
+.BR Note:
+These numbers may be specific to the CPU of the calling
+thread if the
+.I kind
+binds memory to NUMA nodes associated with the CPU.
+.PP
+.BR memkind_check_available ()
+Returns a zero if the specified
+.I kind
+is available or an error code from the
+.B ERRORS
+section if it is not.
+.sp
+.B "MEMKIND OPERATIONS:"
+.br
+The
+.I memkind_ops
+structure is a vtable that defines the operations which determine the
+kind of memory.  This design pattern is modeled after the "mix-in"
+pattern used in the Linux kernel to enable some of the features of an
+object oriented language in C.  This section defines the inputs,
+outputs and responsiblities of each function pointer enumerated in the
+.I memkind_ops
+structure.  Each of these methods takes a
+.B memkind_t
+argument as its first parameter which shall be self referencing.  In this
+documentation the function pointers in the
+.I memkind_ops
+structure will be prepended with
+.RB """" ops. """"
+and should be considered the operation associated with the
+.IR kind .
+.PP
+.BI "int ops.create(memkind_t " "kind" ", const struct memkind_ops " "*ops" ", const char " "*name" );
+.br
+shall instantiate all of the dynamic resources associated with the
+.IR kind .
+It takes a pointer to the vtable structure
+.I ops
+which has a function pointer for each of methods defined in this section
+of the man page.  If any methods are unnessary to the implementation of
+the
+.I kind
+these function pointers shall be set to
+.BR NULL .
+The
+.I name
+string is an input parameter that identifies the kind of memory so
+that it can be fetched with the
+.BR memkind_get_kind_by_name ()
+function.  Typically this method is either a pointer to the function
+.BR memkind_default_create ()
+defined in
+.IR <memkind_default.h> ,
+or a function that calls
+.BR memkind_default_create ()
+before performing other setup.
+.PP
+.BI "int ops.destroy(memkind_t " "kind" );
+.br
+shall free all of the dynamic resources reserved by the
+.BR ops.create ()
+method.  If no dynamic resources were explicitly allocated in the
+.IR ops.create ()
+method, this pointer can be set to
+.BR NULL .
+.PP
+.BI "void *ops.malloc(memkind_t " "kind" ", size_t " "size" );
+.br
+shall implement
+.BR memkind_malloc (),
+as described above.
+.PP
+.BI "void *ops.calloc(memkind_t " "kind" ", size_t " "num" ", size_t " "size" );
+.br
+shall implement
+.BR memkind_calloc (),
+as described above.
+.PP
+.BI "int ops.posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.br
+shall implement
+.BR memkind_posix_memalign (),
+as described above.
+.PP
+.BI "void *ops.realloc(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" );
+.br
+shall implement
+.BR memkind_realloc (),
+as described above.
+.PP
+.BI "void ops.free(memkind_t " "kind" ", void " "*ptr" );
+.br
+shall implement
+.BR memkind_free (),
+as described above.
+.PP
+.BI "int ops.mbind(memkind_t " "kind" ", void " "*ptr" ", size_t " "len" );
+.br
+shall wrap the
+.BR mbind ()
+system call and pass through
+the start address
+.I ptr
+to be mapped, and the number of bytes
+.I len
+from that address to be mapped.
+.PP
+.BI "int ops.get_mmap_flags(memkind_t " "kind" ", int " "*flags" );
+.br
+shall set
+.I flags
+to a value appropriate for passing to the
+.IR mmap ()
+system call for the
+.IR kind .
+.PP
+.BI "int ops.get_mbind_mode(memkind_t " "kind" ", int " "*mode" );
+.br
+shall set
+.I mode
+to a value appropriate for passing to the
+.IR mmap ()
+system call for the
+.IR kind .
+.PP
+.BI "int ops.get_mbind_nodemask(memkind_t " "kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
+.br
+shall set the
+.I nodemask
+of length
+.I maxnode
+bits to a value appropriate for passing to the
+.IR mbind ()
+system call for the
+.IR kind .
+.PP
+.BI "int ops.get_arena(memkind_t " "kind" ", unsigned int " "*arena" );
+.br
+shall set
+.I arena
+to an index appropriate for the
+.I kind
+and CPU when using the jemalloc arena allocation through the
+.BR je_mallocx ()
+API.
+.PP
+.BI "int ops.get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
+.br
+shall implement
+.BR memkind_get_size (),
+as described above.
+.PP
+.BI "int ops.check_available(memkind_t " "kind" );
+.br
+shall return 0 if the
+.I kind
+is available on the system, and an error code if not.
+.PP
+.BI "int ops.check_alignment(memkind_t " "kind" ", size_t " "alignment" );
+.br
+shall return 0 if the
+.I alignment
+is appropriate for the
+.I kind
+and an error code if not.
+.PP
+.BI "int ops.check_addr(memkind_t " "kind" ", void " "*addr" );
+.br
+shall return 0 if the
+.I addr
+can be freed with the specified
+.I kind
+and an error code otherwise.  If the memory cannot be freed with
+.BR je_free (),
+then at least one of the instantiated kinds must return 0 to enable
+freeing.
+.PP
+.BI "void ops.init_once(void);"
+.br
+this function pointer shall be set to NULL for any kind that is not
+built-in.  The method is used to allocate dynamic resources for
+built-in kinds without requiring and initialization routine.
+.SH "RETURN VALUE"
+.BR memkind_calloc (),
+.BR memkind_malloc (),
+and
+.BR memkind_realloc (),
+return the pointer to the allocated memory, or NULL if the request fails.
+.BR memkind_free ()
+and
+.BR memkind_error_message ()
+do not have return values.
+All other memkind API's return 0 upon
+success, and an error code defined in the ERRORS section upon failure.
+The memkind library avoids setting
+.I errno
+directly, but calls to underlying libraries and system calls may set
+.IR errno .
+.SH "KINDS"
+The available kinds of memory
+.TP
+.B MEMKIND_DEFAULT
+Default allocation using standard memory and default page size.
+.TP
+.B MEMKIND_HUGETLB
+Allocate from standard memory using huge pages.
+.TP
+.B MEMKIND_GBTLB
+Allocate from standard memory using giga byte huge pages.
+.TP
+.B MEMKIND_HBW
+Allocate from high bandwidth memory NUMA nodes as defined by the PMTT
+table, or the environment variable
+.BR "MEMKIND_HBW_NODES" .
+If there is not enough high bandwidth memory to satisfy the request
+.I errno
+is set to ENOMEM and the allocated poitner is set to NULL.
+.TP
+.B MEMKIND_HBW_HUGETLB
+Same as
+.B MEMKIND_HBW
+except the allocation is backed by huge pages.
+.TP
+.B MEMKIND_HBW_PREFERRED
+Same as
+.B MEMKIND_HBW
+except that if there is not enough high bandwidth memory to satisfy
+the request, the allocation will fall back on standard memory.
+.TP
+.B MEMKIND_HBW_PREFERRED_HUGETLB
+Same as
+.B MEMKIND_HBW_PREFERRED
+except the allocation is backed by huge pages.
+.TP
+.B MEMKIND_HBW_GBTLB
+Same as
+.B MEMKIND_HBW
+except the allocation is backed by one gigabyte huge pages.  Note that
+.I size
+can take on any value, but full gigabyte pages will allocated for each
+request, so remainder of the last page will be wasted. A good use case
+scenario is to grow a buffer in the course of an application with reallocs.
+In this case, if there is enough memory available within in already allocated
+gigabyte page, newer pages are not fetched. This is demonstrated in the
+examples directory with gb_realloc_example.c
+.TP
+.B MEMKIND_HBW_PREFERRED_GBTLB
+Same as
+.B MEMKIND_HBW_GBTLB
+except that if there is not enough high bandwidth memory to satisfy
+the request, the allocation will fall back on standard memory.
+.SH "ERRORS"
+.TP
+.BR memkind_posix_memalign ()
+returns the one of the POSIX standard error codes
+.B EINVAL
+or
+.B ENOMEM
+as defined in
+.I <errno.h>
+if an error occurs (these have positive values).
+If the
+.I alignment
+parameter is not a power of two, or is not a multiple of
+.IR "sizoeof(void *)" ,
+then
+.B EINVAL
+is returned.  If there is insufficient memory to satisfy the request then
+.B ENOMEM
+is returned.
+.PP
+All functions other than
+.BR memkind_posix_memalign ()
+which have an integer return type return one of the negative error
+codes as defined in
+.I <memkind.h>
+and described below.
+.TP
+.B MEMKIND_ERROR_UNAVAILABLE
+Requested memory kind is not available
+.TP
+.B MEMKIND_ERROR_MBIND
+Call to
+.BR mbind ()
+failed
+.TP
+.B MEMKIND_ERROR_MMAP
+Call to
+.BR mmap ()
+failed
+.TP
+.B MEMKIND_ERROR_MEMALIGN
+Call to
+.BR je_posix_memalign ()
+failed
+.TP
+.B MEMKIND_ERROR_MALLCTL
+Call to
+.BR je_mallctl ()
+failed
+.TP
+.B MEMKIND_ERROR_MALLOC
+Call to
+.BR je_malloc ()
+failed
+.TP
+.B MEMKIND_ERROR_GETCPU
+Call to
+.BR sched_getcpu ()
+returned out of range
+.TP
+.B MEMKIND_ERROR_PMTT
+Unable to find parsed PMTT table or
+invalid PMTT table entries in
+.I /etc/memkind/node-bandwidth
+.TP
+.B MEMKIND_ERROR_TIEDISTANCE
+Two NUMA memory nodes are equidistant from target cpu node
+.TP
+.B MEMKIND_ERROR_ALIGNMENT
+Alignment must be a power of two and larger than sizeof(void *)
+.TP
+.B MEMKIND_ERROR_ALLOCM
+Call to
+.BR je_allocm ()
+failed
+.TP
+.B MEMKIND_ERROR_ENVIRON
+Error parsing environment variable (MEMKIND_*)
+.TP
+.B MEMKIND_ERROR_INVALID
+Invalid input arguments to memkind routine
+.SH "FILES"
+.TP
+.I /etc/memkind/node-bandwidth
+File that contains the bandwidth values for each NUMA node.
+.TP
+.I /etc/rc/d/init.d/memkind
+Initialization script that creates the node-bandwidth file by calling
+the PMTT table parser.
+.TP
+.I /usr/sbin/memkind-pmtt
+The PMTT table parser.
+.SH "ENVIRONMENT"
+.TP
+.B MEMKIND_HBW_NODES
+This environment varaible is a comma separated list of NUMA nodes that
+are treated as high bandwidth. This environment variable should be set
+if the PMTT file is not present, or to override the PMTT table if it
+is present. Uses the
+.I libnuma
+routine
+.BR numa_parse_nodestring ()
+for parsing, so the syntax described in the
+.BR numa (3)
+man page for this routine applies: e.g 1-3,5 is a valid setting.
+.SH "COPYRIGHT"
+Copyright (C) 2014 Intel Corporation. All rights reserved.
+.SH "SEE ALSO"
+.BR malloc (3),
+.BR numa (3),
+.BR numactl (8),
+.BR mbind (2),
+.BR mmap (2),
+.BR move_pages (2),
+.BR jemalloc (3),
+.BR memkind_default (3),
+.BR memkind_arena (3),
+.BR memkind_hbw (3),
+.BR memkind_hugetlb (3),
+.BR memkind_gbtlb (3)

@@ -1,0 +1,91 @@
+.\"
+.\" Copyright (C) 2014 Intel Corporation.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\" 1. Redistributions of source code must retain the above copyright notice(s),
+.\"    this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright notice(s),
+.\"    this list of conditions and the following disclaimer in the documentation
+.\"    and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY EXPRESS
+.\" OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+.\" EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+.\" LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+.\" PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+.\" LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+.\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.TH "MEMKIND_HBW" 3 "2014-09-22" "Intel Corporation" "MEMKIND_HBW" \" -*- nroff -*-
+.SH "NAME"
+memkind_hbw.h \- high bandwidth memory memkind operations.
+.SH "SYNOPSIS"
+.nf
+.B #include <memkind_hbw.h>
+.sp
+.B Link with -ljemalloc -lnuma -lpthread -lmemkind
+.sp
+.BI "int memkind_hbw_check_available(struct memkind " "*kind" );
+.br
+.BI "int memkind_hbw_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
+.br
+.SH DESCRIPTION
+.PP
+High bandwidth memory memkind operations.  The ACPICA specification
+provides the PMTT table which defines a bandwidth value for each
+NUMA node.  This table is used to idenify the set of NUMA nodes
+that share the highest bandwidth value.  When the memkind library
+is installed the application
+.I /usr/sbin/memkind-pmtt
+is executed which creates the file identified by the constant
+.BR MEMKIND_BANDWIDTH_PATH .
+.PP
+.BR memkind_hbw_check_available ()
+returns zero if the PMTT table defines heterogeneous NUMA node
+bandwidths.   Returns
+.B MEMKIND_UNAVAILABLE
+if the PMTT table does not exist, or exists and defines uniform NUMA
+node bandwidth values.  The PMTT table can be overridden by the
+environment variable
+.B MEMKIND_HBW_NODES
+as described in the
+.BR memkind (3)
+man page.
+.PP
+.BR memkind_hbw_get_mbind_nodemask ()
+sets the
+.I nodemask
+bit to one that corresponds to the high bandwidth NUMA node that has
+the closest NUMA distance to the CPU of the calling process and sets
+all other bits up to
+.I maxnode
+to zero.
+The
+.I nodemask
+can be used in conjuction with the
+.BR mbind (2)
+system call.
+.TP
+.B MEMKIND_BANDWIDTH_PATH
+Constant string that contains path to binary file that lists the
+bandwidths of all NUMA nodes.  Flat binary file containing
+.B NUMA_NUM_NODES
+integers of type
+.BR int ,
+where the value is set to zero for undetermined nodes.
+.SH "COPYRIGHT"
+Copyright (C) 2014 Intel Corporation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3),
+.BR memkind_arena (3),
+.BR memkind_default (3),
+.BR memkind_gbtlb (3),
+.BR memkind_hugetlb (3),
+.BR jemalloc (3),
+.BR mbind (2),
+.BR mmap (2)
