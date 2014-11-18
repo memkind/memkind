@@ -29,8 +29,6 @@ extern "C" {
 #endif
 
 #include "memkind.h"
-#include "memkind_default.h"
-#include "memkind_hbw.h"
 
 void *memkind_gbtlb_malloc(struct memkind *kind, size_t size);
 void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size);

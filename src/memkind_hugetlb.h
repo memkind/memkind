@@ -29,8 +29,6 @@ extern "C" {
 #endif
 
 #include "memkind.h"
-#include "memkind_default.h"
-#include "memkind_arena.h"
 
 int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags);
 void memkind_hugetlb_init_once(void);

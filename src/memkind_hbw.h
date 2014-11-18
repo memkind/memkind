@@ -29,9 +29,6 @@ extern "C" {
 #endif
 
 #include "memkind.h"
-#include "memkind_default.h"
-#include "memkind_hugetlb.h"
-#include "memkind_arena.h"
 
 static const char * const MEMKIND_BANDWIDTH_PATH = "/etc/memkind/node-bandwidth";
 

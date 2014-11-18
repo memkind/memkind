@@ -37,6 +37,8 @@
 #endif
 
 #include "memkind_gbtlb.h"
+#include "memkind_default.h"
+#include "memkind_hbw.h"
 
 const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .create = memkind_default_create,

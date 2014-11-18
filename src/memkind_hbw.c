@@ -38,6 +38,9 @@
 #include <sched.h>
 
 #include "memkind_hbw.h"
+#include "memkind_default.h"
+#include "memkind_hugetlb.h"
+#include "memkind_arena.h"
 
 const struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
