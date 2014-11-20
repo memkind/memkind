@@ -15,7 +15,7 @@ release = 1
 src = $(shell cat MANIFEST)
 
 topdir = $(HOME)/rpmbuild
-rpm = $(topdir)/RPMS/$(arch)/$(name)-$(version)-$(release).$(arch).rpm
+rpm = $(topdir)/RPMS/$(arch)/$(name)-devel-$(version)-$(release).$(arch).rpm
 srpm = $(topdir)/SRPMS/$(name)-$(version)-$(release).src.rpm
 specfile = $(topdir)/SPECS/$(name)-$(version).spec
 source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
@@ -27,15 +27,13 @@ all: $(rpm)
 
 $(topdir)/.setup:
 	mkdir -p $(topdir)/SOURCES
-	mkdir -p $(topdir)/RPMS/$(arch)
-	mkdir -p $(topdir)/SRPMS
 	mkdir -p $(topdir)/SPECS
 	touch $(topdir)/.setup
 
 $(rpm): $(specfile) $(source_tar)
 	rpmbuild $(rpmbuild_flags) $(specfile) -ba
 
-$(source_tar): $(topdir)/.setup $(specfile) $(src) MANIFEST
+$(source_tar): $(topdir)/.setup $(src) MANIFEST
 	tar czvf $@ -T MANIFEST --transform="s|^|$(name)-$(version)/|"
 	rpmbuild $(rpmbuild_flags) $(specfile) -bp
 
