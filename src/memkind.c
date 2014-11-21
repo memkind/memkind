@@ -339,48 +339,24 @@ int memkind_get_kind_by_name(const char *name, struct memkind **kind)
     return err;
 }
 
-int memkind_partition_check_available(int partition)
+void *memkind_partition_mmap(int partition, void *addr, size_t size)
 {
-    struct memkind *kind;
     int err;
+    void *result = MAP_FAILED;
 
     err = memkind_get_kind_by_partition(partition, &kind);
     if (!err) {
         err = memkind_check_available(kind);
     }
-    return err;
-}
-
-int memkind_partition_get_mmap_flags(int partition, int *flags)
-{
-    struct memkind *kind;
-    int err = 0;
-
-    err = memkind_get_kind_by_partition(partition, &kind);
     if (!err) {
-        if (kind->ops->get_mmap_flags) {
-            err = kind->ops->get_mmap_flags(kind, flags);
+        if (kind->ops->mmap) {
+            result = kind->ops->mmap(kind, addr, size);
         }
         else {
-            err = memkind_default_get_mmap_flags(kind, flags);
+            result = memkind_default_mmap(kind, addr, size);
         }
     }
-    else {
-        *flags = 0;
-    }
-    return err;
-}
-
-int memkind_partition_mbind(int partition, void *addr, size_t size)
-{
-    struct memkind *kind;
-    int err = 0;
-
-    err = memkind_get_kind_by_partition(partition, &kind);
-    if (!err && kind->ops->mbind) {
-        err = kind->ops->mbind(kind, addr, size);
-    }
-    return err;
+    return result;
 }
 
 int memkind_check_available(struct memkind *kind)

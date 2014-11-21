@@ -90,8 +90,10 @@ struct memkind_ops {
     int (* posix_memalign)(struct memkind *kind, void **memptr, size_t alignment, size_t size);
     void *(* realloc)(struct memkind *kind, void *ptr, size_t size);
     void (* free)(struct memkind *kind, void *ptr);
-    int (* mbind)(struct memkind *kind, void *ptr, size_t len);
+    int (* mmap)(struct memkind *kind, void **memptr, size_t size, size_t alignment, bool *zero);
+    int (* mbind)(struct memkind *kind, void *ptr, size_t size);
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
+    int (* get_mmap_file)(struct memkind *kind, size_t size, int *fd, off_t *offset);
     int (* get_mbind_mode)(struct memkind *kind, int *mode);
     int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
     int (* get_arena)(struct memkind *kind, unsigned int *arena);
@@ -162,16 +164,8 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size);
 /* Free memory allocated with the memkind API */
 void memkind_free(memkind_t kind, void *ptr);
 
-/* ALLOCATOR CALLBACK FUNCTIONS */
-
-/* returns 0 if memory kind associated with the partition is availble else returns error code */
-int memkind_partition_check_available(int partition);
-
-/* get flags for call to mmap for the memory kind associated with the partition */
-int memkind_partition_get_mmap_flags(int partition, int *flags);
-
-/* mbind to the nearest numa node of the memory kind associated with the partition */
-int memkind_partition_mbind(int partition, void *addr, size_t len);
+/* ALLOCATOR CALLBACK FUNCTION */
+void *memkind_partition_mmap(int partition, void *addr, size_t size);
 
 #ifdef __cplusplus
 }

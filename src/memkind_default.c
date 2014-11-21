@@ -115,7 +115,38 @@ int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free)
     return err;
 }
 
-int memkind_default_mbind(struct memkind *kind, void *ptr, size_t len)
+void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
+{
+    void *result = MAP_FAILED;
+    int err = 0;
+    int flags;
+    int fd;
+    off_t offset;
+
+    if (kind->ops->get_mmap_flags) {
+        err = kind->ops->get_mmap_flags(kind, flags);
+    }
+    else {
+        err = memkind_default_get_mmap_flags(kind, flags);
+    }
+    if (!err) {
+        if (kind->ops->get_mmap_file) {
+            err = kind->ops->get_mmap_file(kind, &fd, &offset);
+        }
+        else {
+            err = memkind_default_get_mmap_file(kind, &fd, &offset);
+        }
+    }
+    if (!err) {
+        result = mmap(addr, size, PROT_READ | PROT_WRITE, flags, fd, offset);
+    }
+    if (result != MAP_FAILED && kind->ops->mbind) {
+        err = kind->ops->mbind(kind, result, size);
+    }
+    return result;
+}
+
+int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size)
 {
     nodemask_t nodemask;
     int err = 0;
@@ -126,7 +157,7 @@ int memkind_default_mbind(struct memkind *kind, void *ptr, size_t len)
         err = kind->ops->get_mbind_mode(kind, &mode);
     }
     if (!err) {
-        err = mbind(ptr, len, mode, nodemask.n, NUMA_NUM_NODES, 0);
+        err = mbind(ptr, size, mode, nodemask.n, NUMA_NUM_NODES, 0);
         err = err ? MEMKIND_ERROR_MBIND : 0;
     }
     return err;
@@ -135,6 +166,13 @@ int memkind_default_mbind(struct memkind *kind, void *ptr, size_t len)
 int memkind_default_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_PRIVATE | MAP_ANONYMOUS;
+    return 0;
+}
+
+int memkind_default_get_mmap_file(struct memkind *kind, int *fd, off_t *offset)
+{
+    *fd = -1;
+    *offset = 0;
     return 0;
 }
 
