@@ -142,6 +142,10 @@ void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
     }
     if (result != MAP_FAILED && kind->ops->mbind) {
         err = kind->ops->mbind(kind, result, size);
+        if (err) {
+            munmap(result, size);
+            result = MAP_FAILED;
+        }
     }
     return result;
 }
