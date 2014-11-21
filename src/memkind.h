@@ -79,7 +79,7 @@ struct memkind {
     pthread_once_t init_once;
     int arena_map_len;
     unsigned int *arena_map;
-    void *private;
+    void *priv;
 };
 
 struct memkind_ops {
