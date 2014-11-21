@@ -44,6 +44,8 @@ memkind_default.h \- default implementations for memkind operations.
 .br
 .BI "void memkind_default_free(struct memkind " "*kind" ", void " "*ptr" );
 .br
+.BI "void *memkind_default_mmap(struct memkind " "*kind" ", void " "*addr" ", size_t " "size" );
+.br
 .BI "int memkind_default_mbind(struct memkind " "*kind" ", void " "*ptr" ", size_t " "len" );
 .br
 .BI "int memkind_default_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
@@ -103,6 +105,23 @@ jemalloc allocation, and in particular, all of the arena
 allocations described in
 .BR memkind_arena (3)
 can use this function for freeing.
+.PP 
+.BR memkind_default_mmap ()
+This calls the ops->get_mmap_flags() and ops->get_mmap_file()
+operations for the kind, or falls back on the default implementations
+if the function pointers are NULL.  The results of these calls are
+passed to the
+.BR mmap (2)
+call to allocate pages from the operating system.  The 
+.I addr
+is the hint passed through to
+.BR mmap (2)
+and
+.I size
+is the size of the buffer to be allocated.  The return value is the
+allocated buffer or
+.B MAP_FAILED
+in the case of an error.
 .PP
 .BR memkind_default_mbind ()
 makes calls the kind's
