@@ -43,14 +43,6 @@ Features
       where thread location is unimportant, and the arena index can
       be derived from a hash of the thread ID.
 
-    * Add support in jemalloc and memkind for modifying the file
-      descriptor and offset values passed to mmap() to enable file
-      backed memory allocations.
-
-    * Consider overriding the je_chunk_alloc_mmap() routine rather
-      than modifying it. This would be the the entry point for a
-      single memkind callback.
-
     * Support for verbose mode by setting environment variable which
       will log debug diagnostic information.
 

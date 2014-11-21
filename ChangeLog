@@ -1,3 +1,5 @@
+- Moved to single callback memkind_partition_mmap() to simplify jemalloc modifications.
+- Added hooks for setting file descriptor and offset for mmap.
 * Thu Nov 13 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.1.0
 - Increased test code coverage significantly.
 - Fixed bug in memkind_error_message() for MEMKIND_ERROR_TOOMANY.
