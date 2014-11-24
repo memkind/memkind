@@ -31,9 +31,11 @@ class Partition: public :: testing::Test { };
 TEST_F(Partition, check_available_test)
 {
     int i;
+    memkind_t kind;
     for (i = 0; i < MEMKIND_NUM_BASE_KIND; ++i) {
-        EXPECT_EQ(0, memkind_partition_check_available(i));
+        memkind_get_kind_by_partition(i, &kind);
+        EXPECT_EQ(0, memkind_check_available(kind));
     }
     EXPECT_EQ(MEMKIND_ERROR_UNAVAILABLE,
-              memkind_partition_check_available(0xdeadbeaf));
+              memkind_get_kind_by_partition(0xdeadbeef, &kind));
 }
