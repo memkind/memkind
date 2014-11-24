@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include <errno.h>
+#include <sys/mman.h>
 #include <jemalloc/jemalloc.h>
 
 #include "memkind.h"
