@@ -90,7 +90,7 @@ struct memkind_ops {
     int (* posix_memalign)(struct memkind *kind, void **memptr, size_t alignment, size_t size);
     void *(* realloc)(struct memkind *kind, void *ptr, size_t size);
     void (* free)(struct memkind *kind, void *ptr);
-    int (* mmap)(struct memkind *kind, void **memptr, size_t size, size_t alignment, bool *zero);
+    void *(* mmap)(struct memkind *kind, void *addr, size_t size);
     int (* mbind)(struct memkind *kind, void *ptr, size_t size);
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
     int (* get_mmap_file)(struct memkind *kind, size_t size, int *fd, off_t *offset);
