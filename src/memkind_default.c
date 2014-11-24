@@ -124,10 +124,10 @@ void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
     off_t offset;
 
     if (kind->ops->get_mmap_flags) {
-        err = kind->ops->get_mmap_flags(kind, flags);
+        err = kind->ops->get_mmap_flags(kind, &flags);
     }
     else {
-        err = memkind_default_get_mmap_flags(kind, flags);
+        err = memkind_default_get_mmap_flags(kind, &flags);
     }
     if (!err) {
         if (kind->ops->get_mmap_file) {

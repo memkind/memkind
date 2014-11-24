@@ -39,6 +39,7 @@ void *memkind_default_realloc(struct memkind *kind, void *ptr, size_t size);
 void memkind_default_free(struct memkind *kind, void *ptr);
 void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size);
 int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size);
+int memkind_default_get_mmap_file(struct memkind *kind, int *fd, off_t *offset);
 int memkind_default_get_mmap_flags(struct memkind *kind, int *flags);
 int memkind_default_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode);

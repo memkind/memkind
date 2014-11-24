@@ -344,6 +344,7 @@ void *memkind_partition_mmap(int partition, void *addr, size_t size)
 {
     int err;
     void *result = MAP_FAILED;
+    struct memkind *kind;
 
     err = memkind_get_kind_by_partition(partition, &kind);
     if (!err) {

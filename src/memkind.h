@@ -93,7 +93,7 @@ struct memkind_ops {
     void *(* mmap)(struct memkind *kind, void *addr, size_t size);
     int (* mbind)(struct memkind *kind, void *ptr, size_t size);
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
-    int (* get_mmap_file)(struct memkind *kind, size_t size, int *fd, off_t *offset);
+    int (* get_mmap_file)(struct memkind *kind, int *fd, off_t *offset);
     int (* get_mbind_mode)(struct memkind *kind, int *mode);
     int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
     int (* get_arena)(struct memkind *kind, unsigned int *arena);
