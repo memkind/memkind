@@ -105,14 +105,14 @@ jemalloc allocation, and in particular, all of the arena
 allocations described in
 .BR memkind_arena (3)
 can use this function for freeing.
-.PP 
+.PP
 .BR memkind_default_mmap ()
 This calls the ops->get_mmap_flags() and ops->get_mmap_file()
 operations for the kind, or falls back on the default implementations
 if the function pointers are NULL.  The results of these calls are
 passed to the
 .BR mmap (2)
-call to allocate pages from the operating system.  The 
+call to allocate pages from the operating system.  The
 .I addr
 is the hint passed through to
 .BR mmap (2)
@@ -167,9 +167,9 @@ sums the values returned by
 .BR numa_node_size64 ()
 function for every NUMA node set by the
 .BR .get_node_mask ()
-operation.  If the 
+operation.  If the
 .I .get_node_mask
-pointer is 
+pointer is
 .B NULL
 then the values are summed for all NUMA nodes.
 .PP
