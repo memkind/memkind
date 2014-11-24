@@ -29,6 +29,7 @@ extern "C" {
 #endif
 
 #include <pthread.h>
+#include <sys/types.h>
 
 enum memkind_const {
     MEMKIND_MAX_KIND = 512,
