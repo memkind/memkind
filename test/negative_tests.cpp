@@ -189,6 +189,7 @@ TEST_F(NegativeTest, RegularReallocWithMemalign)
 
     ret = hbw_posix_memalign_psize (&ptr, 4096, 4096,
                                     HBW_PAGESIZE_4KB);
+    EXPECT_EQ(ret, 0);
     ASSERT_TRUE(ptr != NULL);
     memset(ptr, 0, 4096);
     ptr = hbw_realloc (ptr, 8192);
