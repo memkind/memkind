@@ -99,6 +99,9 @@ test_gb_realloc_SOURCES = examples/gb_realloc_example.c
 
 test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
 
+check_PROGRAMS += test/memkind-pmtt
+test_memkind_pmtt_SOURCES = src/memkind_pmtt.c
+test_memkind_pmtt_LDADD = libmemkind.la
 
 # All of the non-standard requirements for testing (gtest and mock .so)
 .PHONY: test clean-local-gtest clean-local-mock
