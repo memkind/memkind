@@ -28,7 +28,15 @@ if [ ! -z "$TEST_HOST" ] && [ ! -z "$TEST_LOGIN" ] && [ ! -z "$TEST_RPMDIR" ]; t
     $basedir/test_remote.sh $TEST_RPMDIR $TEST_LOGIN $TEST_HOST $TEST_OUTDIR $TEST_SSHID
     err=$?
 else
-    $basedir/test.sh
+    if [ -z "$TEST_OUTDIR" ]; then
+        TEST_OUTDIR=gtest_output
+    fi
+    mkdir -p $TEST_OUTDIR
+    if [ -e memkind.cov ]; then
+         cp memkind.cov $TEST_OUTDIR
+    fi
+
+    COVFILE=$TEST_OUTDIR/memkind.cov $basedir/test.sh --gtest_output=xml:$TEST_OUTDIR | tee $TEST_OUTDIR/test.out
     err=$?
 fi
 
