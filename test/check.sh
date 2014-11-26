@@ -36,7 +36,7 @@ else
          cp memkind.cov $TEST_OUTDIR
     fi
 
-    COVFILE=$TEST_OUTDIR/memkind.cov $basedir/test.sh --gtest_output=xml:$TEST_OUTDIR | tee $TEST_OUTDIR/test.out
+    COVFILE=$TEST_OUTDIR/memkind.cov $basedir/test.sh --gtest_output=xml:$TEST_OUTDIR/ | tee $TEST_OUTDIR/test.out
     err=$?
 fi
 
