@@ -34,6 +34,7 @@
 #include <jemalloc/jemalloc.h>
 #include <utmpx.h>
 #include <sched.h>
+#include <smmintrin.h>
 
 #include "memkind.h"
 #include "memkind_default.h"
@@ -115,7 +116,7 @@ int memkind_arena_destroy(struct memkind *kind)
         kind->arena_map = NULL;
     }
     if (kind->ops->get_arena == memkind_thread_get_arena) {
-        pthread_key_destroy(kind->arena_key);
+        pthread_key_delete(kind->arena_key);
     }
     memkind_default_destroy(kind);
     return 0;
