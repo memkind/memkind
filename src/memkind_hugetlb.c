@@ -44,7 +44,7 @@ const struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .realloc = memkind_arena_realloc,
     .free = memkind_default_free,
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
-    .get_arena = memkind_cpu_get_arena,
+    .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hugetlb_init_once
 };

@@ -39,6 +39,7 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size);
 int memkind_cpu_get_arena(struct memkind *kind, unsigned int *arena);
 int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena);
+int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena);
 
 #ifdef __cplusplus
 }
