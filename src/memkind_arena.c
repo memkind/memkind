@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
@@ -242,7 +243,7 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena)
             err = MEMKIND_ERROR_MALLOC;
         }
         if (!err) {
-            *arena_tsd = _mm_crc32_u64(0, (size_t)pthread_self()) %
+            *arena_tsd = _mm_crc32_u64(0, (uint64_t)pthread_self()) %
                          kind->arena_map_len;
             err = pthread_setspecific(kind->arena_key, arena_tsd) ?
                   MEMKIND_ERROR_PTHREAD : 0;
