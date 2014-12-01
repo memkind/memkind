@@ -46,8 +46,9 @@ TEST_F(GetArenaTest, test_thread_hash)
 {
     int num_threads = omp_get_max_threads();
     std::vector<unsigned int> arena_idx(num_threads);
+    unsigned int thread_idx, idx;
     int err = 0;
-    int max_collisions;
+    int max_collisions, collisions, i;
 
 #pragma omp parallel shared(arena_idx) private(thread_idx)
 {
