@@ -67,9 +67,6 @@ int memkind_arena_create_map(struct memkind *kind)
     if (kind->ops->get_arena == memkind_bijective_get_arena) {
         kind->arena_map_len = 1;
     }
-    else if (kind->ops->get_arena == memkind_cpu_get_arena) {
-        kind->arena_map_len = numa_num_configured_cpus();
-    }
     else if (kind->ops->get_arena == memkind_thread_get_arena) {
         kind->arena_map_len = numa_num_configured_cpus() * 4;
     }
@@ -193,24 +190,6 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
         *memptr = je_mallocx_check(size, MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena));
         errno = errno_before;
         err = *memptr ? 0 : ENOMEM;
-    }
-    return err;
-}
-
-int memkind_cpu_get_arena(struct memkind *kind, unsigned int *arena)
-{
-    int err = 0;
-    int cpu_id;
-
-    cpu_id = sched_getcpu();
-    if (cpu_id < kind->arena_map_len) {
-        *arena = kind->arena_map[cpu_id];
-        if (*arena == UINT_MAX) {
-            err = MEMKIND_ERROR_MALLCTL;
-        }
-    }
-    else {
-        err = MEMKIND_ERROR_GETCPU;
     }
     return err;
 }

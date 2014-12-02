@@ -37,7 +37,7 @@ memkind_arena.h \- jemalloc arena allocation memkind operations.
 .BI "void *memkind_arena_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" );
 .BI "int memkind_arena_posix_memalign(struct memkind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .BI "void *memkind_arena_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
-.BI "int memkind_cpu_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" );
+.BI "int memkind_thread_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" );
 .BI "int memkind_bijective_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" );
 .br
 .SH DESCRIPTION
@@ -62,8 +62,8 @@ array for the memkind structure pointed to by
 which can be indexed by the
 .BR ops.get_arena ()
 function from the kind's operations.  If get_arena points
-.BR memkind_cpu_get_arena ()
-then there will be an arena crated for each processor,
+.BR memkind_thread_get_arena ()
+then there will be four arenas crated for each processor,
 and if get_arena points to
 .BR memkind_bijective_get_arena ()
 then just one arena is created.
@@ -124,10 +124,11 @@ though the jemalloc
 interface.  It uses the memkind "get_arena" operation to select the
 arena.
 .PP
-.BR memkind_cpu_arena_get_arena ()
+.BR memkind_thread_get_arena ()
 Retrieves the
 .I arena
-index that is bound to to the CPU of the calling thread.  The
+index that is bound to to the calling thread based on a hash of its
+thread ID.  The
 .I arena
 index can be used with the MALLOCX_ARENA macro to set flags for
 .BR je_mallocx ().
