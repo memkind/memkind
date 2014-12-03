@@ -81,17 +81,17 @@ int get_mbind_nodemask_numa_##NODE(struct memkind *kind,          \
 #include "numakind_helper.h"
 
 static void numakind_init(void);
-static int numakind_get_kind(memkind_t *kind);
+static int numakind_get_kind(memkind_t **kind);
 
 void *numakind_malloc(size_t size)
 {
     int err = 0;
     void *result = NULL;
-    memkind_t kind = NULL;
+    memkind_t *kind = NULL;
 
     err = numakind_get_kind(&kind);
     if (!err) {
-        result = (void *)memkind_malloc(kind, size);
+        result = (void *)memkind_malloc(*kind, size);
     }
     return result;
 }
@@ -100,11 +100,11 @@ void *numakind_calloc(size_t num, size_t size)
 {
     int err = 0;
     void *result = NULL;
-    memkind_t kind = NULL;
+    memkind_t *kind = NULL;
 
     err = numakind_get_kind(&kind);
     if (!err) {
-        result = (void *)memkind_calloc(kind, num, size);
+        result = (void *)memkind_calloc(*kind, num, size);
     }
     return result;
 }
@@ -112,11 +112,11 @@ void *numakind_calloc(size_t num, size_t size)
 int numakind_posix_memalign(void **memptr, size_t alignment, size_t size)
 {
     int err = 0;
-    memkind_t kind = NULL;
+    memkind_t *kind = NULL;
 
     err = numakind_get_kind(&kind) ? EINVAL : 0;
     if (!err) {
-        err = memkind_posix_memalign(kind, memptr, alignment, size);
+        err = memkind_posix_memalign(*kind, memptr, alignment, size);
     }
     return err;
 }
@@ -125,11 +125,11 @@ void *numakind_realloc(void *ptr, size_t size)
 {
     int err = 0;
     void *result = NULL;
-    memkind_t kind = NULL;
+    memkind_t *kind = NULL;
 
     err = numakind_get_kind(&kind);
     if (!err) {
-        result = (void *)memkind_realloc(kind, ptr, size);
+        result = (void *)memkind_realloc(*kind, ptr, size);
     }
     return result;
 }
@@ -175,7 +175,7 @@ static void numakind_init(void)
     }
 }
 
-static int numakind_get_kind(memkind_t *kind)
+static int numakind_get_kind(memkind_t **kind)
 {
     int err = 0;
     unsigned int thread_numa_node;
@@ -186,18 +186,18 @@ static int numakind_get_kind(memkind_t *kind)
     }
 
     if (!err) {
-        kind = pthread_getspecific(numakind_key_g);
-        if (kind == NULL) {
-            kind = (memkind_t *)je_malloc(sizeof(memkind_t));
-            if (kind == NULL) {
+        *kind = pthread_getspecific(numakind_key_g);
+        if (*kind == NULL) {
+            *kind = (memkind_t *)je_malloc(sizeof(memkind_t));
+            if (*kind == NULL) {
                 err = MEMKIND_ERROR_MALLOC;
             }
             if (!err) {
                 thread_numa_node = numa_node_of_cpu(sched_getcpu());
-                err = memkind_get_kind_by_partition(numakind_zero_partition_g + thread_numa_node, kind);
+                err = memkind_get_kind_by_partition(numakind_zero_partition_g + thread_numa_node, *kind);
             }
             if (!err) {
-                err = pthread_setspecific(numakind_key_g, kind) ?
+                err = pthread_setspecific(numakind_key_g, *kind) ?
                       MEMKIND_ERROR_PTHREAD : 0;
             }
         }
