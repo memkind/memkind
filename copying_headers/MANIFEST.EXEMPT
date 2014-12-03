@@ -8,4 +8,5 @@ TODO
 VERSION
 ChangeLog
 examples/README
+test/mock-pmtt.txt
 test/mock-pmtt.aml

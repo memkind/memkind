@@ -51,6 +51,7 @@ test/Makefile.mk
 test/check.sh
 test/test.sh
 test/mock-pmtt.aml
+test/mock-pmtt.txt
 test/multithreaded_tests.cpp
 test/gb_page_tests.cpp
 test/environ_err_test.cpp
@@ -83,3 +84,4 @@ test/create_tests.cpp
 test/create_tests_helper.c
 test/memkind_default_tests.cpp
 test/policy_tests.cpp
+test/memkind_pmtt_tests.cpp
