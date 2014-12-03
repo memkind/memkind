@@ -11,8 +11,10 @@
  * index for the arena will be kept in thread local storage.  
  */
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
+#include <sched.h>
 #include <numa.h>
 #include <numaif.h>
 #include <jemalloc/jemalloc.h>
@@ -112,8 +114,7 @@ void *numakind_malloc(size_t size)
             err = MEMKIND_ERROR_MALLOC;
         }
         if (!err) {
-            thread_numa_node = numa_preferred();
-            fprintf(stderr, "thread_numa_node = %d\n", thread_numa_node);
+            thread_numa_node = numa_node_of_cpu(sched_getcpu());
             err = memkind_get_kind_by_partition(numakind_zero_partition_g + thread_numa_node, numakind);
             if (!err) {
                 err = pthread_setspecific(numakind_key_g, numakind) ?
@@ -147,8 +148,7 @@ int main(int argc, char **argv)
     else {
         data[0] = '\0';
         move_pages(0, 1, (void **)&data, NULL, &status, MPOL_MF_MOVE);
-        pref = numa_preferred();
-        fprintf(stdout, "omp_thread: %.4d numa_node: %.4d numa_pref: %.4d\n", omp_get_thread_num(), status, pref);
+        fprintf(stdout, "omp_thread: %.4d numa_node: %.4d\n", omp_get_thread_num(), status);
     }
     numakind_free(data);
 }
