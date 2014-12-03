@@ -82,7 +82,7 @@ TEST_F(MemkindPmttTest, NodeBandwidthSize) {
     //Known bandwidths from MOCK PMTT table.
     const int MEM_CTRLS_BW[2] = {17072, 760800};
     
-    rv = hexDump2Bin("test/mock-pmtt.txt");
+    rv = hexDump2Bin("mock-pmtt.txt");
     EXPECT_EQ(0, rv);
     
     snprintf(pmtt_parser_exe,sizeof(pmtt_parser_exe),"%s %s %s",
