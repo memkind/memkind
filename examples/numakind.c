@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <sched.h>
 #include <numa.h>
-#include <numaif.h>
+#include <errno.h>
 #include <jemalloc/jemalloc.h>
 #include <memkind.h>
 #include <memkind_default.h>
@@ -51,7 +51,7 @@ static pthread_once_t numakind_init_once_g = PTHREAD_ONCE_INIT;
 static int numakind_init_err_g = 0;
 static int numakind_zero_partition_g;
 
-static enum { NUMAKIND_MAX = 2048 };
+enum { NUMAKIND_MAX = 2048 };
 
 #define NUMAKIND_GET_MBIND_NODEMASK_MACRO(NODE)                   \
 int get_mbind_nodemask_numa_##NODE(struct memkind *kind,          \
@@ -87,7 +87,7 @@ void *numakind_malloc(size_t size)
 {
     int err = 0;
     void *result = NULL;
-    memkind_t kind;
+    memkind_t kind = NULL;
 
     err = numakind_get_kind(&kind);
     if (!err) {
@@ -100,7 +100,7 @@ void *numakind_calloc(size_t num, size_t size)
 {
     int err = 0;
     void *result = NULL;
-    memkind_t kind;
+    memkind_t kind = NULL;
 
     err = numakind_get_kind(&kind);
     if (!err) {
@@ -112,8 +112,7 @@ void *numakind_calloc(size_t num, size_t size)
 int numakind_posix_memalign(void **memptr, size_t alignment, size_t size)
 {
     int err = 0;
-    void *result = NULL;
-    memkind_t kind;
+    memkind_t kind = NULL;
 
     err = numakind_get_kind(&kind) ? EINVAL : 0;
     if (!err) {
@@ -126,7 +125,7 @@ void *numakind_realloc(void *ptr, size_t size)
 {
     int err = 0;
     void *result = NULL;
-    memkind_t kind;
+    memkind_t kind = NULL;
 
     err = numakind_get_kind(&kind);
     if (!err) {

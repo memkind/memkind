@@ -22,19 +22,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <numaif.h>
+#include <omp.h>
 #include "numakind.h"
-#include "omp.h"
 
 int main(int argc, char **argv)
 {
-#pragma omp parallel
+    int err = 0;
+#pragma omp parallel shared(err)
 {
     char *data;
-    int status, pref;
+    int status;
 
     data = numakind_malloc(1024);
     if (!data) {
-        fprintf(stderr, "ERROR: %d\n", numakind_init_err_g);
+        fprintf(stderr, "ERROR: numakind_malloc()\n");
+        err = 1;
     }
     else {
         data[0] = '\0';
@@ -43,5 +48,5 @@ int main(int argc, char **argv)
     }
     numakind_free(data);
 }
-    return numakind_init_err_g;
+    return err;
 }

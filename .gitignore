@@ -72,4 +72,10 @@
 /test/new_kind
 /test/stream
 /test/stream_memkind
+/examples/libnumakind.la
+/examples/numakind.lo
+/examples/numakind.o
+/examples/numakind_test
+/examples/numakind_test.o
+
 

@@ -25,6 +25,8 @@
 #ifndef numakind_include_h
 #define numakind_include_h
 
+#include <stdlib.h>
+
 void *numakind_malloc(size_t size);
 void *numakind_calloc(size_t num, size_t size);
 int numakind_posix_memalign(void **memptr, size_t alignment, size_t size);
