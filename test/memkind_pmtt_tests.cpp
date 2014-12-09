@@ -48,7 +48,7 @@ TEST_F(MemkindPmttTest, NodeBandwidthSize) {
     //FILE *pipe = NULL;
     size_t NUMA_NUM_NODES = 2;
     static const char *MOCK_NBW_PATH = "/tmp/pmtt-test/node-bandwidth";
-    static const char *PMTT_PARSER_EXE_PATH = "/usr/sbin/memkind-pmtt";
+    char pmtt_parser_exe_path[64] = "/usr/sbin/memkind-pmtt";
     //static const char *NODE_BW_PARSER_SCRIPT = "python bandwidth-parser.py";
     int rv = 0;
     //char buffer[128],pmtt_parser_exe[256], node_bw_parser[256];
@@ -61,8 +61,15 @@ TEST_F(MemkindPmttTest, NodeBandwidthSize) {
     rv = hexDump2Bin("test/mock-pmtt.txt");
     EXPECT_EQ(0, rv);
 
+    if(FILE *file = fopen(pmtt_parser_exe_path, "r")) {
+        fclose(file);
+    }
+    else {
+        strcpy(pmtt_parser_exe_path,"./memkind-pmtt");
+    }
+
     snprintf(pmtt_parser_exe,sizeof(pmtt_parser_exe),"%s %s %s",
-        PMTT_PARSER_EXE_PATH, MOCK_PMTT_PATH, MOCK_NBW_PATH);
+        pmtt_parser_exe_path, MOCK_PMTT_PATH, MOCK_NBW_PATH);
 
     printf("Running memkind_pmtt with args: %s\n", pmtt_parser_exe);
     rv = system(pmtt_parser_exe);
