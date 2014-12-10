@@ -167,7 +167,7 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
         ACPI_PMTT_HEADER *buf_in, int *bytes_remaining)
 {
     int err = 0;
-    int i, j;
+    unsigned int i, j;
     struct memctlr_t *buf = (struct memctlr_t *)buf_in;
 
     if (buf->memctlr.Header.Type != ACPI_PMTT_TYPE_CONTROLLER) {
