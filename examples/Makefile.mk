@@ -29,6 +29,7 @@ noinst_PROGRAMS += examples/hello_memkind \
                    examples/stream_memkind \
                    examples/new_kind \
                    examples/gb_realloc \
+                   examples/eratosthenes \
                    # end
 
 examples_hello_memkind_LDADD = libmemkind.la
@@ -38,6 +39,7 @@ examples_stream_LDADD = libmemkind.la
 examples_stream_memkind_LDADD = libmemkind.la
 examples_new_kind_LDADD = libmemkind.la
 examples_gb_realloc_LDADD = libmemkind.la
+examples_eratosthenes_LDADD = libmemkind.la -lm
 
 examples_hello_memkind_SOURCES = examples/hello_memkind_example.c
 examples_hello_hbw_SOURCES = examples/hello_hbw_example.c
@@ -46,5 +48,6 @@ examples_stream_SOURCES = examples/stream_example.c
 examples_stream_memkind_SOURCES = examples/stream_example.c
 examples_new_kind_SOURCES = examples/new_kind_example.c
 examples_gb_realloc_SOURCES = examples/gb_realloc_example.c
+examples_eratosthenes_SOURCES = examples/eratosthenes_example.c
 
 examples_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC

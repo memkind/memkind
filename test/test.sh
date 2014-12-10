@@ -151,6 +151,11 @@ ret=$?
 if [ $ret -ne 0 ]; then echo "FAIL: stream" 1>&2; fi
 if [ $err -eq 0 ]; then err=$ret; fi
 
+$basedir/eratosthenes
+ret=$?
+if [ $ret -ne 0 ]; then echo "FAIL: eratosthenes" 1>&2; fi
+if [ $err -eq 0 ]; then err=$ret; fi
+
 for kind in memkind_default \
             memkind_hbw \
             memkind_hbw_hugetlb \
