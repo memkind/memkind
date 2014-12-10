@@ -358,23 +358,19 @@ static void memkind_gbtlb_ceil_size(size_t *size)
 
 static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)
 {
-    void *addr=NULL;
-    int ret = 0;
+    int err = 0;
     int flags;
 
-    ret = kind->ops->get_mmap_flags(kind, &flags);
-    if (ret != 0) {
-        return ret;
+    *result = NULL;
+    err = kind->ops->get_mmap_flags(kind, &flags);
+    if (!err) {
+        *result = mmap(NULL, size, PROT_READ | PROT_WRITE,
+                       MAP_PRIVATE | MAP_ANONYMOUS | flags,
+                       -1, 0);
+        if (*result == MAP_FAILED) {
+           err = MEMKIND_ERROR_MMAP;
+           *result = NULL;
+        }
     }
-
-    addr = mmap (NULL, size, PROT_READ | PROT_WRITE,
-                 MAP_PRIVATE | MAP_ANONYMOUS | flags,
-                 -1, 0);
-
-    if (addr == MAP_FAILED) {
-        ret = MEMKIND_ERROR_MMAP;
-    }
-
-    *result  = addr;
-    return ret;
+    return err;
 }
