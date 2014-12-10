@@ -54,7 +54,6 @@ const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .get_mbind_mode = memkind_default_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size,
-    .check_alignment = memkind_posix_check_alignment,
     .check_addr = memkind_gbtlb_check_addr
 };
 
@@ -72,7 +71,6 @@ const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size,
-    .check_alignment = memkind_posix_check_alignment,
     .check_addr = memkind_gbtlb_check_addr
 };
 
@@ -86,7 +84,6 @@ const struct memkind_ops MEMKIND_GBTLB_OPS = {
     .free = memkind_gbtlb_free,
     .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
     .get_size = memkind_default_get_size,
-    .check_alignment = memkind_posix_check_alignment,
     .check_addr = memkind_gbtlb_check_addr
 };
 
@@ -159,7 +156,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
         do_shift = 1;
         size += alignment;
     }
-    err = kind->ops->check_alignment(kind, alignment);
+    err = memkind_posix_check_alignment(kind, alignment);
     if (!err) {
         *memptr = memkind_gbtlb_malloc(kind, size);
         if (*memptr == NULL) {

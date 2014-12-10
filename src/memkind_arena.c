@@ -181,7 +181,7 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     *memptr = NULL;
     err = kind->ops->get_arena(kind, &arena);
     if (!err) {
-        err = kind->ops->check_alignment(kind, alignment);
+        err = memkind_posix_check_alignment(kind, alignment);
     }
     if (!err) {
         /* posix_memalign should not change errno.

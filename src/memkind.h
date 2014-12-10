@@ -101,7 +101,6 @@ struct memkind_ops {
     int (* get_arena)(struct memkind *kind, unsigned int *arena);
     int (* get_size)(struct memkind *kind, size_t *total, size_t *free);
     int (* check_available)(struct memkind *kind);
-    int (* check_alignment)(struct memkind *kind, size_t alignment);
     int (* check_addr)(struct memkind *kind, void *addr);
     void (*init_once)(void);
 };

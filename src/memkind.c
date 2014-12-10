@@ -295,7 +295,8 @@ int memkind_finalize(void)
 
 exit:
     if (err != MEMKIND_ERROR_PTHREAD) {
-        err = pthread_mutex_unlock(&(memkind_registry_g.lock)) ? MEMKIND_ERROR_PTHREAD : 0;
+        err = pthread_mutex_unlock(&(memkind_registry_g.lock)) ?
+              MEMKIND_ERROR_PTHREAD : 0;
     }
     return err;
 }
