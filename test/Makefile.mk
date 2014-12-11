@@ -61,8 +61,10 @@ test_all_tests_SOURCES = test/common.h \
                          test/create_tests.cpp \
                          test/create_tests_helper.c \
                          test/memkind_default_tests.cpp \
-			 test/policy_tests.cpp \
+                         test/policy_tests.cpp \
                          test/get_arena_test.cpp \
+                         test/policy_tests.cpp \
+                         test/memkind_pmtt_tests.cpp \
                          # end
 
 test_schedcpu_test_SOURCES = test/main.cpp test/sched_cpu_test.cpp

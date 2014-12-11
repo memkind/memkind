@@ -70,3 +70,4 @@ test/create_tests_helper.c
 test/memkind_default_tests.cpp
 test/policy_tests.cpp
 test/get_arena_test.cpp
+test/memkind_pmtt_tests.cpp

@@ -40,6 +40,8 @@ unset MEMKIND_HBW_NODES
 #fi
 
 rm -f  /tmp/node-bandwidth
+xxd -r $basedir/mock-pmtt.txt $basedir/mock-pmtt.aml
+
 if [ -f /usr/sbin/memkind-pmtt ]; then
     /usr/sbin/memkind-pmtt $basedir/mock-pmtt.aml /tmp/node-bandwidth
     ret=$?
