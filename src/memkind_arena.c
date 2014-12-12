@@ -52,9 +52,6 @@ int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, co
     if (!err) {
         err = memkind_arena_create_map(kind);
     }
-    if (kind->ops->get_arena == memkind_thread_get_arena) {
-        pthread_key_create(&kind->arena_key, je_free);
-    }
     return err;
 }
 
@@ -69,6 +66,7 @@ int memkind_arena_create_map(struct memkind *kind)
     }
     else if (kind->ops->get_arena == memkind_thread_get_arena) {
         kind->arena_map_len = numa_num_configured_cpus() * 4;
+        pthread_key_create(&(kind->arena_key), je_free);
     }
     else {
         kind->arena_map_len = 0;
