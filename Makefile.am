@@ -86,6 +86,7 @@ bin_PROGRAMS =
 check_PROGRAMS =
 noinst_PROGRAMS =
 noinst_LTLIBRARIES =
+noinst_HEADERS =
 
 TESTS =
 XFAIL_TESTS =
