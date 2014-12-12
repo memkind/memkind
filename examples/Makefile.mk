@@ -56,5 +56,6 @@ examples_numakind_test_SOURCES = examples/numakind_test.c
 examples_libnumakind_la_SOURCES = examples/numakind.c
 examples_eratosthenes_SOURCES = examples/eratosthenes_example.c
 
+examples_libnumakind_la_SOURCES = examples/numakind_helper.h
 
 examples_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
