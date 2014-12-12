@@ -29,38 +29,53 @@
 
 int main (int argc, char *argv[])
 {
-
-
     void *ptr;
-    int ret;
+    int err = 0;
 
     hbw_set_policy(HBW_POLICY_BIND);
 
     printf ("Allocating 400 KB with 1GB pages\n");
-    ret = hbw_posix_memalign_psize (&ptr,
+    err = hbw_posix_memalign_psize (&ptr,
                                     1073741824,
                                     409600,
                                     HBW_PAGESIZE_1GB);
 
-    if (ret) {
-        printf ("Error in hbw_posix_memalign_size");
+    if (err) {
+        fprintf(stderr, "ERROR: hbw_posix_memalign_size()\n");
     }
-    memset (ptr, 0, 409600);
+    if (!err) {
+        memset (ptr, 0, 409600);
+        printf ("Reallocing 100KB with 1GB pages\n");
+        ptr = hbw_realloc (ptr, 102400);
+        if (ptr == NULL) {
+            fprintf(stderr, "ERROR: hbw_realloc()\n");
+            err = -1;
+	}
+    }
+    if (!err) {
+        memset (ptr, 0, 102400);
+        printf ("Reallocing 1GB with 1GB pages\n");
+        ptr = hbw_realloc (ptr, 1073741824);
+        if (ptr == NULL) {
+            fprintf(stderr, "ERROR: hbw_realloc()");
+            err = -1;
+        }
+    }
+    if (!err) {
+        memset (ptr, 0, 1073741824);
+        printf ("Reallocing 1073742848 with 1GB pages\n");
+        ptr = hbw_realloc (ptr, 1073742848);
+        if (ptr == NULL) {
+            fprintf(stderr, "ERROR:  hbw_realloc()\n");
+            err = -1;
+        }
+    }
+    if (!err) {
+        memset (ptr, 0, 1073742848);
+    }
+    if (ptr) {
+        hbw_free(ptr);
+    }
 
-    printf ("Reallocing 100KB with 1GB pages\n");
-    ptr = hbw_realloc (ptr, 102400);
-    memset (ptr, 0, 102400);
-
-    printf ("Reallocing 1GB with 1GB pages\n");
-    ptr = hbw_realloc (ptr, 1073741824);
-    memset (ptr, 0, 1073741824);
-
-    printf ("Reallocing 1073742848 with 1GB pages\n");
-    ptr = hbw_realloc (ptr, 1073742848);
-    memset (ptr, 0, 1073742848);
-
-
-    hbw_free(ptr);
-
-    return 0;
+    return err;
 }
