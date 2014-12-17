@@ -80,3 +80,8 @@
 /examples/numakind.o
 /examples/numakind_test
 /examples/numakind_test.o
+/examples/examples_libnumakind_la-numakind.lo
+/examples/examples_libnumakind_la-numakind.o
+/examples/numakind_macro.h
+/test-driver
+

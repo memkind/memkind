@@ -9,7 +9,6 @@ examples/new_kind_example.c
 examples/gb_realloc_example.c
 examples/numakind.c
 examples/numakind.h
-examples/numakind_helper.h
 examples/numakind_test.c
 examples/eratosthenes_example.c
 init.d/memkind

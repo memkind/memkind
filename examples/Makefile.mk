@@ -53,11 +53,24 @@ examples_stream_SOURCES = examples/stream_example.c
 examples_stream_memkind_SOURCES = examples/stream_example.c
 examples_new_kind_SOURCES = examples/new_kind_example.c
 examples_gb_realloc_SOURCES = examples/gb_realloc_example.c
-examples_numakind_test_SOURCES = examples/numakind_test.c
-examples_libnumakind_la_SOURCES = examples/numakind.c
 examples_eratosthenes_SOURCES = examples/eratosthenes_example.c
-
-examples_libnumakind_la_SOURCES = examples/numakind_helper.h
-noinst_HEADERS += examples/numakind.h examples/numakind_helper.h
+examples_numakind_test_SOURCES = examples/numakind_test.c
+examples_libnumakind_la_SOURCES = examples/numakind.c examples/numakind.h examples/numakind_macro.h
+noinst_HEADERS += examples/numakind.h examples/numakind_macro.h
 
 examples_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
+
+NUMAKIND_MAX = 2048
+examples_libnumakind_la_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DNUMAKIND_MAX=$(NUMAKIND_MAX)
+CLEANFILES += examples/numakind_macro.h
+examples/numakind.c: examples/numakind_macro.h
+examples/numakind_macro.h:
+	for ((i=0;i<$(NUMAKIND_MAX);i++)); do \
+	  echo "NUMAKIND_GET_MBIND_NODEMASK_MACRO($$i)" >> $@; \
+	done
+	echo 'const struct memkind_ops NUMAKIND_OPS[NUMAKIND_MAX] = {' >> $@
+	for ((i=0;i<$(NUMAKIND_MAX);i++)); do \
+	  echo "NUMAKIND_OPS_MACRO($$i)," >> $@; \
+	done
+	echo '};' >> $@
+	echo >> $@

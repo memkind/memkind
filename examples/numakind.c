@@ -51,7 +51,9 @@ static pthread_once_t numakind_init_once_g = PTHREAD_ONCE_INIT;
 static int numakind_init_err_g = 0;
 static int numakind_zero_partition_g;
 
-enum { NUMAKIND_MAX = 2048 };
+#ifndef NUMAKIND_MAX
+#define NUMAKIND_MAX 2048
+#endif
 
 #define NUMAKIND_GET_MBIND_NODEMASK_MACRO(NODE)                   \
 int get_mbind_nodemask_numa_##NODE(struct memkind *kind,          \
@@ -78,7 +80,7 @@ int get_mbind_nodemask_numa_##NODE(struct memkind *kind,          \
     .get_mbind_nodemask = get_mbind_nodemask_numa_##NODE          \
 }
 
-#include "numakind_helper.h"
+#include "numakind_macro.h"
 
 static void numakind_init(void);
 static int numakind_get_kind(memkind_t **kind);
