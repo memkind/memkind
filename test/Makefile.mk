@@ -63,7 +63,6 @@ test_all_tests_SOURCES = test/common.h \
                          test/memkind_default_tests.cpp \
                          test/policy_tests.cpp \
                          test/get_arena_test.cpp \
-                         test/policy_tests.cpp \
                          test/memkind_pmtt_tests.cpp \
                          # end
 

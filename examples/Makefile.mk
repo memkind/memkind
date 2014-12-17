@@ -31,7 +31,6 @@ noinst_PROGRAMS += examples/hello_memkind \
                    examples/gb_realloc \
                    examples/numakind_test \
                    examples/eratosthenes \
-
                    # end
 
 noinst_LTLIBRARIES += examples/libnumakind.la
