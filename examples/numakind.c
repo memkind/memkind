@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sched.h>
+#include <assert.h>
 #include <numa.h>
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
@@ -144,7 +145,7 @@ void numakind_free(void *ptr)
 static void numakind_init(void)
 {
     int err = 0;
-    char numakind_name[64];
+    char numakind_name[MEMKIND_NAME_LENGTH];
     int i, name_length, num_nodes;
     memkind_t numakind;
 
@@ -156,13 +157,10 @@ static void numakind_init(void)
     }
 
     for (i = 0; !err && i < num_nodes; ++i) {
-        name_length = snprintf(numakind_name, 63, "numakind_%.4d", i);
-        if (name_length == 63) {
-            err = MEMKIND_ERROR_INVALID;
-        }
-        if (!err) {
-            err = memkind_create(NUMAKIND_OPS + i, numakind_name, &numakind);
-        }
+        name_length = snprintf(numakind_name, MEMKIND_NAME_LENGTH - 1, "numakind_%.4d", i);
+        assert(MEMKIND_NAME_LENGTH > 20 && name_length != MEMKIND_NAME_LENGTH - 1);
+
+        err = memkind_create(NUMAKIND_OPS + i, numakind_name, &numakind);
         if (!err) {
             if (i == 0) {
                 numakind_zero_partition_g = numakind->partition;
