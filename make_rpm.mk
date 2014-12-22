@@ -20,7 +20,12 @@ $(rpm): $(specfile) $(source_tar)
 	rpmbuild $(rpmbuild_flags) $(specfile) -ba
 
 $(source_tar): $(topdir)/.setup $(src) MANIFEST
-	tar czvf $@ -T MANIFEST --transform="s|^|$(name)-$(version)/|"
+	mkdir -p source_tar_tmp
+	tar cf source_tar_tmp/tmp.tar -T MANIFEST --transform="s|^|$(name)-$(version)/|"
+	cd source_tar_tmp && tar xf tmp.tar
+	cd source_tar_tmp/$(name)-$(version) && ./autogen.sh && ./configure && make dist
+	mv source_tar_tmp/$(name)-$(version)/$(name)-$(version).tar.gz $@
+	rm -rf source_tar_tmp
 
 $(specfile): $(topdir)/.setup memkind.spec.mk
 	@echo "$$memkind_spec" > $@
