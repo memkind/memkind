@@ -37,12 +37,6 @@ Features
 
     * Support for non-standard x86 page sizes like 128 MB.
 
-    * Implement the use of thread local storage for arena index.  If a
-      thread is pinned, then this can be used to avoid calling
-      sched_getcpu() more than once.  It would also benefit cases
-      where thread location is unimportant, and the arena index can
-      be derived from a hash of the thread ID.
-
     * Support for verbose mode by setting environment variable which
       will log debug diagnostic information.
 
