@@ -34,6 +34,7 @@ check_PROGRAMS += test/all_tests \
                   # end
 
 TESTS += test/check.sh
+EXTRA_DIST += test/mock-pmtt.txt
 
 test_all_tests_LDADD = libgtest.a libmemkind.la
 test_schedcpu_test_LDADD = libgtest.a libmemkind.la
