@@ -87,7 +87,7 @@ start() {
 
 stop() {
     echo_success "deleting bandwidth values file"
-    rm $FILE
+    rm -f $FILE
     err=$?
     if [ $err -eq 0 ] && [ ! -f $FILE ]
     then
@@ -106,11 +106,10 @@ stop() {
 }
 
 restart() {
-    stop
-    if [ $err -eq 0 ]
-    then
-        start
+    if [ -f $FILE ]; then
+        stop
     fi
+    start
 }
 
 case $1 in
@@ -120,12 +119,8 @@ case $1 in
     stop)
         stop
         ;;
-    restart)
+    restart|force-reload|reload|condrestart|try-restart)
         restart
-        ;;
-    force-reload)
-        stop
-        start
         ;;
     status)
         if [ -f $FILE ];
@@ -133,15 +128,12 @@ case $1 in
             echo_success "file $FILE exists"
             err=0
         else
-            echo_failure "file $FILE does not exists"
+            echo_failure "file $FILE does not exist"
             err=3
         fi
         ;;
-    condrestart|try-restart)
-        restart
-        ;;
     *)
-        echo "Usage: $0 {start|stop|restart|force-reload|status|condrestart|try-restart}"
+        echo "Usage: $0 {start|stop|restart|status|force-reload|reload|condrestart|try-restart}"
         err=2
 esac
 exit $err
