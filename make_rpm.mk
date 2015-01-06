@@ -10,7 +10,7 @@ rpm = $(topdir)/RPMS/$(arch)/$(name)-devel-$(version)-$(release).$(arch).rpm
 srpm = $(topdir)/SRPMS/$(name)-$(version)-$(release).src.rpm
 specfile = $(topdir)/SPECS/$(name)-$(version).spec
 source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
-source_tmp_dir = $(topdir)/SOURCES/memkind-tmp-$(shell date +%s)
+source_tmp_dir := $(topdir)/SOURCES/memkind-tmp-$(shell date +%s)
 
 rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
