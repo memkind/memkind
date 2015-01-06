@@ -37,7 +37,7 @@
 #include <sys/stat.h>
 
 
-static const int STRLEN = 512;
+enum {STRLEN = 512};
 // The include file actbl.h comes from acpica which is available from this URL:
 // https://acpica.org/sites/acpica/files/acpica-unix-20130517.tar.gz
 //
@@ -199,7 +199,7 @@ int memkind_pmtt(char *pmtt_path, char *bandwidth_path)
     FILE *fp = NULL;
     int *bandwidth = NULL;
     size_t nwrite;
-    char dir[STRLEN];
+    char dir[STRLEN] = {0};
 
     bandwidth = (int *)malloc(sizeof(int) * NUMA_NUM_NODES);
     if (bandwidth == NULL) {
@@ -212,7 +212,6 @@ int memkind_pmtt(char *pmtt_path, char *bandwidth_path)
         err = 1;
         goto exit;
     }
-    dir[STRLEN-1] = '\0';
     strncpy(dir, bandwidth_path, STRLEN - 1);
     dirname(dir);
     err = mkdir(dir, 0755);
@@ -252,6 +251,12 @@ exit:
     }
     if (bandwidth != NULL) {
         free(bandwidth);
+    }
+    if (err) {
+        unlink(bandwidth_path);
+        if(*dir) {
+            rmdir(dir);
+        }
     }
     return err;
 }
