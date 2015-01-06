@@ -115,10 +115,10 @@ $(extra_install)
 
 %post devel
 /sbin/ldconfig
-if [ -x /sbin/chkconfig ]; then
-    /sbin/chkconfig --add memkind
-elif [ -x /usr/lib/lsb/install_initd ]; then
+if [ -x /usr/lib/lsb/install_initd ]; then
     /usr/lib/lsb/install_initd %{_initddir}/memkind
+elif [ -x /sbin/chkconfig ]; then
+    /sbin/chkconfig --add memkind
 else
     for i in 3 4 5; do
         ln -sf %{_initddir}/memkind /etc/rc.d/rc${i}.d/S90memkind
@@ -127,15 +127,15 @@ else
         ln -sf %{_initddir}/memkind /etc/rc.d/rc${i}.d/K10memkind
     done
 fi
-%{_initddir}/memkind force-reload >/dev/null 2>&1 || :
+%{_initddir}/memkind restart >/dev/null 2>&1 || :
 
 %preun devel
 if [ -z "$1" ] || [ "$1" == 0 ]; then
     %{_initddir}/memkind stop >/dev/null 2>&1 || :
-    if [ -x /sbin/chkconfig ]; then
-        /sbin/chkconfig --del memkind
-    elif [ -x /usr/lib/lsb/remove_initd ]; then
+    if [ -x /usr/lib/lsb/remove_initd ]; then
         /usr/lib/lsb/remove_initd %{_initddir}/memkind
+    elif [ -x /sbin/chkconfig ]; then
+        /sbin/chkconfig --del memkind
     else
         rm -f /etc/rc.d/rc?.d/???memkind
     fi
