@@ -38,8 +38,6 @@
 #
 #              restart - Delete and recreate bandwidth file from PMTT table.
 #
-#              force-reload - Delete and recreate bandwidth file.  Ignore deletion errors.
-#
 #              status - Print existance of bandwidth file
 # Default-Start: 3 4 5
 # Default-Stop: 0 1 2 6
