@@ -28,9 +28,6 @@ Features
     * Add gcc malloc hooks for hbwmalloc interface.
       http://www.gnu.org/software/libc/manual/html_node/Hooks-for-Malloc.html
 
-    * Consider redefining the meaning of memkind_free(0, ptr) so that
-      it is calls memkind_get_kind_for_free() internally.
-
     * Add asynchronous duplicate API's for conversion from one kind to
       another:
           int memkind_dup_async(memkind_t kind, void *orig, size_t size,
