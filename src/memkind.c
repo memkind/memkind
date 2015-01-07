@@ -143,6 +143,8 @@ static struct memkind_registry memkind_registry_g = {
     PTHREAD_MUTEX_INITIALIZER
 };
 
+static int memkind_get_kind_for_free(void *ptr, struct memkind **kind);
+
 void memkind_error_message(int err, char *msg, size_t size)
 {
     switch (err) {
@@ -371,25 +373,6 @@ int memkind_check_available(struct memkind *kind)
     return err;
 }
 
-int memkind_get_kind_for_free(void *ptr, struct memkind **kind)
-{
-    int i, num_kind;
-    struct memkind *test_kind;
-
-    *kind = MEMKIND_DEFAULT;
-    memkind_get_num_kind(&num_kind);
-    for (i = 0; i < num_kind; ++i) {
-        memkind_get_kind_by_partition(i, &test_kind);
-        if (test_kind &&
-            test_kind->ops->check_addr &&
-            test_kind->ops->check_addr(test_kind, ptr) == 0) {
-            *kind = test_kind;
-            break;
-        }
-    }
-    return 0;
-}
-
 void *memkind_malloc(struct memkind *kind, size_t size)
 {
     if (kind->ops->init_once) {
@@ -425,10 +408,32 @@ void *memkind_realloc(struct memkind *kind, void *ptr, size_t size)
 
 void memkind_free(struct memkind *kind, void *ptr)
 {
+    if (!kind) {
+        memkind_get_kind_for_free(ptr, &kind);
+    }
     kind->ops->free(kind, ptr);
 }
 
 int memkind_get_size(memkind_t kind, size_t *total, size_t *free)
 {
     return kind->ops->get_size(kind, total, free);
+}
+
+static int memkind_get_kind_for_free(void *ptr, struct memkind **kind)
+{
+    int i, num_kind;
+    struct memkind *test_kind;
+
+    *kind = MEMKIND_DEFAULT;
+    memkind_get_num_kind(&num_kind);
+    for (i = 0; i < num_kind; ++i) {
+        memkind_get_kind_by_partition(i, &test_kind);
+        if (test_kind &&
+            test_kind->ops->check_addr &&
+            test_kind->ops->check_addr(test_kind, ptr) == 0) {
+            *kind = test_kind;
+            break;
+        }
+    }
+    return 0;
 }

@@ -153,7 +153,7 @@ fi
 %{_includedir}/memkind_gbtlb.h
 %{_includedir}/memkind_hbw.h
 %{_includedir}/memkind_hugetlb.h
-%{_libdir}/libmemkind.so.0.0.0
+%{_libdir}/libmemkind.so.0.0.1
 %{_libdir}/libmemkind.so.0
 %{_libdir}/libmemkind.so
 %{_sbindir}/memkind-pmtt

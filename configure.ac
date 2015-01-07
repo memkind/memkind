@@ -30,7 +30,7 @@ AC_INIT([memkind],m4_esyscmd([tr -d '\n' < VERSION]),[christopher.m.cantalupo@in
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects tar-ustar])
 AC_CONFIG_HEADERS([config.h])
 
-memkind_abi_version=0:0:0
+memkind_abi_version=0:1:0
 AC_SUBST(memkind_abi_version)
 
 LT_PREREQ([2.2.6])
