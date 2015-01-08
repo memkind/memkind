@@ -55,49 +55,28 @@ if [ $err -eq 0 ]; then err=$ret; fi
 
 if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
     export MEMKIND_HBW_NODES=1
-    $basedir/all_tests --gtest_list_tests > .tmp
-    cat .tmp | while read line
-    do
-        if [[ $line == *. ]]; then
-            test_main=$line;
-        else
-            if [[ $test_main == GBPagesTest. ]]; then
-                if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then
-                    numactl --membind=0 $basedir/all_tests --gtest_filter="$test_main$line" $@
-                    ret=$?
-                    if [ $err -eq 0 ]; then err=$ret; fi
-                fi
-            else
-                numactl --membind=0 $basedir/all_tests --gtest_filter="$test_main$line" $@
-                ret=$?
-                if [ $err -eq 0 ]; then err=$ret; fi
-            fi
-        fi
-    done
-    rm -f .tmp
-
-else
-    $basedir/all_tests --gtest_list_tests > .tmp
-    cat .tmp | while read line
-    do
-	    if [[ $line == *. ]]; then
-	        test_main=$line;
-	    else
-            if [[ $test_main == GBPagesTest. ]]; then
-                if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then
-                    $basedir/all_tests --gtest_filter="$test_main$line" $@
-                    ret=$?
-                    if [ $err -eq 0 ]; then err=$ret; fi
-                fi
-            else
-                $basedir/all_tests --gtest_filter="$test_main$line" $@
-                ret=$?
-                if [ $err -eq 0 ]; then err=$ret; fi
-            fi
-        fi
-    done
-    rm -f .tmp
+    test_prefix='numactl --membind=0'
 fi
+$basedir/all_tests --gtest_list_tests > .tmp
+cat .tmp | while read line
+do
+    if [[ $line == *. ]]; then
+        test_main=$line;
+    else
+        if [[ $test_main == GBPagesTest. ]]; then
+            if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then
+                $test_prefix $basedir/all_tests --gtest_filter="$test_main$line" $@
+                ret=$?
+                if [ $err -eq 0 ]; then err=$ret; fi
+            fi
+        else
+            $test_prefix $basedir/all_tests --gtest_filter="$test_main$line" $@
+            ret=$?
+            if [ $err -eq 0 ]; then err=$ret; fi
+        fi
+    fi
+done
+rm -f .tmp
 
 $basedir/environerr_test $@
 ret=$?
