@@ -200,7 +200,7 @@ was already called before, undefined behavior occurs.
 If
 .I ptr
 is  NULL, no operation is performed.
-The the value of
+The value of
 .B MEMKIND_DEFAULT
 can be given as the
 .I kind
@@ -223,7 +223,7 @@ This section describes the memkind interface which is used internally
 by the heap manager.  For this API the kind is determined by the
 partition index.  This enables the underlying heap manager to call
 routines with standard type arguments, and allows the heap manager
-implementation to be independent of the the specifics of the
+implementation to be independent of the specifics of the
 .I memkind_t
 implementation.  Currently there is only one callback function.
 .PP
