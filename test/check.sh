@@ -37,7 +37,7 @@ else
     fi
 
     COVFILE=$TEST_OUTDIR/memkind.cov $basedir/test.sh --gtest_output=xml:$TEST_OUTDIR/ | tee $TEST_OUTDIR/test.out
-    err=$?
+    err=${PIPESTATUS[0]}
 fi
 
 exit $err
