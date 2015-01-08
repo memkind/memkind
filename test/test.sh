@@ -57,9 +57,7 @@ if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
     export MEMKIND_HBW_NODES=1
     test_prefix='numactl --membind=0'
 fi
-$basedir/all_tests --gtest_list_tests > .tmp
-cat .tmp | while read line
-do
+for line in $($basedir/all_tests --gtest_list_tests); do
     if [[ $line == *. ]]; then
         test_main=$line;
     else
@@ -76,7 +74,6 @@ do
         fi
     fi
 done
-rm -f .tmp
 
 $basedir/environerr_test $@
 ret=$?

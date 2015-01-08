@@ -36,7 +36,7 @@ else
          cp $TEST_COVDIR/memkind.cov $TEST_OUTDIR
     fi
     cp $basedir/mock-pmtt.txt /tmp/
-    COVFILE=$TEST_OUTDIR/memkind.cov $basedir/test.sh --gtest_output=xml:$TEST_OUTDIR/ | tee $TEST_OUTDIR/test.out
+    COVFILE=$TEST_OUTDIR/memkind.cov $basedir/test.sh --gtest_output=xml:$TEST_OUTDIR/ 2>&1| tee $TEST_OUTDIR/test.out
     err=${PIPESTATUS[0]}
 fi
 
