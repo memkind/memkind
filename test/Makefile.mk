@@ -82,7 +82,6 @@ check_PROGRAMS += test/hello_memkind \
                   test/stream_memkind \
                   test/new_kind \
                   test/gb_realloc \
-                  test/eratosthenes \
                   # end
 
 test_hello_memkind_LDADD = libmemkind.la
@@ -92,7 +91,6 @@ test_stream_LDADD = libmemkind.la
 test_stream_memkind_LDADD = libmemkind.la
 test_new_kind_LDADD = libmemkind.la
 test_gb_realloc_LDADD = libmemkind.la
-test_eratosthenes_LDADD = libmemkind.la -lm
 
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_hbw_SOURCES = examples/hello_hbw_example.c
@@ -101,7 +99,6 @@ test_stream_SOURCES = examples/stream_example.c
 test_stream_memkind_SOURCES = examples/stream_example.c
 test_new_kind_SOURCES = examples/new_kind_example.c
 test_gb_realloc_SOURCES = examples/gb_realloc_example.c
-test_eratosthenes_SOURCES = examples/eratosthenes_example.c
 
 test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
 
