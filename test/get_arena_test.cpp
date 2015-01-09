@@ -26,6 +26,7 @@
 #include <vector>
 #include <gtest/gtest.h>
 #include <omp.h>
+#include <pthread.h>
 #include "memkind_arena.h"
 
 class GetArenaTest: public :: testing::Test
@@ -49,6 +50,8 @@ TEST_F(GetArenaTest, test_thread_hash)
     unsigned int thread_idx, idx;
     int err = 0;
     int max_collisions, collisions, i;
+
+    pthread_once(&(MEMKIND_HBW->init_once), MEMKIND_HBW->ops->init_once);
 
 #pragma omp parallel shared(arena_idx) private(thread_idx)
 {
