@@ -45,7 +45,6 @@ protected:
 
 
 TEST_F(MemkindPmttTest, NodeBandwidthSize) {
-    //FILE *pipe = NULL;
     size_t NUMA_NUM_NODES = 2;
     static const char *MOCK_NBW_PATH = "/tmp/pmtt-test/node-bandwidth";
     char pmtt_parser_exe_path[64] = "/usr/sbin/memkind-pmtt";
