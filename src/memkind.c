@@ -22,6 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sys/param.h>
+#include <sys/mman.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,6 +32,9 @@
 #include <pthread.h>
 #include <errno.h>
 #include <sys/mman.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <jemalloc/jemalloc.h>
 
 #include "memkind.h"
@@ -37,6 +43,7 @@
 #include "memkind_arena.h"
 #include "memkind_hbw.h"
 #include "memkind_gbtlb.h"
+#include "memkind_pmem.h"
 
 
 static struct memkind MEMKIND_DEFAULT_STATIC = {
@@ -153,6 +160,8 @@ static struct memkind_registry memkind_registry_g = {
     PTHREAD_MUTEX_INITIALIZER
 };
 
+static size_t Chunksize = 0;
+
 static int memkind_get_kind_for_free(void *ptr, struct memkind **kind);
 
 /* Declare weak symbols for alloctor decorators */
@@ -204,7 +213,7 @@ void memkind_error_message(int err, char *msg, size_t size)
             strncpy(msg, "<memkind> Invalid input arguments to memkind routine", size);
             break;
         case MEMKIND_ERROR_TOOMANY:
-            snprintf(msg, size, "<memkind> Attempted to inizailze more than maximum (%i) number of kinds", MEMKIND_MAX_KIND);
+            snprintf(msg, size, "<memkind> Attempted to initialize more than maximum (%i) number of kinds", MEMKIND_MAX_KIND);
             break;
         case MEMKIND_ERROR_RUNTIME:
             strncpy(msg, "<memkind> Unspecified run-time error", size);
@@ -501,4 +510,109 @@ static int memkind_get_kind_for_free(void *ptr, struct memkind **kind)
         }
     }
     return 0;
+}
+
+static int memkind_tmpfile(const char *dir, size_t size, int *fd, void **addr)
+{
+    static char template[] = "/memkind.XXXXXX";
+    int err = 0;
+    int oerrno;
+
+    char fullname[strlen(dir) + sizeof (template)];
+    (void) strcpy(fullname, dir);
+    (void) strcat(fullname, template);
+
+    sigset_t set, oldset;
+    sigfillset(&set);
+    (void) sigprocmask(SIG_BLOCK, &set, &oldset);
+
+    if ((*fd = mkstemp(fullname)) < 0) {
+        err = MEMKIND_ERROR_RUNTIME;
+        goto exit;
+    }
+
+    (void) unlink(fullname);
+    (void) sigprocmask(SIG_SETMASK, &oldset, NULL);
+
+    if (ftruncate(*fd, size) != 0) {
+        err = MEMKIND_ERROR_RUNTIME;
+        goto exit;
+    }
+
+    *addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, *fd, 0);
+    if (*addr == MAP_FAILED) {
+        err = MEMKIND_ERROR_RUNTIME;
+        goto exit;
+    }
+
+    return err;
+
+exit:
+    oerrno = errno;
+    (void) sigprocmask(SIG_SETMASK, &oldset, NULL);
+    if (*fd != -1) {
+        (void) close(*fd);
+    }
+    *fd = -1;
+    *addr = NULL;
+    errno = oerrno;
+    return err;
+}
+
+int memkind_create_pmem(const char *dir, size_t max_size,
+        struct memkind **kind)
+{
+    int err = 0;
+    int oerrno;
+
+    size_t s = sizeof (Chunksize);
+
+    if (Chunksize == 0) {
+        err = jemk_mallctl("opt.lg_chunk", &Chunksize, &s, NULL, 0);
+        if (err) {
+            return MEMKIND_ERROR_MALLCTL;
+        }
+        Chunksize = 1 << Chunksize; /* 2^N */
+    }
+
+    if (max_size < MEMKIND_PMEM_MIN_SIZE) {
+        return MEMKIND_ERROR_INVALID;
+    }
+
+    /* round up to a multiple of jemalloc chunk size */
+    max_size = roundup(max_size, Chunksize);
+
+    int fd = -1;
+    void *addr;
+    char name[16];
+
+    err = memkind_tmpfile(dir, max_size, &fd, &addr);
+    if (err) {
+        goto exit;
+    }
+
+    snprintf(name, sizeof (name), "pmem%08x", fd);
+
+    err = memkind_create(&MEMKIND_PMEM_OPS, name, kind);
+    if (err) {
+        goto exit;
+    }
+
+    void *aligned_addr = (void *)roundup((uintptr_t)addr, Chunksize);
+    struct memkind_pmem *priv = (*kind)->priv;
+
+    priv->fd = fd;
+    priv->addr = addr;
+    priv->max_size = max_size;
+    priv->offset = (uintptr_t)aligned_addr - (uintptr_t)addr;
+
+    return err;
+
+exit:
+    oerrno = errno;
+    if (fd != -1) {
+        (void) close(fd);
+    }
+    errno = oerrno;
+    return err;
 }

@@ -175,6 +175,7 @@ fi
 %{_includedir}/memkind_gbtlb.h
 %{_includedir}/memkind_hbw.h
 %{_includedir}/memkind_hugetlb.h
+%{_includedir}/memkind_pmem.h
 %{_libdir}/libmemkind.so.0.0.1
 %{_libdir}/libmemkind.so.0
 %{_libdir}/libmemkind.so
@@ -191,6 +192,7 @@ fi
 %doc %{_mandir}/man3/memkind_gbtlb.3.gz
 %doc %{_mandir}/man3/memkind_hbw.3.gz
 %doc %{_mandir}/man3/memkind_hugetlb.3.gz
+%doc %{_mandir}/man3/memkind_pmem.3.gz
 $(extra_files)
 
 %changelog

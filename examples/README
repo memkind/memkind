@@ -11,3 +11,4 @@ Pass --help to stream_memkind for the available options.  There is
 also an example of how to create user defined kinds.  This example
 creates kinds which isolate allocations to a single NUMA node each
 backed by a single arena.
+The pmem_example.c demonstrates how to create a file-backed memkind.

@@ -51,7 +51,9 @@ memkind \- Heap manager that enables allocations to memory with different proper
 .sp
 .B "KIND MANAGMENT:"
 .br
-.BI "int memkind_create(const struct memkind_ops " "*ops" ", const char " "*name " ", memkind_t " "*kind" );
+.BI "int memkind_create(const struct memkind_ops " "*ops" ", const char " "*name" ", memkind_t " "*kind" );
+.br
+.BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
 .br
 .BI "int memkind_finalize(void);"
 .br
@@ -105,7 +107,7 @@ The functions described in this section define a heap manager with an
 interface modeled on the ISO C standard API's, except that the user
 must specify the
 .I kind
-of memory with the first arguement to each function.  See the
+of memory with the first argument to each function.  See the
 .B KINDS
 section below for a full description of the implemented kinds.
 .PP
@@ -284,6 +286,55 @@ section.  See the
 .B SEE ALSO
 section for the list of memkind header files that implement the built-in
 operations: each header has a man page.
+.PP
+.BR memkind_create_pmem ()
+is a convenience function used to create a file-backed kind of memory.
+It allocates a temporary file in the given directory
+.IR dir .
+The file is created in a fashion similar to
+.BR tmpfile (3),
+so that the file name does not appear when the directory is listed and
+the space is automatically freed when the program terminates.
+The file is truncated to a size of
+.I max_size
+bytes and the resulting space is memory-mapped.  Then, the actual pmem
+.I kind
+is created by calling 
+.BR memkind_create ()
+with a unique
+.I name
+string ("pmemXXXXXXXX"), and the pointer to
+.BR MEMKIND_PMEM_OPS
+as
+.I ops
+argument.
+.br
+Note that the actual file system space is not allocated immediately, but only
+on a call to
+.BR memkind_pmem_mmap ()
+(see
+.BR memkind_pmem (3)).
+This allows to create a pmem memkind of a pretty large size without the
+need to reserve in advance the corresponding file system space for the entire
+heap.  The minimum
+.I max_size
+value allowed by the library is defined in
+.B <memkind_pmem.h>
+as
+.BR MEMKIND_PMEM_MIN_SIZE .
+Calling
+.BR memkind_create_pmem ()
+with a size smaller than that will return an error.
+The maximum allowed size is not limited by
+.BR memkind ,
+but by the file system specified by the
+.I dir
+argument.
+The
+.I max_size
+passed in is the raw size of the memory pool and
+.B jemalloc
+will use some of that space for its own metadata.
 .PP
 .BR memkind_finalize ()
 releases all resources associated with the memkind library including
@@ -514,16 +565,6 @@ to a value appropriate for passing to the
 system call for the
 .IR kind .
 .PP
-.BI "int ops.get_mmap_file(memkind_t " "kind" ", int " "*fd" ", off_t " "*offset" );
-shall set
-.I fd
-to the file descriptor and
-.I offset
-to the file offset appropriate for passing to the
-.IR mmap (2)
-system call for the
-.IR kind .
-.PP
 .BI "int ops.get_mbind_mode(memkind_t " "kind" ", int " "*mode" );
 .br
 shall set
@@ -659,6 +700,12 @@ Same as
 except that the pages that support the allocation is interleaved
 across all high bandwidth nodes and transparent huge pages are
 disabled.
+.B MEMKIND_PMEM
+Allocate from file-backed heap.  If the amount of allocated memory exceeds
+the total size of memory-mapped file associated with given kind, or if the actual
+file system space cannot be allocated
+.I errno
+is set to ENOMEM and the allocated poitner is set to NULL.
 .SH "ERRORS"
 .TP
 .BR memkind_posix_memalign ()
@@ -778,4 +825,5 @@ Copyright (C) 2014, 2015 Intel Corporation. All rights reserved.
 .BR memkind_arena (3),
 .BR memkind_hbw (3),
 .BR memkind_hugetlb (3),
-.BR memkind_gbtlb (3)
+.BR memkind_gbtlb (3),
+.BR memkind_pmem (3)

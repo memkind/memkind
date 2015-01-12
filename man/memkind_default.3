@@ -21,7 +21,7 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "MEMKIND_DEFAULT" 3 "2015-01-09" "Intel Corporation" "MEMKIND_DEFAULT" \" -*- nroff -*-
+.TH "MEMKIND_DEFAULT" 3 "2015-02-12" "Intel Corporation" "MEMKIND_DEFAULT" \" -*- nroff -*-
 .SH "NAME"
 memkind_default.h \- default implementations for memkind operations.
 .SH "SYNOPSIS"
@@ -111,7 +111,7 @@ allocations described in
 can use this function for freeing.
 .PP
 .BR memkind_default_mmap ()
-This calls the ops->get_mmap_flags() and ops->get_mmap_file()
+This calls the ops->get_mmap_flags()
 operations for the kind, or falls back on the default implementations
 if the function pointers are NULL.  The results of these calls are
 passed to the
@@ -210,6 +210,7 @@ Copyright (C) 2014, 2015 Intel Corporation. All rights reserved.
 .BR memkind_hbw (3),
 .BR memkind_hugetlb (3),
 .BR memkind_gbtlb (3),
+.BR memkind_pmem (3),
 .BR jemalloc (3),
 .BR mbind (2),
 .BR mmap (2)

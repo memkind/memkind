@@ -29,6 +29,7 @@ noinst_PROGRAMS += examples/hello_memkind \
                    examples/stream \
                    examples/stream_memkind \
                    examples/new_kind \
+                   examples/pmem_memkind \
                    examples/gb_realloc \
                    examples/numakind_test \
                    # end
@@ -46,6 +47,7 @@ examples_filter_memkind_LDADD = libmemkind.la
 examples_stream_LDADD = libmemkind.la
 examples_stream_memkind_LDADD = libmemkind.la
 examples_new_kind_LDADD = libmemkind.la
+examples_pmem_memkind_LDADD = libmemkind.la
 examples_gb_realloc_LDADD = libmemkind.la
 examples_numakind_test_LDADD = examples/libnumakind.la libmemkind.la
 
@@ -57,6 +59,7 @@ examples_filter_memkind_SOURCES = examples/filter_example.c
 examples_stream_SOURCES = examples/stream_example.c
 examples_stream_memkind_SOURCES = examples/stream_example.c
 examples_new_kind_SOURCES = examples/new_kind_example.c
+examples_pmem_memkind_SOURCES = examples/pmem_example.c
 examples_gb_realloc_SOURCES = examples/gb_realloc_example.c
 examples_numakind_test_SOURCES = examples/numakind_test.c
 examples_libnumakind_la_SOURCES = examples/numakind.c examples/numakind.h examples/numakind_macro.h

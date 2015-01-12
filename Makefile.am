@@ -34,6 +34,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_gbtlb.c \
                         src/memkind_hbw.c \
                         src/memkind_hugetlb.c \
+                        src/memkind_pmem.c \
                         src/actbl1.h \
                         src/actbl2.h \
                         src/actbl3.h \
@@ -51,6 +52,7 @@ include_HEADERS = src/hbwmalloc.h \
                   src/memkind.h \
                   src/memkind_hbw.h \
                   src/memkind_hugetlb.h \
+                  src/memkind_pmem.h \
                   # end
 
 sbin_PROGRAMS = memkind-pmtt
@@ -236,6 +238,7 @@ dist_man_MANS = man/hbwmalloc.3 \
                 man/memkind_gbtlb.3 \
                 man/memkind_hbw.3 \
                 man/memkind_hugetlb.3 \
+                man/memkind_pmem.3 \
                 # end
 
 CLEANFILES = memkind-$(VERSION).spec
