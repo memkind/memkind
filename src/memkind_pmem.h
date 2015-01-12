@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,32 +22,47 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef memkind_default_include_h
-#define memkind_default_include_h
+#ifndef memkind_pmem_include_h
+#define memkind_pmem_include_h
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include <pthread.h>
+
 #include "memkind.h"
+#include "memkind_default.h"
+#include "memkind_arena.h"
 
-int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
-int memkind_default_destroy(struct memkind *kind);
-void *memkind_default_malloc(struct memkind *kind, size_t size);
-void *memkind_default_calloc(struct memkind *kind, size_t num, size_t size);
-int memkind_default_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
-void *memkind_default_realloc(struct memkind *kind, void *ptr, size_t size);
-void memkind_default_free(struct memkind *kind, void *ptr);
-void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size);
-int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size);
-int memkind_default_get_mmap_flags(struct memkind *kind, int *flags);
-int memkind_default_get_mbind_mode(struct memkind *kind, int *mode);
-int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode);
-int memkind_interleave_get_mbind_mode(struct memkind *kind, int *mode);
-int memkind_nohugepage_madvise(struct memkind *kind, void *addr, size_t size);
-int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free);
-int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
+#define	MEMKIND_PMEM_MIN_SIZE (1024 * 1024 * 16)
 
-extern const struct memkind_ops MEMKIND_DEFAULT_OPS;
+int memkind_pmem_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
+int memkind_pmem_destroy(struct memkind *kind);
+void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size);
+int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags);
+int memkind_pmem_get_size(struct memkind *kind, size_t *total, size_t *free);
+
+struct memkind_pmem {
+    int fd;
+    void *addr;
+    off_t offset;
+    size_t max_size;
+    pthread_mutex_t pmem_lock;
+};
+
+static const struct memkind_ops MEMKIND_PMEM_OPS = {
+    .create = memkind_pmem_create,
+    .destroy = memkind_pmem_destroy,
+    .malloc = memkind_arena_malloc,
+    .calloc = memkind_arena_calloc,
+    .posix_memalign = memkind_arena_posix_memalign,
+    .realloc = memkind_arena_realloc,
+    .free = memkind_default_free,
+    .mmap = memkind_pmem_mmap,
+    .get_mmap_flags = memkind_pmem_get_mmap_flags,
+    .get_arena = memkind_thread_get_arena,
+    .get_size = memkind_pmem_get_size,
+};
 
 #ifdef __cplusplus
 }

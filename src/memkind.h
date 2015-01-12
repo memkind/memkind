@@ -99,7 +99,6 @@ struct memkind_ops {
     int (* mbind)(struct memkind *kind, void *ptr, size_t size);
     int (* madvise)(struct memkind *kind, void *addr, size_t size);
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
-    int (* get_mmap_file)(struct memkind *kind, int *fd, off_t *offset);
     int (* get_mbind_mode)(struct memkind *kind, int *mode);
     int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
     int (* get_arena)(struct memkind *kind, unsigned int *arena);
@@ -134,6 +133,9 @@ int memkind_finalize(void);
 /* Create a new kind */
 int memkind_create(const struct memkind_ops *ops, const char *name, memkind_t *kind);
 
+/* Create a new PMEM (file-backed) kind of given size on top of a temporary file */
+int memkind_create_pmem(const char *dir, size_t max_size, memkind_t *kind);
+
 /* Query the number of kinds instantiated */
 int memkind_get_num_kind(int *num_kind);
 
@@ -143,10 +145,10 @@ int memkind_get_kind_by_partition(int partition, memkind_t *kind);
 /* Get kind given the name of the kind */
 int memkind_get_kind_by_name(const char *name, memkind_t *kind);
 
-/* Get the amount in bytes of total and free memory of the NUMA nodes assciated with the kind */
+/* Get the amount in bytes of total and free memory of the NUMA nodes associated with the kind */
 int memkind_get_size(memkind_t kind, size_t *total, size_t *free);
 
-/* returns 0 if memory kind is availble else returns error code */
+/* returns 0 if memory kind is available else returns error code */
 int memkind_check_available(memkind_t kind);
 
 /* HEAP MANAGEMENT INTERFACE */

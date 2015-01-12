@@ -124,8 +124,6 @@ void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
     void *result = MAP_FAILED;
     int err = 0;
     int flags;
-    int fd;
-    off_t offset;
 
     if (kind->ops->get_mmap_flags) {
         err = kind->ops->get_mmap_flags(kind, &flags);
@@ -134,15 +132,7 @@ void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
         err = memkind_default_get_mmap_flags(kind, &flags);
     }
     if (!err) {
-        if (kind->ops->get_mmap_file) {
-            err = kind->ops->get_mmap_file(kind, &fd, &offset);
-        }
-        else {
-            err = memkind_default_get_mmap_file(kind, &fd, &offset);
-        }
-    }
-    if (!err) {
-        result = mmap(addr, size, PROT_READ | PROT_WRITE, flags, fd, offset);
+        result = mmap(addr, size, PROT_READ | PROT_WRITE, flags, -1, 0);
     }
     if (result != MAP_FAILED && kind->ops->mbind) {
         err = kind->ops->mbind(kind, result, size);
@@ -186,13 +176,6 @@ int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size)
 int memkind_default_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_PRIVATE | MAP_ANONYMOUS;
-    return 0;
-}
-
-int memkind_default_get_mmap_file(struct memkind *kind, int *fd, off_t *offset)
-{
-    *fd = -1;
-    *offset = 0;
     return 0;
 }
 

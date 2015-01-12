@@ -27,6 +27,7 @@ examples/numakind.c
 examples/numakind.h
 examples/numakind_test.c
 examples/memkind_decorator_debug.c
+examples/pmem_example.c
 init.d/memkind
 man/hbwmalloc.3
 man/memkind.3
@@ -35,6 +36,7 @@ man/memkind_default.3
 man/memkind_gbtlb.3
 man/memkind_hbw.3
 man/memkind_hugetlb.3
+man/memkind_pmem.3
 memkind.spec.mk
 src/actbl.h
 src/actbl1.h
@@ -56,6 +58,8 @@ src/memkind_hbw.h
 src/memkind_hugetlb.c
 src/memkind_hugetlb.h
 src/memkind_pmtt.c
+src/memkind_pmem.c
+src/memkind_pmem.h
 test/Makefile.mk
 test/check.sh
 test/test.sh
