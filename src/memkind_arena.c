@@ -37,6 +37,7 @@
 #include <sched.h>
 #include <smmintrin.h>
 
+#include "config_tls.h"
 #include "memkind.h"
 #include "memkind_default.h"
 #include "memkind_arena.h"
@@ -69,9 +70,11 @@ int memkind_arena_create_map(struct memkind *kind)
             kind->arena_map_len = numa_num_configured_cpus() * 4;
         }
     }
+#ifndef MEMKIND_TLS
     if (kind->ops->get_arena == memkind_thread_get_arena) {
         pthread_key_create(&(kind->arena_key), je_free);
     }
+#endif
 
     if (kind->arena_map_len) {
         kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int) * kind->arena_map_len);
@@ -111,9 +114,11 @@ int memkind_arena_destroy(struct memkind *kind)
         je_free(kind->arena_map);
         kind->arena_map = NULL;
     }
+#ifndef MEMKIND_TLS
     if (kind->ops->get_arena == memkind_thread_get_arena) {
         pthread_key_delete(kind->arena_key);
     }
+#endif
     memkind_default_destroy(kind);
     return 0;
 }
@@ -208,6 +213,20 @@ int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena)
     return err;
 }
 
+#ifdef MEMKIND_TLS
+int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena)
+{
+    static __thread unsigned int MEMKIND_TLS_MODEL arena_tls = UINT_MAX;
+
+    if (arena_tls == UINT_MAX) {
+        if (kind->arena_map != NULL) {
+            arena_tls = _mm_crc32_u64(0, (uint64_t)pthread_self());
+        }
+    }
+    *arena = kind->arena_map[arena_tls % kind->arena_map_len];
+    return 0;
+}
+#else
 int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena)
 {
     int err = 0;
@@ -234,6 +253,7 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena)
     }
     return err;
 }
+#endif /* MEMKIND_TLS */
 
 static void *je_mallocx_check(size_t size, int flags)
 {
