@@ -29,6 +29,7 @@ AC_PREREQ([2.62])
 AC_INIT([memkind],m4_esyscmd([tr -d '\n' < VERSION]),[christopher.m.cantalupo@intel.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects tar-ustar])
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([config_tls.h])
 
 memkind_abi_version=0:1:0
 AC_SUBST(memkind_abi_version)
@@ -73,6 +74,61 @@ if test "x$with_numa_lib" != x; then
   LD_LIBRARY_PATH="$with_numa_lib:$LD_LIBRARY_PATH"
   LDFLAGS="$LDFLAGS -L$with_numa_lib"
 fi
+
+AC_PROG_CC
+
+# Check for tls_model attribute support
+SAVED_CFLAGS="${CFLAGS}"
+CFLAGS="$CFLAGS -Werror"
+AC_MSG_CHECKING([for tls_model attribute support])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+[[
+    static __thread int __attribute__((tls_model("initial-exec"))) x;
+]],
+[[
+    x = 1234;
+]])],
+    [AC_MSG_RESULT([yes])
+     tls_model="1"],
+    [AC_MSG_RESULT([no])
+     tls_model="0"])
+
+CFLAGS="${SAVED_CFLAGS}"
+if test "x${tls_model}" = "x1" ; then
+  AC_DEFINE([MEMKIND_TLS_MODEL],
+            [__attribute__((tls_model("initial-exec")))], [TLS model attribute])
+else
+  AC_DEFINE([MEMKIND_TLS_MODEL], [ ], [TLS model attribute])
+fi
+
+AC_ARG_ENABLE([tls],
+  [AS_HELP_STRING([--disable-tls], [Disable thread-local storage (__thread keyword)])],
+[if test "x$enable_tls" = "xno" ; then
+  enable_tls="0"
+else
+  enable_tls="1"
+fi
+],
+[enable_tls="1"]
+)
+if test "x${enable_tls}" = "x1" ; then
+AC_MSG_CHECKING([for TLS support])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+[[
+    __thread int x;
+]], [[
+    x = 1234;
+]])],
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no])
+    enable_tls="0")
+fi
+if test "x${enable_tls}" = "x1" ; then
+  AC_DEFINE([MEMKIND_TLS], [ ], [Enables TLS usage for mapping arenas to threads])
+#  CFLAGS="$CFLAGS -DMEMKIND_TLS"
+#  CXXFLAGS="$CXXFLAGS -DMEMKIND_TLS"
+fi
+AC_SUBST([enable_tls])
 
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING([--enable-debug], [Build debugging code and compile with -O0 -g])],
@@ -169,4 +225,5 @@ AC_MSG_RESULT([datadir            : ${datadir}])
 AC_MSG_RESULT([mandir             : ${mandir}])
 AC_MSG_RESULT([])
 AC_MSG_RESULT([debug              : ${enable_debug}])
+AC_MSG_RESULT([tls                : ${enable_tls}])
 AC_MSG_RESULT([===============================================================================])

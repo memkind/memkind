@@ -11,6 +11,7 @@
 /config.sub
 /configure
 /depcomp
+/config_tls.h
 /gtest-1.7.0/
 /gtest-1.7.0.zip
 /gtest-all.o

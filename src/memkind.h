@@ -80,7 +80,9 @@ struct memkind {
     pthread_once_t init_once;
     int arena_map_len;
     unsigned int *arena_map;
+#ifndef MEMKIND_TLS
     pthread_key_t arena_key;
+#endif
     void *priv;
 };
 
