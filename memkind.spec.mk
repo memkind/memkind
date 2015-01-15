@@ -59,6 +59,12 @@ BuildRequires: numactl-devel
 BuildRequires: jemalloc-devel
 %endif
 
+%if %{defined suse_version}
+%define docdir %{_defaultdocdir}/memkind
+%else
+%define docdir %{_defaultdocdir}/memkind-%{version}
+%endif
+
 %description
 The memkind library is a user extensible heap manager built on top of
 jemalloc which enables control of memory characteristics and a
@@ -92,15 +98,9 @@ package installs header files.
 
 %build
 test -f configure || ./autogen.sh
-%if %{defined suse_version}
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} \
     --includedir=%{_includedir} --sbindir=%{_sbindir} \
-    --mandir=%{_mandir} --docdir=%{_docdir}/memkind
-%else
-./configure --prefix=%{_prefix} --libdir=%{_libdir} \
-    --includedir=%{_includedir} --sbindir=%{_sbindir} \
-    --mandir=%{_mandir} --docdir=%{_docdir}/memkind-%{version}
-%endif
+    --mandir=%{_mandir} --docdir=%{docdir}
 $(make_prefix)%{__make} $(make_postfix)
 
 %install
@@ -158,17 +158,10 @@ fi
 %{_libdir}/libmemkind.so
 %{_sbindir}/memkind-pmtt
 %{_initddir}/memkind
-%if %{defined suse_version}
-%dir %{_docdir}/memkind
-%doc %{_docdir}/memkind/README
-%doc %{_docdir}/memkind/COPYING
-%doc %{_docdir}/memkind/VERSION
-%else
-%dir %{_docdir}/memkind-%{version}
-%doc %{_docdir}/memkind-%{version}/README
-%doc %{_docdir}/memkind-%{version}/COPYING
-%doc %{_docdir}/memkind-%{version}/VERSION
-%endif
+%dir %{docdir}
+%doc %{docdir}/README
+%doc %{docdir}/COPYING
+%doc %{docdir}/VERSION
 %doc %{_mandir}/man3/hbwmalloc.3.gz
 %doc %{_mandir}/man3/memkind.3.gz
 %doc %{_mandir}/man3/memkind_arena.3.gz
