@@ -26,7 +26,7 @@
 
 int hexDump2Bin(char const *hexDumpFile);
 int parse_node_bandwidth(size_t num_bandwidth, int *bandwidth,
-                                const char *bandwidth_path);
+                         const char *bandwidth_path);
 static const char *MOCK_PMTT_PATH = "/tmp/mock-pmtt.aml";
 
 class MemkindPmttTest: public :: testing::Test
@@ -44,7 +44,8 @@ protected:
 };
 
 
-TEST_F(MemkindPmttTest, NodeBandwidthSize) {
+TEST_F(MemkindPmttTest, NodeBandwidthSize)
+{
     size_t NUMA_NUM_NODES = 2;
     static const char *MOCK_NBW_PATH = "/tmp/pmtt-test/node-bandwidth";
     char pmtt_parser_exe_path[64] = "/usr/sbin/memkind-pmtt";
@@ -68,7 +69,7 @@ TEST_F(MemkindPmttTest, NodeBandwidthSize) {
     }
 
     snprintf(pmtt_parser_exe,sizeof(pmtt_parser_exe),"%s %s %s",
-        pmtt_parser_exe_path, MOCK_PMTT_PATH, MOCK_NBW_PATH);
+             pmtt_parser_exe_path, MOCK_PMTT_PATH, MOCK_NBW_PATH);
 
     printf("Running memkind_pmtt with args: %s\n", pmtt_parser_exe);
     rv = system(pmtt_parser_exe);
@@ -77,8 +78,7 @@ TEST_F(MemkindPmttTest, NodeBandwidthSize) {
     rv = parse_node_bandwidth(NUMA_NUM_NODES, bandwidth, MOCK_NBW_PATH);
     EXPECT_EQ(0, rv);
 
-    for(size_t i=0; i < NUMA_NUM_NODES; i++)
-    {
+    for(size_t i=0; i < NUMA_NUM_NODES; i++) {
         EXPECT_EQ(bandwidth[i], MEM_CTRLS_BW[i]);
     }
 
@@ -87,7 +87,7 @@ TEST_F(MemkindPmttTest, NodeBandwidthSize) {
 }
 
 int parse_node_bandwidth(size_t num_bandwidth, int *bandwidth,
-                                const char *bandwidth_path)
+                         const char *bandwidth_path)
 {
     FILE *fid = NULL;
     size_t nread = 0;
@@ -106,7 +106,8 @@ int parse_node_bandwidth(size_t num_bandwidth, int *bandwidth,
 }
 
 
-int hexDump2Bin(char const *hexDumpFile) {
+int hexDump2Bin(char const *hexDumpFile)
+{
     char cmd[128];
     int rv = 0;
     snprintf(cmd,sizeof(cmd),"xxd -r %s %s",hexDumpFile, MOCK_PMTT_PATH);

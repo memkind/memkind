@@ -50,7 +50,7 @@ int main (int argc, char *argv[])
         if (ptr == NULL) {
             fprintf(stderr, "ERROR: hbw_realloc()\n");
             err = -1;
-	}
+        }
     }
     if (!err) {
         memset (ptr, 0, 102400);

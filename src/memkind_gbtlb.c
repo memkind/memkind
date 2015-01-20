@@ -365,8 +365,8 @@ static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)
                        MAP_PRIVATE | MAP_ANONYMOUS | flags,
                        -1, 0);
         if (*result == MAP_FAILED) {
-           err = MEMKIND_ERROR_MMAP;
-           *result = NULL;
+            err = MEMKIND_ERROR_MMAP;
+            *result = NULL;
         }
     }
     return err;

@@ -31,22 +31,22 @@
 int main(int argc, char **argv)
 {
     int err = 0;
-#pragma omp parallel shared(err)
-{
-    char *data;
-    int status;
+    #pragma omp parallel shared(err)
+    {
+        char *data;
+        int status;
 
-    data = numakind_malloc(1024);
-    if (!data) {
-        fprintf(stderr, "ERROR: numakind_malloc()\n");
-        err = 1;
+        data = numakind_malloc(1024);
+        if (!data) {
+            fprintf(stderr, "ERROR: numakind_malloc()\n");
+            err = 1;
+        }
+        else {
+            data[0] = '\0';
+            move_pages(0, 1, (void **)&data, NULL, &status, MPOL_MF_MOVE);
+            fprintf(stdout, "omp_thread: %.4d numa_node: %.4d\n", omp_get_thread_num(), status);
+        }
+        numakind_free(data);
     }
-    else {
-        data[0] = '\0';
-        move_pages(0, 1, (void **)&data, NULL, &status, MPOL_MF_MOVE);
-        fprintf(stdout, "omp_thread: %.4d numa_node: %.4d\n", omp_get_thread_num(), status);
-    }
-    numakind_free(data);
-}
     return err;
 }

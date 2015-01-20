@@ -41,7 +41,10 @@ protected:
 
 };
 
-bool uint_comp(unsigned int a, unsigned int b) { return (a < b); }
+bool uint_comp(unsigned int a, unsigned int b)
+{
+    return (a < b);
+}
 
 TEST_F(GetArenaTest, test_thread_hash)
 {
@@ -53,11 +56,11 @@ TEST_F(GetArenaTest, test_thread_hash)
 
     pthread_once(&(MEMKIND_HBW->init_once), MEMKIND_HBW->ops->init_once);
 
-#pragma omp parallel shared(arena_idx) private(thread_idx)
-{
-    thread_idx = omp_get_thread_num();
-    err = memkind_thread_get_arena(MEMKIND_HBW, &(arena_idx[thread_idx]));
-}
+    #pragma omp parallel shared(arena_idx) private(thread_idx)
+    {
+        thread_idx = omp_get_thread_num();
+        err = memkind_thread_get_arena(MEMKIND_HBW, &(arena_idx[thread_idx]));
+    }
     ASSERT_TRUE(err == 0);
     std::sort(arena_idx.begin(), arena_idx.end(), uint_comp);
     idx = arena_idx[0];
