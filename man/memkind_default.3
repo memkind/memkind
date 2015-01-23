@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 Intel Corporation.
+.\" Copyright (C) 2014, 2015 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "MEMKIND_DEFAULT" 3 "2014-09-22" "Intel Corporation" "MEMKIND_DEFAULT" \" -*- nroff -*-
+.TH "MEMKIND_DEFAULT" 3 "2015-01-09" "Intel Corporation" "MEMKIND_DEFAULT" \" -*- nroff -*-
 .SH "NAME"
 memkind_default.h \- default implementations for memkind operations.
 .SH "SYNOPSIS"
@@ -43,6 +43,8 @@ memkind_default.h \- default implementations for memkind operations.
 .BI "void *memkind_default_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
 .br
 .BI "void memkind_default_free(struct memkind " "*kind" ", void " "*ptr" );
+.br
+.BI "void *memkind_default_mmap(struct memkind " "*kind" ", void " "*addr" ", size_t " "size" );
 .br
 .BI "int memkind_default_mbind(struct memkind " "*kind" ", void " "*ptr" ", size_t " "len" );
 .br
@@ -104,6 +106,23 @@ allocations described in
 .BR memkind_arena (3)
 can use this function for freeing.
 .PP
+.BR memkind_default_mmap ()
+This calls the ops->get_mmap_flags() and ops->get_mmap_file()
+operations for the kind, or falls back on the default implementations
+if the function pointers are NULL.  The results of these calls are
+passed to the
+.BR mmap (2)
+call to allocate pages from the operating system.  The
+.I addr
+is the hint passed through to
+.BR mmap (2)
+and
+.I size
+is the size of the buffer to be allocated.  The return value is the
+allocated buffer or
+.B MAP_FAILED
+in the case of an error.
+.PP
 .BR memkind_default_mbind ()
 makes calls the kind's
 .BR ops.get_mbind_nodemask ()
@@ -148,9 +167,9 @@ sums the values returned by
 .BR numa_node_size64 ()
 function for every NUMA node set by the
 .BR .get_node_mask ()
-operation.  If the 
+operation.  If the
 .I .get_node_mask
-pointer is 
+pointer is
 .B NULL
 then the values are summed for all NUMA nodes.
 .PP
@@ -161,7 +180,7 @@ to ensure that is abides by the POSIX requirements:
 alignment must be a power of 2 at least as large as
 .RB sizeof( "void *" ).
 .SH "COPYRIGHT"
-Copyright (C) 2014 Intel Corporation. All rights reserved.
+Copyright (C) 2014, 2015 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3),
 .BR memkind_arena (3),

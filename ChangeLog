@@ -1,3 +1,29 @@
+* Fri Jan 8 2015 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.2.0
+- Bumped memkind ABI version to 0:1:0.
+- Removed memkind_get_kind_for_free() from externally facing API's.  Instead if
+  memkind_free() is called with zero passed for the kind then
+  memkind_get_kind_for_free() is called internally.
+- Moved to single callback memkind_partition_mmap() to simplify
+  jemalloc modifications.
+- Added hooks for setting file descriptor and offset for mmap enabling
+  file-backed memory kinds.
+- Added a void pointer called "priv" to memkind structure for storing data for
+  user-defined kinds.
+- Removed call to sched_getcpu(), now thread id is hashed to determine the arena
+  index.
+- Fixed several issues with init.d/memkind script and spec file scriptlets that
+  are exposed by SLES-12.
+- Introduced an example library called numakind.
+  The numakind library will allocate from the closest NUMA node to a thread as
+  measured when that thread makes its first allocation call.
+- Fixed error handling in memkind_gbtlb_mmap() that could cause a segfault when
+  gigabyte pages are not available.
+- Added tests for PMTT parser.
+- Removed binary mock PMTT table from source code, replaced it with a hexdump.
+- Fixed a number of issues in test scripts which were suppressing errors.
+- Removed unnecessary includes from header files.
+- Better error checking in example code.
+- Documentation update and clean up.
 * Thu Nov 13 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.1.0
 - Increased test code coverage significantly.
 - Fixed bug in memkind_error_message() for MEMKIND_ERROR_TOOMANY.

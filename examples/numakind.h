@@ -22,27 +22,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef memkind_gbtlb_include_h
-#define memkind_gbtlb_include_h
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef numakind_include_h
+#define numakind_include_h
 
-#include "memkind.h"
+#include <stdlib.h>
 
-void *memkind_gbtlb_malloc(struct memkind *kind, size_t size);
-void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size);
-int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
-void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size);
-void memkind_gbtlb_free(struct memkind *kind, void *ptr);
-int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags);
-int memkind_gbtlb_check_addr(struct memkind *kind, void *addr);
+void *numakind_malloc(size_t size);
+void *numakind_calloc(size_t num, size_t size);
+int numakind_posix_memalign(void **memptr, size_t alignment, size_t size);
+void *numakind_realloc(void *ptr, size_t size);
+void numakind_free(void *ptr);
 
-extern const struct memkind_ops MEMKIND_HBW_GBTLB_OPS;
-extern const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS;
-extern const struct memkind_ops MEMKIND_GBTLB_OPS;
-
-#ifdef __cplusplus
-}
-#endif
 #endif

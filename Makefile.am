@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 Intel Corporation.
+#  Copyright (C) 2014, 2015 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -85,6 +85,8 @@ DISTCLEANFILES = VERSION
 bin_PROGRAMS =
 check_PROGRAMS =
 noinst_PROGRAMS =
+noinst_LTLIBRARIES =
+noinst_HEADERS =
 
 TESTS =
 XFAIL_TESTS =

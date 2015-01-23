@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 #include <sys/stat.h>
 
 
-static const int STRLEN = 512;
+enum {STRLEN = 512};
 // The include file actbl.h comes from acpica which is available from this URL:
 // https://acpica.org/sites/acpica/files/acpica-unix-20130517.tar.gz
 //
@@ -167,7 +167,7 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
         ACPI_PMTT_HEADER *buf_in, int *bytes_remaining)
 {
     int err = 0;
-    int i, j;
+    unsigned int i, j;
     struct memctlr_t *buf = (struct memctlr_t *)buf_in;
 
     if (buf->memctlr.Header.Type != ACPI_PMTT_TYPE_CONTROLLER) {
@@ -199,7 +199,7 @@ int memkind_pmtt(char *pmtt_path, char *bandwidth_path)
     FILE *fp = NULL;
     int *bandwidth = NULL;
     size_t nwrite;
-    char dir[STRLEN];
+    char dir[STRLEN] = {0};
 
     bandwidth = (int *)malloc(sizeof(int) * NUMA_NUM_NODES);
     if (bandwidth == NULL) {
@@ -212,7 +212,6 @@ int memkind_pmtt(char *pmtt_path, char *bandwidth_path)
         err = 1;
         goto exit;
     }
-    dir[STRLEN-1] = '\0';
     strncpy(dir, bandwidth_path, STRLEN - 1);
     dirname(dir);
     err = mkdir(dir, 0755);
@@ -252,6 +251,12 @@ exit:
     }
     if (bandwidth != NULL) {
         free(bandwidth);
+    }
+    if (err) {
+        unlink(bandwidth_path);
+        if(*dir) {
+            rmdir(dir);
+        }
     }
     return err;
 }

@@ -14,7 +14,7 @@ COLLABORATION AND WAS NOT ISSUED AS A RELEASED PRODUCT BY INTEL.
 LAST UPDATE
 -----------
 Christopher Cantalupo <christopher.m.cantalupo@intel.com>
-2014 November 13
+2015 January 9
 
 
 SUMMARY
@@ -68,7 +68,9 @@ RUN REQUIREMENTS
 Requires kernel patch introduced in Linux v3.11 that impacts
 functionality of the NUMA system calls.  This is patch is commit
 3964acd0dbec123aa0a621973a2a0580034b4788 in the linux-stable git
-repository from kernel.org.
+repository from kernel.org.  Red Hat has back-ported this patch to the
+v3.10 kernel in the RHEL 7.0 GA release, so RHEL 7.0 onward supports
+memkind even though this kernel version predates v3.11.
 
 To use the interfaces for obtaining 2MB and 1GB pages please be sure
 to follow the instructions here:

@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 Intel Corporation.
+.\" Copyright (C) 2014, 2015 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "MEMKIND" 3 "2014-09-22" "Intel Corporation" "MEMKIND" \" -*- nroff -*-
+.TH "MEMKIND" 3 "2015-01-09" "Intel Corporation" "MEMKIND" \" -*- nroff -*-
 .SH "NAME"
 memkind \- Heap manager that enables allocations to memory with different properties.
 .SH "SYNOPSIS"
@@ -44,16 +44,10 @@ memkind \- Heap manager that enables allocations to memory with different proper
 .br
 .BI "void memkind_free(memkind_t " "kind" ", void " "*ptr" );
 .br
-.BI "int memkind_get_kind_for_free(void " "*ptr" ", memkind_t " "*kind" );
-.br
 .sp
-.B "ALLOCATOR CALLBACK FUNCTIONS:"
+.B "ALLOCATOR CALLBACK FUNCTION:"
 .br
-.BI "int memkind_partition_check_available(int " "partition" );
-.br
-.BI "int memkind_partition_get_mmap_flags(int " "partition" ", int " "*flags" );
-.br
-.BI "int memkind_partition_mbind(int " "partition" ", void " "*addr" ", size_t " "len" );
+.BI "void *memkind_partition_mmap(int " "partition" ", void " "*addr" ", size_t " "size" );
 .sp
 .B "KIND MANAGMENT:"
 .br
@@ -206,64 +200,46 @@ was already called before, undefined behavior occurs.
 If
 .I ptr
 is  NULL, no operation is performed.
-For all currently supported kinds the value of
+The value of
 .B MEMKIND_DEFAULT
-or 0 can be given for the
-.IR kind .
-In the future there may be kinds introduced that will require that the
+can be given as the
+.I kind
+for all buffers allocated by a kind that leverages the jemalloc
+allocator.  This includes all interally defined kinds other than those
+that use gigabyte pages.  In cases where the kind is unknown in the
+context of the call to
+.BR memkind_free ()
+.B 0
+can be given as the
 .I kind
 specified to
 .BR memkind_free ()
-match the value given when the memory to be freed was allocated.
-.PP
-.BR memkind_get_kind_for_free ()
-sets the parameter
-.I kind
-to a value appropriate for passing to
-.BR memkind_free ()
-for the address
-.IR ptr .
-This method can be used in a case where the
-.I kind
-is unknown in the context of the call to
-.BR memkind_free ().
+but this will require a a look up that can be bypassed by specifying
+a non-zero value.
 .sp
-.B "ALLOCATOR CALLBACK FUNCTIONS:"
+.B "ALLOCATOR CALLBACK FUNCTION:"
 .br
 This section describes the memkind interface which is used internally
-by the heap manager interface.  For these API's the kind is determined
-by the partition index.  This enables the underlying heap manager to
-call routines with standard type arguments, and allows the heap
-manager implementation to be independent of the the specifics of the
+by the heap manager.  For this API the kind is determined by the
+partition index.  This enables the underlying heap manager to call
+routines with standard type arguments, and allows the heap manager
+implementation to be independent of the specifics of the
 .I memkind_t
-implementation.
+implementation.  Currently there is only one callback function.
 .PP
-.BR memkind_partition_check_available ()
-returns 0 if there is support on the system for the kind
-associated with the
-.I partition
-and an error code otherwise.
-.PP
-.BR memkind_partition_get_mmap_flags ()
-sets
-.I flags
-to the value appropriate for the kind associated with the
-.I partition
-when calling
-.BR mmap (2).
-.PP
-.BR memkind_partition_mbind ()
-is a wrapper around
-.BR mbind (2)
-that simplifies the interface so that the user specifies the
-.I partition
-associated with the kind of memory, the start address
-.I addr
-to be mapped, and the number of bytes
-.I len
-from that address to be mapped. This call is made after
+.BR memkind_partition_mmap ()
+which is a wrapper around the
 .BR mmap (2)
-by the heap manager on the memory that was mapped.
+system call.  The hint address
+.I addr
+and the length in bytes of the buffer to be
+allocated
+.I size
+are passed through to
+.BR mmap (2).
+The other
+.BR mmap (2)
+parameters are determined by the kind operations.
 .sp
 .B "KIND MANAGEMENT:"
 .br
@@ -434,23 +410,60 @@ shall implement
 .BR memkind_free (),
 as described above.
 .PP
-.BI "int ops.mbind(memkind_t " "kind" ", void " "*ptr" ", size_t " "len" );
+.BI "void *ops.mmap(memkind_t " "kind" ", void " "*addr" ", size_t " "size" );
+shall wrap the
+.BR mmap (2)
+and
+.BR mbind (2)
+system calls while passing
+.I addr
+and
+.I size
+through and determining all other parameters for
+.BR mmap (2)
+and
+.BR mbind (2)
+by calling other functions resolved by the
+.B kind.ops
+vtable.
+This function shall return a virtual address to the memory mapped, or
+.B MAP_FAILED
+as defined in
+.I <sys/mman.h>
+which is
+.IR "(void *) -1" .
+.PP
+.BI "int ops.mbind(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" );
 .br
 shall wrap the
-.BR mbind ()
+.BR mbind (2)
 system call and pass through
 the start address
 .I ptr
 to be mapped, and the number of bytes
-.I len
-from that address to be mapped.
+.I size
+from that address to be mapped.  The other parmeters to
+.BR mbind (2)
+shall be determined by calling other functions resolved by the
+.B kind.ops
+vtable.
 .PP
 .BI "int ops.get_mmap_flags(memkind_t " "kind" ", int " "*flags" );
 .br
 shall set
 .I flags
 to a value appropriate for passing to the
-.IR mmap ()
+.IR mmap (2)
+system call for the
+.IR kind .
+.PP
+.BI "int ops.get_mmap_file(memkind_t " "kind" ", int " "*fd" ", off_t " "*offset" );
+shall set
+.I fd
+to the file descriptor and
+.I offset
+to the file offset appropriate for passing to the
+.IR mmap (2)
 system call for the
 .IR kind .
 .PP
@@ -459,7 +472,7 @@ system call for the
 shall set
 .I mode
 to a value appropriate for passing to the
-.IR mmap ()
+.IR mmap (2)
 system call for the
 .IR kind .
 .PP
@@ -470,7 +483,7 @@ shall set the
 of length
 .I maxnode
 bits to a value appropriate for passing to the
-.IR mbind ()
+.IR mbind (2)
 system call for the
 .IR kind .
 .PP
@@ -495,14 +508,6 @@ as described above.
 shall return 0 if the
 .I kind
 is available on the system, and an error code if not.
-.PP
-.BI "int ops.check_alignment(memkind_t " "kind" ", size_t " "alignment" );
-.br
-shall return 0 if the
-.I alignment
-is appropriate for the
-.I kind
-and an error code if not.
 .PP
 .BI "int ops.check_addr(memkind_t " "kind" ", void " "*addr" );
 .br
@@ -621,12 +626,12 @@ Requested memory kind is not available
 .TP
 .B MEMKIND_ERROR_MBIND
 Call to
-.BR mbind ()
+.BR mbind (2)
 failed
 .TP
 .B MEMKIND_ERROR_MMAP
 Call to
-.BR mmap ()
+.BR mmap (2)
 failed
 .TP
 .B MEMKIND_ERROR_MEMALIGN
@@ -695,7 +700,7 @@ for parsing, so the syntax described in the
 .BR numa (3)
 man page for this routine applies: e.g 1-3,5 is a valid setting.
 .SH "COPYRIGHT"
-Copyright (C) 2014 Intel Corporation. All rights reserved.
+Copyright (C) 2014, 2015 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR malloc (3),
 .BR numa (3),

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@ extern "C" {
 #endif
 
 #include <pthread.h>
+#include <sys/types.h>
 
 enum memkind_const {
     MEMKIND_MAX_KIND = 512,
@@ -79,6 +80,8 @@ struct memkind {
     pthread_once_t init_once;
     int arena_map_len;
     unsigned int *arena_map;
+    pthread_key_t arena_key;
+    void *priv;
 };
 
 struct memkind_ops {
@@ -89,14 +92,15 @@ struct memkind_ops {
     int (* posix_memalign)(struct memkind *kind, void **memptr, size_t alignment, size_t size);
     void *(* realloc)(struct memkind *kind, void *ptr, size_t size);
     void (* free)(struct memkind *kind, void *ptr);
-    int (* mbind)(struct memkind *kind, void *ptr, size_t len);
+    void *(* mmap)(struct memkind *kind, void *addr, size_t size);
+    int (* mbind)(struct memkind *kind, void *ptr, size_t size);
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
+    int (* get_mmap_file)(struct memkind *kind, int *fd, off_t *offset);
     int (* get_mbind_mode)(struct memkind *kind, int *mode);
     int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
     int (* get_arena)(struct memkind *kind, unsigned int *arena);
     int (* get_size)(struct memkind *kind, size_t *total, size_t *free);
     int (* check_available)(struct memkind *kind);
-    int (* check_alignment)(struct memkind *kind, size_t alignment);
     int (* check_addr)(struct memkind *kind, void *addr);
     void (*init_once)(void);
 };
@@ -134,9 +138,6 @@ int memkind_get_kind_by_partition(int partition, memkind_t *kind);
 /* Get kind given the name of the kind */
 int memkind_get_kind_by_name(const char *name, memkind_t *kind);
 
-/* Get the kind associated with an virtual address which could be used for free */
-int memkind_get_kind_for_free(void *ptr, memkind_t *kind);
-
 /* Get the amount in bytes of total and free memory of the NUMA nodes assciated with the kind */
 int memkind_get_size(memkind_t kind, size_t *total, size_t *free);
 
@@ -161,16 +162,8 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size);
 /* Free memory allocated with the memkind API */
 void memkind_free(memkind_t kind, void *ptr);
 
-/* ALLOCATOR CALLBACK FUNCTIONS */
-
-/* returns 0 if memory kind associated with the partition is availble else returns error code */
-int memkind_partition_check_available(int partition);
-
-/* get flags for call to mmap for the memory kind associated with the partition */
-int memkind_partition_get_mmap_flags(int partition, int *flags);
-
-/* mbind to the nearest numa node of the memory kind associated with the partition */
-int memkind_partition_mbind(int partition, void *addr, size_t len);
+/* ALLOCATOR CALLBACK FUNCTION */
+void *memkind_partition_mmap(int partition, void *addr, size_t size);
 
 #ifdef __cplusplus
 }

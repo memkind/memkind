@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,23 +103,26 @@ int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
 
 void *hbw_realloc(void *ptr, size_t size)
 {
+    int i;
     memkind_t kind;
-    memkind_get_kind_for_free(ptr, &kind);
+    memkind_t gbtlb_kinds[3] = {MEMKIND_HBW_GBTLB, MEMKIND_HBW_PREFERRED_GBTLB, MEMKIND_GBTLB};
 
-    if (kind != MEMKIND_HBW_GBTLB &&
-        kind != MEMKIND_HBW_PREFERRED_GBTLB &&
-        kind != MEMKIND_GBTLB) {
+    for (i = 0; i < 3; i++) {
+        kind = gbtlb_kinds[i];
+        if (kind->ops->check_addr(kind, ptr) == 0) {
+            i = -1;
+            break;
+        }
+    }
+    if (i != -1) {
         kind = hbw_get_kind(HBW_PAGESIZE_4KB);
     }
-
     return memkind_realloc(kind, ptr, size);
 }
 
 void hbw_free(void *ptr)
 {
-    memkind_t kind;
-    memkind_get_kind_for_free(ptr, &kind);
-    memkind_free(kind, ptr);
+    memkind_free(0, ptr);
 }
 
 static inline memkind_t hbw_get_kind(int pagesize)

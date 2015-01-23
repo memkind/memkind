@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 Intel Corporation.
+#  Copyright (C) 2014, 2015 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,12 @@ BuildRequires: numactl-devel
 BuildRequires: jemalloc-devel
 %endif
 
+%if %{defined suse_version}
+%define docdir %{_defaultdocdir}/memkind
+%else
+%define docdir %{_defaultdocdir}/memkind-%{version}
+%endif
+
 %description
 The memkind library is a user extensible heap manager built on top of
 jemalloc which enables control of memory characteristics and a
@@ -92,15 +98,9 @@ package installs header files.
 
 %build
 test -f configure || ./autogen.sh
-%if %{defined suse_version}
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} \
     --includedir=%{_includedir} --sbindir=%{_sbindir} \
-    --mandir=%{_mandir} --docdir=%{_docdir}/memkind
-%else
-./configure --prefix=%{_prefix} --libdir=%{_libdir} \
-    --includedir=%{_includedir} --sbindir=%{_sbindir} \
-    --mandir=%{_mandir} --docdir=%{_docdir}/memkind-%{version}
-%endif
+    --mandir=%{_mandir} --docdir=%{docdir}
 $(make_prefix)%{__make} $(make_postfix)
 
 %install
@@ -115,10 +115,10 @@ $(extra_install)
 
 %post devel
 /sbin/ldconfig
-if [ -x /sbin/chkconfig ]; then
-    /sbin/chkconfig --add memkind
-elif [ -x /usr/lib/lsb/install_initd ]; then
+if [ -x /usr/lib/lsb/install_initd ]; then
     /usr/lib/lsb/install_initd %{_initddir}/memkind
+elif [ -x /sbin/chkconfig ]; then
+    /sbin/chkconfig --add memkind
 else
     for i in 3 4 5; do
         ln -sf %{_initddir}/memkind /etc/rc.d/rc${i}.d/S90memkind
@@ -127,15 +127,15 @@ else
         ln -sf %{_initddir}/memkind /etc/rc.d/rc${i}.d/K10memkind
     done
 fi
-%{_initddir}/memkind force-reload >/dev/null 2>&1 || :
+%{_initddir}/memkind restart >/dev/null 2>&1 || :
 
 %preun devel
 if [ -z "$1" ] || [ "$1" == 0 ]; then
     %{_initddir}/memkind stop >/dev/null 2>&1 || :
-    if [ -x /sbin/chkconfig ]; then
-        /sbin/chkconfig --del memkind
-    elif [ -x /usr/lib/lsb/remove_initd ]; then
+    if [ -x /usr/lib/lsb/remove_initd ]; then
         /usr/lib/lsb/remove_initd %{_initddir}/memkind
+    elif [ -x /sbin/chkconfig ]; then
+        /sbin/chkconfig --del memkind
     else
         rm -f /etc/rc.d/rc?.d/???memkind
     fi
@@ -153,22 +153,15 @@ fi
 %{_includedir}/memkind_gbtlb.h
 %{_includedir}/memkind_hbw.h
 %{_includedir}/memkind_hugetlb.h
-%{_libdir}/libmemkind.so.0.0.0
+%{_libdir}/libmemkind.so.0.0.1
 %{_libdir}/libmemkind.so.0
 %{_libdir}/libmemkind.so
 %{_sbindir}/memkind-pmtt
 %{_initddir}/memkind
-%if %{defined suse_version}
-%dir %{_docdir}/memkind
-%doc %{_docdir}/memkind/README
-%doc %{_docdir}/memkind/COPYING
-%doc %{_docdir}/memkind/VERSION
-%else
-%dir %{_docdir}/memkind-%{version}
-%doc %{_docdir}/memkind-%{version}/README
-%doc %{_docdir}/memkind-%{version}/COPYING
-%doc %{_docdir}/memkind-%{version}/VERSION
-%endif
+%dir %{docdir}
+%doc %{docdir}/README
+%doc %{docdir}/COPYING
+%doc %{docdir}/VERSION
 %doc %{_mandir}/man3/hbwmalloc.3.gz
 %doc %{_mandir}/man3/memkind.3.gz
 %doc %{_mandir}/man3/memkind_arena.3.gz

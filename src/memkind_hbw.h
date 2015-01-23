@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,6 @@ extern "C" {
 #endif
 
 #include "memkind.h"
-#include "memkind_default.h"
-#include "memkind_hugetlb.h"
-#include "memkind_arena.h"
 
 static const char * const MEMKIND_BANDWIDTH_PATH = "/etc/memkind/node-bandwidth";
 

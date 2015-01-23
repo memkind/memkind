@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
@@ -34,6 +35,7 @@
 #include <jemalloc/jemalloc.h>
 #include <utmpx.h>
 #include <sched.h>
+#include <smmintrin.h>
 
 #include "memkind.h"
 #include "memkind_default.h"
@@ -59,20 +61,23 @@ int memkind_arena_create_map(struct memkind *kind)
     int i;
     size_t unsigned_size = sizeof(unsigned int);
 
-    if (kind->ops->get_arena == memkind_cpu_get_arena) {
-        kind->arena_map_len = numa_num_configured_cpus();
+    if (kind->arena_map_len == 0) {
+        if (kind->ops->get_arena == memkind_bijective_get_arena) {
+            kind->arena_map_len = 1;
+        }
+        else if (kind->ops->get_arena == memkind_thread_get_arena) {
+            kind->arena_map_len = numa_num_configured_cpus() * 4;
+        }
+    }
+    if (kind->ops->get_arena == memkind_thread_get_arena) {
+        pthread_key_create(&(kind->arena_key), je_free);
+    }
+
+    if (kind->arena_map_len) {
         kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int) * kind->arena_map_len);
-    }
-    else if (kind->ops->get_arena == memkind_bijective_get_arena) {
-        kind->arena_map_len = 1;
-        kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int));
-    }
-    else {
-        kind->arena_map_len = 0;
-        kind->arena_map = NULL;
-    }
-    if (kind->arena_map_len && kind->arena_map == NULL) {
-        err = MEMKIND_ERROR_MALLOC;
+        if (kind->arena_map == NULL) {
+            err = MEMKIND_ERROR_MALLOC;
+        }
     }
     if (!err) {
         for (i = 0; i < kind->arena_map_len; ++i) {
@@ -105,6 +110,9 @@ int memkind_arena_destroy(struct memkind *kind)
         }
         je_free(kind->arena_map);
         kind->arena_map = NULL;
+    }
+    if (kind->ops->get_arena == memkind_thread_get_arena) {
+        pthread_key_delete(kind->arena_key);
     }
     memkind_default_destroy(kind);
     return 0;
@@ -171,7 +179,7 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     *memptr = NULL;
     err = kind->ops->get_arena(kind, &arena);
     if (!err) {
-        err = kind->ops->check_alignment(kind, alignment);
+        err = memkind_posix_check_alignment(kind, alignment);
     }
     if (!err) {
         /* posix_memalign should not change errno.
@@ -180,24 +188,6 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
         *memptr = je_mallocx_check(size, MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena));
         errno = errno_before;
         err = *memptr ? 0 : ENOMEM;
-    }
-    return err;
-}
-
-int memkind_cpu_get_arena(struct memkind *kind, unsigned int *arena)
-{
-    int err = 0;
-    int cpu_id;
-
-    cpu_id = sched_getcpu();
-    if (cpu_id < kind->arena_map_len) {
-        *arena = kind->arena_map[cpu_id];
-        if (*arena == UINT_MAX) {
-            err = MEMKIND_ERROR_MALLCTL;
-        }
-    }
-    else {
-        err = MEMKIND_ERROR_GETCPU;
     }
     return err;
 }
@@ -214,6 +204,33 @@ int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena)
     }
     else {
         err = MEMKIND_ERROR_RUNTIME;
+    }
+    return err;
+}
+
+int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena)
+{
+    int err = 0;
+    unsigned int *arena_tsd;
+
+    arena_tsd = pthread_getspecific(kind->arena_key);
+    if (arena_tsd == NULL) {
+        arena_tsd = je_malloc(sizeof(unsigned int));
+        if (arena_tsd == NULL) {
+            err = MEMKIND_ERROR_MALLOC;
+        }
+        if (!err) {
+            *arena_tsd = _mm_crc32_u64(0, (uint64_t)pthread_self()) %
+                         kind->arena_map_len;
+            err = pthread_setspecific(kind->arena_key, arena_tsd) ?
+                  MEMKIND_ERROR_PTHREAD : 0;
+        }
+    }
+    if (!err) {
+        *arena = kind->arena_map[*arena_tsd];
+        if (*arena == UINT_MAX) {
+            err = MEMKIND_ERROR_MALLCTL;
+        }
     }
     return err;
 }

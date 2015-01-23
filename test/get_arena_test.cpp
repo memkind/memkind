@@ -22,27 +22,61 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef memkind_gbtlb_include_h
-#define memkind_gbtlb_include_h
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <algorithm>
+#include <vector>
+#include <gtest/gtest.h>
+#include <omp.h>
+#include <pthread.h>
+#include "memkind_arena.h"
 
-#include "memkind.h"
+class GetArenaTest: public :: testing::Test
+{
 
-void *memkind_gbtlb_malloc(struct memkind *kind, size_t size);
-void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size);
-int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
-void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size);
-void memkind_gbtlb_free(struct memkind *kind, void *ptr);
-int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags);
-int memkind_gbtlb_check_addr(struct memkind *kind, void *addr);
+protected:
+    void SetUp()
+    {}
 
-extern const struct memkind_ops MEMKIND_HBW_GBTLB_OPS;
-extern const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS;
-extern const struct memkind_ops MEMKIND_GBTLB_OPS;
+    void TearDown()
+    {}
 
-#ifdef __cplusplus
+};
+
+bool uint_comp(unsigned int a, unsigned int b)
+{
+    return (a < b);
 }
-#endif
-#endif
+
+TEST_F(GetArenaTest, test_thread_hash)
+{
+    int num_threads = omp_get_max_threads();
+    std::vector<unsigned int> arena_idx(num_threads);
+    unsigned int thread_idx, idx;
+    int err = 0;
+    int max_collisions, collisions, i;
+
+    pthread_once(&(MEMKIND_HBW->init_once), MEMKIND_HBW->ops->init_once);
+
+    #pragma omp parallel shared(arena_idx) private(thread_idx)
+    {
+        thread_idx = omp_get_thread_num();
+        err = memkind_thread_get_arena(MEMKIND_HBW, &(arena_idx[thread_idx]));
+    }
+    ASSERT_TRUE(err == 0);
+    std::sort(arena_idx.begin(), arena_idx.end(), uint_comp);
+    idx = arena_idx[0];
+    collisions = 0;
+    max_collisions = 0;
+    for (i = 1; i < num_threads; ++i) {
+        if (arena_idx[i] == idx) {
+            collisions++;
+        }
+        else {
+            if (collisions > max_collisions) {
+                max_collisions = collisions;
+            }
+            idx = arena_idx[i];
+            collisions = 0;
+        }
+    }
+    EXPECT_TRUE(max_collisions < 4);
+}

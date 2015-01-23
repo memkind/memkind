@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,54 +27,42 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*!
- *  \file hbwmalloc.h
- *  \brief Header file for the high bandwidth memory interface.
- *
- *  #include <hbwmalloc.h>
- *
- *  Link with -lnuma -lmemkind
+/*
+ *  Header file for the high bandwidth memory interface.
  *
  *  This file defines the external API's and enumerations for the
  *  hbwmalloc library.  These interfaces define a heap manager that
  *  targets the high bandwidth memory numa nodes.
- *
- *  \section ENVIRONMENT
- *  \subsection MEMKIND_HBW_NODES
- *  Comma separated list of NUMA nodes that are treated as high
- *  bandwidth.  Can be used if pmtt file is not present.  Uses same
- *  parser as numactl, so logic defined in numactl man pages applies:
- *  e.g 1-3,5 is a valid setting.
  */
 
-/*!
- *  \brief Fallback policy.
+/*
+ *  Fallback policy.
  *
  *  Policy that determines behavior when there is not enough free high
  *  bandwidth memory to satisfy a user request.  This enum is used with
  *  hbw_get_policy() and hbw_set_policy().
  */
 typedef enum {
-    /*!
+    /*
      *  If insufficient high bandwidth memory pages are available seg
-     *  fault when memory is touched (default).
+     *  fault when memory is touched.
      */
     HBW_POLICY_BIND = 1,
-    /*!
+    /*
      *  If insufficient high bandwidth memory pages are available fall
      *  back on standard memory pages.
      */
     HBW_POLICY_PREFERRED = 2
 } hbw_policy_t;
 
-/*!
- *  \brief Page size selection.
+/*
+ *  Page size selection.
  *
  *  The hbw_posix_memalign_psize() API gives the user the option to
  *  select the page size from this enumerated list.
  */
 typedef enum {
-    /*!
+    /*
      *  The 4 kilobyte page size option, this enables the same behavior
      *  from hbw_posix_memalign_psize() as the hbw_posix_memalign()
      *  API.  Note with transparent huge pages enabled, these allocations

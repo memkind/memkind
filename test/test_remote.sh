@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2014 Intel Corporation.
+#  Copyright (C) 2014, 2015 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ scp $basedir/.libs/schedcpu_test $remote_login@$remote_ip:
 scp $basedir/.libs/tieddisterr_test $remote_login@$remote_ip:
 scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
 
-scp $basedir/mock-pmtt.aml $remote_login@$remote_ip:
+scp $basedir/mock-pmtt.txt $remote_login@$remote_ip:/tmp/
 scp $basedir/libfopen.so $remote_login@$remote_ip:
 scp $basedir/libmallctl.so $remote_login@$remote_ip:
 scp $basedir/libmalloc.so $remote_login@$remote_ip:
@@ -87,7 +87,7 @@ ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_hugepages"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_overcommit_hugepages"
 
 ssh $remote_login@$remote_ip "if [ -e /opt/mpss/coverage/memkind.cov ]; then mkdir -p gtest_output; cp /opt/mpss/coverage/memkind.cov gtest_output; fi"
-ssh $remote_login@$remote_ip "COVFILE=gtest_output/memkind.cov ./test.sh --gtest_output=xml:gtest_output/" | tee $outdir/test.out
+ssh $remote_login@$remote_ip "COVFILE=gtest_output/memkind.cov ./test.sh --gtest_output=xml:gtest_output/" 2>&1| tee $outdir/test.out
 err=${PIPESTATUS[0]}
 scp $remote_login@$remote_ip:gtest_output/\* $outdir
 exit $err

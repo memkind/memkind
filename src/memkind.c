@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include <errno.h>
+#include <sys/mman.h>
 #include <jemalloc/jemalloc.h>
 
 #include "memkind.h"
@@ -142,6 +143,8 @@ static struct memkind_registry memkind_registry_g = {
     PTHREAD_MUTEX_INITIALIZER
 };
 
+static int memkind_get_kind_for_free(void *ptr, struct memkind **kind);
+
 void memkind_error_message(int err, char *msg, size_t size)
 {
     switch (err) {
@@ -241,16 +244,17 @@ int memkind_create(const struct memkind_ops *ops, const char *name, struct memki
             goto exit;
         }
     }
-    *kind = (struct memkind *)je_malloc(sizeof(struct memkind));
+    *kind = (struct memkind *)je_calloc(1, sizeof(struct memkind));
     if (!*kind) {
         err = MEMKIND_ERROR_MALLOC;
         goto exit;
     }
-    (*kind)->partition = memkind_registry_g.num_kind;
+
     err = ops->create(*kind, ops, name);
     if (err) {
         goto exit;
     }
+    (*kind)->partition = memkind_registry_g.num_kind;
     memkind_registry_g.partition_map[memkind_registry_g.num_kind] = *kind;
     ++memkind_registry_g.num_kind;
 
@@ -293,7 +297,8 @@ int memkind_finalize(void)
 
 exit:
     if (err != MEMKIND_ERROR_PTHREAD) {
-        err = pthread_mutex_unlock(&(memkind_registry_g.lock)) ? MEMKIND_ERROR_PTHREAD : 0;
+        err = pthread_mutex_unlock(&(memkind_registry_g.lock)) ?
+              MEMKIND_ERROR_PTHREAD : 0;
     }
     return err;
 }
@@ -338,48 +343,25 @@ int memkind_get_kind_by_name(const char *name, struct memkind **kind)
     return err;
 }
 
-int memkind_partition_check_available(int partition)
+void *memkind_partition_mmap(int partition, void *addr, size_t size)
 {
-    struct memkind *kind;
     int err;
+    void *result = MAP_FAILED;
+    struct memkind *kind;
 
     err = memkind_get_kind_by_partition(partition, &kind);
     if (!err) {
         err = memkind_check_available(kind);
     }
-    return err;
-}
-
-int memkind_partition_get_mmap_flags(int partition, int *flags)
-{
-    struct memkind *kind;
-    int err = 0;
-
-    err = memkind_get_kind_by_partition(partition, &kind);
     if (!err) {
-        if (kind->ops->get_mmap_flags) {
-            err = kind->ops->get_mmap_flags(kind, flags);
+        if (kind->ops->mmap) {
+            result = kind->ops->mmap(kind, addr, size);
         }
         else {
-            err = memkind_default_get_mmap_flags(kind, flags);
+            result = memkind_default_mmap(kind, addr, size);
         }
     }
-    else {
-        *flags = 0;
-    }
-    return err;
-}
-
-int memkind_partition_mbind(int partition, void *addr, size_t size)
-{
-    struct memkind *kind;
-    int err = 0;
-
-    err = memkind_get_kind_by_partition(partition, &kind);
-    if (!err && kind->ops->mbind) {
-        err = kind->ops->mbind(kind, addr, size);
-    }
-    return err;
+    return result;
 }
 
 int memkind_check_available(struct memkind *kind)
@@ -389,25 +371,6 @@ int memkind_check_available(struct memkind *kind)
         err = kind->ops->check_available(kind);
     }
     return err;
-}
-
-int memkind_get_kind_for_free(void *ptr, struct memkind **kind)
-{
-    int i, num_kind;
-    struct memkind *test_kind;
-
-    *kind = MEMKIND_DEFAULT;
-    memkind_get_num_kind(&num_kind);
-    for (i = 0; i < num_kind; ++i) {
-        memkind_get_kind_by_partition(i, &test_kind);
-        if (test_kind &&
-            test_kind->ops->check_addr &&
-            test_kind->ops->check_addr(test_kind, ptr) == 0) {
-            *kind = test_kind;
-            break;
-        }
-    }
-    return 0;
 }
 
 void *memkind_malloc(struct memkind *kind, size_t size)
@@ -445,10 +408,32 @@ void *memkind_realloc(struct memkind *kind, void *ptr, size_t size)
 
 void memkind_free(struct memkind *kind, void *ptr)
 {
+    if (!kind) {
+        memkind_get_kind_for_free(ptr, &kind);
+    }
     kind->ops->free(kind, ptr);
 }
 
 int memkind_get_size(memkind_t kind, size_t *total, size_t *free)
 {
     return kind->ops->get_size(kind, total, free);
+}
+
+static int memkind_get_kind_for_free(void *ptr, struct memkind **kind)
+{
+    int i, num_kind;
+    struct memkind *test_kind;
+
+    *kind = MEMKIND_DEFAULT;
+    memkind_get_num_kind(&num_kind);
+    for (i = 0; i < num_kind; ++i) {
+        memkind_get_kind_by_partition(i, &test_kind);
+        if (test_kind &&
+            test_kind->ops->check_addr &&
+            test_kind->ops->check_addr(test_kind, ptr) == 0) {
+            *kind = test_kind;
+            break;
+        }
+    }
+    return 0;
 }

@@ -64,6 +64,8 @@
 /examples/stream_memkind
 /examples/gb_realloc
 /examples/gb_realloc_example.o
+/examples/eratosthenes
+/examples/eratosthenes_example.o
 /examples/test_stream_memkind-stream_example.o
 /test/filter_memkind
 /test/gb_realloc
@@ -72,4 +74,15 @@
 /test/new_kind
 /test/stream
 /test/stream_memkind
+/test/eratosthenes
+/test/memkind-pmtt
+/examples/libnumakind.la
+/examples/numakind.lo
+/examples/numakind.o
+/examples/numakind_test
+/examples/numakind_test.o
+/examples/examples_libnumakind_la-numakind.lo
+/examples/examples_libnumakind_la-numakind.o
+/examples/numakind_macro.h
+/test-driver
 

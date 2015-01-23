@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,13 +50,10 @@ protected:
 
 TEST_F(NegativeTest, ErrorUnavailable)
 {
-    int ret = 0;
-    int memkind_flags;
-    int err = MEMKIND_ERROR_UNAVAILABLE;
-    ret = memkind_partition_get_mmap_flags(-1, &memkind_flags);
-    EXPECT_EQ(err, ret);
+    void *ret;
+    void *err = (void *)(-1); /* MAP_FAILED */
 
-    ret = memkind_partition_mbind(-1, NULL, 1024);
+    ret = memkind_partition_mmap(-1, NULL, 1024);
     EXPECT_EQ(err, ret);
 }
 
@@ -66,7 +63,7 @@ TEST_F(NegativeTest, ErrorMbind)
     int ret = 0;
     int err = MEMKIND_ERROR_MBIND;
 
-    ret = memkind_partition_mbind(MEMKIND_PARTITION_HBW, NULL, 1024);
+    ret = MEMKIND_HBW->ops->mbind(MEMKIND_HBW, NULL, 1024);
     EXPECT_EQ(err, ret);
 }
 
@@ -192,6 +189,7 @@ TEST_F(NegativeTest, RegularReallocWithMemalign)
 
     ret = hbw_posix_memalign_psize (&ptr, 4096, 4096,
                                     HBW_PAGESIZE_4KB);
+    EXPECT_EQ(ret, 0);
     ASSERT_TRUE(ptr != NULL);
     memset(ptr, 0, 4096);
     ptr = hbw_realloc (ptr, 8192);

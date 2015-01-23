@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,87 +27,88 @@
 #include <memkind_hbw.h>
 
 const struct memkind_ops MEMKIND_BAD_OPS[] = {{
-    .create = NULL,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = NULL,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = NULL,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = NULL,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = NULL,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = NULL,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = NULL,
-    .get_size = memkind_default_get_size
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = NULL
-}, {
-    .create = memkind_default_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_default_malloc,
-    .calloc = memkind_default_calloc,
-    .posix_memalign = memkind_default_posix_memalign,
-    .realloc = memkind_default_realloc,
-    .free = memkind_default_free,
-    .get_size = memkind_default_get_size,
-    .init_once = memkind_hbw_init_once
-}};
+        .create = NULL,
+        .destroy = memkind_default_destroy,
+        .malloc = memkind_default_malloc,
+        .calloc = memkind_default_calloc,
+        .posix_memalign = memkind_default_posix_memalign,
+        .realloc = memkind_default_realloc,
+        .free = memkind_default_free,
+        .get_size = memkind_default_get_size
+    }, {
+        .create = memkind_default_create,
+        .destroy = NULL,
+        .malloc = memkind_default_malloc,
+        .calloc = memkind_default_calloc,
+        .posix_memalign = memkind_default_posix_memalign,
+        .realloc = memkind_default_realloc,
+        .free = memkind_default_free,
+        .get_size = memkind_default_get_size
+    }, {
+        .create = memkind_default_create,
+        .destroy = memkind_default_destroy,
+        .malloc = NULL,
+        .calloc = memkind_default_calloc,
+        .posix_memalign = memkind_default_posix_memalign,
+        .realloc = memkind_default_realloc,
+        .free = memkind_default_free,
+        .get_size = memkind_default_get_size
+    }, {
+        .create = memkind_default_create,
+        .destroy = memkind_default_destroy,
+        .malloc = memkind_default_malloc,
+        .calloc = NULL,
+        .posix_memalign = memkind_default_posix_memalign,
+        .realloc = memkind_default_realloc,
+        .free = memkind_default_free,
+        .get_size = memkind_default_get_size
+    }, {
+        .create = memkind_default_create,
+        .destroy = memkind_default_destroy,
+        .malloc = memkind_default_malloc,
+        .calloc = memkind_default_calloc,
+        .posix_memalign = NULL,
+        .realloc = memkind_default_realloc,
+        .free = memkind_default_free,
+        .get_size = memkind_default_get_size
+    }, {
+        .create = memkind_default_create,
+        .destroy = memkind_default_destroy,
+        .malloc = memkind_default_malloc,
+        .calloc = memkind_default_calloc,
+        .posix_memalign = memkind_default_posix_memalign,
+        .realloc = NULL,
+        .free = memkind_default_free,
+        .get_size = memkind_default_get_size
+    }, {
+        .create = memkind_default_create,
+        .destroy = memkind_default_destroy,
+        .malloc = memkind_default_malloc,
+        .calloc = memkind_default_calloc,
+        .posix_memalign = memkind_default_posix_memalign,
+        .realloc = memkind_default_realloc,
+        .free = NULL,
+        .get_size = memkind_default_get_size
+    }, {
+        .create = memkind_default_create,
+        .destroy = memkind_default_destroy,
+        .malloc = memkind_default_malloc,
+        .calloc = memkind_default_calloc,
+        .posix_memalign = memkind_default_posix_memalign,
+        .realloc = memkind_default_realloc,
+        .free = memkind_default_free,
+        .get_size = NULL
+    }, {
+        .create = memkind_default_create,
+        .destroy = memkind_default_destroy,
+        .malloc = memkind_default_malloc,
+        .calloc = memkind_default_calloc,
+        .posix_memalign = memkind_default_posix_memalign,
+        .realloc = memkind_default_realloc,
+        .free = memkind_default_free,
+        .get_size = memkind_default_get_size,
+        .init_once = memkind_hbw_init_once
+    }
+};
 
 const size_t MEMKIND_BAD_OPS_LEN = sizeof(MEMKIND_BAD_OPS)/sizeof(struct memkind_ops);

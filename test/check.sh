@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2014 Intel Corporation.
+#  Copyright (C) 2014, 2015 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,16 @@ if [ ! -z "$TEST_HOST" ] && [ ! -z "$TEST_LOGIN" ] && [ ! -z "$TEST_RPMDIR" ]; t
     $basedir/test_remote.sh $TEST_RPMDIR $TEST_LOGIN $TEST_HOST $TEST_OUTDIR $TEST_SSHID
     err=$?
 else
-    $basedir/test.sh
-    err=$?
+    if [ -z "$TEST_OUTDIR" ]; then
+        TEST_OUTDIR=gtest_output
+    fi
+    mkdir -p $TEST_OUTDIR
+    if [ -f $TEST_COVDIR/memkind.cov ]; then
+         cp $TEST_COVDIR/memkind.cov $TEST_OUTDIR
+    fi
+    cp $basedir/mock-pmtt.txt /tmp/
+    COVFILE=$TEST_OUTDIR/memkind.cov $basedir/test.sh --gtest_output=xml:$TEST_OUTDIR/ 2>&1| tee $TEST_OUTDIR/test.out
+    err=${PIPESTATUS[0]}
 fi
 
 exit $err

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2014 Intel Corporation.
+#  Copyright (C) 2014, 2015 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,6 @@
 #
 #              restart - Delete and recreate bandwidth file from PMTT table.
 #
-#              force-reload - Delete and recreate bandwidth file.  Ignore deletion errors.
-#
 #              status - Print existance of bandwidth file
 # Default-Start: 3 4 5
 # Default-Stop: 0 1 2 6
@@ -69,48 +67,47 @@ else
 fi
 
 err=0
-FILE=/etc/memkind/node-bandwidth
-DIR=`dirname $FILE`
+MEMKIND_FILE=/etc/memkind/node-bandwidth
+MEMKIND_DIR=`dirname $MEMKIND_FILE`
 MEMKIND_BIN=/usr/sbin/memkind-pmtt
 
 start() {
     echo_success "creating bandwidth values file"
     $MEMKIND_BIN
     err=$?
-    if [ $err -eq 0 ] && [ -f $FILE ]
+    if [ $err -eq 0 ] && [ -f $MEMKIND_FILE ]
     then
-        echo_success "created file: $FILE"
+        echo_success "created file: $MEMKIND_FILE"
     else
-        echo_failure "could not create file: $FILE"
+        echo_failure "could not create file: $MEMKIND_FILE"
     fi
 }
 
 stop() {
     echo_success "deleting bandwidth values file"
-    rm $FILE
+    rm -f $MEMKIND_FILE
     err=$?
-    if [ $err -eq 0 ] && [ ! -f $FILE ]
+    if [ $err -eq 0 ] && [ ! -f $MEMKIND_FILE ]
     then
-        echo_success "deleted file: $FILE"
-        rmdir $DIR
+        echo_success "deleted file: $MEMKIND_FILE"
+        rmdir $MEMKIND_DIR
         err=$?
-        if [ $err -eq 0 ] && [ ! -d $DIR ]
+        if [ $err -eq 0 ] && [ ! -d $MEMKIND_DIR ]
         then
-            echo_success "deleted directory: $DIR"
+            echo_success "deleted directory: $MEMKIND_DIR"
         else
-            echo_failure "could not delete directory: $DIR"
+            echo_failure "could not delete directory: $MEMKIND_DIR"
         fi
     else
-        echo_failure "could not delete file: $FILE"
+        echo_failure "could not delete file: $MEMKIND_FILE"
     fi
 }
 
 restart() {
-    stop
-    if [ $err -eq 0 ]
-    then
-        start
+    if [ -f $MEMKIND_FILE ]; then
+        stop
     fi
+    start
 }
 
 case $1 in
@@ -120,28 +117,21 @@ case $1 in
     stop)
         stop
         ;;
-    restart)
+    restart|force-reload|reload|condrestart|try-restart)
         restart
         ;;
-    force-reload)
-        stop
-        start
-        ;;
     status)
-        if [ -f $FILE ];
+        if [ -f $MEMKIND_FILE ];
         then
-            echo_success "file $FILE exists"
+            echo_success "file $MEMKIND_FILE exists"
             err=0
         else
-            echo_failure "file $FILE does not exists"
+            echo_failure "file $MEMKIND_FILE does not exist"
             err=3
         fi
         ;;
-    condrestart|try-restart)
-        restart
-        ;;
     *)
-        echo "Usage: $0 {start|stop|restart|force-reload|status|condrestart|try-restart}"
+        echo "Usage: $0 {start|stop|restart|status|force-reload|reload|condrestart|try-restart}"
         err=2
 esac
 exit $err

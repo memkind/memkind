@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,9 @@ void *memkind_default_calloc(struct memkind *kind, size_t num, size_t size);
 int memkind_default_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
 void *memkind_default_realloc(struct memkind *kind, void *ptr, size_t size);
 void memkind_default_free(struct memkind *kind, void *ptr);
-int memkind_default_mbind(struct memkind *kind, void *ptr, size_t len);
+void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size);
+int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size);
+int memkind_default_get_mmap_file(struct memkind *kind, int *fd, off_t *offset);
 int memkind_default_get_mmap_flags(struct memkind *kind, int *flags);
 int memkind_default_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode);

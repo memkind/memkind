@@ -22,27 +22,31 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef memkind_gbtlb_include_h
-#define memkind_gbtlb_include_h
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdlib.h>
+#include <stdio.h>
+#include <numaif.h>
+#include <omp.h>
+#include "numakind.h"
 
-#include "memkind.h"
+int main(int argc, char **argv)
+{
+    int err = 0;
+    #pragma omp parallel shared(err)
+    {
+        char *data;
+        int status;
 
-void *memkind_gbtlb_malloc(struct memkind *kind, size_t size);
-void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size);
-int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
-void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size);
-void memkind_gbtlb_free(struct memkind *kind, void *ptr);
-int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags);
-int memkind_gbtlb_check_addr(struct memkind *kind, void *addr);
-
-extern const struct memkind_ops MEMKIND_HBW_GBTLB_OPS;
-extern const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS;
-extern const struct memkind_ops MEMKIND_GBTLB_OPS;
-
-#ifdef __cplusplus
+        data = numakind_malloc(1024);
+        if (!data) {
+            fprintf(stderr, "ERROR: numakind_malloc()\n");
+            err = 1;
+        }
+        else {
+            data[0] = '\0';
+            move_pages(0, 1, (void **)&data, NULL, &status, MPOL_MF_MOVE);
+            fprintf(stdout, "omp_thread: %.4d numa_node: %.4d\n", omp_get_thread_num(), status);
+        }
+        numakind_free(data);
+    }
+    return err;
 }
-#endif
-#endif

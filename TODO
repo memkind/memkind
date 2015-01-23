@@ -18,8 +18,6 @@ Testing
 
 Documentation
 -------------
-    * Document the memkind_ops structure in a man page.
-
     * Better documentation for how NULL pointers in ops structure are
       handled.
 
@@ -30,26 +28,16 @@ Features
     * Add gcc malloc hooks for hbwmalloc interface.
       http://www.gnu.org/software/libc/manual/html_node/Hooks-for-Malloc.html
 
-    * Consider redefining the meaning of memkind_free(0, ptr) so that
-      it is calls memkind_get_kind_for_free() internally.
+    * Add asynchronous duplicate API's for conversion from one kind to
+      another:
+          int memkind_dup_async(memkind_t kind, void *orig, size_t size,
+                                void **copy, void **lock);
+          int memkind_wait(void *lock);
+          int memkind_check(void *lock);
 
     * Extend huge page support using libhugetlbfs.
 
     * Support for non-standard x86 page sizes like 128 MB.
-
-    * Implement the use of thread local storage for arena index.  If a
-      thread is pinned, then this can be used to avoid calling
-      sched_getcpu() more than once.  It would also benefit cases
-      where thread location is unimportant, and the arena index can
-      be derived from a hash of the thread ID.
-
-    * Add support in jemalloc and memkind for modifying the file
-      descriptor and offset values passed to mmap() to enable file
-      backed memory allocations.
-
-    * Consider overriding the je_chunk_alloc_mmap() routine rather
-      than modifying it. This would be the the entry point for a
-      single memkind callback.
 
     * Support for verbose mode by setting environment variable which
       will log debug diagnostic information.
@@ -67,3 +55,17 @@ Issues
       jeamlloc's dev branch.  Since version 3.6.0 uses arenas for huge
       allocations, this will simplify the modifications required to
       enable memkind.
+
+      Two two concerns about merging to head of jemalloc dev branch.
+          + Free pool for huge allocations is not shared between
+            threads.
+          + New jemalloc feature for user defined chunk allocator does
+            not use the jemalloc recycling algorithm.  This seems to
+            be the intended way for customizing the mmap() call, but
+            requires user to implement chunk recycling.
+
+    * The default implementation of the memkind_get_size() API is a
+      thin wrapper around numa_node_size64() which means that it
+      cannot account for the memory available in the recycling pool
+      for each kind.  Performance of memkind_get_size() is also an
+      issue.

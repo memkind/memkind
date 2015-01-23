@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
 #endif
 
 #include "memkind_hugetlb.h"
+#include "memkind_default.h"
+#include "memkind_arena.h"
 
 const struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .create = memkind_arena_create,
@@ -42,7 +44,7 @@ const struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .realloc = memkind_arena_realloc,
     .free = memkind_default_free,
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
-    .get_arena = memkind_cpu_get_arena,
+    .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hugetlb_init_once
 };

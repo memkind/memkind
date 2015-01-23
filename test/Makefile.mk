@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 Intel Corporation.
+#  Copyright (C) 2014, 2015 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@ check_PROGRAMS += test/all_tests \
                   # end
 
 TESTS += test/check.sh
+EXTRA_DIST += test/mock-pmtt.txt
 
 test_all_tests_LDADD = libgtest.a libmemkind.la
 test_schedcpu_test_LDADD = libgtest.a libmemkind.la
@@ -61,7 +62,9 @@ test_all_tests_SOURCES = test/common.h \
                          test/create_tests.cpp \
                          test/create_tests_helper.c \
                          test/memkind_default_tests.cpp \
-			 test/policy_tests.cpp \
+                         test/policy_tests.cpp \
+                         test/get_arena_test.cpp \
+                         test/memkind_pmtt_tests.cpp \
                          # end
 
 test_schedcpu_test_SOURCES = test/main.cpp test/sched_cpu_test.cpp
@@ -99,6 +102,9 @@ test_gb_realloc_SOURCES = examples/gb_realloc_example.c
 
 test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
 
+check_PROGRAMS += test/memkind-pmtt
+test_memkind_pmtt_SOURCES = src/memkind_pmtt.c
+test_memkind_pmtt_LDADD = libmemkind.la
 
 # All of the non-standard requirements for testing (gtest and mock .so)
 .PHONY: test clean-local-gtest clean-local-mock

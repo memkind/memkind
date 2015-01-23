@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Intel Corporation.
+ * Copyright (C) 2014, 2015 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,9 @@
 #include <sched.h>
 
 #include "memkind_hbw.h"
+#include "memkind_default.h"
+#include "memkind_hugetlb.h"
+#include "memkind_arena.h"
 
 const struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
@@ -52,10 +55,9 @@ const struct memkind_ops MEMKIND_HBW_OPS = {
     .get_mmap_flags = memkind_default_get_mmap_flags,
     .get_mbind_mode = memkind_default_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
-    .get_arena = memkind_cpu_get_arena,
+    .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_init_once,
-    .check_alignment = memkind_posix_check_alignment
 };
 
 const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
@@ -71,10 +73,9 @@ const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_mbind_mode = memkind_default_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
-    .get_arena = memkind_cpu_get_arena,
+    .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_hugetlb_init_once,
-    .check_alignment = memkind_posix_check_alignment
 };
 
 const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
@@ -90,10 +91,9 @@ const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .get_mmap_flags = memkind_default_get_mmap_flags,
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
-    .get_arena = memkind_cpu_get_arena,
+    .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_preferred_init_once,
-    .check_alignment = memkind_posix_check_alignment
 };
 
 const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
@@ -109,10 +109,9 @@ const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
-    .get_arena = memkind_cpu_get_arena,
+    .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_preferred_hugetlb_init_once,
-    .check_alignment = memkind_posix_check_alignment
 };
 
 struct numanode_bandwidth_t {
