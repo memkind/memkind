@@ -1,4 +1,4 @@
-* Fri Jan 8 2015 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.2.0
+* Fri Jan 9 2015 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.2.0
 - Bumped memkind ABI version to 0:1:0.
 - Removed memkind_get_kind_for_free() from externally facing API's.  Instead if
   memkind_free() is called with zero passed for the kind then

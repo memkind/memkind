@@ -67,6 +67,7 @@ EXTRA_DIST = autogen.sh \
              VERSION \
              memkind-$(VERSION).spec \
              memkind.spec.mk \
+             .gitignore \
              # end
 
 dist_doc_DATA = README COPYING VERSION

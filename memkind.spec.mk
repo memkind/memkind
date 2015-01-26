@@ -35,6 +35,7 @@ rpm: memkind-$(version).tar.gz
 
 memkind-$(version).spec:
 	@echo "$$memkind_spec" > $@
+	cat ChangeLog >> $@
 
 .PHONY: rpm
 
@@ -172,24 +173,6 @@ fi
 $(extra_files)
 
 %changelog
-* Thu Nov 13 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.1.0
-- Increased test code coverage significantly.
-- Fixed bug in memkind_error_message() for MEMKIND_ERROR_TOOMANY.
-- Removed memkind_arena_free() API since it was redundant with memkind_default_free().
-- Static memkind structs are now declared as extern in the headers and defined in the
-  source files files rather than being statically defined in the headers.
-* Thu Oct 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.0.9
-- Now building with autotools.
-- Updated documentation.
-- Fixed typo in copyright.
-- Fixed test scripts to properly handle return code of each test.
-- Added C++03 standard allocator that uses hbw_malloc and hbw_free.
-* Tue Sep 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.0.8
-- Added GBTLB functionality, code clean up, documentation updates,
-  examples directory.  Examples includes stream modified to use
-  memkind interface.  Code coverage still lacking, and documentation
-  incomplete.
-
 endef
 
 export memkind_spec
