@@ -43,7 +43,7 @@ command:
     sudo zypper install libnuma-devel gcc-c++
 
 The jemalloc package must be versioned with the +mk extension.
-Minimum version 3.5.1+mk2 of jemalloc is required.  To use memkind,
+Minimum version 3.5.1+mk3 of jemalloc is required.  To use memkind,
 jemalloc must be configured with the options below:
 
     configure --enable-memkind --with-jemalloc-prefix=je_
