@@ -99,7 +99,7 @@ package installs header files.
 
 %build
 test -f configure || ./autogen.sh
-./configure --prefix=%{_prefix} --libdir=%{_libdir} \
+./configure --enable-tls --prefix=%{_prefix} --libdir=%{_libdir} \
     --includedir=%{_includedir} --sbindir=%{_sbindir} \
     --mandir=%{_mandir} --docdir=%{docdir}
 $(make_prefix)%{__make} $(make_postfix)
