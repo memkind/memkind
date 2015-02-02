@@ -16,12 +16,17 @@ Testing
 
     * Need to expand performance testing significantly.
 
+    * Add more tests for memkind_check_available().
+
 Documentation
 -------------
     * Better documentation for how NULL pointers in ops structure are
       handled.
 
     * Provide an architectural overview document.
+
+    * Document the hbwmalloc::hbwmalloc_allocator C++ standard
+      allocator and add an example that uses it.
 
 Features
 --------
@@ -35,6 +40,9 @@ Features
           int memkind_wait(void *lock);
           int memkind_check(void *lock);
 
+    * Investigate support for overloading the C++ new operator and the
+      C++11 alignas() mark up.
+
     * Extend huge page support using libhugetlbfs.
 
     * Support for non-standard x86 page sizes like 128 MB.
@@ -44,6 +52,13 @@ Features
 
     * Use atexit() rather than __attribute__((destructor)) to support
       compilers other than gcc.
+
+    * Add a kind of memory which allocates to low bandwidth nodes.
+      This would be the inverse of the node mask used for high
+      bandwidth nodes, and would be useful in conjunction with numactl
+      to put default allocations, the stack and globals in high
+      bandwidth memory while selectively allocating some heap
+      variables in low bandwidth memory.
 
 Issues
 ------
@@ -69,3 +84,34 @@ Issues
       cannot account for the memory available in the recycling pool
       for each kind.  Performance of memkind_get_size() is also an
       issue.
+
+    * Weak symbols are different in Mac OS-X which uses weak_import,
+      no weak. The only other issue is we are not allowed to have a
+      strong symbol for one that is declared as weak (this is not a
+      concern for us). Basically we need a different attribute for
+      weak symbols on Mac OSX, weak_import instead of weak.
+
+    * Check the OS version and report issues.  The library should not
+      run into error conditions on OS versions that do not support our
+      library (at least warn the user during installation).
+
+    * Enable inspection of the kind of memory from virtual address of
+      the allocation for external libraries to benefit.
+
+    * In case where /etc/memkind/node-bandwith is absent, and
+      MEMKIND_HBW_NODES is not defined, use MPOL_INTERLEAVED across
+      all NUMA nodes rather than erroring out.
+
+    * Remove the implicit dependency on the openMP runtime from the
+      memkind library. Although the tests and examples use openMP, the
+      memkind library itself should not identify libgomp.so as a
+      dependency when running readelf -d on libmemkind.so.  This is a
+      build issue.
+
+    * PMTT parser does not properly handle empty memory controllers.
+
+    * readelf -d libmemkind.so lists libgomp.so as a dependency, but
+      this library is only required for tests
+
+    * Do memkind and hbwmalloc man pages really need to list anything
+      other than -lmemkind for linking requirements?
