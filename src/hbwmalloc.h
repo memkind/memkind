@@ -44,8 +44,8 @@ extern "C" {
  */
 typedef enum {
     /*
-     *  If insufficient high bandwidth memory pages are available seg
-     *  fault when memory is touched.
+     *  If insufficient high bandwidth memory pages are available then
+     *  OOM killer will be triggered.
      */
     HBW_POLICY_BIND = 1,
     /*
