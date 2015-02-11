@@ -58,6 +58,8 @@ BuildRequires: numactl-devel
 %if ! %{defined jemalloc_installed}
 BuildRequires: jemalloc-devel
 %endif
+Prefix: %{_prefix}
+Prefix: %{_initddir}
 
 %if %{defined suse_version}
 %define docdir %{_defaultdocdir}/memkind
