@@ -250,11 +250,11 @@ int memkind_create(const struct memkind_ops *ops, const char *name, struct memki
         goto exit;
     }
 
+    (*kind)->partition = memkind_registry_g.num_kind;
     err = ops->create(*kind, ops, name);
     if (err) {
         goto exit;
     }
-    (*kind)->partition = memkind_registry_g.num_kind;
     memkind_registry_g.partition_map[memkind_registry_g.num_kind] = *kind;
     ++memkind_registry_g.num_kind;
 
