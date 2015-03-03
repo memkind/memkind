@@ -45,7 +45,6 @@ int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, 
 {
     int err = 0;
 
-    memset(kind, 0, sizeof(struct memkind));
     kind->ops = ops;
     if (strlen(name) >= MEMKIND_NAME_LENGTH) {
         kind->name[0] = '\0';
