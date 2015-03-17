@@ -63,11 +63,11 @@ TEST_F(MemkindCreate, partitions)
     size_t SIZE = 8*1024*1024;
     memkind_t deadbeef_kind;
     void *buffer = NULL;
-    
+
     res = memkind_create(&deadbeef_ops, "deadbeef_ops", &deadbeef_kind);
     EXPECT_EQ(res, 0);
     EXPECT_FALSE(deadbeef_kind == NULL);
-    
+
     buffer = memkind_malloc(MEMKIND_DEFAULT, SIZE);
     memkind_free(MEMKIND_DEFAULT, buffer);
     buffer = memkind_malloc(deadbeef_kind, SIZE);

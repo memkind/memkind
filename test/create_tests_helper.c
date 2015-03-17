@@ -137,9 +137,9 @@ void *mmap_deadbeef(struct memkind *kind, void *addr, size_t size) {
                          MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
     printf("Hello from mmap_deadbeef\n");
-    
+
     for(i=0; i< size/sizeof(int); ++i){
         ((int *)buffer) [i] = 0xDEADBEEF;
     }
     return buffer;
-}  
+}
