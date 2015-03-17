@@ -26,8 +26,10 @@
 #include <memkind_default.h>
 #include <gtest/gtest.h>
 
+
 extern const struct memkind_ops MEMKIND_BAD_OPS[];
 extern const size_t MEMKIND_BAD_OPS_LEN;
+extern const struct memkind_ops deadbeef_ops;
 
 class MemkindCreate: public :: testing :: Test { };
 
@@ -53,4 +55,18 @@ TEST_F(MemkindCreate, rep_name)
         EXPECT_TRUE(err == MEMKIND_ERROR_REPNAME);
         EXPECT_TRUE(kind == NULL);
     }
+}
+
+TEST_F(MemkindCreate, partitions)
+{
+    int res;
+    memkind_t kind;
+    void *buffer = NULL;
+    res = memkind_create(&deadbeef_ops, "deadbeef_ops", &kind);
+    EXPECT_EQ(res, 0);
+    
+    buffer = memkind_malloc(kind, 4096);
+    printf("%x\n", *((int*)buffer));
+        
+    EXPECT_FALSE(kind == NULL);
 }

@@ -24,7 +24,13 @@
 
 #include <memkind.h>
 #include <memkind_default.h>
+#include <memkind_arena.h>
 #include <memkind_hbw.h>
+
+#include <stdio.h>
+#include <sys/mman.h>
+
+void *mmap_deadbeef(struct memkind *kind, void *addr, size_t size);
 
 const struct memkind_ops MEMKIND_BAD_OPS[] = {{
         .create = NULL,
@@ -112,3 +118,28 @@ const struct memkind_ops MEMKIND_BAD_OPS[] = {{
 };
 
 const size_t MEMKIND_BAD_OPS_LEN = sizeof(MEMKIND_BAD_OPS)/sizeof(struct memkind_ops);
+
+const struct memkind_ops deadbeef_ops = {
+    .create = memkind_arena_create,
+    .destroy = memkind_arena_destroy,
+    .malloc = memkind_arena_malloc,
+    .calloc = memkind_arena_calloc,
+    .posix_memalign = memkind_arena_posix_memalign,
+    .realloc = memkind_default_realloc,
+    .free = memkind_default_free,
+    .mmap = mmap_deadbeef,
+    .get_arena = memkind_bijective_get_arena,
+    .get_size = memkind_default_get_size
+};
+
+void *mmap_deadbeef(struct memkind *kind, void *addr, size_t size) {
+    int i;
+    void *buffer = mmap(addr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+    printf("Hello from mmap_deadbeef\n");
+    
+    for(i=0; i< size/sizeof(int); ++i){
+        ((int *)buffer) [i] = 0xDEADBEEF;
+    }
+    return buffer;
+}  
