@@ -26,7 +26,6 @@
 #include <memkind_default.h>
 #include <memkind_arena.h>
 #include <memkind_hbw.h>
-
 #include <stdio.h>
 #include <sys/mman.h>
 
@@ -134,7 +133,8 @@ const struct memkind_ops deadbeef_ops = {
 
 void *mmap_deadbeef(struct memkind *kind, void *addr, size_t size) {
     int i;
-    void *buffer = mmap(addr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    void *buffer = mmap(addr, size, PROT_READ | PROT_WRITE,
+                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
     printf("Hello from mmap_deadbeef\n");
     

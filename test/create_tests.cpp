@@ -60,13 +60,16 @@ TEST_F(MemkindCreate, rep_name)
 TEST_F(MemkindCreate, partitions)
 {
     int res;
-    memkind_t kind;
+    size_t SIZE = 8*1024*1024;
+    memkind_t deadbeef_kind;
     void *buffer = NULL;
-    res = memkind_create(&deadbeef_ops, "deadbeef_ops", &kind);
-    EXPECT_EQ(res, 0);
     
-    buffer = memkind_malloc(kind, 4096);
-    printf("%x\n", *((int*)buffer));
-        
-    EXPECT_FALSE(kind == NULL);
+    res = memkind_create(&deadbeef_ops, "deadbeef_ops", &deadbeef_kind);
+    EXPECT_EQ(res, 0);
+    EXPECT_FALSE(deadbeef_kind == NULL);
+    
+    buffer = memkind_malloc(MEMKIND_DEFAULT, SIZE);
+    memkind_free(MEMKIND_DEFAULT, buffer);
+    buffer = memkind_malloc(deadbeef_kind, SIZE);
+    EXPECT_EQ(*((unsigned int*)buffer), 0xDEADBEEF);
 }
