@@ -76,6 +76,7 @@ test_tieddisterr_test_SOURCES = test/main.cpp test/tied_dist_test.cpp
 
 # Examples as tests
 check_PROGRAMS += test/hello_memkind \
+                  test/hello_memkind_debug \
                   test/hello_hbw \
                   test/filter_memkind \
                   test/stream \
@@ -85,6 +86,7 @@ check_PROGRAMS += test/hello_memkind \
                   # end
 
 test_hello_memkind_LDADD = libmemkind.la
+test_hello_memkind_debug_LDADD = libmemkind.la
 test_hello_hbw_LDADD = libmemkind.la
 test_filter_memkind_LDADD = libmemkind.la
 test_stream_LDADD = libmemkind.la
@@ -92,7 +94,9 @@ test_stream_memkind_LDADD = libmemkind.la
 test_new_kind_LDADD = libmemkind.la
 test_gb_realloc_LDADD = libmemkind.la
 
+
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
+test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 test_hello_hbw_SOURCES = examples/hello_hbw_example.c
 test_filter_memkind_SOURCES = examples/filter_example.c
 test_stream_SOURCES = examples/stream_example.c

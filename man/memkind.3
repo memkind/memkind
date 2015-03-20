@@ -64,6 +64,28 @@ memkind \- Heap manager that enables allocations to memory with different proper
 .BI "int memkind_get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
 .br
 .BI "int memkind_check_available(memkind_t " "kind" );
+.sp
+.B "DECORATORS:"
+.br
+.BI "void memkind_malloc_pre(memkind_t " "*kind" ", size_t " "*size" );
+.br
+.BI "void memkind_malloc_post(memkind_t " "kind" ", size_t " "size" ", void " "**result" );
+.br
+.BI "void memkind_calloc_pre(memkind_t " "*kind" ", size_t " "*nmemb" ", size_t " "*size" );
+.br
+.BI "void memkind_calloc_post(memkind_t " "kind" ", size_t " "nmemb" ", size_t " "size" ", void " "**result" );
+.br
+.BI "void memkind_posix_memalign_pre(memkind_t " "*kind" ", void " "**memptr" ", size_t " "*alignment" ", size_t " "*size" );
+.br
+.BI "void memkind_posix_memalign_post(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" ", int " "*err" );
+.br
+.BI "void memkind_realloc_pre(memkind_t " "*kind" ", void " "**ptr" ", size_t " "*size" );
+.br
+.BI "void memkind_realloc_post(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" ", void " "**result" );
+.br
+.BI "void memkind_free_pre(memkind_t " "*kind" ", void " "**ptr" );
+.br
+.BI "void memkind_free_post(memkind_t " "kind" ", void " "*ptr" );
 .br
 .SH "DESCRIPTION"
 .PP
@@ -325,6 +347,26 @@ Returns a zero if the specified
 is available or an error code from the
 .B ERRORS
 section if it is not.
+.sp
+.B "DECORATORS:"
+.br
+The memkind library enables the user to define decorator functions that
+can be called before and after each memkind heap management API.  The
+decorators that are called at the beginning of the function end are named
+after that function with
+.I _pre
+appended to the name, and those that are called at the end of the
+function are named after that function with
+.I _post
+appended to the name.  These are weak symbols, and if they are not
+present at link time they are not called.  The memkind library does
+not define these symbols which are reserved for user definition.
+These decorators can be used to track calls to the heap management
+interface or to modify parameters.  The decorators that are called at
+the beginning of the allocator pass all inputs by reference, and the
+decorators that are called at the end of the allocator pass the output
+by reference.  This enables the modification of the input and output
+of each heap management function by the decorators.
 .sp
 .B "MEMKIND OPERATIONS:"
 .br

@@ -145,6 +145,18 @@ static struct memkind_registry memkind_registry_g = {
 
 static int memkind_get_kind_for_free(void *ptr, struct memkind **kind);
 
+/* Declare weak symbols for alloctor decorators */
+extern void memkind_malloc_pre(struct memkind **, size_t *) __attribute__((weak));
+extern void memkind_malloc_post(struct memkind *, size_t, void **) __attribute__((weak));
+extern void memkind_calloc_pre(struct memkind **, size_t *, size_t *) __attribute__((weak));
+extern void memkind_calloc_post(struct memkind *, size_t, size_t, void **) __attribute__((weak));
+extern void memkind_posix_memalign_pre(struct memkind **, void **, size_t *, size_t *) __attribute__((weak));
+extern void memkind_posix_memalign_post(struct memkind *, void **, size_t, size_t, int *) __attribute__((weak));
+extern void memkind_realloc_pre(struct memkind **, void **, size_t *) __attribute__((weak));
+extern void memkind_realloc_post(struct memkind *, void *, size_t, void **) __attribute__((weak));
+extern void memkind_free_pre(struct memkind **, void **) __attribute__((weak));
+extern void memkind_free_post(struct memkind *, void *) __attribute__((weak));
+
 void memkind_error_message(int err, char *msg, size_t size)
 {
     switch (err) {
@@ -367,6 +379,7 @@ void *memkind_partition_mmap(int partition, void *addr, size_t size)
 int memkind_check_available(struct memkind *kind)
 {
     int err = 0;
+
     if (kind->ops->check_available) {
         err = kind->ops->check_available(kind);
     }
@@ -375,35 +388,71 @@ int memkind_check_available(struct memkind *kind)
 
 void *memkind_malloc(struct memkind *kind, size_t size)
 {
+    void *result;
+
     if (kind->ops->init_once) {
         pthread_once(&(kind->init_once), kind->ops->init_once);
     }
-    return kind->ops->malloc(kind, size);
+    if (memkind_malloc_pre) {
+        memkind_malloc_pre(&kind, &size);
+    }
+    result = kind->ops->malloc(kind, size);
+    if (memkind_malloc_post) {
+        memkind_malloc_post(kind, size, &result);
+    }
+    return result;
 }
 
 void *memkind_calloc(struct memkind *kind, size_t num, size_t size)
 {
+    void *result;
+
     if (kind->ops->init_once) {
         pthread_once(&(kind->init_once), kind->ops->init_once);
     }
-    return kind->ops->calloc(kind, num, size);
+    if (memkind_calloc_pre) {
+        memkind_calloc_pre(&kind, &num, &size);
+    }
+    result = kind->ops->calloc(kind, num, size);
+    if (memkind_calloc_post) {
+        memkind_calloc_post(kind, num, size, &result);
+    }
+    return result;
 }
 
 int memkind_posix_memalign(struct memkind *kind, void **memptr, size_t alignment,
                            size_t size)
 {
+    int err;
+
     if (kind->ops->init_once) {
         pthread_once(&(kind->init_once), kind->ops->init_once);
     }
-    return kind->ops->posix_memalign(kind, memptr, alignment, size);
+    if (memkind_posix_memalign_pre) {
+        memkind_posix_memalign_pre(&kind, memptr, &alignment, &size);
+    }
+    err = kind->ops->posix_memalign(kind, memptr, alignment, size);
+    if (memkind_posix_memalign_post) {
+        memkind_posix_memalign_post(kind, memptr, alignment, size, &err);
+    }
+    return err;
 }
 
 void *memkind_realloc(struct memkind *kind, void *ptr, size_t size)
 {
+    void *result;
+
     if (kind->ops->init_once) {
         pthread_once(&(kind->init_once), kind->ops->init_once);
     }
-    return kind->ops->realloc(kind, ptr, size);
+    if (memkind_realloc_pre) {
+        memkind_realloc_pre(&kind, &ptr, &size);
+    }
+    result = kind->ops->realloc(kind, ptr, size);
+    if (memkind_realloc_post) {
+        memkind_realloc_post(kind, ptr, size, &result);
+    }
+    return result;
 }
 
 void memkind_free(struct memkind *kind, void *ptr)
@@ -411,7 +460,13 @@ void memkind_free(struct memkind *kind, void *ptr)
     if (!kind) {
         memkind_get_kind_for_free(ptr, &kind);
     }
+    if (memkind_free_pre) {
+        memkind_free_pre(&kind, &ptr);
+    }
     kind->ops->free(kind, ptr);
+    if (memkind_free_post) {
+        memkind_free_post(kind, ptr);
+    }
 }
 
 int memkind_get_size(memkind_t kind, size_t *total, size_t *free)

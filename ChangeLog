@@ -11,6 +11,7 @@
   user-defined kinds.
 - Removed call to sched_getcpu(), now thread id is hashed to determine the arena
   index.
+- Added weak symbol hooks for decorating the heap management functions.
 - Fixed several issues with init.d/memkind script and spec file scriptlets that
   are exposed by SLES-12.
 - Introduced an example library called numakind.

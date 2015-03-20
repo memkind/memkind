@@ -57,6 +57,7 @@
 /examples/hello_hbw_example.o
 /examples/hello_memkind
 /examples/hello_memkind_example.o
+/examples/hello_memkind_debug
 /examples/new_kind
 /examples/new_kind_example.o
 /examples/stream

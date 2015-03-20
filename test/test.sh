@@ -109,6 +109,11 @@ ret=$?
 if [ $ret -ne 0 ]; then echo "FAIL: hello_memkind" 1>&2; fi
 if [ $err -eq 0 ]; then err=$ret; fi
 
+$basedir/hello_memkind_debug
+ret=$?
+if [ $ret -ne 0 ]; then echo "FAIL: hello_memkind_debug" 1>&2; fi
+if [ $err -eq 0 ]; then err=$ret; fi
+
 $basedir/hello_hbw
 ret=$?
 if [ $ret -ne 0 ]; then echo "FAIL: hello_hbw" 1>&2; fi

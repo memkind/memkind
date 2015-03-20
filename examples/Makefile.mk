@@ -23,6 +23,7 @@
 #
 
 noinst_PROGRAMS += examples/hello_memkind \
+                   examples/hello_memkind_debug \
                    examples/hello_hbw \
                    examples/filter_memkind \
                    examples/stream \
@@ -35,6 +36,7 @@ noinst_PROGRAMS += examples/hello_memkind \
 noinst_LTLIBRARIES += examples/libnumakind.la
 
 examples_hello_memkind_LDADD = libmemkind.la
+examples_hello_memkind_debug_LDADD = libmemkind.la
 examples_hello_hbw_LDADD = libmemkind.la
 examples_filter_memkind_LDADD = libmemkind.la
 examples_stream_LDADD = libmemkind.la
@@ -44,6 +46,7 @@ examples_gb_realloc_LDADD = libmemkind.la
 examples_numakind_test_LDADD = examples/libnumakind.la libmemkind.la
 
 examples_hello_memkind_SOURCES = examples/hello_memkind_example.c
+examples_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 examples_hello_hbw_SOURCES = examples/hello_hbw_example.c
 examples_filter_memkind_SOURCES = examples/filter_example.c
 examples_stream_SOURCES = examples/stream_example.c
