@@ -43,6 +43,8 @@ int memkind_default_get_mmap_file(struct memkind *kind, int *fd, off_t *offset);
 int memkind_default_get_mmap_flags(struct memkind *kind, int *flags);
 int memkind_default_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode);
+int memkind_interleave_get_mbind_mode(struct memkind *kind, int *mode);
+int memkind_nohugepage_madvise(struct memkind *kind, void *addr, size_t size);
 int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free);
 int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
 

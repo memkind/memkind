@@ -455,16 +455,18 @@ as described above.
 .BI "void *ops.mmap(memkind_t " "kind" ", void " "*addr" ", size_t " "size" );
 shall wrap the
 .BR mmap (2)
-and
 .BR mbind (2)
+and
+.BR madvise (2)
 system calls while passing
 .I addr
 and
 .I size
 through and determining all other parameters for
 .BR mmap (2)
-and
 .BR mbind (2)
+and
+.BR madvise (2)
 by calling other functions resolved by the
 .B kind.ops
 vtable.
@@ -482,13 +484,26 @@ shall wrap the
 system call and pass through
 the start address
 .I ptr
-to be mapped, and the number of bytes
+to be bound, and the number of bytes
 .I size
-from that address to be mapped.  The other parmeters to
+from that address to be bound.  The other parmeters to
 .BR mbind (2)
 shall be determined by calling other functions resolved by the
 .B kind.ops
 vtable.
+.PP
+.BI "int ops.madvise(memkind_t " "kind" ", void " "*addr" ", size_t " "size" );
+.br
+shall wrap the
+.BR madvise (2)
+system call and pass through
+the start address
+.I addr
+to be advised, and the number of bytes
+.I size
+from that address to be advised.  This may call
+.BR madvise (2)
+multiple times with different advice.
 .PP
 .BI "int ops.get_mmap_flags(memkind_t " "kind" ", int " "*flags" );
 .br
@@ -596,7 +611,8 @@ Allocate from standard memory using huge pages.
 Allocate from standard memory using giga byte huge pages.
 .TP
 .B MEMKIND_HBW
-Allocate from high bandwidth memory NUMA nodes as defined by the PMTT
+Allocate from the closest high bandwidth memory NUMA node at time
+of allocation.  High bandwidth nodes are defined by the PMTT
 table, or the environment variable
 .BR "MEMKIND_HBW_NODES" .
 If there is not enough high bandwidth memory to satisfy the request
@@ -636,6 +652,13 @@ Same as
 .B MEMKIND_HBW_GBTLB
 except that if there is not enough high bandwidth memory to satisfy
 the request, the allocation will fall back on standard memory.
+.TP
+.B MEMKIND_HBW_INTERLEAVE
+Same as
+.B MEMKIND_HBW
+except that the pages that support the allocation is interleaved
+across all high bandwidth nodes and transparent huge pages are
+disabled.
 .SH "ERRORS"
 .TP
 .BR memkind_posix_memalign ()

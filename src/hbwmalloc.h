@@ -52,7 +52,11 @@ typedef enum {
      *  If insufficient high bandwidth memory pages are available fall
      *  back on standard memory pages.
      */
-    HBW_POLICY_PREFERRED = 2
+    HBW_POLICY_PREFERRED = 2,
+    /*
+     *  Interleave pages accross high bandwidth nodes.
+     */
+    HBW_POLICY_INTERLEAVE = 3
 } hbw_policy_t;
 
 /*

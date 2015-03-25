@@ -35,7 +35,7 @@ static pthread_once_t hbw_policy_once_g = PTHREAD_ONCE_INIT;
 static inline memkind_t hbw_get_kind(int pagesize);
 static inline void hbw_policy_preferred_init(void);
 static inline void hbw_policy_bind_init(void);
-
+static inline void hbw_policy_interleave_init(void);
 
 int hbw_get_policy(void)
 {
@@ -49,6 +49,9 @@ void hbw_set_policy(int mode)
     }
     else if (mode == HBW_POLICY_BIND) {
         pthread_once(&hbw_policy_once_g, hbw_policy_bind_init);
+    }
+    else if (mode == HBW_POLICY_INTERLEAVE) {
+        pthread_once(&hbw_policy_once_g, hbw_policy_interleave_init);
     }
     if (mode != hbw_policy_g) {
         fprintf(stderr, "WARNING: hbw_set_policy() called more than once with different values, only first call heeded.\n");
@@ -128,8 +131,9 @@ void hbw_free(void *ptr)
 static inline memkind_t hbw_get_kind(int pagesize)
 {
     memkind_t result = NULL;
+    int policy = hbw_get_policy();
 
-    if (hbw_get_policy() == HBW_POLICY_BIND) {
+    if (policy == HBW_POLICY_BIND || policy == HBW_POLICY_INTERLEAVE) {
         switch (pagesize) {
             case HBW_PAGESIZE_2MB:
                 result = MEMKIND_HBW_HUGETLB;
@@ -139,7 +143,12 @@ static inline memkind_t hbw_get_kind(int pagesize)
                 result = MEMKIND_HBW_GBTLB;
                 break;
             default:
-                result = MEMKIND_HBW;
+                if (policy == HBW_POLICY_BIND) {
+                    result = MEMKIND_HBW;
+                }
+                else {
+                    result = MEMKIND_HBW_INTERLEAVE;
+                }
                 break;
         }
     }
@@ -183,4 +192,9 @@ static inline void hbw_policy_bind_init(void)
 static inline void hbw_policy_preferred_init(void)
 {
     hbw_policy_g = HBW_POLICY_PREFERRED;
+}
+
+static inline void hbw_policy_interleave_init(void)
+{
+    hbw_policy_g = HBW_POLICY_INTERLEAVE;
 }
