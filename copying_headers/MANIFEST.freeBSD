@@ -1,6 +1,7 @@
 autogen.sh
 Makefile.am
 configure.ac
+config_tls.h.in
 examples/Makefile.mk
 examples/filter_example.c
 examples/hello_hbw_example.c
@@ -10,6 +11,7 @@ examples/gb_realloc_example.c
 examples/numakind.c
 examples/numakind.h
 examples/numakind_test.c
+examples/memkind_decorator_debug.c
 init.d/memkind
 man/hbwmalloc.3
 man/memkind.3

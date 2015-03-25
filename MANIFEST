@@ -10,6 +10,7 @@ TODO
 VERSION
 autogen.sh
 configure.ac
+config_tls.h.in
 examples/filter_example.c
 examples/hello_memkind_example.c
 examples/stream_example.c
@@ -21,6 +22,7 @@ examples/gb_realloc_example.c
 examples/numakind.c
 examples/numakind.h
 examples/numakind_test.c
+examples/memkind_decorator_debug.c
 init.d/memkind
 man/hbwmalloc.3
 man/memkind.3
