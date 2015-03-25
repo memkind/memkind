@@ -54,6 +54,10 @@ memkind_default.h \- default implementations for memkind operations.
 .br
 .BI "int memkind_preferred_get_mbind_mode(struct memkind " "*kind" ", int " "*mode" );
 .br
+.BI "int memkind_interleave_get_mbind_mode(struct memkind " "*kind" ", int " "*mode" );
+.br
+.BI "int memkind_nohugepage_madvise(struct memkind " "*kind" ", void " "*addr" ", size_t " "size" );
+.br
 .BI "int memkind_default_get_size(struct memkind " "*kind" ", size_t " "*total" ", size_t " "*free" );
 .br
 .BI "int memkind_posix_check_alignment(struct memkind " "*kind" ", size_t " "alignment" );
@@ -161,6 +165,25 @@ to
 See
 .BR mbind (2)
 for more information about this flag.
+.PP
+.BR memkind_interleave_get_mbind_mode ()
+sets
+.I mode
+to
+.BR MPOL_INTERLEAVE .
+See
+.BR mbind (2)
+for more information about this flag.
+.PP
+.BR memkind_nohugepage_madvise ()
+calls
+.BR madvise (2)
+with the
+.B MADV_NOHUGEPAGE
+advice.
+See
+.BR madvise (2)
+for more information about this option.
 .PP
 .BR memkind_default_get_size ()
 sums the values returned by

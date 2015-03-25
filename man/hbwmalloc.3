@@ -208,14 +208,24 @@ buffer is allocated determines the policy for that buffer until it is
 freed.
 .TP
 .B HBW_POLICY_BIND
-If insufficient high bandwidth memory is available to satisfy
-a request, the allocated pointer is set to NULL and
+If insufficient high bandwidth memory from the nearest NUMA node is
+available to satisfy a request, the allocated pointer is set to NULL
+and
 .I errno
-is set to ENOMEM.
+is set to ENOMEM.  If insufficient high bandwidth memory pages are
+available at fault time the Out Of Memory (OOM) killer is triggered.
+Note that pages are faulted exclusively from the high bandwidth NUMA
+node nearest at time of allocation, not at time of fault.
 .TP
 .B HBW_POLICY_PREFERRED
-If insufficient high bandwidth memory is available, fall back to
-standard memory (default).
+If insufficient memory is available from the high bandwidth NUMA node
+closest at allocation time, fall back to standard memory (default)
+with the smallest NUMA distance.
+.TP
+.B HBW_POLICY_INTERLEAVE
+Interleave faulted pages from across all high bandwidth NUMA nodes
+using standard size pages (the Transparent Huge Page feature is
+disabled).
 .SH "RETURN VALUE"
 .BR hbw_get_policy ()
 returns

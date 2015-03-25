@@ -30,6 +30,10 @@
 
 #include "memkind_default.h"
 
+#ifndef MADV_NOHUGEPAGE
+#define MADV_NOHUGEPAGE 15
+#endif
+
 const struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
@@ -147,7 +151,19 @@ void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
             result = MAP_FAILED;
         }
     }
+    if (result != MAP_FAILED && kind->ops->madvise) {
+        err = kind->ops->madvise(kind, result, size);
+        if (err) {
+            munmap(result, size);
+            result = MAP_FAILED;
+        }
+    }
     return result;
+}
+
+int memkind_nohugepage_madvise(struct memkind *kind, void *addr, size_t size)
+{
+    return madvise(addr, size, MADV_NOHUGEPAGE);
 }
 
 int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size)
@@ -189,6 +205,12 @@ int memkind_default_get_mbind_mode(struct memkind *kind, int *mode)
 int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode)
 {
     *mode = MPOL_PREFERRED;
+    return 0;
+}
+
+int memkind_interleave_get_mbind_mode(struct memkind *kind, int *mode)
+{
+    *mode = MPOL_INTERLEAVE;
     return 0;
 }
 

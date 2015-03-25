@@ -200,3 +200,13 @@ TEST_F(PolicyTest, change_preferred_1GB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_PREFERRED, 1024));
 }
+
+TEST_F(PolicyTest, change_interleave_1MB)
+{
+    EXPECT_EQ(0, execute_policy(HBW_POLICY_INTERLEAVE, 1));
+}
+
+TEST_F(PolicyTest, change_interleave_1GB)
+{
+    EXPECT_EQ(0, execute_policy(HBW_POLICY_INTERLEAVE, 1024));
+}

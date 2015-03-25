@@ -68,6 +68,7 @@ enum memkind_base_partition {
     MEMKIND_PARTITION_HBW_GBTLB = 6,
     MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 7,
     MEMKIND_PARTITION_GBTLB = 8,
+    MEMKIND_PARTITION_HBW_INTERLEAVE = 9,
     MEMKIND_NUM_BASE_KIND
 };
 
@@ -96,6 +97,7 @@ struct memkind_ops {
     void (* free)(struct memkind *kind, void *ptr);
     void *(* mmap)(struct memkind *kind, void *addr, size_t size);
     int (* mbind)(struct memkind *kind, void *ptr, size_t size);
+    int (* madvise)(struct memkind *kind, void *addr, size_t size);
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
     int (* get_mmap_file)(struct memkind *kind, int *fd, off_t *offset);
     int (* get_mbind_mode)(struct memkind *kind, int *mode);
@@ -118,6 +120,7 @@ extern memkind_t MEMKIND_HBW_PREFERRED_HUGETLB;
 extern memkind_t MEMKIND_HBW_GBTLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
 extern memkind_t MEMKIND_GBTLB;
+extern memkind_t MEMKIND_HBW_INTERLEAVE;
 
 
 /* Convert error number into an error message */
