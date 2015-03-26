@@ -77,6 +77,7 @@ scp $basedir/.libs/stream $remote_login@$remote_ip:
 scp $basedir/.libs/stream_memkind $remote_login@$remote_ip:
 scp $basedir/.libs/new_kind $remote_login@$remote_ip:
 scp $basedir/.libs/gb_realloc $remote_login@$remote_ip:
+scp $basedir/.libs/hello_memkind_debug $remote_login@$remote_ip:
 
 scp $basedir/test.sh $remote_login@$remote_ip:
 
