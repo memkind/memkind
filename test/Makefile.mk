@@ -34,7 +34,8 @@ check_PROGRAMS += test/all_tests \
                   # end
 
 TESTS += test/check.sh
-EXTRA_DIST += test/mock-pmtt.txt
+EXTRA_DIST += test/mock-pmtt-2-nodes.hex \
+              test/mock-pmtt-empty-controller.hex
 
 test_all_tests_LDADD = libgtest.a libmemkind.la
 test_schedcpu_test_LDADD = libgtest.a libmemkind.la
@@ -158,3 +159,4 @@ test/libfopen.so: test/fopen_mock.c
 
 clean-local-mock:
 	rm -f test/*.so
+	rm -f test/*.aml

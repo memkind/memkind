@@ -24,9 +24,10 @@
 
 #include "common.h"
 
-int hexDump2Bin(char const *hexDumpFile);
-int parse_node_bandwidth(size_t num_bandwidth, int *bandwidth,
-                         const char *bandwidth_path);
+int hex_dump_to_bin(const char*);
+int parse_node_bandwidth(size_t, int*,const char*);
+int run_pmtt_parser(const char*,const int[], size_t);
+
 static const char *MOCK_PMTT_PATH = "/tmp/mock-pmtt.aml";
 
 class MemkindPmttTest: public :: testing::Test
@@ -44,21 +45,44 @@ protected:
 };
 
 
-TEST_F(MemkindPmttTest, NodeBandwidthSize)
+TEST_F(MemkindPmttTest, TC_Memkind_PmttParser_2NodeSystem)
 {
     size_t NUMA_NUM_NODES = 2;
-    static const char *MOCK_NBW_PATH = "/tmp/pmtt-test/node-bandwidth";
-    char pmtt_parser_exe_path[64] = "/usr/sbin/memkind-pmtt";
-    //static const char *NODE_BW_PARSER_SCRIPT = "python bandwidth-parser.py";
+    const char *mockPmtt = "/tmp/mock-pmtt-2-nodes.hex";
     int rv = 0;
-    //char buffer[128],pmtt_parser_exe[256], node_bw_parser[256];
-    char pmtt_parser_exe[256];
-    int bandwidth[NUMA_NUM_NODES];
 
     //Known bandwidths from MOCK PMTT table.
     const int MEM_CTRLS_BW[2] = {17072, 760800};
 
-    rv = hexDump2Bin("/tmp/mock-pmtt.txt");
+    rv = run_pmtt_parser(mockPmtt, MEM_CTRLS_BW, NUMA_NUM_NODES);
+    EXPECT_EQ(0, rv);
+
+}
+
+TEST_F(MemkindPmttTest, TC_Memkind_PmttParser_EmptyController)
+{
+    size_t NUMA_NUM_NODES = 2;
+    const char *mockPmtt = "/tmp/mock-pmtt-empty-controller.hex";
+    int rv = 0;
+
+    //Known bandwidths from MOCK PMTT table.
+    const int MEM_CTRLS_BW[2] = {8536, 204800};
+
+    rv = run_pmtt_parser(mockPmtt, MEM_CTRLS_BW, NUMA_NUM_NODES);
+    EXPECT_EQ(0, rv);
+
+}
+
+int run_pmtt_parser(const char *mockPmtt, const int MEM_CTRLS_BW[],
+                    size_t NUMA_NUM_NODES)
+{
+    int rv = 0;
+    static const char *MOCK_NBW_PATH = "/tmp/node-bandwidth";
+    char pmtt_parser_exe_path[64] = "/usr/sbin/memkind-pmtt";
+    char pmtt_parser_exe[256];
+    int bandwidth[NUMA_NUM_NODES];
+
+    rv = hex_dump_to_bin(mockPmtt);
     EXPECT_EQ(0, rv);
 
     if(FILE *file = fopen(pmtt_parser_exe_path, "r")) {
@@ -84,6 +108,8 @@ TEST_F(MemkindPmttTest, NodeBandwidthSize)
 
     remove(MOCK_PMTT_PATH);
     remove(MOCK_NBW_PATH);
+
+    return rv;
 }
 
 int parse_node_bandwidth(size_t num_bandwidth, int *bandwidth,
@@ -106,7 +132,7 @@ int parse_node_bandwidth(size_t num_bandwidth, int *bandwidth,
 }
 
 
-int hexDump2Bin(char const *hexDumpFile)
+int hex_dump_to_bin(const char *hexDumpFile)
 {
     char cmd[128];
     int rv = 0;

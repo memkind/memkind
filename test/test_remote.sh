@@ -62,7 +62,7 @@ scp $basedir/.libs/schedcpu_test $remote_login@$remote_ip:
 scp $basedir/.libs/tieddisterr_test $remote_login@$remote_ip:
 scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
 
-scp $basedir/mock-pmtt.txt $remote_login@$remote_ip:/tmp/
+scp $basedir/mock-pmtt* $remote_login@$remote_ip:/tmp/
 scp $basedir/libfopen.so $remote_login@$remote_ip:
 scp $basedir/libmallctl.so $remote_login@$remote_ip:
 scp $basedir/libmalloc.so $remote_login@$remote_ip:
