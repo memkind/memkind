@@ -27,7 +27,7 @@
 
 AC_PREREQ([2.62])
 AC_INIT([memkind],m4_esyscmd([tr -d '\n' < VERSION]),[christopher.m.cantalupo@intel.com])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects tar-ustar])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects tar-pax])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_HEADERS([config_tls.h])
 
