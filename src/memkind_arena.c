@@ -268,7 +268,7 @@ static void *je_mallocx_check(size_t size, int flags)
     if (size >= LLONG_MAX) {
         errno = ENOMEM;
     }
-    else {
+    else if (size != 0) {
         result = je_mallocx(size, flags);
     }
     return result;
