@@ -112,6 +112,9 @@ $(make_prefix)%{__make} $(make_postfix)
 %{__install} init.d/memkind %{buildroot}/%{_initddir}/memkind
 rm -f %{buildroot}/%{_libdir}/libmemkind.a
 rm -f %{buildroot}/%{_libdir}/libmemkind.la
+rm -f %{buildroot}/%{_libdir}/libnumakind.*
+rm -f %{buildroot}/%{_libdir}/libautohbw.*
+
 $(extra_install)
 
 %clean

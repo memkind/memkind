@@ -3,6 +3,9 @@ Makefile.am
 configure.ac
 config_tls.h.in
 examples/Makefile.mk
+examples/autohbw.c
+examples/autohbw_get_src_lines.pl
+examples/autohbw_helper.h
 examples/filter_example.c
 examples/hello_hbw_example.c
 examples/hello_memkind_example.c

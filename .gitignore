@@ -86,5 +86,10 @@
 /examples/examples_libnumakind_la-numakind.lo
 /examples/examples_libnumakind_la-numakind.o
 /examples/numakind_macro.h
+/examples/autohbw.lo
+/examples/autohbw.o
+/examples/libautohbw.la
+/examples/memkind_decorator_debug.o
+/stamp-h2
 /test-driver
 
