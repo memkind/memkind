@@ -286,59 +286,69 @@ static int memkind_store(void *memptr, void **mmapptr, struct memkind **kind,
         if (!is_init) {
             table_len = numa_num_configured_cpus();
             table = je_malloc(sizeof(memkind_table_node_t) * table_len);
-            for (i = 0; i < table_len; ++i) {
-                pthread_mutex_init(&(table[i].mutex), NULL);
-                table[i].list = NULL;
+            if (table == NULL) {
+                err = MEMKIND_ERROR_MALLOC;
             }
-            is_init = 1;
+            else {
+                for (i = 0; i < table_len; ++i) {
+                    pthread_mutex_init(&(table[i].mutex), NULL);
+                    table[i].list = NULL;
+                }
+                is_init = 1;
+            }
         }
         pthread_mutex_unlock(&init_mutex);
     }
-    hash = ptr_hash(memptr, table_len);
-    pthread_mutex_lock(&(table[hash].mutex));
-    if (mode == GBTLB_STORE_REMOVE || mode == GBTLB_STORE_QUERY) {
-        /*
-           memkind_store() call is a query
-           GBTLB_STORE_REMOVE -> Query if found remove and
-           return the address and size;
-           GBTLB_STORE_QUERTY -> Query if found and return;
-        */
-        storeptr = table[hash].list;
-        lastptr = NULL;
-        while (storeptr && storeptr->ptr != memptr) {
-            lastptr = storeptr;
-            storeptr = storeptr->next;
-        }
-        if (storeptr == NULL) {
-            err = MEMKIND_ERROR_RUNTIME;
-        }
-        if (!err) {
-            *mmapptr = storeptr->mmapptr;
-            *size = storeptr->size;
-            *req_size = storeptr->requested_size;
-            *kind = storeptr->kind;
-        }
-        if (!err && mode == GBTLB_STORE_REMOVE) {
-            if (lastptr) {
-                lastptr->next = storeptr->next;
+    if (is_init) {
+        hash = ptr_hash(memptr, table_len);
+        pthread_mutex_lock(&(table[hash].mutex));
+        if (mode == GBTLB_STORE_REMOVE || mode == GBTLB_STORE_QUERY) {
+            /*
+               memkind_store() call is a query
+               GBTLB_STORE_REMOVE -> Query if found remove and
+               return the address and size;
+               GBTLB_STORE_QUERTY -> Query if found and return;
+            */
+            storeptr = table[hash].list;
+            lastptr = NULL;
+            while (storeptr && storeptr->ptr != memptr) {
+                lastptr = storeptr;
+                storeptr = storeptr->next;
             }
-            else {
-                table[hash].list = storeptr->next;
+            if (storeptr == NULL) {
+                err = MEMKIND_ERROR_RUNTIME;
             }
-            je_free(storeptr);
+            if (!err) {
+                *mmapptr = storeptr->mmapptr;
+                *size = storeptr->size;
+                *req_size = storeptr->requested_size;
+                *kind = storeptr->kind;
+            }
+            if (!err && mode == GBTLB_STORE_REMOVE) {
+                if (lastptr) {
+                    lastptr->next = storeptr->next;
+                }
+                else {
+                    table[hash].list = storeptr->next;
+                }
+                je_free(storeptr);
+            }
         }
+        else { /* memkind_store() call is a store */
+            storeptr = table[hash].list;
+            table[hash].list = (memkind_list_node_t*)je_malloc(sizeof(memkind_list_node_t));
+            table[hash].list->ptr = memptr;
+            table[hash].list->mmapptr = *mmapptr;
+            table[hash].list->size = *size;
+            table[hash].list->requested_size = *req_size;
+            table[hash].list->kind = *kind;
+            table[hash].list->next = storeptr;
+        }
+        pthread_mutex_unlock(&(table[hash].mutex));
     }
-    else { /* memkind_store() call is a store */
-        storeptr = table[hash].list;
-        table[hash].list = (memkind_list_node_t*)je_malloc(sizeof(memkind_list_node_t));
-        table[hash].list->ptr = memptr;
-        table[hash].list->mmapptr = *mmapptr;
-        table[hash].list->size = *size;
-        table[hash].list->requested_size = *req_size;
-        table[hash].list->kind = *kind;
-        table[hash].list->next = storeptr;
+    else {
+        err = MEMKIND_ERROR_MALLOC;
     }
-    pthread_mutex_unlock(&(table[hash].mutex));
     return err;
 }
 
