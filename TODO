@@ -111,5 +111,3 @@ Issues
     * readelf -d libmemkind.so lists libgomp.so as a dependency, but
       this library is only required for tests
 
-    * Do memkind and hbwmalloc man pages really need to list anything
-      other than -lmemkind for linking requirements?
