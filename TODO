@@ -58,6 +58,9 @@ Features
       bandwidth memory while selectively allocating some heap
       variables in low bandwidth memory.
 
+    * Enable inspection of the kind of memory from virtual address of
+      the allocation for external libraries to benefit.
+
 Issues
 ------
     * Error message when starting memkind service after it is already
@@ -92,9 +95,6 @@ Issues
     * Check the OS version and report issues.  The library should not
       run into error conditions on OS versions that do not support our
       library (at least warn the user during installation).
-
-    * Enable inspection of the kind of memory from virtual address of
-      the allocation for external libraries to benefit.
 
     * In case where /etc/memkind/node-bandwith is absent, and
       MEMKIND_HBW_NODES is not defined, use MPOL_INTERLEAVED across
