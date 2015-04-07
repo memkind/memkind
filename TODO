@@ -23,8 +23,6 @@ Documentation
     * Better documentation for how NULL pointers in ops structure are
       handled.
 
-    * Provide an architectural overview document.
-
     * Document the hbwmalloc::hbwmalloc_allocator C++ standard
       allocator and add an example that uses it.
 
