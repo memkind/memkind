@@ -183,10 +183,10 @@ void memkind_error_message(int err, char *msg, size_t size)
             strncpy(msg, "<memkind> Call to posix_memalign() failed", size);
             break;
         case MEMKIND_ERROR_MALLCTL:
-            strncpy(msg, "<memkind> Call to je_mallctl() failed", size);
+            strncpy(msg, "<memkind> Call to jemk_mallctl() failed", size);
             break;
         case MEMKIND_ERROR_MALLOC:
-            strncpy(msg, "<memkind> Call to je_malloc() failed", size);
+            strncpy(msg, "<memkind> Call to jemk_malloc() failed", size);
             break;
         case MEMKIND_ERROR_GETCPU:
             strncpy(msg, "<memkind> Call to sched_getcpu() returned out of range", size);
@@ -215,7 +215,7 @@ void memkind_error_message(int err, char *msg, size_t size)
             break;
         case MEMKIND_ERROR_MALLOCX:
         case ENOMEM:
-            strncpy(msg, "<memkind> Call to je_mallocx() failed", size);
+            strncpy(msg, "<memkind> Call to jemk_mallocx() failed", size);
             break;
         case MEMKIND_ERROR_PTHREAD:
             strncpy(msg, "<memkind> Call to pthread library failed", size);
@@ -266,7 +266,7 @@ int memkind_create(const struct memkind_ops *ops, const char *name, struct memki
             goto exit;
         }
     }
-    *kind = (struct memkind *)je_calloc(1, sizeof(struct memkind));
+    *kind = (struct memkind *)jemk_calloc(1, sizeof(struct memkind));
     if (!*kind) {
         err = MEMKIND_ERROR_MALLOC;
         goto exit;
@@ -312,7 +312,7 @@ int memkind_finalize(void)
             }
             memkind_registry_g.partition_map[i] = NULL;
             if (i >= MEMKIND_NUM_BASE_KIND) {
-                je_free(kind);
+                jemk_free(kind);
             }
         }
     }

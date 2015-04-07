@@ -551,7 +551,7 @@ shall set
 to an index appropriate for the
 .I kind
 and CPU when using the jemalloc arena allocation through the
-.BR je_mallocx ()
+.BR jemk_mallocx ()
 API.
 .PP
 .BI "int ops.get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
@@ -573,7 +573,7 @@ shall return 0 if the
 can be freed with the specified
 .I kind
 and an error code otherwise.  If the memory cannot be freed with
-.BR je_free (),
+.BR jemk_free (),
 then at least one of the instantiated kinds must return 0 to enable
 freeing.
 .PP
@@ -701,17 +701,17 @@ failed
 .TP
 .B MEMKIND_ERROR_MEMALIGN
 Call to
-.BR je_posix_memalign ()
+.BR jemk_posix_memalign ()
 failed
 .TP
 .B MEMKIND_ERROR_MALLCTL
 Call to
-.BR je_mallctl ()
+.BR jemk_mallctl ()
 failed
 .TP
 .B MEMKIND_ERROR_MALLOC
 Call to
-.BR je_malloc ()
+.BR jemk_malloc ()
 failed
 .TP
 .B MEMKIND_ERROR_GETCPU
@@ -732,7 +732,7 @@ Alignment must be a power of two and larger than sizeof(void *)
 .TP
 .B MEMKIND_ERROR_ALLOCM
 Call to
-.BR je_allocm ()
+.BR jemk_allocm ()
 failed
 .TP
 .B MEMKIND_ERROR_ENVIRON

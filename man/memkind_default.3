@@ -87,23 +87,23 @@ at its end.
 .PP
 .BR memkind_default_malloc ()
 is a direct call through to
-.BR je_malloc ().
+.BR jemk_malloc ().
 .PP
 .BR memkind_default_calloc ()
 is a direct call through to
-.BR je_calloc ().
+.BR jemk_calloc ().
 .PP
 .BR memkind_default_posix_memalign ()
 is a direct call through to
-.BR je_posix_memalign ().
+.BR jemk_posix_memalign ().
 .PP
 .BR memkind_default_realloc ()
 is a direct call through to
-.BR je_realloc ().
+.BR jemk_realloc ().
 .PP
 .BR memkind_default_free ().
 is a direct call through to
-.BR je_free ().
+.BR jemk_free ().
 Note that this method can be called on any pointer returned by a
 jemalloc allocation, and in particular, all of the arena
 allocations described in

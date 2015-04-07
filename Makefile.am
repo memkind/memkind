@@ -23,7 +23,7 @@
 #
 
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/jemalloc/obj/include
 
 lib_LTLIBRARIES = libmemkind.la
 
@@ -40,6 +40,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/actbl.h \
                         src/actypes.h \
                         # end
+libmemkind_la_LIBADD = jemalloc/obj/lib/libjemalloc_pic.a
 
 libmemkind_la_LDFLAGS = -version-info $(memkind_abi_version)
 
@@ -69,6 +70,162 @@ EXTRA_DIST = autogen.sh \
              memkind-$(VERSION).spec \
              memkind.spec.mk \
              .gitignore \
+             jemalloc/doc/jemalloc.xml.in \
+             jemalloc/doc/html.xsl.in \
+             jemalloc/doc/stylesheet.xsl \
+             jemalloc/doc/manpages.xsl.in \
+             jemalloc/src/extent.c \
+             jemalloc/src/tcache.c \
+             jemalloc/src/ctl.c \
+             jemalloc/src/util.c \
+             jemalloc/src/mutex.c \
+             jemalloc/src/prof.c \
+             jemalloc/src/huge.c \
+             jemalloc/src/tsd.c \
+             jemalloc/src/stats.c \
+             jemalloc/src/arena.c \
+             jemalloc/src/quarantine.c \
+             jemalloc/src/hash.c \
+             jemalloc/src/chunk_dss.c \
+             jemalloc/src/ckh.c \
+             jemalloc/src/base.c \
+             jemalloc/src/zone.c \
+             jemalloc/src/mb.c \
+             jemalloc/src/jemalloc.c \
+             jemalloc/src/bitmap.c \
+             jemalloc/src/chunk.c \
+             jemalloc/src/chunk_mmap.c \
+             jemalloc/src/atomic.c \
+             jemalloc/src/rtree.c \
+             jemalloc/.gitignore \
+             jemalloc/configure.ac \
+             jemalloc/include/jemalloc/internal/tcache.h \
+             jemalloc/include/jemalloc/internal/prof.h \
+             jemalloc/include/jemalloc/internal/private_namespace.sh \
+             jemalloc/include/jemalloc/internal/prng.h \
+             jemalloc/include/jemalloc/internal/public_unnamespace.sh \
+             jemalloc/include/jemalloc/internal/bitmap.h \
+             jemalloc/include/jemalloc/internal/chunk.h \
+             jemalloc/include/jemalloc/internal/size_classes.sh \
+             jemalloc/include/jemalloc/internal/mutex.h \
+             jemalloc/include/jemalloc/internal/rb.h \
+             jemalloc/include/jemalloc/internal/arena.h \
+             jemalloc/include/jemalloc/internal/base.h \
+             jemalloc/include/jemalloc/internal/jemalloc_internal_macros.h \
+             jemalloc/include/jemalloc/internal/atomic.h \
+             jemalloc/include/jemalloc/internal/jemalloc_internal_defs.h.in \
+             jemalloc/include/jemalloc/internal/qr.h \
+             jemalloc/include/jemalloc/internal/jemalloc_internal.h.in \
+             jemalloc/include/jemalloc/internal/tsd.h \
+             jemalloc/include/jemalloc/internal/rtree.h \
+             jemalloc/include/jemalloc/internal/quarantine.h \
+             jemalloc/include/jemalloc/internal/ctl.h \
+             jemalloc/include/jemalloc/internal/extent.h \
+             jemalloc/include/jemalloc/internal/ql.h \
+             jemalloc/include/jemalloc/internal/public_namespace.sh \
+             jemalloc/include/jemalloc/internal/mb.h \
+             jemalloc/include/jemalloc/internal/util.h \
+             jemalloc/include/jemalloc/internal/stats.h \
+             jemalloc/include/jemalloc/internal/huge.h \
+             jemalloc/include/jemalloc/internal/chunk_mmap.h \
+             jemalloc/include/jemalloc/internal/chunk_dss.h \
+             jemalloc/include/jemalloc/internal/hash.h \
+             jemalloc/include/jemalloc/internal/private_symbols.txt \
+             jemalloc/include/jemalloc/internal/ckh.h \
+             jemalloc/include/jemalloc/internal/private_unnamespace.sh \
+             jemalloc/include/jemalloc/jemalloc_protos.h.in \
+             jemalloc/include/jemalloc/jemalloc_mangle.sh \
+             jemalloc/include/jemalloc/jemalloc.sh \
+             jemalloc/include/jemalloc/jemalloc_macros.h.in \
+             jemalloc/include/jemalloc/jemalloc_defs.h.in \
+             jemalloc/include/jemalloc/jemalloc_rename.sh \
+             jemalloc/include/msvc_compat/strings.h \
+             jemalloc/include/msvc_compat/stdint.h \
+             jemalloc/include/msvc_compat/stdbool.h \
+             jemalloc/include/msvc_compat/inttypes.h \
+             jemalloc/configure \
+             jemalloc/ChangeLog \
+             jemalloc/COPYING \
+             jemalloc/test/test.sh.in \
+             jemalloc/test/src/math.c \
+             jemalloc/test/src/timer.c \
+             jemalloc/test/src/thd.c \
+             jemalloc/test/src/SFMT.c \
+             jemalloc/test/src/test.c \
+             jemalloc/test/src/mtx.c \
+             jemalloc/test/include/test/thd.h \
+             jemalloc/test/include/test/SFMT.h \
+             jemalloc/test/include/test/timer.h \
+             jemalloc/test/include/test/jemalloc_test_defs.h.in \
+             jemalloc/test/include/test/test.h \
+             jemalloc/test/include/test/math.h \
+             jemalloc/test/include/test/SFMT-params216091.h \
+             jemalloc/test/include/test/SFMT-params1279.h \
+             jemalloc/test/include/test/SFMT-params86243.h \
+             jemalloc/test/include/test/SFMT-sse2.h \
+             jemalloc/test/include/test/SFMT-params132049.h \
+             jemalloc/test/include/test/jemalloc_test.h.in \
+             jemalloc/test/include/test/SFMT-params.h \
+             jemalloc/test/include/test/SFMT-params2281.h \
+             jemalloc/test/include/test/mtx.h \
+             jemalloc/test/include/test/SFMT-params19937.h \
+             jemalloc/test/include/test/SFMT-params44497.h \
+             jemalloc/test/include/test/SFMT-params11213.h \
+             jemalloc/test/include/test/SFMT-params4253.h \
+             jemalloc/test/include/test/SFMT-alti.h \
+             jemalloc/test/include/test/SFMT-params607.h \
+             jemalloc/test/include/test/mq.h \
+             jemalloc/test/stress/microbench.c \
+             jemalloc/test/unit/prof_accum.h \
+             jemalloc/test/unit/rb.c \
+             jemalloc/test/unit/math.c \
+             jemalloc/test/unit/util.c \
+             jemalloc/test/unit/prof_accum.c \
+             jemalloc/test/unit/tsd.c \
+             jemalloc/test/unit/stats.c \
+             jemalloc/test/unit/quarantine.c \
+             jemalloc/test/unit/prof_gdump.c \
+             jemalloc/test/unit/hash.c \
+             jemalloc/test/unit/prof_idump.c \
+             jemalloc/test/unit/ckh.c \
+             jemalloc/test/unit/junk.c \
+             jemalloc/test/unit/prof_accum_b.c \
+             jemalloc/test/unit/bitmap.c \
+             jemalloc/test/unit/mallctl.c \
+             jemalloc/test/unit/SFMT.c \
+             jemalloc/test/unit/prof_accum_a.c \
+             jemalloc/test/unit/ql.c \
+             jemalloc/test/unit/zero.c \
+             jemalloc/test/unit/mtx.c \
+             jemalloc/test/unit/rtree.c \
+             jemalloc/test/unit/mq.c \
+             jemalloc/test/unit/qr.c \
+             jemalloc/test/integration/rallocm.c \
+             jemalloc/test/integration/ALLOCM_ARENA.c \
+             jemalloc/test/integration/rallocx.c \
+             jemalloc/test/integration/mallocx.c \
+             jemalloc/test/integration/allocm.c \
+             jemalloc/test/integration/allocated.c \
+             jemalloc/test/integration/xallocx.c \
+             jemalloc/test/integration/mremap.c \
+             jemalloc/test/integration/aligned_alloc.c \
+             jemalloc/test/integration/thread_tcache_enabled.c \
+             jemalloc/test/integration/thread_arena.c \
+             jemalloc/test/integration/posix_memalign.c \
+             jemalloc/Makefile.in \
+             jemalloc/bin/jemalloc.sh.in \
+             jemalloc/bin/pprof \
+             jemalloc/autogen.sh \
+             jemalloc/install-sh \
+             jemalloc/README \
+             jemalloc/coverage.sh \
+             jemalloc/config.stamp.in \
+             jemalloc/INSTALL \
+             jemalloc/config.sub \
+             jemalloc/autom4te.cache/output.0 \
+             jemalloc/autom4te.cache/requests \
+             jemalloc/autom4te.cache/traces.0 \
+             jemalloc/config.guess \
              # end
 
 dist_doc_DATA = README COPYING VERSION
@@ -107,7 +264,7 @@ memkind-$(VERSION).spec:
 
 rpm: dist
 	$(MAKE) version="$(VERSION)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
-		jemalloc_installed=true -f memkind.spec.mk $@
+		-f memkind.spec.mk $@
 
 include test/Makefile.mk
 include examples/Makefile.mk

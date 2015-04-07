@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <numa.h>
 
-void* je_malloc(size_t size)
+void* jemk_malloc(size_t size)
 {
     if (size == (sizeof(unsigned int) * numa_num_configured_cpus())) {
         return malloc(size);

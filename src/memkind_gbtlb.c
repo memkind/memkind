@@ -285,7 +285,7 @@ static int memkind_store(void *memptr, void **mmapptr, struct memkind **kind,
         pthread_mutex_lock(&init_mutex);
         if (!is_init) {
             table_len = numa_num_configured_cpus();
-            table = je_malloc(sizeof(memkind_table_node_t) * table_len);
+            table = jemk_malloc(sizeof(memkind_table_node_t) * table_len);
             if (table == NULL) {
                 err = MEMKIND_ERROR_MALLOC;
             }
@@ -331,12 +331,12 @@ static int memkind_store(void *memptr, void **mmapptr, struct memkind **kind,
                 else {
                     table[hash].list = storeptr->next;
                 }
-                je_free(storeptr);
+                jemk_free(storeptr);
             }
         }
         else { /* memkind_store() call is a store */
             storeptr = table[hash].list;
-            table[hash].list = (memkind_list_node_t*)je_malloc(sizeof(memkind_list_node_t));
+            table[hash].list = (memkind_list_node_t*)jemk_malloc(sizeof(memkind_list_node_t));
             table[hash].list->ptr = memptr;
             table[hash].list->mmapptr = *mmapptr;
             table[hash].list->size = *size;

@@ -42,7 +42,6 @@
 #include <assert.h>
 #include <numa.h>
 #include <errno.h>
-#include <jemalloc/jemalloc.h>
 #include <memkind.h>
 #include <memkind_default.h>
 #include <memkind_arena.h>
@@ -149,7 +148,7 @@ static void numakind_init(void)
     int i, name_length, num_nodes;
     memkind_t numakind;
 
-    pthread_key_create(&numakind_key_g, je_free);
+    pthread_key_create(&numakind_key_g, numakind_free);
 
     num_nodes = numa_num_configured_nodes();
     if (num_nodes > NUMAKIND_MAX) {
@@ -188,7 +187,7 @@ static int numakind_get_kind(memkind_t **kind)
     if (!err) {
         *kind = pthread_getspecific(numakind_key_g);
         if (*kind == NULL) {
-            *kind = (memkind_t *)je_malloc(sizeof(memkind_t));
+            *kind = (memkind_t *)memkind_malloc(MEMKIND_DEFAULT, sizeof(memkind_t));
             if (*kind == NULL) {
                 err = MEMKIND_ERROR_MALLOC;
             }
