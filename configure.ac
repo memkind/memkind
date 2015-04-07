@@ -36,25 +36,6 @@ AC_SUBST(memkind_abi_version)
 
 LT_PREREQ([2.2.6])
 
-# Specify the location for jemalloc
-AC_ARG_WITH([jemalloc], [AS_HELP_STRING([--with-jemalloc=PATH],
-            [specify prefix directory for installed jemalloc package.])])
-if test "x$with_jemalloc" != x; then
-  CPPFLAGS="$CPPFLAGS -I$with_jemalloc/include"
-  LD_LIBRARY_PATH="$with_jemalloc/lib:$LD_LIBRARY_PATH"
-  LDFLAGS="$LDFLAGS -L$with_jemalloc/lib"
-fi
-AC_ARG_WITH([jemalloc-include], [AS_HELP_STRING([--with-jemalloc-include=PATH],
-            [specify directory for the installed jemalloc include files.])])
-if test "x$with_jemalloc_include" != x; then
-  CPPFLAGS="$CPPFLAGS -I$with_jemalloc_include"
-fi
-AC_ARG_WITH([jemalloc-lib], [AS_HELP_STRING([--with-jemalloc-lib=PATH],
-            [specify directory for installed jemalloc library])])
-if test "x$with_jemalloc_lib" != x; then
-  LD_LIBRARY_PATH="$with_jemalloc_lib:$LD_LIBRARY_PATH"
-  LDFLAGS="$LDFLAGS -L$with_jemalloc_lib"
-fi
 
 AC_ARG_WITH([numa], [AS_HELP_STRING([--with-numa=PATH],
             [specify prefix directory for installed numa package.])])
@@ -166,12 +147,6 @@ AC_CHECK_LIB([gomp], [omp_get_num_threads], [], [
     exit -1])
 AC_CHECK_HEADER([omp.h], [], [
     echo "omp.h is required for this library"
-    exit -1])
-AC_CHECK_LIB([jemalloc], [je_malloc], [], [
-    echo "jemalloc is required for this library"
-    exit -1])
-AC_CHECK_HEADER([jemalloc/jemalloc.h], [], [
-    echo "jemalloc/jemalloc.h is required for this library"
     exit -1])
 AC_CHECK_LIB([numa], [numa_available], [], [
     echo "libnuma is required for this library"

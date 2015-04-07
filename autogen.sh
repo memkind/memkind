@@ -40,5 +40,12 @@ if [ ! -f VERSION ]; then
     echo $version > VERSION
 fi
 
+if [ ! -e jemalloc/.git ]; then
+    git submodule update --init jemalloc
+fi
+pushd jemalloc
+autoconf
+popd
+
 mkdir -p m4
 autoreconf -i -f

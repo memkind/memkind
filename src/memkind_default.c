@@ -69,27 +69,27 @@ int memkind_default_destroy(struct memkind *kind)
 
 void *memkind_default_malloc(struct memkind *kind, size_t size)
 {
-    return je_malloc(size);
+    return jemk_malloc(size);
 }
 
 void *memkind_default_calloc(struct memkind *kind, size_t num, size_t size)
 {
-    return je_calloc(num, size);
+    return jemk_calloc(num, size);
 }
 
 int memkind_default_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size)
 {
-    return je_posix_memalign(memptr, alignment, size);
+    return jemk_posix_memalign(memptr, alignment, size);
 }
 
 void *memkind_default_realloc(struct memkind *kind, void *ptr, size_t size)
 {
-    return je_realloc(ptr, size);
+    return jemk_realloc(ptr, size);
 }
 
 void memkind_default_free(struct memkind *kind, void *ptr)
 {
-    je_free(ptr);
+    jemk_free(ptr);
 }
 
 int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free)

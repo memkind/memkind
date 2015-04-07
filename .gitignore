@@ -35,6 +35,7 @@
 /src/memkind_defines.h.in
 /src/*.o
 /stamp-h1
+/stamp-h2
 /test/all_tests
 /test/.deps/
 /test/.dirstamp

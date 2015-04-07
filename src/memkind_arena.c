@@ -42,8 +42,8 @@
 #include "memkind_default.h"
 #include "memkind_arena.h"
 
-static void *je_mallocx_check(size_t size, int flags);
-static void *je_rallocx_check(void *ptr, size_t size, int flags);
+static void *jemk_mallocx_check(size_t size, int flags);
+static void *jemk_rallocx_check(void *ptr, size_t size, int flags);
 
 int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
 {
@@ -72,12 +72,12 @@ int memkind_arena_create_map(struct memkind *kind)
     }
 #ifndef MEMKIND_TLS
     if (kind->ops->get_arena == memkind_thread_get_arena) {
-        pthread_key_create(&(kind->arena_key), je_free);
+        pthread_key_create(&(kind->arena_key), jemk_free);
     }
 #endif
 
     if (kind->arena_map_len) {
-        kind->arena_map = (unsigned int *)je_malloc(sizeof(unsigned int) * kind->arena_map_len);
+        kind->arena_map = (unsigned int *)jemk_malloc(sizeof(unsigned int) * kind->arena_map_len);
         if (kind->arena_map == NULL) {
             err = MEMKIND_ERROR_MALLOC;
         }
@@ -87,13 +87,13 @@ int memkind_arena_create_map(struct memkind *kind)
             kind->arena_map[i] = UINT_MAX;
         }
         for (i = 0; !err && i < kind->arena_map_len; ++i) {
-            err = je_mallctl("arenas.extendk", kind->arena_map + i,
+            err = jemk_mallctl("arenas.extendk", kind->arena_map + i,
                              &unsigned_size, &(kind->partition),
                              unsigned_size);
         }
         if (err) {
             if (kind->arena_map) {
-                je_free(kind->arena_map);
+                jemk_free(kind->arena_map);
             }
             err = MEMKIND_ERROR_MALLCTL;
         }
@@ -109,9 +109,9 @@ int memkind_arena_destroy(struct memkind *kind)
     if (kind->arena_map) {
         for (i = 0; i < kind->arena_map_len; ++i) {
             snprintf(cmd, 128, "arena.%u.purge", kind->arena_map[i]);
-            je_mallctl(cmd, NULL, NULL, NULL, 0);
+            jemk_mallctl(cmd, NULL, NULL, NULL, 0);
         }
-        je_free(kind->arena_map);
+        jemk_free(kind->arena_map);
         kind->arena_map = NULL;
     }
 #ifndef MEMKIND_TLS
@@ -133,7 +133,7 @@ void *memkind_arena_malloc(struct memkind *kind, size_t size)
         err = kind->ops->get_arena(kind, &arena);
     }
     if (!err) {
-        result = je_mallocx_check(size, MALLOCX_ARENA(arena));
+        result = jemk_mallocx_check(size, MALLOCX_ARENA(arena));
     }
     return result;
 }
@@ -151,10 +151,10 @@ void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size)
         err = kind->ops->get_arena(kind, &arena);
         if (!err) {
             if (ptr == NULL) {
-                ptr = je_mallocx_check(size, MALLOCX_ARENA(arena));
+                ptr = jemk_mallocx_check(size, MALLOCX_ARENA(arena));
             }
             else {
-                ptr = je_rallocx_check(ptr, size, MALLOCX_ARENA(arena));
+                ptr = jemk_rallocx_check(ptr, size, MALLOCX_ARENA(arena));
             }
         }
     }
@@ -169,7 +169,7 @@ void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size)
 
     err = kind->ops->get_arena(kind, &arena);
     if (!err) {
-        result = je_mallocx_check(num * size, MALLOCX_ARENA(arena) | MALLOCX_ZERO);
+        result = jemk_mallocx_check(num * size, MALLOCX_ARENA(arena) | MALLOCX_ZERO);
     }
     return result;
 }
@@ -190,7 +190,7 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
         /* posix_memalign should not change errno.
            Set it to its previous value after calling jemalloc */
         errno_before = errno;
-        *memptr = je_mallocx_check(size, MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena));
+        *memptr = jemk_mallocx_check(size, MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena));
         errno = errno_before;
         err = *memptr ? 0 : ENOMEM;
     }
@@ -238,7 +238,7 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena)
 
     arena_tsd = pthread_getspecific(kind->arena_key);
     if (arena_tsd == NULL) {
-        arena_tsd = je_malloc(sizeof(unsigned int));
+        arena_tsd = jemk_malloc(sizeof(unsigned int));
         if (arena_tsd == NULL) {
             err = MEMKIND_ERROR_MALLOC;
         }
@@ -259,11 +259,11 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena)
 }
 #endif /* MEMKIND_TLS */
 
-static void *je_mallocx_check(size_t size, int flags)
+static void *jemk_mallocx_check(size_t size, int flags)
 {
     /*
      * Checking for out of range size due to unhandled error in
-     * je_mallocx().  Size invalid for the range
+     * jemk_mallocx().  Size invalid for the range
      * LLONG_MAX <= size <= ULLONG_MAX
      * which is the result of passing a negative signed number as size
      */
@@ -273,16 +273,16 @@ static void *je_mallocx_check(size_t size, int flags)
         errno = ENOMEM;
     }
     else if (size != 0) {
-        result = je_mallocx(size, flags);
+        result = jemk_mallocx(size, flags);
     }
     return result;
 }
 
-static void *je_rallocx_check(void *ptr, size_t size, int flags)
+static void *jemk_rallocx_check(void *ptr, size_t size, int flags)
 {
     /*
      * Checking for out of range size due to unhandled error in
-     * je_mallocx().  Size invalid for the range
+     * jemk_mallocx().  Size invalid for the range
      * LLONG_MAX <= size <= ULLONG_MAX
      * which is the result of passing a negative signed number as size
      */
@@ -292,7 +292,7 @@ static void *je_rallocx_check(void *ptr, size_t size, int flags)
         errno = ENOMEM;
     }
     else {
-        result = je_rallocx(ptr, size, flags);
+        result = jemk_rallocx(ptr, size, flags);
     }
     return result;
 

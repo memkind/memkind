@@ -229,8 +229,8 @@ static void memkind_hbw_closest_numanode_init(void)
     struct bitmask *hbw_nodes_bm;
 
     g->num_cpu = numa_num_configured_cpus();
-    g->closest_numanode = (int *)je_malloc(sizeof(int) * g->num_cpu);
-    bandwidth = (int *)je_malloc(sizeof(int) * NUMA_NUM_NODES);
+    g->closest_numanode = (int *)jemk_malloc(sizeof(int) * g->num_cpu);
+    bandwidth = (int *)jemk_malloc(sizeof(int) * NUMA_NUM_NODES);
     if (!(g->closest_numanode && bandwidth)) {
         g->init_err = MEMKIND_ERROR_MALLOC;
     }
@@ -274,14 +274,14 @@ static void memkind_hbw_closest_numanode_init(void)
                                            g->closest_numanode);
     }
     if (bandwidth_nodes) {
-        je_free(bandwidth_nodes);
+        jemk_free(bandwidth_nodes);
     }
     if (bandwidth) {
-        je_free(bandwidth);
+        jemk_free(bandwidth);
     }
     if (g->init_err) {
         if (g->closest_numanode) {
-            je_free(g->closest_numanode);
+            jemk_free(g->closest_numanode);
             g->closest_numanode = NULL;
         }
     }
@@ -334,7 +334,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
     struct numanode_bandwidth_t *numanode_bandwidth = NULL;
     *bandwidth_nodes = NULL;
     /* allocate space for sorting array */
-    numanode_bandwidth = je_malloc(sizeof(struct numanode_bandwidth_t) *
+    numanode_bandwidth = jemk_malloc(sizeof(struct numanode_bandwidth_t) *
                                    num_bandwidth);
     if (!numanode_bandwidth) {
         err = MEMKIND_ERROR_MALLOC;
@@ -368,7 +368,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
             }
         }
         /* allocate output array */
-        *bandwidth_nodes = (struct bandwidth_nodes_t*)je_malloc(
+        *bandwidth_nodes = (struct bandwidth_nodes_t*)jemk_malloc(
                                sizeof(struct bandwidth_nodes_t) **num_unique +
                                sizeof(int) * num_bandwidth);
         if (!*bandwidth_nodes) {
@@ -396,11 +396,11 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
         (*bandwidth_nodes)[k].bandwidth = last_bandwidth;
     }
     if (numanode_bandwidth) {
-        je_free(numanode_bandwidth);
+        jemk_free(numanode_bandwidth);
     }
     if (err) {
         if (*bandwidth_nodes) {
-            je_free(*bandwidth_nodes);
+            jemk_free(*bandwidth_nodes);
         }
     }
     return err;
