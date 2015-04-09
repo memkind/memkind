@@ -32,8 +32,8 @@ else
         TEST_OUTDIR=gtest_output
     fi
     mkdir -p $TEST_OUTDIR
-    if [ -f $TEST_COVDIR/memkind.cov ]; then
-         cp $TEST_COVDIR/memkind.cov $TEST_OUTDIR
+    if [ -n "$COVFILE" ]; then
+         cp $COVFILE $TEST_OUTDIR/memkind.cov
     fi
     cp $basedir/mock-pmtt.txt /tmp/
     COVFILE=$TEST_OUTDIR/memkind.cov $basedir/test.sh --gtest_output=xml:$TEST_OUTDIR/ 2>&1| tee $TEST_OUTDIR/test.out

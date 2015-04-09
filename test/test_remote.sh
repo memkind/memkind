@@ -49,9 +49,9 @@ basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 rm -f all_tests.xml
 
 pushd $rpmdir
-nkrpm=`ls -t memkind-devel*.rpm | head -n1`
+mkrpm=`ls -t memkind-devel*.rpm | head -n1`
 jerpm=`ls -t jemalloc-devel*.rpm | head -n1`
-scp $nkrpm $jerpm $remote_login@$remote_ip:
+scp $mkrpm $jerpm $remote_login@$remote_ip:
 popd
 
 scp $basedir/.libs/all_tests $remote_login@$remote_ip:
@@ -80,14 +80,17 @@ scp $basedir/.libs/gb_realloc $remote_login@$remote_ip:
 scp $basedir/.libs/hello_memkind_debug $remote_login@$remote_ip:
 
 scp $basedir/test.sh $remote_login@$remote_ip:
+if [ -n "$COVFILE" ]; then
+    ssh $remote_login@$remote_ip "mkdir -p gtest_output"
+    scp $COVFILE $remote_login@$remote_ip:gtest_output/memkind.cov
+fi
 
 ssh root@$remote_ip "rpm -e memkind-devel >& /dev/null"
 ssh root@$remote_ip "rpm -e jemalloc-devel >& /dev/null"
-ssh root@$remote_ip "rpm -i ~$remote_login/$nkrpm ~$remote_login/$jerpm"
+ssh root@$remote_ip "rpm -i ~$remote_login/$mkrpm ~$remote_login/$jerpm"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_hugepages"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_overcommit_hugepages"
 
-ssh $remote_login@$remote_ip "if [ -e /opt/mpss/coverage/memkind.cov ]; then mkdir -p gtest_output; cp /opt/mpss/coverage/memkind.cov gtest_output; fi"
 ssh $remote_login@$remote_ip "COVFILE=gtest_output/memkind.cov ./test.sh --gtest_output=xml:gtest_output/" 2>&1| tee $outdir/test.out
 err=${PIPESTATUS[0]}
 scp $remote_login@$remote_ip:gtest_output/\* $outdir
