@@ -65,6 +65,7 @@ EXTRA_DIST = autogen.sh \
              test/test_remote.sh \
              test/*_mock.c \
              VERSION \
+             CONTRIBUTING \
              memkind-$(VERSION).spec \
              memkind.spec.mk \
              .gitignore \
