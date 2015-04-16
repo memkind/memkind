@@ -78,3 +78,5 @@ test/memkind_pmtt_tests.cpp
 man/memkind_pmem.3
 src/memkind_pmem.c
 src/memkind_pmem.h
+scripts/memkind-hbw-nodes
+scripts/Makefile.mk

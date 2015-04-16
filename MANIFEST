@@ -260,3 +260,5 @@ jemalloc/test/unit/stats.c
 jemalloc/test/unit/tsd.c
 jemalloc/test/unit/util.c
 jemalloc/test/unit/zero.c
+scripts/memkind-hbw-nodes
+scripts/Makefile.mk

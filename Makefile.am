@@ -245,6 +245,7 @@ CLEANFILES = memkind-$(VERSION).spec
 DISTCLEANFILES = VERSION
 
 bin_PROGRAMS =
+bin_SCRIPTS =
 check_PROGRAMS =
 noinst_PROGRAMS =
 noinst_LTLIBRARIES =
@@ -271,3 +272,4 @@ rpm: dist
 
 include test/Makefile.mk
 include examples/Makefile.mk
+include scripts/Makefile.mk
