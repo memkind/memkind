@@ -24,7 +24,7 @@
 
 ///////////////////////////////////////////////////////////////////////////
 // File   : autohbw.c
-// Purpose: Library to automatically allocate HBM (MCDRAM_
+// Purpose: Library to automatically allocate HBW (MCDRAM)
 // Author : Ruchira Sasanka (ruchira.sasanka@intel.com)
 // Date   : Jan 30, 2015
 ///////////////////////////////////////////////////////////////////////////
@@ -59,16 +59,16 @@ static int LogLevel = 1;
 //
 enum {LOG_NONE, LOG_ALLOC, LOG_ALL};
 
-// The low limit for automatically promoting an allocation to HBM. Allocations
+// The low limit for automatically promoting an allocation to HBW. Allocations
 // of size greater than the following will ber promoted.
 //
-static long int HBMLowLimit = 1 * 1024 * 1024;
+static long int HBWLowLimit = 1 * 1024 * 1024;
 
 // If there is a high limit specified, allocations larger than this limit
-// will not be allocated in HBM. By default, it is -1, indicating no
+// will not be allocated in HBW. By default, it is -1, indicating no
 // high limit
 //
-static long int HBMHighLimit = -1;
+static long int HBWHighLimit = -1;
 
 // Whether we have initialized HBW arena of memkind library -- by making
 // a dummy call to it. HBW arena (and hence any memkind_* call with kind
@@ -76,6 +76,12 @@ static long int HBMHighLimit = -1;
 //
 static int MemkindInitDone = FALSE;
 
+// Following is the type of HBW memory that is allocated using memkind.
+// By changing this type, this library can be used to allocate other
+// types of memory types (e.g., MEMKIND_HUGETLB, MEMKIND_GBTLB,
+// MEMKIND_HBW_HUGETLB etc.)
+//
+static memkind_t HBW_Type;
 
 // Include helper file
 //
@@ -91,6 +97,12 @@ static int MemkindInitDone = FALSE;
 void __attribute__ ((constructor)) autohbw_load(void)
 {
 
+    // First set the default memory type this library allocates. This can
+    // be overridden by env variable
+    //
+    int ret = memkind_get_kind_by_name("memkind_hbw", &HBW_Type);
+    assert(!ret && "FATAL: Could not find default memory type\n");
+
     // Read any env variables. This has to be done first because DbgLevel
     // is set using env variables and debug printing is used below
     //
@@ -100,7 +112,7 @@ void __attribute__ ((constructor)) autohbw_load(void)
 
     // dummy HBW call to initialize HBW arena
     //
-    void *pp = memkind_malloc(MEMKIND_HBW, 16);
+    void *pp = memkind_malloc(HBW_Type, 16);
     //
     if (pp) {
 
@@ -144,11 +156,11 @@ void *myMemkindMalloc(size_t size)
     // if we have not initialized memkind HBW arena yet, call default kind
     // Similarly, if the hueristic decides not to alloc in HBW, use default
     //
-    if (!MemkindInitDone || !isAllocInHBM(size))
+    if (!MemkindInitDone || !isAllocInHBW(size))
         pp = memkind_malloc(MEMKIND_DEFAULT, size);
     else {
         DBG(2) printf("\tHBW");
-        pp =  memkind_malloc(MEMKIND_HBW, size);
+        pp =  memkind_malloc(HBW_Type, size);
         logHBW(pp, size);
     }
 
@@ -173,11 +185,11 @@ void *myMemkindCalloc(size_t nmemb, size_t size)
 
     // if we have not initialized memkind HBW arena yet, call default kind
     //
-    if (!MemkindInitDone || !isAllocInHBM(size*nmemb))
+    if (!MemkindInitDone || !isAllocInHBW(size*nmemb))
         pp = memkind_calloc(MEMKIND_DEFAULT, nmemb, size);
     else {
         DBG(2) printf("\tHBW");
-        pp = memkind_calloc(MEMKIND_HBW, nmemb, size);
+        pp = memkind_calloc(HBW_Type, nmemb, size);
         logHBW(pp, size*nmemb);
     }
 
@@ -200,11 +212,11 @@ void *myMemkindRealloc(void *ptr, size_t size)
 
     // if we have not initialized memkind HBW arena yet, call default kind
     //
-    if (!MemkindInitDone  || !isAllocInHBM(size))
+    if (!MemkindInitDone  || !isAllocInHBW(size))
         pp = memkind_realloc(MEMKIND_DEFAULT, ptr, size);
     else {
         DBG(2) printf("\tHBW");
-        pp = memkind_realloc(MEMKIND_HBW, ptr, size);
+        pp = memkind_realloc(HBW_Type, ptr, size);
         logHBW(pp, size);
     }
 
@@ -227,12 +239,12 @@ int myMemkindAlign(void **memptr, size_t alignment, size_t size)
     // if we have not initialized memkind HBW arena yet, call default kind
     // Similarly, if the hueristic decides not to alloc in HBW, use default
     //
-    if (!MemkindInitDone || !isAllocInHBM(size))
+    if (!MemkindInitDone || !isAllocInHBW(size))
 
         ret = memkind_posix_memalign(MEMKIND_DEFAULT, memptr, alignment, size);
     else {
         DBG(2) printf("\tHBW");
-        ret = memkind_posix_memalign(MEMKIND_HBW, memptr, alignment, size);
+        ret = memkind_posix_memalign(HBW_Type, memptr, alignment, size);
         logHBW(*memptr, size);
     }
     DBG(2) printf("\tptr:%p\n", *memptr);

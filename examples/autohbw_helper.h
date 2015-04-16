@@ -23,8 +23,8 @@
  */
 
 ///////////////////////////////////////////////////////////////////////////
-// File   : autohbw_helper.c
-// Purpose: Helper functions (e.g., debug, env read) for AutoHBM
+// File   : autohbw_helper.h
+// Purpose: Helper functions (e.g., debug, env read) for AutoHBW
 // Author : Ruchira Sasanka (ruchira.sasanka@intel.com)
 // Date   : Jan 30, 2015
 ///////////////////////////////////////////////////////////////////////////
@@ -43,25 +43,25 @@ void errPrn(const char *msg)
 }
 
 
-static BOOL isAutoHBMEnabled = TRUE;
+static BOOL isAutoHBWEnabled = TRUE;
 
 
 
 ////////////////////////////////////////////////////////////////////////////
-// API functions to enable and disable AutoHBM
+// API functions to enable and disable AutoHBW
 ////////////////////////////////////////////////////////////////////////////
-void enableAutoHBM()
+void enableAutoHBW()
 {
 
-    isAutoHBMEnabled = TRUE;
-    printf("INFO: HBM allocations enabled by application (for this rank)\n");
+    isAutoHBWEnabled = TRUE;
+    printf("INFO: HBW allocations enabled by application (for this rank)\n");
 }
 //
-void disableAutoHBM()
+void disableAutoHBW()
 {
 
-    isAutoHBMEnabled = FALSE;
-    printf("INFO: HBM allocations disabled by application (for this rank)\n");
+    isAutoHBWEnabled = FALSE;
+    printf("INFO: HBW allocations disabled by application (for this rank)\n");
 
 }
 
@@ -69,21 +69,21 @@ void disableAutoHBM()
 ////////////////////////////////////////////////////////////////////////////
 // Define the hueristic here.
 ////////////////////////////////////////////////////////////////////////////
-BOOL isAllocInHBM(int size)
+BOOL isAllocInHBW(int size)
 {
 
-    if (!isAutoHBMEnabled)
+    if (!isAutoHBWEnabled)
         return FALSE;
 
     // if an upper limit is specified, and size is grearter than this upper
     // limit, return false
     //
-    if ((HBMHighLimit > 0) && (size > HBMHighLimit))
+    if ((HBWHighLimit > 0) && (size > HBWHighLimit))
         return FALSE;
 
     // if size is greater than the lower limit, return true
     //
-    if (size > HBMLowLimit)
+    if (size > HBWLowLimit)
         return TRUE;
 
     return FALSE;
@@ -125,9 +125,9 @@ long getLimit(const unsigned long limit, const char lchar)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// Once HBMLowLimit (and HBMHighLimit) are set, call this method to
+// Once HBWLowLimit (and HBWHighLimit) are set, call this method to
 // inform the user about the size range of arrays that will be allocated
-// in HBM
+// in HBW
 ////////////////////////////////////////////////////////////////////////////
 void printLimits()
 {
@@ -135,31 +135,31 @@ void printLimits()
 
     // Inform accoriding to the limits set
     //
-    if ((HBMLowLimit >= 0) && (HBMHighLimit >= 0)) {
+    if ((HBWLowLimit >= 0) && (HBWHighLimit >= 0)) {
 
         // if both high and low limits are specified, we use a range
         //
-        printf("INFO: Allocations between %ldK - %ldK will be allocated in HBM. "
-               "Set AUTO_HBM_SIZE=X:Y to change this limit.\n",
-               HBMLowLimit/1024, HBMHighLimit/1024);
+        printf("INFO: Allocations between %ldK - %ldK will be allocated in HBW. "
+               "Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
+               HBWLowLimit/1024, HBWHighLimit/1024);
 
     }
-    else if (HBMLowLimit >= 0) {
+    else if (HBWLowLimit >= 0) {
 
         // if only a low limit is provided, use that
         //
-        printf("INFO: Allocations greater than %ldK will be allocated in HBM. "
-               "Set AUTO_HBM_SIZE=X:Y to change this limit.\n",
-               HBMLowLimit/1024);
+        printf("INFO: Allocations greater than %ldK will be allocated in HBW. "
+               "Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
+               HBWLowLimit/1024);
 
     }
-    else if (HBMHighLimit >= 0) {
+    else if (HBWHighLimit >= 0) {
 
         // if only a high limit is provided, use that
         //
-        printf("INFO: Allocations smaller than %ldK will be allocated in HBM. "
-               "Set AUTO_HBM_SIZE=X:Y to change this limit.\n",
-               HBMHighLimit/1024);
+        printf("INFO: Allocations smaller than %ldK will be allocated in HBW. "
+               "Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
+               HBWHighLimit/1024);
 
     }
     else {
@@ -173,9 +173,9 @@ void printLimits()
 ////////////////////////////////////////////////////////////////////////////
 // Read from the enviornment and sets global variables
 // Env variables are:
-//   AUTO_HBM_SIZE = gives the size for auto HBM allocation
-//   AUTO_HBM_DbgLevel = sets debug level
-//   AUTO_HBM_LOG = gives logging level
+//   AUTO_HBW_SIZE = gives the size for auto HBW allocation
+//   AUTO_HBW_DbgLevel = sets debug level
+//   AUTO_HBW_LOG = gives logging level
 ////////////////////////////////////////////////////////////////////////////
 void setEnvValues()
 {
@@ -183,7 +183,7 @@ void setEnvValues()
     // STEP: Read Debug level from the env variable
     //       Note: do this first because DBG(x) macro is used below
     //
-    char *debug_str = getenv("AUTO_HBM_DEBUG");
+    const char *debug_str = getenv("AUTO_HBW_DEBUG");
     if (debug_str && strlen(debug_str)) {
         int level = atoi(debug_str);
         if (level >= 0) {
@@ -192,11 +192,47 @@ void setEnvValues()
         }
     }
 
-    // STEP: Set the size limits (thresholds) for HBM allocation
+    // Set the memory type allocated by this library. By default, it is
+    // MEMKIND_HBW, but we can use this library to allocate other memory
+    // types
+    //
+    const char *memtype_str = getenv("AUTO_HBW_MEM_TYPE");
+    //
+    if (memtype_str && strlen(memtype_str)) {
+
+        const int BLEN=80, slen = strlen(memtype_str);
+        char buf[BLEN];
+        //
+        // Convert to all lower case because memkind API names user lower case
+        //
+        int i=0;
+        for (i=0; (i < BLEN-1) && (i < slen); i++) {
+            buf[i] = tolower(memtype_str[i]);
+        }
+        buf[i] = 0;
+        //
+        // Find the memkind_t using the name the user has provided in the env
+        // variable
+        //
+        memkind_t mty;
+        if (!memkind_get_kind_by_name(buf, &mty)) {
+
+            HBW_Type = mty;
+            printf("INFO: Setting target memory type to %s\n", memtype_str);
+
+        }
+        else {
+            printf("WARN: Memory type %s not recognized. Using default type\n",
+                   memtype_str);
+        }
+    }
+
+
+    // STEP: Set the size limits (thresholds) for HBW allocation
     //
     // Reads the enviornment variable
     //
-    const char *size_str = getenv("AUTO_HBM_SIZE");
+    const char *size_str = getenv("AUTO_HBW_SIZE");
     //
     long lowlim = -1, highlim = -1;
     char lowC = 'K', highC = 'K';
@@ -207,11 +243,10 @@ void setEnvValues()
 
         DBG(1) printf("INFO:lowlim=%ld(%c), highlim=%ld(%c)\n",
                       lowlim, lowC, highlim, highC);
-
     }
 
     if (lowlim == 0 || highlim == 0) {
-        printf("WARN: In AUTO_HBM_SIZE=X:Y, X or Y cannot be zero. "
+        printf("WARN: In AUTO_HBW_SIZE=X:Y, X or Y cannot be zero. "
                "Minimum value for X or Y must be 1.\n");
     }
     //
@@ -220,7 +255,7 @@ void setEnvValues()
     if (lowlim >= 0) {
         lowlim = getLimit(lowlim, lowC);
         if (lowlim >= 0) {
-            HBMLowLimit = lowlim;
+            HBWLowLimit = lowlim;
         }
     }
     //
@@ -234,12 +269,12 @@ void setEnvValues()
 
             // if the lower limit is greater than the upper limit, warn
             //
-            if (HBMLowLimit > highlim) {
-                printf("WARN: In AUTO_HBM_SIZE=X:Y, Y must be greater than X. "
+            if (HBWLowLimit > highlim) {
+                printf("WARN: In AUTO_HBW_SIZE=X:Y, Y must be greater than X. "
                        "Y value is ignored\n");
             }
             else {
-                HBMHighLimit = highlim;
+                HBWHighLimit = highlim;
             }
         }
     }
@@ -249,7 +284,7 @@ void setEnvValues()
     //
     if ((lowlim < 0) && (highlim < 0)) {
         printf("INFO: Using default values for array size thesholds. "
-               "Set AUTO_HBM_SIZE=X:Y to change.\n");
+               "Set AUTO_HBW_SIZE=X:Y to change.\n");
     }
     //
     // inform the user about limits
@@ -259,7 +294,7 @@ void setEnvValues()
 
     // STEP: Read the log level from the env variable
     //
-    char *log_str = getenv("AUTO_HBM_LOG");
+    char *log_str = getenv("AUTO_HBW_LOG");
     if (log_str && strlen(log_str)) {
         int level = atoi(log_str);
         if (level >= 0) {
@@ -269,16 +304,16 @@ void setEnvValues()
     }
 
     if (LogLevel == LOG_NONE) {
-        printf("INFO: HBM allocation stats will not be printed. "
-               "Set AUTO_HBM_LOG to enable.\n");
+        printf("INFO: HBW allocation stats will not be printed. "
+               "Set AUTO_HBW_LOG to enable.\n");
     }
     else if (LogLevel == LOG_ALLOC) {
-        printf("INFO: Only HBM allocations will be printed. "
-               "Set AUTO_HBM_LOG to disable/enable.\n");
+        printf("INFO: Only HBW allocations will be printed. "
+               "Set AUTO_HBW_LOG to disable/enable.\n");
     }
     else if (LogLevel == LOG_ALL) {
-        printf("INFO: HBM allocation with backtrace info will be printed. "
-               "Set AUTO_HBM_LOG to disable.\n");
+        printf("INFO: HBW allocation with backtrace info will be printed. "
+               "Set AUTO_HBW_LOG to disable.\n");
     }
 
 
@@ -364,7 +399,7 @@ void logHBW(void *p, size_t size)
             const int buf_sz = 128;
             char msg_buf[buf_sz];
 
-            memkind_get_size(MEMKIND_HBW, &btotal, &bfree);
+            memkind_get_size(HBW_Type, &btotal, &bfree);
             printBackTrace(msg_buf, buf_sz);
             printf("Log: allocated HBW bytes: %ld (%ld free) \tBacktrace:%s\n",
                    size, bfree, msg_buf);
@@ -375,7 +410,7 @@ void logHBW(void *p, size_t size)
 
             // Allocation was NOT succesful AND logging of failures requested
             //
-            memkind_get_size(MEMKIND_HBW, &btotal, &bfree);
+            memkind_get_size(HBW_Type, &btotal, &bfree);
             printf("Log: allocated HBW bytes: %ld (%ld free)\n",
                    size, bfree);
 
@@ -388,7 +423,7 @@ void logHBW(void *p, size_t size)
         // Allocation was NOT succesful AND logging of failures requested
         // This should not really happen because we are using PREFERRED policy
         //
-        memkind_get_size(MEMKIND_HBW, &btotal, &bfree);
+        memkind_get_size(HBW_Type, &btotal, &bfree);
         printf("Log: HBW -- call did NOT succeed: Requested:%ld, free:%ld\n",
                size, bfree);
     }
