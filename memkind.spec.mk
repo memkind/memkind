@@ -179,6 +179,7 @@ fi
 %{_libdir}/libmemkind.so.0.0.1
 %{_libdir}/libmemkind.so.0
 %{_libdir}/libmemkind.so
+%{_bindir}/memkind-hbw-nodes
 %{_sbindir}/memkind-pmtt
 %{_initddir}/memkind
 %dir %{docdir}
