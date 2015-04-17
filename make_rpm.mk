@@ -23,6 +23,7 @@ $(rpm): $(specfile) $(source_tar)
 
 jemalloc/%:
 	cp .gitmodules-local .gitmodules
+	git submodule sync
 	git submodule update --init
 
 $(source_tar): $(topdir)/.setup $(src) MANIFEST
