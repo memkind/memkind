@@ -43,39 +43,30 @@ website based on a target describe in memkind/test/Makefile.mk.
 The memkind library has a dependency on a related fork of jemalloc.
 Since there is little hope of cleanly rebasing against the head of
 jemalloc's public development branch (primarily due to the upstream
-modifications to how "huge" allocations are done), we may include this
-source in the memkind repository in the future with the intention of
-removing it when upstream jemalloc supports our requirements.  In the
-mean time, the developer can build and install the memkind fork of
-jemalloc into a non-standard location by configuring jemalloc with the
---prefix option.  You can inform the memkind build of this
-non-standard location using the --with-jemalloc configuration options.
-These are documented in the help message for memkind's configure
-script.
+modifications to how "huge" allocations are done), we have included
+this source in the memkind repository as a git submodule with the
+intention of removing it when upstream jemalloc supports our
+requirements.  In the mean time, the developer must configure and
+build jemalloc prior to configuring and building memkind.  The
+initialization of the jemalloc submodule is done by memkind's
+autogen.sh script.  A simple example to build from the public memkind
+github follows:
 
-A simple example on how this can be done if jemalloc and memkind are
-cloned in the current working directory follows:
-
-    $ cd jemalloc
-    $ autoconf
-    $ mkdir obj
-    $ cd obj
-    $ ../configure --enable-autogen --with-jemalloc-prefix=je_ --enable-memkind \
-                   --enable-safe --enable-cc-silence --prefix=$HOME/build/jemalloc
-    $ make
-    $ make build_doc
-    $ make install
-    $ cd ../../memkind
-    $ ./autogen.sh
-    $ ./configure --with-jemalloc=$HOME/build/jemalloc --prefix=$HOME/build/memkind
-    $ make
-    $ make install
-    $ find $HOME/build # This command just lists out what was installed
-
-Note that on SLES an additional configure option is required for
-jemalloc to create man pages:
-
-    --with-xslroot=/usr/share/xml/docbook/stylesheet/nwalsh/current
+    git clone https://github.com/memkind/memkind.git
+    cd memkind
+    ./autogen.sh
+    cd jemalloc
+    autoconf
+    mkdir obj
+    cd obj
+    ../configure --enable-autogen --with-jemalloc-prefix=jemk_ \
+                 --enable-memkind --enable-cc-silence
+    make
+    cd ../..
+    ./configure --prefix=$HOME/build
+    make
+    make install
+    find $HOME/build # This command just lists out what was installed
 
 
 TESTING
