@@ -51,12 +51,22 @@ to the original form, and in particular, the build system has been
 lightly modified.
 
 It is required that you configure and build the jemalloc subdirectory
-before configuring and building the top level memkind directory.  To
-configure the jemalloc subdirectory the two options:
+before configuring and building the top level memkind directory.  The
+jemalloc build system supports using an object directory separate from
+the source tree.  To ensure the memkind is able to discover the output
+of the jemalloc build you must create an 'obj' directory, and from
+within that directory.  In particular, issue the following
+configuration and build commands for jemalloc:
 
-    ./configure --enable-memkind --with-jemalloc-prefix=jemk_
+    cd jemalloc
+    test -e configure || autoconf
+    mkdir obj
+    cd obj
+    ../configure --enable-autogen --enable-memkind \
+                 --with-jemalloc-prefix=jemk_
+    make
 
-must be provided.  See the output of:
+See the output of:
 
     ./configure --help
 
