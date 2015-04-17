@@ -23,8 +23,9 @@ $(rpm): $(specfile) $(source_tar)
 
 jemalloc/%:
 	cp .gitmodules-local .gitmodules
+	git checkout jemalloc
 	git submodule sync
-	git submodule update --init
+	git submodule update --init --force jemalloc
 
 $(source_tar): $(topdir)/.setup $(src) MANIFEST
 	mkdir -p $(source_tmp_dir)
