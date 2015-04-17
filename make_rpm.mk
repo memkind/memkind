@@ -21,12 +21,6 @@ all: $(rpm)
 $(rpm): $(specfile) $(source_tar)
 	rpmbuild $(rpmbuild_flags) $(specfile) -ba
 
-jemalloc/%:
-	cp .gitmodules-local .gitmodules
-	git checkout jemalloc
-	git submodule sync
-	git submodule update --init --force jemalloc
-
 $(source_tar): $(topdir)/.setup $(src) MANIFEST
 	mkdir -p $(source_tmp_dir)
 	tar cf $(source_tmp_dir)/tmp.tar -T MANIFEST --transform="s|^|$(name)-$(version)/|"
