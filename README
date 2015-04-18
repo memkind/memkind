@@ -54,8 +54,8 @@ It is required that you configure and build the jemalloc subdirectory
 before configuring and building the top level memkind directory.  The
 jemalloc build system supports using an object directory separate from
 the source tree.  To ensure the memkind is able to discover the output
-of the jemalloc build you must create an 'obj' directory, and from
-within that directory.  In particular, issue the following
+of the jemalloc build you must create an 'obj' directory, and build
+from within that directory.  In particular, issue the following
 configuration and build commands for jemalloc:
 
     cd jemalloc
