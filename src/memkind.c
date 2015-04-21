@@ -232,6 +232,9 @@ void memkind_error_message(int err, char *msg, size_t size)
         case MEMKIND_ERROR_BADOPS:
             strncpy(msg, "<memkind> memkind_ops structure is poorly formed (missing or incorrect functions)", size);
             break;
+        case MEMKIND_ERROR_HUGETLB:
+            strncpy(msg, "<memkind> unable to allocate huge pages", size);
+            break;
         default:
             snprintf(msg, size, "<memkind> Undefined error number: %i", err);
             break;
