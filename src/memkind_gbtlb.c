@@ -37,6 +37,7 @@
 #endif
 
 #include "memkind_gbtlb.h"
+#include "memkind_hugetlb.h"
 #include "memkind_default.h"
 #include "memkind_hbw.h"
 
@@ -48,7 +49,7 @@ const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .posix_memalign = memkind_gbtlb_posix_memalign,
     .realloc = memkind_gbtlb_realloc,
     .free = memkind_gbtlb_free,
-    .check_available = memkind_hbw_check_available,
+    .check_available = memkind_hbw_gbtlb_check_available,
     .mbind = memkind_default_mbind,
     .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
     .get_mbind_mode = memkind_default_get_mbind_mode,
@@ -65,7 +66,7 @@ const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .posix_memalign = memkind_gbtlb_posix_memalign,
     .realloc = memkind_gbtlb_realloc,
     .free = memkind_gbtlb_free,
-    .check_available = memkind_hbw_check_available,
+    .check_available = memkind_hbw_gbtlb_check_available,
     .mbind = memkind_default_mbind,
     .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
@@ -82,6 +83,7 @@ const struct memkind_ops MEMKIND_GBTLB_OPS = {
     .posix_memalign = memkind_gbtlb_posix_memalign,
     .realloc = memkind_gbtlb_realloc,
     .free = memkind_gbtlb_free,
+    .check_available = memkind_hugetlb_check_available_1gb,
     .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
     .get_size = memkind_default_get_size,
     .check_addr = memkind_gbtlb_check_addr

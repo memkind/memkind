@@ -68,7 +68,7 @@ const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .posix_memalign = memkind_arena_posix_memalign,
     .realloc = memkind_arena_realloc,
     .free = memkind_default_free,
-    .check_available = memkind_hbw_check_available,
+    .check_available = memkind_hbw_hugetlb_check_available,
     .mbind = memkind_default_mbind,
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_mbind_mode = memkind_default_get_mbind_mode,
@@ -104,7 +104,7 @@ const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .posix_memalign = memkind_arena_posix_memalign,
     .realloc = memkind_arena_realloc,
     .free = memkind_default_free,
-    .check_available = memkind_hbw_check_available,
+    .check_available = memkind_hbw_hugetlb_check_available,
     .mbind = memkind_default_mbind,
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
@@ -170,6 +170,24 @@ static int numanode_bandwidth_compare(const void *a, const void *b);
 int memkind_hbw_check_available(struct memkind *kind)
 {
     return kind->ops->get_mbind_nodemask(kind, NULL, 0);
+}
+
+int memkind_hbw_hugetlb_check_available(struct memkind *kind)
+{
+    int err = memkind_hbw_check_available(kind);
+    if (!err) {
+        err = memkind_hugetlb_check_available_2mb(kind);
+    }
+    return err;
+}
+
+int memkind_hbw_gbtlb_check_available(struct memkind *kind)
+{
+    int err = memkind_hbw_check_available(kind);
+    if (!err) {
+        err = memkind_hugetlb_check_available_1gb(kind);
+    }
+    return err;
 }
 
 int memkind_hbw_get_mbind_nodemask(struct memkind *kind,

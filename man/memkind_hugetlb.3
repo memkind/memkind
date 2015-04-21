@@ -30,6 +30,10 @@ memkind_hugetlb.h \- hugetlb memory memkind operations.
 .sp
 .B Link with -ljemalloc -lnuma -lpthread -lmemkind
 .sp
+.BI "int memkind_hugetlb_check_available_2mb(struct memkind " "*kind" );
+.br
+.BI "int memkind_hugetlb_check_available_1gb(struct memkind " "*kind" );
+.br
 .BI "int memkind_hugetlb_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
 .br
 .SH DESCRIPTION
@@ -39,6 +43,15 @@ the Linux hugetlbfs file system.  For more information about the
 hugetlbfs see link below.
 .br
 .IR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+.PP
+.BR memkind_hugetlb_check_available_2mb ()
+Check if there are 2MB pages reserved in the default hugetlbfs.  If
+the kind implements ops.get_mbind_nodemask(), then only the NUMA nodes
+set by the nodemask are checked, otherwise every NUMA node is checked.
+.PP
+.BR memkind_hugetlb_check_available_1gb ()
+Similar to memkind_hugetlb_check_available_2mb() except that the check
+is for 1GB pages instead of 2MB pages.
 .PP
 .BR memkind_hugetlb_get_mmap_flags ()
 Sets the flags for the
