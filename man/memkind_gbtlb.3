@@ -21,14 +21,14 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "MEMKIND_GBTLB" 3 "2015-02-12" "Intel Corporation" "MEMKIND_GBTLB" \" -*- nroff -*-
+.TH "MEMKIND_GBTLB" 3 "2015-04-21" "Intel Corporation" "MEMKIND_GBTLB" \" -*- nroff -*-
 .SH "NAME"
 memkind_gbtlb.h \- gigabyte TLB memkind operations.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind_gbtlb.h>
 .sp
-.B Link with -ljemalloc -lnuma -lpthread -lmemkind
+.B Link with -lmemkind
 .sp
 .BI "void *memkind_gbtlb_malloc(struct memkind " "*kind" ", size_t " "size" );
 .BI "void *memkind_gbtlb_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" );

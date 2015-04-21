@@ -21,14 +21,14 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "MEMKIND_PMEM" 3 "2015-02-12" "Intel Corporation" "MEMKIND_PMEM" \" -*- nroff -*-
+.TH "MEMKIND_PMEM" 3 "2015-04-21" "Intel Corporation" "MEMKIND_PMEM" \" -*- nroff -*-
 .SH "NAME"
 memkind_pmem.h \- file-backed memory memkind operations.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind_pmem.h>
 .sp
-.B Link with -ljemalloc -lnuma -lpthread -lmemkind
+.B Link with -lmemkind
 .sp
 .BI "int memkind_pmem_create(struct memkind " "*kind" ", const struct memkind_ops " "*ops" ", const char " "*name" );
 .br
