@@ -179,6 +179,15 @@ int memkind_default_get_mmap_flags(struct memkind *kind, int *flags)
     return 0;
 }
 
+int memkind_default_get_mbind_nodemask(struct memkind *kind,
+                                       unsigned long *nodemask,
+                                       unsigned long maxnode)
+{
+    struct bitmask nodemask_bm = {maxnode, nodemask};
+    copy_bitmask_to_bitmask(numa_all_nodes_ptr, &nodemask_bm);
+    return 0;
+}
+
 int memkind_default_get_mbind_mode(struct memkind *kind, int *mode)
 {
     *mode = MPOL_BIND;

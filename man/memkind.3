@@ -651,6 +651,10 @@ Allocate from standard memory using huge pages.
 .B MEMKIND_GBTLB
 Allocate from standard memory using giga byte huge pages.
 .TP
+.B MEMKIND_INTERLEAVE
+Allocate pages interleaved across all NUMA nodes with transparent huge
+pages disabled.
+.TP
 .B MEMKIND_HBW
 Allocate from the closest high bandwidth memory NUMA node at time
 of allocation.  High bandwidth nodes are defined by the PMTT
@@ -697,7 +701,7 @@ the request, the allocation will fall back on standard memory.
 .B MEMKIND_HBW_INTERLEAVE
 Same as
 .B MEMKIND_HBW
-except that the pages that support the allocation is interleaved
+except that the pages that support the allocation are interleaved
 across all high bandwidth nodes and transparent huge pages are
 disabled.
 .B MEMKIND_PMEM

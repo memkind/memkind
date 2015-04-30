@@ -44,6 +44,7 @@
 #include "memkind_hbw.h"
 #include "memkind_gbtlb.h"
 #include "memkind_pmem.h"
+#include "memkind_interleave.h"
 
 
 static struct memkind MEMKIND_DEFAULT_STATIC = {
@@ -58,6 +59,14 @@ static struct memkind MEMKIND_HUGETLB_STATIC = {
     &MEMKIND_HUGETLB_OPS,
     MEMKIND_PARTITION_HUGETLB,
     "memkind_hugetlb",
+    PTHREAD_ONCE_INIT,
+    0, NULL
+};
+
+static struct memkind MEMKIND_INTERLEAVE_STATIC = {
+    &MEMKIND_INTERLEAVE_OPS,
+    MEMKIND_PARTITION_INTERLEAVE,
+    "memkind_interleave",
     PTHREAD_ONCE_INIT,
     0, NULL
 };
@@ -128,6 +137,7 @@ static struct memkind MEMKIND_HBW_INTERLEAVE_STATIC = {
 
 struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
 struct memkind *MEMKIND_HUGETLB = &MEMKIND_HUGETLB_STATIC;
+struct memkind *MEMKIND_INTERLEAVE = &MEMKIND_INTERLEAVE_STATIC;
 struct memkind *MEMKIND_HBW = &MEMKIND_HBW_STATIC;
 struct memkind *MEMKIND_HBW_PREFERRED = &MEMKIND_HBW_PREFERRED_STATIC;
 struct memkind *MEMKIND_HBW_HUGETLB = &MEMKIND_HBW_HUGETLB_STATIC;
@@ -155,6 +165,7 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC,
         [MEMKIND_PARTITION_GBTLB] = &MEMKIND_GBTLB_STATIC,
         [MEMKIND_PARTITION_HBW_INTERLEAVE] = &MEMKIND_HBW_INTERLEAVE_STATIC,
+        [MEMKIND_PARTITION_INTERLEAVE] = &MEMKIND_INTERLEAVE_STATIC,
     },
     MEMKIND_NUM_BASE_KIND,
     PTHREAD_MUTEX_INITIALIZER
