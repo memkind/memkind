@@ -38,6 +38,8 @@ src/memkind_hbw.c
 src/memkind_hbw.h
 src/memkind_hugetlb.c
 src/memkind_hugetlb.h
+src/memkind_interleave.c
+src/memkind_interleave.h
 src/memkind_pmtt.c
 test/Makefile.mk
 test/bat_tests.cpp
