@@ -500,11 +500,15 @@ void memkind_hbw_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW);
     assert(err == 0);
+    err = numa_available();
+    assert(err == 0);
 }
 
 void memkind_hbw_hugetlb_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_HUGETLB);
+    assert(err == 0);
+    err = numa_available();
     assert(err == 0);
 }
 
@@ -512,16 +516,22 @@ void memkind_hbw_preferred_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_PREFERRED);
     assert(err == 0);
+    err = numa_available();
+    assert(err == 0);
 }
 
 void memkind_hbw_preferred_hugetlb_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_PREFERRED_HUGETLB);
     assert(err == 0);
+    err = numa_available();
+    assert(err == 0);
 }
 
 void memkind_hbw_interleave_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_INTERLEAVE);
+    assert(err == 0);
+    err = numa_available();
     assert(err == 0);
 }

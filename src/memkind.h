@@ -70,6 +70,7 @@ enum memkind_base_partition {
     MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 7,
     MEMKIND_PARTITION_GBTLB = 8,
     MEMKIND_PARTITION_HBW_INTERLEAVE = 9,
+    MEMKIND_PARTITION_INTERLEAVE = 10,
     MEMKIND_NUM_BASE_KIND
 };
 
@@ -121,6 +122,7 @@ extern memkind_t MEMKIND_HBW_GBTLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
 extern memkind_t MEMKIND_GBTLB;
 extern memkind_t MEMKIND_HBW_INTERLEAVE;
+extern memkind_t MEMKIND_INTERLEAVE;
 
 
 /* Convert error number into an error message */

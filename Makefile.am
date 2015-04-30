@@ -35,6 +35,8 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_hbw.c \
                         src/memkind_hugetlb.c \
                         src/memkind_pmem.c \
+                        src/memkind_interleave.c \
+                        src/memkind_interleave.h \
                         src/actbl1.h \
                         src/actbl2.h \
                         src/actbl3.h \
