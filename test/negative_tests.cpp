@@ -114,41 +114,48 @@ TEST_F(NegativeTest, ErrorAllocM)
 TEST_F(NegativeTest, InvalidSizeMalloc)
 {
     void *ptr = NULL;
-    ptr = hbw_malloc(-1);
-    ASSERT_TRUE(ptr == NULL);
-    EXPECT_EQ(errno, ENOMEM);
+    for(int i=-1; i<=0; i++)
+    {
+        ptr = hbw_malloc(i);
+        ASSERT_TRUE(ptr == NULL);
+        EXPECT_EQ(errno, ENOMEM);
 
-    ptr = memkind_malloc(MEMKIND_HBW, -1);
-    ASSERT_TRUE(ptr == NULL);
-    EXPECT_EQ(errno, ENOMEM);
+        ptr = memkind_malloc(MEMKIND_HBW, i);
+        ASSERT_TRUE(ptr == NULL);
+        EXPECT_EQ(errno, ENOMEM);
+    }
 }
 
 TEST_F(NegativeTest, InvalidSizeCalloc)
 {
     void *ptr = NULL;
-    ptr = hbw_calloc(1, -1);
-    ASSERT_TRUE(ptr == NULL);
-    EXPECT_EQ(errno, ENOMEM);
+    for(int i=-1; i<=0; i++)
+    {
+        ptr = hbw_calloc(1, i);
+        ASSERT_TRUE(ptr == NULL);
+        EXPECT_EQ(errno, ENOMEM);
 
-    ptr = memkind_calloc(MEMKIND_HBW, 1,
-                         -1);
-    ASSERT_TRUE(ptr == NULL);
-    EXPECT_EQ(errno, ENOMEM);
+        ptr = memkind_calloc(MEMKIND_HBW,
+                             1, i);
+	ASSERT_TRUE(ptr == NULL);
+	EXPECT_EQ(errno, ENOMEM);
+    }
 }
 
 TEST_F(NegativeTest, InvalidSizeRealloc)
 {
-
     void *ptr = NULL;
-    ptr = hbw_realloc(ptr, -1);
-    ASSERT_TRUE(ptr==NULL);
-    EXPECT_EQ(errno, ENOMEM);
+    for(int i=-1; i<=0; i++)
+    {
+        ptr = hbw_realloc(ptr, i);
+	ASSERT_TRUE(ptr==NULL);
+	EXPECT_EQ(errno, ENOMEM);
 
-    ptr = memkind_realloc(MEMKIND_HBW,
-                          ptr,
-                          -1);
-    ASSERT_TRUE(ptr==NULL);
-    EXPECT_EQ(errno, ENOMEM);
+	ptr = memkind_realloc(MEMKIND_HBW,
+			      ptr, i);
+	ASSERT_TRUE(ptr==NULL);
+	EXPECT_EQ(errno, ENOMEM);
+    }
 }
 
 TEST_F(NegativeTest, InvalidSizeMemalign)
@@ -225,4 +232,20 @@ TEST_F(NegativeTest, GBNullRealloc)
 TEST_F(NegativeTest, GBNullFree)
 {
     memkind_free(MEMKIND_GBTLB,NULL);
+}
+
+TEST_F(NegativeTest, InvalidMallocKind)
+{
+    void *ptr = NULL;
+    ptr = memkind_malloc(MEMKIND_GBTLB, MB);
+    EXPECT_TRUE(ptr == NULL);
+    EXPECT_EQ(errno, EINVAL);
+}
+
+TEST_F(NegativeTest, InvalidGBMallocKind)
+{
+    void *ptr = NULL;
+    ptr = memkind_gbtlb_malloc(MEMKIND_DEFAULT, GB);
+    EXPECT_TRUE(ptr == NULL);
+    EXPECT_EQ(errno, EINVAL);
 }
