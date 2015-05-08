@@ -107,7 +107,7 @@ for enabling the kernel's huge page pool.
 TESTING
 -------
 All existing tests pass both within the simics simulation environment
-of the Intel(R) Xeon Phi(TM) Processor x200 Product Family and when
+of the Intel's 2nd generation Intel(R) Xeon Phi(TM) Product Family and when
 run directly on the Intel(R) Xeon(TM) Processor Family.  For more
 information on how to execute tests see the CONTRIBUTING file.
 
@@ -123,7 +123,7 @@ SIMULATE HIGH BANDWIDTH MEMORY
 A method for testing for the benefit of high bandwidth memory on a
 dual socket Intel(R) Xeon(TM) system is to use the QPI bus to simulate
 slow memory.  This is not an accurate model of the bandwidth and
-latency characteristics of the Intel(R) Xeon Phi(TM) Processor x200
+latency characteristics of the Intel's 2nd generation Intel(R) Xeon Phi(TM)
 Product Family on package memory, but is a reasonable way to determine
 which data structures rely critically on bandwidth.
 
