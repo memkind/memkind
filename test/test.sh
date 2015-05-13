@@ -119,6 +119,11 @@ ret=$?
 if [ $ret -ne 0 ]; then echo "FAIL: hello_hbw" 1>&2; fi
 if [ $err -eq 0 ]; then err=$ret; fi
 
+$basedir/memkind_allocated
+ret=$?
+if [ $ret -ne 0 ]; then echo "FAIL: memkind_allocated" 1>&2; fi
+if [ $err -eq 0 ]; then err=$ret; fi
+
 $basedir/filter_memkind
 ret=$?
 if [ $ret -ne 0 ]; then echo "FAIL: filter_memkind" 1>&2; fi
