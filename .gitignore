@@ -57,6 +57,7 @@
 /examples/*.la
 /examples/filter_memkind
 /examples/hello_hbw
+/examples/memkind_allocated
 /examples/hello_memkind
 /examples/hello_memkind_example.o
 /examples/hello_memkind_debug
@@ -71,6 +72,7 @@
 /test/filter_memkind
 /test/gb_realloc
 /test/hello_hbw
+/test/memkind_allocated
 /test/hello_memkind
 /test/new_kind
 /test/stream

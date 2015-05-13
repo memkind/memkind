@@ -71,6 +71,7 @@ scp $basedir/libsched.so $remote_login@$remote_ip:
 
 scp $basedir/.libs/hello_memkind $remote_login@$remote_ip:
 scp $basedir/.libs/hello_hbw $remote_login@$remote_ip:
+scp $basedir/.libs/memkind_allocated $remote_login@$remote_ip:
 scp $basedir/.libs/filter_memkind $remote_login@$remote_ip:
 scp $basedir/.libs/stream $remote_login@$remote_ip:
 scp $basedir/.libs/stream_memkind $remote_login@$remote_ip:

@@ -8,6 +8,8 @@ examples/autohbw_get_src_lines.pl
 examples/autohbw_helper.h
 examples/filter_example.c
 examples/hello_hbw_example.c
+examples/memkind_allocated_example.cpp
+examples/memkind_allocated.hpp
 examples/hello_memkind_example.c
 examples/new_kind_example.c
 examples/gb_realloc_example.c

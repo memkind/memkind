@@ -22,6 +22,8 @@ examples/README
 examples/new_kind_example.c
 examples/Makefile.mk
 examples/hello_hbw_example.c
+examples/memkind_allocated_example.cpp
+examples/memkind_allocated.hpp
 examples/gb_realloc_example.c
 examples/numakind.c
 examples/numakind.h
