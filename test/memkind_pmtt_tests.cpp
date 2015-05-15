@@ -45,10 +45,10 @@ protected:
 };
 
 
-TEST_F(MemkindPmttTest, TC_PmttParser_001)
+TEST_F(MemkindPmttTest, TC_Memkind_PmttParser_2NodeSystem)
 {
     size_t NUMA_NUM_NODES = 2;
-    const char *mockPmtt = "/tmp/mock-pmtt.txt";
+    const char *mockPmtt = "/tmp/mock-pmtt-2-nodes.bin";
     int rv = 0;
 
     //Known bandwidths from MOCK PMTT table.
@@ -59,10 +59,10 @@ TEST_F(MemkindPmttTest, TC_PmttParser_001)
 
 }
 
-TEST_F(MemkindPmttTest, TC_PmttParser_002)
+TEST_F(MemkindPmttTest, TC_Memkind_PmttParser_EmptyController)
 {
     size_t NUMA_NUM_NODES = 2;
-    const char *mockPmtt = "/tmp/mock-pmtt2.txt";
+    const char *mockPmtt = "/tmp/mock-pmtt-empty-controller.bin";
     int rv = 0;
 
     //Known bandwidths from MOCK PMTT table.

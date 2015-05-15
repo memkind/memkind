@@ -69,7 +69,6 @@ src/memkind_pmem.h
 test/Makefile.mk
 test/check.sh
 test/test.sh
-test/mock-pmtt.txt
 test/multithreaded_tests.cpp
 test/gb_page_tests.cpp
 test/environ_err_test.cpp

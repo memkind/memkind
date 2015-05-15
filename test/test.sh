@@ -39,19 +39,7 @@ unset MEMKIND_HBW_NODES
 #    exit -1
 #fi
 
-rm -f  /tmp/node-bandwidth
-xxd -r /tmp/mock-pmtt.txt $basedir/mock-pmtt.aml
-
-if [ -f /usr/sbin/memkind-pmtt ]; then
-    /usr/sbin/memkind-pmtt $basedir/mock-pmtt.aml /tmp/node-bandwidth
-    ret=$?
-else
-    $basedir/memkind-pmtt $basedir/mock-pmtt.aml /tmp/node-bandwidth
-    ret=$?
-fi
 if [ $err -eq 0 ]; then err=$ret; fi
-
-
 
 if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
     export MEMKIND_HBW_NODES=1
