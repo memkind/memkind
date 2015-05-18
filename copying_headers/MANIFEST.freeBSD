@@ -83,6 +83,12 @@ test/memkind_pmtt_tests.cpp
 test/slts_test.cpp
 test/memkind_ft.py
 test/memkind_ft.py
+test/perf_tests.cpp
+test/performance/framework.hpp
+test/performance/framework.cpp
+test/performance/malloc_perf_tests.cpp
+test/performance/jemalloc_perf_tests.cpp
+test/performance/memkind_perf_tests.cpp
 man/memkind_pmem.3
 src/memkind_pmem.c
 src/memkind_pmem.h
