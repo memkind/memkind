@@ -235,6 +235,18 @@ $(destdir)/*.ts
 $(destdir)/*.txt
 $(destdir)/*.sh
 $(destdir)/memkind_ft.py*
+$(destdir)/mallctlerr_test
+$(destdir)/mallocerr_test
+$(destdir)/memkind-pmtt
+$(destdir)/new_kind
+$(destdir)/pmtterr_test
+$(destdir)/schedcpu_test
+$(destdir)/stream
+$(destdir)/stream_memkind
+$(destdir)/tieddisterr_test
+$(destdir)/*.ts
+$(destdir)/*.txt
+$(destdir)/*.sh
 
 %changelog
 endef

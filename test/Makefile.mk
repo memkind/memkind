@@ -35,6 +35,7 @@ check_PROGRAMS += test/all_tests \
                   # end
 
 TESTS += test/check.sh
+
 EXTRA_DIST += test/mock-pmtt-2-nodes.hex \
               test/mock-pmtt-empty-controller.hex \
               test/memkind-dt.ts \
