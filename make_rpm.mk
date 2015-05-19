@@ -7,19 +7,22 @@ src = $(shell cat MANIFEST)
 
 topdir = $(HOME)/rpmbuild
 rpm = $(topdir)/RPMS/$(arch)/$(name)-devel-$(version)-$(release).$(arch).rpm
+trpm = $(topdir)/TRPMS/$(arch)/$(name)-tests-$(version)-$(release).$(arch).rpm
 srpm = $(topdir)/SRPMS/$(name)-$(version)-$(release).src.rpm
 specfile = $(topdir)/SPECS/$(name)-$(version).spec
 source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
 source_tmp_dir := $(topdir)/SOURCES/memkind-tmp-$(shell date +%s)
-
 rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
 gtest_archive = /opt/mpss_toolchains/googletest/1.7.0/gtest-1.7.0.zip
+destdir = /usr/share/mpss/test/memkind-dt
 
 all: $(rpm)
 
 $(rpm): $(specfile) $(source_tar)
 	rpmbuild $(rpmbuild_flags) $(specfile) -ba
+	mkdir -p $(topdir)/TRPMS/$(arch)
+	mv $(topdir)/RPMS/$(arch)/$(name)-tests-$(version)-$(release).$(arch).rpm $(trpm)
 
 $(source_tar): $(topdir)/.setup $(src) MANIFEST
 	mkdir -p $(source_tmp_dir)
