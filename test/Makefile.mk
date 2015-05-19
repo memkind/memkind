@@ -34,8 +34,10 @@ check_PROGRAMS += test/all_tests \
                   # end
 
 TESTS += test/check.sh
+
 EXTRA_DIST += test/mock-pmtt-2-nodes.hex \
-              test/mock-pmtt-empty-controller.hex
+              test/mock-pmtt-empty-controller.hex \
+              test/memkind-dt.ts
 
 test_all_tests_LDADD = libgtest.a libmemkind.la
 test_schedcpu_test_LDADD = libgtest.a libmemkind.la
