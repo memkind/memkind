@@ -1,4 +1,4 @@
 [submodule "jemalloc"]
 	path = jemalloc
-	url = https://github.com/memkind/jemalloc.git
-	branch = memkind-dev
+	url = git@mic-git.pdx.intel.com:jemalloc
+	branch = public-memkind-dev

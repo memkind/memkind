@@ -135,11 +135,11 @@ $(make_prefix)%{__make} checkprogs $(make_postfix)
 %install
 %{__make} DESTDIR=%{buildroot} install
 %{__install} -d %{buildroot}/%{_initddir}
-%{__install} -d %{buildroot}$(destdir)
+%{__install} -d %{buildroot}$(test_destdir)
 %{__install} init.d/memkind %{buildroot}/%{_initddir}/memkind
 %{__install} -d %{buildroot}/%{statedir}
 touch %{buildroot}/%{statedir}/node-bandwidth
-%{__install} test/.libs/* test/*.sh test/*.txt test/*.ts test/memkind_ft.py %{buildroot}$(destdir)
+%{__install} test/.libs/* test/*.sh test/*.hex test/*.ts test/memkind_ft.py %{buildroot}$(test_destdir)
 rm -f %{buildroot}/%{_libdir}/libmemkind.a
 rm -f %{buildroot}/%{_libdir}/libmemkind.la
 rm -f %{buildroot}/%{_libdir}/libnumakind.*
@@ -214,39 +214,26 @@ $(extra_files)
 
 %files tests
 %defattr(-,root,root,-)
-$(destdir)/all_tests
-$(destdir)/environerr_test
-$(destdir)/mallctlerr_test
-$(destdir)/mallocerr_test
-$(destdir)/memkind-pmtt
-$(destdir)/pmtterr_test
-$(destdir)/schedcpu_test
-$(destdir)/tieddisterr_test
-$(destdir)/filter_memkind
-$(destdir)/gb_realloc
-$(destdir)/hello_hbw
-$(destdir)/hello_memkind
-$(destdir)/hello_memkind_debug
-$(destdir)/new_kind
-$(destdir)/stream
-$(destdir)/stream_memkind
-$(destdir)/memkind_allocated
-$(destdir)/*.ts
-$(destdir)/*.txt
-$(destdir)/*.sh
-$(destdir)/memkind_ft.py*
-$(destdir)/mallctlerr_test
-$(destdir)/mallocerr_test
-$(destdir)/memkind-pmtt
-$(destdir)/new_kind
-$(destdir)/pmtterr_test
-$(destdir)/schedcpu_test
-$(destdir)/stream
-$(destdir)/stream_memkind
-$(destdir)/tieddisterr_test
-$(destdir)/*.ts
-$(destdir)/*.txt
-$(destdir)/*.sh
+$(test_destdir)/all_tests
+$(test_destdir)/environerr_test
+$(test_destdir)/filter_memkind
+$(test_destdir)/gb_realloc
+$(test_destdir)/hello_hbw
+$(test_destdir)/hello_memkind
+$(test_destdir)/hello_memkind_debug
+$(test_destdir)/mallctlerr_test
+$(test_destdir)/mallocerr_test
+$(test_destdir)/memkind-pmtt
+$(test_destdir)/new_kind
+$(test_destdir)/pmtterr_test
+$(test_destdir)/schedcpu_test
+$(test_destdir)/stream
+$(test_destdir)/stream_memkind
+$(test_destdir)/tieddisterr_test
+$(test_destdir)/memkind_ft.py*
+$(test_destdir)/*.ts
+$(test_destdir)/*.hex
+$(test_destdir)/*.sh
 
 %changelog
 endef

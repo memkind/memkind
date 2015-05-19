@@ -15,7 +15,8 @@ source_tmp_dir := $(topdir)/SOURCES/memkind-tmp-$(shell date +%s)
 rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
 gtest_archive = /opt/mpss_toolchains/googletest/1.7.0/gtest-1.7.0.zip
-destdir = $(MPSS_TEST_BASEDIR)/memkind-dt
+test_destdir = $(MPSS_TEST_BASEDIR)/memkind-dt
+
 
 all: $(rpm)
 
