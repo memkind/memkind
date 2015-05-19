@@ -10,6 +10,7 @@ VERSION
 ChangeLog
 examples/README
 test/mock-pmtt.txt
+test/memkind-dt.ts
 jemalloc/.gitignore
 jemalloc/autogen.sh
 jemalloc/bin

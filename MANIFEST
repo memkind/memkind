@@ -102,6 +102,7 @@ test/memkind_default_tests.cpp
 test/policy_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmtt_tests.cpp
+test/memkind-dt.ts
 jemalloc/.gitignore
 jemalloc/autogen.sh
 jemalloc/bin

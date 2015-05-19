@@ -102,6 +102,13 @@ other memkind interfaces the user can control and extend memory
 partition features and allocate memory while selecting enabled
 features.  The devel package installs header files.
 
+%package tests
+Summary: Extention to libnuma for kinds of memory - validation
+Group: Validation/Libraries
+
+%description tests
+memkind functional tests
+
 %build
 test -f configure || ./autogen.sh
 
@@ -120,12 +127,15 @@ popd
 ./configure --enable-tls --prefix=%{_prefix} --libdir=%{_libdir} \
     --includedir=%{_includedir} --sbindir=%{_sbindir} \
     --mandir=%{_mandir} --docdir=%{docdir}
-$(make_prefix)%{__make} $(make_postfix)
+$(make_prefix)%{__make} libgtest.a $(make_postfix)
+$(make_prefix)%{__make} checkprogs $(make_postfix)
 
 %install
 %{__make} DESTDIR=%{buildroot} install
 %{__install} -d %{buildroot}/%{_initddir}
+%{__install} -d %{buildroot}$(destdir)
 %{__install} init.d/memkind %{buildroot}/%{_initddir}/memkind
+%{__install} test/.libs/* test/*.sh test/*.txt test/*.ts %{buildroot}$(destdir)
 rm -f %{buildroot}/%{_libdir}/libmemkind.a
 rm -f %{buildroot}/%{_libdir}/libmemkind.la
 rm -f %{buildroot}/%{_libdir}/libnumakind.*
@@ -195,6 +205,28 @@ fi
 %doc %{_mandir}/man3/memkind_hugetlb.3.gz
 %doc %{_mandir}/man3/memkind_pmem.3.gz
 $(extra_files)
+
+%files tests
+%defattr(-,root,root,-)
+$(destdir)/all_tests
+$(destdir)/environerr_test
+$(destdir)/filter_memkind
+$(destdir)/gb_realloc
+$(destdir)/hello_hbw
+$(destdir)/hello_memkind
+$(destdir)/hello_memkind_debug
+$(destdir)/mallctlerr_test
+$(destdir)/mallocerr_test
+$(destdir)/memkind-pmtt
+$(destdir)/new_kind
+$(destdir)/pmtterr_test
+$(destdir)/schedcpu_test
+$(destdir)/stream
+$(destdir)/stream_memkind
+$(destdir)/tieddisterr_test
+$(destdir)/*.ts
+$(destdir)/*.txt
+$(destdir)/*.sh
 
 %changelog
 endef
