@@ -66,6 +66,8 @@ Prefix: %{_initddir}
 %define docdir %{_defaultdocdir}/memkind-%{version}
 %endif
 
+%define statedir %{_localstatedir}/run/memkind
+
 %description
 The memkind library is a user extensible heap manager built on top of
 jemalloc which enables control of memory characteristics and a
@@ -126,6 +128,8 @@ $(make_prefix)%{__make} $(make_postfix)
 %{__make} DESTDIR=%{buildroot} install
 %{__install} -d %{buildroot}/%{_initddir}
 %{__install} init.d/memkind %{buildroot}/%{_initddir}/memkind
+%{__install} -d %{buildroot}/%{statedir}
+touch %{buildroot}/%{statedir}/node-bandwidth
 rm -f %{buildroot}/%{_libdir}/libmemkind.a
 rm -f %{buildroot}/%{_libdir}/libmemkind.la
 rm -f %{buildroot}/%{_libdir}/libnumakind.*
@@ -182,6 +186,8 @@ fi
 %{_bindir}/memkind-hbw-nodes
 %{_sbindir}/memkind-pmtt
 %{_initddir}/memkind
+%{statedir}/node-bandwidth
+%dir %{statedir}
 %dir %{docdir}
 %doc %{docdir}/README
 %doc %{docdir}/COPYING

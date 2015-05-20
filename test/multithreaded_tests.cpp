@@ -63,7 +63,7 @@ protected:
             }
         }
         else {
-            const char *node_bandwidth_path = "/etc/memkind/node-bandwidth";
+            const char *node_bandwidth_path = "/var/run/memkind/node-bandwidth";
             std::ifstream nbw_file;
 
             nbw_file.open(node_bandwidth_path, std::ifstream::binary);

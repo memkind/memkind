@@ -96,7 +96,7 @@ Issues
       run into error conditions on OS versions that do not support our
       library (at least warn the user during installation).
 
-    * In case where /etc/memkind/node-bandwith is absent, and
+    * In case where /var/run/memkind/node-bandwith is absent, and
       MEMKIND_HBW_NODES is not defined, use MPOL_INTERLEAVED across
       all NUMA nodes rather than erroring out.
 

@@ -282,7 +282,7 @@ library. These interfaces define a heap manager that targets high
 bandwidth memory numa nodes.
 .SH "FILES"
 .TP
-.I /etc/memkind/node-bandwidth
+.I /var/run/memkind/node-bandwidth
 File that contains the bandwidth values for each numa node.
 .TP
 .I /etc/rc/d/init.d/memkind
@@ -293,7 +293,7 @@ the PMTT table parser.
 The PMTT table parser.
 .TP
 .I /usr/bin/memkind-hbw-nodes
-Parses /etc/memkind/node-bandwidth and prints a comma separated list
+Parses /var/run/memkind/node-bandwidth and prints a comma separated list
 of high bandwidth nodes.
 .SH "ENVIRONMENT"
 .TP

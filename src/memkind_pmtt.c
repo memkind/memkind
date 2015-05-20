@@ -220,7 +220,6 @@ int memkind_pmtt(char *pmtt_path, char *bandwidth_path)
         err = errno ? -errno : 1;
         goto exit;
     }
-    unlink(bandwidth_path);
     fd = open(bandwidth_path, O_CREAT | O_EXCL | O_WRONLY, 0644);
     if (fd == -1) {
         fprintf(stderr, "ERROR: <memkind_pmtt> opening %s for writing\n", bandwidth_path);
@@ -241,6 +240,7 @@ int memkind_pmtt(char *pmtt_path, char *bandwidth_path)
     }
     nwrite = fwrite(bandwidth, sizeof(int), NUMA_NUM_NODES, fp);
     if (nwrite != NUMA_NUM_NODES) {
+        fprintf(stderr, "ERROR: <memkind_pmtt> could not write all of %s\n", bandwidth_path);
         err = errno ? -errno : 1;
         goto exit;
     }
@@ -251,12 +251,6 @@ exit:
     }
     if (bandwidth != NULL) {
         free(bandwidth);
-    }
-    if (err) {
-        unlink(bandwidth_path);
-        if(*dir) {
-            rmdir(dir);
-        }
     }
     return err;
 }

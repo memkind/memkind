@@ -30,7 +30,7 @@ extern "C" {
 
 #include "memkind.h"
 
-static const char * const MEMKIND_BANDWIDTH_PATH = "/etc/memkind/node-bandwidth";
+static const char * const MEMKIND_BANDWIDTH_PATH = "/var/run/memkind/node-bandwidth";
 
 int memkind_hbw_check_available(struct memkind *kind);
 int memkind_hbw_hugetlb_check_available(struct memkind *kind);

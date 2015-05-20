@@ -30,11 +30,11 @@
 # Required-Start:
 # Required-Stop:
 # Short-Description: Sets up memkind library
-# Description: Parses the PMTT table and creates the file /etc/memkind/node-bandwidth.
+# Description: Parses the PMTT table and creates the file /var/run/memkind/node-bandwidth.
 #
 #              start - Create bandwidth file from PMTT table.
 #
-#              stop  - Delete bandwidth file from /etc/memkind.
+#              stop  - Delete bandwidth file from /var/run/memkind.
 #
 #              restart - Delete and recreate bandwidth file from PMTT table.
 #
@@ -67,19 +67,27 @@ else
 fi
 
 err=0
-MEMKIND_FILE=/etc/memkind/node-bandwidth
+MEMKIND_FILE=/var/run/memkind/node-bandwidth
 MEMKIND_DIR=`dirname $MEMKIND_FILE`
 MEMKIND_BIN=/usr/sbin/memkind-pmtt
 
 start() {
     echo_success "creating bandwidth values file"
-    $MEMKIND_BIN
-    err=$?
-    if [ $err -eq 0 ] && [ -f $MEMKIND_FILE ]
-    then
-        echo_success "created file: $MEMKIND_FILE"
-    else
-        echo_failure "could not create file: $MEMKIND_FILE"
+    if [ -f $MEMKIND_FILE ]; then
+        echo_success "bandwidth values file exists, atemptting to delete before
+        creation."
+        stop
+    fi
+
+    if [ ! -f $MEMKIND_FILE ]; then
+        $MEMKIND_BIN
+        err=$?
+        if [ $err -eq 0 ] && [ -f $MEMKIND_FILE ]
+        then
+            echo_success "created file: $MEMKIND_FILE"
+        else
+            echo_failure "could not create file: $MEMKIND_FILE"
+        fi
     fi
 }
 
@@ -90,14 +98,6 @@ stop() {
     if [ $err -eq 0 ] && [ ! -f $MEMKIND_FILE ]
     then
         echo_success "deleted file: $MEMKIND_FILE"
-        rmdir $MEMKIND_DIR
-        err=$?
-        if [ $err -eq 0 ] && [ ! -d $MEMKIND_DIR ]
-        then
-            echo_success "deleted directory: $MEMKIND_DIR"
-        else
-            echo_failure "could not delete directory: $MEMKIND_DIR"
-        fi
     else
         echo_failure "could not delete file: $MEMKIND_FILE"
     fi

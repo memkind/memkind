@@ -773,7 +773,7 @@ returned out of range
 .B MEMKIND_ERROR_PMTT
 Unable to find parsed PMTT table or
 invalid PMTT table entries in
-.I /etc/memkind/node-bandwidth
+.I /var/run/memkind/node-bandwidth
 .TP
 .B MEMKIND_ERROR_TIEDISTANCE
 Two NUMA memory nodes are equidistant from target cpu node
@@ -793,7 +793,7 @@ Error parsing environment variable (MEMKIND_*)
 Invalid input arguments to memkind routine
 .SH "FILES"
 .TP
-.I /etc/memkind/node-bandwidth
+.I /var/run/memkind/node-bandwidth
 File that contains the bandwidth values for each NUMA node.
 .TP
 .I /etc/rc/d/init.d/memkind
