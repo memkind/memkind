@@ -22,25 +22,8 @@
 #  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-
-basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-sudo yum install numactl -y
-
-#Commands which Berta needs for automated testing
-if [[ $@ == *--list* ]]
-then
-    $basedir/all_tests --gtest_list_tests | grep -v "\."
-    exit
-fi
-
-if [[ $@ == *--results* ]]
-then
-    xml=`echo $@ | sed "s/--results gtest_output/\(.*xml\).*/\1/"`
-    echo "xml:$xml"
-fi
-
 err=0
+basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [ ! -z "$TEST_HOST" ] && [ ! -z "$TEST_LOGIN" ] && [ ! -z "$TEST_RPMDIR" ]; then
     $basedir/test_remote.sh $TEST_RPMDIR $TEST_LOGIN $TEST_HOST $TEST_OUTDIR $TEST_SSHID
     err=$?

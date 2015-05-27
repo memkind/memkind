@@ -11,6 +11,7 @@ ChangeLog
 examples/README
 test/mock-pmtt.txt
 test/memkind-dt.ts
+test/memkind_ft.py
 jemalloc/.gitignore
 jemalloc/autogen.sh
 jemalloc/bin
