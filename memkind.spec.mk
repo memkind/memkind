@@ -135,7 +135,7 @@ $(make_prefix)%{__make} checkprogs $(make_postfix)
 %install
 %{__make} DESTDIR=%{buildroot} install
 %{__install} -d %{buildroot}/%{_initddir}
-%{__install} -d %{buildroot}$(test_destdir)
+%{__install} -d %{buildroot}$(destdir)
 %{__install} init.d/memkind %{buildroot}/%{_initddir}/memkind
 %{__install} -d %{buildroot}/%{statedir}
 touch %{buildroot}/%{statedir}/node-bandwidth
