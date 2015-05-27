@@ -224,6 +224,7 @@ $(destdir)/hello_memkind_debug
 $(destdir)/new_kind
 $(destdir)/stream
 $(destdir)/stream_memkind
+$(destdir)/memkind_allocated
 $(destdir)/*.ts
 $(destdir)/*.txt
 $(destdir)/*.sh
