@@ -63,7 +63,6 @@ memkind_pmtt_LDADD = libmemkind.la
 
 EXTRA_DIST = autogen.sh \
              init.d/memkind \
-             config/node-bandwidth \
              gtest-1.7.0.zip \
              examples/README \
              test/check.sh \

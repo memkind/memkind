@@ -33,9 +33,11 @@
 #include <errno.h>
 #include <assert.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <jemalloc/jemalloc.h>
 #include <utmpx.h>
 #include <sched.h>
+ 
 
 #include "memkind_hbw.h"
 #include "memkind_default.h"
@@ -309,10 +311,17 @@ static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
                                 const char *bandwidth_path)
 {
     FILE *fid = NULL;
+    struct stat st;
     size_t nread = 0;
+    int stat_ret = 0;
     int err = 0;
     fid = fopen(bandwidth_path, "r");
     if (fid == NULL) {
+        err = MEMKIND_ERROR_PMTT ? MEMKIND_ERROR_PMTT : -1;
+        goto exit;
+    }
+    stat_ret = stat(bandwidth_path, &st);
+    if (stat_ret || !st.st_size) {
         err = MEMKIND_ERROR_PMTT ? MEMKIND_ERROR_PMTT : -1;
         goto exit;
     }

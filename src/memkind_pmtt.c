@@ -240,6 +240,7 @@ int memkind_pmtt(char *pmtt_path, char *bandwidth_path)
     }
     nwrite = fwrite(bandwidth, sizeof(int), NUMA_NUM_NODES, fp);
     if (nwrite != NUMA_NUM_NODES) {
+        fprintf(stderr, "ERROR: <memkind_pmtt> could not write all of %s\n", bandwidth_path);
         err = errno ? -errno : 1;
         goto exit;
     }

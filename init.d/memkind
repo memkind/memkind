@@ -30,11 +30,11 @@
 # Required-Start:
 # Required-Stop:
 # Short-Description: Sets up memkind library
-# Description: Parses the PMTT table and creates the file /etc/memkind/node-bandwidth.
+# Description: Parses the PMTT table and creates the file /var/run/memkind/node-bandwidth.
 #
 #              start - Create bandwidth file from PMTT table.
 #
-#              stop  - Delete bandwidth file from /etc/memkind.
+#              stop  - Delete bandwidth file from /var/run/memkind.
 #
 #              restart - Delete and recreate bandwidth file from PMTT table.
 #
@@ -67,7 +67,7 @@ else
 fi
 
 err=0
-MEMKIND_FILE=/etc/memkind/node-bandwidth
+MEMKIND_FILE=/var/run/memkind/node-bandwidth
 MEMKIND_DIR=`dirname $MEMKIND_FILE`
 MEMKIND_BIN=/usr/sbin/memkind-pmtt
 

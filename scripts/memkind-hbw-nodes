@@ -31,7 +31,7 @@ SYNOPSIS
         Print this help message.
 
 DESCRIPTION
-    Parse the /etc/memkind/node-bandwidth file and prints a comma
+    Parse the /var/run/memkind/node-bandwidth file and prints a comma
     separated list of high bandwidth nodes that can be used with the
     numactl --membind option.
 
@@ -52,7 +52,7 @@ SEE ALSO
 import sys
 import struct
 
-def hbw_nodes(node_bandwidth_file='/etc/memkind/node-bandwidth'):
+def hbw_nodes(node_bandwidth_file='/var/run/memkind/node-bandwidth'):
     with open(node_bandwidth_file, 'rb') as fid:
         data = fid.read()
     num_node = len(data)/4
