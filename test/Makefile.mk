@@ -66,6 +66,7 @@ test_all_tests_SOURCES = test/common.h \
                          test/policy_tests.cpp \
                          test/get_arena_test.cpp \
                          test/memkind_pmtt_tests.cpp \
+		         test/stress_test.cpp \
                          # end
 
 test_schedcpu_test_SOURCES = test/main.cpp test/sched_cpu_test.cpp

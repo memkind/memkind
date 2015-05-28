@@ -47,6 +47,7 @@ public:
     int check_node_hbw(size_t num_bandwidth, const int *bandwidth);
     int check_page_size(size_t page_size);
     int check_zero(void);
+    int check_data(int data);
     int check_align(size_t align);
 private:
     const void *ptr;
