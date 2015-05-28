@@ -138,15 +138,3 @@ TEST_F(BATest, hbw_memkind_malloc_recycle_psize)
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_memkind_trials_two_kind_stress)
-{
-    tgen->generate_multi_app_stress(2);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(BATest, hbw_memkind_trials_all_kind_stress)
-{
-    tgen->generate_multi_app_stress(6);
-    tgen->run(num_bandwidth, bandwidth);
-}
-

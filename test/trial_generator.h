@@ -52,6 +52,11 @@ typedef enum {
     MEMKIND_FREE
 } alloc_api_t;
 
+typedef enum {
+    MEMALLOC,
+    DATACHECK
+} test_t;
+
 typedef struct {
     alloc_api_t api;
     size_t size;
@@ -59,6 +64,7 @@ typedef struct {
     int page_size;
     memkind_t memkind;
     int free_index;
+    test_t test;
 } trial_t;
 
 class TrialGenerator
@@ -69,7 +75,7 @@ public:
     void generate_recycle_incremental(alloc_api_t api);
     void generate_recycle_psize_incremental(alloc_api_t api);
     void generate_recycle_psize_2GB(alloc_api_t api);
-    void generate_multi_app_stress(int num_types);
+    void generate_multi_app_stress(int num_types, test_t test);
     void generate_size_1KB_2GB(alloc_api_t api);
     void generate_hbw_gb_incremental(alloc_api_t api);
     void generate_gb_regular(alloc_api_t api);

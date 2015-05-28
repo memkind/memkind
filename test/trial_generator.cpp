@@ -86,7 +86,7 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
     ltrial.page_size = page_size;
     ltrial.memkind = memkind;
     ltrial.free_index = free_index;
-
+    ltrial.test = MEMALLOC;
     return ltrial;
 }
 
@@ -201,12 +201,12 @@ int n_random(int i)
     return random() % i;
 }
 
-void TrialGenerator :: generate_multi_app_stress(int num_types)
+void TrialGenerator :: generate_multi_app_stress(int num_types, test_t test)
 {
-
     int i;
     int num_trials = 1000;
-    int index, k = 0;
+    int index = 0;
+    int k = 0;
     int num_alloc = 0;
     memkind_t kind;
 
@@ -215,11 +215,13 @@ void TrialGenerator :: generate_multi_app_stress(int num_types)
     for (i = 0; i < num_trials; i++) {
         if (n_random(3) || num_alloc == 0) {
             memkind_get_kind_by_partition(n_random(num_types), &kind);
-            trial_vec.push_back(create_trial_tuple(MEMKIND_MALLOC,
+	    trial_t ltrial = create_trial_tuple(MEMKIND_MALLOC,
                                                    n_random(8*MB - 1) + 1,
                                                    0, 2097152,
                                                    kind,
-                                                   k++));
+                                                   k++);
+	    if (test == DATACHECK) ltrial.test = DATACHECK;
+            trial_vec.push_back(ltrial);
             num_alloc++;
         }
         else {
@@ -228,7 +230,6 @@ void TrialGenerator :: generate_multi_app_stress(int num_types)
                    trial_vec[index].free_index == -1) {
                 index = n_random(trial_vec.size());
             }
-
             trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,
                                                    0,
                                                    0, 2097152,
@@ -244,12 +245,10 @@ void TrialGenerator :: generate_multi_app_stress(int num_types)
     for (i = 0; i <(int) trial_vec.size(); i++) {
         if (trial_vec[i].api != MEMKIND_FREE &&
             trial_vec[i].free_index > 0) {
-
             trial_t ltrial = create_trial_tuple(MEMKIND_FREE,
                                                 0, 0, 2097152,
                                                 trial_vec[i].memkind,
                                                 trial_vec[i].free_index);
-
             trial_vec[i].free_index = -1;
             trial_vec.push_back(ltrial);
         }
@@ -432,7 +431,6 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                                                psize);
 
                 break;
-
             case MEMKIND_MALLOC:
                 if (trial_vec[i].memkind == MEMKIND_HBW_GBTLB ||
                     trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB) {
@@ -474,6 +472,9 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
             ASSERT_TRUE(ptr_vec[i] != NULL);
             memset(ptr_vec[i], 0, trial_vec[i].size);
             Check check(ptr_vec[i], trial_vec[i].size);
+	    if (trial_vec[i].test == DATACHECK){
+	        EXPECT_EQ(0, check.check_data(0x0A));
+	    }
             if (trial_vec[i].memkind != MEMKIND_DEFAULT &&
                 trial_vec[i].memkind != MEMKIND_HUGETLB &&
                 trial_vec[i].memkind != MEMKIND_GBTLB) {

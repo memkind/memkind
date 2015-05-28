@@ -31,6 +31,7 @@ check_PROGRAMS += test/all_tests \
                   test/mallctlerr_test \
                   test/environerr_test \
                   test/tieddisterr_test \
+                  test/slts_test \
                   # end
 
 TESTS += test/check.sh
@@ -44,6 +45,7 @@ test_mallctlerr_test_LDADD = libgtest.a libmemkind.la
 test_pmtterr_test_LDADD = libgtest.a libmemkind.la
 test_environerr_test_LDADD = libgtest.a libmemkind.la
 test_tieddisterr_test_LDADD = libgtest.a libmemkind.la
+test_slts_test_LDADD = libgtest.a libmemkind.la
 
 test_all_tests_SOURCES = test/common.h \
                          test/bat_tests.cpp \
@@ -74,6 +76,7 @@ test_mallctlerr_test_SOURCES = test/main.cpp test/mallctl_err_test.cpp
 test_pmtterr_test_SOURCES = test/main.cpp test/pmtt_err_test.cpp
 test_environerr_test_SOURCES = test/main.cpp test/environ_err_test.cpp
 test_tieddisterr_test_SOURCES = test/main.cpp test/tied_dist_test.cpp
+test_slts_test_SOURCES = test/slts_test.cpp
 
 # Examples as tests
 check_PROGRAMS += test/hello_memkind \

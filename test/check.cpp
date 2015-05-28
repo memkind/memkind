@@ -35,7 +35,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
+#include <cstring>
 #include "check.h"
 
 
@@ -45,21 +45,21 @@ using namespace std;
 /*Check every 4K space between the start
 and the end address additionally also
 check the end address for pagesize*/
-Check::Check(const void *ptr, size_t size)
+Check::Check(const void *p, size_t c_size)
 {
     const size_t min_page_size = 4096;
     size_t i;
-    this->ptr = ptr;
-    this->size = size;
-    if (ptr && size) {
-        num_address = size / min_page_size + 1;
-        num_address += size % min_page_size ? 1 : 0;
+    this->ptr = p;
+    this->size = c_size;
+    if (p && c_size) {
+        num_address = c_size / min_page_size + 1;
+        num_address += c_size % min_page_size ? 1 : 0;
 
         address = new void* [num_address];
         for (i = 0; i < num_address - 1; ++i) {
             address[i] = (char *)ptr + i * min_page_size;
         }
-        address[i] = (char *)ptr + size - 1;
+        address[i] = (char *)p + c_size - 1;
     }
     else {
         address = NULL;
@@ -127,6 +127,18 @@ int Check::check_zero(void)
         }
     }
     return 0;
+}
+
+int Check::check_data(int data)
+{
+    int ret;
+    void *p;
+    p = malloc(size);
+    memset(p, data, size);
+    memset((void*)ptr, data, size);
+    ret = memcmp(p, ptr, size);
+    free(p);
+    return ret;
 }
 
 int Check::check_align(size_t align)
