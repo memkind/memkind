@@ -574,7 +574,7 @@ exit:
 }
 
 int memkind_create_pmem(const char *dir, size_t max_size,
-        struct memkind **kind)
+                        struct memkind **kind)
 {
     int err = 0;
     int oerrno;

@@ -88,8 +88,8 @@ int memkind_arena_create_map(struct memkind *kind)
         }
         for (i = 0; !err && i < kind->arena_map_len; ++i) {
             err = jemk_mallctl("arenas.extendk", kind->arena_map + i,
-                             &unsigned_size, &(kind->partition),
-                             unsigned_size);
+                               &unsigned_size, &(kind->partition),
+                               unsigned_size);
         }
         if (err) {
             if (kind->arena_map) {

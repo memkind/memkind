@@ -131,14 +131,15 @@ const struct memkind_ops deadbeef_ops = {
     .get_size = memkind_default_get_size
 };
 
-void *mmap_deadbeef(struct memkind *kind, void *addr, size_t size) {
+void *mmap_deadbeef(struct memkind *kind, void *addr, size_t size)
+{
     int i;
     void *buffer = mmap(addr, size, PROT_READ | PROT_WRITE,
-                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
     printf("Hello from mmap_deadbeef\n");
 
-    for(i=0; i< size/sizeof(int); ++i){
+    for(i=0; i< size/sizeof(int); ++i) {
         ((int *)buffer) [i] = 0xDEADBEEF;
     }
     return buffer;

@@ -37,7 +37,7 @@
 #include <jemalloc/jemalloc.h>
 #include <utmpx.h>
 #include <sched.h>
- 
+
 
 #include "memkind_hbw.h"
 #include "memkind_default.h"
@@ -362,7 +362,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
     *bandwidth_nodes = NULL;
     /* allocate space for sorting array */
     numanode_bandwidth = jemk_malloc(sizeof(struct numanode_bandwidth_t) *
-                                   num_bandwidth);
+                                     num_bandwidth);
     if (!numanode_bandwidth) {
         err = MEMKIND_ERROR_MALLOC;
     }
