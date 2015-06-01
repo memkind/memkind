@@ -77,7 +77,6 @@ test/negative_tests.cpp
 test/tied_dist_test.cpp
 test/sched_mock.c
 test/trial_generator.cpp
-test/extended_tests.cpp
 test/fopen_mock.c
 test/sched_cpu_test.cpp
 test/check.h
