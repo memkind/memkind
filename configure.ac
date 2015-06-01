@@ -30,6 +30,7 @@ AC_INIT([memkind],m4_esyscmd([tr -d '\n' < VERSION]),[christopher.m.cantalupo@in
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects tar-pax])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_HEADERS([config_tls.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 memkind_abi_version=0:1:0
 AC_SUBST(memkind_abi_version)
@@ -137,8 +138,7 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_LIBTOOL
-AC_PROG_RANLIB
+LT_INIT
 AM_PROG_CC_C_O
 
 # Checks for libraries.
@@ -175,7 +175,8 @@ AC_FUNC_MMAP
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([gettimeofday memset mkdir munmap setenv strtol strtoul])
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
 
 # ============================================================================
 # Print out the results of configuration.
