@@ -33,7 +33,7 @@
 
 
 int memkind_pmem_create(struct memkind *kind, const struct memkind_ops *ops,
-        const char *name)
+                        const char *name)
 {
     struct memkind_pmem *priv;
     int err;
