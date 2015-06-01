@@ -17,6 +17,7 @@ examples/numakind.c
 examples/numakind.h
 examples/numakind_test.c
 examples/memkind_decorator_debug.c
+examples/autohbw_test.sh
 init.d/memkind
 man/hbwmalloc.3
 man/memkind.3
