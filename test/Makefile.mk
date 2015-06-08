@@ -33,8 +33,7 @@ check_PROGRAMS += test/all_tests \
                   test/tieddisterr_test \
                   # end
 
-TESTS += test/check.sh
-EXTRA_DIST += test/mock-pmtt*
+TESTS += test/check.sh test/mock-pmtt-2-nodes.bin test/mock-pmtt-empty-controller.bin
 
 test_all_tests_LDADD = libgtest.a libmemkind.la
 test_schedcpu_test_LDADD = libgtest.a libmemkind.la
