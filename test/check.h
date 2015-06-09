@@ -41,7 +41,7 @@ using namespace std;
 class Check
 {
 public:
-    Check(const void *ptr, size_t size);
+    Check(const void *p, size_t c_size);
     Check(const Check &);
     ~Check();
     int check_node_hbw(size_t num_bandwidth, const int *bandwidth);
