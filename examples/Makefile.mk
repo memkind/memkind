@@ -25,7 +25,6 @@
 noinst_PROGRAMS += examples/hello_memkind \
                    examples/hello_memkind_debug \
                    examples/hello_hbw \
-                   examples/memkind_allocated \
                    examples/filter_memkind \
                    examples/stream \
                    examples/stream_memkind \
@@ -34,6 +33,10 @@ noinst_PROGRAMS += examples/hello_memkind \
                    examples/gb_realloc \
                    examples/numakind_test \
                    # end
+if ENABLE_CXX11
+noinst_PROGRAMS += examples/memkind_allocated
+endif
+
 
 lib_LTLIBRARIES += examples/libnumakind.la \
                    examples/libautohbw.la \
@@ -44,7 +47,6 @@ EXTRA_DIST += examples/autohbw_get_src_lines.pl
 examples_hello_memkind_LDADD = libmemkind.la
 examples_hello_memkind_debug_LDADD = libmemkind.la
 examples_hello_hbw_LDADD = libmemkind.la
-examples_memkind_allocated_LDADD = libmemkind.la
 examples_filter_memkind_LDADD = libmemkind.la
 examples_stream_LDADD = libmemkind.la
 examples_stream_memkind_LDADD = libmemkind.la
@@ -52,12 +54,13 @@ examples_new_kind_LDADD = libmemkind.la
 examples_pmem_memkind_LDADD = libmemkind.la
 examples_gb_realloc_LDADD = libmemkind.la
 examples_numakind_test_LDADD = examples/libnumakind.la libmemkind.la
-
+if ENABLE_CXX11
+examples_memkind_allocated_LDADD = libmemkind.la
+endif
 
 examples_hello_memkind_SOURCES = examples/hello_memkind_example.c
 examples_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 examples_hello_hbw_SOURCES = examples/hello_hbw_example.c
-examples_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 examples_filter_memkind_SOURCES = examples/filter_example.c
 examples_stream_SOURCES = examples/stream_example.c
 examples_stream_memkind_SOURCES = examples/stream_example.c
@@ -68,6 +71,10 @@ examples_numakind_test_SOURCES = examples/numakind_test.c
 examples_libnumakind_la_SOURCES = examples/numakind.c examples/numakind.h examples/numakind_macro.h
 examples_libautohbw_la_SOURCES = examples/autohbw.c examples/autohbw_helper.h
 noinst_HEADERS += examples/numakind.h examples/numakind_macro.h
+if ENABLE_CXX11
+examples_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
+endif
+
 
 examples_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
 

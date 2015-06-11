@@ -258,7 +258,12 @@ XFAIL_TESTS =
 TESTS_ENVIRONMENT =
 
 AM_CFLAGS = -Wall -Werror -msse4.2 -fopenmp
-AM_CXXFLAGS = -Wall -Werror -msse4.2 -std=c++0x -fopenmp
+AM_CXXFLAGS = -Wall -Werror -msse4.2 -fopenmp
+if ENABLE_CXX11
+AM_CXXFLAGS += -std=c++11
+else
+AM_CXXFLAGS += -std=c++0x
+endif
 
 .PHONY: checkprogs
 
