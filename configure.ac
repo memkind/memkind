@@ -107,8 +107,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
 fi
 if test "x${enable_tls}" = "x1" ; then
   AC_DEFINE([MEMKIND_TLS], [ ], [Enables TLS usage for mapping arenas to threads])
-#  CFLAGS="$CFLAGS -DMEMKIND_TLS"
-#  CXXFLAGS="$CXXFLAGS -DMEMKIND_TLS"
 fi
 AC_SUBST([enable_tls])
 
@@ -128,6 +126,22 @@ if test "x$enable_debug" = "x1" ; then
   CXXFLAGS="$CXXFLAGS -O0 -g"
 fi
 AC_SUBST([enable_debug])
+
+AC_ARG_ENABLE([cxx11],
+  [AS_HELP_STRING([--enable-cxx11], [Enable tests and examples that use C++11 features])],
+[if test "x$enable_cxx11" = "xno" ; then
+  enable_cxx11="0"
+else
+  enable_cxx11="1"
+fi
+],
+[enable_cxx11="0"]
+)
+if test "x$enable_cxx11" = "x1" ; then
+  AC_DEFINE([MEMKIND_CXX11], [ ], [Enables C++11 features in tests and examples])
+fi
+AC_SUBST([enable_cxx11])
+AM_CONDITIONAL([ENABLE_CXX11], [test "x$enable_cxx11" = "x1"])
 
 # Checks for programs.
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
