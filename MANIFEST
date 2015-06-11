@@ -102,6 +102,8 @@ test/memkind_default_tests.cpp
 test/policy_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmtt_tests.cpp
+test/mock-pmtt-2-nodes.hex
+test/mock-pmtt-empty-controller.hex
 jemalloc/.gitignore
 jemalloc/autogen.sh
 jemalloc/bin

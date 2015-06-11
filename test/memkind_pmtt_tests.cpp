@@ -24,7 +24,7 @@
 
 #include "common.h"
 
-int hexDump2Bin(const char*);
+int hex_dump_to_bin(const char*);
 int parse_node_bandwidth(size_t, int*,const char*);
 int run_pmtt_parser(const char*,const int[], size_t);
 
@@ -48,7 +48,7 @@ protected:
 TEST_F(MemkindPmttTest, TC_Memkind_PmttParser_2NodeSystem)
 {
     size_t NUMA_NUM_NODES = 2;
-    const char *mockPmtt = "/tmp/mock-pmtt-2-nodes.bin";
+    const char *mockPmtt = "/tmp/mock-pmtt-2-nodes.hex";
     int rv = 0;
 
     //Known bandwidths from MOCK PMTT table.
@@ -62,7 +62,7 @@ TEST_F(MemkindPmttTest, TC_Memkind_PmttParser_2NodeSystem)
 TEST_F(MemkindPmttTest, TC_Memkind_PmttParser_EmptyController)
 {
     size_t NUMA_NUM_NODES = 2;
-    const char *mockPmtt = "/tmp/mock-pmtt-empty-controller.bin";
+    const char *mockPmtt = "/tmp/mock-pmtt-empty-controller.hex";
     int rv = 0;
 
     //Known bandwidths from MOCK PMTT table.
@@ -82,7 +82,7 @@ int run_pmtt_parser(const char *mockPmtt, const int MEM_CTRLS_BW[],
     char pmtt_parser_exe[256];
     int bandwidth[NUMA_NUM_NODES];
 
-    rv = hexDump2Bin(mockPmtt);
+    rv = hex_dump_to_bin(mockPmtt);
     EXPECT_EQ(0, rv);
 
     if(FILE *file = fopen(pmtt_parser_exe_path, "r")) {
@@ -132,7 +132,7 @@ int parse_node_bandwidth(size_t num_bandwidth, int *bandwidth,
 }
 
 
-int hexDump2Bin(const char *hexDumpFile)
+int hex_dump_to_bin(const char *hexDumpFile)
 {
     char cmd[128];
     int rv = 0;
