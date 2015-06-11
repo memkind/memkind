@@ -10,8 +10,8 @@ VERSION
 ChangeLog
 examples/README
 examples/autohbw_README
-test/mock-pmtt-2-nodes.bin
-test/mock-pmtt-empty-controller.bin
+test/mock-pmtt-2-nodes.hex
+test/mock-pmtt-empty-controller.hex
 jemalloc/.gitignore
 jemalloc/autogen.sh
 jemalloc/bin
