@@ -85,34 +85,40 @@ test_slts_test_SOURCES = test/slts_test.cpp
 check_PROGRAMS += test/hello_memkind \
                   test/hello_memkind_debug \
                   test/hello_hbw \
-                  test/memkind_allocated \
                   test/filter_memkind \
                   test/stream \
                   test/stream_memkind \
                   test/new_kind \
                   test/gb_realloc \
                   # end
+if ENABLE_CXX11
+check_PROGRAMS += test/memkind_allocated
+endif
+
 
 test_hello_memkind_LDADD = libmemkind.la
 test_hello_memkind_debug_LDADD = libmemkind.la
 test_hello_hbw_LDADD = libmemkind.la
-test_memkind_allocated_LDADD = libmemkind.la
 test_filter_memkind_LDADD = libmemkind.la
 test_stream_LDADD = libmemkind.la
 test_stream_memkind_LDADD = libmemkind.la
 test_new_kind_LDADD = libmemkind.la
 test_gb_realloc_LDADD = libmemkind.la
-
+if ENABLE_CXX11
+test_memkind_allocated_LDADD = libmemkind.la
+endif
 
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 test_hello_hbw_SOURCES = examples/hello_hbw_example.c
-test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 test_filter_memkind_SOURCES = examples/filter_example.c
 test_stream_SOURCES = examples/stream_example.c
 test_stream_memkind_SOURCES = examples/stream_example.c
 test_new_kind_SOURCES = examples/new_kind_example.c
 test_gb_realloc_SOURCES = examples/gb_realloc_example.c
+if ENABLE_CXX11
+test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
+endif
 
 test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
 
