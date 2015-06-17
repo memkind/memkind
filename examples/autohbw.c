@@ -99,8 +99,10 @@ void __attribute__ ((constructor)) autohbw_load(void)
 
     // First set the default memory type this library allocates. This can
     // be overridden by env variable
+    // Note: 'memkind_hbw_preferred' will allow falling back to DDR but
+    //       'memkind_hbw will not'
     //
-    int ret = memkind_get_kind_by_name("memkind_hbw", &HBW_Type);
+    int ret = memkind_get_kind_by_name("memkind_hbw_preferred", &HBW_Type);
     assert(!ret && "FATAL: Could not find default memory type\n");
 
     // Read any env variables. This has to be done first because DbgLevel
@@ -120,18 +122,6 @@ void __attribute__ ((constructor)) autohbw_load(void)
         //
         DBG(2) printf("\t-HBW int call succeeded\n");
         memkind_free(0, pp);
-
-        // The following is not really necessary since HBW_POLICY_PREFERRED
-        // is the default. However, we must ensure that the policy is
-        // HBW_POLICY_PREFERRED. This will allow a *page* to be allocated
-        // using DDR when HBW is not available. Note that, although
-        // hbw_malloc/memkind_malloc returns success, it does not guarantee
-        // space is available -- space is actually allocate when pages are
-        // touched, and hence OOM killer can kill the app later, when a
-        // page is touched, if there is no HBW memory AND the policy is
-        // HBW_POLICY_BIND.
-        //
-        hbw_set_policy(HBW_POLICY_PREFERRED);
 
         MemkindInitDone = TRUE;        // enable HBW allocation
 

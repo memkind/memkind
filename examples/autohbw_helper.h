@@ -69,7 +69,7 @@ void disableAutoHBW()
 ////////////////////////////////////////////////////////////////////////////
 // Define the hueristic here.
 ////////////////////////////////////////////////////////////////////////////
-BOOL isAllocInHBW(int size)
+BOOL isAllocInHBW(size_t size)
 {
 
     if (!isAutoHBWEnabled)
@@ -108,7 +108,7 @@ long getLimit(const unsigned long limit, const char lchar)
     //
     if ((limit > 0) && isalpha(lchar)) {
 
-        int mult = 1;              // default multiplier
+        long mult = 1;              // default multiplier
 
         if (toupper(lchar) == 'K') mult = 1024;
         else if (toupper(lchar) == 'M') mult = 1024 * 1024;
