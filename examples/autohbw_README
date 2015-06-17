@@ -15,16 +15,16 @@ There are two libraries installed at the same location as memkind library:
 
 USAGE
 -----
-To use the dynamic library, insert LD_PRELOAD=libautohbw.so before your
-commandline. For instance,
+To use the dynamic library, insert LD_PRELOAD=libautohbw.so and libmekind.so
+before your commandline. For instance,
 
-   LD_PRELOAD=libautohbw.so /bin/ls
+   LD_PRELOAD=libautohbw.so:libmemkind.so /bin/ls
 
 executes Unix ls utility with autohbw library. You can execute the
 above command on the prompt or put it in a shell script. An example of
 the latter approach is given in ./autohbw_test.sh. Make sure that
 LD_LIBRARY_PATH enviornment variable contains the path to libautohbw.so
-before you exeute the above command.
+and libmekind.so before you exeute the above command.
 
 To use the statically linked library, inset -lautohbw -lmemkind -ljemalloc
 on your link line. You will have to provide the library path with -L to
