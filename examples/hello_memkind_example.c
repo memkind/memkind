@@ -44,7 +44,7 @@ int main(int argc, char **argv)
         return errno ? -errno : 1;
     }
     hugetlb_str = (char *)memkind_malloc(MEMKIND_HUGETLB, size);
-    if (default_str == NULL) {
+    if (hugetlb_str == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate hugetlb string\n");
         return errno ? -errno : 1;
