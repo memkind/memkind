@@ -34,16 +34,7 @@
 static int v_lvl;
 static int l_flag;
 
-bool              t_done;
-size_t            duration;
-long unsigned int d_fail;
-long unsigned int d_pass;
-long unsigned int n_fail;
-long unsigned int n_pass;
-long unsigned int n_alloc;
-long unsigned int n_avail;
-
-typedef enum{
+typedef enum test_operations {
   MALLOC,
   CALLOC,
   REALLOC,
@@ -51,289 +42,270 @@ typedef enum{
   GBTLBCALLOC,
   GBTLBREALLOC,
   MEMALIGN
-}testop;
+} test_operations;
 
-typedef struct{
-  testop op;
+typedef struct test_summary {
+    long unsigned int d_fail;
+    long unsigned int d_pass;
+    long unsigned int n_fail;
+    long unsigned int n_pass;
+    long unsigned int n_alloc;
+    long unsigned int n_avail;
+} test_summary;
+
+typedef struct test_type {
+  test_operations op;
   std :: string name;
-  int (*fp)();
-}test_t;
+  int (*fp)(size_t);
+} test_type;
 
-std :: vector<test_t> test_vec;
+std :: vector<test_type> test_vec;
 
-memkind_t randomBufferKind()
+typedef struct thread_args {
+  test_operations op;
+  size_t time;
+  test_summary res;
+} thread_args;
+
+memkind_t random_buffer_kind()
 {
     switch(rand() % 10)
     {
         case 1:
             return MEMKIND_DEFAULT;
         case 2:
-	    return MEMKIND_HUGETLB;
+            return MEMKIND_HUGETLB;
         case 3:
-	    return MEMKIND_HBW;
+            return MEMKIND_HBW;
         case 4:
 	    return MEMKIND_HBW_PREFERRED;
         case 5:
-	    return MEMKIND_HBW_HUGETLB;
+            return MEMKIND_HBW_HUGETLB;
         case 6:
-	    return MEMKIND_HBW_PREFERRED_HUGETLB;
+            return MEMKIND_HBW_PREFERRED_HUGETLB;
         case 7:
-	    return MEMKIND_HBW_GBTLB;
+            return MEMKIND_HBW_GBTLB;
         case 8:
-	    return MEMKIND_HBW_PREFERRED_GBTLB;
+            return MEMKIND_HBW_PREFERRED_GBTLB;
         case 9:
-	    return MEMKIND_GBTLB;
+            return MEMKIND_GBTLB;
     }
     return MEMKIND_DEFAULT;
 }
 
-void waitForDuration()
+const char* get_kind_name(memkind_t kind)
 {
-    struct timeval final;
-    struct timeval current;
-
-    sleep(1);
-    gettimeofday(&current, NULL);
-    final.tv_sec = current.tv_sec + duration;
-    do{
-        gettimeofday(&current, NULL);
-    }while(current.tv_sec < final.tv_sec);
-    t_done = true;
-}
-
-const char* getKindName(memkind_t kind)
-{
-    if(kind == MEMKIND_DEFAULT)
+    if (kind == MEMKIND_DEFAULT)
         return "memkind_default";
-    if(kind == MEMKIND_HUGETLB)
+    if (kind == MEMKIND_HUGETLB)
         return "memkind_hugetlb";
-    if(kind == MEMKIND_HBW)
+    if (kind == MEMKIND_HBW)
         return "memkind_hbw";
-    if(kind == MEMKIND_HBW_PREFERRED)
+    if (kind == MEMKIND_HBW_PREFERRED)
         return "memkind_hbw_preferred";
-    if(kind == MEMKIND_HBW_HUGETLB)
+    if (kind == MEMKIND_HBW_HUGETLB)
         return "memkind_hbw_hugetlb";
-    if(kind == MEMKIND_HBW_PREFERRED_HUGETLB)
+    if (kind == MEMKIND_HBW_PREFERRED_HUGETLB)
         return "memkind_hbw_preferred_hugetlb";
-    if(kind == MEMKIND_HBW_GBTLB)
+    if (kind == MEMKIND_HBW_GBTLB)
         return "memkind_hbw_gbtlb";
-    if(kind == MEMKIND_HBW_PREFERRED_GBTLB)
+    if (kind == MEMKIND_HBW_PREFERRED_GBTLB)
         return "memkind_hbw_preferred_gbtlb";
-    if(kind == MEMKIND_GBTLB)
+    if (kind == MEMKIND_GBTLB)
         return "memkind_gbtlb";
 
   return "Not defined";
 }
 
-size_t randomBufferSize(memkind_t kind)
+size_t random_buffer_size(memkind_t kind)
 {
     size_t free;
     size_t total;
 
-    if(memkind_check_available(kind) == 0)
+    if (memkind_check_available(kind) == 0)
     {
         memkind_get_size(kind, &total, &free);
         if (kind == MEMKIND_GBTLB ||
             kind == MEMKIND_HBW_GBTLB ||
-	    kind == MEMKIND_HBW_PREFERRED_GBTLB)
+            kind == MEMKIND_HBW_PREFERRED_GBTLB)
         {
             if (free < GB) return (size_t)-1;
-	    return (size_t)(((rand() % free) % ((free - GB) + 1)) + GB);
+            return (size_t)(((rand() % free) % ((free - GB) + 1)) + GB);
         }else{
-	  if (free > 0) return (size_t)(rand() % free);
+            if (free > 0) return (size_t)(rand() % free);
         }
     }
     return -1; /* Not available memory for this kind */
 }
 
-int dataCheck(void *ptr, size_t size)
+int data_check(void *ptr, size_t size)
 {
     size_t i = 0;
     char  *p = (char*)ptr;
 
-    memset(p, 1, size);
+    memset(p, 0x0A, size);
     for(i = 0; i < size; i++)
-    {
-        if (p[i] != 1) return -1;
-    }
+      if (p[i] != 0x0A) return -1;
 
     return 0;
 }
 
-void *mem_allocations(void* arg)
+void *mem_allocations(void* t_args)
 {
-    void       *p   = NULL;
-    size_t     size = 0;
-    static int op   = (intptr_t)(arg);
-    memkind_t  kind = MEMKIND_DEFAULT;
+    void *p = NULL;
+    size_t size = 0;
+    thread_args *args = (thread_args*)t_args;
+    memkind_t kind = MEMKIND_DEFAULT;
+    struct timeval final, current;
 
-    while(!t_done)
-    {
-        kind = randomBufferKind();
-	size = randomBufferSize(kind);
-	if(size == (size_t)-1)
-	{
-	    n_avail++;
-	    if (v_lvl == 2)
-	        fprintf(stderr, "No memmory available %zd for %s\n",
-		        size, getKindName(kind));
-	}else{
-            n_alloc++;
-            switch(op)
-	    {
+    gettimeofday(&current, NULL);
+    final.tv_sec = current.tv_sec + args->time;
+    do {
+        kind = random_buffer_kind();
+        size = random_buffer_size(kind);
+        if (size == (size_t)(-1))
+        {
+            args->res.n_avail++;
+            if (v_lvl == 2)
+                fprintf(stderr, "No memmory available %zd for %s\n",
+                        size, get_kind_name(kind));
+        } else {
+            args->res.n_alloc++;
+            switch (args->op)
+            {
                 case MALLOC:
-	            p = memkind_malloc(kind, size);
-		    break;
-	        case CALLOC:
-		    p = memkind_calloc(kind, 1, size);
-		    break;
+                    p = memkind_malloc(kind, size);
+                    break;
+                case CALLOC:
+                    p = memkind_calloc(kind, 1, size);
+                    break;
                 case REALLOC:
-	            p = memkind_malloc(kind, size);
-		    p = memkind_realloc(kind, p, randomBufferSize(kind));
-		    break;
-	        case GBTLBMALLOC:
-		    p = memkind_gbtlb_malloc(kind,size);
-		    break;
-	        case GBTLBCALLOC:
-		    p = memkind_gbtlb_calloc(kind, 1, size);
-		    break;
-	        case GBTLBREALLOC:
-		    p = memkind_gbtlb_malloc(kind,size);
-		    p = memkind_gbtlb_realloc(kind, p, randomBufferSize(kind));
-		    break;
-	        case MEMALIGN:
-		    memkind_posix_memalign(kind, &p, 1024, size);
-		    break;
-	    }
-	    if (p == NULL){
-                n_fail++;
-	        if (v_lvl == 1) fprintf(stdout,"Alloc: %zd of %s: Failed\n",
-					size, getKindName(kind));
-	    }else{
-	        n_pass++;
-	        if (v_lvl == 1) fprintf(stdout,"Alloc: %zd of %s: Passed - DataCheck: ",
-					size, getKindName(kind));
+                    p = memkind_malloc(kind, size);
+                    p = memkind_realloc(kind, p, random_buffer_size(kind));
+                    break;
+                case GBTLBMALLOC:
+                    p = memkind_gbtlb_malloc(kind,size);
+                    break;
+                case GBTLBCALLOC:
+                    p = memkind_gbtlb_calloc(kind, 1, size);
+                    break;
+                case GBTLBREALLOC:
+                    p = memkind_gbtlb_malloc(kind,size);
+                    p = memkind_gbtlb_realloc(kind, p, random_buffer_size(kind));
+                    break;
+                case MEMALIGN:
+                    memkind_posix_memalign(kind, &p, 1024, size);
+                    break;
+            }
+            if (p == NULL)
+            {
+                args->res.n_fail++;
+                if (v_lvl == 1) fprintf(stdout,"Alloc: %zd of %s: Failed\n",
+                                        size, get_kind_name(kind));
+            } else {
+	        args->res.n_pass++;
+                if (v_lvl == 1) fprintf(stdout,"Alloc: %zd of %s: Passed - DataCheck: ",
+                                        size, get_kind_name(kind));
 
-		if (dataCheck(p, size) == 0){
-                    d_pass++;
-	            if (v_lvl == 1) fprintf(stdout,"Passed\n");
-		}else{
-		    d_fail++;
-		    if (v_lvl == 1) fprintf(stdout,"Failed\n");
-		}
-		switch(op)
-	        {
-	            case GBTLBMALLOC:
-	            case GBTLBCALLOC:
+                if (data_check(p, size) == 0){
+                    args->res.d_pass++;
+                    if (v_lvl == 1) fprintf(stdout,"Passed\n");
+                } else {
+                    args->res.d_fail++;
+                    if (v_lvl == 1) fprintf(stdout,"Failed\n");
+                }
+                switch (args->op)
+                {
+                    case GBTLBMALLOC:
+                    case GBTLBCALLOC:
                     case GBTLBREALLOC:
-	                memkind_gbtlb_free(kind, p);
-			break;
+                        memkind_gbtlb_free(kind, p);
+                        break;
                     default:
-		        memkind_free(kind, p);
-			break;
-		}
-	    }
-	}
-    }
-
+                        memkind_free(kind, p);
+                        break;
+                }
+            }
+        }
+        gettimeofday(&current, NULL);
+    } while(current.tv_sec < final.tv_sec);
     return 0;
 }
 
-void init_t()
+void print_results(std::string name, test_summary test_results)
 {
-   t_done  = false;
-   n_fail  = 0;
-   n_pass  = 0;
-   d_fail  = 0;
-   d_pass  = 0;
-   n_alloc = 0;
-   n_avail = 0;
-}
+  test_summary res = test_results;
 
-void printResults(std::string name)
-{
   printf("************** Execution Summary *********************\n");
   printf("API exercised             : %s\n", name.c_str());
-  printf("Allocation failures       : %ld\n", n_fail);
-  printf("Allocation passes         : %ld\n", n_pass);
-  printf("Data check failures       : %ld\n", d_fail);
-  printf("Data check passes         : %ld\n", d_pass);
-  printf("Memory not available      : %ld\n", n_avail);
-  printf("Total of alloc trial      : %ld\n", n_alloc);
+  printf("Allocation failures       : %ld\n", res.n_fail);
+  printf("Allocation passes         : %ld\n", res.n_pass);
+  printf("Data check failures       : %ld\n", res.d_fail);
+  printf("Data check passes         : %ld\n", res.d_pass);
+  printf("Memory not available      : %ld\n", res.n_avail);
+  printf("Total of alloc trial      : %ld\n", res.n_alloc);
   printf("*****************************************************\n");
 }
 
-int TestMalloc()
+void test(test_operations op, size_t duration, std::string name)
 {
-    pthread_t t;
-    init_t();
-    pthread_create(&t, NULL, mem_allocations, (void*)MALLOC);
-    waitForDuration();
-    printResults("memkind_malloc()");
+  pthread_t t;
+  thread_args args;
+  test_summary results;
+
+  args.op = op;
+  args.time = duration;
+  args.res = results;
+
+  pthread_create(&t, NULL, mem_allocations, (void*)&args);
+  pthread_join(t, NULL);
+  print_results(name, args.res);
+}
+
+int test_malloc(size_t duration)
+{
+    test(MALLOC, duration, "memkind_malloc()");
     return 0;
 }
-int TestCalloc()
+int test_calloc(size_t duration)
 {
-    pthread_t t;
-    init_t();
-    pthread_create(&t, NULL, mem_allocations, (void*)CALLOC);
-    waitForDuration();
-    printResults("memkind_calloc()");
+    test(CALLOC, duration, "memkind_calloc()");
     return 0;
 }
-int TestRealloc()
+int test_realloc(size_t duration)
 {
-    pthread_t t;
-    init_t();
-    pthread_create(&t,NULL,mem_allocations,(void*)REALLOC);
-    waitForDuration();
-    printResults("memkind_realloc()");
+    test(REALLOC, duration, "memkind_realloc()");
     return 0;
 }
 
-int TestGBTLBMalloc()
+int test_gbtlb_malloc(size_t duration)
 {
-    pthread_t t;
-    init_t();
-    pthread_create(&t,NULL,mem_allocations,(void*)GBTLBMALLOC);
-    waitForDuration();
-    printResults("memkind_gbtlb_malloc()");
+    test(GBTLBMALLOC, duration, "memkind_gbtlb_malloc()");
     return 0;
 }
 
-int TestGBTLBCalloc()
+int test_gbtlb_calloc(size_t duration)
 {
-    pthread_t t;
-    init_t();
-    pthread_create(&t,NULL,mem_allocations,(void*)GBTLBCALLOC);
-    waitForDuration();
-    printResults("memkind_gbtlb_calloc()");
+    test(GBTLBCALLOC, duration, "memkind_gbtlb_calloc()");
     return 0;
 }
 
-int TestGBTLBRealloc()
+int test_gbtlb_realloc(size_t duration)
 {
-    pthread_t t;
-    init_t();
-    pthread_create(&t,NULL,mem_allocations,(void*)GBTLBREALLOC);
-    waitForDuration();
-    printResults("memkind_gbtlb_realloc()");
+    test(GBTLBREALLOC, duration, "memkind_gbtlb_realloc()");
     return 0;
 }
 
-int TestPosixMemAlign()
+int test_posix_memalign(size_t duration)
 {
-    pthread_t t;
-    init_t();
-    pthread_create(&t,NULL,mem_allocations,(void*)MEMALIGN);
-    waitForDuration();
-    printResults("memkind_posix_memalign()");
+    test(MEMALIGN, duration, "memkind_posix_memalign()");
     return 0;
 }
 
-test_t create_test(testop op, std::string name,  int (*fp)())
+test_type create_test(test_operations op, std::string name,  int (*fp)(size_t))
 {
-  test_t t;
+  test_type t;
+
   t.op = op;
   t.name = name;
   t.fp = fp;
@@ -343,52 +315,36 @@ test_t create_test(testop op, std::string name,  int (*fp)())
 
 void init()
 {
-    /* Default test duration = 1 minute */
-    duration = 60 * 1;
-
+    srand(time(NULL));
     test_vec.clear();
     test_vec.push_back(create_test(MALLOC,
-	                           "TC_Memkind_Malloc_slts",
-		                   &TestMalloc));
+                                   "TC_Memkind_Malloc_slts",
+                                   &test_malloc));
     test_vec.push_back(create_test(CALLOC,
                                    "TC_Memkind_Calloc_slts",
-			           &TestCalloc));
+                                   &test_calloc));
     test_vec.push_back(create_test(REALLOC,
                                    "TC_Memkind_Realloc_slts",
-			           &TestRealloc));
+                                   &test_realloc));
     test_vec.push_back(create_test(GBTLBMALLOC,
                                    "TC_Memkind_GBTLB_Malloc_slts",
-			           &TestGBTLBMalloc));
+                                   &test_gbtlb_malloc));
     test_vec.push_back(create_test(GBTLBCALLOC,
                                    "TC_Memkind_GBTLB_Calloc_slts",
-			           &TestGBTLBCalloc));
+                                   &test_gbtlb_calloc));
     test_vec.push_back(create_test(GBTLBREALLOC,
-				   "TC_Memkind_GBTLB_Realloc_slts",
-				   &TestGBTLBRealloc));
+                                   "TC_Memkind_GBTLB_Realloc_slts",
+                                   &test_gbtlb_realloc));
     test_vec.push_back(create_test(MEMALIGN,
-				   "TC_Memkind_Posix_MemAlign_slts",
-				   &TestPosixMemAlign));
+                                   "TC_Memkind_Posix_MemAlign_slts",
+                                   &test_posix_memalign));
 }
 
-int runAll()
+void print_list()
 {
-   int i;
+   size_t i;
 
-   for (i = 0; i < (int)test_vec.size(); i++)
-   {
-     fprintf(stdout, "Test in progress...\n");
-     test_vec[i].fp();
-   }
-
-   return 0;
-}
-
-void PrintList()
-{
-   int i;
-   int n_test = test_vec.size();
-
-   for (i = 0; i < n_test; i++)
+   for (i = 0; i < test_vec.size(); i++)
    {
        fprintf(stdout,"%s\n",test_vec[i].name.c_str());
    }
@@ -396,17 +352,29 @@ void PrintList()
     exit(0);
 }
 
-int runSingle(std::string test)
+int run_all(size_t duration)
 {
-   int i;
-   int n_test = test_vec.size();
+   size_t i;
 
-   for (i = 0; i < n_test; i++)
+   for (i = 0; i < test_vec.size(); i++)
+   {
+     fprintf(stdout, "Test in progress...\n");
+     test_vec[i].fp(duration);
+   }
+
+   return 0;
+}
+
+int run_single(std::string test, size_t duration)
+{
+   size_t i;
+
+   for (i = 0; i < test_vec.size(); i++)
    {
        if (test_vec[i].name == test)
        {
            fprintf(stdout,"Test in progress...\n");
-           test_vec[i].fp();
+           test_vec[i].fp(duration);
        }
    }
 
@@ -430,6 +398,7 @@ int main(int argc, char **argv)
 {
     int c;
     std::string test_name;
+    size_t duration = 60 * 1; // Default to 1 minute
 
     init();
     while (1)
@@ -438,50 +407,50 @@ int main(int argc, char **argv)
         {
             /* These options set a flag. */
 	    {"list",       no_argument,       &l_flag,  1 },
-	    {"verbose",    required_argument, 0,       'v'},
-	    {"filter",     required_argument, 0,       'f'},
-	    {"duration",   required_argument, 0,       'd'},
-	    {"help",       required_argument, 0,       'h'},
-	    {0,            0,                 0,        0 }
-	};
+            {"verbose",    required_argument, 0,       'v'},
+            {"filter",     required_argument, 0,       'f'},
+            {"duration",   required_argument, 0,       'd'},
+            {"help",       no_argument,       0,       'h'},
+            {0,            0,                 0,        0 }
+         };
 
-	/* getopt_long stores the option index here. */
-	int option_index = 0;
-	c = getopt_long (argc, argv, "f:d:h:v:",
-			 long_options, &option_index);
+        /* getopt_long stores the option index here. */
+        int option_index = 0;
+        c = getopt_long (argc, argv, "f:d:h:v:",
+                         long_options, &option_index);
 
-	/* Detect the end of the options. */
-	if (c == -1)
-	    break;
+        /* Detect the end of the options. */
+        if (c == -1)
+            break;
 
-	/* Print list of test cases */
-	if (l_flag) PrintList();
+        /* Print list of test cases */
+        if (l_flag) print_list();
 
-	switch (c)
-	{
+        switch (c)
+        {
             case 'f':
-		test_name = optarg;
-		break;
+                test_name = optarg;
+                break;
             case 'd':
-	        duration = 60 * strtol(optarg, NULL, 10);
-		break;
+                duration = 60 * strtol(optarg, NULL, 10);
+                break;
             case 'v':
-	        v_lvl = strtol(optarg, NULL, 10);
-		break;
+                v_lvl = strtol(optarg, NULL, 10);
+                break;
             case 'h':
                usage();
-	       break;
+               break;
             case '?':
-	       fprintf(stderr,"missing argument\n");
+               fprintf(stderr,"missing argument\n");
                usage();
                break;
-	}
+        }
     }
 
     if (!test_name.empty())
-        runSingle(test_name);
+        run_single(test_name, duration);
     else
-        runAll();
+        run_all(duration);
 
     return 0;
 }
