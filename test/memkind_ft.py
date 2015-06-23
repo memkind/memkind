@@ -96,7 +96,7 @@ def run(cmd, wait_time_in_seconds=None, ignore_error=True):
             # Kill process if wait time exceeded
             if wait_time_in_seconds <= 0 and p.poll() is None:
                 if platform.system().startswith("Linux"):
-                    cmd = "sudo kill %d" % p.pid
+                    cmd = "kill %d" % p.pid
                 else:
                     cmd = "taskkill.exe /PID %d /T /F" % p.pid
                 pk = subprocess.Popen(cmd, stdout=subprocess.PIPE,

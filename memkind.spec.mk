@@ -135,11 +135,11 @@ $(make_prefix)%{__make} checkprogs $(make_postfix)
 %install
 %{__make} DESTDIR=%{buildroot} install
 %{__install} -d %{buildroot}/%{_initddir}
-%{__install} -d %{buildroot}$(destdir)
+%{__install} -d %{buildroot}$(memkind_test_dir)
 %{__install} init.d/memkind %{buildroot}/%{_initddir}/memkind
 %{__install} -d %{buildroot}/%{statedir}
 touch %{buildroot}/%{statedir}/node-bandwidth
-%{__install} test/.libs/* test/*.sh test/*.txt test/*.ts test/memkind_ft.py %{buildroot}$(destdir)
+%{__install} test/.libs/* test/*.sh test/*.txt test/*.ts test/memkind_ft.py %{buildroot}$(memkind_test_dir)
 rm -f %{buildroot}/%{_libdir}/libmemkind.a
 rm -f %{buildroot}/%{_libdir}/libmemkind.la
 rm -f %{buildroot}/%{_libdir}/libnumakind.*
@@ -214,27 +214,27 @@ $(extra_files)
 
 %files tests
 %defattr(-,root,root,-)
-$(destdir)/all_tests
-$(destdir)/environerr_test
-$(destdir)/mallctlerr_test
-$(destdir)/mallocerr_test
-$(destdir)/memkind-pmtt
-$(destdir)/pmtterr_test
-$(destdir)/schedcpu_test
-$(destdir)/tieddisterr_test
-$(destdir)/filter_memkind
-$(destdir)/gb_realloc
-$(destdir)/hello_hbw
-$(destdir)/hello_memkind
-$(destdir)/hello_memkind_debug
-$(destdir)/new_kind
-$(destdir)/stream
-$(destdir)/stream_memkind
-$(destdir)/memkind_allocated
-$(destdir)/*.ts
-$(destdir)/*.txt
-$(destdir)/*.sh
-$(destdir)/memkind_ft.py*
+$(memkind_test_dir)/all_tests
+$(memkind_test_dir)/environerr_test
+$(memkind_test_dir)/mallctlerr_test
+$(memkind_test_dir)/mallocerr_test
+$(memkind_test_dir)/memkind-pmtt
+$(memkind_test_dir)/pmtterr_test
+$(memkind_test_dir)/schedcpu_test
+$(memkind_test_dir)/tieddisterr_test
+$(memkind_test_dir)/filter_memkind
+$(memkind_test_dir)/gb_realloc
+$(memkind_test_dir)/hello_hbw
+$(memkind_test_dir)/hello_memkind
+$(memkind_test_dir)/hello_memkind_debug
+$(memkind_test_dir)/new_kind
+$(memkind_test_dir)/stream
+$(memkind_test_dir)/stream_memkind
+$(memkind_test_dir)/memkind_allocated
+$(memkind_test_dir)/*.ts
+$(memkind_test_dir)/*.txt
+$(memkind_test_dir)/*.sh
+$(memkind_test_dir)/memkind_ft.py*
 
 %changelog
 endef
