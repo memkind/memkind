@@ -78,7 +78,7 @@ memkind_t random_buffer_kind()
         case 3:
             return MEMKIND_HBW;
         case 4:
-	    return MEMKIND_HBW_PREFERRED;
+            return MEMKIND_HBW_PREFERRED;
         case 5:
             return MEMKIND_HBW_HUGETLB;
         case 6:
@@ -203,7 +203,7 @@ void *mem_allocations(void* t_args)
                 if (v_lvl == 1) fprintf(stdout,"Alloc: %zd of %s: Failed\n",
                                         size, get_kind_name(kind));
             } else {
-	        args->res.n_pass++;
+                args->res.n_pass++;
                 if (v_lvl == 1) fprintf(stdout,"Alloc: %zd of %s: Passed - DataCheck: ",
                                         size, get_kind_name(kind));
 
@@ -406,7 +406,7 @@ int main(int argc, char **argv)
         static struct option long_options[] =
         {
             /* These options set a flag. */
-	    {"list",       no_argument,       &l_flag,  1 },
+            {"list",       no_argument,       &l_flag,  1 },
             {"verbose",    required_argument, 0,       'v'},
             {"filter",     required_argument, 0,       'f'},
             {"duration",   required_argument, 0,       'd'},
