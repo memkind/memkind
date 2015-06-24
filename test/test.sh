@@ -39,8 +39,6 @@ unset MEMKIND_HBW_NODES
 #    exit -1
 #fi
 
-if [ $err -eq 0 ]; then err=$ret; fi
-
 if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
     export MEMKIND_HBW_NODES=1
     test_prefix='numactl --membind=0'
