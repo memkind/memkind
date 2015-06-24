@@ -37,10 +37,7 @@ protected:
     void TearDown()
     {}
 
-
 };
-
-
 
 TEST_F(MemkindDefaultTests, DefaultCalloc)
 {
@@ -52,12 +49,10 @@ TEST_F(MemkindDefaultTests, DefaultCalloc)
     EXPECT_TRUE(NULL != default_str);
 
     sprintf(default_str, "memkind_calloc MEMKIND_DEFAULT\n");
-    fprintf(stdout, "%s", default_str);
+    printf("%s", default_str);
 
     memkind_free(MEMKIND_DEFAULT, default_str);
-
 }
-
 
 TEST_F(MemkindDefaultTests, DefaultGetSize)
 {
@@ -76,9 +71,7 @@ TEST_F(MemkindDefaultTests, DefaultGetSize)
     EXPECT_EQ(0,err);
 
     memkind_free(MEMKIND_DEFAULT, default_str);
-
 }
-
 
 TEST_F(MemkindDefaultTests, DefaultRealloc)
 {
@@ -90,14 +83,13 @@ TEST_F(MemkindDefaultTests, DefaultRealloc)
     EXPECT_TRUE(NULL != default_str);
 
     sprintf(default_str, "memkind_realloc MEMKIND_DEFAULT with size %zu\n", size1);
-    fprintf(stdout, "%s", default_str);
+    printf("%s", default_str);
 
     default_str = (char *)memkind_realloc(MEMKIND_DEFAULT, default_str, size2);
     EXPECT_TRUE(NULL != default_str);
 
     sprintf(default_str, "memkind_realloc MEMKIND_DEFAULT with size %zu\n", size2);
-    fprintf(stdout, "%s", default_str);
+    printf("%s", default_str);
 
     memkind_free(MEMKIND_DEFAULT, default_str);
-
 }
