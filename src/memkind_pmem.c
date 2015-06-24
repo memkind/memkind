@@ -31,6 +31,19 @@
 #include "memkind_arena.h"
 #include "memkind_pmem.h"
 
+const struct memkind_ops MEMKIND_PMEM_OPS = {
+    .create = memkind_pmem_create,
+    .destroy = memkind_pmem_destroy,
+    .malloc = memkind_arena_malloc,
+    .calloc = memkind_arena_calloc,
+    .posix_memalign = memkind_arena_posix_memalign,
+    .realloc = memkind_arena_realloc,
+    .free = memkind_default_free,
+    .mmap = memkind_pmem_mmap,
+    .get_mmap_flags = memkind_pmem_get_mmap_flags,
+    .get_arena = memkind_thread_get_arena,
+    .get_size = memkind_pmem_get_size,
+};
 
 int memkind_pmem_create(struct memkind *kind, const struct memkind_ops *ops,
                         const char *name)

@@ -69,6 +69,7 @@ test_all_tests_SOURCES = test/common.h \
                          test/get_arena_test.cpp \
                          test/memkind_pmtt_tests.cpp \
                          test/multithreaded_policy_tests.cpp \
+                         test/memkind_pmem_tests.cpp \
                          # end
 
 test_schedcpu_test_SOURCES = test/main.cpp test/sched_cpu_test.cpp
@@ -89,6 +90,7 @@ check_PROGRAMS += test/hello_memkind \
                   test/stream_memkind \
                   test/new_kind \
                   test/gb_realloc \
+                  test/pmem \
                   # end
 
 test_hello_memkind_LDADD = libmemkind.la
@@ -100,6 +102,7 @@ test_stream_LDADD = libmemkind.la
 test_stream_memkind_LDADD = libmemkind.la
 test_new_kind_LDADD = libmemkind.la
 test_gb_realloc_LDADD = libmemkind.la
+test_pmem_LDADD = libmemkind.la
 
 
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
@@ -111,6 +114,8 @@ test_stream_SOURCES = examples/stream_example.c
 test_stream_memkind_SOURCES = examples/stream_example.c
 test_new_kind_SOURCES = examples/new_kind_example.c
 test_gb_realloc_SOURCES = examples/gb_realloc_example.c
+test_pmem_SOURCES = examples/pmem_example.c
+
 
 test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
 
