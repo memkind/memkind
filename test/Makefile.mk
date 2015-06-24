@@ -71,6 +71,7 @@ test_all_tests_SOURCES = test/common.h \
                          test/policy_tests.cpp \
                          test/get_arena_test.cpp \
                          test/memkind_pmtt_tests.cpp \
+                         test/memkind_pmem_tests.cpp \
                          test/performance/framework.cpp \
                          test/performance/framework.hpp \
                          test/performance/operations.hpp \
@@ -97,6 +98,7 @@ check_PROGRAMS += test/hello_memkind \
                   test/stream_memkind \
                   test/new_kind \
                   test/gb_realloc \
+                  test/pmem \
                   # end
 if ENABLE_CXX11
 check_PROGRAMS += test/memkind_allocated
@@ -111,9 +113,11 @@ test_stream_LDADD = libmemkind.la
 test_stream_memkind_LDADD = libmemkind.la
 test_new_kind_LDADD = libmemkind.la
 test_gb_realloc_LDADD = libmemkind.la
+test_pmem_LDADD = libmemkind.la
 if ENABLE_CXX11
 test_memkind_allocated_LDADD = libmemkind.la
 endif
+
 
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
@@ -123,6 +127,7 @@ test_stream_SOURCES = examples/stream_example.c
 test_stream_memkind_SOURCES = examples/stream_example.c
 test_new_kind_SOURCES = examples/new_kind_example.c
 test_gb_realloc_SOURCES = examples/gb_realloc_example.c
+test_pmem_SOURCES = examples/pmem_example.c
 if ENABLE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 endif
