@@ -80,6 +80,7 @@ test/memkind_default_tests.cpp
 test/policy_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmtt_tests.cpp
+test/slts_test.cpp
 man/memkind_pmem.3
 src/memkind_pmem.c
 src/memkind_pmem.h
