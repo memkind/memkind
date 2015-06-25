@@ -24,6 +24,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// This code is example usage of C++11 features with custom allocator,
+// support for C++11 is required.
+#if __cplusplus > 199711L
+
 #include <cstdlib>
 #include <new>
 #include <string>
@@ -82,3 +86,9 @@ int main()
 
     return 0;
 }
+#else //If C++11 is not avaiable - do nothing.
+int main()
+{
+    return 0;
+}
+#endif
