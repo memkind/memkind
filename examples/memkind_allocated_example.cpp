@@ -26,12 +26,13 @@
 
 // This code is example usage of C++11 features with custom allocator,
 // support for C++11 is required.
+#include <iostream>
+
 #if __cplusplus > 199711L
 
 #include <cstdlib>
 #include <new>
 #include <string>
-#include <iostream>
 
 #include <memkind.h>
 #include "memkind_allocated.hpp"
@@ -89,6 +90,8 @@ int main()
 #else //If C++11 is not avaiable - do nothing.
 int main()
 {
+    std::cout << "WARNING: because your compiler does not support C++11 standard," << std::endl;
+    std::cout << "this example is only as a dummy placeholder." << std::endl;
     return 0;
 }
 #endif
