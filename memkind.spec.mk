@@ -222,6 +222,7 @@ $(memkind_test_dir)/memkind-pmtt
 $(memkind_test_dir)/pmtterr_test
 $(memkind_test_dir)/schedcpu_test
 $(memkind_test_dir)/tieddisterr_test
+$(memkind_test_dir)/slts_test
 $(memkind_test_dir)/filter_memkind
 $(memkind_test_dir)/gb_realloc
 $(memkind_test_dir)/hello_hbw
