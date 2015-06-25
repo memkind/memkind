@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-<<<<<<< HEAD
 #
 #  Copyright (C) 2014, 2015 Intel Corporation.
 #  All rights reserved.
