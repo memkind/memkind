@@ -83,6 +83,7 @@ test/memkind_pmtt_tests.cpp
 test/multithreaded_policy_tests.cpp
 test/slts_test.cpp
 test/memkind_ft.py
+test/memkind_ft.py
 man/memkind_pmem.3
 src/memkind_pmem.c
 src/memkind_pmem.h

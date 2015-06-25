@@ -17,7 +17,6 @@ rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
 gtest_archive = /opt/mpss_toolchains/googletest/1.7.0/gtest-1.7.0.zip
 memkind_test_dir = $(MPSS_TEST_BASEDIR)/memkind-dt
 
-
 all: $(rpm)
 
 $(rpm): $(specfile) $(source_tar)
