@@ -106,6 +106,8 @@ test/multithreaded_policy_tests.cpp
 test/slts_test.cpp
 test/mock-pmtt-2-nodes.hex
 test/mock-pmtt-empty-controller.hex
+test/memkind-dt.ts
+test/memkind_ft.py
 jemalloc/.gitignore
 jemalloc/autogen.sh
 jemalloc/bin

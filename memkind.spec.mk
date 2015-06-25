@@ -104,6 +104,13 @@ other memkind interfaces the user can control and extend memory
 partition features and allocate memory while selecting enabled
 features.  The devel package installs header files.
 
+%package tests
+Summary: Extention to libnuma for kinds of memory - validation
+Group: Validation/Libraries
+
+%description tests
+memkind functional tests
+
 %build
 test -f configure || ./autogen.sh
 
@@ -122,14 +129,17 @@ popd
 ./configure --enable-tls --prefix=%{_prefix} --libdir=%{_libdir} \
     --includedir=%{_includedir} --sbindir=%{_sbindir} \
     --mandir=%{_mandir} --docdir=%{docdir}
-$(make_prefix)%{__make} $(make_postfix)
+$(make_prefix)%{__make} libgtest.a $(make_postfix)
+$(make_prefix)%{__make} checkprogs $(make_postfix)
 
 %install
 %{__make} DESTDIR=%{buildroot} install
 %{__install} -d %{buildroot}/%{_initddir}
+%{__install} -d %{buildroot}$(memkind_test_dir)
 %{__install} init.d/memkind %{buildroot}/%{_initddir}/memkind
 %{__install} -d %{buildroot}/%{statedir}
 touch %{buildroot}/%{statedir}/node-bandwidth
+%{__install} test/.libs/* test/*.sh test/*.hex test/*.ts test/memkind_ft.py %{buildroot}$(memkind_test_dir)
 rm -f %{buildroot}/%{_libdir}/libmemkind.a
 rm -f %{buildroot}/%{_libdir}/libmemkind.la
 rm -f %{buildroot}/%{_libdir}/libnumakind.*
@@ -201,6 +211,30 @@ fi
 %doc %{_mandir}/man3/memkind_hugetlb.3.gz
 %doc %{_mandir}/man3/memkind_pmem.3.gz
 $(extra_files)
+
+%files tests
+%defattr(-,root,root,-)
+$(memkind_test_dir)/all_tests
+$(memkind_test_dir)/environerr_test
+$(memkind_test_dir)/mallctlerr_test
+$(memkind_test_dir)/mallocerr_test
+$(memkind_test_dir)/memkind-pmtt
+$(memkind_test_dir)/pmtterr_test
+$(memkind_test_dir)/schedcpu_test
+$(memkind_test_dir)/tieddisterr_test
+$(memkind_test_dir)/filter_memkind
+$(memkind_test_dir)/gb_realloc
+$(memkind_test_dir)/hello_hbw
+$(memkind_test_dir)/hello_memkind
+$(memkind_test_dir)/hello_memkind_debug
+$(memkind_test_dir)/new_kind
+$(memkind_test_dir)/stream
+$(memkind_test_dir)/stream_memkind
+$(memkind_test_dir)/memkind_allocated
+$(memkind_test_dir)/*.ts
+$(memkind_test_dir)/*.txt
+$(memkind_test_dir)/*.sh
+$(memkind_test_dir)/memkind_ft.py*
 
 %changelog
 endef
