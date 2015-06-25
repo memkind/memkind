@@ -232,7 +232,7 @@ $(memkind_test_dir)/stream
 $(memkind_test_dir)/stream_memkind
 $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/*.ts
-$(memkind_test_dir)/*.txt
+$(memkind_test_dir)/*.hex
 $(memkind_test_dir)/*.sh
 $(memkind_test_dir)/memkind_ft.py*
 
