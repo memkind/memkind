@@ -79,7 +79,6 @@
 /test/stream_memkind
 /test/eratosthenes
 /test/memkind-pmtt
-/test/pmem
 /examples/libnumakind.la
 /examples/numakind.lo
 /examples/numakind.o

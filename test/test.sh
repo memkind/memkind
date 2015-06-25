@@ -120,11 +120,6 @@ ret=$?
 if [ $ret -ne 0 ]; then echo "FAIL: new_kind" 1>&2; fi
 if [ $err -eq 0 ]; then err=$ret; fi
 
-$basedir/pmem
-ret=$?
-if [ $ret -ne 0 ]; then echo "FAIL: pmem" 1>&2; fi
-if [ $err -eq 0 ]; then err=$ret; fi
-
 $basedir/stream
 ret=$?
 if [ $ret -ne 0 ]; then echo "FAIL: stream" 1>&2; fi
