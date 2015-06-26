@@ -80,7 +80,6 @@ test/memkind_default_tests.cpp
 test/policy_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmtt_tests.cpp
-test/multithreaded_policy_tests.cpp
 test/slts_test.cpp
 test/memkind_ft.py
 test/memkind_ft.py
