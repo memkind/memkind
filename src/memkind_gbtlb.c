@@ -371,7 +371,12 @@ static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)
     int flags;
 
     *result = NULL;
-    err = kind->ops->get_mmap_flags(kind, &flags);
+    if (kind->ops->get_mmap_flags == NULL) {
+        err = MEMKIND_ERROR_BADOPS;
+    }
+    if (!err) {
+        err = kind->ops->get_mmap_flags(kind, &flags);
+    }
     if (!err) {
         *result = mmap(NULL, size, PROT_READ | PROT_WRITE,
                        MAP_PRIVATE | MAP_ANONYMOUS | flags,

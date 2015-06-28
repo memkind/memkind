@@ -162,7 +162,13 @@ int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size)
     int err = 0;
     int mode;
 
-    err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
+    if (kind->ops->get_mbind_nodemask == NULL ||
+        kind->ops->get_mbind_mode == NULL) {
+        err = MEMKIND_ERROR_BADOPS;
+    }
+    if (!err) {
+        err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
+    }
     if (!err) {
         err = kind->ops->get_mbind_mode(kind, &mode);
     }
