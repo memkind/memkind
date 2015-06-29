@@ -156,7 +156,8 @@ void *mem_allocations(void* t_args)
     size_t size = 0;
     thread_args *args = (thread_args*)t_args;
     memkind_t kind = MEMKIND_DEFAULT;
-    struct timeval final, current;
+    struct timeval current;
+    struct timeval final;
 
     gettimeofday(&current, NULL);
     final.tv_sec = current.tv_sec + args->time;
