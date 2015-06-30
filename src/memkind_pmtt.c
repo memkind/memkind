@@ -181,7 +181,10 @@ static int parse_pmtt_one_memory_controller(int num_bandwidth, int *bandwidth,
         for (i = 0; i < buf->memctlr.DomainCount; i++) {
             j = buf->domain[i].ProximityDomain;
             if (j < num_bandwidth) {
-                bandwidth[j] = buf->memctlr.ReadBandwidth;
+                /* Skip empty controllers (with ReadBandwidth == 0) */
+                if (buf->memctlr.ReadBandwidth > 0) {
+                    bandwidth[j] = buf->memctlr.ReadBandwidth;
+                }
             }
             else {
                 err = MEMKIND_ERROR_PMTT;
