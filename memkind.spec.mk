@@ -127,7 +127,7 @@ popd
 popd
 
 ./configure --enable-tls --prefix=%{_prefix} --libdir=%{_libdir} \
-    --includedir=%{_includedir} --sbindir=%{_sbindir} \
+    --includedir=%{_includedir} --sbindir=%{_sbindir} --enable-cxx11 \
     --mandir=%{_mandir} --docdir=%{docdir}
 $(make_prefix)%{__make} libgtest.a $(make_postfix)
 $(make_prefix)%{__make} checkprogs $(make_postfix)
