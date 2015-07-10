@@ -72,6 +72,9 @@ test_all_tests_SOURCES = test/common.h \
                          test/get_arena_test.cpp \
                          test/memkind_pmtt_tests.cpp \
                          test/performance/framework.cpp \
+                         test/performance/framework.hpp \
+                         test/performance/operations.hpp \
+                         test/performance/perf_tests.hpp \
                          test/performance/malloc_perf_tests.cpp \
                          test/performance/jemalloc_perf_tests.cpp \
                          test/performance/memkind_perf_tests.cpp \
