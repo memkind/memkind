@@ -107,6 +107,13 @@ test/mock-pmtt-2-nodes.hex
 test/mock-pmtt-empty-controller.hex
 test/memkind-dt.ts
 test/memkind_ft.py
+test/performance/framework.cpp
+test/performance/framework.hpp
+test/performance/operations.hpp
+test/performance/perf_tests.hpp
+test/performance/malloc_perf_tests.cpp
+test/performance/jemalloc_perf_tests.cpp
+test/performance/memkind_perf_tests.cpp
 jemalloc/.gitignore
 jemalloc/autogen.sh
 jemalloc/bin
