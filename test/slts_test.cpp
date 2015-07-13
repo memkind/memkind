@@ -254,6 +254,13 @@ void test(test_operations op, size_t duration, std::string name)
   thread_args args;
   test_summary results;
 
+  results.d_fail = 0;
+  results.d_pass = 0;
+  results.n_fail = 0;
+  results.n_pass = 0;
+  results.n_alloc = 0;
+  results.n_avail = 0;
+
   args.op = op;
   args.time = duration;
   args.res = results;
