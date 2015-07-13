@@ -262,7 +262,7 @@ AM_CXXFLAGS = -Wall -Werror -msse4.2 -std=c++0x -fopenmp
 
 .PHONY: checkprogs
 
-# build check programs without running tests
+# build check programs without running tests (requires libgtest.a)
 checkprogs: $(check_PROGRAMS)
 
 memkind-$(VERSION).spec:
