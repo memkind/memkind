@@ -252,7 +252,7 @@ void test(test_operations op, size_t duration, std::string name)
 {
   pthread_t t;
   thread_args args;
-  test_summary results;
+  test_summary results = {};
 
   args.op = op;
   args.time = duration;

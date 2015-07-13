@@ -80,6 +80,8 @@
 /test/eratosthenes
 /test/memkind-pmtt
 /test/pmem
+/test/slts_test
+/test/hello_memkind_debug
 /examples/libnumakind.la
 /examples/numakind.lo
 /examples/numakind.o
