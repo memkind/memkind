@@ -48,6 +48,7 @@
 /test/schedcpu_test
 /test/*.so
 /test/tieddisterr_test
+/test/perf/
 /VERSION
 /examples/.deps/
 /examples/.dirstamp
