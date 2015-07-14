@@ -84,14 +84,14 @@ else
 fi
 
 AC_ARG_ENABLE([tls],
-  [AS_HELP_STRING([--disable-tls], [Disable thread-local storage (__thread keyword)])],
-[if test "x$enable_tls" = "xno" ; then
-  enable_tls="0"
-else
+  [AS_HELP_STRING([--enable-tls], [Enable thread-local storage (__thread keyword)])],
+[if test "x$enable_tls" = "xyes" ; then
   enable_tls="1"
+else
+  enable_tls="0"
 fi
 ],
-[enable_tls="1"]
+[enable_tls="0"]
 )
 if test "x${enable_tls}" = "x1" ; then
 AC_MSG_CHECKING([for TLS support])
