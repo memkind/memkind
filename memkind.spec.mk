@@ -236,10 +236,12 @@ ${memkind_test_dir}/pmem
 $(memkind_test_dir)/*.ts
 $(memkind_test_dir)/*.hex
 $(memkind_test_dir)/*.sh
-$(memkind_test_dir)/memkind_ft.py*
+$(memkind_test_dir)/memkind_ft.py
+
+%exclude $(memkind_test_dir)/*.pyo
+%exclude $(memkind_test_dir)/*.pyc
 
 %changelog
 endef
 
 export memkind_spec
-
