@@ -22,14 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <unistd.h>
-#include <string>
 
 #include "common.h"
 
 class MemkindPmttTest: public :: testing::Test
 {
 public:
-    char *mock_pmtt_path;
     char cwd[1024];
     int hex_dump_to_bin(const char*, const char*);
     int parse_node_bandwidth(size_t, int*,const char*);
@@ -96,7 +94,8 @@ int MemkindPmttTest::run_pmtt_parser(char *mock_hex, const int MEM_CTRLS_BW[],
 {
     int rv = 0;
     static const char *MOCK_NBW_PATH = "/tmp/node-bandwidth";
-    char pmtt_parser_exe_path[64] = "/usr/sbin/memkind-pmtt";
+    char pmtt_parser_exe_path[] = "/usr/sbin/memkind-pmtt";
+    char tmp_mock_dir[256] = "/tmp/";
     char pmtt_parser_exe[256];
     int bandwidth[NUMA_NUM_NODES];
     char *mock_aml;
@@ -107,11 +106,10 @@ int MemkindPmttTest::run_pmtt_parser(char *mock_hex, const int MEM_CTRLS_BW[],
     strncpy(tmp_cwd, cwd, sizeof(tmp_cwd));
     mock_pmtt_hex = strncat(tmp_cwd, mock_hex, sizeof(cwd));
     mock_aml = strncat(mock_hex, mock_aml_ext, sizeof(cwd));
-    mock_pmtt_path = strncat(cwd, mock_aml, sizeof(cwd));
+    strncat(tmp_mock_dir, mock_aml, sizeof(cwd));
 
-    rv = hex_dump_to_bin(mock_pmtt_hex, mock_pmtt_path);
+    rv = hex_dump_to_bin(mock_pmtt_hex, tmp_mock_dir);
     EXPECT_EQ(0, rv);
-
     if(FILE *file = fopen(pmtt_parser_exe_path, "r")) {
         fclose(file);
     }
@@ -119,8 +117,8 @@ int MemkindPmttTest::run_pmtt_parser(char *mock_hex, const int MEM_CTRLS_BW[],
         strcpy(pmtt_parser_exe_path,"./memkind-pmtt");
     }
 
-    snprintf(pmtt_parser_exe,sizeof(pmtt_parser_exe),"%s %s %s",
-             pmtt_parser_exe_path, mock_pmtt_path, MOCK_NBW_PATH);
+    snprintf(pmtt_parser_exe, sizeof(pmtt_parser_exe), "%s %s %s",
+             pmtt_parser_exe_path, tmp_mock_dir, MOCK_NBW_PATH);
 
     fprintf(stdout, "Running memkind_pmtt with args: %s\n", pmtt_parser_exe);
     rv = system(pmtt_parser_exe);
@@ -133,7 +131,7 @@ int MemkindPmttTest::run_pmtt_parser(char *mock_hex, const int MEM_CTRLS_BW[],
         EXPECT_EQ(bandwidth[i], MEM_CTRLS_BW[i]);
     }
 
-    remove(mock_pmtt_path);
+    remove(tmp_mock_dir);
     remove(MOCK_NBW_PATH);
 
     return rv;
