@@ -268,7 +268,7 @@ endif
 .PHONY: checkprogs
 
 # build check programs without running tests (requires libgtest.a)
-checkprogs: $(check_PROGRAMS)
+checkprogs: $(check_PROGRAMS) test-mock-so
 
 memkind-$(VERSION).spec:
 	$(MAKE) version="$(VERSION)" -f memkind.spec.mk $@

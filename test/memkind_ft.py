@@ -238,7 +238,12 @@ if __name__ == "__main__":
             if "." in test:
                 test_main = test
             else: #Run test command
-                test_cmd = cmd + " --gtest_filter=" +test_main+test + " --gtest_output=xml:" + xmlt
+                if "SchedGeTest" in test_main:
+                    test_cmd = "LD_PRELOAD="+HOST+"libsched.so ./schedcpu_test" + " --gtest_output=xml:" + xmlt
+                elif "TiedDistTest" in test_main:
+                    test_cmd = "LD_PRELOAD="+HOST+"libnumadist.so ./tieddisterr_test" + " --gtest_output=xml:" + xmlt
+                else:
+                    test_cmd = cmd + " --gtest_filter=" +test_main+test + " --gtest_output=xml:" + xmlt
                 print test_cmd
                 stdout, ret = run(test_cmd,900)
                 print stdout
