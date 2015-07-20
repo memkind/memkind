@@ -139,7 +139,7 @@ $(make_prefix)%{__make} checkprogs $(make_postfix)
 %{__install} init.d/memkind %{buildroot}/%{_initddir}/memkind
 %{__install} -d %{buildroot}/%{statedir}
 touch %{buildroot}/%{statedir}/node-bandwidth
-%{__install} test/.libs/* test/*.sh test/*.hex test/*.ts test/memkind_ft.py %{buildroot}$(memkind_test_dir)
+%{__install} test/.libs/* test/*.sh test/*.hex test/*.ts test/memkind_ft.py test/*.so %{buildroot}$(memkind_test_dir)
 rm -f %{buildroot}/%{_libdir}/libmemkind.a
 rm -f %{buildroot}/%{_libdir}/libmemkind.la
 rm -f %{buildroot}/%{_libdir}/libnumakind.*
@@ -237,6 +237,7 @@ $(memkind_test_dir)/*.ts
 $(memkind_test_dir)/*.hex
 $(memkind_test_dir)/*.sh
 $(memkind_test_dir)/memkind_ft.py
+$(memkind_test_dir)/*.so
 
 %exclude $(memkind_test_dir)/*.pyo
 %exclude $(memkind_test_dir)/*.pyc

@@ -168,6 +168,8 @@ clean-local-gtest:
 	rm -rf libgtest.a $(googletest)
 
 # shared libraries to enable mocks using LD_PRELOAD
+test-mock-so: test/libsched.so test/libnumadist.so test/libmalloc.so test/libmallctl.so test/libfopen.so
+
 test/libsched.so: test/sched_mock.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $^ -o $@
 test/libnumadist.so: test/numadist_mock.c
