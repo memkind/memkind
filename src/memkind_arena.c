@@ -36,7 +36,9 @@
 #include <utmpx.h>
 #include <sched.h>
 #include <smmintrin.h>
+#include <limits.h>
 
+#include "config.h"
 #include "config_tls.h"
 #include "memkind.h"
 #include "memkind_default.h"
@@ -56,6 +58,39 @@ int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, co
     return err;
 }
 
+int memkind_set_arena_map_len(struct memkind *kind)
+{
+    if (kind->ops->get_arena == memkind_bijective_get_arena) {
+        kind->arena_map_len = 1;
+
+    }
+    else if (kind->ops->get_arena == memkind_thread_get_arena) {
+        char *arena_num_env = getenv("MEMKIND_ARENA_NUM_PER_KIND");
+
+        if (arena_num_env) {
+            unsigned long int arena_num_value = strtoul(arena_num_env, NULL, 10);
+
+            if ((arena_num_value == 0) || (arena_num_value > INT_MAX)) {
+                return MEMKIND_ERROR_ENVIRON;
+            }
+
+            kind->arena_map_len = arena_num_value;
+        }
+        else {
+             int calculated_arena_num = numa_num_configured_cpus() * 4;
+
+#if ARENA_LIMIT_PER_KIND > 0
+            kind->arena_map_len = ((ARENA_LIMIT_PER_KIND < calculated_arena_num) ? ARENA_LIMIT_PER_KIND : calculated_arena_num);
+#else
+            kind->arena_map_len = calculated_arena_num;
+#endif
+
+        }
+    }
+
+    return 0;
+}
+
 int memkind_arena_create_map(struct memkind *kind)
 {
     int err = 0;
@@ -63,12 +98,7 @@ int memkind_arena_create_map(struct memkind *kind)
     size_t unsigned_size = sizeof(unsigned int);
 
     if (kind->arena_map_len == 0) {
-        if (kind->ops->get_arena == memkind_bijective_get_arena) {
-            kind->arena_map_len = 1;
-        }
-        else if (kind->ops->get_arena == memkind_thread_get_arena) {
-            kind->arena_map_len = numa_num_configured_cpus() * 4;
-        }
+        err = memkind_set_arena_map_len(kind);
     }
 #ifndef MEMKIND_TLS
     if (kind->ops->get_arena == memkind_thread_get_arena) {

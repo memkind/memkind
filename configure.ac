@@ -110,6 +110,16 @@ if test "x${enable_tls}" = "x1" ; then
 fi
 AC_SUBST([enable_tls])
 
+arena_limit=256;
+AC_ARG_VAR(ARENA_LIMIT,
+  [Upper bound for number of arenas per kind, if set to 0 then no limit]
+)
+if test "$ARENA_LIMIT" != "" ; then
+  arena_limit=$ARENA_LIMIT;
+fi
+
+AC_DEFINE_UNQUOTED([ARENA_LIMIT_PER_KIND], $arena_limit, [Upper bound for number of arenas per kind])
+
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING([--enable-debug], [Build debugging code and compile with -O0 -g])],
 [if test "x$enable_debug" = "xno" ; then
@@ -214,6 +224,7 @@ AC_MSG_RESULT([datarootdir        : ${datarootdir}])
 AC_MSG_RESULT([datadir            : ${datadir}])
 AC_MSG_RESULT([mandir             : ${mandir}])
 AC_MSG_RESULT([])
+AC_MSG_RESULT([arena_limit        : ${arena_limit}])
 AC_MSG_RESULT([debug              : ${enable_debug}])
 AC_MSG_RESULT([tls                : ${enable_tls}])
 AC_MSG_RESULT([===============================================================================])

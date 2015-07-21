@@ -308,6 +308,17 @@ routine
 for parsing, so the syntax described in the
 .BR numa (3)
 man page for this routine applies for example: 1-3,5 is a valid setting.
+.TP
+.B MEMKIND_ARENA_NUM_PER_KIND
+This environment variable allows leveraging internal mechanism of
+the library for setting number of arenas per kind. Value should be
+a positive integer (not greater than INT_MAX defined in limits.h).
+The user should set the value based on the characteristics
+of application that is using the library. Higher value can
+provide better performance in extremely multithreaded applications at
+the cost of memory overhead. See section "IMPLEMENTATION NOTES" of
+.BR jemalloc (3)
+for more details about arenas.
 .SH "COPYRIGHT"
 Copyright (C) 2014, 2015 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
