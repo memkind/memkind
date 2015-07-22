@@ -233,11 +233,18 @@ $(memkind_test_dir)/stream
 $(memkind_test_dir)/stream_memkind
 $(memkind_test_dir)/memkind_allocated
 ${memkind_test_dir}/pmem
-$(memkind_test_dir)/*.ts
-$(memkind_test_dir)/*.hex
-$(memkind_test_dir)/*.sh
+$(memkind_test_dir)/memkind-dt.ts
+$(memkind_test_dir)/mock-pmtt-2-nodes.hex
+$(memkind_test_dir)/mock-pmtt-empty-controller.hex
+$(memkind_test_dir)/check.sh
+$(memkind_test_dir)/test.sh
+$(memkind_test_dir)/test_remote.sh
 $(memkind_test_dir)/memkind_ft.py
-$(memkind_test_dir)/*.so
+$(memkind_test_dir)/libfopen.so
+$(memkind_test_dir)/libmallctl.so
+$(memkind_test_dir)/libmalloc.so
+$(memkind_test_dir)/libnumadist.so
+$(memkind_test_dir)/libsched.so
 
 %exclude $(memkind_test_dir)/*.pyo
 %exclude $(memkind_test_dir)/*.pyc
