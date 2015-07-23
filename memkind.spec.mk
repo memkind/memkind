@@ -126,7 +126,7 @@ $(make_prefix)%{__make} $(make_postfix)
 popd
 popd
 
-./configure --enable-tls --prefix=%{_prefix} --libdir=%{_libdir} \
+./configure --prefix=%{_prefix} --libdir=%{_libdir} \
     --includedir=%{_includedir} --sbindir=%{_sbindir} --enable-cxx11 \
     --mandir=%{_mandir} --docdir=%{docdir}
 $(make_prefix)%{__make} libgtest.a $(make_postfix)
