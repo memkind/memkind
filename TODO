@@ -38,9 +38,6 @@ Features
           int memkind_wait(void *lock);
           int memkind_check(void *lock);
 
-    * Investigate support for overloading the C++ new operator and the
-      C++11 alignas() mark up.
-
     * Extend huge page support using libhugetlbfs.
 
     * Support for non-standard x86 page sizes like 128 MB.
@@ -72,7 +69,7 @@ Issues
       allocations, this will simplify the modifications required to
       enable memkind.
 
-      Two two concerns about merging to head of jemalloc dev branch.
+      Two concerns about merging to head of jemalloc dev branch.
           + Free pool for huge allocations is not shared between
             threads.
           + New jemalloc feature for user defined chunk allocator does
