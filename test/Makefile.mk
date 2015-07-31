@@ -77,6 +77,7 @@ test_all_tests_SOURCES = test/common.h \
                          test/performance/operations.hpp \
                          test/performance/perf_tests.hpp \
                          test/performance/perf_tests.cpp \
+                         test/hbw_allocator_tests.cpp \
                          # end
 
 test_schedcpu_test_SOURCES = test/main.cpp test/sched_cpu_test.cpp
