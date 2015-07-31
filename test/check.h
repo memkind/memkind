@@ -26,6 +26,7 @@
 #define check_include_h
 
 #include <list>
+#include "trial_generator.h"
 
 
 typedef struct {
@@ -41,7 +42,7 @@ using namespace std;
 class Check
 {
 public:
-    Check(const void *p, size_t c_size);
+    Check(const void *p, const trial_t& trial);
     Check(const Check &);
     ~Check();
     int check_node_hbw(size_t num_bandwidth, const int *bandwidth);
@@ -53,10 +54,10 @@ private:
     const void *ptr;
     size_t size;
     void **address;
+    size_t num_address;
     list<smaps_entry_t>smaps_table;
     ifstream ip;
     int smaps_fd;
-    size_t num_address;
     string skip_to_next_entry(ifstream &);
     string skip_to_next_kpage(ifstream &);
     void get_address_range(string &line, unsigned long long *start_addr,

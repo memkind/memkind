@@ -471,7 +471,7 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
             trial_vec[i].memkind != MEMKIND_DEFAULT) {
             ASSERT_TRUE(ptr_vec[i] != NULL);
             memset(ptr_vec[i], 0, trial_vec[i].size);
-            Check check(ptr_vec[i], trial_vec[i].size);
+            Check check(ptr_vec[i], trial_vec[i]);
 	    if (trial_vec[i].test == DATACHECK){
 	        EXPECT_EQ(0, check.check_data(0x0A));
 	    }
