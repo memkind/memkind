@@ -42,35 +42,37 @@
 using namespace std;
 
 
-/*Check every 4K space between the start
+/*Check each page between the start
 and the end address additionally also
 check the end address for pagesize*/
-Check::Check(const void *p, size_t c_size)
+Check::Check(const void *p, const trial_t &trial)
 {
     const size_t min_page_size = 4096;
-    size_t i;
     this->ptr = p;
-    this->size = c_size;
-    if (p && c_size) {
-        num_address = c_size / min_page_size + 1;
-        num_address += c_size % min_page_size ? 1 : 0;
+    this->size = trial.size;
+    size_t page_size = (trial.page_size >= min_page_size ? trial.page_size : min_page_size);
+    if (p && size)
+    {
+        num_address = size / page_size;
+        num_address += size % page_size ? 1 : 0;
 
         address = new void* [num_address];
-        for (i = 0; i < num_address - 1; ++i) {
-            address[i] = (char *)ptr + i * min_page_size;
+        size_t i;
+        for (i = 0; i < num_address - 1; ++i)
+        {
+            address[i] = (char *)ptr + i * page_size;
         }
-        address[i] = (char *)p + c_size - 1;
+        address[i] = (char *)p + size - 1;
     }
-    else {
+    else
+    {
         address = NULL;
     }
 }
 
 Check::~Check()
 {
-    if (address) {
-        delete[] address;
-    }
+     delete[] address;
 }
 
 Check::Check(const Check &other)
@@ -92,7 +94,10 @@ int Check::check_node_hbw(size_t num_bandwidth, const int *bandwidth)
 
     status = new int [num_address];
 
-    move_pages(0, num_address, address, NULL, status, MPOL_MF_MOVE);
+    for (i = 0; i < num_address; i++)
+    {
+        get_mempolicy(&status[i], NULL, 0, address[i], MPOL_F_NODE | MPOL_F_ADDR);
+    }
 
     max_bandwidth = 0;
     for (j = 0; j < num_bandwidth; ++j) {

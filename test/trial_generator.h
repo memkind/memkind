@@ -61,7 +61,7 @@ typedef struct {
     alloc_api_t api;
     size_t size;
     size_t alignment;
-    int page_size;
+    size_t page_size;
     memkind_t memkind;
     int free_index;
     test_t test;
