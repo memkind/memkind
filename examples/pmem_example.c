@@ -140,14 +140,14 @@ main(int argc, char *argv[])
     pmem_str10 = (char *)memkind_malloc(pmem_kind1, size);
     if (pmem_str10 == NULL) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string\n");
+        fprintf(stderr, "Unable to allocate pmem string (pmem_str10)\n");
         return errno ? -errno : 1;
     }
 
     pmem_str20 = (char *)memkind_malloc(pmem_kind2, size);
     if (pmem_str20 == NULL) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string\n");
+        fprintf(stderr, "Unable to allocate pmem string (pmem_str20)\n");
         return errno ? -errno : 1;
     }
 
@@ -155,7 +155,7 @@ main(int argc, char *argv[])
     pmem_str11 = (char *)memkind_malloc(pmem_kind1, 8 * 1024 * 1024);
     if (pmem_str11 == NULL) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string\n");
+        fprintf(stderr, "Unable to allocate pmem string (pmem_str11)\n");
         return errno ? -errno : 1;
     }
 
@@ -163,16 +163,16 @@ main(int argc, char *argv[])
     pmem_str12 = (char *)memkind_malloc(pmem_kind1, 16 * 1024 * 1024);
     if (pmem_str12 == NULL) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string\n");
+        fprintf(stderr, "Unable to allocate pmem string (pmem_str12)\n");
         return errno ? -errno : 1;
     }
 
     /* OOM #1 */
     pmem_str = (char *)memkind_malloc(pmem_kind1, 16 * 1024 * 1024);
-    if (pmem_str == NULL) {
+    if (pmem_str != NULL) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string\n");
-        /* expected - not an error */
+        fprintf(stderr, "Failure, this allocation should not be possible (expected result was NULL)\n");
+        return errno ? -errno : 1;
     }
 
     sprintf(pmem_str10, "Hello world from persistent memory1\n");
