@@ -233,19 +233,3 @@ TEST_F(NegativeTest, GBNullFree)
 {
     memkind_free(MEMKIND_GBTLB,NULL);
 }
-
-TEST_F(NegativeTest, InvalidMallocKind)
-{
-    void *ptr = NULL;
-    ptr = memkind_malloc(MEMKIND_GBTLB, MB);
-    EXPECT_TRUE(ptr == NULL);
-    EXPECT_EQ(errno, EINVAL);
-}
-
-TEST_F(NegativeTest, InvalidGBMallocKind)
-{
-    void *ptr = NULL;
-    ptr = memkind_gbtlb_malloc(MEMKIND_DEFAULT, GB);
-    EXPECT_TRUE(ptr == NULL);
-    EXPECT_EQ(errno, EINVAL);
-}
