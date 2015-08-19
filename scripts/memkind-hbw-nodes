@@ -58,9 +58,12 @@ def hbw_nodes(node_bandwidth_file='/var/run/memkind/node-bandwidth'):
     num_node = len(data)/4
     fmt = '{0}i'.format(num_node)
     node_bw = struct.unpack(fmt, data)
-    max_bw = max(node_bw)
-    hbw_nodes = ','.join([str(ii) for ii in range(len(node_bw))
-                          if node_bw[ii] == max_bw])
+    if (len(set(node_bw)) != 1):
+        max_bw = max(node_bw)
+        hbw_nodes = ','.join([str(ii) for ii in range(len(node_bw))
+                              if node_bw[ii] == max_bw])
+    else:
+        hbw_nodes = ''
     return hbw_nodes
 
 if __name__ == '__main__':
