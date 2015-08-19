@@ -493,6 +493,9 @@ void memkind_free(struct memkind *kind, void *ptr)
     if (!kind) {
         memkind_get_kind_for_free(ptr, &kind);
     }
+    if (kind->ops->init_once) {
+        pthread_once(&(kind->init_once), kind->ops->init_once);
+    }
     if (memkind_free_pre) {
         memkind_free_pre(&kind, &ptr);
     }
