@@ -53,6 +53,7 @@ TEST_F(GetArenaTest, TC_Memkind_ThreadHash)
     std::vector<unsigned int> arena_idx(num_threads);
     unsigned int thread_idx, idx;
     int err = 0;
+    size_t size = 0;
     int max_collisions, collisions, i;
 
     pthread_once(&(MEMKIND_HBW->init_once), MEMKIND_HBW->ops->init_once);
@@ -60,7 +61,7 @@ TEST_F(GetArenaTest, TC_Memkind_ThreadHash)
     #pragma omp parallel shared(arena_idx) private(thread_idx)
     {
         thread_idx = omp_get_thread_num();
-        err = memkind_thread_get_arena(MEMKIND_HBW, &(arena_idx[thread_idx]));
+        err = memkind_thread_get_arena(MEMKIND_HBW, &(arena_idx[thread_idx]), size);
     }
     ASSERT_TRUE(err == 0);
     std::sort(arena_idx.begin(), arena_idx.end(), uint_comp);

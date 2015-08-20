@@ -37,8 +37,8 @@ memkind_arena.h \- jemalloc arena allocation memkind operations.
 .BI "void *memkind_arena_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" );
 .BI "int memkind_arena_posix_memalign(struct memkind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .BI "void *memkind_arena_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
-.BI "int memkind_thread_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" );
-.BI "int memkind_bijective_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" );
+.BI "int memkind_thread_get_arena(struct memkind " "*kind" ", unsigned int " "*arena", size_t " "size" );
+.BI "int memkind_bijective_get_arena(struct memkind " "*kind" ", unsigned int " "*arena", size_t " "size" );
 .br
 .SH DESCRIPTION
 This header file is a collection of functions can be used to populate
