@@ -585,15 +585,17 @@ bits to a value appropriate for passing to the
 system call for the
 .IR kind .
 .PP
-.BI "int ops.get_arena(memkind_t " "kind" ", unsigned int " "*arena" );
+.BI "int ops.get_arena(memkind_t " "kind" ", unsigned int " "*arena"," " size_t " "size" );
 .br
 shall set
 .I arena
 to an index appropriate for the
-.I kind
+.I kind,
+allocation
+.I size,
 and CPU when using the jemalloc arena allocation through the
 .BR jemk_mallocx ()
-API.
+API. Size parameter is not used at the moment, but will be necesary for integration with jemalloc 4.0.x (planned for one of the future releases).
 .PP
 .BI "int ops.get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
 .br

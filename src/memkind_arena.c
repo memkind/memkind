@@ -160,7 +160,7 @@ void *memkind_arena_malloc(struct memkind *kind, size_t size)
     unsigned int arena;
 
     if (!err) {
-        err = kind->ops->get_arena(kind, &arena);
+        err = kind->ops->get_arena(kind, &arena, size);
     }
     if (!err) {
         result = jemk_mallocx_check(size, MALLOCX_ARENA(arena));
@@ -178,7 +178,7 @@ void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size)
         ptr = NULL;
     }
     else {
-        err = kind->ops->get_arena(kind, &arena);
+        err = kind->ops->get_arena(kind, &arena, size);
         if (!err) {
             if (ptr == NULL) {
                 ptr = jemk_mallocx_check(size, MALLOCX_ARENA(arena));
@@ -197,7 +197,7 @@ void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size)
     int err = 0;
     unsigned int arena;
 
-    err = kind->ops->get_arena(kind, &arena);
+    err = kind->ops->get_arena(kind, &arena, size);
     if (!err) {
         result = jemk_mallocx_check(num * size, MALLOCX_ARENA(arena) | MALLOCX_ZERO);
     }
@@ -212,7 +212,7 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     int errno_before;
 
     *memptr = NULL;
-    err = kind->ops->get_arena(kind, &arena);
+    err = kind->ops->get_arena(kind, &arena, size);
     if (!err) {
         err = memkind_posix_check_alignment(kind, alignment);
     }
@@ -227,7 +227,7 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     return err;
 }
 
-int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena)
+int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
 {
     int err = 0;
 
@@ -244,7 +244,7 @@ int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena)
 }
 
 #ifdef MEMKIND_TLS
-int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena)
+int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
 {
     static __thread unsigned int MEMKIND_TLS_MODEL arena_tls = UINT_MAX;
     int err = 0;
@@ -261,7 +261,7 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena)
     return err;
 }
 #else
-int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena)
+int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
 {
     int err = 0;
     unsigned int *arena_tsd;
