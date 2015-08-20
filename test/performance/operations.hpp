@@ -118,7 +118,7 @@ namespace performance_tests
             return (ballSize < m_bucketSize);
         }
 
-        const OperationName getName() const
+        OperationName getName() const
         {
             return m_name;
         }
