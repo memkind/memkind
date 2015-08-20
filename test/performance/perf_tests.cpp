@@ -30,15 +30,16 @@
 using std::cout;
 using std::endl;
 
-const double Delta = 0.15;
 // Memkind tests
 class PerformanceTest : public testing::Test
 {
 protected:
+    const double Delta = 0.2;
+
     Metrics referenceMetrics;
     Metrics performanceMetrics;
-	PerfTestCase<performance_tests::MallocOperation> referenceTest;
-	PerfTestCase<performance_tests::MemkindOperation> performanceTest;
+    PerfTestCase<performance_tests::MallocOperation> referenceTest;
+    PerfTestCase<performance_tests::MemkindOperation> performanceTest;
 
     void SetUp()
     {
@@ -48,31 +49,41 @@ protected:
     {
     }
 
-    template <class T>
-    bool checkDelta(T value, T reference, const string &info, double delta)
+    bool checkDelta(double value, double reference, const string &info, double delta, bool notLessThan = false)
     {
-        if (value * (1 + Delta) >= reference)
+        // If notLessThan is true, current value should be >= (reference - delta); otherwise, it should be <= (reference + delta)
+        double treshold;
+        if (notLessThan)
         {
-            cout << "Value of '" << info << "': actual='"
-                << value << "', reference='" << reference << "', delta='" << delta << "'." << endl;
+            treshold = reference / (1 + Delta);
+        }
+        else
+        {
+            treshold = reference * (1 + Delta);
+        }
+        cout << "Value of '" << info << "' expected to be at " << (notLessThan ? "least '" : "most '")
+             << treshold << "'. Actual='" << value << "', reference='"
+             << reference << "', delta='" << delta << "'." << endl;
+        if (notLessThan ? (value >= treshold) : (value <= treshold))
+        {
             return true;
         }
         else
         {
-            cout << "Error: value of '" << info << "' expected to be at least '" << value * (1 + Delta) << "'. Actual='"
-                << value << "', reference='" << reference << "', delta='" << delta << "'." << endl;
+            cout << "ERROR: Value of '" << info << "' outside expected bounds!" << endl;
             return false;
         }
     }
+
     bool compareMetrics(Metrics metrics, Metrics reference, double delta)
     {
         return (
-            checkDelta<double>(metrics.operationsPerSecond, reference.operationsPerSecond, "operationsPerSecond", delta) &&
-            checkDelta<double>(metrics.avgOperationDuration, reference.avgOperationDuration, "avgOperationDuration", delta) &&
-            checkDelta<double>(metrics.iterationDuration, reference.iterationDuration, "iterationDuration", delta) &&
-            checkDelta<double>(metrics.repeatDuration, reference.repeatDuration, "repeatDuration", delta)
+            checkDelta(metrics.operationsPerSecond, reference.operationsPerSecond, "operationsPerSecond", delta, true) &&
+            checkDelta(metrics.avgOperationDuration, reference.avgOperationDuration, "avgOperationDuration", delta) &&
+            checkDelta(metrics.iterationDuration, reference.iterationDuration, "iterationDuration", delta) &&
+            checkDelta(metrics.repeatDuration, reference.repeatDuration, "repeatDuration", delta)
             );
-        }
+    }
 };
 
 PERF_TEST(PerformanceTest, single_op_single_iter)
@@ -125,7 +136,7 @@ PERF_TEST(PerformanceTest, many_ops_many_iters)
     EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Delta));
 }
 
-PERF_TEST(PerformanceTest, many_ops_many_iters_many_kinds)
+TEST_F(PerformanceTest, DISABLED_many_ops_many_iters_many_kinds)
 {
     referenceTest.setupTest_manyOpsManyIters();
     referenceMetrics = referenceTest.runTest({ MEMKIND_DEFAULT, MEMKIND_HBW_PREFERRED });
