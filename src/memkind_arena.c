@@ -38,6 +38,7 @@
 #include <smmintrin.h>
 #include <limits.h>
 
+#include "config.h"
 #include "config_tls.h"
 #include "memkind.h"
 #include "memkind_default.h"
