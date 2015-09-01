@@ -122,15 +122,15 @@ pushd obj
              --enable-safe --enable-cc-silence \
              --prefix=%{_prefix} --includedir=%{_includedir} --libdir=%{_libdir} \
              --bindir=%{_bindir} --docdir=%{_docdir} --mandir=%{_mandir}
-$(make_prefix)%{__make} $(make_postfix)
+$(make_prefix)%{__make} %{?_smp_mflags} $(make_postfix)
 popd
 popd
 
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} \
     --includedir=%{_includedir} --sbindir=%{_sbindir} --enable-cxx11 \
     --mandir=%{_mandir} --docdir=%{docdir}
-$(make_prefix)%{__make} libgtest.a $(make_postfix)
-$(make_prefix)%{__make} checkprogs $(make_postfix)
+$(make_prefix)%{__make} %{?_smp_mflags} libgtest.a $(make_postfix)
+$(make_prefix)%{__make} %{?_smp_mflags} checkprogs $(make_postfix)
 
 %install
 %{__make} DESTDIR=%{buildroot} install
