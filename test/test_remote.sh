@@ -49,7 +49,7 @@ basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 rm -f all_tests.xml
 
 pushd $rpmdir
-mkrpm=`ls -t memkind-devel*.rpm | head -n1`
+mkrpm=`ls -t *memkind-devel*.rpm | head -n1`
 scp $mkrpm $remote_login@$remote_ip:
 popd
 
@@ -86,7 +86,9 @@ if [ -n "$COVFILE" ]; then
     scp $COVFILE $remote_login@$remote_ip:gtest_output/memkind.cov
 fi
 
-ssh root@$remote_ip "rpm -e memkind-devel >& /dev/null"
+already_installed_library=$(ssh root@172.28.81.214 "rpm -qa" | grep memkind-devel)
+
+ssh root@$remote_ip "rpm -e $already_installed_library >& /dev/null"
 ssh root@$remote_ip "rpm -i ~$remote_login/$mkrpm"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_hugepages"
 ssh root@$remote_ip "echo 4000 > /proc/sys/vm/nr_overcommit_hugepages"

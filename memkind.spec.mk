@@ -30,7 +30,7 @@ ifeq ($(jemalloc_installed),true)
 	rpmbuild_flags += -E '%define jemalloc_installed true'
 endif
 
-rpm: memkind-$(version).tar.gz
+rpm: $(name)-$(version).tar.gz
 	rpmbuild $(rpmbuild_flags) $^ -ta
 
 memkind-$(version).spec:
@@ -41,7 +41,7 @@ memkind-$(version).spec:
 
 define memkind_spec
 Summary: User Extensible Heap Manager
-Name: memkind
+Name: $(name)
 Version: $(version)
 Release: $(release)
 License: See COPYING
@@ -89,6 +89,8 @@ features.
 %package devel
 Summary: Extention to libnuma for kinds of memory - development
 Group: Development/Libraries
+$(opt_obsolete)
+$(opt_provides)
 
 %description devel
 The memkind library is a user extensible heap manager built on top of
