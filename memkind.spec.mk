@@ -30,7 +30,7 @@ ifeq ($(jemalloc_installed),true)
 	rpmbuild_flags += -E '%define jemalloc_installed true'
 endif
 
-rpm: memkind-$(version).tar.gz
+rpm: $(name)-$(version).tar.gz
 	rpmbuild $(rpmbuild_flags) $^ -ta
 
 memkind-$(version).spec:
@@ -41,7 +41,7 @@ memkind-$(version).spec:
 
 define memkind_spec
 Summary: User Extensible Heap Manager
-Name: memkind
+Name: $(name)
 Version: $(version)
 Release: $(release)
 License: See COPYING
@@ -56,6 +56,8 @@ BuildRequires: libnuma-devel
 %else
 BuildRequires: numactl-devel
 %endif
+$(opt_obsolete)
+$(opt_provides)
 
 Prefix: %{_prefix}
 Prefix: %{_initddir}

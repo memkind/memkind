@@ -1,4 +1,5 @@
-name = memkind
+package_prefix ?=
+name = $(package_prefix)memkind
 arch = $(shell uname -p)
 version = 0.0.0
 release = 1
@@ -10,8 +11,8 @@ rpm = $(topdir)/RPMS/$(arch)/$(name)-devel-$(version)-$(release).$(arch).rpm
 trpm = $(topdir)/TRPMS/$(arch)/$(name)-tests-$(version)-$(release).$(arch).rpm
 srpm = $(topdir)/SRPMS/$(name)-$(version)-$(release).src.rpm
 specfile = $(topdir)/SPECS/$(name)-$(version).spec
-source_tar = $(topdir)/SOURCES/$(name)-$(version).tar.gz
-source_tmp_dir := $(topdir)/SOURCES/memkind-tmp-$(shell date +%s)
+source_tar = $(topdir)/SOURCES/memkind-$(version).tar.gz
+source_tmp_dir := $(topdir)/SOURCES/$(name)-tmp-$(shell date +%s)
 rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
 gtest_archive = /opt/mpss_toolchains/googletest/1.7.0/gtest-1.7.0.zip
@@ -30,7 +31,17 @@ $(source_tar): $(topdir)/.setup $(src) MANIFEST
 	cd $(source_tmp_dir) && tar xf tmp.tar
 	if [ -f "$(gtest_archive)" ]; then cp $(gtest_archive) $(source_tmp_dir)/$(name)-$(version); fi
 	cd $(source_tmp_dir)/$(name)-$(version) && ./autogen.sh && ./configure && make dist
-	mv $(source_tmp_dir)/$(name)-$(version)/$(name)-$(version).tar.gz $@
+	# tar.gz produced by "make dist" from above produces memkind-$(version).tar.gz
+	# If $(package_prefix) is not empty, then need to repackage that tar.gz to $(name)-$(version)
+	# thus below command. Otherwise, rpmbuild will fail.
+	if [ -n "$(package_prefix)" ]; then \
+	    cd $(source_tmp_dir)/$(name)-$(version) && \
+	    tar xf memkind-$(version).tar.gz && \
+	    rm -rf memkind-$(version).tar.gz && \
+	    mv memkind-$(version) $(name)-$(version) && \
+	    tar cfz memkind-$(version).tar.gz $(name)-$(version); \
+	fi
+	mv $(source_tmp_dir)/$(name)-$(version)/memkind-$(version).tar.gz $@
 	rm -rf $(source_tmp_dir)
 
 $(specfile): $(topdir)/.setup memkind.spec.mk
