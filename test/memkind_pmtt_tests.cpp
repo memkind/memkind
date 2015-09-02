@@ -22,6 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <unistd.h>
+#include <libgen.h>
 
 #include "common.h"
 
@@ -36,23 +37,11 @@ protected:
     void SetUp()
     {
         /* The setup will provide a current working directory to where
-        the .hex mock files are placed. It will also set the cwd to test
-        directory for internal automation executions */
-        FILE *fid = NULL;
-        char test_dir[] = "test/";
-        char task_dir[] = "tasks/";
-        getcwd(cwd, sizeof(cwd)) ;
+        the .hex mock files are placed which is the location of the 
+        test binary */
+        realpath("/proc/self/exe", cwd);
+        dirname(cwd);
         strncat(cwd, "/", 1);
-        /* Berta path */
-        if(strstr(cwd, task_dir)) {
-            strncpy(cwd, "/usr/share/mpss/test/memkind-dt/", sizeof(cwd));
-        }
-        /* Directory for local executions through make check */
-        else {
-            fid = fopen("mock-pmtt-2-nodes.hex", "r");
-            if(!fid)
-                strncat(cwd, test_dir, sizeof(test_dir));
-        }
     }
 
     void TearDown()

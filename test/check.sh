@@ -32,6 +32,7 @@ else
         TEST_OUTDIR=gtest_output
     fi
     mkdir -p $TEST_OUTDIR
+    cp -f $basedir/*.hex $basedir/.libs/
     if [ -n "$COVFILE" ]; then
          cp $COVFILE $TEST_OUTDIR/memkind.cov
     fi
