@@ -26,7 +26,9 @@
 #include <errno.h>
 #include <gtest/gtest.h>
 
-
+/* Tests which calls APIS in wrong ways to generate Error Messages thrown by the
+ * the memkind library
+ */
 class ErrorMessage: public :: testing :: Test
 {
 protected:
@@ -64,7 +66,7 @@ protected:
     }
 };
 
-TEST_F(ErrorMessage, message_length)
+TEST_F(ErrorMessage, TC_Memkind_ErrorMsgLength)
 {
     int i;
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
@@ -75,7 +77,7 @@ TEST_F(ErrorMessage, message_length)
     memkind_error_message(MEMKIND_ERROR_UNAVAILABLE, NULL, 0);
 }
 
-TEST_F(ErrorMessage, message_format)
+TEST_F(ErrorMessage, TC_Memkind_ErrorMsgFormat)
 {
     int i;
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
@@ -85,7 +87,7 @@ TEST_F(ErrorMessage, message_format)
     }
 }
 
-TEST_F(ErrorMessage, undefined_message)
+TEST_F(ErrorMessage, TC_Memkind_ErrorMsgUndefMesg)
 {
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
     memkind_error_message(-0xdeadbeef, error_message, MEMKIND_ERROR_MESSAGE_SIZE);

@@ -24,13 +24,17 @@
 
 #include <fstream>
 #include <algorithm>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
 #include "memkind.h"
 #include "trial_generator.h"
 
-
+/* Set of basic acceptance tests for PREFERRED policy, the goal of this set of tests
+ * is to prove that you can do incremental allocations of memory with different
+ * sizes and that pages are actually allocated in HBW node.
+ */
 class BATest: public :: testing::Test
 {
 
@@ -84,57 +88,56 @@ protected:
 };
 
 
-TEST_F(BATest, hbw_check_available)
+TEST_F(BATest, TC_Memkind_HBW_Pref_CheckAvailable)
 {
     ASSERT_EQ(0, hbw_check_available());
 }
 
-TEST_F(BATest, hbw_policy)
+TEST_F(BATest, TC_Memkind_HBW_Pref_Policy)
 {
-    hbw_set_policy(2);
-    EXPECT_EQ(2, hbw_get_policy());
+    hbw_set_policy(HBW_POLICY_PREFERRED);
+    EXPECT_EQ(HBW_POLICY_PREFERRED, hbw_get_policy());
 }
 
-TEST_F(BATest, hbw_malloc_incremental)
+TEST_F(BATest, TC_Memkind_HBW_Pref_MallocIncremental)
 {
     tgen->generate_incremental(HBW_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_calloc_incremental)
+TEST_F(BATest, TC_Memkind_HBW_Pref_CallocIncremental)
 {
     tgen->generate_incremental(HBW_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(BATest, hbw_realloc_incremental)
+TEST_F(BATest, TC_Memkind_HBW_Pref_ReallocIncremental)
 {
     tgen->generate_incremental(HBW_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_memalign_incremental)
+TEST_F(BATest, TC_Memkind_HBW_Pref_MemalignIncremental)
 {
     tgen->generate_incremental(HBW_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_memalign_psize_incremental)
+TEST_F(BATest, TC_Memkind_HBW_Pref_MemalignPsizeIncremental)
 {
     tgen->generate_incremental(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_memkind_malloc_recycle)
+TEST_F(BATest, TC_Memkind_HBW_Pref_MallocRecycle)
 {
     tgen->generate_recycle_incremental(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, hbw_memkind_malloc_recycle_psize)
+TEST_F(BATest, TC_Memkind_HBW_Pref_MallocRecyclePsize)
 {
     tgen->generate_recycle_psize_incremental(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
-

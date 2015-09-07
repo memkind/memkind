@@ -24,13 +24,17 @@
 
 #include <fstream>
 #include <algorithm>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
 #include "memkind.h"
 #include "trial_generator.h"
 
-
+/* Set of basic acceptance tests for BIND policy, the goal of this set of tests
+ * is to prove that you can do incremental allocations of memory with different
+ * sizes and that pages are actually allocated in HBW node.
+ */
 class BABindTest: public :: testing::Test
 {
 
@@ -84,49 +88,49 @@ protected:
 };
 
 
-TEST_F(BABindTest, hbw_check_available)
+TEST_F(BABindTest, TC_Memkind_HBW_Bind_CheckAvailable)
 {
     ASSERT_EQ(0, hbw_check_available());
 }
 
-TEST_F(BABindTest, hbw_policy)
+TEST_F(BABindTest, TC_Memkind_HBW_Bind_Policy)
 {
-    hbw_set_policy(1);
-    EXPECT_EQ(1, hbw_get_policy());
+    hbw_set_policy(HBW_POLICY_BIND);
+    EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
 }
 
-TEST_F(BABindTest, hbw_malloc_incremental)
+TEST_F(BABindTest, TC_Memkind_HBW_Bind_MallocIncremental)
 {
-    hbw_set_policy(1);
+    hbw_set_policy(HBW_POLICY_BIND);
     tgen->generate_incremental(HBW_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BABindTest, hbw_calloc_incremental)
+TEST_F(BABindTest, TC_Memkind_HBW_Bind_CallocIncremental)
 {
-    hbw_set_policy(1);
+    hbw_set_policy(HBW_POLICY_BIND);
     tgen->generate_incremental(HBW_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(BABindTest, hbw_realloc_incremental)
+TEST_F(BABindTest, TC_Memkind_HBW_Bind_ReallocIncremental)
 {
-    hbw_set_policy(1);
+    hbw_set_policy(HBW_POLICY_BIND);
     tgen->generate_incremental(HBW_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BABindTest, hbw_memalign_incremental)
+TEST_F(BABindTest, TC_Memkind_HBW_Bind_MemalignIncremental)
 {
-    hbw_set_policy(1);
+    hbw_set_policy(HBW_POLICY_BIND);
     tgen->generate_incremental(HBW_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BABindTest, hbw_memalign_psize_incremental)
+TEST_F(BABindTest, TC_Memkind_HBW_Bind_MemalignPsizeIncremental)
 {
-    hbw_set_policy(1);
+    hbw_set_policy(HBW_POLICY_BIND);
     tgen->generate_incremental(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
 }

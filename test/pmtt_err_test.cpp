@@ -26,12 +26,13 @@
 #include <algorithm>
 #include <numa.h>
 #include <errno.h>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
 #include "memkind.h"
 
-
+/* Sets environment to create a MEMKIND_ERROR_PMTT error type */
 class PmttTest: public :: testing::Test
 {
 
@@ -43,7 +44,7 @@ protected:
     {}
 };
 
-TEST_F(PmttTest, ErrorPMTT)
+TEST_F(PmttTest, TC_Memkind_ErrorPMTT)
 {
     int ret = 0;
     int err = MEMKIND_ERROR_PMTT;

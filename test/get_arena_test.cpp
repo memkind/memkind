@@ -27,6 +27,7 @@
 #include <gtest/gtest.h>
 #include <omp.h>
 #include <pthread.h>
+
 #include "memkind_arena.h"
 
 class GetArenaTest: public :: testing::Test
@@ -46,7 +47,7 @@ bool uint_comp(unsigned int a, unsigned int b)
     return (a < b);
 }
 
-TEST_F(GetArenaTest, test_thread_hash)
+TEST_F(GetArenaTest, TC_Memkind_ThreadHash)
 {
     int num_threads = omp_get_max_threads();
     std::vector<unsigned int> arena_idx(num_threads);

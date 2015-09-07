@@ -45,6 +45,12 @@ void TrialGenerator :: generate_incremental(alloc_api_t api)
         trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
                                                MEMKIND_HBW, k++));
 
+        trial_vec.push_back(create_trial_tuple(api, size[i],
+                                               align[i], psize[i],
+                                               MEMKIND_HBW_PREFERRED,-1));
+        k++;
+        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
+                                               MEMKIND_HBW_PREFERRED, k++));
     }
 }
 
@@ -63,11 +69,19 @@ void TrialGenerator :: generate_recycle_incremental(alloc_api_t api)
             k++;
         trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
                                                MEMKIND_DEFAULT, k++));
+
         trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
                                                MEMKIND_HBW,-1));
         k++;
         trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
                                                MEMKIND_HBW, k++));
+
+        trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
+                                               MEMKIND_HBW_PREFERRED,-1));
+        k++;
+        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
+                                               MEMKIND_HBW_PREFERRED, k++));
+
     }
 
 }
@@ -319,6 +333,23 @@ void TrialGenerator :: generate_size_1KB_2GB(alloc_api_t api)
     }
 }
 
+void TrialGenerator :: generate_interleave(alloc_api_t api)
+{
+    size_t size[] = {4*KB, 2*MB, 2*GB};
+    size_t psize = 4096;
+    int k = 0;
+    trial_vec.clear();
+    for (size_t i = 0; i < (sizeof(size)/sizeof(size[0])); i++) {
+        trial_vec.push_back(create_trial_tuple(api, size[i],0, psize,
+                                               MEMKIND_HBW_INTERLEAVE,-1));
+
+        if (i > 0)
+            k++;
+        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
+                                               MEMKIND_HBW_INTERLEAVE, k++));
+    }
+}
+
 void TrialGenerator :: print()
 {
 
@@ -432,11 +463,8 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
 
                 break;
             case MEMKIND_MALLOC:
-                if (trial_vec[i].memkind == MEMKIND_HBW_GBTLB ||
-                    trial_vec[i].memkind == MEMKIND_HBW_PREFERRED_GBTLB) {
-                    fprintf (stdout,"Allocating %zd bytes using memkind_malloc\n",
+                fprintf (stdout,"Allocating %zd bytes using memkind_malloc\n",
                              trial_vec[i].size);
-                }
                 ptr_vec[i] = memkind_malloc(trial_vec[i].memkind,
                                             trial_vec[i].size);
                 break;
@@ -478,7 +506,12 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
             if (trial_vec[i].memkind != MEMKIND_DEFAULT &&
                 trial_vec[i].memkind != MEMKIND_HUGETLB &&
                 trial_vec[i].memkind != MEMKIND_GBTLB) {
-                EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+                if (trial_vec[i].memkind == MEMKIND_HBW_INTERLEAVE) {
+                    EXPECT_EQ(0, check.check_node_hbw_interleave(num_bandwidth, bandwidth));
+                    EXPECT_EQ(0, check.check_page_size(trial_vec[i].page_size));
+                } else {
+                    EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+                }
             }
             if (trial_vec[i].api == HBW_CALLOC) {
                 EXPECT_EQ(0, check.check_zero());

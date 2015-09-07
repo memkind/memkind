@@ -26,12 +26,13 @@
 #include <algorithm>
 #include <numa.h>
 #include <errno.h>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
 #include "memkind.h"
 
-
+/* Sets conditions to create a MEMKIND_ERROR_MALLOC error type */
 class MallocErrTest: public :: testing::Test
 {
 
@@ -44,7 +45,7 @@ protected:
 
 };
 
-TEST_F(MallocErrTest, ErrorMalloc)
+TEST_F(MallocErrTest, TC_Memkind_ErrorMalloc)
 {
     int ret = 0;
     int err = MEMKIND_ERROR_MALLOC;

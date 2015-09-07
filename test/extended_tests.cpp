@@ -24,13 +24,19 @@
 
 #include <fstream>
 #include <algorithm>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
 #include "memkind.h"
 #include "trial_generator.h"
 
-
+/* This set of test cases are meant to use the trial_generator which is used to
+ * create a set of inputs for an API to create calls to common fucntions like
+ * malloc, calloc, realloc, etc. In this case the extended tests will be calling
+ * in an increasing way the API to generate memory allocations that can go from
+ * 1kB to 2GB.
+ */
 class EXTendedTest : public :: testing :: Test
 {
 protected:
@@ -84,14 +90,14 @@ protected:
 };
 
 
-TEST_F(EXTendedTest, hbw_malloc_1KB_2GB_sizes)
+TEST_F(EXTendedTest, TC_Memkind_HBW_Malloc_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_MALLOC);
     tgen->run(num_bandwidth,
               bandwidth);
 }
 
-TEST_F(EXTendedTest, hbw_realloc_1KB_2GB_sizes)
+TEST_F(EXTendedTest, TC_Memkind_HBW_Realloc_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_REALLOC);
     tgen->run(num_bandwidth,
@@ -99,14 +105,14 @@ TEST_F(EXTendedTest, hbw_realloc_1KB_2GB_sizes)
 }
 
 
-TEST_F(EXTendedTest, hbw_calloc_1KB_2GB_sizes)
+TEST_F(EXTendedTest, TC_Memkind_HBW_Calloc_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_CALLOC);
     tgen->run(num_bandwidth,
               bandwidth);
 }
 
-TEST_F(EXTendedTest, hbw_memalign_1KB_2GB_sizes)
+TEST_F(EXTendedTest, TC_Memkind_HBW_Memalign_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_MEMALIGN);
     tgen->run(num_bandwidth,
@@ -114,7 +120,7 @@ TEST_F(EXTendedTest, hbw_memalign_1KB_2GB_sizes)
 }
 
 
-TEST_F(EXTendedTest, hbw_memalign_psize_1KB_2GB_sizes)
+TEST_F(EXTendedTest, TC_Memkind_HBW_MemalignPsize_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth,

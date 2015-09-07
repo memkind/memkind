@@ -33,8 +33,12 @@
 #include <hbwmalloc.h>
 #include <stdint.h>
 #include <string.h>
+
 #include "common.h"
 
+/* Set of test cases which intention is to used the Set Policy API, set it to a
+ * desired policy and do memory allocations of 1MB and 1GB
+ */
 class PolicyTest : public :: testing :: Test
 {
 protected:
@@ -46,9 +50,8 @@ int execute_policy(int set_policy, int size_in_megas)
 {
 
     uint64_t NUMBER_OF_ELEMENTS = 1024*1024*1024;
-    int DESIRED_POLICY = HBW_POLICY_BIND;
+    int DESIRED_POLICY = set_policy;
 
-    DESIRED_POLICY = set_policy;
     NUMBER_OF_ELEMENTS = size_in_megas;
     NUMBER_OF_ELEMENTS *= 1024*1024/8;
 
@@ -58,20 +61,29 @@ int execute_policy(int set_policy, int size_in_megas)
         return -1;
     }
 
+    const char *HBW_Types[] =
+        {
+            "DUMMY",
+            "HBW_POLICY_BIND",
+            "HBW_POLICY_PREFERRED",
+            "HBW_POLICY_INTERLEAVE"
+        };
+
     //Verify that policy is set to bind
     if (hbw_get_policy() != DESIRED_POLICY) {
-        printf("hbw policy default is NOT HBW_POLICY_BIND, changing it...");
+
+        printf("hbw policy is NOT %s, changing it...", HBW_Types[set_policy]);
+
+        //set memory policy to desired one
+        hbw_set_policy(DESIRED_POLICY);
+        if (hbw_get_policy() == DESIRED_POLICY)
+            printf(" done\n");
+        else
+            printf(" failed\n");
     }
     else {
-        printf("hbw policy default is NOT HBW_POLICY_PREFERRED, changing it...");
+        printf("hbw policy is already set to %s\n", HBW_Types[set_policy]);
     }
-
-    //set memory policy to bind
-    hbw_set_policy(DESIRED_POLICY);
-    if (hbw_get_policy() == DESIRED_POLICY)
-        printf(" done\n");
-    else
-        printf(" failed\n");
 
     // Make some memory allocations
     printf("Calling hbw_malloc with %ld bytes...",NUMBER_OF_ELEMENTS * sizeof(double));
@@ -181,32 +193,32 @@ int execute_policy(int set_policy, int size_in_megas)
     return 0;
 }
 
-TEST_F(PolicyTest, change_bind_1MB)
+TEST_F(PolicyTest, TC_Memkind_PolicyBind_1MB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_BIND, 1));
 }
 
-TEST_F(PolicyTest, change_preferred_1MB)
+TEST_F(PolicyTest, TC_Memkind_PolicyPreferred_1MB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_PREFERRED, 1));
 }
 
-TEST_F(PolicyTest, change_bind_1GB)
+TEST_F(PolicyTest, TC_Memkind_PolicyBind_1GB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_BIND, 1024));
 }
 
-TEST_F(PolicyTest, change_preferred_1GB)
+TEST_F(PolicyTest, TC_Memkind_PolicyPreferred_1GB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_PREFERRED, 1024));
 }
 
-TEST_F(PolicyTest, change_interleave_1MB)
+TEST_F(PolicyTest, TC_Memkind_PolicyInterleave_1MB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_INTERLEAVE, 1));
 }
 
-TEST_F(PolicyTest, change_interleave_1GB)
+TEST_F(PolicyTest, TC_Memkind_PolicyInterleave_1GB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_INTERLEAVE, 1024));
 }

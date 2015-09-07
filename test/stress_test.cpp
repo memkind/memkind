@@ -24,6 +24,7 @@
 
 #include <fstream>
 #include <algorithm>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
@@ -80,25 +81,25 @@ protected:
 
 };
 
-TEST_F(STRESSTest, hbw_memkind_trials_two_kind_stress)
+TEST_F(STRESSTest, TC_MEMKIND_HBW_TrialsTwoKind)
 {
     tgen->generate_multi_app_stress(2,MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(STRESSTest, hbw_memkind_trials_all_kind_stress)
+TEST_F(STRESSTest, TC_MEMKIND_HBW_TrialsAllKind)
 {
     tgen->generate_multi_app_stress(6,MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(STRESSTest, hbw_memkind_trials_two_kind_datacheck_stress)
+TEST_F(STRESSTest, TC_MEMKIND_HBW_TrialsTwoKindDatacheck)
 {
     tgen->generate_multi_app_stress(2,MEMKIND_DATACHECK);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(STRESSTest, hbw_memkind_trials_all_kind_datacheck_stress)
+TEST_F(STRESSTest, TC_MEMKIND_HBW_TrialsAllKindDatacheck)
 {
     tgen->generate_multi_app_stress(6,MEMKIND_DATACHECK);
     tgen->run(num_bandwidth, bandwidth);

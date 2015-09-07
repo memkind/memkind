@@ -24,13 +24,18 @@
 
 #include <fstream>
 #include <algorithm>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
 #include "memkind.h"
 #include "trial_generator.h"
 
-
+/* This set of tests are itended to use GB pages allocation, it is needed to have
+ * GB pages enabled or ignore its execution in case GB can't be enabled on an
+ * specifc machibe. It uses the trial generator to run the tests and validate
+ * its output.
+ */
 class GBPagesTest: public :: testing::Test
 {
 
@@ -83,68 +88,68 @@ protected:
 
 };
 
-TEST_F(GBPagesTest, hbw_memalign_psize_incremental)
+TEST_F(GBPagesTest, TC_Memkind_HBW_GBPages_MemalignPsizeIncremental)
 {
     tgen->generate_hbw_gb_incremental(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_malloc)
+TEST_F(GBPagesTest, TC_Memkind_GBPages_Malloc)
 {
     tgen->generate_gb_incremental(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_calloc)
+TEST_F(GBPagesTest, TC_Memkind_GBPages_Calloc)
 {
     tgen->generate_gb_incremental(MEMKIND_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_realloc)
+TEST_F(GBPagesTest, TC_Memkind_GBPages_Realloc)
 {
     tgen->generate_gb_incremental(MEMKIND_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_posix_memalign)
+TEST_F(GBPagesTest, TC_Memkind_GBPages_PosixMemalign)
 {
     tgen->generate_gb_incremental(MEMKIND_POSIX_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, hbw_memalign_psize_incremental_strict)
+TEST_F(GBPagesTest, TC_Memkind_HBW_GBPages_MemalignPsizeIncrementalStrict)
 {
     tgen->generate_hbw_gb_strict(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(GBPagesTest, memkind_malloc_regular)
+TEST_F(GBPagesTest, TC_Memkind_GBPages_MallocRegular)
 {
     tgen->generate_gb_regular(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_calloc_regular)
+TEST_F(GBPagesTest, TC_Memkind_GBPages_CallocRegular)
 {
     tgen->generate_gb_regular(MEMKIND_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_realloc_regular)
+TEST_F(GBPagesTest, TC_Memkind_GBPages_ReallocRegular)
 {
     tgen->generate_gb_regular(MEMKIND_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, memkind_posix_memalign_regular)
+TEST_F(GBPagesTest, TC_Memkind_GBPages_PosixMemalignRegular)
 {
     tgen->generate_gb_regular(MEMKIND_POSIX_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, hbw_memalign_psize_incremental_bind)
+TEST_F(GBPagesTest, TC_Memkind_HBW_GBPages_MemalignPsizeIncrementalBind)
 {
     hbw_set_policy(1);
     EXPECT_EQ(1, hbw_get_policy());
@@ -152,21 +157,21 @@ TEST_F(GBPagesTest, hbw_memalign_psize_incremental_bind)
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, hbw_memalign_psize_strict_bind)
+TEST_F(GBPagesTest, TC_Memkind_HBW_GBPages_MemalignPsizeStrictBind)
 {
     hbw_set_policy(1);
     tgen->generate_hbw_gb_strict(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, generate_gb_misalign_preferred)
+TEST_F(GBPagesTest, TC_Memkind_GBPages_GenerateMisalignPreferred)
 {
     tgen->generate_gb_misalign(HBW_MEMALIGN_PSIZE,
                                2147483648);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, generate_gb_misalign_bind)
+TEST_F(GBPagesTest, TC_Memkind_GBPages_GenerateMisalignBind)
 {
     hbw_set_policy(1);
     tgen->generate_gb_misalign(HBW_MEMALIGN_PSIZE,

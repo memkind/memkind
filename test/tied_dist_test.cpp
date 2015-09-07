@@ -26,12 +26,13 @@
 #include <algorithm>
 #include <numa.h>
 #include <errno.h>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
 #include "memkind.h"
 
-
+/* Sets environment to create a MEMKIND_ERROR_TIEDISTANCE error type */
 class TiedDistTest: public :: testing::Test
 {
 
@@ -44,7 +45,7 @@ protected:
 
 };
 
-TEST_F(TiedDistTest, ErrorTiedDist)
+TEST_F(TiedDistTest, TC_Memkind_Negative_ErrorTiedDist)
 {
     int ret = 0;
     int err = MEMKIND_ERROR_TIEDISTANCE;

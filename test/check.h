@@ -46,6 +46,7 @@ public:
     Check(const Check &);
     ~Check();
     int check_node_hbw(size_t num_bandwidth, const int *bandwidth);
+    int check_node_hbw_interleave(size_t num_bandwidth, const int *bandwidth);
     int check_page_size(size_t page_size);
     int check_zero(void);
     int check_data(int data);

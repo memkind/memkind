@@ -53,6 +53,7 @@ test_slts_test_LDADD = libgtest.a libmemkind.la
 test_all_tests_SOURCES = test/common.h \
                          test/bat_tests.cpp \
                          test/bat_bind_tests.cpp \
+                         test/bat_interleave_tests.cpp \
                          test/gb_page_tests.cpp \
                          test/trial_generator.cpp \
                          test/check.cpp \

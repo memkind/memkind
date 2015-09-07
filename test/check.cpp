@@ -36,6 +36,7 @@
 #include <fstream>
 #include <string>
 #include <cstring>
+
 #include "check.h"
 
 
@@ -120,6 +121,66 @@ int Check::check_node_hbw(size_t num_bandwidth, const int *bandwidth)
 
     return err;
 
+}
+
+int Check::check_node_hbw_interleave(size_t num_bandwidth, const int *bandwidth)
+{
+    printf("Running check for hbw interleave\n");
+    printf("num_bandwidth = %zd\n num_address = %zd \n",num_bandwidth, num_address );
+
+    int err = 0;
+    int max_bandwidth;
+    int *status = NULL;
+    int *hbw_nodes =  NULL;
+    bool page_in_node = false;
+
+    status = new int [num_address];
+    hbw_nodes = new int[num_bandwidth];
+
+    move_pages(0, num_address, address, NULL, status, MPOL_MF_MOVE);
+    max_bandwidth = 0;
+    memset(hbw_nodes, 0, sizeof(int)*num_bandwidth);
+
+    // Here we will identify which nodes are HBW and set the max
+    // bandwidth in the systeml
+    for (size_t i = 0; i < num_bandwidth; ++i) {
+        if (bandwidth[i] > max_bandwidth) {
+            // Set hbw_nodes to 0 since a new max bandwidth
+            // has been identified, and then set the node to 1
+            memset(hbw_nodes, 0, sizeof(int)*num_bandwidth);
+            max_bandwidth = bandwidth[i];
+            hbw_nodes[i] = 1;
+        }
+        else if (bandwidth[i] == max_bandwidth) {
+            hbw_nodes[i] = 1;
+        }
+    }
+
+    for (size_t i = 0 ; i < num_bandwidth && !err; ++i) {
+        page_in_node = false;
+        //Find a hbw_node
+        if (hbw_nodes[i]) {
+            //Itereate through num_address to see
+            //if a status position is set to the
+            // hbw node
+            for(size_t j = 0; j < num_address; ++j) {
+                //Minus 1 is because nodes are 1-based
+                //and hbw_nodes is a 0-based index array
+                if(((size_t)status[j] - 1) == i) {
+                    page_in_node = true;
+                    break;
+                }
+            }
+            //None page has been assign to hbw node
+            if (!page_in_node) {
+                err = 1;
+            }
+        }
+    }
+
+    delete[] status;
+    delete[] hbw_nodes;
+    return err;
 }
 
 int Check::check_zero(void)
