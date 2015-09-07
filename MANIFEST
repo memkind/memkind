@@ -84,6 +84,7 @@ test/check.h
 test/trial_generator.h
 test/bat_tests.cpp
 test/bat_bind_tests.cpp
+test/bat_interleave_tests.cpp
 test/malloc_err_test.cpp
 test/mallctl_err_test.cpp
 test/mallctl_mock.c

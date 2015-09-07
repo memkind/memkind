@@ -27,15 +27,18 @@
 #include <numa.h>
 #include <errno.h>
 #include <limits.h>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
 #include "memkind.h"
 #include "memkind_gbtlb.h"
-
 #include "trial_generator.h"
 
-
+/* Set of negative test cases for memkind, its main goal are to verify that the
+ * library behaves accordingly to documentation when calling an API with
+ * invalid inputs, incorrect usage, NULL pointers.
+ */
 class NegativeTest: public :: testing::Test
 {
 
@@ -48,7 +51,7 @@ protected:
 };
 
 
-TEST_F(NegativeTest, ErrorUnavailable)
+TEST_F(NegativeTest, TC_Memkind_Negative_ErrorUnavailable)
 {
     void *ret;
     void *err = (void *)(-1); /* MAP_FAILED */
@@ -58,7 +61,7 @@ TEST_F(NegativeTest, ErrorUnavailable)
 }
 
 
-TEST_F(NegativeTest, ErrorMbind)
+TEST_F(NegativeTest, TC_Memkind_Negative_ErrorMBind)
 {
     int ret = 0;
     int err = MEMKIND_ERROR_MBIND;
@@ -67,7 +70,7 @@ TEST_F(NegativeTest, ErrorMbind)
     EXPECT_EQ(err, ret);
 }
 
-TEST_F(NegativeTest, ErrorMemalign)
+TEST_F(NegativeTest, TC_Memkind_Negative_ErrorMemAlign)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -81,7 +84,7 @@ TEST_F(NegativeTest, ErrorMemalign)
     EXPECT_EQ(errno, 0);
 }
 
-TEST_F(NegativeTest, ErrorAlignment)
+TEST_F(NegativeTest, TC_Memkind_Negative_ErrorAlignment)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -96,7 +99,7 @@ TEST_F(NegativeTest, ErrorAlignment)
 }
 
 
-TEST_F(NegativeTest, ErrorAllocM)
+TEST_F(NegativeTest, TC_Memkind_Negative_ErrorAllocM)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -111,7 +114,7 @@ TEST_F(NegativeTest, ErrorAllocM)
     EXPECT_EQ(errno, 0);
 }
 
-TEST_F(NegativeTest, InvalidSizeMalloc)
+TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeMalloc)
 {
     void *ptr = NULL;
     for(int i=-1; i<=0; i++)
@@ -126,7 +129,7 @@ TEST_F(NegativeTest, InvalidSizeMalloc)
     }
 }
 
-TEST_F(NegativeTest, InvalidSizeCalloc)
+TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeCalloc)
 {
     void *ptr = NULL;
     for(int i=-1; i<=0; i++)
@@ -142,7 +145,7 @@ TEST_F(NegativeTest, InvalidSizeCalloc)
     }
 }
 
-TEST_F(NegativeTest, InvalidSizeRealloc)
+TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeRealloc)
 {
     void *ptr = NULL;
     for(int i=-1; i<=0; i++)
@@ -158,7 +161,7 @@ TEST_F(NegativeTest, InvalidSizeRealloc)
     }
 }
 
-TEST_F(NegativeTest, InvalidSizeMemalign)
+TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -177,7 +180,7 @@ TEST_F(NegativeTest, InvalidSizeMemalign)
     EXPECT_EQ(errno, 0);
 }
 
-TEST_F(NegativeTest, GBFailureTestMemalign)
+TEST_F(NegativeTest, TC_Memkind_Negative_GBFailureMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -189,7 +192,7 @@ TEST_F(NegativeTest, GBFailureTestMemalign)
     EXPECT_TRUE(ptr == NULL);
 }
 
-TEST_F(NegativeTest, RegularReallocWithMemalign)
+TEST_F(NegativeTest, TC_Memkind_Negative_RegularReallocWithMemAllign)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -204,7 +207,7 @@ TEST_F(NegativeTest, RegularReallocWithMemalign)
     hbw_free(ptr);
 }
 
-TEST_F(NegativeTest, SetPolicyTest)
+TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicy)
 {
     hbw_set_policy(2);
     hbw_set_policy(1);
@@ -212,7 +215,7 @@ TEST_F(NegativeTest, SetPolicyTest)
 
 }
 
-TEST_F(NegativeTest, GBMemalignPsizeAlign)
+TEST_F(NegativeTest, TC_Memkind_Negative_GBMemalignPsizeAllign)
 {
     void *ptr = NULL;
     int ret = 0;
@@ -222,14 +225,14 @@ TEST_F(NegativeTest, GBMemalignPsizeAlign)
     EXPECT_EQ(err, ret);
 }
 
-TEST_F(NegativeTest, GBNullRealloc)
+TEST_F(NegativeTest, TC_Memkind_Negative_GBNullRealloc)
 {
     void *ptr = NULL;
     ptr = memkind_gbtlb_realloc(MEMKIND_HBW_GBTLB, NULL, -1);
     EXPECT_TRUE(ptr == NULL);
 }
 
-TEST_F(NegativeTest, GBNullFree)
+TEST_F(NegativeTest, TC_Memkind_Negative_GBNullFree)
 {
     memkind_free(MEMKIND_GBTLB,NULL);
 }

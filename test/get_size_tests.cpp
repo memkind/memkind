@@ -25,9 +25,10 @@
 #include <memkind.h>
 #include <gtest/gtest.h>
 
+/* Verifies output of size and free values returned by get size API */
 class GetSize: public :: testing::Test { };
 
-TEST_F(GetSize, get_size_test)
+TEST_F(GetSize, TC_Memkind_GetSizeTest)
 {
     size_t total = 0;
     size_t free = 0;

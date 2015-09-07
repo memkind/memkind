@@ -24,9 +24,13 @@
 
 #include <numa.h>
 #include <stdio.h>
+
 #include "common.h"
 #include "memkind.h"
 
+/* Calling the basic APIs (calloc, realloc and get_size) with
+ * MEMKIND_DEFAULT kind.
+ */
 class MemkindDefaultTests: public :: testing::Test
 {
 
@@ -39,7 +43,7 @@ protected:
 
 };
 
-TEST_F(MemkindDefaultTests, DefaultCalloc)
+TEST_F(MemkindDefaultTests, TC_Memkind_DefaultCalloc)
 {
     const size_t size = 1024;
     const size_t num = 1;
@@ -54,7 +58,7 @@ TEST_F(MemkindDefaultTests, DefaultCalloc)
     memkind_free(MEMKIND_DEFAULT, default_str);
 }
 
-TEST_F(MemkindDefaultTests, DefaultGetSize)
+TEST_F(MemkindDefaultTests, TC_Memkind_DefaultGetSize)
 {
     const size_t size = 512;
     char *default_str = NULL;
@@ -73,7 +77,7 @@ TEST_F(MemkindDefaultTests, DefaultGetSize)
     memkind_free(MEMKIND_DEFAULT, default_str);
 }
 
-TEST_F(MemkindDefaultTests, DefaultRealloc)
+TEST_F(MemkindDefaultTests, TC_Memkind_DefaultRealloc)
 {
     const size_t size1 = 512;
     const size_t size2 = 1024;

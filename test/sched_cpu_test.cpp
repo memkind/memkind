@@ -33,6 +33,7 @@
 
 extern int memkind_hbw_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
 
+/* Sets environment to create a MEMKIND_ERROR_GETCPU error type */
 class SchedGeTest: public :: testing::Test
 {
 
@@ -45,7 +46,7 @@ protected:
 
 };
 
-TEST_F(SchedGeTest, ErrorSchedGetCpu)
+TEST_F(SchedGeTest, TC_Memkind_Negative_ErrorSchedGetCpu)
 {
     int ret = 0;
     int err = MEMKIND_ERROR_GETCPU;

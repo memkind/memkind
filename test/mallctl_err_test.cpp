@@ -26,13 +26,14 @@
 #include <algorithm>
 #include <numa.h>
 #include <errno.h>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
 #include "memkind.h"
 
 
-
+/* Sets condition to create a MEMKIND_ERROR_MALLCTL error type */
 class MallctlTest: public :: testing::Test
 {
 
@@ -45,7 +46,7 @@ protected:
 
 };
 
-TEST_F(MallctlTest, ErrorMallctl)
+TEST_F(MallctlTest, TC_Memkind_ErrorMallctl)
 {
     int ret = 0;
     int err = MEMKIND_ERROR_MALLCTL;

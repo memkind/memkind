@@ -31,9 +31,13 @@ extern const struct memkind_ops MEMKIND_BAD_OPS[];
 extern const size_t MEMKIND_BAD_OPS_LEN;
 extern const struct memkind_ops deadbeef_ops;
 
+/*These set of test cases are using defined ops (operations) structures to
+ * validate the memkind_create API.
+ */
 class MemkindCreate: public :: testing :: Test { };
 
-TEST_F(MemkindCreate, bad_ops)
+/* bad_ops -> tests a set of invalid operations */
+TEST_F(MemkindCreate, TC_Memkind_CreateBadOps)
 {
     size_t i;
     int err;
@@ -45,7 +49,10 @@ TEST_F(MemkindCreate, bad_ops)
     }
 }
 
-TEST_F(MemkindCreate, rep_name)
+/* rep_name-> test will verify that memkind does not allows to add a repeated
+ * kind name
+ */
+TEST_F(MemkindCreate, TC_Memkind_CreateRepName)
 {
     int i, err;
     int num_bad_ops = sizeof(*MEMKIND_BAD_OPS)/sizeof(memkind_ops);
@@ -57,7 +64,10 @@ TEST_F(MemkindCreate, rep_name)
     }
 }
 
-TEST_F(MemkindCreate, partitions)
+/* partitions-> will verify that a user can defined its own way to treat mmaps as
+ * defined in its ops list
+ */
+TEST_F(MemkindCreate, TC_Memkind_CreatePartitions)
 {
     int res;
     size_t SIZE = 8*1024*1024;

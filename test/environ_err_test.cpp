@@ -27,6 +27,7 @@
 #include <numa.h>
 #include <errno.h>
 #include <stdlib.h>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
@@ -45,7 +46,8 @@ protected:
 
 };
 
-TEST_F(EnvTest, ErrorEnviron)
+/* Test to check MEMKIND_HBW_NODES enviroment variable with incorrect value.*/
+TEST_F(EnvTest, TC_Memkind_Negative_EnvTest_ErrorEnviron)
 {
     int ret = 0;
     int err = MEMKIND_ERROR_ENVIRON;

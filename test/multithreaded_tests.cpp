@@ -24,6 +24,7 @@
 
 #include <fstream>
 #include <algorithm>
+
 #include "common.h"
 #include "check.h"
 #include "omp.h"
@@ -32,6 +33,10 @@
 
 #define NTHREADS 2
 
+/* Multithread test content which will also use the trial_benerator to call
+ * malloc, calloc, memalign, realloc, with different memory sizes but this time
+ * it will use Open MP threads with NTHREADS set to 2
+ */
 class MultithreadedTest : public :: testing :: Test
 {
 protected:
@@ -84,7 +89,7 @@ protected:
     }
 };
 
-TEST_F(MultithreadedTest, hbw_malloc_1KB_2GB_sizes)
+TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Malloc_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_MALLOC);
     #pragma omp parallel num_threads(NTHREADS)
@@ -94,7 +99,7 @@ TEST_F(MultithreadedTest, hbw_malloc_1KB_2GB_sizes)
     }
 }
 
-TEST_F(MultithreadedTest, hbw_calloc_1KB_2GB_sizes)
+TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Calloc_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_CALLOC);
     #pragma omp parallel num_threads(NTHREADS)
@@ -104,7 +109,7 @@ TEST_F(MultithreadedTest, hbw_calloc_1KB_2GB_sizes)
     }
 }
 
-TEST_F(MultithreadedTest, hbw_memalign_1KB_2GB_sizes)
+TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Memalign_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_MEMALIGN);
     #pragma omp parallel num_threads(NTHREADS)
@@ -115,7 +120,7 @@ TEST_F(MultithreadedTest, hbw_memalign_1KB_2GB_sizes)
 }
 
 
-TEST_F(MultithreadedTest, hbw_memalign_psize_1KB_2GB_sizes)
+TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_MemalignPsize_1KB_2GB_sizes)
 {
     tgen->generate_size_1KB_2GB(HBW_MEMALIGN_PSIZE);
     #pragma omp parallel num_threads(NTHREADS)
