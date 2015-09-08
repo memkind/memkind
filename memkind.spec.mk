@@ -56,8 +56,6 @@ BuildRequires: libnuma-devel
 %else
 BuildRequires: numactl-devel
 %endif
-$(opt_obsolete)
-$(opt_provides)
 
 Prefix: %{_prefix}
 Prefix: %{_initddir}
@@ -91,6 +89,8 @@ features.
 %package devel
 Summary: Extention to libnuma for kinds of memory - development
 Group: Development/Libraries
+$(opt_obsolete)
+$(opt_provides)
 
 %description devel
 The memkind library is a user extensible heap manager built on top of
