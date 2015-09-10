@@ -32,6 +32,11 @@ point to the above libraries. If you are linking your program statically
 (e.g., with -static or -fast flags in ifort/icc), you must use the static
 version of autohbw library (libautohbw.a).
 
+It is possible to temporarily disable/enable automatic HBM allocations by
+calling disableAutoHBW() and enableAutoHBW() in your source code. To call
+these routines, please include autohbw_api.h header file and link with
+-lautohbw.
+
 
 Usage with MPI programs
 -----------------------
@@ -72,11 +77,14 @@ library:
 
   AUTO_HBW_MEM_TYPE=memory_type
   Sets the type of memory type that should be automatically allocated. By
-  default, this type is MEMKIND_HBW. The names of memory types are defined
-  in memkind(3) man page. If you are requesting any huge TLB pages, please
-  make sure that the requested type is currently enabled in your OS.
+  default, this type is MEMKIND_HBW_PREFERRED, if MCDRAM is found in your
+  system; otherwise, the default is MEMKIND_DEFAULT. The names of memory
+  types are definedin memkind(3) man page. If you are requesting any huge
+  TLB pages, pleasemake sure that the requested type is currently enabled
+  in your OS.
   Examples:
-    AUTO_HBW_MEM_TYPE=MEMKIND_HBW            (default)
+    AUTO_HBW_MEM_TYPE=MEMKIND_HBW_PREFERRED   (default, if MCDRAM present)
+    AUTO_HBW_MEM_TYPE=MEMKIND_DEFAULT         (default, if MCDRAM absent)
     AUTO_HBW_MEM_TYPE=MEMKIND_HBW_HUGETLB
     AUTO_HBW_MEM_TYPE=MEMKIND_HUGETLB
 
