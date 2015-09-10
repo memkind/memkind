@@ -101,8 +101,18 @@ void __attribute__ ((constructor)) autohbw_load(void)
     // be overridden by env variable
     // Note: 'memkind_hbw_preferred' will allow falling back to DDR but
     //       'memkind_hbw will not'
+    // Note: If HBM is not installed on a system, memkind_hbw_preferred call
+    //       woudl fail. Therefore, we need to check for availability first.
     //
-    int ret = memkind_get_kind_by_name("memkind_hbw_preferred", &HBW_Type);
+    int ret = 0;
+    if (memkind_check_available(MEMKIND_HBW) == 0) {
+      ret = memkind_get_kind_by_name("memkind_hbw_preferred", &HBW_Type);
+    }
+    else {
+      printf("WARN: *** No HBM found in system. Will use default (DDR) "
+             "OR user specifid type ***\n");
+      ret = memkind_get_kind_by_name("memkind_default", &HBW_Type);
+    }
     assert(!ret && "FATAL: Could not find default memory type\n");
 
     // Read any env variables. This has to be done first because DbgLevel
@@ -127,7 +137,7 @@ void __attribute__ ((constructor)) autohbw_load(void)
 
     }
     else {
-        errPrn("\t-HBW init call FAILED\n");
+        errPrn("\t-HBW init call FAILED. Is required memory type present on your system?\n");
         assert(0 && "HBW/memkind initialization faild");
     }
 }
@@ -302,7 +312,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
 
 
 ////////////////////////////////////////////////////////////////////////////
-// Capture deprecated valloc. We don't allow this use of this func beause
+// Capture deprecated valloc. We don't allow the use of this func because
 // (1) A ptr obtained by this can be passed to free()
 // (2) To warn the use of a deprecated function.
 // However, if really needed we can support this method using posix_memalign
@@ -316,7 +326,7 @@ void *valloc(size_t size)
 
 
 ////////////////////////////////////////////////////////////////////////////
-// Capture deprecated memalign. We don't allow this use of this func beause
+// Capture deprecated memalign. We don't allow the use of this func because
 // (1) A ptr obtained by this can be passed to free()
 // (2) To warn the use of a deprecated function.
 // However, if really needed we can support this method using posix_memalign

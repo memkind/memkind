@@ -32,6 +32,7 @@ noinst_PROGRAMS += examples/hello_memkind \
                    examples/pmem_memkind \
                    examples/gb_realloc \
                    examples/numakind_test \
+                   examples/autohbw_candidates \
                    # end
 if ENABLE_CXX11
 noinst_PROGRAMS += examples/memkind_allocated
@@ -54,6 +55,10 @@ examples_new_kind_LDADD = libmemkind.la
 examples_pmem_memkind_LDADD = libmemkind.la
 examples_gb_realloc_LDADD = libmemkind.la
 examples_numakind_test_LDADD = examples/libnumakind.la libmemkind.la
+examples_autohbw_candidates_LDADD = libmemkind.la
+examples_libautohbw_la_LIBADD = libmemkind.la
+examples_libautohbw_la_LDFLAGS = -version-info $(memkind_abi_version)
+
 if ENABLE_CXX11
 examples_memkind_allocated_LDADD = libmemkind.la
 endif
@@ -70,6 +75,7 @@ examples_gb_realloc_SOURCES = examples/gb_realloc_example.c
 examples_numakind_test_SOURCES = examples/numakind_test.c
 examples_libnumakind_la_SOURCES = examples/numakind.c examples/numakind.h examples/numakind_macro.h
 examples_libautohbw_la_SOURCES = examples/autohbw.c examples/autohbw_helper.h
+examples_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
 noinst_HEADERS += examples/numakind.h examples/numakind_macro.h
 if ENABLE_CXX11
 examples_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp

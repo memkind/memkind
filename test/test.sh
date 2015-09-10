@@ -105,6 +105,11 @@ ret=$?
 if [ $ret -ne 0 ]; then echo "FAIL: hello_memkind" 1>&2; fi
 if [ $err -eq 0 ]; then err=$ret; fi
 
+LD_PRELOAD=$basedir/libautohbw.so AUTO_HBW_SIZE=4K $basedir/autohbw_candidates
+ret=$?
+if [ $ret -ne 0 ]; then echo "FAIL: autohbw_candidates" 1>&2; fi
+if [ $err -eq 0 ]; then err=$ret; fi
+
 $basedir/hello_memkind_debug
 ret=$?
 if [ $ret -ne 0 ]; then echo "FAIL: hello_memkind_debug" 1>&2; fi
@@ -139,6 +144,12 @@ $basedir/stream
 ret=$?
 if [ $ret -ne 0 ]; then echo "FAIL: stream" 1>&2; fi
 if [ $err -eq 0 ]; then err=$ret; fi
+
+
+
+
+
+
 
 for kind in memkind_default \
             memkind_hbw \

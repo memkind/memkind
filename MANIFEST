@@ -15,6 +15,7 @@ config_tls.h.in
 examples/autohbw.c
 examples/autohbw_get_src_lines.pl
 examples/autohbw_helper.h
+examples/autohbw_candidates.c
 examples/filter_example.c
 examples/hello_memkind_example.c
 examples/stream_example.c

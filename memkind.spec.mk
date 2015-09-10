@@ -147,6 +147,8 @@ rm -f %{buildroot}/%{_libdir}/libmemkind.la
 rm -f %{buildroot}/%{_libdir}/libnumakind.*
 rm -f %{buildroot}/%{_libdir}/liballocatorperftool.*
 rm -f %{buildroot}/%{_libdir}/libautohbw.*
+rm -f %{buildroot}$(memkind_test_dir)/libautohbw.*
+
 
 $(extra_install)
 
@@ -237,6 +239,7 @@ $(memkind_test_dir)/new_kind
 $(memkind_test_dir)/stream
 $(memkind_test_dir)/stream_memkind
 $(memkind_test_dir)/memkind_allocated
+$(memkind_test_dir)/autohbw_candidates
 ${memkind_test_dir}/pmem
 ${memkind_test_dir}/allocator_perf_tool_tests
 ${memkind_test_dir}/perf_tool

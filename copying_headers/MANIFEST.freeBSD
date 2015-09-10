@@ -6,6 +6,7 @@ examples/Makefile.mk
 examples/autohbw.c
 examples/autohbw_get_src_lines.pl
 examples/autohbw_helper.h
+examples/autohbw_candidates.c
 examples/filter_example.c
 examples/hello_hbw_example.c
 examples/memkind_allocated_example.cpp

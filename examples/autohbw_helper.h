@@ -218,7 +218,7 @@ void setEnvValues()
         if (!memkind_get_kind_by_name(buf, &mty)) {
 
             HBW_Type = mty;
-            printf("INFO: Setting target memory type to %s\n", memtype_str);
+            printf("INFO: Setting HBW memory type to %s\n", memtype_str);
 
         }
         else {

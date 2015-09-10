@@ -82,6 +82,9 @@ scp $basedir/.libs/gb_realloc $remote_login@$remote_ip:
 scp $basedir/.libs/hello_memkind_debug $remote_login@$remote_ip:
 scp $basedir/.libs/pmem $remote_login@$remote_ip:
 
+scp $basedir/.libs/autohbw_candidates $remote_login@$remote_ip:
+scp $basedir/../examples/.libs/libautohbw.so $remote_login@$remote_ip:
+
 scp $basedir/test.sh $remote_login@$remote_ip:
 if [ -n "$COVFILE" ]; then
     ssh $remote_login@$remote_ip "mkdir -p gtest_output"
