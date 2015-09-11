@@ -451,9 +451,8 @@ static int set_closest_numanode(int num_unique,
     *       bandwidth.                                                         *
     *   RETURNS zero on success, error code on failure                         *
     ***************************************************************************/
-
     int err = 0;
-    int min_distance, distance, i, j, old_errno;
+    int min_distance, distance, i, j, old_errno, min_unique;
     struct bandwidth_nodes_t match;
     match.bandwidth = -1;
     for (i = 0; i < num_cpunode; ++i) {
@@ -471,6 +470,7 @@ static int set_closest_numanode(int num_unique,
     else {
         for (i = 0; i < num_cpunode; ++i) {
             min_distance = INT_MAX;
+            min_unique = 1;
             for (j = 0; j < match.num_numanodes; ++j) {
                 old_errno = errno;
                 distance = numa_distance(numa_node_of_cpu(i),
@@ -479,10 +479,14 @@ static int set_closest_numanode(int num_unique,
                 if (distance < min_distance) {
                     min_distance = distance;
                     closest_numanode[i] = match.numanodes[j];
+                    min_unique = 1;
                 }
                 else if (distance == min_distance) {
-                    err = MEMKIND_ERROR_TIEDISTANCE;
+                    min_unique = 0;
                 }
+            }
+            if (!min_unique) {
+                err = MEMKIND_ERROR_TIEDISTANCE;
             }
         }
     }
