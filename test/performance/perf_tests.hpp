@@ -49,6 +49,9 @@ private:
     Operation *m_freeOperation;
     performance_tests::PerformanceTest *m_test;
     const unsigned m_seed = 1297654;
+    const unsigned m_repeats = 5;
+    const unsigned m_threads = 72;
+    const unsigned m_iterations = 100;
 
 public:
     PerfTestCase()
@@ -79,7 +82,6 @@ public:
         return m_test->getMetrics();
     }
 
-    // 5 repeats, 8 threads, 10000 operations/thread
     // malloc only
     // 128 bytes
 
@@ -88,12 +90,11 @@ public:
 
         m_testOperations = { { new T(OperationName::Malloc) } };
 
-        m_test = new performance_tests::PerformanceTest(5, 8, 10000);
+        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads, m_iterations * 10);
         m_test->setOperations(m_testOperations, m_freeOperation);
         m_test->setAllocationSizes({ 128 });
     }
 
-    // 5 repeats, 8 threads, 10000 operations/thread
     // malloc, calloc, realloc and align (equal probability)
     // 120, 521, 1200 and 4099 bytes
     void setupTest_manyOpsSingleIter()
@@ -105,14 +106,13 @@ public:
                 new T(OperationName::Align, 100)
             } };
 
-        m_test = new performance_tests::PerformanceTest(5, 8, 10000);
+        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads, m_iterations * 10);
         m_test->setOperations(m_testOperations, m_freeOperation);
         m_test->setAllocationSizes({ 120, 521, 1200, 4099 });
     }
 
-    // 5 repeats, 8 threads, 1000 operations/thread
     // malloc, calloc, realloc and align (equal probability)
-    // 1000000, 2000000, 4000000 and 8000000 bytes
+    // 500000, 1000000, 2000000 and 4000000 bytes
     void setupTest_manyOpsSingleIterHugeAlloc()
     {
         m_testOperations = { {
@@ -122,12 +122,11 @@ public:
                 new T(OperationName::Align, 100)
             }};
 
-        m_test = new performance_tests::PerformanceTest(5, 8, 1000);
+        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads, m_iterations);
         m_test->setOperations(m_testOperations, m_freeOperation);
-        m_test->setAllocationSizes({ 1000000, 2000000, 4000000, 8000000 });
+        m_test->setAllocationSizes({ 500000, 1000000, 2000000, 4000000 });
     }
 
-    // 5 repeats, 8 threads, 10000 operations/thread
     // 4 iterations of each thread (first malloc, then calloc, realloc and align)
     // 120, 521, 1200 and 4099 bytes
     void setupTest_singleOpManyIters()
@@ -139,13 +138,12 @@ public:
             { new T(OperationName::Align, 100) }
         };
 
-        m_test = new performance_tests::PerformanceTest(5, 8, 10000);
+        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads, m_iterations * 10);
         m_test->setOperations(m_testOperations, m_freeOperation);
         m_test->setAllocationSizes({ 120, 521, 1200, 4099 });
         m_test->setExecutionMode(ExecutionMode::ManyIterations);
     }
 
-    // 5 repeats, 8 threads, 10000 operations/thread
     // 4 iterations of each thread, all with same set of operations (malloc, then calloc, realloc and align),
     // but different operation probability
     // 120, 521, 1200 and 4099 bytes
@@ -184,7 +182,7 @@ public:
             }
         };
 
-        m_test = new performance_tests::PerformanceTest(5, 8, 10000);
+        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads, m_iterations * 10);
         m_test->setOperations(m_testOperations, m_freeOperation);
         m_test->setAllocationSizes({ 120, 521, 1200, 4099 });
         m_test->setExecutionMode(ExecutionMode::ManyIterations);
