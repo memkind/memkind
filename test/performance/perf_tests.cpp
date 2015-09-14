@@ -34,7 +34,7 @@ using std::endl;
 class PerformanceTest : public testing::Test
 {
 protected:
-    const double Delta = 0.2;
+    const double Delta = 0.15;
 
     Metrics referenceMetrics;
     Metrics performanceMetrics;
@@ -136,7 +136,7 @@ PERF_TEST(PerformanceTest, many_ops_many_iters)
     EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Delta));
 }
 
-TEST_F(PerformanceTest, DISABLED_many_ops_many_iters_many_kinds)
+TEST_F(PerformanceTest, many_ops_many_iters_many_kinds)
 {
     referenceTest.setupTest_manyOpsManyIters();
     referenceMetrics = referenceTest.runTest({ MEMKIND_DEFAULT, MEMKIND_HBW_PREFERRED });
