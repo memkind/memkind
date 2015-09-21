@@ -11,7 +11,7 @@ malloc_tsd_data(, thread_allocated, thread_allocated_t,
 /* Runtime configuration options. */
 const char	*je_malloc_conf;
 bool	opt_abort =
-#ifdef JEMALLOC_DEBUG
+#if (defined(JEMALLOC_DEBUG) || defined(JEMALLOC_SAFE))
     true
 #else
     false
