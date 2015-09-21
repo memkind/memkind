@@ -107,7 +107,8 @@ DOCS_MAN3 := $(DOCS_XML:$(objroot)%.xml=$(srcroot)%.3)
 DOCS := $(DOCS_HTML) $(DOCS_MAN3)
 C_TESTLIB_SRCS := $(srcroot)test/src/math.c $(srcroot)test/src/mtx.c \
 	$(srcroot)test/src/SFMT.c $(srcroot)test/src/test.c \
-	$(srcroot)test/src/thd.c
+	$(srcroot)test/src/thd.c \
+	$(srcroot)test/src/timer.c
 C_UTIL_INTEGRATION_SRCS := $(srcroot)src/util.c
 TESTS_UNIT := $(srcroot)test/unit/bitmap.c \
 	$(srcroot)test/unit/ckh.c \
@@ -146,7 +147,7 @@ TESTS_INTEGRATION += $(srcroot)test/integration/allocm.c \
 	$(srcroot)test/integration/ALLOCM_ARENA.c \
 	$(srcroot)test/integration/rallocm.c
 endif
-TESTS_STRESS :=
+TESTS_STRESS := $(srcroot)test/stress/microbench.c
 TESTS := $(TESTS_UNIT) $(TESTS_INTEGRATION) $(TESTS_STRESS)
 
 C_OBJS := $(C_SRCS:$(srcroot)%.c=$(objroot)%.$(O))
