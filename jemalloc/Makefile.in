@@ -16,6 +16,7 @@ BINDIR := $(DESTDIR)@BINDIR@
 INCLUDEDIR := $(DESTDIR)@INCLUDEDIR@
 LIBDIR := $(DESTDIR)@LIBDIR@
 DATADIR := $(DESTDIR)@DATADIR@
+DOCDIR := $(DATADIR)/doc
 MANDIR := $(DESTDIR)@MANDIR@
 srcroot := @srcroot@
 objroot := @objroot@
@@ -23,7 +24,8 @@ abs_srcroot := @abs_srcroot@
 abs_objroot := @abs_objroot@
 
 # Build parameters.
-CPPFLAGS := @CPPFLAGS@ -I$(srcroot)include -I$(objroot)include
+EXTRA_CPPFLAGS := @EXTRA_CPPFLAGS@ -I$(srcroot)include -I$(objroot)include
+CPPFLAGS := @CPPFLAGS@
 CFLAGS := @CFLAGS@
 LDFLAGS := @LDFLAGS@
 EXTRA_LDFLAGS := @EXTRA_LDFLAGS@
@@ -201,26 +203,26 @@ $(C_PIC_OBJS): CFLAGS += $(PIC_CFLAGS)
 $(C_JET_OBJS): $(objroot)src/%.jet.$(O): $(srcroot)src/%.c
 $(C_JET_OBJS): CFLAGS += -DJEMALLOC_JET
 $(C_TESTLIB_UNIT_OBJS): $(objroot)test/src/%.unit.$(O): $(srcroot)test/src/%.c
-$(C_TESTLIB_UNIT_OBJS): CPPFLAGS += -DJEMALLOC_UNIT_TEST
+$(C_TESTLIB_UNIT_OBJS): EXTRA_CPPFLAGS += -DJEMALLOC_UNIT_TEST
 $(C_TESTLIB_INTEGRATION_OBJS): $(objroot)test/src/%.integration.$(O): $(srcroot)test/src/%.c
-$(C_TESTLIB_INTEGRATION_OBJS): CPPFLAGS += -DJEMALLOC_INTEGRATION_TEST
+$(C_TESTLIB_INTEGRATION_OBJS): EXTRA_CPPFLAGS += -DJEMALLOC_INTEGRATION_TEST
 $(C_UTIL_INTEGRATION_OBJS): $(objroot)src/%.integration.$(O): $(srcroot)src/%.c
 $(C_TESTLIB_STRESS_OBJS): $(objroot)test/src/%.stress.$(O): $(srcroot)test/src/%.c
-$(C_TESTLIB_STRESS_OBJS): CPPFLAGS += -DJEMALLOC_STRESS_TEST -DJEMALLOC_STRESS_TESTLIB
-$(C_TESTLIB_OBJS): CPPFLAGS += -I$(srcroot)test/include -I$(objroot)test/include
-$(TESTS_UNIT_OBJS): CPPFLAGS += -DJEMALLOC_UNIT_TEST
-$(TESTS_UNIT_AUX_OBJS): CPPFLAGS += -DJEMALLOC_UNIT_TEST
+$(C_TESTLIB_STRESS_OBJS): EXTRA_CPPFLAGS += -DJEMALLOC_STRESS_TEST -DJEMALLOC_STRESS_TESTLIB
+$(C_TESTLIB_OBJS): EXTRA_CPPFLAGS += -I$(srcroot)test/include -I$(objroot)test/include
+$(TESTS_UNIT_OBJS): EXTRA_CPPFLAGS += -DJEMALLOC_UNIT_TEST
+$(TESTS_UNIT_AUX_OBJS): EXTRA_CPPFLAGS += -DJEMALLOC_UNIT_TEST
 define make-unit-link-dep
 $(1): TESTS_UNIT_LINK_OBJS += $(2)
 $(1): $(2)
 endef
 $(foreach test, $(TESTS_UNIT:$(srcroot)test/unit/%.c=$(objroot)test/unit/%$(EXE)), $(eval $(call make-unit-link-dep,$(test),$(filter $(test:%=%_a.$(O)) $(test:%=%_b.$(O)),$(TESTS_UNIT_AUX_OBJS)))))
-$(TESTS_INTEGRATION_OBJS): CPPFLAGS += -DJEMALLOC_INTEGRATION_TEST
-$(TESTS_STRESS_OBJS): CPPFLAGS += -DJEMALLOC_STRESS_TEST
+$(TESTS_INTEGRATION_OBJS): EXTRA_CPPFLAGS += -DJEMALLOC_INTEGRATION_TEST
+$(TESTS_STRESS_OBJS): EXTRA_CPPFLAGS += -DJEMALLOC_STRESS_TEST
 $(TESTS_OBJS): $(objroot)test/%.$(O): $(srcroot)test/%.c
-$(TESTS_OBJS): CPPFLAGS += -I$(srcroot)test/include -I$(objroot)test/include
+$(TESTS_OBJS): EXTRA_CPPFLAGS += -I$(srcroot)test/include -I$(objroot)test/include
 ifneq ($(IMPORTLIB),$(SO))
-$(C_OBJS): CPPFLAGS += -DDLLEXPORT
+$(C_OBJS): EXTRA_CPPFLAGS += -DDLLEXPORT
 endif
 
 ifndef CC_MM
@@ -234,9 +236,9 @@ endif
 
 $(C_OBJS) $(C_PIC_OBJS) $(C_JET_OBJS) $(C_TESTLIB_OBJS) $(TESTS_OBJS): %.$(O):
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $(CPPFLAGS) $(CTARGET) $<
+	$(CC) $(CFLAGS) -c $(CPPFLAGS) $(EXTRA_CPPFLAGS) $(CTARGET) $<
 ifdef CC_MM
-	@$(CC) -MM $(CPPFLAGS) -MT $@ -o $(@:%.$(O)=%.d) $<
+	@$(CC) -MM $(CPPFLAGS) $(EXTRA_CPPFLAGS) -MT $@ -o $(@:%.$(O)=%.d) $<
 endif
 
 ifneq ($(SOREV),$(SO))
@@ -304,10 +306,10 @@ done
 install_lib: install_lib_shared install_lib_static
 
 install_doc_html:
-	install -d $(DATADIR)/doc/jemalloc$(install_suffix)
+	install -d $(DOCDIR)/jemalloc$(install_suffix)
 	@for d in $(DOCS_HTML); do \
-	echo "install -m 644 $$d $(DATADIR)/doc/jemalloc$(install_suffix)"; \
-	install -m 644 $$d $(DATADIR)/doc/jemalloc$(install_suffix); \
+	echo "install -m 644 $$d $(DOCDIR)/jemalloc$(install_suffix)"; \
+	install -m 644 $$d $(DOCDIR)/jemalloc$(install_suffix); \
 done
 
 install_doc_man:
@@ -318,6 +320,9 @@ install_doc_man:
 done
 
 install_doc: install_doc_html install_doc_man
+	install -d $(DOCDIR)/jemalloc$(install_suffix)
+	install -m 644 $(srcroot)/README $(DOCDIR)/jemalloc$(install_suffix)
+	install -m 644 $(srcroot)/COPYING $(DOCDIR)/jemalloc$(install_suffix)
 
 install: install_bin install_include install_lib install_doc
 
