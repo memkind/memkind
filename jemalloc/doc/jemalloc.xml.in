@@ -1580,6 +1580,17 @@ malloc_conf = "xmalloc:true";]]></programlisting>
         and returning the new arena index.</para></listitem>
       </varlistentry>
 
+      <varlistentry id="arenas.extendk">
+        <term>
+          <mallctl>arenas.extendk</mallctl>
+          (<type>unsigned</type>)
+          <literal>rw</literal>
+          [<option>--enable-memkind</option>]
+        </term>
+        <listitem><para>Extend the array of arenas by appending a new memkind enabled arena
+        of the specified NUMA kind, and returning the new arena index.</para></listitem>
+      </varlistentry>
+
       <varlistentry id="prof.active">
         <term>
           <mallctl>prof.active</mallctl>

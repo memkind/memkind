@@ -5,6 +5,14 @@ found in the git revision history:
 
     https://github.com/jemalloc/jemalloc
 
+  - Moved to a single memkind callback: memkind_partition_mmap()
+* Thu Oct 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> 3.5.1+mk2
+  - Updated README with memkind information.
+  - Added support for the memkind library with --enable-memkind configure
+    flag.  This includes a new mallctl switch "arenas.extendk". This is a
+    fork of the github jemalloc 3.5.1 release.
+  - Now using weak symbols for memkind callback functions.
+
 * 3.5.1 (February 25, 2014)
 
   This version primarily addresses minor bugs in test code.
@@ -521,4 +529,3 @@ found in the git revision history:
   support into the FreeBSD malloc sources.
 
 --------------------------------------------------------------------------------
-vim:filetype=text:textwidth=80
