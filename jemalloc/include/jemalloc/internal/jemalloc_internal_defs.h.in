@@ -94,6 +94,11 @@
  */
 #undef JEMALLOC_DEBUG
 
+/*
+ * JEMALLOC_SAFE ensures that no klocwork critical bugs exist
+ */
+#undef JEMALLOC_SAFE
+
 /* JEMALLOC_STATS enables statistics calculation. */
 #undef JEMALLOC_STATS
 

@@ -47,7 +47,7 @@ void	rtree_postfork_child(rtree_t *rtree);
 #ifdef JEMALLOC_H_INLINES
 
 #ifndef JEMALLOC_ENABLE_INLINE
-#ifdef JEMALLOC_DEBUG
+#ifdef JEMALLOC_SAFE
 uint8_t rtree_get_locked(rtree_t *rtree, uintptr_t key);
 #endif
 uint8_t	rtree_get(rtree_t *rtree, uintptr_t key);
@@ -96,7 +96,7 @@ f(rtree_t *rtree, uintptr_t key)					\
 	return (ret);							\
 }
 
-#ifdef JEMALLOC_DEBUG
+#ifdef JEMALLOC_SAFE
 #  define RTREE_LOCK(l)		malloc_mutex_lock(l)
 #  define RTREE_UNLOCK(l)	malloc_mutex_unlock(l)
 #  define RTREE_GET_VALIDATE
@@ -108,7 +108,7 @@ RTREE_GET_GENERATE(rtree_get_locked)
 
 #define	RTREE_LOCK(l)
 #define	RTREE_UNLOCK(l)
-#ifdef JEMALLOC_DEBUG
+#ifdef JEMALLOC_SAFE
    /*
     * Suppose that it were possible for a jemalloc-allocated chunk to be
     * munmap()ped, followed by a different allocator in another thread re-using

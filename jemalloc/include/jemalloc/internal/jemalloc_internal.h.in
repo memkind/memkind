@@ -85,6 +85,13 @@ static const bool config_debug =
     false
 #endif
     ;
+static const bool config_safe =
+#ifdef JEMALLOC_SAFE
+    true
+#else
+    false
+#endif
+    ;
 static const bool config_dss =
 #ifdef JEMALLOC_DSS
     true

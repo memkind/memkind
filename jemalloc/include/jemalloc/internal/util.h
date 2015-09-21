@@ -33,7 +33,7 @@
  */
 #ifndef assert
 #define	assert(e) do {							\
-	if (config_debug && !(e)) {					\
+	if (config_safe && !(e)) {					\
 		malloc_printf(						\
 		    "<jemalloc>: %s:%d: Failed assertion: \"%s\"\n",	\
 		    __FILE__, __LINE__, #e);				\
@@ -44,7 +44,7 @@
 
 #ifndef not_reached
 #define	not_reached() do {						\
-	if (config_debug) {						\
+	if (config_safe) {						\
 		malloc_printf(						\
 		    "<jemalloc>: %s:%d: Unreachable code reached\n",	\
 		    __FILE__, __LINE__);				\
