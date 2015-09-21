@@ -1460,7 +1460,7 @@ je_mallocx(size_t size, int flags)
 			/* default or memkind arenas */
 			try_tcache = true;
 		} else {
-			/* ext arenas */
+			/* extended arenas */
 			try_tcache = false;
 		}
 #else
@@ -1717,7 +1717,7 @@ je_xallocx(void *ptr, size_t size, size_t extra, int flags)
 	if (arena_ind != UINT_MAX)
 		arena = arenas[arena_ind];
 	else
-		arena = NULL;
+		arena = choose_arena(NULL);
 
 	old_usize = isalloc(ptr, config_prof);
 	if (config_valgrind && opt_valgrind)
