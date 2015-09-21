@@ -305,6 +305,7 @@ arena_run_reg_dalloc(arena_run_t *run, void *ptr)
 	size_t pageind = ((uintptr_t)ptr - (uintptr_t)chunk) >> LG_PAGE;
 	size_t mapbits = arena_mapbits_get(chunk, pageind);
 	size_t binind = arena_ptr_small_binind_get(ptr, mapbits);
+	assert(binind < NBINS);
 	arena_bin_info_t *bin_info = &arena_bin_info[binind];
 	unsigned regind = arena_run_regind(run, bin_info, ptr);
 	bitmap_t *bitmap = (bitmap_t *)((uintptr_t)run +
@@ -1880,6 +1881,7 @@ arena_dalloc_bin_locked(arena_t *arena, arena_chunk_t *chunk, void *ptr,
 	    arena_mapbits_small_runind_get(chunk, pageind)) << LG_PAGE));
 	bin = run->bin;
 	binind = arena_ptr_small_binind_get(ptr, mapelm->bits);
+	assert(binind < NBINS);
 	bin_info = &arena_bin_info[binind];
 	if (config_fill || config_stats)
 		size = bin_info->reg_size;
