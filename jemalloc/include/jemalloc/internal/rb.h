@@ -544,7 +544,7 @@ a_prefix##remove(a_rbt_type *rbtree, a_type *node) {			\
 	    }								\
 	}								\
     }									\
-    assert(nodep->node == node);					\
+    assert(nodep != NULL && nodep->node == node);			\
     pathp--;								\
     if (pathp->node != node) {						\
 	/* Swap node with its successor. */				\
