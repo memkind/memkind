@@ -747,7 +747,8 @@ ctl_lookup(const char *name, ctl_node_t const **nodesp, size_t *mibp,
 			for (j = 0; j < node->nchildren; j++) {
 				const ctl_named_node_t *child =
 				    ctl_named_children(node, j);
-				if (strlen(child->name) == elen &&
+				if (child != NULL &&
+				    strlen(child->name) == elen &&
 				    strncmp(elm, child->name, elen) == 0) {
 					node = child;
 					if (nodesp != NULL)
@@ -773,6 +774,10 @@ ctl_lookup(const char *name, ctl_node_t const **nodesp, size_t *mibp,
 			}
 
 			inode = ctl_indexed_node(node->children);
+			if (inode == NULL) {
+				ret = ENOENT;
+				goto label_return;
+			}
 			node = inode->index(mibp, *depthp, (size_t)index);
 			if (node == NULL) {
 				ret = ENOENT;
@@ -893,6 +898,10 @@ ctl_bymib(const size_t *mib, size_t miblen, void *oldp, size_t *oldlenp,
 
 			/* Indexed element. */
 			inode = ctl_indexed_node(node->children);
+			if (inode == NULL) {
+				ret = ENOENT;
+				goto label_return;
+			}
 			node = inode->index(mib, miblen, mib[i]);
 			if (node == NULL) {
 				ret = ENOENT;
@@ -1332,13 +1341,17 @@ arena_i_dss_ctl(const size_t *mib, size_t miblen, void *oldp, size_t *oldlenp,
 {
 	int ret, i;
 	bool match, err;
-	const char *dss;
+	const char *dss = NULL;
 	unsigned arena_ind = mib[1];
 	dss_prec_t dss_prec_old = dss_prec_limit;
 	dss_prec_t dss_prec = dss_prec_limit;
 
 	malloc_mutex_lock(&ctl_mtx);
 	WRITE(dss, const char *);
+	if (dss == NULL) {
+		ret = EINVAL;
+		goto label_return;
+        }
 	match = false;
 	for (i = 0; i < dss_prec_limit; i++) {
 		if (strcmp(dss_prec_names[i], dss) == 0) {
