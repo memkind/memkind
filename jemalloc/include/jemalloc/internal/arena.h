@@ -958,11 +958,14 @@ arena_malloc(arena_t *arena, size_t size, bool zero, bool try_tcache)
 	assert(size <= arena_maxclass);
 
 	if (size <= SMALL_MAXCLASS) {
-		if (try_tcache && (tcache = tcache_get(true)) != NULL)
+		if (try_tcache && (tcache = tcache_get(
+#ifdef JEMALLOC_ENABLE_MEMKIND
+				arena,
+#endif
+				true)) != NULL)
 			return (tcache_alloc_small(tcache, size, zero));
 		else {
-			return (arena_malloc_small(choose_arena(arena), size,
-			    zero));
+			return (arena_malloc_small(arena, size, zero));
 		}
 	} else {
 		/*
@@ -970,11 +973,14 @@ arena_malloc(arena_t *arena, size_t size, bool zero, bool try_tcache)
 		 * infinite recursion during tcache initialization.
 		 */
 		if (try_tcache && size <= tcache_maxclass && (tcache =
-		    tcache_get(true)) != NULL)
+		    tcache_get(
+#ifdef JEMALLOC_ENABLE_MEMKIND
+			    arena,
+#endif
+			    true)) != NULL)
 			return (tcache_alloc_large(tcache, size, zero));
 		else {
-			return (arena_malloc_large(choose_arena(arena), size,
-			    zero));
+			return (arena_malloc_large(arena, size, zero));
 		}
 	}
 }
@@ -1042,7 +1048,11 @@ arena_dalloc(arena_t *arena, arena_chunk_t *chunk, void *ptr, bool try_tcache)
 	assert(arena_mapbits_allocated_get(chunk, pageind) != 0);
 	if ((mapbits & CHUNK_MAP_LARGE) == 0) {
 		/* Small allocation. */
-		if (try_tcache && (tcache = tcache_get(false)) != NULL) {
+		if (try_tcache && (tcache = tcache_get(
+#ifdef JEMALLOC_ENABLE_MEMKIND
+				arena,
+#endif
+				false)) != NULL) {
 			size_t binind;
 
 			binind = arena_ptr_small_binind_get(ptr, mapbits);
@@ -1055,7 +1065,11 @@ arena_dalloc(arena_t *arena, arena_chunk_t *chunk, void *ptr, bool try_tcache)
 		assert(((uintptr_t)ptr & PAGE_MASK) == 0);
 
 		if (try_tcache && size <= tcache_maxclass && (tcache =
-		    tcache_get(false)) != NULL) {
+		    tcache_get(
+#ifdef JEMALLOC_ENABLE_MEMKIND
+			    arena,
+#endif
+			    false)) != NULL) {
 			tcache_dalloc_large(tcache, ptr, size);
 		} else
 			arena_dalloc_large(arena, chunk, ptr);

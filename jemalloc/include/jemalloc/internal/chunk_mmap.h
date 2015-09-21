@@ -9,7 +9,11 @@
 /******************************************************************************/
 #ifdef JEMALLOC_H_EXTERNS
 
-bool	pages_purge(void *addr, size_t length);
+bool	pages_purge(void *addr, size_t length
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, bool file_mapped
+#endif
+);
 
 void	*chunk_alloc_mmap(size_t size, size_t alignment, bool *zero
 #ifdef JEMALLOC_ENABLE_MEMKIND

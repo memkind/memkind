@@ -3,8 +3,11 @@
 
 /******************************************************************************/
 /* Data. */
-
+#ifdef JEMALLOC_ENABLE_MEMKIND
+malloc_tsd_data(, tcache, tsd_tcache_t, TSD_TCACHE_INITIALIZER)
+#else
 malloc_tsd_data(, tcache, tcache_t *, NULL)
+#endif
 malloc_tsd_data(, tcache_enabled, tcache_enabled_t, tcache_enabled_default)
 
 bool	opt_tcache = true;
@@ -271,7 +274,9 @@ tcache_create(arena_t *arena)
 	tcache_t *tcache;
 	size_t size, stack_offset;
 	unsigned i;
-
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	tsd_tcache_t *tsd = tcache_tsd_get();
+#endif
 	size = offsetof(tcache_t, tbins) + (sizeof(tcache_bin_t) * nhbins);
 	/* Naturally align the pointer stacks. */
 	size = PTR_CEILING(size);
@@ -307,7 +312,11 @@ tcache_create(arena_t *arena)
 		stack_offset += tcache_bin_info[i].ncached_max * sizeof(void *);
 	}
 
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	tsd->tcaches[arena->partition & ~JEMALLOC_MEMKIND_FILE_MAPPED] = tcache;
+#else
 	tcache_tsd_set(&tcache);
+#endif
 
 	return (tcache);
 }
@@ -369,6 +378,48 @@ tcache_destroy(tcache_t *tcache)
 		idalloct(tcache, false);
 }
 
+#ifdef JEMALLOC_ENABLE_MEMKIND
+
+void
+tcache_thread_cleanup(void *arg)
+{
+	tsd_tcache_t *tsd = arg;
+
+	int npartitions;
+	int maxarena = narenas_total_get() - 1;
+	if (arenas[maxarena] != NULL)
+		npartitions = arenas[maxarena]->partition & ~JEMALLOC_MEMKIND_FILE_MAPPED;
+	else
+		npartitions = 1;
+
+	for (int i = 0; i < npartitions; ++i) {
+		tcache_t *tcache = tsd->tcaches[i];
+		if (tcache == TCACHE_STATE_DISABLED) {
+			/* Do nothing. */
+		} else if (tcache == TCACHE_STATE_REINCARNATED) {
+			/*
+			 * Another destructor called an allocator function after this
+			 * destructor was called.  Reset tcache to
+			 * TCACHE_STATE_PURGATORY in order to receive another callback.
+			 */
+			tsd->tcaches[i] = TCACHE_STATE_PURGATORY;
+		} else if (tcache == TCACHE_STATE_PURGATORY) {
+			/*
+			 * The previous time this destructor was called, we set the key
+			 * to TCACHE_STATE_PURGATORY so that other destructors wouldn't
+			 * cause re-creation of the tcache.  This time, do nothing, so
+			 * that the destructor will not be called again.
+			 */
+		} else if (tcache != NULL) {
+			assert(tcache != TCACHE_STATE_PURGATORY);
+			tsd->tcaches[i] = TCACHE_STATE_PURGATORY;
+			tcache_destroy(tcache);
+		}
+	}
+}
+
+#else
+
 void
 tcache_thread_cleanup(void *arg)
 {
@@ -398,6 +449,8 @@ tcache_thread_cleanup(void *arg)
 		tcache_tsd_set(&tcache);
 	}
 }
+
+#endif
 
 /* Caller must own arena->lock. */
 void

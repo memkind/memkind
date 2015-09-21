@@ -1216,6 +1216,9 @@ thread_arena_ctl(const size_t *mib, size_t miblen, void *oldp, size_t *oldlenp,
 {
 	int ret;
 	unsigned newind, oldind;
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	tsd_tcache_t *tsd = tcache_tsd_get();
+#endif
 
 	malloc_mutex_lock(&ctl_mtx);
 	newind = oldind = choose_arena(NULL)->ind;
@@ -1246,7 +1249,11 @@ thread_arena_ctl(const size_t *mib, size_t miblen, void *oldp, size_t *oldlenp,
 		/* Set new arena association. */
 		if (config_tcache) {
 			tcache_t *tcache;
+#ifdef JEMALLOC_ENABLE_MEMKIND
+			if ((uintptr_t)(tcache = tsd->tcaches[arena->partition & ~JEMALLOC_MEMKIND_FILE_MAPPED]) >
+#else
 			if ((uintptr_t)(tcache = *tcache_tsd_get()) >
+#endif
 			    (uintptr_t)TCACHE_STATE_MAX) {
 				tcache_arena_dissociate(tcache);
 				tcache_arena_associate(tcache, arena);
@@ -1307,7 +1314,11 @@ thread_tcache_flush_ctl(const size_t *mib, size_t miblen, void *oldp,
 	READONLY();
 	WRITEONLY();
 
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	tcache_flush(0); /* default partition */
+#else
 	tcache_flush();
+#endif
 
 	ret = 0;
 label_return:

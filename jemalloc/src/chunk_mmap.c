@@ -145,7 +145,11 @@ pages_trim(void *addr, size_t alloc_size, size_t leadsize, size_t size
 }
 
 bool
-pages_purge(void *addr, size_t length)
+pages_purge(void *addr, size_t length
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, bool file_mapped
+#endif
+)
 {
 	bool unzeroed;
 
@@ -163,7 +167,11 @@ pages_purge(void *addr, size_t length)
 #    error "No method defined for purging unused dirty pages."
 #  endif
 	int err = madvise(addr, length, JEMALLOC_MADV_PURGE);
-	unzeroed = (JEMALLOC_MADV_ZEROS == false || err != 0);
+	unzeroed = (JEMALLOC_MADV_ZEROS == false ||
+#ifdef JEMALLOC_ENABLE_MEMKIND
+			file_mapped ||
+#endif
+			err != 0);
 #  undef JEMALLOC_MADV_PURGE
 #  undef JEMALLOC_MADV_ZEROS
 #endif

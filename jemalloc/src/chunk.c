@@ -277,7 +277,11 @@ chunk_record(extent_tree_t *chunks_szad, extent_tree_t *chunks_ad, void *chunk,
 	bool unzeroed;
 	extent_node_t *xnode, *node, *prev, *xprev, key;
 
-	unzeroed = pages_purge(chunk, size);
+	unzeroed = pages_purge(chunk, size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+			, (partition & JEMALLOC_MEMKIND_FILE_MAPPED) != 0
+#endif
+			);
 	VALGRIND_MAKE_MEM_NOACCESS(chunk, size);
 
 	/*

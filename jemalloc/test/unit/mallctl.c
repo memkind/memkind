@@ -370,6 +370,7 @@ TEST_BEGIN(test_arenas_extend)
 }
 TEST_END
 
+#ifdef JEMALLOC_ENABLE_MEMKIND
 TEST_BEGIN(test_arenas_extendk)
 {
 	unsigned narenas_before, arena, narenas_after, partition;
@@ -388,6 +389,7 @@ TEST_BEGIN(test_arenas_extendk)
 	assert_u_eq(arena, narenas_after-1, "Unexpected arena index");
 }
 TEST_END
+#endif
 
 TEST_BEGIN(test_stats_arenas)
 {
@@ -430,6 +432,8 @@ main(void)
 	    test_arenas_bin_constants,
 	    test_arenas_lrun_constants,
 	    test_arenas_extend,
+#ifdef JEMALLOC_ENABLE_MEMKIND
 	    test_arenas_extendk,
+#endif
 	    test_stats_arenas));
 }

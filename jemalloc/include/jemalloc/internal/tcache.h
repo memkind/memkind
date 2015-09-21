@@ -4,6 +4,9 @@
 typedef struct tcache_bin_info_s tcache_bin_info_t;
 typedef struct tcache_bin_s tcache_bin_t;
 typedef struct tcache_s tcache_t;
+#ifdef JEMALLOC_ENABLE_MEMKIND
+typedef struct tsd_tcache_s tsd_tcache_t;
+#endif
 
 /*
  * tcache pointers close to NULL are used to encode state information that is
@@ -40,6 +43,10 @@ typedef struct tcache_s tcache_t;
 /* Number of tcache allocation/deallocation events between incremental GCs. */
 #define	TCACHE_GC_INCR							\
     ((TCACHE_GC_SWEEP / NBINS) + ((TCACHE_GC_SWEEP / NBINS == 0) ? 0 : 1))
+
+#ifdef JEMALLOC_ENABLE_MEMKIND
+#define	TSD_TCACHE_INITIALIZER	JEMALLOC_ARG_CONCAT({.tcaches = {0}})
+#endif
 
 #endif /* JEMALLOC_H_TYPES */
 /******************************************************************************/
@@ -82,6 +89,12 @@ struct tcache_s {
 	 */
 };
 
+#ifdef JEMALLOC_ENABLE_MEMKIND
+struct tsd_tcache_s {
+	tcache_t* tcaches[512]; /* 512 == MEMKIND_MAX_KIND */
+};
+#endif
+
 #endif /* JEMALLOC_H_STRUCTS */
 /******************************************************************************/
 #ifdef JEMALLOC_H_EXTERNS
@@ -122,13 +135,27 @@ bool	tcache_boot1(void);
 #ifdef JEMALLOC_H_INLINES
 
 #ifndef JEMALLOC_ENABLE_INLINE
-malloc_tsd_protos(JEMALLOC_ATTR(unused), tcache, tcache_t *)
+malloc_tsd_protos(JEMALLOC_ATTR(unused), tcache
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, tsd_tcache_t)
+#else
+, tcache_t *)
+#endif
 malloc_tsd_protos(JEMALLOC_ATTR(unused), tcache_enabled, tcache_enabled_t)
 
 void	tcache_event(tcache_t *tcache);
-void	tcache_flush(void);
+void	tcache_flush(
+#ifdef JEMALLOC_ENABLE_MEMKIND
+unsigned partition);
+#else
+void);
+#endif
 bool	tcache_enabled_get(void);
-tcache_t *tcache_get(bool create);
+tcache_t *tcache_get(
+#ifdef JEMALLOC_ENABLE_MEMKIND
+arena_t *arena,
+#endif
+bool create);
 void	tcache_enabled_set(bool enabled);
 void	*tcache_alloc_easy(tcache_bin_t *tbin);
 void	*tcache_alloc_small(tcache_t *tcache, size_t size, bool zero);
@@ -139,27 +166,49 @@ void	tcache_dalloc_large(tcache_t *tcache, void *ptr, size_t size);
 
 #if (defined(JEMALLOC_ENABLE_INLINE) || defined(JEMALLOC_TCACHE_C_))
 /* Map of thread-specific caches. */
-malloc_tsd_externs(tcache, tcache_t *)
-malloc_tsd_funcs(JEMALLOC_ALWAYS_INLINE, tcache, tcache_t *, NULL,
-    tcache_thread_cleanup)
+malloc_tsd_externs(tcache,
+#ifdef JEMALLOC_ENABLE_MEMKIND
+tsd_tcache_t)
+#else
+tcache_t *)
+#endif
+malloc_tsd_funcs(JEMALLOC_ALWAYS_INLINE, tcache,
+#ifdef JEMALLOC_ENABLE_MEMKIND
+tsd_tcache_t, TSD_TCACHE_INITIALIZER,
+#else
+tcache_t *, NULL,
+#endif
+tcache_thread_cleanup)
+
 /* Per thread flag that allows thread caches to be disabled. */
 malloc_tsd_externs(tcache_enabled, tcache_enabled_t)
 malloc_tsd_funcs(JEMALLOC_ALWAYS_INLINE, tcache_enabled, tcache_enabled_t,
     tcache_enabled_default, malloc_tsd_no_cleanup)
 
 JEMALLOC_INLINE void
-tcache_flush(void)
+tcache_flush(
+#ifdef JEMALLOC_ENABLE_MEMKIND
+unsigned partition
+#endif
+)
 {
-	tcache_t *tcache;
-
 	cassert(config_tcache);
 
-	tcache = *tcache_tsd_get();
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	tsd_tcache_t *tsd = tcache_tsd_get();
+	tcache_t *tcache = tsd->tcaches[partition & ~JEMALLOC_MEMKIND_FILE_MAPPED];
+#else
+	tcache_t *tcache = *tcache_tsd_get();
+#endif
 	if ((uintptr_t)tcache <= (uintptr_t)TCACHE_STATE_MAX)
 		return;
 	tcache_destroy(tcache);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	tsd->tcaches[partition & ~JEMALLOC_MEMKIND_FILE_MAPPED] = NULL;
+#else
 	tcache = NULL;
 	tcache_tsd_set(&tcache);
+#endif
 }
 
 JEMALLOC_INLINE bool
@@ -188,6 +237,34 @@ tcache_enabled_set(bool enabled)
 
 	tcache_enabled = (tcache_enabled_t)enabled;
 	tcache_enabled_tsd_set(&tcache_enabled);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	tsd_tcache_t *tsd = tcache_tsd_get();
+
+	int i;
+	int npartitions;
+	int maxarena = narenas_total_get() - 1;
+	if (arenas[maxarena] != NULL)
+		npartitions = arenas[maxarena]->partition & ~JEMALLOC_MEMKIND_FILE_MAPPED;
+	else
+		npartitions = 1;
+
+	for (i = 0; i < npartitions; i++) {
+		tcache = tsd->tcaches[i];
+		if (enabled) {
+			if (tcache == TCACHE_STATE_DISABLED) {
+				tsd->tcaches[i] = NULL;
+			}
+		} else /* disabled */ {
+			if (tcache > TCACHE_STATE_MAX) {
+				tcache_destroy(tcache);
+				tcache = NULL;
+			}
+			if (tcache == NULL) {
+				tsd->tcaches[i] = TCACHE_STATE_DISABLED;
+			}
+		}
+	}
+#else
 	tcache = *tcache_tsd_get();
 	if (enabled) {
 		if (tcache == TCACHE_STATE_DISABLED) {
@@ -204,10 +281,15 @@ tcache_enabled_set(bool enabled)
 			tcache_tsd_set(&tcache);
 		}
 	}
+#endif
 }
 
 JEMALLOC_ALWAYS_INLINE tcache_t *
-tcache_get(bool create)
+tcache_get(
+#ifdef JEMALLOC_ENABLE_MEMKIND
+arena_t *arena,
+#endif
+bool create)
 {
 	tcache_t *tcache;
 
@@ -216,7 +298,14 @@ tcache_get(bool create)
 	if (config_lazy_lock && isthreaded == false)
 		return (NULL);
 
+
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	tsd_tcache_t *tsd = tcache_tsd_get();
+	arena = choose_arena(arena);
+	tcache = tsd->tcaches[arena->partition & ~JEMALLOC_MEMKIND_FILE_MAPPED];
+#else
 	tcache = *tcache_tsd_get();
+#endif
 	if ((uintptr_t)tcache <= (uintptr_t)TCACHE_STATE_MAX) {
 		if (tcache == TCACHE_STATE_DISABLED)
 			return (NULL);
@@ -239,7 +328,11 @@ tcache_get(bool create)
 				tcache_enabled_set(false); /* Memoize. */
 				return (NULL);
 			}
+#ifdef JEMALLOC_ENABLE_MEMKIND
+			return (tcache_create(arena));
+#else
 			return (tcache_create(choose_arena(NULL)));
+#endif
 		}
 		if (tcache == TCACHE_STATE_PURGATORY) {
 			/*
@@ -247,7 +340,11 @@ tcache_get(bool create)
 			 * after tcache_thread_cleanup() was called.
 			 */
 			tcache = TCACHE_STATE_REINCARNATED;
+#ifdef JEMALLOC_ENABLE_MEMKIND
+			tsd->tcaches[arena->partition & ~JEMALLOC_MEMKIND_FILE_MAPPED] = tcache;
+#else
 			tcache_tsd_set(&tcache);
+#endif
 			return (NULL);
 		}
 		if (tcache == TCACHE_STATE_REINCARNATED)
