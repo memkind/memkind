@@ -16,14 +16,26 @@ malloc_mutex_t	huge_mtx;
 static extent_tree_t	huge;
 
 void *
-huge_malloc(size_t size, bool zero)
+huge_malloc(size_t size, bool zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, int partition
+#endif
+)
 {
 
-	return (huge_palloc(size, chunksize, zero));
+	return (huge_palloc(size, chunksize, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+));
 }
 
 void *
-huge_palloc(size_t size, size_t alignment, bool zero)
+huge_palloc(size_t size, size_t alignment, bool zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, int partition
+#endif
+)
 {
 	void *ret;
 	size_t csize;
@@ -49,7 +61,11 @@ huge_palloc(size_t size, size_t alignment, bool zero)
 	 */
 	is_zeroed = zero;
 	ret = chunk_alloc(csize, alignment, false, &is_zeroed,
-	    chunk_dss_prec_get());
+	    chunk_dss_prec_get()
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 	if (ret == NULL) {
 		base_node_dealloc(node);
 		return (NULL);
@@ -58,6 +74,9 @@ huge_palloc(size_t size, size_t alignment, bool zero)
 	/* Insert node into huge. */
 	node->addr = ret;
 	node->size = csize;
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	node->partition = partition;
+#endif
 
 	malloc_mutex_lock(&huge_mtx);
 	extent_tree_ad_insert(&huge, node);
@@ -98,7 +117,11 @@ huge_ralloc_no_move(void *ptr, size_t oldsize, size_t size, size_t extra)
 
 void *
 huge_ralloc(void *ptr, size_t oldsize, size_t size, size_t extra,
-    size_t alignment, bool zero, bool try_tcache_dalloc)
+    size_t alignment, bool zero, bool try_tcache_dalloc
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, int partition
+#endif
+)
 {
 	void *ret;
 	size_t copysize;
@@ -113,18 +136,34 @@ huge_ralloc(void *ptr, size_t oldsize, size_t size, size_t extra,
 	 * space and copying.
 	 */
 	if (alignment > chunksize)
-		ret = huge_palloc(size + extra, alignment, zero);
+		ret = huge_palloc(size + extra, alignment, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 	else
-		ret = huge_malloc(size + extra, zero);
+		ret = huge_malloc(size + extra, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 
 	if (ret == NULL) {
 		if (extra == 0)
 			return (NULL);
 		/* Try again, this time without extra. */
 		if (alignment > chunksize)
-			ret = huge_palloc(size, alignment, zero);
+			ret = huge_palloc(size, alignment, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 		else
-			ret = huge_malloc(size, zero);
+			ret = huge_malloc(size, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 
 		if (ret == NULL)
 			return (NULL);
@@ -143,7 +182,11 @@ huge_ralloc(void *ptr, size_t oldsize, size_t size, size_t extra,
 	 */
 	if (oldsize >= chunksize && (config_dss == false || (chunk_in_dss(ptr)
 	    == false && chunk_in_dss(ret) == false))) {
-		size_t newsize = huge_salloc(ret);
+		size_t newsize = huge_salloc(ret
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 
 		/*
 		 * Remove ptr from the tree of huge allocations before
@@ -170,7 +213,7 @@ huge_ralloc(void *ptr, size_t oldsize, size_t size, size_t extra,
 			if (opt_abort)
 				abort();
 			memcpy(ret, ptr, copysize);
-			chunk_dealloc_mmap(ptr, oldsize);
+			chunk_dealloc_mmap(ptr, oldsize, partition);
 		} else if (config_fill && zero == false && opt_junk && oldsize
 		    < newsize) {
 			/*
@@ -223,9 +266,20 @@ huge_dalloc(void *ptr, bool unmap)
 
 	/* Extract from tree of huge allocations. */
 	key.addr = ptr;
-	node = extent_tree_ad_search(&huge, &key);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	key.partition = -1;
+	do {
+		key.partition++;
+#endif
+		node = extent_tree_ad_search(&huge, &key);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	} while ((node == NULL || node->partition != key.partition) &&
+		 key.partition < 256); /* FIXME hard coding partition max to 256 */
+#endif
+
 	assert(node != NULL);
 	assert(node->addr == ptr);
+
 	extent_tree_ad_remove(&huge, node);
 
 	if (config_stats) {
@@ -239,13 +293,21 @@ huge_dalloc(void *ptr, bool unmap)
 	if (unmap)
 		huge_dalloc_junk(node->addr, node->size);
 
-	chunk_dealloc(node->addr, node->size, unmap);
+	chunk_dealloc(node->addr, node->size, unmap
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, key.partition
+#endif
+);
 
 	base_node_dealloc(node);
 }
 
 size_t
-huge_salloc(const void *ptr)
+huge_salloc(const void *ptr
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+)
 {
 	size_t ret;
 	extent_node_t *node, key;
@@ -254,7 +316,17 @@ huge_salloc(const void *ptr)
 
 	/* Extract from tree of huge allocations. */
 	key.addr = __DECONST(void *, ptr);
-	node = extent_tree_ad_search(&huge, &key);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	key.partition = partition - 1;
+	do {
+		key.partition++;
+#endif
+		node = extent_tree_ad_search(&huge, &key);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	} while((node == NULL || node->partition != key.partition) &&
+		key.partition < 256); /* FIXME hard coding partition max to 256 */
+#endif
+
 	assert(node != NULL);
 
 	ret = node->size;
