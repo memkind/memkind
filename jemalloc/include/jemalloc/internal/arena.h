@@ -381,6 +381,11 @@ struct arena_s {
 
 	/* bins is used to store trees of free regions. */
 	arena_bin_t		bins[NBINS];
+
+	/* used to bind arena to a particular numa kind */
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	unsigned       		partition;
+#endif
 };
 
 #endif /* JEMALLOC_H_STRUCTS */

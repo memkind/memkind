@@ -4,6 +4,9 @@
 /* Support the experimental API. */
 #undef JEMALLOC_EXPERIMENTAL
 
+/* Support the memkind library. */
+#undef JEMALLOC_ENABLE_MEMKIND
+
 /*
  * Define overrides for non-standard allocator-related functions if they are
  * present on the system.

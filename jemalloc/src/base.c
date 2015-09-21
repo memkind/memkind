@@ -33,7 +33,11 @@ base_pages_alloc(size_t minsize)
 	csize = CHUNK_CEILING(minsize);
 	zero = false;
 	base_pages = chunk_alloc(csize, chunksize, true, &zero,
-	    chunk_dss_prec_get());
+	    chunk_dss_prec_get()
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, 0
+#endif
+);
 	if (base_pages == NULL)
 		return (true);
 	base_next_addr = base_pages;
