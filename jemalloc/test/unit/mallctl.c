@@ -370,6 +370,25 @@ TEST_BEGIN(test_arenas_extend)
 }
 TEST_END
 
+TEST_BEGIN(test_arenas_extendk)
+{
+	unsigned narenas_before, arena, narenas_after, partition;
+	size_t sz = sizeof(unsigned);
+
+	partition = 1;
+	assert_d_eq(mallctl("arenas.narenas", &narenas_before, &sz, NULL, 0), 0,
+	    "Unexpected mallctl() failure");
+	assert_d_eq(mallctl("arenas.extendk", &arena, &sz, &partition, sz), 0,
+	    "Unexpected mallctl() failure");
+	assert_d_eq(mallctl("arenas.narenas", &narenas_after, &sz, NULL, 0), 0,
+	    "Unexpected mallctl() failure");
+
+	assert_u_eq(narenas_before+1, narenas_after,
+	    "Unexpected number of arenas before versus after extension");
+	assert_u_eq(arena, narenas_after-1, "Unexpected arena index");
+}
+TEST_END
+
 TEST_BEGIN(test_stats_arenas)
 {
 
@@ -411,5 +430,6 @@ main(void)
 	    test_arenas_bin_constants,
 	    test_arenas_lrun_constants,
 	    test_arenas_extend,
+	    test_arenas_extendk,
 	    test_stats_arenas));
 }
