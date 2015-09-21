@@ -1,18 +1,33 @@
 #define	JEMALLOC_CHUNK_MMAP_C_
 #include "jemalloc/internal/jemalloc_internal.h"
+#ifdef JEMALLOC_ENABLE_MEMKIND
+extern void *memkind_partition_mmap(int, void *, size_t) __attribute__((weak));
+#endif
 
 /******************************************************************************/
 /* Function prototypes for non-inline static functions. */
 
-static void	*pages_map(void *addr, size_t size);
+static void	*pages_map(void *addr, size_t size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+);
 static void	pages_unmap(void *addr, size_t size);
 static void	*chunk_alloc_mmap_slow(size_t size, size_t alignment,
-    bool *zero);
+    bool *zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+);
 
 /******************************************************************************/
 
 static void *
-pages_map(void *addr, size_t size)
+pages_map(void *addr, size_t size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+)
 {
 	void *ret;
 
@@ -26,12 +41,20 @@ pages_map(void *addr, size_t size)
 	ret = VirtualAlloc(addr, size, MEM_COMMIT | MEM_RESERVE,
 	    PAGE_READWRITE);
 #else
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	if (partition && memkind_partition_mmap) {
+		ret = memkind_partition_mmap(partition, addr, size);
+	}
+        else {
+#endif /* JEMALLOC_ENABLE_MEMKIND */
 	/*
 	 * We don't use MAP_FIXED here, because it can cause the *replacement*
 	 * of existing mappings, and we only want to create new mappings.
 	 */
-	ret = mmap(addr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON,
-	    -1, 0);
+	ret = mmap(addr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	}
+#endif /* JEMALLOC_ENABLE_MEMKIND */
 	assert(ret != NULL);
 
 	if (ret == MAP_FAILED)
@@ -44,7 +67,7 @@ pages_map(void *addr, size_t size)
 			char buf[BUFERROR_BUF];
 
 			buferror(get_errno(), buf, sizeof(buf));
-			malloc_printf("<jemalloc: Error in munmap(): %s\n",
+			malloc_printf("<jemalloc>: Error in munmap(): %s\n",
 			    buf);
 			if (opt_abort)
 				abort();
@@ -83,7 +106,11 @@ pages_unmap(void *addr, size_t size)
 }
 
 static void *
-pages_trim(void *addr, size_t alloc_size, size_t leadsize, size_t size)
+pages_trim(void *addr, size_t alloc_size, size_t leadsize, size_t size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+)
 {
 	void *ret = (void *)((uintptr_t)addr + leadsize);
 
@@ -93,7 +120,11 @@ pages_trim(void *addr, size_t alloc_size, size_t leadsize, size_t size)
 		void *new_addr;
 
 		pages_unmap(addr, alloc_size);
-		new_addr = pages_map(ret, size);
+		new_addr = pages_map(ret, size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 		if (new_addr == ret)
 			return (ret);
 		if (new_addr)
@@ -140,7 +171,11 @@ pages_purge(void *addr, size_t length)
 }
 
 static void *
-chunk_alloc_mmap_slow(size_t size, size_t alignment, bool *zero)
+chunk_alloc_mmap_slow(size_t size, size_t alignment, bool *zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+)
 {
 	void *ret, *pages;
 	size_t alloc_size, leadsize;
@@ -150,12 +185,20 @@ chunk_alloc_mmap_slow(size_t size, size_t alignment, bool *zero)
 	if (alloc_size < size)
 		return (NULL);
 	do {
-		pages = pages_map(NULL, alloc_size);
+		pages = pages_map(NULL, alloc_size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 		if (pages == NULL)
 			return (NULL);
 		leadsize = ALIGNMENT_CEILING((uintptr_t)pages, alignment) -
 		    (uintptr_t)pages;
-		ret = pages_trim(pages, alloc_size, leadsize, size);
+		ret = pages_trim(pages, alloc_size, leadsize, size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 	} while (ret == NULL);
 
 	assert(ret != NULL);
@@ -164,7 +207,11 @@ chunk_alloc_mmap_slow(size_t size, size_t alignment, bool *zero)
 }
 
 void *
-chunk_alloc_mmap(size_t size, size_t alignment, bool *zero)
+chunk_alloc_mmap(size_t size, size_t alignment, bool *zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+)
 {
 	void *ret;
 	size_t offset;
@@ -185,13 +232,21 @@ chunk_alloc_mmap(size_t size, size_t alignment, bool *zero)
 	assert(alignment != 0);
 	assert((alignment & chunksize_mask) == 0);
 
-	ret = pages_map(NULL, size);
+	ret = pages_map(NULL, size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 	if (ret == NULL)
 		return (NULL);
 	offset = ALIGNMENT_ADDR2OFFSET(ret, alignment);
 	if (offset != 0) {
 		pages_unmap(ret, size);
-		return (chunk_alloc_mmap_slow(size, alignment, zero));
+		return (chunk_alloc_mmap_slow(size, alignment, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+));
 	}
 
 	assert(ret != NULL);

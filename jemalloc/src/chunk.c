@@ -35,15 +35,27 @@ size_t		arena_maxclass; /* Max size class for arenas. */
 
 static void	*chunk_recycle(extent_tree_t *chunks_szad,
     extent_tree_t *chunks_ad, size_t size, size_t alignment, bool base,
-    bool *zero);
+    bool *zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+);
 static void	chunk_record(extent_tree_t *chunks_szad,
-    extent_tree_t *chunks_ad, void *chunk, size_t size);
+    extent_tree_t *chunks_ad, void *chunk, size_t size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+);
 
 /******************************************************************************/
 
 static void *
 chunk_recycle(extent_tree_t *chunks_szad, extent_tree_t *chunks_ad, size_t size,
-    size_t alignment, bool base, bool *zero)
+    size_t alignment, bool base, bool *zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+)
 {
 	void *ret;
 	extent_node_t *node;
@@ -67,9 +79,17 @@ chunk_recycle(extent_tree_t *chunks_szad, extent_tree_t *chunks_ad, size_t size,
 		return (NULL);
 	key.addr = NULL;
 	key.size = alloc_size;
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	key.partition = partition;
+#endif
+
 	malloc_mutex_lock(&chunks_mtx);
 	node = extent_tree_szad_nsearch(chunks_szad, &key);
-	if (node == NULL) {
+	if (node == NULL
+#ifdef JEMALLOC_ENABLE_MEMKIND
+|| node->partition != key.partition
+#endif
+) {
 		malloc_mutex_unlock(&chunks_mtx);
 		return (NULL);
 	}
@@ -104,7 +124,11 @@ chunk_recycle(extent_tree_t *chunks_szad, extent_tree_t *chunks_ad, size_t size,
 			malloc_mutex_unlock(&chunks_mtx);
 			node = base_node_alloc();
 			if (node == NULL) {
-				chunk_dealloc(ret, size, true);
+				chunk_dealloc(ret, size, true
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 				return (NULL);
 			}
 			malloc_mutex_lock(&chunks_mtx);
@@ -143,7 +167,11 @@ chunk_recycle(extent_tree_t *chunks_szad, extent_tree_t *chunks_ad, size_t size,
  */
 void *
 chunk_alloc(size_t size, size_t alignment, bool base, bool *zero,
-    dss_prec_t dss_prec)
+    dss_prec_t dss_prec
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+)
 {
 	void *ret;
 
@@ -153,23 +181,48 @@ chunk_alloc(size_t size, size_t alignment, bool base, bool *zero,
 	assert((alignment & chunksize_mask) == 0);
 
 	/* "primary" dss. */
-	if (config_dss && dss_prec == dss_prec_primary) {
+	if (config_dss && dss_prec == dss_prec_primary
+#ifdef JEMALLOC_ENABLE_MEMKIND
+&& !partition
+#endif
+) {
 		if ((ret = chunk_recycle(&chunks_szad_dss, &chunks_ad_dss, size,
-		    alignment, base, zero)) != NULL)
+		    alignment, base, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, 0
+#endif
+)) != NULL)
 			goto label_return;
 		if ((ret = chunk_alloc_dss(size, alignment, zero)) != NULL)
 			goto label_return;
 	}
 	/* mmap. */
 	if ((ret = chunk_recycle(&chunks_szad_mmap, &chunks_ad_mmap, size,
-	    alignment, base, zero)) != NULL)
+	    alignment, base, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+)) != NULL)
 		goto label_return;
-	if ((ret = chunk_alloc_mmap(size, alignment, zero)) != NULL)
+	ret = chunk_alloc_mmap(size, alignment, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
+	if (ret != NULL)
 		goto label_return;
 	/* "secondary" dss. */
-	if (config_dss && dss_prec == dss_prec_secondary) {
+	if (config_dss && dss_prec == dss_prec_secondary
+#ifdef JEMALLOC_ENABLE_MEMKIND
+&& !partition
+#endif
+) {
 		if ((ret = chunk_recycle(&chunks_szad_dss, &chunks_ad_dss, size,
-		    alignment, base, zero)) != NULL)
+		    alignment, base, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+)) != NULL)
 			goto label_return;
 		if ((ret = chunk_alloc_dss(size, alignment, zero)) != NULL)
 			goto label_return;
@@ -181,7 +234,11 @@ label_return:
 	if (ret != NULL) {
 		if (config_ivsalloc && base == false) {
 			if (rtree_set(chunks_rtree, (uintptr_t)ret, 1)) {
-				chunk_dealloc(ret, size, true);
+				chunk_dealloc(ret, size, true
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 				return (NULL);
 			}
 		}
@@ -211,7 +268,11 @@ label_return:
 
 static void
 chunk_record(extent_tree_t *chunks_szad, extent_tree_t *chunks_ad, void *chunk,
-    size_t size)
+    size_t size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+)
 {
 	bool unzeroed;
 	extent_node_t *xnode, *node, *prev, *xprev, key;
@@ -231,9 +292,17 @@ chunk_record(extent_tree_t *chunks_szad, extent_tree_t *chunks_ad, void *chunk,
 
 	malloc_mutex_lock(&chunks_mtx);
 	key.addr = (void *)((uintptr_t)chunk + size);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	key.partition = partition;
+#endif
+
 	node = extent_tree_ad_nsearch(chunks_ad, &key);
 	/* Try to coalesce forward. */
-	if (node != NULL && node->addr == key.addr) {
+	if (node != NULL && node->addr == key.addr
+#ifdef JEMALLOC_ENABLE_MEMKIND
+            && node->partition == key.partition
+#endif
+) {
 		/*
 		 * Coalesce chunk with the following address range.  This does
 		 * not change the position within chunks_ad, so only
@@ -260,6 +329,9 @@ chunk_record(extent_tree_t *chunks_szad, extent_tree_t *chunks_ad, void *chunk,
 		node->addr = chunk;
 		node->size = size;
 		node->zeroed = (unzeroed == false);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+		node->partition = partition;
+#endif
 		extent_tree_ad_insert(chunks_ad, node);
 		extent_tree_szad_insert(chunks_szad, node);
 	}
@@ -267,7 +339,11 @@ chunk_record(extent_tree_t *chunks_szad, extent_tree_t *chunks_ad, void *chunk,
 	/* Try to coalesce backward. */
 	prev = extent_tree_ad_prev(chunks_ad, node);
 	if (prev != NULL && (void *)((uintptr_t)prev->addr + prev->size) ==
-	    chunk) {
+	    chunk
+#ifdef JEMALLOC_ENABLE_MEMKIND
+&& prev->partition == partition
+#endif
+) {
 		/*
 		 * Coalesce chunk with the previous address range.  This does
 		 * not change the position within chunks_ad, so only
@@ -298,7 +374,11 @@ label_return:
 }
 
 void
-chunk_unmap(void *chunk, size_t size)
+chunk_unmap(void *chunk, size_t size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+)
 {
 	assert(chunk != NULL);
 	assert(CHUNK_ADDR2BASE(chunk) == chunk);
@@ -306,13 +386,25 @@ chunk_unmap(void *chunk, size_t size)
 	assert((size & chunksize_mask) == 0);
 
 	if (config_dss && chunk_in_dss(chunk))
-		chunk_record(&chunks_szad_dss, &chunks_ad_dss, chunk, size);
+		chunk_record(&chunks_szad_dss, &chunks_ad_dss, chunk, size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, 0
+#endif
+);
 	else if (chunk_dealloc_mmap(chunk, size))
-		chunk_record(&chunks_szad_mmap, &chunks_ad_mmap, chunk, size);
+		chunk_record(&chunks_szad_mmap, &chunks_ad_mmap, chunk, size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 }
 
 void
-chunk_dealloc(void *chunk, size_t size, bool unmap)
+chunk_dealloc(void *chunk, size_t size, bool unmap
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, unsigned partition
+#endif
+)
 {
 
 	assert(chunk != NULL);
@@ -330,7 +422,11 @@ chunk_dealloc(void *chunk, size_t size, bool unmap)
 	}
 
 	if (unmap)
-		chunk_unmap(chunk, size);
+		chunk_unmap(chunk, size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, partition
+#endif
+);
 }
 
 bool

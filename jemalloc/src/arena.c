@@ -555,7 +555,11 @@ arena_chunk_init_hard(arena_t *arena)
 	zero = false;
 	malloc_mutex_unlock(&arena->lock);
 	chunk = (arena_chunk_t *)chunk_alloc(chunksize, chunksize, false,
-	    &zero, arena->dss_prec);
+	    &zero, arena->dss_prec
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, arena->partition
+#endif
+);
 	malloc_mutex_lock(&arena->lock);
 	if (chunk == NULL)
 		return (NULL);
@@ -652,7 +656,11 @@ arena_chunk_dealloc(arena_t *arena, arena_chunk_t *chunk)
 
 		arena->spare = chunk;
 		malloc_mutex_unlock(&arena->lock);
-		chunk_dealloc((void *)spare, chunksize, true);
+		chunk_dealloc((void *)spare, chunksize, true
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, arena->partition
+#endif
+);
 		malloc_mutex_lock(&arena->lock);
 		if (config_stats)
 			arena->stats.mapped -= chunksize;
@@ -2306,6 +2314,9 @@ arena_new(arena_t *arena, unsigned ind)
 
 	arena->ind = ind;
 	arena->nthreads = 0;
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	arena->partition = 0;
+#endif
 
 	if (malloc_mutex_init(&arena->lock))
 		return (true);

@@ -124,7 +124,11 @@ chunk_alloc_dss(size_t size, size_t alignment, bool *zero)
 				dss_max = dss_next;
 				malloc_mutex_unlock(&dss_mtx);
 				if (cpad_size != 0)
-					chunk_unmap(cpad, cpad_size);
+					chunk_unmap(cpad, cpad_size
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, 0
+#endif
+);
 				if (*zero) {
 					VALGRIND_MAKE_MEM_UNDEFINED(ret, size);
 					memset(ret, 0, size);

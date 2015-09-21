@@ -26,6 +26,11 @@ struct extent_node_s {
 
 	/* True if zero-filled; used by chunk recycling code. */
 	bool			zeroed;
+
+	/* Numa kind associated with the extent. */
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	unsigned		partition;
+#endif
 };
 typedef rb_tree(extent_node_t) extent_tree_t;
 
