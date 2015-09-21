@@ -2082,7 +2082,11 @@ a0alloc(size_t size, bool zero)
 	if (size <= arena_maxclass)
 		return (arena_malloc(arenas[0], size, zero, false));
 	else
-		return (huge_malloc(size, zero));
+		return (huge_malloc(size, zero
+#ifdef JEMALLOC_ENABLE_MEMKIND
+, 0
+#endif
+));
 }
 
 void *
