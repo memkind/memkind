@@ -625,6 +625,9 @@ arena_chunk_alloc(arena_t *arena)
                        return (NULL);
         }
 
+	if (chunk == NULL)
+		return chunk;
+
 	/* Insert the run into the runs_avail tree. */
 	arena_avail_insert(arena, chunk, map_bias, chunk_npages-map_bias,
 	    false, false);
@@ -912,7 +915,11 @@ arena_chunk_purge_stashed(arena_t *arena, arena_chunk_t *chunk,
 		    LG_PAGE;
 		assert(pageind + npages <= chunk_npages);
 		unzeroed = pages_purge((void *)((uintptr_t)chunk + (pageind <<
-		    LG_PAGE)), (npages << LG_PAGE));
+		    LG_PAGE)), (npages << LG_PAGE)
+#ifdef JEMALLOC_ENABLE_MEMKIND
+		    , (arena->partition & JEMALLOC_MEMKIND_FILE_MAPPED) != 0
+#endif
+		    );
 		flag_unzeroed = unzeroed ? CHUNK_MAP_UNZEROED : 0;
 		/*
 		 * Set the unzeroed flag for all pages, now that pages_purge()

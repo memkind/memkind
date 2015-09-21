@@ -779,7 +779,7 @@ imalloct(size_t size, bool try_tcache, arena_t *arena)
 	else
 		return (huge_malloc(size, false
 #ifdef JEMALLOC_ENABLE_MEMKIND
-, arena ? arena->partition : 0
+, arena->partition
 #endif
 ));
 }
@@ -788,7 +788,7 @@ JEMALLOC_ALWAYS_INLINE void *
 imalloc(size_t size)
 {
 
-	return (imalloct(size, true, NULL));
+	return (imalloct(size, true, choose_arena(NULL)));
 }
 
 JEMALLOC_ALWAYS_INLINE void *
@@ -800,7 +800,7 @@ icalloct(size_t size, bool try_tcache, arena_t *arena)
 	else
 		return (huge_malloc(size, true
 #ifdef JEMALLOC_ENABLE_MEMKIND
-, arena ? arena->partition : 0
+, arena->partition
 #endif
 ));
 }
@@ -809,7 +809,7 @@ JEMALLOC_ALWAYS_INLINE void *
 icalloc(size_t size)
 {
 
-	return (icalloct(size, true, NULL));
+	return (icalloct(size, true, choose_arena(NULL)));
 }
 
 JEMALLOC_ALWAYS_INLINE void *
@@ -825,18 +825,17 @@ ipalloct(size_t usize, size_t alignment, bool zero, bool try_tcache,
 		ret = arena_malloc(arena, usize, zero, try_tcache);
 	else {
 		if (usize <= arena_maxclass) {
-			ret = arena_palloc(choose_arena(arena), usize,
-			    alignment, zero);
+			ret = arena_palloc(arena, usize, alignment, zero);
 		} else if (alignment <= chunksize)
 			ret = huge_malloc(usize, zero
 #ifdef JEMALLOC_ENABLE_MEMKIND
-, arena ? arena->partition : 0
+, arena->partition
 #endif
 );
 		else
 			ret = huge_palloc(usize, alignment, zero
 #ifdef JEMALLOC_ENABLE_MEMKIND
-, arena ? arena->partition : 0
+, arena->partition
 #endif
 );
 	}
@@ -849,7 +848,7 @@ JEMALLOC_ALWAYS_INLINE void *
 ipalloc(size_t usize, size_t alignment, bool zero)
 {
 
-	return (ipalloct(usize, alignment, zero, true, NULL));
+	return (ipalloct(usize, alignment, zero, true, choose_arena(NULL)));
 }
 
 /*
@@ -1013,7 +1012,7 @@ iralloct(void *ptr, size_t size, size_t extra, size_t alignment, bool zero,
 		return (huge_ralloc(ptr, oldsize, size, extra,
 		    alignment, zero, try_tcache_dalloc
 #ifdef JEMALLOC_ENABLE_MEMKIND
-, arena ? arena->partition : 0
+, arena->partition
 #endif
 ));
 	}
@@ -1023,7 +1022,8 @@ JEMALLOC_ALWAYS_INLINE void *
 iralloc(void *ptr, size_t size, size_t extra, size_t alignment, bool zero)
 {
 
-	return (iralloct(ptr, size, extra, alignment, zero, true, true, NULL));
+	return (iralloct(ptr, size, extra, alignment, zero, true, true,
+	    choose_arena(NULL)));
 }
 
 JEMALLOC_ALWAYS_INLINE bool

@@ -59,3 +59,7 @@
 #  define JEMALLOC_SECTION(s)
 #  define JEMALLOC_NOINLINE
 #endif
+
+#ifdef JEMALLOC_ENABLE_MEMKIND
+#  define JEMALLOC_MEMKIND_FILE_MAPPED (1 << (sizeof(unsigned) * 8 - 1))
+#endif
