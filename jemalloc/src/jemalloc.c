@@ -620,6 +620,7 @@ malloc_conf_init(void)
 				    "lg_tcache_max", -1,
 				    (sizeof(size_t) << 3) - 1)
 			}
+#ifdef JEMALLOC_PROF
 			if (config_prof) {
 				CONF_HANDLE_BOOL(opt_prof, "prof")
 				CONF_HANDLE_CHAR_P(opt_prof_prefix,
@@ -636,6 +637,7 @@ malloc_conf_init(void)
 				CONF_HANDLE_BOOL(opt_prof_final, "prof_final")
 				CONF_HANDLE_BOOL(opt_prof_leak, "prof_leak")
 			}
+#endif
 			malloc_conf_error("Invalid conf pair", k, klen, v,
 			    vlen);
 #undef CONF_HANDLE_BOOL
