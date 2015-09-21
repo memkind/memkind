@@ -6,7 +6,8 @@ found in the git revision history:
     https://github.com/jemalloc/jemalloc
 
 * Thu Jan 22 2015 Christopher Cantalupo <christopher.m.cantalupo@intel.com> 3.5.1+mk3
-  - Moved to a single memkind callback: memkind_partition_mmap()
+  - Moved to a single memkind callback: memkind_partition_mmap().
+  - Backported patch 20a8c78bfe3310e0f0f72b596d4e10ca7336063b from upstream jemalloc.
 * Thu Oct 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> 3.5.1+mk2
   - Updated README with memkind information.
   - Added support for the memkind library with --enable-memkind configure
