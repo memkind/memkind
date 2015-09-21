@@ -59,6 +59,9 @@ static void	ctl_arena_stats_smerge(ctl_arena_stats_t *sstats,
     ctl_arena_stats_t *astats);
 static void	ctl_arena_refresh(arena_t *arena, unsigned i);
 static bool	ctl_grow(void);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+static bool	ctl_growk(unsigned partition);
+#endif
 static void	ctl_refresh(void);
 static bool	ctl_init(void);
 static int	ctl_lookup(const char *name, ctl_node_t const **nodesp,
@@ -132,6 +135,9 @@ CTL_PROTO(arenas_nhbins)
 CTL_PROTO(arenas_nlruns)
 CTL_PROTO(arenas_purge)
 CTL_PROTO(arenas_extend)
+#ifdef JEMALLOC_ENABLE_MEMKIND
+CTL_PROTO(arenas_extendk)
+#endif
 CTL_PROTO(prof_active)
 CTL_PROTO(prof_dump)
 CTL_PROTO(prof_interval)
@@ -305,6 +311,9 @@ static const ctl_named_node_t arenas_node[] = {
 	{NAME("lrun"),			CHILD(indexed, arenas_lrun)},
 	{NAME("purge"),			CTL(arenas_purge)},
 	{NAME("extend"),		CTL(arenas_extend)}
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	, {NAME("extendk"),		CTL(arenas_extendk)}
+#endif
 };
 
 static const ctl_named_node_t	prof_node[] = {
@@ -545,6 +554,15 @@ ctl_arena_refresh(arena_t *arena, unsigned i)
 
 static bool
 ctl_grow(void)
+#ifdef JEMALLOC_ENABLE_MEMKIND
+{
+
+	return(ctl_growk(0));
+}
+
+static bool
+ctl_growk(unsigned partition)
+#endif
 {
 	ctl_arena_stats_t *astats;
 	arena_t **tarenas;
@@ -598,6 +616,9 @@ ctl_grow(void)
 		    sizeof(arena_t *));
 		narenas_total++;
 		arenas_extend(narenas_total - 1);
+#ifdef JEMALLOC_ENABLE_MEMKIND
+		arenas[narenas_total - 1]->partition = partition;
+#endif
 		malloc_mutex_unlock(&arenas_lock);
 		/*
 		 * Deallocate arenas_old only if it came from imalloc() (not
@@ -1509,6 +1530,31 @@ label_return:
 	malloc_mutex_unlock(&ctl_mtx);
 	return (ret);
 }
+
+#ifdef JEMALLOC_ENABLE_MEMKIND
+static int
+arenas_extendk_ctl(const size_t *mib, size_t miblen, void *oldp, size_t *oldlenp,
+    void *newp, size_t newlen)
+{
+	int ret;
+	unsigned narenas;
+	unsigned partition;
+
+	malloc_mutex_lock(&ctl_mtx);
+	WRITE(partition, unsigned);
+	if (ctl_growk(partition)) {
+		ret = EAGAIN;
+		goto label_return;
+	}
+	narenas = ctl_stats.narenas - 1;
+	READ(narenas, unsigned);
+
+	ret = 0;
+label_return:
+	malloc_mutex_unlock(&ctl_mtx);
+	return (ret);
+}
+#endif /* JEMALLOC_ENABLE_MEMKIND */
 
 static int
 arenas_extend_ctl(const size_t *mib, size_t miblen, void *oldp, size_t *oldlenp,
