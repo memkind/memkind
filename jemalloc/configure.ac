@@ -141,7 +141,7 @@ if test "x$CFLAGS" = "x" ; then
     JE_CFLAGS_APPEND([-Zi])
     JE_CFLAGS_APPEND([-MT])
     JE_CFLAGS_APPEND([-W3])
-    CPPFLAGS="$CPPFLAGS -I${srcroot}/include/msvc_compat"
+    EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -I${srcroot}/include/msvc_compat"
   fi
 fi
 dnl Append EXTRA_CFLAGS to CFLAGS, if defined.
@@ -249,7 +249,7 @@ dnl Platform-specific settings.  abi and RPATH can probably be determined
 dnl programmatically, but doing so is error-prone, which makes it generally
 dnl not worth the trouble.
 dnl 
-dnl Define cpp macros in CPPFLAGS, rather than doing AC_DEFINE(macro), since the
+dnl Define cpp macros in EXTRA_CPPFLAGS, rather than doing AC_DEFINE(macro), since the
 dnl definitions need to be seen before any headers are included, which is a pain
 dnl to make happen otherwise.
 default_munmap="1"
@@ -276,7 +276,7 @@ case "${host}" in
 	;;
   *-*-linux*)
 	CFLAGS="$CFLAGS"
-	CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
+	EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -D_GNU_SOURCE"
 	abi="elf"
 	AC_DEFINE([JEMALLOC_HAS_ALLOCA_H])
 	AC_DEFINE([JEMALLOC_PURGE_MADVISE_DONTNEED], [ ])
@@ -304,7 +304,7 @@ case "${host}" in
 	AC_DEFINE([JEMALLOC_PURGE_MADVISE_FREE], [ ])
 	RPATH='-Wl,-R,$(1)'
 	dnl Solaris needs this for sigwait().
-	CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
+	EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
 	LIBS="$LIBS -lposix4 -lsocket -lnsl"
 	;;
   *-ibm-aix*)
@@ -357,6 +357,7 @@ AC_SUBST([a])
 AC_SUBST([exe])
 AC_SUBST([libprefix])
 AC_SUBST([DSO_LDFLAGS])
+AC_SUBST([EXTRA_CPPFLAGS])
 AC_SUBST([EXTRA_LDFLAGS])
 AC_SUBST([SOREV])
 AC_SUBST([PIC_CFLAGS])
@@ -450,6 +451,23 @@ if test "x$enable_experimental" = "x1" ; then
   public_syms="${public_syms} allocm dallocm nallocm rallocm sallocm"
 fi
 AC_SUBST([enable_experimental])
+
+dnl Do not use memkind by default.
+AC_ARG_ENABLE([memkind],
+  [AS_HELP_STRING([--enable-memkind],
+   [Enable memkind interface])],
+[if test "x$enable_memkind" = "xno" ; then
+  enable_memkind="0"
+else
+  enable_memkind="1"
+fi
+],
+[enable_memkind="0"]
+)
+if test "x$enable_memkind" = "x1" ; then
+  AC_DEFINE([JEMALLOC_ENABLE_MEMKIND], [ ])
+fi
+AC_SUBST([enable_memkind])
 
 dnl Do not compute test code coverage by default.
 GCOV_FLAGS=
@@ -609,7 +627,7 @@ fi
 
 dnl Do not compile with debugging by default.
 AC_ARG_ENABLE([debug],
-  [AS_HELP_STRING([--enable-debug], [Build debugging code (implies --enable-ivsalloc)])],
+  [AS_HELP_STRING([--enable-debug], [Build debugging code (implies --enable-ivsalloc and --enable-safe)])],
 [if test "x$enable_debug" = "xno" ; then
   enable_debug="0"
 else
@@ -621,8 +639,25 @@ fi
 if test "x$enable_debug" = "x1" ; then
   AC_DEFINE([JEMALLOC_DEBUG], [ ])
   enable_ivsalloc="1"
+  enable_safe="1"
 fi
 AC_SUBST([enable_debug])
+
+dnl Do not compile with safe mode by default.
+AC_ARG_ENABLE([safe],
+  [AS_HELP_STRING([--enable-safe], [Build safe code])],
+[if test "x$enable_safe" = "xno" ; then
+  enable_safe="0"
+else
+  enable_safe="1"
+fi
+],
+[enable_safe="0"]
+)
+if test "x$enable_safe" = "x1" ; then
+  AC_DEFINE([JEMALLOC_SAFE], [ ])
+fi
+AC_SUBST([enable_safe])
 
 dnl Do not validate pointers by default.
 AC_ARG_ENABLE([ivsalloc],
@@ -1063,7 +1098,7 @@ if test "x$abi" != "xpecoff" ; then
                                AC_MSG_ERROR([libpthread is missing]))])
 fi
 
-CPPFLAGS="$CPPFLAGS -D_REENTRANT"
+EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -D_REENTRANT"
 
 dnl Check whether the BSD-specific _malloc_thread_cleanup() exists.  If so, use
 dnl it rather than pthreads TSD cleanup functions to support cleanup during
@@ -1449,6 +1484,7 @@ AC_MSG_RESULT([library revision   : ${rev}])
 AC_MSG_RESULT([])
 AC_MSG_RESULT([CC                 : ${CC}])
 AC_MSG_RESULT([CPPFLAGS           : ${CPPFLAGS}])
+AC_MSG_RESULT([EXTRA_CPPFLAGS     : ${EXTRA_CPPFLAGS}])
 AC_MSG_RESULT([CFLAGS             : ${CFLAGS}])
 AC_MSG_RESULT([LDFLAGS            : ${LDFLAGS}])
 AC_MSG_RESULT([EXTRA_LDFLAGS      : ${EXTRA_LDFLAGS}])
@@ -1476,6 +1512,7 @@ AC_MSG_RESULT([                   : ${JEMALLOC_PRIVATE_NAMESPACE}])
 AC_MSG_RESULT([install_suffix     : ${install_suffix}])
 AC_MSG_RESULT([autogen            : ${enable_autogen}])
 AC_MSG_RESULT([experimental       : ${enable_experimental}])
+AC_MSG_RESULT([memkind           : ${enable_memkind}])
 AC_MSG_RESULT([cc-silence         : ${enable_cc_silence}])
 AC_MSG_RESULT([debug              : ${enable_debug}])
 AC_MSG_RESULT([code-coverage      : ${enable_code_coverage}])
