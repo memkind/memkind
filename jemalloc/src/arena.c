@@ -625,12 +625,6 @@ arena_chunk_alloc(arena_t *arena)
                        return (NULL);
         }
 
-	if (chunk == NULL)
-		return chunk;
-
-	if (chunk == NULL)
-		return chunk;
-
 	/* Insert the run into the runs_avail tree. */
 	arena_avail_insert(arena, chunk, map_bias, chunk_npages-map_bias,
 	    false, false);
