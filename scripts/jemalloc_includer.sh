@@ -39,31 +39,34 @@
 #
 # Requirements:
 #
-# - jemalloc directory should be deleted
+# - jemalloc directory should be deleted (except cbc mode)
 # - jemalloc repo where the commits come from shoud be added to remotes and
 # fetched
 #
 #############################################################################
 
-if [ $# != 2 ]; then
-    echo "Usage $0: commit0 commit1"
+if [ $# != 2 ] && [ $# != 3 ]; then
+    echo "Usage $0: commit0 commit1 <optionals>"
+    echo "Optionals: --cbc-only"
     exit 0
 fi
 
 first_commit="$1"
 last_commit="$2"
+
 commit_list=$(git rev-list $first_commit..$last_commit | tac)
 
 prefix="jemalloc"
 commit_prefix="[jemalloc_integration] original commit:"
 
 #integrate repo state from first commit (original jemalloc)
-original_message=$(git show --quiet $first_commit)
-integration_message=`echo -e "$commit_prefix\n$original_message"`
+if [ $3 != "--cbc-only" ]; then
+	original_message=$(git show --quiet $first_commit)
+	integration_message=`echo -e "$commit_prefix\n$original_message"`
 
-git read-tree --prefix=jemalloc -u $first_commit
-git commit -m "$integration_message"
-
+	git read-tree --prefix=jemalloc -u $first_commit
+	git commit -m "$integration_message"
+fi
 #apply change by change
 old_commit="$first_commit"
 for commit in $commit_list; do
