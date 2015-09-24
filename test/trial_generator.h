@@ -86,6 +86,7 @@ public:
     void generate_size_4GB_8GB(alloc_api_t api);
     void run(int num_bandwidth, int *bandwidths);
     void generate_interleave(alloc_api_t api);
+    void generate_size_2bytes_2KB_2MB(alloc_api_t api);
     /*For debugging purposes*/
     void print();
 private:

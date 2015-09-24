@@ -350,6 +350,31 @@ void TrialGenerator :: generate_interleave(alloc_api_t api)
     }
 }
 
+void TrialGenerator :: generate_size_2bytes_2KB_2MB(alloc_api_t api)
+{
+    size_t size[] = {2, 2*KB, 2*MB};
+
+    int k = 0;
+    trial_vec.clear();
+    for (unsigned int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
+         i++) {
+        trial_vec.push_back(
+          create_trial_tuple(
+            api,size[i],
+            32,
+            4096,
+            MEMKIND_HBW,
+            -1
+          )
+        );
+
+        if (i > 0) k++;
+        trial_vec.push_back(create_trial_tuple(HBW_FREE, 0, 0, 0,
+                                               MEMKIND_HBW, k));
+        k++;
+    }
+}
+
 void TrialGenerator :: print()
 {
 

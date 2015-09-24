@@ -89,9 +89,9 @@ protected:
     }
 };
 
-TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Malloc_1KB_2GB_sizes)
+TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Malloc_2bytes_2KB_2MB_sizes)
 {
-    tgen->generate_size_1KB_2GB(HBW_MALLOC);
+    tgen->generate_size_2bytes_2KB_2MB(HBW_MALLOC);
     #pragma omp parallel num_threads(NTHREADS)
     {
         tgen->run(num_bandwidth,
@@ -99,9 +99,9 @@ TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Malloc_1KB_2GB_sizes)
     }
 }
 
-TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Calloc_1KB_2GB_sizes)
+TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Calloc_2bytes_2KB_2MB_sizes)
 {
-    tgen->generate_size_1KB_2GB(HBW_CALLOC);
+    tgen->generate_size_2bytes_2KB_2MB(HBW_CALLOC);
     #pragma omp parallel num_threads(NTHREADS)
     {
         tgen->run(num_bandwidth,
@@ -109,9 +109,9 @@ TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Calloc_1KB_2GB_sizes)
     }
 }
 
-TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Memalign_1KB_2GB_sizes)
+TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Memalign_2bytes_2KB_2MB_sizes)
 {
-    tgen->generate_size_1KB_2GB(HBW_MEMALIGN);
+    tgen->generate_size_2bytes_2KB_2MB(HBW_MEMALIGN);
     #pragma omp parallel num_threads(NTHREADS)
     {
         tgen->run(num_bandwidth,
@@ -119,15 +119,12 @@ TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_Memalign_1KB_2GB_sizes)
     }
 }
 
-
-TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_MemalignPsize_1KB_2GB_sizes)
+TEST_F(MultithreadedTest, TC_Memkind_Multithread_HBW_MemalignPsize_2bytes_2KB_2MB_sizes)
 {
-    tgen->generate_size_1KB_2GB(HBW_MEMALIGN_PSIZE);
+    tgen->generate_size_2bytes_2KB_2MB(HBW_MEMALIGN_PSIZE);
     #pragma omp parallel num_threads(NTHREADS)
     {
         tgen->run(num_bandwidth,
                   bandwidth);
     }
 }
-
-
