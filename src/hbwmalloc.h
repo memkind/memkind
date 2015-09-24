@@ -116,8 +116,6 @@ public:
 
     hbwmalloc_allocator() throw() { }
 
-    hbwmalloc_allocator(const hbwmalloc_allocator&) throw() { }
-
     template <class U>
     hbwmalloc_allocator(const hbwmalloc_allocator<U>&) throw() { }
 
