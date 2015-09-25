@@ -52,13 +52,13 @@ import xml.dom.minidom
 
 if os.name == 'posix':
     Linux       = True
-    HOST        = "/usr/share/mpss/test/memkind-dt/"
+    tests_home  = "/usr/share/mpss/test/memkind-dt/"
     slash       = "/"
 else:
     import _winreg
     Linux       = False
     mpss_home   = os.environ.get("INTEL_MPSS_HOME")
-    HOST        =  mpss_home + "test\\windows-memkind-dt\\"
+    tests_home  =  mpss_home + "test\\windows-memkind-dt\\"
     slash       = "\\"
 
 def setup_logging(name):
@@ -203,19 +203,10 @@ if __name__ == "__main__":
 
     (opts, args) = parser.parse_args()
 
-    if Linux:
-        cmd = './' + sys.argv[1]
-    else:
-        cmd = sys.argv[1]
+    cmd = tests_home + sys.argv[1]
 
-    if Linux:
-        if opts.list:
-            shutil.copy(HOST+sys.argv[1], source)
-            cmd = cmd + " --gtest_list_tests"
-    else:
-        if opts.list:
-            shutil.copy(HOST+sys.argv[1]+'.exe', source)
-            cmd = cmd + " --gtest_list_tests"
+    if opts.list:
+        cmd = cmd + " --gtest_list_tests"
 
     if opts.time:
         sys.exit()
@@ -239,9 +230,9 @@ if __name__ == "__main__":
                 test_main = test
             else: #Run test command
                 if "SchedGeTest" in test_main:
-                    test_cmd = "LD_PRELOAD="+HOST+"libsched.so ./schedcpu_test" + " --gtest_output=xml:" + xmlt
+                    test_cmd = "LD_PRELOAD=" + tests_home + "libsched.so " + tests_home + "schedcpu_test" + " --gtest_output=xml:" + xmlt
                 elif "TiedDistTest" in test_main:
-                    test_cmd = "LD_PRELOAD="+HOST+"libnumadist.so ./tieddisterr_test" + " --gtest_output=xml:" + xmlt
+                    test_cmd = "LD_PRELOAD=" + tests_home + "libnumadist.so " + tests_home + "tieddisterr_test" + " --gtest_output=xml:" + xmlt
                 else:
                     test_cmd = cmd + " --gtest_filter=" +test_main+test + " --gtest_output=xml:" + xmlt
                 print test_cmd
