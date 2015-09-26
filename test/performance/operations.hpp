@@ -21,12 +21,14 @@
 * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+#pragma once
+
 #include <malloc.h>
 #include <memkind.h>
 #include "jemalloc/jemalloc.h"
 
 // Malloc, jemalloc, memkind jemalloc and memkind memory operations definitions
-#pragma once
 namespace performance_tests
 {
     using std::vector;

@@ -24,11 +24,13 @@
 
 #include "perf_tests.hpp"
 #include <iostream>
+#include <cmath>
 #include <gtest/gtest.h>
 
 // Memkind performance tests
 using std::cout;
 using std::endl;
+using std::abs;
 
 // Memkind tests
 class PerformanceTest : public testing::Test
@@ -55,15 +57,15 @@ protected:
         double treshold;
         if (notLessThan)
         {
-            treshold = reference / (1 + Delta);
+            treshold = reference * (1 - delta);
         }
         else
         {
-            treshold = reference * (1 + Delta);
+            treshold = reference * (1 + delta);
         }
-        cout << "Value of '" << info << "' expected to be at " << (notLessThan ? "least '" : "most '")
-             << treshold << "'. Actual='" << value << "', reference='"
-             << reference << "', delta='" << delta << "'." << endl;
+        cout << "Metric: " << info << ". Reference value: " << reference << ". "
+            "Expected: " << (notLessThan ? ">= " : "<= ") << treshold << " (delta = " << delta << ")."
+            "Actual: " << value << " (delta = " << (value - reference) * (notLessThan ? -1.0 : 1.0) / reference << ")." << endl;
         if (notLessThan ? (value >= treshold) : (value <= treshold))
         {
             return true;
@@ -136,7 +138,7 @@ PERF_TEST(PerformanceTest, many_ops_many_iters)
     EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Delta));
 }
 
-TEST_F(PerformanceTest, many_ops_many_iters_many_kinds)
+PERF_TEST(PerformanceTest, many_ops_many_iters_many_kinds)
 {
     referenceTest.setupTest_manyOpsManyIters();
     referenceMetrics = referenceTest.runTest({ MEMKIND_DEFAULT, MEMKIND_HBW_PREFERRED });

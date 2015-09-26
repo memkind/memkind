@@ -22,6 +22,8 @@
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#pragma once
+
 #include <thread>
 #include <vector>
 #include <algorithm> // log2
@@ -33,7 +35,6 @@
 // Malloc, jemalloc, memkind jemalloc and memkind memory operations definitions
 #include "operations.hpp"
 
-#pragma once
 /* Framework for testing memory allocators pefromance */
 namespace performance_tests
 {

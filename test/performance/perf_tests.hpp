@@ -22,8 +22,7 @@
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef  __PERF_TESTS_HPP
-#define  __PERF_TESTS_HPP
+#pragma once
 
 #include "framework.hpp"
 #include "operations.hpp"
@@ -50,7 +49,7 @@ private:
     performance_tests::PerformanceTest *m_test;
     const unsigned m_seed = 1297654;
     const unsigned m_repeats = 5;
-    const unsigned m_threads = 72;
+    const unsigned m_threads = 144;
     const unsigned m_iterations = 100;
 
 public:
@@ -188,5 +187,3 @@ public:
         m_test->setExecutionMode(ExecutionMode::ManyIterations);
     }
 };
-
-#endif // __PERF_TESTS_HPP
