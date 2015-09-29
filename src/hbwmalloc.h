@@ -79,7 +79,7 @@ typedef enum {
 } hbw_pagesize_t;
 
 int hbw_get_policy(void);
-void hbw_set_policy(int mode);
+int hbw_set_policy(int mode);
 int hbw_check_available(void);
 void *hbw_malloc(size_t size);
 void *hbw_calloc(size_t num, size_t size);

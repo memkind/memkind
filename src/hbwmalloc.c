@@ -42,20 +42,32 @@ int hbw_get_policy(void)
     return hbw_policy_g;
 }
 
-void hbw_set_policy(int mode)
+int hbw_set_policy(int mode)
 {
-    if (mode == HBW_POLICY_PREFERRED) {
+    int err = 0;
+    if (mode == HBW_POLICY_PREFERRED)
+    {
         pthread_once(&hbw_policy_once_g, hbw_policy_preferred_init);
     }
-    else if (mode == HBW_POLICY_BIND) {
+    else if (mode == HBW_POLICY_BIND)
+    {
         pthread_once(&hbw_policy_once_g, hbw_policy_bind_init);
     }
-    else if (mode == HBW_POLICY_INTERLEAVE) {
+    else if (mode == HBW_POLICY_INTERLEAVE)
+    {
         pthread_once(&hbw_policy_once_g, hbw_policy_interleave_init);
     }
-    if (mode != hbw_policy_g) {
-        fprintf(stderr, "WARNING: hbw_set_policy() called more than once with different values, only first call heeded.\n");
+    else
+    {
+        err = MEMKIND_ERROR_BADPOLICY;
+        goto exit;
     }
+    if (mode != hbw_policy_g) {
+        err = MEMKIND_ERROR_REPPOLICY;
+        goto exit;
+    }
+exit:
+    return err;
 }
 
 int hbw_check_available(void)

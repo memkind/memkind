@@ -37,7 +37,7 @@ protected:
 
     void SetUp()
     {
-        num_error_code = 20;
+        num_error_code = 23;
         all_error_code = new int[num_error_code];
         all_error_code[0] = MEMKIND_ERROR_UNAVAILABLE;
         all_error_code[1] = MEMKIND_ERROR_MBIND;
@@ -56,9 +56,12 @@ protected:
         all_error_code[14] = MEMKIND_ERROR_TOOMANY;
         all_error_code[15] = MEMKIND_ERROR_PTHREAD;
         all_error_code[16] = MEMKIND_ERROR_BADOPS;
-        all_error_code[17] = MEMKIND_ERROR_RUNTIME;
-        all_error_code[18] = EINVAL;
-        all_error_code[19] = ENOMEM;
+        all_error_code[17] = MEMKIND_ERROR_HUGETLB;
+        all_error_code[18] = MEMKIND_ERROR_BADPOLICY;
+        all_error_code[19] = MEMKIND_ERROR_REPPOLICY;
+        all_error_code[20] = MEMKIND_ERROR_RUNTIME;
+        all_error_code[21] = EINVAL;
+        all_error_code[22] = ENOMEM;
     }
     void TearDown()
     {
