@@ -246,6 +246,12 @@ void memkind_error_message(int err, char *msg, size_t size)
         case MEMKIND_ERROR_HUGETLB:
             strncpy(msg, "<memkind> unable to allocate huge pages", size);
             break;
+        case MEMKIND_ERROR_BADPOLICY:
+            strncpy(msg, "<memkind> invalid policy value", size);
+            break;
+        case MEMKIND_ERROR_REPPOLICY:
+            strncpy(msg, "<memkind> policy initialized more than once", size);
+            break;
         default:
             snprintf(msg, size, "<memkind> Undefined error number: %i", err);
             break;
