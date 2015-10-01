@@ -43,6 +43,7 @@ class Check
 {
 public:
     Check(const void *p, const trial_t& trial);
+    Check(const void *p, const size_t size, const size_t page_size);
     Check(const Check &);
     ~Check();
     int check_node_hbw(size_t num_bandwidth, const int *bandwidth);

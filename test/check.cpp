@@ -46,22 +46,26 @@ using namespace std;
 /*Check each page between the start
 and the end address additionally also
 check the end address for pagesize*/
-Check::Check(const void *p, const trial_t &trial)
+Check::Check(const void *p, const trial_t &trial): Check(p, trial.size, trial.page_size)
+{
+}
+
+Check::Check(const void *p, const size_t size, const size_t page_size)
 {
     const size_t min_page_size = 4096;
     this->ptr = p;
-    this->size = trial.size;
-    size_t page_size = (trial.page_size >= min_page_size ? trial.page_size : min_page_size);
+    this->size = size;
+    size_t psize = (page_size >= min_page_size ? page_size : min_page_size);
     if (p && size)
     {
-        num_address = size / page_size;
-        num_address += size % page_size ? 1 : 0;
+        num_address = size / psize;
+        num_address += size % psize ? 1 : 0;
 
         address = new void* [num_address];
         size_t i;
         for (i = 0; i < num_address - 1; ++i)
         {
-            address[i] = (char *)ptr + i * page_size;
+            address[i] = (char *)ptr + i * psize;
         }
         address[i] = (char *)p + size - 1;
     }
@@ -214,7 +218,6 @@ int Check::check_align(size_t align)
 
 string Check::skip_to_next_entry (ifstream &ip)
 {
-
     string temp, token;
     size_t found = 0;
     string empty ="";
@@ -233,7 +236,6 @@ string Check::skip_to_next_entry (ifstream &ip)
 
 string Check::skip_to_next_kpage(ifstream &ip)
 {
-
     string temp, token;
     size_t found = 0;
     string empty ="";
@@ -268,7 +270,6 @@ void Check::get_address_range(string &line,
 
 size_t Check::get_kpagesize(string line)
 {
-
     stringstream ss(line);
     string token;
     size_t pagesize;
@@ -303,7 +304,6 @@ int Check::check_page_size(size_t page_size)
 
 int Check::populate_smaps_table ()
 {
-
     string read;
     size_t lpagesize;
     smaps_entry_t lentry;
@@ -343,8 +343,6 @@ int Check::populate_smaps_table ()
 
 int Check::check_page_size(size_t page_size, void *vaddr)
 {
-
-
     string read;
     unsigned long long virt_addr;
     size_t lpagesize;
