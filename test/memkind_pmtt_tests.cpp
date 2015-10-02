@@ -37,7 +37,7 @@ protected:
     void SetUp()
     {
         /* The setup will provide a current working directory to where
-        the .hex mock files are placed which is the location of the 
+        the .hex mock files are placed which is the location of the
         test binary */
         realpath("/proc/self/exe", cwd);
         dirname(cwd);
@@ -150,7 +150,7 @@ int MemkindPmttTest::hex_dump_to_bin(const char *hex_dump_file, const char *mock
 {
     char cmd[256];
     int rv = 0;
-    snprintf(cmd, sizeof(cmd), "sudo xxd -r %s %s", hex_dump_file, mock_pmtt_path);
+    snprintf(cmd, sizeof(cmd), "/usr/bin/sudo /usr/bin/xxd -r %s %s", hex_dump_file, mock_pmtt_path);
     rv = system(cmd);
     return rv;
 }
