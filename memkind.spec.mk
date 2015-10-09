@@ -222,6 +222,7 @@ $(extra_files)
 %defattr(-,root,root,-)
 $(memkind_test_dir)/all_tests
 $(memkind_test_dir)/environerr_test
+$(memkind_test_dir)/environerr_hbw_malloc_test
 $(memkind_test_dir)/mallctlerr_test
 $(memkind_test_dir)/mallocerr_test
 $(memkind_test_dir)/memkind-pmtt

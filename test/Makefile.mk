@@ -30,6 +30,7 @@ check_PROGRAMS += test/all_tests \
                   test/pmtterr_test \
                   test/mallctlerr_test \
                   test/environerr_test \
+                  test/environerr_hbw_malloc_test \
                   test/tieddisterr_test \
                   test/slts_test \
                   test/decorator_test \
@@ -51,6 +52,7 @@ test_mallocerr_test_LDADD = libgtest.a libmemkind.la
 test_mallctlerr_test_LDADD = libgtest.a libmemkind.la
 test_pmtterr_test_LDADD = libgtest.a libmemkind.la
 test_environerr_test_LDADD = libgtest.a libmemkind.la
+test_environerr_hbw_malloc_test_LDADD = libgtest.a libmemkind.la
 test_tieddisterr_test_LDADD = libgtest.a libmemkind.la
 test_slts_test_LDADD = libgtest.a libmemkind.la
 test_decorator_test_LDADD = libgtest.a libmemkind.la
@@ -93,6 +95,7 @@ test_mallocerr_test_SOURCES = test/main.cpp test/malloc_err_test.cpp
 test_mallctlerr_test_SOURCES = test/main.cpp test/mallctl_err_test.cpp
 test_pmtterr_test_SOURCES = test/main.cpp test/pmtt_err_test.cpp
 test_environerr_test_SOURCES = test/main.cpp test/environ_err_test.cpp
+test_environerr_hbw_malloc_test_SOURCES = test/main.cpp test/environ_err_hbw_malloc_test.cpp test/trial_generator.cpp test/check.cpp
 test_tieddisterr_test_SOURCES = test/main.cpp test/tied_dist_test.cpp
 test_slts_test_SOURCES = test/slts_test.cpp
 test_decorator_test_SOURCES = test/main.cpp test/decorator_test.cpp test/decorator_test.h
