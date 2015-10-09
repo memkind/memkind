@@ -101,5 +101,14 @@ private:
 
 };
 
+class TGTest : public::testing::Test
+{
+protected:
+    size_t num_bandwidth;
+    int *bandwidth;
+    TrialGenerator *tgen;
+    void SetUp();
+    void TearDown();
+};
 
 #endif
