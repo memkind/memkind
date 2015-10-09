@@ -55,6 +55,7 @@ test/check.h
 test/check.sh
 test/common.h
 test/environ_err_test.cpp
+test/environ_err_hbw_malloc_test.cpp
 test/extended_tests.cpp
 test/fopen_mock.c
 test/gb_page_tests.cpp

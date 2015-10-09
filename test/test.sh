@@ -73,6 +73,10 @@ $basedir/environerr_test $@
 ret=$?
 if [ $err -eq 0 ]; then err=$ret; fi
 
+$basedir/environerr_hbw_malloc_test $@
+ret=$?
+if [ $err -eq 0 ]; then err=$ret; fi
+
 LD_PRELOAD=$basedir/libsched.so $basedir/schedcpu_test $@
 ret=$?
 if [ $err -eq 0 ]; then err=$ret; fi

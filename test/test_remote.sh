@@ -55,6 +55,7 @@ popd
 
 scp $basedir/.libs/all_tests $remote_login@$remote_ip:
 scp $basedir/.libs/environerr_test $remote_login@$remote_ip:
+scp $basedir/.libs/environerr_hbw_malloc_test $remote_login@$remote_ip:
 scp $basedir/.libs/mallctlerr_test $remote_login@$remote_ip:
 scp $basedir/.libs/mallocerr_test $remote_login@$remote_ip:
 scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
