@@ -61,6 +61,7 @@ scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
 scp $basedir/.libs/schedcpu_test $remote_login@$remote_ip:
 scp $basedir/.libs/tieddisterr_test $remote_login@$remote_ip:
 scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
+scp $basedir/.libs/decorator_test $remote_login@$remote_ip:
 
 scp $basedir/*.hex $remote_login@$remote_ip:
 scp $basedir/libfopen.so $remote_login@$remote_ip:

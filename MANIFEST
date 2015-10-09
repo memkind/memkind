@@ -115,6 +115,8 @@ test/performance/operations.hpp
 test/performance/perf_tests.hpp
 test/performance/perf_tests.cpp
 test/hbw_allocator_tests.cpp
+test/decorator_test.cpp
+test/decorator_test.h
 jemalloc/.gitignore
 jemalloc/autogen.sh
 jemalloc/bin

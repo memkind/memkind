@@ -61,12 +61,18 @@ for line in $($basedir/all_tests --gtest_list_tests); do
     fi
 done
 
+$basedir/decorator_test $@
+ret=$?
+if [ $err -eq 0 ]; then err=$ret; fi
+
 $basedir/environerr_test $@
 ret=$?
 if [ $err -eq 0 ]; then err=$ret; fi
+
 LD_PRELOAD=$basedir/libsched.so $basedir/schedcpu_test $@
 ret=$?
 if [ $err -eq 0 ]; then err=$ret; fi
+
 LD_PRELOAD=$basedir/libnumadist.so $basedir/tieddisterr_test $@
 ret=$?
 if [ $err -eq 0 ]; then err=$ret; fi
