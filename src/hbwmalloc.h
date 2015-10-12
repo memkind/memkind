@@ -27,6 +27,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdlib.h>
 /*
  *  Header file for the high bandwidth memory interface.
  *
