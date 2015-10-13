@@ -227,12 +227,12 @@ void TrialGenerator :: generate_multi_app_stress(int num_types, test_t test)
     for (i = 0; i < num_trials; i++) {
         if (n_random(3) || num_alloc == 0) {
             memkind_get_kind_by_partition(n_random(num_types), &kind);
-        trial_t ltrial = create_trial_tuple(MEMKIND_MALLOC,
-                                                   n_random(8*MB - 1) + 1,
-                                                   0, 2097152,
-                                                   kind,
-                                                   k++);
-        if (test == DATACHECK) ltrial.test = DATACHECK;
+            trial_t ltrial = create_trial_tuple(MEMKIND_MALLOC,
+                                                n_random(8*MB - 1) + 1,
+                                                0, 2097152,
+                                                kind,
+                                                k++);
+            if (test == DATACHECK) ltrial.test = DATACHECK;
             trial_vec.push_back(ltrial);
             num_alloc++;
         }
@@ -357,13 +357,13 @@ void TrialGenerator :: generate_size_2bytes_2KB_2MB(alloc_api_t api)
     for (unsigned int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
          i++) {
         trial_vec.push_back(
-          create_trial_tuple(
-            api,size[i],
-            32,
-            4096,
-            MEMKIND_HBW,
-            -1
-          )
+            create_trial_tuple(
+                api,size[i],
+                32,
+                4096,
+                MEMKIND_HBW,
+                -1
+            )
         );
 
         if (i > 0) k++;
@@ -487,7 +487,7 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
                 break;
             case MEMKIND_MALLOC:
                 fprintf (stdout,"Allocating %zd bytes using memkind_malloc\n",
-                             trial_vec[i].size);
+                         trial_vec[i].size);
                 ptr_vec[i] = memkind_malloc(trial_vec[i].memkind,
                                             trial_vec[i].size);
                 break;
@@ -523,16 +523,17 @@ void TrialGenerator :: run(int num_bandwidth, int *bandwidth)
             ASSERT_TRUE(ptr_vec[i] != NULL);
             memset(ptr_vec[i], 0, trial_vec[i].size);
             Check check(ptr_vec[i], trial_vec[i]);
-        if (trial_vec[i].test == DATACHECK){
-            EXPECT_EQ(0, check.check_data(0x0A));
-        }
+            if (trial_vec[i].test == DATACHECK) {
+                EXPECT_EQ(0, check.check_data(0x0A));
+            }
             if (trial_vec[i].memkind != MEMKIND_DEFAULT &&
                 trial_vec[i].memkind != MEMKIND_HUGETLB &&
                 trial_vec[i].memkind != MEMKIND_GBTLB) {
                 if (trial_vec[i].memkind == MEMKIND_HBW_INTERLEAVE) {
                     EXPECT_EQ(0, check.check_node_hbw_interleave(num_bandwidth, bandwidth));
                     EXPECT_EQ(0, check.check_page_size(trial_vec[i].page_size));
-                } else {
+                }
+                else {
                     EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
                 }
             }

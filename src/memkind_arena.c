@@ -77,7 +77,7 @@ int memkind_set_arena_map_len(struct memkind *kind)
             kind->arena_map_len = arena_num_value;
         }
         else {
-             int calculated_arena_num = numa_num_configured_cpus() * 4;
+            int calculated_arena_num = numa_num_configured_cpus() * 4;
 
 #if ARENA_LIMIT_PER_KIND > 0
             kind->arena_map_len = ((ARENA_LIMIT_PER_KIND < calculated_arena_num) ? ARENA_LIMIT_PER_KIND : calculated_arena_num);

@@ -45,20 +45,16 @@ int hbw_get_policy(void)
 int hbw_set_policy(int mode)
 {
     int err = 0;
-    if (mode == HBW_POLICY_PREFERRED)
-    {
+    if (mode == HBW_POLICY_PREFERRED) {
         pthread_once(&hbw_policy_once_g, hbw_policy_preferred_init);
     }
-    else if (mode == HBW_POLICY_BIND)
-    {
+    else if (mode == HBW_POLICY_BIND) {
         pthread_once(&hbw_policy_once_g, hbw_policy_bind_init);
     }
-    else if (mode == HBW_POLICY_INTERLEAVE)
-    {
+    else if (mode == HBW_POLICY_INTERLEAVE) {
         pthread_once(&hbw_policy_once_g, hbw_policy_interleave_init);
     }
-    else
-    {
+    else {
         err = MEMKIND_ERROR_BADPOLICY;
         goto exit;
     }

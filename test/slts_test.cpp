@@ -36,13 +36,13 @@ static int v_lvl;
 static int l_flag;
 
 typedef enum test_operations {
-  MALLOC,
-  CALLOC,
-  REALLOC,
-  GBTLBMALLOC,
-  GBTLBCALLOC,
-  GBTLBREALLOC,
-  MEMALIGN
+    MALLOC,
+    CALLOC,
+    REALLOC,
+    GBTLBMALLOC,
+    GBTLBCALLOC,
+    GBTLBREALLOC,
+    MEMALIGN
 } test_operations;
 
 typedef struct test_summary {
@@ -55,23 +55,22 @@ typedef struct test_summary {
 } test_summary;
 
 typedef struct test_type {
-  test_operations op;
-  std :: string name;
-  int (*fp)(size_t);
+    test_operations op;
+    std :: string name;
+    int (*fp)(size_t);
 } test_type;
 
 std :: vector<test_type> test_vec;
 
 typedef struct thread_args {
-  test_operations op;
-  size_t time;
-  test_summary res;
+    test_operations op;
+    size_t time;
+    test_summary res;
 } thread_args;
 
 memkind_t random_buffer_kind()
 {
-    switch(rand() % 10)
-    {
+    switch(rand() % 10) {
         case 1:
             return MEMKIND_DEFAULT;
         case 2:
@@ -115,7 +114,7 @@ const char* get_kind_name(memkind_t kind)
     if (kind == MEMKIND_GBTLB)
         return "memkind_gbtlb";
 
-  return "Not defined";
+    return "Not defined";
 }
 
 size_t random_buffer_size(memkind_t kind)
@@ -123,16 +122,15 @@ size_t random_buffer_size(memkind_t kind)
     size_t free;
     size_t total;
 
-    if (memkind_check_available(kind) == 0)
-    {
+    if (memkind_check_available(kind) == 0) {
         memkind_get_size(kind, &total, &free);
         if (kind == MEMKIND_GBTLB ||
             kind == MEMKIND_HBW_GBTLB ||
-            kind == MEMKIND_HBW_PREFERRED_GBTLB)
-        {
+            kind == MEMKIND_HBW_PREFERRED_GBTLB) {
             if (free < GB) return (size_t)-1;
             return (size_t)(((rand() % free) % ((free - GB) + 1)) + GB);
-        }else{
+        }
+        else {
             if (free > 0) return (size_t)(rand() % free);
         }
     }
@@ -146,7 +144,7 @@ int data_check(void *ptr, size_t size)
 
     memset(p, 0x0A, size);
     for(i = 0; i < size; i++)
-      if (p[i] != 0x0A) return -1;
+        if (p[i] != 0x0A) return -1;
 
     return 0;
 }
@@ -165,16 +163,15 @@ void *mem_allocations(void* t_args)
     do {
         kind = random_buffer_kind();
         size = random_buffer_size(kind);
-        if (size == (size_t)(-1))
-        {
+        if (size == (size_t)(-1)) {
             args->res.n_avail++;
             if (v_lvl == 2)
                 fprintf(stderr, "No memmory available %zd for %s\n",
                         size, get_kind_name(kind));
-        } else {
+        }
+        else {
             args->res.n_alloc++;
-            switch (args->op)
-            {
+            switch (args->op) {
                 case MALLOC:
                     p = memkind_malloc(kind, size);
                     break;
@@ -199,25 +196,25 @@ void *mem_allocations(void* t_args)
                     memkind_posix_memalign(kind, &p, 1024, size);
                     break;
             }
-            if (p == NULL)
-            {
+            if (p == NULL) {
                 args->res.n_fail++;
                 if (v_lvl == 1) fprintf(stdout,"Alloc: %zd of %s: Failed\n",
-                                        size, get_kind_name(kind));
-            } else {
+                                            size, get_kind_name(kind));
+            }
+            else {
                 args->res.n_pass++;
                 if (v_lvl == 1) fprintf(stdout,"Alloc: %zd of %s: Passed - DataCheck: ",
-                                        size, get_kind_name(kind));
+                                            size, get_kind_name(kind));
 
-                if (data_check(p, size) == 0){
+                if (data_check(p, size) == 0) {
                     args->res.d_pass++;
                     if (v_lvl == 1) fprintf(stdout,"Passed\n");
-                } else {
+                }
+                else {
                     args->res.d_fail++;
                     if (v_lvl == 1) fprintf(stdout,"Failed\n");
                 }
-                switch (args->op)
-                {
+                switch (args->op) {
                     case GBTLBMALLOC:
                     case GBTLBCALLOC:
                     case GBTLBREALLOC:
@@ -230,38 +227,39 @@ void *mem_allocations(void* t_args)
             }
         }
         gettimeofday(&current, NULL);
-    } while(current.tv_sec < final.tv_sec);
+    }
+    while(current.tv_sec < final.tv_sec);
     return 0;
 }
 
 void print_results(std::string name, test_summary test_results)
 {
-  test_summary res = test_results;
+    test_summary res = test_results;
 
-  printf("************** Execution Summary *********************\n");
-  printf("API exercised             : %s\n", name.c_str());
-  printf("Allocation failures       : %ld\n", res.n_fail);
-  printf("Allocation passes         : %ld\n", res.n_pass);
-  printf("Data check failures       : %ld\n", res.d_fail);
-  printf("Data check passes         : %ld\n", res.d_pass);
-  printf("Memory not available      : %ld\n", res.n_avail);
-  printf("Total of alloc trial      : %ld\n", res.n_alloc);
-  printf("*****************************************************\n");
+    printf("************** Execution Summary *********************\n");
+    printf("API exercised             : %s\n", name.c_str());
+    printf("Allocation failures       : %ld\n", res.n_fail);
+    printf("Allocation passes         : %ld\n", res.n_pass);
+    printf("Data check failures       : %ld\n", res.d_fail);
+    printf("Data check passes         : %ld\n", res.d_pass);
+    printf("Memory not available      : %ld\n", res.n_avail);
+    printf("Total of alloc trial      : %ld\n", res.n_alloc);
+    printf("*****************************************************\n");
 }
 
 void test(test_operations op, size_t duration, std::string name)
 {
-  pthread_t t;
-  thread_args args;
-  test_summary results = {};
+    pthread_t t;
+    thread_args args;
+    test_summary results = {};
 
-  args.op = op;
-  args.time = duration;
-  args.res = results;
+    args.op = op;
+    args.time = duration;
+    args.res = results;
 
-  pthread_create(&t, NULL, mem_allocations, (void*)&args);
-  pthread_join(t, NULL);
-  print_results(name, args.res);
+    pthread_create(&t, NULL, mem_allocations, (void*)&args);
+    pthread_join(t, NULL);
+    print_results(name, args.res);
 }
 
 int test_malloc(size_t duration)
@@ -306,13 +304,13 @@ int test_posix_memalign(size_t duration)
 
 test_type create_test(test_operations op, std::string name,  int (*fp)(size_t))
 {
-  test_type t;
+    test_type t;
 
-  t.op = op;
-  t.name = name;
-  t.fp = fp;
+    t.op = op;
+    t.name = name;
+    t.fp = fp;
 
-  return t;
+    return t;
 }
 
 void init()
@@ -344,56 +342,52 @@ void init()
 
 void print_list()
 {
-   size_t i;
+    size_t i;
 
-   for (i = 0; i < test_vec.size(); i++)
-   {
-       fprintf(stdout,"%s\n",test_vec[i].name.c_str());
-   }
+    for (i = 0; i < test_vec.size(); i++) {
+        fprintf(stdout,"%s\n",test_vec[i].name.c_str());
+    }
 
     exit(0);
 }
 
 int run_all(size_t duration)
 {
-   size_t i;
+    size_t i;
 
-   for (i = 0; i < test_vec.size(); i++)
-   {
-     fprintf(stdout, "Test in progress...\n");
-     test_vec[i].fp(duration);
-   }
+    for (i = 0; i < test_vec.size(); i++) {
+        fprintf(stdout, "Test in progress...\n");
+        test_vec[i].fp(duration);
+    }
 
-   return 0;
+    return 0;
 }
 
 int run_single(std::string test, size_t duration)
 {
-   size_t i;
+    size_t i;
 
-   for (i = 0; i < test_vec.size(); i++)
-   {
-       if (test_vec[i].name == test)
-       {
-           fprintf(stdout,"Test in progress...\n");
-           test_vec[i].fp(duration);
-       }
-   }
+    for (i = 0; i < test_vec.size(); i++) {
+        if (test_vec[i].name == test) {
+            fprintf(stdout,"Test in progress...\n");
+            test_vec[i].fp(duration);
+        }
+    }
 
-   exit(0);
+    exit(0);
 }
 
 void usage()
 {
-   printf("Usage:                                              \n");
-   printf("slts_tests <options> <args>                         \n");
-   printf("Options & args:                                     \n");
-   printf("    --filter       Run the selected test            \n");
-   printf("    --list         List all the test availables     \n");
-   printf("    --duration     Sets the time duration per test  \n");
-   printf("    --verbose      Enables stdout=1 and stderr=2    \n");
-   printf("    --help         Prints this help message         \n");
-   exit(0);
+    printf("Usage:                                              \n");
+    printf("slts_tests <options> <args>                         \n");
+    printf("Options & args:                                     \n");
+    printf("    --filter       Run the selected test            \n");
+    printf("    --list         List all the test availables     \n");
+    printf("    --duration     Sets the time duration per test  \n");
+    printf("    --verbose      Enables stdout=1 and stderr=2    \n");
+    printf("    --help         Prints this help message         \n");
+    exit(0);
 }
 
 int main(int argc, char **argv)
@@ -403,10 +397,8 @@ int main(int argc, char **argv)
     size_t duration = 60 * 1; // Default to 1 minute
 
     init();
-    while (1)
-    {
-        static struct option long_options[] =
-        {
+    while (1) {
+        static struct option long_options[] = {
             /* These options set a flag. */
             {"list",       no_argument,       &l_flag,  1 },
             {"verbose",    required_argument, 0,       'v'},
@@ -414,7 +406,7 @@ int main(int argc, char **argv)
             {"duration",   required_argument, 0,       'd'},
             {"help",       no_argument,       0,       'h'},
             {0,            0,                 0,        0 }
-         };
+        };
 
         /* getopt_long stores the option index here. */
         int option_index = 0;
@@ -428,8 +420,7 @@ int main(int argc, char **argv)
         /* Print list of test cases */
         if (l_flag) print_list();
 
-        switch (c)
-        {
+        switch (c) {
             case 'f':
                 test_name = optarg;
                 break;
@@ -440,12 +431,12 @@ int main(int argc, char **argv)
                 v_lvl = strtol(optarg, NULL, 10);
                 break;
             case 'h':
-               usage();
-               break;
+                usage();
+                break;
             case '?':
-               fprintf(stderr,"missing argument\n");
-               usage();
-               break;
+                fprintf(stderr,"missing argument\n");
+                usage();
+                break;
         }
     }
 

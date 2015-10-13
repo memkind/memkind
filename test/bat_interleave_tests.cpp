@@ -71,8 +71,7 @@ protected:
 
     void TearDown()
     {
-        if (can_interleave)
-        {
+        if (can_interleave) {
             delete[] bandwidth;
             delete tgen;
         }

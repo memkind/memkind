@@ -78,9 +78,9 @@ TEST_F(NegativeTest, TC_Memkind_Negative_ErrorMemAlign)
 
     errno = 0;
     ret = memkind_posix_memalign(MEMKIND_DEFAULT,
-        &ptr,
-        5,
-        100);
+                                 &ptr,
+                                 5,
+                                 100);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
 }
@@ -93,9 +93,9 @@ TEST_F(NegativeTest, TC_Memkind_Negative_ErrorAlignment)
 
     errno = 0;
     ret = memkind_posix_memalign(MEMKIND_HBW,
-        &ptr,
-        5,
-        100);
+                                 &ptr,
+                                 5,
+                                 100);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
 }
@@ -109,9 +109,9 @@ TEST_F(NegativeTest, TC_Memkind_Negative_ErrorAllocM)
 
     errno = 0;
     ret = memkind_posix_memalign(MEMKIND_HBW,
-        &ptr,
-        16,
-        100*GB);
+                                 &ptr,
+                                 16,
+                                 100*GB);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
 }
@@ -119,8 +119,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_ErrorAllocM)
 TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeMalloc)
 {
     void *ptr = NULL;
-    for (int i = -1; i <= 0; i++)
-    {
+    for (int i = -1; i <= 0; i++) {
         ptr = hbw_malloc(i);
         ASSERT_TRUE(ptr == NULL);
         EXPECT_EQ(errno, ENOMEM);
@@ -134,15 +133,14 @@ TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeMalloc)
 TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeCalloc)
 {
     void *ptr = NULL;
-    for (int i = -1; i <= 0; i++)
-    {
+    for (int i = -1; i <= 0; i++) {
         ptr = hbw_calloc(1, i);
         ASSERT_TRUE(ptr == NULL);
         EXPECT_EQ(errno, ENOMEM);
 
         ptr = memkind_calloc(MEMKIND_HBW,
-            1,
-            i);
+                             1,
+                             i);
         ASSERT_TRUE(ptr == NULL);
         EXPECT_EQ(errno, ENOMEM);
     }
@@ -151,15 +149,14 @@ TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeCalloc)
 TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeRealloc)
 {
     void *ptr = NULL;
-    for (int i = -1; i <= 0; i++)
-    {
+    for (int i = -1; i <= 0; i++) {
         ptr = hbw_realloc(ptr, i);
         ASSERT_TRUE(ptr == NULL);
         EXPECT_EQ(errno, ENOMEM);
 
         ptr = memkind_realloc(MEMKIND_HBW,
-            ptr,
-            i);
+                              ptr,
+                              i);
         ASSERT_TRUE(ptr == NULL);
         EXPECT_EQ(errno, ENOMEM);
     }
@@ -191,9 +188,9 @@ TEST_F(NegativeTest, TC_Memkind_Negative_GBFailureMemalign)
     int err = EINVAL;
 
     ret = hbw_posix_memalign_psize(&ptr,
-        1073741824,
-        1073741826,
-        HBW_PAGESIZE_1GB_STRICT);
+                                   1073741824,
+                                   1073741826,
+                                   HBW_PAGESIZE_1GB_STRICT);
     EXPECT_EQ(ret, err);
     EXPECT_TRUE(ptr == NULL);
 }
@@ -204,9 +201,9 @@ TEST_F(NegativeTest, TC_Memkind_Negative_RegularReallocWithMemAllign)
     void *ptr = NULL;
 
     ret = hbw_posix_memalign_psize(&ptr,
-        4096,
-        4096,
-        HBW_PAGESIZE_4KB);
+                                   4096,
+                                   4096,
+                                   HBW_PAGESIZE_4KB);
     EXPECT_EQ(ret, 0);
     ASSERT_TRUE(ptr != NULL);
     memset(ptr, 0, 4096);

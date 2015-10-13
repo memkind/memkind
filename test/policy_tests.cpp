@@ -61,13 +61,12 @@ int execute_policy(int set_policy, int size_in_megas)
         return -1;
     }
 
-    const char *HBW_Types[] =
-        {
-            "DUMMY",
-            "HBW_POLICY_BIND",
-            "HBW_POLICY_PREFERRED",
-            "HBW_POLICY_INTERLEAVE"
-        };
+    const char *HBW_Types[] = {
+        "DUMMY",
+        "HBW_POLICY_BIND",
+        "HBW_POLICY_PREFERRED",
+        "HBW_POLICY_INTERLEAVE"
+    };
 
     //Verify that policy is set to bind
     if (hbw_get_policy() != DESIRED_POLICY) {
