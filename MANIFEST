@@ -134,9 +134,6 @@ jemalloc/doc/html.xsl.in
 jemalloc/doc/jemalloc.xml.in
 jemalloc/doc/manpages.xsl.in
 jemalloc/doc/stylesheet.xsl
-jemalloc/include
-jemalloc/include/jemalloc
-jemalloc/include/jemalloc/internal
 jemalloc/include/jemalloc/internal/arena.h
 jemalloc/include/jemalloc/internal/atomic.h
 jemalloc/include/jemalloc/internal/base.h
@@ -186,7 +183,6 @@ jemalloc/INSTALL
 jemalloc/install-sh
 jemalloc/Makefile.in
 jemalloc/README
-jemalloc/src
 jemalloc/src/arena.c
 jemalloc/src/atomic.c
 jemalloc/src/base.c
@@ -210,9 +206,6 @@ jemalloc/src/tcache.c
 jemalloc/src/tsd.c
 jemalloc/src/util.c
 jemalloc/src/zone.c
-jemalloc/test
-jemalloc/test/include
-jemalloc/test/include/test
 jemalloc/test/include/test/jemalloc_test_defs.h.in
 jemalloc/test/include/test/jemalloc_test.h.in
 jemalloc/test/include/test/math.h
@@ -233,8 +226,8 @@ jemalloc/test/include/test/SFMT-params86243.h
 jemalloc/test/include/test/SFMT-params.h
 jemalloc/test/include/test/SFMT-sse2.h
 jemalloc/test/include/test/test.h
+jemalloc/test/include/test/timer.h
 jemalloc/test/include/test/thd.h
-jemalloc/test/integration
 jemalloc/test/integration/aligned_alloc.c
 jemalloc/test/integration/allocated.c
 jemalloc/test/integration/ALLOCM_ARENA.c
@@ -247,14 +240,14 @@ jemalloc/test/integration/rallocx.c
 jemalloc/test/integration/thread_arena.c
 jemalloc/test/integration/thread_tcache_enabled.c
 jemalloc/test/integration/xallocx.c
-jemalloc/test/src
+jemalloc/test/stress/microbench.c
 jemalloc/test/src/math.c
 jemalloc/test/src/mtx.c
 jemalloc/test/src/SFMT.c
 jemalloc/test/src/test.c
+jemalloc/test/src/timer.c
 jemalloc/test/src/thd.c
 jemalloc/test/test.sh.in
-jemalloc/test/unit
 jemalloc/test/unit/bitmap.c
 jemalloc/test/unit/ckh.c
 jemalloc/test/unit/hash.c
