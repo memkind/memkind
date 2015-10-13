@@ -50,8 +50,7 @@ TEST_F(HbwAllocatorTests, DetaultAllocatorTest)
     ASSERT_TRUE(NULL != ptr);
 
     //Do the actually memory writing
-    for (size_t i=0; i<size; i++)
-    {
+    for (size_t i=0; i<size; i++) {
         ptr[i] = i;
     }
 
@@ -121,8 +120,7 @@ TEST_F(HbwAllocatorTests, StandardVector)
     std::vector<int, hbwmalloc::hbwmalloc_allocator<int> > vec;
     const int size = 10000;
 
-    for (int i=0; i<size; i++)
-    {
+    for (int i=0; i<size; i++) {
         vec.push_back(i);
     }
 

@@ -46,59 +46,59 @@ protected:
 
 TEST_F(DecoratorTest, DT_malloc)
 {
-	void *buffer = memkind_malloc(kind, size);
+    void *buffer = memkind_malloc(kind, size);
 
-	ASSERT_TRUE(buffer != NULL);
-	EXPECT_EQ(1, decorators_state->malloc_pre);
-	EXPECT_EQ(1, decorators_state->malloc_post);
+    ASSERT_TRUE(buffer != NULL);
+    EXPECT_EQ(1, decorators_state->malloc_pre);
+    EXPECT_EQ(1, decorators_state->malloc_post);
 
-	memkind_free(0, buffer);
+    memkind_free(0, buffer);
 }
 
 TEST_F(DecoratorTest, DT_calloc)
 {
-	void *buffer = memkind_calloc(kind, 1, size);
+    void *buffer = memkind_calloc(kind, 1, size);
 
-	ASSERT_TRUE(buffer != NULL);
-	EXPECT_EQ(1, decorators_state->calloc_pre);
-	EXPECT_EQ(1, decorators_state->calloc_post);
+    ASSERT_TRUE(buffer != NULL);
+    EXPECT_EQ(1, decorators_state->calloc_pre);
+    EXPECT_EQ(1, decorators_state->calloc_post);
 
-	memkind_free(0, buffer);
+    memkind_free(0, buffer);
 }
 
 TEST_F(DecoratorTest, DT_posix_memalign)
 {
-	void *buffer;
+    void *buffer;
 
-	int res = memkind_posix_memalign(kind, &buffer, 8, size);
+    int res = memkind_posix_memalign(kind, &buffer, 8, size);
 
-	ASSERT_TRUE(buffer != NULL);
-	ASSERT_EQ(0, res);
-	EXPECT_EQ(1, decorators_state->posix_memalign_pre);
-	EXPECT_EQ(1, decorators_state->posix_memalign_post);
+    ASSERT_TRUE(buffer != NULL);
+    ASSERT_EQ(0, res);
+    EXPECT_EQ(1, decorators_state->posix_memalign_pre);
+    EXPECT_EQ(1, decorators_state->posix_memalign_post);
 
-	memkind_free(0, buffer);
+    memkind_free(0, buffer);
 }
 
 TEST_F(DecoratorTest, DT_realloc)
 {
-	void *buffer = memkind_realloc(kind, NULL, size);
+    void *buffer = memkind_realloc(kind, NULL, size);
 
-	ASSERT_TRUE(buffer != NULL);
-	EXPECT_EQ(1, decorators_state->realloc_pre);
-	EXPECT_EQ(1, decorators_state->realloc_post);
+    ASSERT_TRUE(buffer != NULL);
+    EXPECT_EQ(1, decorators_state->realloc_pre);
+    EXPECT_EQ(1, decorators_state->realloc_post);
 
-	memkind_free(0, buffer);
+    memkind_free(0, buffer);
 }
 
 TEST_F(DecoratorTest, DT_free)
 {
-	void *buffer = memkind_malloc(kind, size);
+    void *buffer = memkind_malloc(kind, size);
 
-	ASSERT_TRUE(buffer != NULL);
+    ASSERT_TRUE(buffer != NULL);
 
-	memkind_free(0, buffer);
+    memkind_free(0, buffer);
 
-	EXPECT_EQ(1, decorators_state->free_pre);
-	EXPECT_EQ(1, decorators_state->free_post);
+    EXPECT_EQ(1, decorators_state->free_pre);
+    EXPECT_EQ(1, decorators_state->free_post);
 }

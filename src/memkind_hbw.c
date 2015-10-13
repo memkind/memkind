@@ -199,7 +199,7 @@ int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
     int cpu;
     struct bitmask nodemask_bm = {maxnode, nodemask};
     struct memkind_hbw_closest_numanode_t *g =
-                &memkind_hbw_closest_numanode_g;
+            &memkind_hbw_closest_numanode_g;
     pthread_once(&memkind_hbw_closest_numanode_once_g,
                  memkind_hbw_closest_numanode_init);
 
@@ -223,7 +223,7 @@ int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
     int cpu;
     struct bitmask nodemask_bm = {maxnode, nodemask};
     struct memkind_hbw_closest_numanode_t *g =
-                &memkind_hbw_closest_numanode_g;
+            &memkind_hbw_closest_numanode_g;
     pthread_once(&memkind_hbw_closest_numanode_once_g,
                  memkind_hbw_closest_numanode_init);
 
@@ -239,7 +239,7 @@ int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
 static void memkind_hbw_closest_numanode_init(void)
 {
     struct memkind_hbw_closest_numanode_t *g =
-                &memkind_hbw_closest_numanode_g;
+            &memkind_hbw_closest_numanode_g;
     int *bandwidth = NULL;
     int num_unique = 0;
     int high_bandwidth = 0;

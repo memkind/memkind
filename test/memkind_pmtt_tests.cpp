@@ -79,7 +79,7 @@ TEST_F(MemkindPmttTest, TC_Memkind_PmttParser_EmptyController)
 }
 
 int MemkindPmttTest::run_pmtt_parser(char *mock_hex, const int MEM_CTRLS_BW[],
-                    size_t NUMA_NUM_NODES)
+                                     size_t NUMA_NUM_NODES)
 {
     int rv = 0;
     static const char *MOCK_NBW_PATH = "/tmp/node-bandwidth";
@@ -127,7 +127,7 @@ int MemkindPmttTest::run_pmtt_parser(char *mock_hex, const int MEM_CTRLS_BW[],
 }
 
 int MemkindPmttTest::parse_node_bandwidth(size_t num_bandwidth, int *bandwidth,
-                         const char *bandwidth_path)
+        const char *bandwidth_path)
 {
     FILE *fid = NULL;
     size_t nread = 0;

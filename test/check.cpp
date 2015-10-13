@@ -56,28 +56,25 @@ Check::Check(const void *p, const size_t size, const size_t page_size)
     this->ptr = p;
     this->size = size;
     size_t psize = (page_size >= min_page_size ? page_size : min_page_size);
-    if (p && size)
-    {
+    if (p && size) {
         num_address = size / psize;
         num_address += size % psize ? 1 : 0;
 
         address = new void* [num_address];
         size_t i;
-        for (i = 0; i < num_address - 1; ++i)
-        {
+        for (i = 0; i < num_address - 1; ++i) {
             address[i] = (char *)ptr + i * psize;
         }
         address[i] = (char *)p + size - 1;
     }
-    else
-    {
+    else {
         address = NULL;
     }
 }
 
 Check::~Check()
 {
-     delete[] address;
+    delete[] address;
 }
 
 Check::Check(const Check &other)
@@ -99,8 +96,7 @@ int Check::check_node_hbw(size_t num_bandwidth, const int *bandwidth)
 
     status = new int [num_address];
 
-    for (i = 0; i < num_address; i++)
-    {
+    for (i = 0; i < num_address; i++) {
         get_mempolicy(&status[i], NULL, 0, address[i], MPOL_F_NODE | MPOL_F_ADDR);
     }
 
