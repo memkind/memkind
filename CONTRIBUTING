@@ -44,12 +44,10 @@ The memkind library has a dependency on a related fork of jemalloc.
 Since there is little hope of cleanly rebasing against the head of
 jemalloc's public development branch (primarily due to the upstream
 modifications to how "huge" allocations are done), we have included
-this source in the memkind repository as a git submodule with the
-intention of removing it when upstream jemalloc supports our
-requirements.  In the mean time, the developer must configure and
-build jemalloc prior to configuring and building memkind.  The
-initialization of the jemalloc submodule is done by memkind's
-autogen.sh script.  A simple example to build from the public memkind
+this source in the memkind repository with the intention of removing
+it when upstream jemalloc supports our requirements. In the mean time,
+the developer must configure and build jemalloc prior to configuring
+and building memkind. A simple example to build from the public memkind
 github follows:
 
     git clone https://github.com/memkind/memkind.git

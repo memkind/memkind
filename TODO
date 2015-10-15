@@ -14,8 +14,6 @@ Testing
       kernel version greater than 3.11, sufficient 2 MB pages in
       hugetlbfs, and support for 1 GB pages.
 
-    * Need to expand performance testing significantly.
-
     * Add more tests for memkind_check_available().
 
 Documentation
@@ -24,7 +22,7 @@ Documentation
       handled.
 
     * Document the hbwmalloc::hbwmalloc_allocator C++ standard
-      allocator and add an example that uses it.
+      allocator.
 
 Features
 --------
