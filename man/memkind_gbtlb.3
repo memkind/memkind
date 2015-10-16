@@ -61,14 +61,6 @@ relaxed.
 .BR memkind_gbtlb_malloc ()
 calls
 .BR mmap (2)
-with flags that enable gigabyte pages and stores the returned address
-in the internal hash table which can be queried to support the
-.BR memkind_gbtlb_free ()
-operation.
-
-.BR memkind_gbtlb_malloc ()
-calls
-.BR mmap (2)
 with
 .BR MAP_HUGE_1GB
 mmap flag for allocating gigabyte pages for
@@ -82,7 +74,7 @@ can take
 and stores the returned address
 in the internal hash table which can be queried to support the
 .BR memkind_gbtlb_free ()
-operation.
+operation. If kind does not support GBTLB undefined behaviour occurs.
 .PP
 .BR memkind_gbtlb_calloc ()
 is exactly the same implementation and supports the same

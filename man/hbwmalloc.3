@@ -46,7 +46,7 @@ hbwmalloc \- The high bandwidth memory interface
 .br
 .B int hbw_get_policy(void);
 .br
-.BI "void hbw_set_policy(int " "mode" );
+.BI "int hbw_set_policy(int " "mode" );
 .fi
 .SH "DESCRIPTION"
 .BR hbw_check_available ()
@@ -233,19 +233,18 @@ returns
 or
 .B HBW_POLICY_PREFERRED
 which represents the current high bandwidth policy.
-.BR hbw_set_policy ()
-and
 .BR hbw_free ()
-do not have return values.
+do not have return value.
 .BR hbw_malloc ()
-.BR hbw_calloc ()
+.BR hbw_calloc (),
 and
 .BR hbw_realloc ()
 return the pointer to the allocated memory, or NULL if the request
 fails.
-.BR hbw_posix_memalign ()
-and
+.BR hbw_posix_memalign (),
 .BR hbw_posix_memalign_psize ()
+and
+.BR hbw_set_policy ()
 return zero on success and return an error code
 as described in the
 .B ERRORS
@@ -271,9 +270,21 @@ parameter is not a power of two, or was not a multiple of
 .IR "sizoeof(void *)" ,
 then
 .B EINVAL
-is returned.  If there was insufficient memory to satisfy the request then
+is returned. If there was insufficient memory to satisfy the request then
 .B ENOMEM
 is returned.
+.TP
+.BR hbw_set_policy ()
+returns
+.B MEMKIND_ERROR_REPPOLICY
+if hbw_set_policy () was called more than once, or
+.B MEMKIND_ERROR_BADPOLICY if
+.I mode
+argument was neither
+.B HBW_POLICY_PREFERRED,
+.B HBW_POLICY_BIND
+nor
+.B HBW_POLICY_INTERLEAVE.
 .SH "NOTES"
 The
 .I hbwmalloc.h

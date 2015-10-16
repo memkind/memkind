@@ -28,6 +28,9 @@ We are moving to a more open development model with memkind.
 - We have posted source and binary RPMs for several distributions here:
   http://download.opensuse.org/repositories/home:/cmcantalupo/
 
+- memkind is also avaiable in Fedora package repository (devel, EPEL7):
+  https://admin.fedoraproject.org/pkgdb/package/memkind/
+
 - Pull requests are welcome.
 
 - White space formatting generally conforms to

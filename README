@@ -12,9 +12,8 @@ COLLABORATION AND WAS NOT ISSUED AS A RELEASED PRODUCT BY INTEL.
 
 LAST UPDATE
 -----------
-Christopher Cantalupo <christopher.m.cantalupo@intel.com>
-2015 April 11
-
+Krzysztof Kulakowski <krzysztof.kulakowski@intel.com>
+Fri Jul 24 2015
 
 SUMMARY
 -------
@@ -151,7 +150,7 @@ bandwidth allocations will be local to the process CPU.
 STATUS
 ------
 This software is being made available for early evaluation.  The
-memkind library should be considered pre-alpha: bugs may exist and the
-interfaces may be subject to change prior to alpha release.  Feedback
+memkind library should be considered beta: bugs may exist and the
+interfaces may be subject to change prior to the next release. Feedback
 on design or implementation is greatly appreciated.  Please see the
 TODO file for more information about future work.

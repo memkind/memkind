@@ -1,3 +1,28 @@
+* Thu Oct 15 2015 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v0.3.0
+- Added two new kinds: MEMKIND_INTERLEAVE and MEMKIND_HBW_INTERLEAVE
+  (for details please take a look at man/memkind.3)
+- Added support for file-backed memory heaps
+  (for details please take a look at man/memkind_pmem.3)
+- Added autohbw library, that intercepts the standard heap allocations,
+  which let use high-bandwidth memory without modifying existing codebase
+  (for details please take a look at examples/autohbw_README)
+- jemalloc is now, staticly linked, internal component of memkind RPM
+  instead of rpm dependency.
+- Added memkind_allocated example which demonstrates usage of memkind
+  with alignas() alignment specifier introduced in C++11
+  (for details please take a look at examples/README)
+- Added support for using thread local storage to improve performance in
+  multithreaded applications (enabled by configure time option: --enable-tls)
+- Added posibility to set number of jemalloc arenas per kind by
+  configure time parameter or enviromental variable
+  (for details please take a look at MEMKIND_ARENA_NUM_PER_KIND section
+  of man/memkind.3).
+- Added decorators to the memkind allocation APIs.
+  These are weak symbols (pre and post for each API) which can modify
+  the input and output of each of the calls.
+- Significantly extended test base (new groups of tests: performance,
+  multithreaded, PMTT, nagtive, stress).
+
 * Fri Jan 9 2015 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.2.0
 - Bumped memkind ABI version to 0:1:0.
 - Removed memkind_get_kind_for_free() from externally facing API's.  Instead if
@@ -25,12 +50,14 @@
 - Removed unnecessary includes from header files.
 - Better error checking in example code.
 - Documentation update and clean up.
+
 * Thu Nov 13 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.1.0
 - Increased test code coverage significantly.
 - Fixed bug in memkind_error_message() for MEMKIND_ERROR_TOOMANY.
 - Removed memkind_arena_free() API since it was redundant with memkind_default_free().
 - Static memkind structs are now declared as extern in the headers and defined in the
   source files files rather than being statically defined in the headers.
+
 * Thu Oct 30 2014 Christopher Cantalupo <christopher.m.cantalupo@intel.com> v0.0.9
 - Now building with autotools.
 - Updated documentation.

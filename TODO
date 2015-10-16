@@ -14,8 +14,6 @@ Testing
       kernel version greater than 3.11, sufficient 2 MB pages in
       hugetlbfs, and support for 1 GB pages.
 
-    * Need to expand performance testing significantly.
-
     * Add more tests for memkind_check_available().
 
 Documentation
@@ -24,7 +22,7 @@ Documentation
       handled.
 
     * Document the hbwmalloc::hbwmalloc_allocator C++ standard
-      allocator and add an example that uses it.
+      allocator.
 
 Features
 --------
@@ -37,9 +35,6 @@ Features
                                 void **copy, void **lock);
           int memkind_wait(void *lock);
           int memkind_check(void *lock);
-
-    * Investigate support for overloading the C++ new operator and the
-      C++11 alignas() mark up.
 
     * Extend huge page support using libhugetlbfs.
 
@@ -72,7 +67,7 @@ Issues
       allocations, this will simplify the modifications required to
       enable memkind.
 
-      Two two concerns about merging to head of jemalloc dev branch.
+      Two concerns about merging to head of jemalloc dev branch.
           + Free pool for huge allocations is not shared between
             threads.
           + New jemalloc feature for user defined chunk allocator does
