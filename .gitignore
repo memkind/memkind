@@ -44,6 +44,7 @@
 /test/mallctlerr_test
 /test/mallocerr_test
 /test/*.o
+/test/performance/.deps/
 /test/pmtterr_test
 /test/schedcpu_test
 /test/*.so
