@@ -37,11 +37,15 @@ memkind-$(version).spec:
 .PHONY: rpm
 
 define memkind_spec
+%if %{defined suse_version}
+Name: libmemkind0
+%else
 Name: memkind
+%endif
 Summary: User Extensible Heap Manager
 Version: $(version)
 Release: $(release)
-License: BSD
+License: BSD-2-Clause
 Group: System Environment/Libraries
 URL: http://memkind.github.io/memkind
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -51,20 +55,22 @@ BuildRequires: libnuma-devel
 %else
 BuildRequires: numactl-devel
 %endif
-#!BuildIgnore: post-build-checks
 
 Prefix: %{_prefix}
-Prefix: %{_initddir}
+Prefix: %{_unitdir}
 $(opt_obsolete)
 $(opt_provides)
 
+%define namespace memkind
+
 %if %{defined suse_version}
-%define docdir %{_defaultdocdir}/memkind
+%define docdir %{_defaultdocdir}/%{namespace}
 %else
-%define docdir %{_defaultdocdir}/memkind-%{version}
+%define docdir %{_defaultdocdir}/%{namespace}-%{version}
 %endif
 
-%define statedir %{_localstatedir}/run/memkind
+%define statedir %{_localstatedir}/run/%{namespace}
+
 
 # x86_64 is the only arch memkind will build due to its
 # current dependency on SSE4.2 CRC32 instruction which
@@ -78,8 +84,8 @@ ExclusiveArch: x86_64
 
 # default values if version is a tagged release on github
 %{!?commit: %define commit %{version}}
-%{!?buildsubdir: %define buildsubdir %{name}-%{commit}}
-Source0: https://github.com/%{name}/%{name}/archive/v%{commit}/%{buildsubdir}.tar.gz
+%{!?buildsubdir: %define buildsubdir %{namespace}-%{commit}}
+Source0: https://github.com/%{namespace}/%{namespace}/archive/v%{commit}/%{buildsubdir}.tar.gz
 
 %description
 The memkind library is an user extensible heap manager built on top of
@@ -99,7 +105,7 @@ Feedback on design or implementation is greatly appreciated.
 %package devel
 Summary: Memkind User Extensible Heap Manager development lib and tools
 Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
+Requires: %{namespace} = %{version}-%{release}
 
 %description devel
 Install header files and development aids to link memkind library into
@@ -110,7 +116,7 @@ available for early evaluation. The memkind library should be considered beta:
 bugs may exist. Feedback on design or implementation is greatly appreciated.
 
 %prep
-%setup -q -a 0 -n %{name}-%{version}
+%setup -q -a 0 -n %{namespace}-%{version}
 
 %build
 # It is required that we configure and build the jemalloc subdirectory
@@ -127,7 +133,7 @@ cd %{_builddir}/%{buildsubdir}/jemalloc/obj
 %configure --enable-autogen --with-jemalloc-prefix=jemk_ --enable-memkind \
            --enable-safe --enable-cc-silence --prefix=%{_prefix} \
            --includedir=%{_includedir} --libdir=%{_libdir} --bindir=%{_bindir} \
-           --docdir=%{_docdir}/%{name} --mandir=%{_mandir} \
+           --docdir=%{_docdir}/%{namespace} --mandir=%{_mandir} \
            CFLAGS="-std=gnu99"
 %{__make} %{?_smp_mflags}
 
@@ -137,74 +143,58 @@ echo %{version} > %{_builddir}/%{buildsubdir}/VERSION
 test -f configure || ./autogen.sh
 %configure --enable-tls --prefix=%{_prefix} --libdir=%{_libdir} \
            --includedir=%{_includedir} --sbindir=%{_sbindir} \
-           --mandir=%{_mandir} --docdir=%{_docdir}/%{name} \
+           --mandir=%{_mandir} --docdir=%{_docdir}/%{namespace} \
            CFLAGS="-std=gnu99"
 %{__make} %{?_smp_mflags}
 
 %install
 cd %{_builddir}/%{buildsubdir}
 %{__make} DESTDIR=%{buildroot} install
-%{__install} -d %{buildroot}/%{_initddir}
-%{__install} init.d/memkind %{buildroot}/%{_initddir}/memkind
+%{__install} -d %{buildroot}/%{_unitdir}
+%{__install} %{namespace}.service %{buildroot}/%{_unitdir}/%{namespace}.service
 %if 0%{?suse_version} <= 1310
 %{__install} -d %{buildroot}/%{statedir}
 touch %{buildroot}/%{statedir}/node-bandwidth
 %endif
-rm -f %{buildroot}/%{_libdir}/lib%{name}.{l,}a
+rm -f %{buildroot}/%{_libdir}/lib%{namespace}.{l,}a
 rm -f %{buildroot}/%{_libdir}/lib{numakind,autohbw}.*
+
+%pre
+%{service_add_pre %{namespace}.service}
 
 %post
 /sbin/ldconfig
-if [ -x /usr/lib/lsb/install_initd ]; then
-    /usr/lib/lsb/install_initd %{_initddir}/memkind
-elif [ -x /sbin/chkconfig ]; then
-    /sbin/chkconfig --add memkind
-else
-    for i in 3 4 5; do
-        ln -sf %{_initddir}/memkind /etc/rc.d/rc${i}.d/S90memkind
-    done
-    for i in 0 1 2 6; do
-        ln -sf %{_initddir}/memkind /etc/rc.d/rc${i}.d/K10memkind
-    done
-fi
-%{_initddir}/memkind restart >/dev/null 2>&1 || :
+%{service_add_post %{namespace}.service}
 
 %preun
-if [ -z "$1" ] || [ "$1" == 0 ]; then
-    %{_initddir}/memkind stop >/dev/null 2>&1 || :
-    if [ -x /usr/lib/lsb/remove_initd ]; then
-        /usr/lib/lsb/remove_initd %{_initddir}/memkind
-    elif [ -x /sbin/chkconfig ]; then
-        /sbin/chkconfig --del memkind
-    else
-        rm -f /etc/rc.d/rc?.d/???memkind
-    fi
-fi
+%{service_del_preun %{namespace}.service}
 
-%postun -p /sbin/ldconfig
+%postun
+%{service_del_postun %{namespace}.service}
+/sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
-%license %{_docdir}/%{name}/COPYING
-%doc %{_docdir}/%{name}/README
-%doc %{_docdir}/%{name}/VERSION
-%dir %{_docdir}/%{name}
-%dir %{_initddir}
-%{_libdir}/lib%{name}.so.*
-%{_bindir}/%{name}-hbw-nodes
-%{_sbindir}/%{name}-pmtt
-%{_initddir}/%{name}
+%license %{_docdir}/%{namespace}/COPYING
+%doc %{_docdir}/%{namespace}/README
+%doc %{_docdir}/%{namespace}/VERSION
+%dir %{_docdir}/%{namespace}
+%dir %{_unitdir}
+%{_libdir}/lib%{namespace}.so.*
+%{_bindir}/%{namespace}-hbw-nodes
+%{_sbindir}/%{namespace}-pmtt
+%{_unitdir}/%{namespace}.service
 %if 0%{?suse_version} <= 1310
 %ghost %dir %{statedir}
 %ghost %{statedir}/node-bandwidth
 %endif
 %files devel
 %defattr(-,root,root,-)
-%{_includedir}/%{name}*.h
+%{_includedir}/%{namespace}*.h
 %{_includedir}/hbwmalloc.h
-%{_libdir}/lib%{name}.so
+%{_libdir}/lib%{namespace}.so
 %{_mandir}/man3/hbwmalloc.3.*
-%{_mandir}/man3/%{name}*.3.*
+%{_mandir}/man3/%{namespace}*.3.*
 
 %changelog
 endef
