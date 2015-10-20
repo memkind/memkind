@@ -48,10 +48,6 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .BI "void memkind_free(memkind_t " "kind" ", void " "*ptr" );
 .br
 .sp
-.B "ALLOCATOR CALLBACK FUNCTION:"
-.br
-.BI "void *memkind_partition_mmap(int " "partition" ", void " "*addr" ", size_t " "size" );
-.sp
 .B "KIND MANAGMENT:"
 .br
 .BI "int memkind_create(const struct memkind_ops " "*ops" ", const char " "*name" ", memkind_t " "*kind" );
@@ -63,6 +59,8 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .BI "int memkind_get_num_kind(int " "*num_kind" );
 .br
 .BI "int memkind_get_kind_by_partition(int " "partition" ", memkind_t " "*kind" );
+.br
+.BI "int memkind_get_kind_by_arena(unsigned " "arena_ind" ", memkind_t " "*kind" );
 .br
 .BI "int memkind_get_kind_by_name(const char " "*name" ", memkind_t " "*kind" );
 .br
@@ -248,30 +246,6 @@ specified to
 but this will require a look up that can be bypassed by specifying
 a non-zero value.
 .sp
-.B "ALLOCATOR CALLBACK FUNCTION:"
-.br
-This section describes the memkind interface which is used internally
-by the heap manager.  For this API the kind is determined by the
-partition index.  This enables the underlying heap manager to call
-routines with standard type arguments, and allows the heap manager
-implementation to be independent of the specifics of the
-.I memkind_t
-implementation.  Currently there is only one callback function.
-.PP
-.BR memkind_partition_mmap ()
-which is a wrapper around the
-.BR mmap (2)
-system call.  The hint address
-.I addr
-and the length in bytes of the buffer to be
-allocated
-.I size
-are passed through to
-.BR mmap (2).
-The other
-.BR mmap (2)
-parameters are determined by the kind operations.
-.sp
 .B "KIND MANAGEMENT:"
 .br
 There are built-in kinds that are always available, and these are enumerated in the
@@ -369,6 +343,13 @@ index which must be in the range [0,
 where num_kind can be retrieved with the
 .BR memkind_get_num_kind ()
 function.
+.PP
+.BR memkind_get_kind_by_arena ()
+sets
+.I kind
+to the memory kind associated with the
+.I arena
+index which must be in the range [0, 4095].
 .PP
 .BR memkind_get_kind_by_name ()
 sets

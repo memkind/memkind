@@ -65,6 +65,8 @@ jemalloc_objects = jemalloc/obj/src/jemalloc.lo \
                    jemalloc/obj/src/tcache.lo \
                    jemalloc/obj/src/util.lo \
                    jemalloc/obj/src/tsd.lo \
+                   jemalloc/obj/src/pages.lo \
+                   jemalloc/obj/src/valgrind.lo \
                    # end
 
 libmemkind_la_LIBADD = $(jemalloc_objects)
@@ -130,6 +132,9 @@ EXTRA_DIST = autogen.sh \
              jemalloc/src/chunk_mmap.c \
              jemalloc/src/atomic.c \
              jemalloc/src/rtree.c \
+             jemalloc/src/pages.c \
+             jemalloc/src/valgrind.c \
+             jemalloc/.gitignore \
              jemalloc/configure.ac \
              jemalloc/include/jemalloc/internal/tcache.h \
              jemalloc/include/jemalloc/internal/prof.h \

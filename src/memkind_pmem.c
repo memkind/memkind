@@ -31,6 +31,99 @@
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_pmem.h>
 
+
+void *pmem_chunk_alloc(void *chunk, size_t size, size_t alignment,
+                       bool *zero, bool *commit, unsigned arena_ind)
+{
+    int err;
+    void *addr = NULL;
+
+    if (chunk != NULL) {
+        /* not supported */
+        goto exit;
+    }
+
+    struct memkind *kind;
+    err = memkind_get_kind_by_arena(arena_ind, &kind);
+    if (err) {
+        goto exit;
+    }
+
+    err = memkind_check_available(kind);
+    if (err) {
+        goto exit;
+    }
+
+    addr = memkind_pmem_mmap(kind, chunk, size);
+
+    if (addr != MAP_FAILED) {
+        *zero = true;
+        *commit = true;
+
+        /* XXX - check alignment */
+    } else {
+        addr = NULL;
+    }
+
+exit:
+    //printf("%s(chunk=%p size=%zu align=%zu zero=%d commit=%d arena=%u) = %p\n",
+    //   __func__, chunk, size, alignment, *zero, *commit, arena_ind, addr);
+    return addr;
+}
+
+bool pmem_chunk_dalloc(void *chunk, size_t size, bool commited,
+                        unsigned arena_ind)
+{
+    /* do nothing - report failure (opt-out) */
+    return true;
+}
+
+bool pmem_chunk_commit(void *chunk, size_t size, size_t offset, size_t length,
+                        unsigned arena_ind)
+{
+    /* do nothing - report success */
+    return false;
+}
+
+bool pmem_chunk_decommit(void *chunk, size_t size, size_t offset, size_t length,
+                          unsigned arena_ind)
+{
+    /* do nothing - report failure (opt-out) */
+    return true;
+}
+
+bool pmem_chunk_purge(void *chunk, size_t size, size_t offset, size_t length,
+                       unsigned arena_ind)
+{
+    /* do nothing - report failure (opt-out) */
+    return true;
+}
+
+bool pmem_chunk_split(void *chunk, size_t size, size_t size_a, size_t size_b,
+                       bool commited, unsigned arena_ind)
+{
+    /* do nothing - report success */
+    return false;
+}
+
+bool pmem_chunk_merge(void *chunk_a, size_t size_a, void *chunk_b,
+                       size_t size_b, bool commited, unsigned arena_ind)
+{
+    /* do nothing - report success */
+    return false;
+}
+
+static chunk_hooks_t pmem_chunk_hooks = {
+    pmem_chunk_alloc,
+    pmem_chunk_dalloc,
+    pmem_chunk_commit,
+    pmem_chunk_decommit,
+    pmem_chunk_purge,
+    pmem_chunk_split,
+    pmem_chunk_merge
+};
+
+
 const struct memkind_ops MEMKIND_PMEM_OPS = {
     .create = memkind_pmem_create,
     .destroy = memkind_pmem_destroy,
@@ -43,7 +136,9 @@ const struct memkind_ops MEMKIND_PMEM_OPS = {
     .get_mmap_flags = memkind_pmem_get_mmap_flags,
     .get_arena = memkind_thread_get_arena,
     .get_size = memkind_pmem_get_size,
+    .chunk_hooks = &pmem_chunk_hooks
 };
+
 
 int memkind_pmem_create(struct memkind *kind, const struct memkind_ops *ops,
                         const char *name)

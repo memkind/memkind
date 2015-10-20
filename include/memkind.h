@@ -41,7 +41,8 @@ extern "C" {
 enum memkind_const {
     MEMKIND_MAX_KIND = 512,
     MEMKIND_ERROR_MESSAGE_SIZE = 128,
-    MEMKIND_NAME_LENGTH = 64
+    MEMKIND_NAME_LENGTH = 64,
+    MEMKIND_MAX_ARENA = 4096
 };
 
 /*EXPERIMENTAL API*/
@@ -122,6 +123,7 @@ struct memkind_ops {
     int (* check_available)(struct memkind *kind);
     int (* check_addr)(struct memkind *kind, void *addr);
     void (*init_once)(void);
+    void *chunk_hooks;
 };
 
 typedef struct memkind * memkind_t;
@@ -193,6 +195,10 @@ int memkind_get_num_kind(int *num_kind);
 int memkind_get_kind_by_partition(int partition, memkind_t *kind);
 
 /*EXPERIMENTAL API*/
+/* Get kind associated with an arena (index from 0 to 4095) */
+int memkind_get_kind_by_arena(unsigned arena_ind, struct memkind **kind);
+
+/*EXPERIMENTAL API*/
 /* Get kind given the name of the kind */
 int memkind_get_kind_by_name(const char *name, memkind_t *kind);
 
@@ -226,10 +232,6 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size);
 /*EXPERIMENTAL API*/
 /* Free memory allocated with the memkind API */
 void memkind_free(memkind_t kind, void *ptr);
-
-/*EXPERIMENTAL API*/
-/* ALLOCATOR CALLBACK FUNCTION */
-void *memkind_partition_mmap(int partition, void *addr, size_t size);
 
 #ifdef __cplusplus
 }

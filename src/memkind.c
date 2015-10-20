@@ -174,6 +174,8 @@ static struct memkind_registry memkind_registry_g = {
     PTHREAD_MUTEX_INITIALIZER
 };
 
+struct memkind *arena_registry_g[MEMKIND_MAX_ARENA];
+
 static size_t Chunksize = 0;
 
 static int memkind_get_kind_for_free(void *ptr, struct memkind **kind);
@@ -384,6 +386,21 @@ int memkind_get_kind_by_partition(int partition, struct memkind **kind)
     return err;
 }
 
+int memkind_get_kind_by_arena(unsigned arena_ind, struct memkind **kind)
+{
+    int err = 0;
+
+    if (arena_ind < MEMKIND_MAX_ARENA &&
+        arena_registry_g[arena_ind] != NULL) {
+        *kind = arena_registry_g[arena_ind];
+    }
+    else {
+        *kind = NULL;
+        err = MEMKIND_ERROR_UNAVAILABLE;
+    }
+    return err;
+}
+
 int memkind_get_kind_by_name(const char *name, struct memkind **kind)
 {
     int err = 0;
@@ -400,27 +417,6 @@ int memkind_get_kind_by_name(const char *name, struct memkind **kind)
         err = MEMKIND_ERROR_UNAVAILABLE;
     }
     return err;
-}
-
-void *memkind_partition_mmap(int partition, void *addr, size_t size)
-{
-    int err;
-    void *result = MAP_FAILED;
-    struct memkind *kind;
-
-    err = memkind_get_kind_by_partition(partition, &kind);
-    if (!err) {
-        err = memkind_check_available(kind);
-    }
-    if (!err) {
-        if (kind->ops->mmap) {
-            result = kind->ops->mmap(kind, addr, size);
-        }
-        else {
-            result = memkind_default_mmap(kind, addr, size);
-        }
-    }
-    return result;
 }
 
 int memkind_check_available(struct memkind *kind)

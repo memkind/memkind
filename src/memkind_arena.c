@@ -37,6 +37,7 @@
 #include <sched.h>
 #include <smmintrin.h>
 #include <limits.h>
+#include <sys/mman.h>
 
 #include "config.h"
 #include "config_tls.h"
@@ -44,8 +45,122 @@
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
 
+extern struct memkind *arena_registry_g[MEMKIND_MAX_ARENA];
+
 static void *jemk_mallocx_check(size_t size, int flags);
 static void *jemk_rallocx_check(void *ptr, size_t size, int flags);
+
+
+void *arena_chunk_alloc(void *chunk, size_t size, size_t alignment,
+                       bool *zero, bool *commit, unsigned arena_ind)
+{
+    int err;
+    void *addr = NULL;
+
+    struct memkind *kind;
+    err = memkind_get_kind_by_arena(arena_ind, &kind);
+    if (err) {
+        goto exit;
+    }
+
+    err = memkind_check_available(kind);
+    if (err) {
+        goto exit;
+    }
+
+    if (kind->ops->mmap) {
+        addr = kind->ops->mmap(kind, chunk, size);
+    } else {
+        addr = memkind_default_mmap(kind, chunk, size);
+    }
+
+    if (addr != MAP_FAILED) {
+        if (addr != chunk) {
+            /* wrong place */
+            munmap(addr, size);
+            addr = NULL;
+            goto exit;
+        }
+
+        *zero = true;
+        *commit = true;
+
+        if ((uintptr_t)addr & (alignment-1)) {
+            /* XXX - fix alignment */
+            munmap(addr, size);
+            addr = NULL;
+        }
+    } else {
+        addr = NULL;
+    }
+
+exit:
+    printf("%s(chunk=%p size=%zu align=%zu zero=%d commit=%d arena=%u) = %p\n",
+       __func__, chunk, size, alignment, *zero, *commit, arena_ind, addr);
+    return addr;
+}
+
+bool arena_chunk_dalloc(void *chunk, size_t size, bool commited,
+                        unsigned arena_ind)
+{
+    /* do nothing - report failure (opt-out) */
+    return true;
+}
+
+bool arena_chunk_commit(void *chunk, size_t size, size_t offset, size_t length,
+                        unsigned arena_ind)
+{
+    /* do nothing - report success */
+    return false;
+}
+
+bool arena_chunk_decommit(void *chunk, size_t size, size_t offset, size_t length,
+                          unsigned arena_ind)
+{
+    /* do nothing - report failure (opt-out) */
+    return true;
+}
+
+bool arena_chunk_purge(void *chunk, size_t size, size_t offset, size_t length,
+                       unsigned arena_ind)
+{
+    /* XXX - may need special implementation for hugetlb/gbtbl kinds */
+    int err;
+
+    if (offset + length > size) {
+        return true;
+    }
+
+    err = madvise(chunk + offset, length, MADV_DONTNEED);
+    return (err != 0);
+}
+
+bool arena_chunk_split(void *chunk, size_t size, size_t size_a, size_t size_b,
+                       bool commited, unsigned arena_ind)
+{
+    /* XXX - may need special implementation for gbtbl kinds */
+
+    /* do nothing - report success */
+    return false;
+}
+
+bool arena_chunk_merge(void *chunk_a, size_t size_a, void *chunk_b,
+                       size_t size_b, bool commited, unsigned arena_ind)
+{
+    /* do nothing - report success */
+    return false;
+}
+
+static chunk_hooks_t arena_chunk_hooks = {
+    arena_chunk_alloc,
+    arena_chunk_dalloc,
+    arena_chunk_commit,
+    arena_chunk_decommit,
+    arena_chunk_purge,
+    arena_chunk_split,
+    arena_chunk_merge
+};
+
 
 int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
 {
@@ -96,6 +211,9 @@ int memkind_arena_create_map(struct memkind *kind)
     int err = 0;
     int i;
     size_t unsigned_size = sizeof(unsigned int);
+    char cmd[128];
+    chunk_hooks_t *hooks;
+    size_t hooks_size = sizeof(chunk_hooks_t);
 
     if (kind->arena_map_len == 0) {
         err = memkind_set_arena_map_len(kind);
@@ -117,9 +235,22 @@ int memkind_arena_create_map(struct memkind *kind)
             kind->arena_map[i] = UINT_MAX;
         }
         for (i = 0; !err && i < kind->arena_map_len; ++i) {
-            err = jemk_mallctl("arenas.extendk", kind->arena_map + i,
-                               &unsigned_size, &(kind->partition),
-                               unsigned_size);
+            err = jemk_mallctl("arenas.extend", kind->arena_map + i,
+                               &unsigned_size, NULL, 0);
+
+            if (!err) {
+                if (kind->ops->chunk_hooks) {
+                    hooks = kind->ops->chunk_hooks;
+                } else {
+                    hooks = &arena_chunk_hooks;
+                }
+                snprintf(cmd, 128, "arena.%u.chunk_hooks", kind->arena_map[i]);
+                err = jemk_mallctl(cmd, NULL, NULL, hooks, hooks_size);
+            }
+
+            if (!err) {
+                arena_registry_g[kind->arena_map[i]] = kind;
+            }
         }
         if (err) {
             if (kind->arena_map) {
@@ -326,5 +457,4 @@ static void *jemk_rallocx_check(void *ptr, size_t size, int flags)
         result = jemk_rallocx(ptr, size, flags);
     }
     return result;
-
 }
