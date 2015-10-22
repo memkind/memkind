@@ -68,7 +68,6 @@ void memkind_hugetlb_init_once(void)
     assert(err == 0);
 }
 
-
 int memkind_hugetlb_check_available_2mb(struct memkind *kind)
 {
     return memkind_hugetlb_check_available(kind, 2097152);
@@ -86,20 +85,42 @@ static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_siz
     int errno_before;
     int num_read = 0;
     unsigned int node, num_node;
-    size_t nr_hugepages = 0;
     FILE *fid = NULL;
     nodemask_t nodemask;
     struct bitmask nodemask_bm = {NUMA_NUM_NODES, nodemask.n};
-    const char *nr_path_fmt = "/sys/devices/system/node/node%u/hugepages/hugepages-%zukB/nr_hugepages";
-    char nr_path[128];
+    char formatted_path[128];
+    int snprintf_ret = 0;
+    size_t value_read = 0;
 
-    /* default huge page size is 2MB */
+    size_t nr_persistent_hugepages = 0;
+    const char *nr_path_fmt = "/sys/devices/system/node/node%u/hugepages/hugepages-%zukB/nr_hugepages";
+
+    size_t nr_overcommit_hugepages = 0;
+    const char *nr_overcommit_path_fmt = "/sys/kernel/mm/hugepages/hugepages-%zukB/nr_overcommit_hugepages";
+
+    /* on x86 default huge page size is 2MB */
     if (huge_size == 0) {
-        huge_size = 2048;
+        huge_size = 2097152;
     }
+
     /* convert input to kB */
-    else {
-        huge_size = huge_size >> 10;
+    huge_size >>= 10;
+
+    //read overcommit hugepages limit for this pagesize
+    snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_overcommit_path_fmt, huge_size);
+    if (snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
+        errno_before = errno;
+        fid = fopen(formatted_path, "r");
+        if (fid) {
+            num_read = fscanf(fid, "%zud", &value_read);
+            if(num_read) {
+                nr_overcommit_hugepages = value_read;
+            }
+            fclose(fid);
+        }
+        else {
+            errno = errno_before;
+        }
     }
 
     if (kind->ops->get_mbind_nodemask) {
@@ -111,19 +132,27 @@ static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_siz
     num_node = numa_num_configured_nodes();
     for (node = 0; !err && node < num_node; ++node) {
         if (numa_bitmask_isbitset(&nodemask_bm, node)) {
-            snprintf(nr_path, 128, nr_path_fmt, node, huge_size);
-            errno_before = errno;
-            fid = fopen(nr_path, "r");
-            if (!fid) {
-                err = MEMKIND_ERROR_HUGETLB;
-                errno = errno_before;
-            }
-            else {
-                num_read = fscanf(fid, "%zud", &nr_hugepages);
-                fclose(fid);
-                if (!num_read || !nr_hugepages) {
-                    err = MEMKIND_ERROR_HUGETLB;
+            nr_persistent_hugepages = 0;
+            snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_path_fmt, node, huge_size);
+            if(snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
+                errno_before = errno;
+                fid = fopen(formatted_path, "r");
+                if (fid) {
+                    num_read = fscanf(fid, "%zud", &value_read);
+                    if(num_read) {
+                        nr_persistent_hugepages = value_read;
+                    }
+                    fclose(fid);
                 }
+                else {
+                    errno = errno_before;
+                }
+            }
+
+            //return error if there is no overcommit limit for that page size
+            //nor persistent hugepages for nodes of that kind
+            if (!nr_overcommit_hugepages && !nr_persistent_hugepages) {
+                err = MEMKIND_ERROR_HUGETLB;
             }
         }
     }
