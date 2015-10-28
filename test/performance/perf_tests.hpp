@@ -55,7 +55,7 @@ private:
 public:
     PerfTestCase()
     {
-        m_freeOperation = new T(performance_tests::OperationName::Free);
+        m_freeOperation = new T(OperationName::Free);
         srand(m_seed);
         m_test = nullptr;
     }

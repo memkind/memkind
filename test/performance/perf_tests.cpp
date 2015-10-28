@@ -79,12 +79,12 @@ protected:
 
     bool compareMetrics(Metrics metrics, Metrics reference, double delta)
     {
-        return (
-            checkDelta(metrics.operationsPerSecond, reference.operationsPerSecond, "operationsPerSecond", delta, true) &&
-            checkDelta(metrics.avgOperationDuration, reference.avgOperationDuration, "avgOperationDuration", delta) &&
-            checkDelta(metrics.iterationDuration, reference.iterationDuration, "iterationDuration", delta) &&
-            checkDelta(metrics.repeatDuration, reference.repeatDuration, "repeatDuration", delta)
-            );
+	    bool result = true;
+	    result &= checkDelta(metrics.operationsPerSecond, reference.operationsPerSecond, "operationsPerSecond", delta, true);
+	    result &= checkDelta(metrics.avgOperationDuration, reference.avgOperationDuration, "avgOperationDuration", delta);
+	    result &= checkDelta(metrics.iterationDuration, reference.iterationDuration, "iterationDuration", delta);
+	    result &= checkDelta(metrics.repeatDuration, reference.repeatDuration, "repeatDuration", delta);
+	    return result;
     }
 };
 

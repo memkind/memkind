@@ -296,6 +296,14 @@ namespace performance_tests
             cout << "ERROR: Test not initialized" << endl;
             return 1;
         }
+	    //warmup kinds
+	    void *alloc = nullptr;
+	    for (const memkind_t& kind : m_kinds)
+	    {
+		    m_testOperations[0][0]->perform(kind, alloc, 1e6);
+		    m_freeOperation->perform(kind, alloc);
+
+	    }
         // Create threads
         prepareWorkers();
         for (size_t repeat = 0; repeat < m_repeatsCount; repeat++)

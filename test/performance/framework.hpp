@@ -177,7 +177,7 @@ namespace performance_tests
         vector<size_t>              m_allocationSizes;
         // List of list of allocation operations, utlization depends on execution mode
         vector<vector<Operation*>>  m_testOperations;
-        // Free oepration
+        // Free operation
         Operation*                  m_freeOperation;
         // List of memory kinds (for memkind allocation only)
         // distributed among threads sequentially
