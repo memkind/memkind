@@ -28,10 +28,10 @@
 
 #set -x
 # Default paths (to installation dir of memkind-tests RPM)
-TEST_PATH=/usr/share/mpss/test/memkind-dt
-LD_PATH=/usr/share/mpss/test/memkind-dt
+TEST_PATH=/usr/share/mpss/test/memkind-dt/
+LD_PATH=/usr/share/mpss/test/memkind-dt/
 # Test bineries executed by Berta
-TEST_BINARIES=(all_tests environerr_test schedcpu_test tieddisterr_test)
+TEST_BINARIES=(all_tests environerr_test schedcpu_test tieddisterr_test decorator_test allocator_perf_tool_tests)
 PROGNAME=`basename $0`
 function usage () {
    cat <<EOF
@@ -111,7 +111,7 @@ TEST_PATH=`normalize_path "$TEST_PATH"`
 LD_PATH=`normalize_path "$LD_PATH"`
 
 # Additional enviroment settings required by some tests (currently schedcpu_test and tieddisterr_test)
-TEST_ENVS=("" "" "LD_PRELOAD=$LD_PATH/libsched.so %s" "LD_PRELOAD=$LD_PATH/libnumadist.so %s")
+TEST_ENVS=("" "" "LD_PRELOAD=$LD_PATH/libsched.so %s" "LD_PRELOAD=$LD_PATH/libnumadist.so %s" "" "")
 # Detect platform
 # TODO: what in case of single-numanode machine?
 CPSIG="Intel(R) Xeon(R) CPU E5-2697 v2 @ 2.70GH"
