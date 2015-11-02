@@ -192,6 +192,7 @@ fi
 %{_includedir}/memkind_hbw.h
 %{_includedir}/memkind_hugetlb.h
 %{_includedir}/memkind_pmem.h
+%{_includedir}/hbw_allocator.h
 %{_libdir}/libmemkind.so.0.0.1
 %{_libdir}/libmemkind.so.0
 %{_libdir}/libmemkind.so

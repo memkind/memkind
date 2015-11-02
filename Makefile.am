@@ -81,6 +81,7 @@ include_HEADERS = src/hbwmalloc.h \
                   src/memkind_hbw.h \
                   src/memkind_hugetlb.h \
                   src/memkind_pmem.h \
+                  src/hbw_allocator.h \
                   # end
 
 sbin_PROGRAMS = memkind-pmtt

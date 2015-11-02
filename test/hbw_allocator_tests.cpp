@@ -23,10 +23,10 @@
  */
 
 #include "common.h"
-#include "hbwmalloc.h"
+#include <hbw_allocator.h>
 #include <vector>
 
-// This is a testing class responsible for hbwmalloc::hbwmalloc_allocator class tests.
+// Tests for hbw::allocator class.
 class HbwAllocatorTests: public :: testing::Test
 {
 
@@ -43,9 +43,9 @@ protected:
 TEST_F(HbwAllocatorTests, DetaultAllocatorTest)
 {
     const size_t size = 512;
-    hbwmalloc::hbwmalloc_allocator<size_t> allocator;
+    hbw::allocator<size_t> allocator;
 
-    hbwmalloc::hbwmalloc_allocator<size_t>::pointer ptr = allocator.allocate(size);
+    hbw::allocator<size_t>::pointer ptr = allocator.allocate(size);
 
     ASSERT_TRUE(NULL != ptr);
 
@@ -61,7 +61,7 @@ TEST_F(HbwAllocatorTests, DetaultAllocatorTest)
 TEST_F(HbwAllocatorTests, AddressConvertion)
 {
     const size_t size = 512;
-    hbwmalloc::hbwmalloc_allocator<int> allocator;
+    hbw::allocator<int> allocator;
 
     int* ptr = allocator.allocate(size);
 
@@ -70,11 +70,11 @@ TEST_F(HbwAllocatorTests, AddressConvertion)
     const int excpected_val = 4;
     ptr[0] = excpected_val;
 
-    hbwmalloc::hbwmalloc_allocator<int>::reference reference = *ptr;
-    hbwmalloc::hbwmalloc_allocator<int>::const_reference const_reference = *ptr;
+    hbw::allocator<int>::reference reference = *ptr;
+    hbw::allocator<int>::const_reference const_reference = *ptr;
 
-    hbwmalloc::hbwmalloc_allocator<int>::pointer test_ptr = allocator.address(reference);
-    hbwmalloc::hbwmalloc_allocator<int>::const_pointer test_const_ptr = allocator.address(const_reference);
+    hbw::allocator<int>::pointer test_ptr = allocator.address(reference);
+    hbw::allocator<int>::const_pointer test_const_ptr = allocator.address(const_reference);
 
     ASSERT_TRUE(NULL != test_ptr);
     ASSERT_TRUE(NULL != test_const_ptr);
@@ -89,7 +89,7 @@ TEST_F(HbwAllocatorTests, AddressConvertion)
 //We expect to catch allocation exceptions caused by out of bound sizes.
 TEST_F(HbwAllocatorTests, AllocationSizeOutOfBounds)
 {
-    hbwmalloc::hbwmalloc_allocator<size_t> allocator;
+    hbw::allocator<size_t> allocator;
 
     const size_t over_size = allocator.max_size() + 1;
 
@@ -105,7 +105,7 @@ TEST_F(HbwAllocatorTests, AllocationSizeOutOfBounds)
 //Test if variable will be constructed.
 TEST_F(HbwAllocatorTests, AllocatorConstruct)
 {
-    hbwmalloc::hbwmalloc_allocator<int> allocator;
+    hbw::allocator<int> allocator;
 
     int x = 0;
     int expect_val = 4;
@@ -117,7 +117,7 @@ TEST_F(HbwAllocatorTests, AllocatorConstruct)
 //Test the integration with std::vector.
 TEST_F(HbwAllocatorTests, StandardVector)
 {
-    std::vector<int, hbwmalloc::hbwmalloc_allocator<int> > vec;
+    std::vector<int, hbw::allocator<int> > vec;
     const int size = 10000;
 
     for (int i=0; i<size; i++) {
