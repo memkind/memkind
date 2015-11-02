@@ -66,6 +66,7 @@ src/memkind_interleave.h
 src/memkind_pmtt.c
 src/memkind_pmem.c
 src/memkind_pmem.h
+src/hbw_allocator.h
 test/Makefile.mk
 test/check.sh
 test/test.sh
