@@ -627,6 +627,8 @@ ctl_growk(unsigned partition)
 		if (ctl_stats.narenas != narenas_auto)
 			idalloc(arenas_old);
 	}
+	if (ctl_stats.narenas != narenas_auto)
+		idalloc(ctl_stats.arenas);
 	ctl_stats.arenas = astats;
 	ctl_stats.narenas++;
 
