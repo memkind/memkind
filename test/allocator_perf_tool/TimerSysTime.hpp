@@ -21,25 +21,24 @@
 * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "FunctionCallsPerformanceTask.h"
+#pragma once
 
+#include <sys/time.h>
 
-void FunctionCallsPerformanceTask::run()
+class TimerSysTime
 {
-	VectorIterator<size_t> allocation_sizes = AllocationSizes::generate_random_sizes(task_conf.allocation_sizes_conf, task_conf.seed);
+public:
+	void start() {gettimeofday(&last, 0);}
 
-	VectorIterator<int> func_calls = FunctionCalls::generate_random_allocator_func_calls(task_conf.n, task_conf.seed, task_conf.func_calls);
+	double getElapsedTime() const
+	{
+		struct timeval now;
+		gettimeofday(&now, 0);
+		double time_delta_sec = ((double)now.tv_sec - (double)last.tv_sec);
+		double time_delta_usec = ((double)now.tv_usec - (double)last.tv_usec) / 1000000.0;
+		return time_delta_sec + time_delta_usec;
+	}
 
-	AllocatorFactory AllocatorFactory;
-	VectorIterator<Allocator*> allocators_calls = AllocatorFactory.generate_random_allocator_calls(task_conf.n, task_conf.seed);
-
-	ScenarioWorkload scenario_workload = ScenarioWorkload(
-		&allocators_calls,
-		&allocation_sizes,
-		&func_calls
-	);
-
-	while (scenario_workload.run());
-
-	results = scenario_workload.get_allocations_info();
-}
+private:
+	struct timeval last;
+};

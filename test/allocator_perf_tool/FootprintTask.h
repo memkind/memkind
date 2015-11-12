@@ -25,7 +25,6 @@
 #include <jemalloc/jemalloc.h>
 #include <pthread.h>
 
-#include "Runnable.hpp"
 #include "Configuration.hpp"
 #include "ScenarioWorkload.h"
 #include "FunctionCalls.hpp"

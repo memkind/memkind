@@ -21,6 +21,7 @@
 * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
 #pragma once
 
 #include "Allocator.hpp"
@@ -28,7 +29,8 @@
 #include "Configuration.hpp"
 #include "WrappersMacros.hpp"
 #include "FunctionCalls.hpp"
-#include "memkind.h"
+#include <cerrno>
+#include <memkind.h>
 
 #include <stdlib.h>
 
@@ -48,6 +50,7 @@ public:
 	{
 		START_TEST(type_id, FunctionCalls::MALLOC)
 		data.ptr = memkind_malloc(kind, size);
+		data.error_code = errno;
 		END_TEST
 	}
 
@@ -55,12 +58,14 @@ public:
 	{
 		START_TEST(type_id, FunctionCalls::CALLOC)
 		data.ptr = memkind_calloc(kind, num, size);
+		data.error_code = errno;
 		END_TEST
 	}
 	memory_operation wrapped_realloc(void* ptr, size_t size)
 	{
 		START_TEST(type_id, FunctionCalls::FREE)
 		data.ptr = memkind_realloc(kind, ptr, size);
+		data.error_code = errno;
 		END_TEST
 	}
 

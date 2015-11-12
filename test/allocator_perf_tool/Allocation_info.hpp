@@ -24,6 +24,8 @@
 #pragma once
 
 #include <stdlib.h>
+#include <numaif.h>
+
 
 //This structure is responsible to store information about single memory operation.
 struct memory_operation
@@ -34,9 +36,9 @@ struct memory_operation
 	unsigned allocator_type;
 	unsigned allocation_method;
 	bool is_allocated;
+	int error_code;
 };
 
-static float convert_bytes_to_mb(unsigned bytes)
-{
-	return ((float)bytes) / (1024.0*1024.0);
-}
+float convert_bytes_to_mb(size_t bytes);
+
+int get_numa_node(void* ptr);

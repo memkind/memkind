@@ -21,25 +21,36 @@
 * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "FunctionCallsPerformanceTask.h"
+#pragma once
 
+#include "Configuration.hpp"
+#include "ScenarioWorkload.h"
+#include "FunctionCalls.hpp"
+#include "AllocationSizes.hpp"
+#include "VectorIterator.hpp"
+#include "AllocatorFactory.hpp"
+#include "Task.hpp"
+#include "Numastat.hpp"
+#include "CSVLogger.hpp"
+#include "TimerSysTime.hpp"
+#include "Stats.hpp"
 
-void FunctionCallsPerformanceTask::run()
+class StressIncreaseToMax
+	: public Task
 {
-	VectorIterator<size_t> allocation_sizes = AllocationSizes::generate_random_sizes(task_conf.allocation_sizes_conf, task_conf.seed);
+public:
+	StressIncreaseToMax(TaskConf conf) {task_conf = conf;}
 
-	VectorIterator<int> func_calls = FunctionCalls::generate_random_allocator_func_calls(task_conf.n, task_conf.seed, task_conf.func_calls);
+	void run();
 
-	AllocatorFactory AllocatorFactory;
-	VectorIterator<Allocator*> allocators_calls = AllocatorFactory.generate_random_allocator_calls(task_conf.n, task_conf.seed);
+	//Return memory operations from the last run.
+	std::vector<memory_operation> get_results() {return results;}
 
-	ScenarioWorkload scenario_workload = ScenarioWorkload(
-		&allocators_calls,
-		&allocation_sizes,
-		&func_calls
-	);
+	static void execute_test_iterations(TaskConf task_conf, unsigned time);
 
-	while (scenario_workload.run());
+private:
+	ScenarioWorkload* scenario_workload;
+	std::vector<memory_operation> results;
+	TaskConf task_conf;
+};
 
-	results = scenario_workload.get_allocations_info();
-}
