@@ -77,6 +77,7 @@ public:
 			result = atof(&buff[number_begin]);
 #endif
 		}
+		pclose(file);
 
 		assert(result > -0.01);
 

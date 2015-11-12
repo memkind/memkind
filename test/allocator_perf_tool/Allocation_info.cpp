@@ -21,25 +21,18 @@
 * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "FunctionCallsPerformanceTask.h"
 
+#include "Allocation_info.hpp"
 
-void FunctionCallsPerformanceTask::run()
+float convert_bytes_to_mb(size_t bytes)
 {
-	VectorIterator<size_t> allocation_sizes = AllocationSizes::generate_random_sizes(task_conf.allocation_sizes_conf, task_conf.seed);
+	return ((float)bytes) / (1024.0*1024.0);
+}
 
-	VectorIterator<int> func_calls = FunctionCalls::generate_random_allocator_func_calls(task_conf.n, task_conf.seed, task_conf.func_calls);
+int get_numa_node(void* ptr)
+{
+	int status = -1;
 
-	AllocatorFactory AllocatorFactory;
-	VectorIterator<Allocator*> allocators_calls = AllocatorFactory.generate_random_allocator_calls(task_conf.n, task_conf.seed);
-
-	ScenarioWorkload scenario_workload = ScenarioWorkload(
-		&allocators_calls,
-		&allocation_sizes,
-		&func_calls
-	);
-
-	while (scenario_workload.run());
-
-	results = scenario_workload.get_allocations_info();
+	get_mempolicy(&status, NULL, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
+	return status;
 }

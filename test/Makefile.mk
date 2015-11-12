@@ -33,6 +33,7 @@ check_PROGRAMS += test/all_tests \
                   test/tieddisterr_test \
                   test/slts_test \
                   test/decorator_test \
+                  test/allocator_perf_tool_tests \
                   # end
 
 TESTS += test/check.sh
@@ -42,6 +43,8 @@ EXTRA_DIST += test/mock-pmtt-2-nodes.hex \
               test/memkind-dt.ts \
               test/memkind_ft.py
 
+
+#test_all_tests_LDADD = libgtest.a libmemkind.la test/liballocatorperftool.la
 test_all_tests_LDADD = libgtest.a libmemkind.la
 test_schedcpu_test_LDADD = libgtest.a libmemkind.la
 test_mallocerr_test_LDADD = libgtest.a libmemkind.la
@@ -51,6 +54,8 @@ test_environerr_test_LDADD = libgtest.a libmemkind.la
 test_tieddisterr_test_LDADD = libgtest.a libmemkind.la
 test_slts_test_LDADD = libgtest.a libmemkind.la
 test_decorator_test_LDADD = libgtest.a libmemkind.la
+test_allocator_perf_tool_tests_LDADD = libgtest.a libmemkind.la
+
 
 test_all_tests_SOURCES = test/common.h \
                          test/bat_tests.cpp \
@@ -91,6 +96,76 @@ test_environerr_test_SOURCES = test/main.cpp test/environ_err_test.cpp
 test_tieddisterr_test_SOURCES = test/main.cpp test/tied_dist_test.cpp
 test_slts_test_SOURCES = test/slts_test.cpp
 test_decorator_test_SOURCES = test/main.cpp test/decorator_test.cpp test/decorator_test.h
+
+#Tests based on Allocator Perf Tool
+allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.hpp \
+                                    test/allocator_perf_tool/Allocation_info.hpp \
+                                    test/allocator_perf_tool/Allocation_info.cpp \
+                                    test/allocator_perf_tool/Allocator.hpp \
+                                    test/allocator_perf_tool/AllocatorFactory.hpp \
+                                    test/allocator_perf_tool/CSVLogger.hpp \
+                                    test/allocator_perf_tool/CommandLine.hpp \
+                                    test/allocator_perf_tool/Configuration.hpp \
+                                    test/allocator_perf_tool/ConsoleLog.hpp \
+                                    test/allocator_perf_tool/FootprintSampling.cpp \
+                                    test/allocator_perf_tool/FootprintSampling.h \
+                                    test/allocator_perf_tool/FootprintTask.cpp \
+                                    test/allocator_perf_tool/FootprintTask.h \
+                                    test/allocator_perf_tool/FunctionCalls.hpp \
+                                    test/allocator_perf_tool/FunctionCallsPerformanceTask.cpp \
+                                    test/allocator_perf_tool/FunctionCallsPerformanceTask.h \
+                                    test/allocator_perf_tool/Iterator.hpp \
+                                    test/allocator_perf_tool/JemallocAllocatorWithTimer.hpp \
+                                    test/allocator_perf_tool/MemkindAllocatorWithTimer.hpp \
+                                    test/allocator_perf_tool/MemoryFootprintStats.hpp \
+                                    test/allocator_perf_tool/Numastat.hpp \
+                                    test/allocator_perf_tool/Runnable.hpp \
+                                    test/allocator_perf_tool/Sample.hpp \
+                                    test/allocator_perf_tool/ScenarioWorkload.cpp \
+                                    test/allocator_perf_tool/ScenarioWorkload.h \
+                                    test/allocator_perf_tool/StandardAllocatorWithTimer.hpp \
+                                    test/allocator_perf_tool/Stats.hpp \
+                                    test/allocator_perf_tool/StressIncreaseToMax.cpp \
+                                    test/allocator_perf_tool/StressIncreaseToMax.h \
+                                    test/allocator_perf_tool/Task.hpp \
+                                    test/allocator_perf_tool/TaskFactory.hpp \
+                                    test/allocator_perf_tool/Tests.hpp \
+                                    test/allocator_perf_tool/Thread.hpp \
+                                    test/allocator_perf_tool/TimerSysTime.hpp \
+                                    test/allocator_perf_tool/VectorIterator.hpp \
+                                    test/allocator_perf_tool/Workload.hpp \
+                                    test/allocator_perf_tool/WrappersMacros.hpp
+
+
+test_allocator_perf_tool_tests_SOURCES = test/main.cpp \
+									$(allocator_perf_tool_library_sources) \
+                                    test/increase_to_max_stress_test.cpp \
+                                    # end
+
+
+test_allocator_perf_tool_tests_CPPFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error -I$(googletest)/include $(AM_CPPFLAGS)
+test_allocator_perf_tool_tests_CXXFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error -I$(googletest)/include $(AM_CPPFLAGS)
+if ENABLE_CXX11
+test_allocator_perf_tool_tests_CPPFLAGS += -std=c++11
+test_allocator_perf_tool_tests_CXXFLAGS += -std=c++11
+endif
+
+
+#Allocator Perf Tool stand alone app
+check_PROGRAMS += test/perf_tool
+test_perf_tool_LDADD = libmemkind.la
+test_perf_tool_SOURCES = $(allocator_perf_tool_library_sources) \
+						test/allocator_perf_tool/main.cpp \
+						# end
+
+
+test_perf_tool_CPPFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
+test_perf_tool_CXXFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
+if ENABLE_CXX11
+test_perf_tool_CPPFLAGS += -std=c++11
+test_perf_tool_CXXFLAGS += -std=c++11
+endif
+
 
 # Examples as tests
 check_PROGRAMS += test/hello_memkind \
@@ -136,6 +211,7 @@ test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples
 endif
 
 test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
+
 
 check_PROGRAMS += test/memkind-pmtt
 test_memkind_pmtt_SOURCES = src/memkind_pmtt.c

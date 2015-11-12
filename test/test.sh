@@ -65,6 +65,10 @@ $basedir/decorator_test $@
 ret=$?
 if [ $err -eq 0 ]; then err=$ret; fi
 
+$basedir/allocator_perf_tool_tests $@
+ret=$?
+if [ $err -eq 0 ]; then err=$ret; fi
+
 $basedir/environerr_test $@
 ret=$?
 if [ $err -eq 0 ]; then err=$ret; fi

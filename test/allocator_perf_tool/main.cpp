@@ -44,6 +44,8 @@
 #include "CommandLine.hpp"
 #include "FootprintSampling.h"
 #include "FunctionCallsPerformanceTask.h"
+#include "StressIncreaseToMax.h"
+#include "CSVLogger.hpp"
 
 /*
 Command line description.
@@ -56,24 +58,32 @@ Options:
 		'calls' - function calls performance test,
 		'all' - execute both above ('footprint' and 'calls') tests,
 		'self' - execute self tests
-	- 'operations' - the number of operations per thread
+		's1' - stress test (allocate memory to maximum* repeatedly, until specific time interval has been exceed), 
+	- 'operations' - the number of memory operations per thread
 	- 'size_from' - lower bound for the random sizes of allocation
 	- 'size_to' - upper bound for the random sizes of allocation
 	- 'seed' - random seed
 	- 'threads_num' - the number of threads per test case
+	- 'time' - minimum execution time interval
+	- 'kind' - the kind to test
+	- 'reserved_unallocated' - limit memory allocations to leave unallocated memory (in MB), where available_memory = free - reserved_unallocated
+	- 'csv_log' - if 'true' then log to csv file memory operations and statistics
+	- 'check_memory_availability' - when 'false' does not check memory avaiability before memory operation
+* - maximum of available memory in OS, or maximum memory based 'operations' parameter
 Example:
+1. Performance test:
 ./perf_tool test=all operations=1000 size_from=32 size_to=20480 seed=11 threads_num=200
+2. Stress test
+./perf_tool test=s1 time=120 kind=MEMKIND_HBW size_from=1048576 csv_log=true reserved_unallocated=15
 */
 
 int main(int argc, char* argv[])
 {
-	int mem_operations_num = 1000;
+	unsigned mem_operations_num = 1000;
 	size_t size_from = 32, size_to = 2048*1024;
 	unsigned seed = 11;
 	//should be at least one
 	size_t threads_number = 10;
-	bool footprint_test_enabled = false;
-	bool calls_test_enabled = false;
 
 	CommandLine cmd_line(argc, argv);
 
@@ -83,21 +93,65 @@ int main(int argc, char* argv[])
 		getchar();
 	}
 
-	footprint_test_enabled = cmd_line.is_option_set("test", "footprint");
-	calls_test_enabled = cmd_line.is_option_set("test", "calls");
-
-	if(cmd_line.is_option_set("test", "all"))
-	{
-		calls_test_enabled = true;
-		footprint_test_enabled = true;
-	}
-
 	cmd_line.parse_with_strtol("operations", mem_operations_num);
 	cmd_line.parse_with_strtol("size_from", size_from);
 	cmd_line.parse_with_strtol("size_to", size_to);
 	cmd_line.parse_with_strtol("seed", seed);
 	cmd_line.parse_with_strtol("threads_num", threads_number);
 
+	bool is_csv_log_enabled = cmd_line.is_option_set("csv_log", "true");
+	bool check_memory_availability = !cmd_line.is_option_set("check_memory_availability", "false");
+
+	unsigned reserved_unallocated = 0;
+	cmd_line.parse_with_strtol("reserved_unallocated", reserved_unallocated);
+
+	float before_init = Numastat::get_total_memory(0);
+	//Ensure library initialization at the first call.
+	memory_operation data = AllocatorFactory().initialize_allocator(AllocatorTypes::MEMKIND_HBW);
+	float memkind_initalization_overhead = Numastat::get_total_memory(0) - before_init;
+	printf("memkind HBW initialization overhead: %f MB/%d.s. \n", memkind_initalization_overhead, data.total_time);
+
+	//Stress test by repeatedly increasing memory (to maximum), until given time interval has been exceed.
+	if(cmd_line.is_option_set("test", "s1"))
+	{
+		printf("Stress test (StressIncreaseToMax) start. \n");
+
+		if(!cmd_line.is_option_present("operations"))
+			mem_operations_num = 1000000;
+
+		unsigned time = 120; //Default time interval.
+		cmd_line.parse_with_strtol("time", time);
+
+		unsigned allocator = AllocatorTypes::MEMKIND_HBW;
+		if(cmd_line.is_option_present("kind"));
+		{
+			//Enable memkind allocator and specify kind.
+			allocator = AllocatorTypes::allocator_type(cmd_line.get_option_value("kind"));
+		}
+		TypesConf allocator_types;
+		allocator_types.enable_type(allocator);
+
+		TypesConf enable_func_calls;
+		enable_func_calls.enable_type(FunctionCalls::MALLOC);
+
+		TaskConf task_conf = {
+			mem_operations_num,
+			{
+				mem_operations_num,
+				reserved_unallocated,
+				size_from, //No random sizes.
+				size_from
+			},
+			enable_func_calls,
+			allocator_types,
+			11,
+			is_csv_log_enabled,
+			check_memory_availability
+		};
+
+		StressIncreaseToMax::execute_test_iterations(task_conf, time);
+		return 0;
+	}
 
 	printf("Test configuration: \n");
 	printf("\t memory operations per thread = %u \n", mem_operations_num);
@@ -113,35 +167,34 @@ int main(int argc, char* argv[])
 	printf("Allocation bound: min: %f, mid: %f, max: %f\n",  min, mid, max);
 #endif
 
-	float before_init = Numastat::get_total_memory(0);
-	//Ensure library initialization at the first call.
-	memory_operation data = AllocatorFactory().initialize_allocator(AllocatorTypes::MEMKIND_HBW);
-	float memkind_initalization_overhead = Numastat::get_total_memory(0) - before_init;
-	printf("memkind HBW initialization overhead: %f MB/%d.s. \n", memkind_initalization_overhead, data.total_time);
-
-	if(!calls_test_enabled && !footprint_test_enabled)
-	{
-		calls_test_enabled = true;
-		footprint_test_enabled = true;
-	}
 
 	TypesConf func_calls;
 	func_calls.enable_type(FunctionCalls::MALLOC);
 	func_calls.enable_type(FunctionCalls::FREE);
 
+	TypesConf allocator_types;
+	allocator_types.enable_type(AllocatorTypes::MEMKIND_DEFAULT);
+	allocator_types.enable_type(AllocatorTypes::MEMKIND_HBW);
+	allocator_types.enable_type(AllocatorTypes::JEMALLOC);
+	allocator_types.enable_type(AllocatorTypes::STANDARD_ALLOCATOR);
+
 	TaskConf conf = {
 		mem_operations_num, //number memory operations
 		{
 			mem_operations_num, //number of memory operations
+			reserved_unallocated, //reserved unallocated memory to limit allocations
 			size_from, //min. size of single allocation
 			size_to //max. size of single allocatioion
 		},
 		func_calls, //enable function calls
-		seed //random seed
+		allocator_types, //enable allocators
+		seed, //random seed
+		is_csv_log_enabled,
+		check_memory_availability
 	};
 
 	//Footprint test
-	if(footprint_test_enabled)
+	if(cmd_line.is_option_set("test", "footprint") || cmd_line.is_option_set("test", "all"))
 	{
 		std::vector<Thread*> threads;
 		std::vector<FootprintTask*> tasks;
@@ -181,7 +234,7 @@ int main(int argc, char* argv[])
 	}
 
 	//Function calls test
-	if(calls_test_enabled)
+	if(cmd_line.is_option_set("test", "calls") || cmd_line.is_option_set("test", "all"))
 	{
 		TaskFactory task_factory;
 

@@ -51,11 +51,21 @@ public:
 		}
 	}
 
-	bool is_option_set(std::string option, std::string val)
+	bool is_option_present(const std::string& option) const
 	{
-		if(args.count(option))
+		return args.count(option);
+	}
+
+	bool is_option_set(const std::string option, std::string val)
+	{
+		if(is_option_present(option))
 			return (args[option] == val);
 		return false;
+	}
+
+	const std::string& get_option_value(const std::string& option)
+	{
+		return args[option];
 	}
 
 	CommandLine(int argc, char* argv[])

@@ -40,7 +40,8 @@ class AllocatorFactory
 public:
 	AllocatorFactory() :
 		memkind_default(MEMKIND_DEFAULT, AllocatorTypes::MEMKIND_DEFAULT),
-		memkind_hbw(MEMKIND_HBW, AllocatorTypes::MEMKIND_HBW)
+		memkind_hbw(MEMKIND_HBW, AllocatorTypes::MEMKIND_HBW),
+		memkind_interleave(MEMKIND_INTERLEAVE, AllocatorTypes::MEMKIND_INTERLEAVE)
 	{}
 
 	//Get existing allocator without creating new.
@@ -60,6 +61,9 @@ public:
 
 			case AllocatorTypes::MEMKIND_HBW:
 				return &memkind_hbw;
+
+			case AllocatorTypes::MEMKIND_INTERLEAVE:
+				return &memkind_interleave;
 
 			default:
 				assert(!"'type' out of range!");
@@ -105,9 +109,26 @@ public:
 		return VectorIterator<Allocator*>::create(allocators_calls);
 	}
 
+	//Return kind to the corresponding AllocatorTypes enum specified in argument.
+	static memkind_t get_kind_by_type(unsigned type)
+	{
+		assert(AllocatorTypes::is_valid_memkind(type));
+
+		switch(type)
+		{
+		case AllocatorTypes::MEMKIND_DEFAULT:
+			return MEMKIND_DEFAULT;
+		case AllocatorTypes::MEMKIND_HBW:
+			return MEMKIND_HBW;
+		case AllocatorTypes::MEMKIND_INTERLEAVE:
+			return MEMKIND_INTERLEAVE;
+		}
+	}
+
 private:
 	StandardAllocatorWithTimer standard_allocator;
 	JemallocAllocatorWithTimer jemalloc;
 	MemkindAllocatorWithTimer memkind_default;
 	MemkindAllocatorWithTimer memkind_hbw;
+	MemkindAllocatorWithTimer memkind_interleave;
 };

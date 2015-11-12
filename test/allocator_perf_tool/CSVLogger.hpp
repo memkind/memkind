@@ -21,25 +21,41 @@
 * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "FunctionCallsPerformanceTask.h"
+#pragma once
 
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <ios>
 
-void FunctionCallsPerformanceTask::run()
+namespace csv
 {
-	VectorIterator<size_t> allocation_sizes = AllocationSizes::generate_random_sizes(task_conf.allocation_sizes_conf, task_conf.seed);
 
-	VectorIterator<int> func_calls = FunctionCalls::generate_random_allocator_func_calls(task_conf.n, task_conf.seed, task_conf.func_calls);
+class Row
+{
+public:
+	Row()
+	{
+		row << std::fixed;
+		row.precision(6);
+	}
 
-	AllocatorFactory AllocatorFactory;
-	VectorIterator<Allocator*> allocators_calls = AllocatorFactory.generate_random_allocator_calls(task_conf.n, task_conf.seed);
+	template<class T>
+	void append(const T& e)
+	{
+		row << "," << e;
+	}
 
-	ScenarioWorkload scenario_workload = ScenarioWorkload(
-		&allocators_calls,
-		&allocation_sizes,
-		&func_calls
-	);
+	std::string export_row() const
+	{
+		std::stringstream ss(row.str());
+		ss << std::endl;
+		return ss.str();
+	}
 
-	while (scenario_workload.run());
+private:
+	std::stringstream row;
+};
 
-	results = scenario_workload.get_allocations_info();
 }

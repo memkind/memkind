@@ -26,6 +26,8 @@
 #include "FunctionCalls.hpp"
 #include "Allocator.hpp"
 
+#include <string.h>
+
 class ScenarioWorkload :
 	public Workload
 {

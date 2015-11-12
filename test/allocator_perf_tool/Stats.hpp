@@ -62,7 +62,7 @@ public:
 
 	TimeStats& operator+=(const std::vector<memory_operation>& data)
 	{
-		for (int i=0; i<data.size(); i++)
+		for (size_t i=0; i<data.size(); i++)
 		{
 			memory_operation tmp = data[i];
 			MethodStats& method_stats = stats[tmp.allocator_type][tmp.allocation_method];
@@ -89,11 +89,11 @@ public:
 		return *this;
 	}
 
-	unsigned get_allocated() const {return allocated;}
-	unsigned get_deallocated() const {return deallocated;}
+	size_t get_allocated() const {return allocated;}
+	size_t get_deallocated() const {return deallocated;}
 
 private:
-	unsigned long allocated;
-	unsigned long deallocated;
+	size_t allocated;
+	size_t deallocated;
 };
 

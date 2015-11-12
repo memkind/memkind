@@ -99,12 +99,9 @@ void ScenarioWorkload::malloc_op()
 	memory_operation data = allocators->next()->wrapped_malloc(alloc_sizes->next());
 	allocations.push_back(data);
 
-	if(touch_memory_on_allocation)
+	if(touch_memory_on_allocation && (data.ptr != NULL) && (data.error_code != ENOMEM))
 	{
-		char x = 8;
-
-		//Write\read memory to ensure physical allocation.
-		*((char*)data.ptr) = 8;
-		x = *((char*)data.ptr);
+		//Write memory to ensure physical allocation.
+		memset(data.ptr, 1, data.size_of_allocation);
 	}
 }

@@ -31,15 +31,30 @@
 class AllocatorTypes
 {
 public:
-	enum {STANDARD_ALLOCATOR, JEMALLOC, MEMKIND_DEFAULT, MEMKIND_HBW, NUM_OF_ALLOCATOR_TYPES};
+	enum {STANDARD_ALLOCATOR, JEMALLOC, MEMKIND_DEFAULT, MEMKIND_HBW, MEMKIND_INTERLEAVE, NUM_OF_ALLOCATOR_TYPES};
 
 	static const std::string& allocator_name(unsigned type)
 	{
-		static const std::string names[] = {"STANDARD_ALLOCATOR", "JEMALLOC", "MEMKIND_DEFAULT", "MEMKIND_HBW"};
-
-		if((type < 0) || (type >= NUM_OF_ALLOCATOR_TYPES)) assert(!"Invalidate input argument!");
+		static const std::string names[] = {"STANDARD_ALLOCATOR", "JEMALLOC", "MEMKIND_DEFAULT", "MEMKIND_HBW", "MEMKIND_INTERLEAVE"};
+		if(type >= NUM_OF_ALLOCATOR_TYPES) assert(!"Invalid input argument!");
 
 		return names[type];
+	}
+
+	static unsigned allocator_type(const std::string& name)
+	{
+		for (unsigned i=0; i<NUM_OF_ALLOCATOR_TYPES; i++)
+		{
+			if(allocator_name(i) == name)
+				return i;
+		}
+
+		assert(!"Invalid input argument!");
+	}
+
+	static bool is_valid_memkind(unsigned type)
+	{
+		return (type >= MEMKIND_DEFAULT) && (type < NUM_OF_ALLOCATOR_TYPES);
 	}
 };
 
@@ -66,22 +81,27 @@ private:
 class AllocationSizesConf
 {
 public:
-	int n;
+	unsigned n;
+	unsigned reserved_unallocated; // limit allocations
 	size_t size_from;
 	size_t size_to;
 };
 
 //TaskConf class contain configuration data for task,
 //where:
-// - "n" is number of iterations,
+// - "n" - number of iterations,
 // - "allocation_sizes_conf" - allocation sizes configuration,
 // - "func_calls" - enabled or disabled function calls,
+// - "allocators_types" - enable allocators,
 // - "seed" - random seed.
 class TaskConf
 {
 public:
-	int n;
+	unsigned n;
 	AllocationSizesConf allocation_sizes_conf;
 	TypesConf func_calls;
+	TypesConf allocators_types;
 	unsigned seed;
+	bool is_csv_log_enabled;
+	bool check_memory_availability;
 };
