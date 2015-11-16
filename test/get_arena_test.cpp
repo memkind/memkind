@@ -54,7 +54,9 @@ TEST_F(GetArenaTest, TC_Memkind_ThreadHash)
     unsigned int thread_idx, idx;
     int err = 0;
     size_t size = 0;
-    int max_collisions, collisions, i;
+    int i;
+    unsigned max_collisions, collisions;
+    const unsigned collisions_limit = 5;
 
     pthread_once(&(MEMKIND_HBW->init_once), MEMKIND_HBW->ops->init_once);
 
@@ -80,5 +82,5 @@ TEST_F(GetArenaTest, TC_Memkind_ThreadHash)
             collisions = 0;
         }
     }
-    EXPECT_TRUE(max_collisions < 4);
+    EXPECT_LE(max_collisions, collisions_limit);
 }
