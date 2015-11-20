@@ -21,6 +21,9 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#define MEMKIND_VERSION_MAJOR 0
+#define MEMKIND_VERSION_MINOR 3
+#define MEMKIND_VERSION_PATCH 0
 
 #include <sys/param.h>
 #include <sys/mman.h>
@@ -186,6 +189,11 @@ extern void memkind_realloc_pre(struct memkind **, void **, size_t *) __attribut
 extern void memkind_realloc_post(struct memkind *, void *, size_t, void **) __attribute__((weak));
 extern void memkind_free_pre(struct memkind **, void **) __attribute__((weak));
 extern void memkind_free_post(struct memkind *, void *) __attribute__((weak));
+
+int memkind_get_version()
+{
+    return MEMKIND_VERSION_MAJOR * 1000000 + MEMKIND_VERSION_MINOR * 1000 + MEMKIND_VERSION_PATCH;
+}
 
 void memkind_error_message(int err, char *msg, size_t size)
 {
