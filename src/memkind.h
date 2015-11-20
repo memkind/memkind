@@ -126,6 +126,8 @@ extern memkind_t MEMKIND_GBTLB;
 extern memkind_t MEMKIND_HBW_INTERLEAVE;
 extern memkind_t MEMKIND_INTERLEAVE;
 
+/* API versioning */
+int memkind_get_version();
 
 /* Convert error number into an error message */
 void memkind_error_message(int err, char *msg, size_t size);
