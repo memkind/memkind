@@ -143,12 +143,12 @@ int memkind_arena_destroy(struct memkind *kind)
         }
         jemk_free(kind->arena_map);
         kind->arena_map = NULL;
-    }
 #ifndef MEMKIND_TLS
-    if (kind->ops->get_arena == memkind_thread_get_arena) {
-        pthread_key_delete(kind->arena_key);
-    }
+        if (kind->ops->get_arena == memkind_thread_get_arena) {
+            pthread_key_delete(kind->arena_key);
+        }
 #endif
+    }
     memkind_default_destroy(kind);
     return 0;
 }
