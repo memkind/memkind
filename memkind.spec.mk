@@ -209,6 +209,7 @@ fi
 %doc %{docdir}/COPYING
 %doc %{docdir}/VERSION
 %doc %{_mandir}/man3/hbwmalloc.3.gz
+%doc %{_mandir}/man3/hbwallocator.3.gz
 %doc %{_mandir}/man3/memkind.3.gz
 %doc %{_mandir}/man3/memkind_arena.3.gz
 %doc %{_mandir}/man3/memkind_default.3.gz
