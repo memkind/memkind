@@ -268,6 +268,7 @@ dist_man_MANS = man/hbwmalloc.3 \
                 man/memkind_hbw.3 \
                 man/memkind_hugetlb.3 \
                 man/memkind_pmem.3 \
+                man/hbwallocator.3 \
                 # end
 
 CLEANFILES = memkind-$(VERSION).spec
