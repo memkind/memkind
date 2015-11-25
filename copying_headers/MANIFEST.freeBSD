@@ -137,6 +137,7 @@ test/allocator_perf_tool/Workload.hpp
 test/allocator_perf_tool/WrappersMacros.hpp
 test/allocator_perf_tool/main.cpp
 test/increase_to_max_stress_test.cpp
+test/memkind_versioning_tests.cpp
 man/memkind_pmem.3
 src/memkind_pmem.c
 src/memkind_pmem.h
