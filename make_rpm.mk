@@ -41,6 +41,7 @@ rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
 gtest_archive = /opt/mpss_toolchains/googletest/1.7.0/gtest-1.7.0.zip
 memkind_test_dir = $(MPSS_TEST_BASEDIR)/memkind-dt
+exclude_source_files = test/memkind-dt.ts test/memkind_ft.py
 
 all: $(rpm)
 
@@ -50,9 +51,16 @@ $(rpm): $(specfile) $(source_tar)
 	mv $(topdir)/RPMS/$(arch)/$(name)-tests-$(version)-$(release).$(arch).rpm $(trpm)
 
 $(source_tar): $(topdir)/.setup $(src) MANIFEST
+	set -x
 	mkdir -p $(source_tmp_dir)
-	tar cf $(source_tmp_dir)/tmp.tar -T MANIFEST --transform="s|^|$(name)-$(version)/|"
+	for f in $(exclude_source_files); do \
+		echo $$f >> $(source_tmp_dir)/EXCLUDE ; \
+	done
+	tar cf $(source_tmp_dir)/tmp.tar -T MANIFEST --transform="s|^|$(name)-$(version)/|" -X $(source_tmp_dir)/EXCLUDE
 	cd $(source_tmp_dir) && tar xf tmp.tar
+	for f in $(exclude_source_files); do \
+		cp $$f $(source_tmp_dir)/$(name)-$(version)/$$f ; \
+	done
 	if [ -f "$(gtest_archive)" ]; then cp $(gtest_archive) $(source_tmp_dir)/$(name)-$(version); fi
 	cd $(source_tmp_dir)/$(name)-$(version) && ./autogen.sh && ./configure && make dist
 	# tar.gz produced by "make dist" from above produces memkind-$(version).tar.gz

@@ -1,4 +1,3 @@
-.gitignore
 AUTHORS
 COPYING
 CONTRIBUTING
@@ -162,7 +161,6 @@ test/allocator_perf_tool/WrappersMacros.hpp
 test/allocator_perf_tool/main.cpp
 test/allocate_to_max_stress_test.cpp
 test/memkind_versioning_tests.cpp
-jemalloc/.gitignore
 jemalloc/autogen.sh
 jemalloc/bin
 jemalloc/bin/jemalloc.sh.in
@@ -228,6 +226,7 @@ jemalloc/INSTALL
 jemalloc/install-sh
 jemalloc/Makefile.in
 jemalloc/README
+jemalloc/COPYING
 jemalloc/src/arena.c
 jemalloc/src/atomic.c
 jemalloc/src/base.c
