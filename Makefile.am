@@ -100,7 +100,6 @@ EXTRA_DIST = autogen.sh \
              CONTRIBUTING \
              memkind-$(VERSION).spec \
              memkind.spec.mk \
-             .gitignore \
              jemalloc/doc/jemalloc.xml.in \
              jemalloc/doc/html.xsl.in \
              jemalloc/doc/stylesheet.xsl \
@@ -128,7 +127,6 @@ EXTRA_DIST = autogen.sh \
              jemalloc/src/chunk_mmap.c \
              jemalloc/src/atomic.c \
              jemalloc/src/rtree.c \
-             jemalloc/.gitignore \
              jemalloc/configure.ac \
              jemalloc/include/jemalloc/internal/tcache.h \
              jemalloc/include/jemalloc/internal/prof.h \
