@@ -23,7 +23,7 @@
  */
 #define MEMKIND_VERSION_MAJOR 0
 #define MEMKIND_VERSION_MINOR 3
-#define MEMKIND_VERSION_PATCH 0
+#define MEMKIND_VERSION_PATCH 1
 
 #include <sys/param.h>
 #include <sys/mman.h>
