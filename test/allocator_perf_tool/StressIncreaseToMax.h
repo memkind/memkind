@@ -35,6 +35,15 @@
 #include "TimerSysTime.hpp"
 #include "Stats.hpp"
 
+#include <vector>
+
+struct iteration_result
+{
+	bool has_next_memory_operation;
+	bool is_memory_available;
+	bool is_allocation_error;
+};
+
 class StressIncreaseToMax
 	: public Task
 {
@@ -45,12 +54,16 @@ public:
 
 	//Return memory operations from the last run.
 	std::vector<memory_operation> get_results() {return results;}
+	iteration_result get_test_status() {return test_status;}
 
-	static void execute_test_iterations(TaskConf task_conf, unsigned time);
+	static std::vector<iteration_result> execute_test_iterations(TaskConf task_conf, unsigned time);
 
 private:
 	ScenarioWorkload* scenario_workload;
 	std::vector<memory_operation> results;
 	TaskConf task_conf;
+
+	//Test status
+	iteration_result test_status;
 };
 

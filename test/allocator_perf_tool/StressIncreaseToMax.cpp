@@ -50,12 +50,12 @@ void StressIncreaseToMax::run()
 
 	scenario_workload.enable_touch_memory_on_allocation(true);
 
-	bool has_next;
+
 	float allocated_memory = Numastat::get_total_memory(1);
 	size_t total_memory = 0;
-	size_t free_memory = 0;
-	bool is_memory_available = true;
-	bool is_allocation_error = false;
+	float  free_memory = 0;
+	test_status.is_memory_available = true;
+	test_status.is_allocation_error = false;
 	int numa_node;
 
 
@@ -74,17 +74,19 @@ void StressIncreaseToMax::run()
 		csv_file << row.export_row();
 	}
 
-	while (is_memory_available && !is_allocation_error && (has_next = scenario_workload.run()))
+	while (test_status.is_memory_available && !test_status.is_allocation_error && (test_status.has_next_memory_operation = scenario_workload.run()))
 	{
 		memory_operation data = scenario_workload.get_allocations_info().back();
-		is_allocation_error = (data.error_code == ENOMEM) && (data.ptr == NULL);
-		numa_node = get_numa_node(data.ptr);
+		test_status.is_allocation_error = (data.error_code == ENOMEM) || (data.ptr == NULL);
+		numa_node = get_numa_node_id(data.ptr);
 
 		if(task_conf.check_memory_availability)
 		{
-			memkind_get_size(AllocatorFactory::get_kind_by_type(type), &total_memory, &free_memory);
+			size_t tmp_free_memory;
+			memkind_get_size(AllocatorFactory::get_kind_by_type(type), &total_memory, &tmp_free_memory);
+			free_memory = convert_bytes_to_mb(tmp_free_memory);
 			allocated_memory = Numastat::get_total_memory(numa_node);
-			is_memory_available = ((convert_bytes_to_mb(task_conf.allocation_sizes_conf.size_from) + task_conf.allocation_sizes_conf.reserved_unallocated) < convert_bytes_to_mb(free_memory));
+			test_status.is_memory_available = ((convert_bytes_to_mb(task_conf.allocation_sizes_conf.size_from) + task_conf.allocation_sizes_conf.reserved_unallocated) < free_memory);
 		}
 
 		if(task_conf.is_csv_log_enabled)
@@ -93,25 +95,28 @@ void StressIncreaseToMax::run()
 			row.append(scenario_workload.get_allocations_info().size());
 			row.append(convert_bytes_to_mb(data.size_of_allocation));
 			row.append(numa_node);
-			row.append(is_memory_available);
-			row.append(convert_bytes_to_mb(free_memory));
+			row.append(test_status.is_memory_available);
+			row.append(free_memory);
 			row.append(allocated_memory);
 			csv_file << row.export_row();
 		}
 	}
 
-	if(!has_next) printf("\nWARN: Too few memory operations. \n");
-	if(is_allocation_error) printf("\nWARN: Allocation error. \n");
+	if(!test_status.is_memory_available && (task_conf.allocation_sizes_conf.reserved_unallocated))
+		printf("\nWARNING: Reserved unallocated limit has been reached. \n");
+
+	if(!test_status.has_next_memory_operation) printf("\nWARNING: Too few memory operations to allocate available memory. Free memory: %fMB.\n", free_memory);
+	if(test_status.is_allocation_error) printf("\nWARNING: Allocation error. \n");
 
 	results = scenario_workload.get_allocations_info();
-
 	csv_file.close();
 }
 
-void StressIncreaseToMax::execute_test_iterations(TaskConf task_conf, unsigned time)
+std::vector<iteration_result> StressIncreaseToMax::execute_test_iterations(TaskConf task_conf, unsigned time)
 {
 		TimerSysTime timer;
 		unsigned itr = 0;
+		std::vector<iteration_result> results;
 
 		std::ofstream csv_file;
 
@@ -137,6 +142,8 @@ void StressIncreaseToMax::execute_test_iterations(TaskConf task_conf, unsigned t
 			TimeStats stats;
 			stats += stress_test.get_results();
 
+			results.push_back(stress_test.get_test_status());
+
 			//Log every interation of StressIncreaseToMax test.
 			csv::Row row;
 			row.append(itr);
@@ -155,4 +162,6 @@ void StressIncreaseToMax::execute_test_iterations(TaskConf task_conf, unsigned t
 		printf("\nStress test (StressIncreaseToMax) finish in time %f.\n",timer.getElapsedTime());
 
 		csv_file.close();
+
+		return results;
 }
