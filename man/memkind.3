@@ -30,6 +30,7 @@ memkind \- Heap manager that enables allocations to memory with different proper
 .sp
 .B Link with -lmemkind
 .sp
+.B "ERROR HANDLING:"
 .BI "void memkind_error_message(int " "err" ", char " "*msg" ", size_t " "size" );
 .sp
 .B "HEAP MANAGEMENT:"
@@ -88,6 +89,10 @@ memkind \- Heap manager that enables allocations to memory with different proper
 .BI "void memkind_free_pre(memkind_t " "*kind" ", void " "**ptr" );
 .br
 .BI "void memkind_free_post(memkind_t " "kind" ", void " "*ptr" );
+.sp
+.B "LIBRARY VERSION:"
+.BI "int memkind_get_version();"
+.sp
 .br
 .SH "DESCRIPTION"
 .PP
@@ -418,6 +423,28 @@ the beginning of the allocator pass all inputs by reference, and the
 decorators that are called at the end of the allocator pass the output
 by reference.  This enables the modification of the input and output
 of each heap management function by the decorators.
+.sp
+.B "LIBRARY VERSION"
+.br
+The memkind library version scheme consist major, minor and patch numbers separated by dot. Combining those numbers, we got the following representation:
+.br
+	major.minor.patch,
+.br
+where:
+.br
+	• major number is incremented whenever API is changed (loss of backward compatibility),
+.br
+	• minor number is incremented whenever additional extensions are introduced, or behavior has been changed,
+.br
+	• patch number is incremented whenever small bug fixes are added.
+.sp
+memkind library provide numeric representation of the version by exposing the following API:
+.br
+int memkind_get_version() return version number represented by a single integer number, obtained from the formula:
+.br
+	major * 1000000 + minor * 1000 + patch
+.sp
+Note: major < 1 means unstable API.
 .sp
 .B "MEMKIND OPERATIONS:"
 .br
