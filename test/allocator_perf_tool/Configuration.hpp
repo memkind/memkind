@@ -62,6 +62,13 @@ public:
 class TypesConf
 {
 public:
+	TypesConf() {}
+
+	TypesConf(unsigned type)
+	{
+		enable_type(type);
+	}
+
 	void enable_type(unsigned type) {types[type] = true;}
 
 	void disable_type(unsigned type)

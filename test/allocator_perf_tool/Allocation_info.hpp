@@ -41,4 +41,4 @@ struct memory_operation
 
 float convert_bytes_to_mb(size_t bytes);
 
-int get_numa_node(void* ptr);
+int get_numa_node_id(void* ptr);

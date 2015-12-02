@@ -143,7 +143,7 @@ allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.h
 
 test_allocator_perf_tool_tests_SOURCES = test/main.cpp \
 									$(allocator_perf_tool_library_sources) \
-                                    test/increase_to_max_stress_test.cpp \
+                                    test/allocate_to_max_stress_test.cpp \
                                     # end
 
 
