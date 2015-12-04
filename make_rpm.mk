@@ -41,7 +41,7 @@ rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
 gtest_archive = /opt/mpss_toolchains/googletest/1.7.0/gtest-1.7.0.zip
 memkind_test_dir = $(MPSS_TEST_BASEDIR)/memkind-dt
-exclude_source_files = test/memkind-dt.ts test/memkind_ft.py
+exclude_source_files = test/memkind-afts.bts test/memkind-slts.bts test/memkind-perf.bts
 
 all: $(rpm)
 

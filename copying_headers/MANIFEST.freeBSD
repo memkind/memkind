@@ -87,8 +87,6 @@ test/get_arena_test.cpp
 test/memkind_pmtt_tests.cpp
 test/memkind_pmem_tests.cpp
 test/slts_test.cpp
-test/memkind_ft.py
-test/memkind_ft.py
 test/performance/framework.hpp
 test/performance/framework.cpp
 test/performance/operations.hpp

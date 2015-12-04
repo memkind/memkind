@@ -29,6 +29,7 @@
 #include "memkind_pmem.h"
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4096;
+static const char*  PMEM_DIR = "/tmp/";
 static const size_t CHUNK_SIZE = (1 << 22); // 4MB
 
 class MemkindPmemTests: public :: testing::Test
@@ -39,7 +40,7 @@ protected:
     void SetUp()
     {
         // create PMEM partition
-        int err = memkind_create_pmem(".", PMEM_PART_SIZE, &pmem_kind);
+        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind);
         ASSERT_EQ(0, err);
         ASSERT_TRUE(NULL != pmem_kind);
     }

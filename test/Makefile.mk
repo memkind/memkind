@@ -42,8 +42,9 @@ TESTS += test/check.sh
 
 EXTRA_DIST += test/mock-pmtt-2-nodes.hex \
               test/mock-pmtt-empty-controller.hex \
-              test/memkind-dt.ts \
-              test/memkind_ft.py
+              test/memkind-afts.bts \
+              test/memkind-slts.bts \
+              test/memkind-perf.bts
 
 
 #test_all_tests_LDADD = libgtest.a libmemkind.la test/liballocatorperftool.la

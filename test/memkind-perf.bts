@@ -1,0 +1,2 @@
+/usr/share/mpss/test/memkind-dt/all_tests -a --gtest_filter=PerformanceTest.*
+
