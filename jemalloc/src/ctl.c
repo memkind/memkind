@@ -611,9 +611,9 @@ ctl_growk(unsigned partition)
 		 * the protection of arenas_lock.
 		 */
 		malloc_mutex_lock(&arenas_lock);
-		arenas = tarenas;
-		memcpy(arenas, arenas_old, ctl_stats.narenas *
+		memcpy(tarenas, arenas_old, ctl_stats.narenas *
 		    sizeof(arena_t *));
+		arenas = tarenas;
 		narenas_total++;
 		arenas_extend(narenas_total - 1);
 #ifdef JEMALLOC_ENABLE_MEMKIND
