@@ -139,6 +139,13 @@ void hbw_free(void *ptr)
 static inline memkind_t hbw_get_kind(int pagesize)
 {
     memkind_t result = NULL;
+
+    if(hbw_policy_once_g == PTHREAD_ONCE_INIT)
+    {
+        //hbw_policy_g is statically initialized
+        hbw_set_policy(hbw_policy_g);
+    }
+
     int policy = hbw_get_policy();
 
     if (policy == HBW_POLICY_BIND || policy == HBW_POLICY_INTERLEAVE) {

@@ -223,6 +223,78 @@ TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicy)
     EXPECT_EQ(hbw_set_policy(0xFF), MEMKIND_ERROR_BADPOLICY);
 }
 
+//Check if hbw_set_policy() will be ignored after malloc.
+TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterMalloc)
+{
+    void *ptr = hbw_malloc(512);
+    EXPECT_TRUE(ptr != NULL);
+
+    EXPECT_EQ(hbw_set_policy(HBW_POLICY_BIND), MEMKIND_ERROR_REPPOLICY);
+    EXPECT_NE(hbw_get_policy(), HBW_POLICY_BIND);
+    EXPECT_EQ(hbw_get_policy(), HBW_POLICY_PREFERRED);
+
+    hbw_free(ptr);
+}
+
+//Check if hbw_set_policy() will be ignored after calloc.
+TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterCalloc)
+{
+    void *ptr = hbw_calloc(512, 1);
+    EXPECT_TRUE(ptr != NULL);
+
+    EXPECT_EQ(hbw_set_policy(HBW_POLICY_BIND), MEMKIND_ERROR_REPPOLICY);
+    EXPECT_NE(hbw_get_policy(), HBW_POLICY_BIND);
+    EXPECT_EQ(hbw_get_policy(), HBW_POLICY_PREFERRED);
+
+    hbw_free(ptr);
+}
+
+//Check if hbw_set_policy() will be ignored after realloc.
+TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterRealloc)
+{
+    void *ptr = hbw_malloc(512);
+    EXPECT_TRUE(ptr != NULL);
+
+    hbw_realloc(ptr, 512);
+
+    EXPECT_EQ(hbw_set_policy(HBW_POLICY_BIND), MEMKIND_ERROR_REPPOLICY);
+    EXPECT_NE(hbw_get_policy(), HBW_POLICY_BIND);
+    EXPECT_EQ(hbw_get_policy(), HBW_POLICY_PREFERRED);
+
+    hbw_free(ptr);
+}
+
+//Check if hbw_set_policy() will be ignored after hbw_posix_memalign.
+TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterHbwPosixMemalign)
+{
+    void *ptr = NULL;
+
+    hbw_posix_memalign(&ptr, 2048, 2048);
+    EXPECT_TRUE(ptr != NULL);
+
+    EXPECT_EQ(hbw_set_policy(HBW_POLICY_BIND), MEMKIND_ERROR_REPPOLICY);
+    EXPECT_NE(hbw_get_policy(), HBW_POLICY_BIND);
+    EXPECT_EQ(hbw_get_policy(), HBW_POLICY_PREFERRED);
+
+    hbw_free(ptr);
+}
+
+//Check if hbw_set_policy() will be ignored after hbw_posix_memalign_psize.
+TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterHbwPosixMemalignPsize)
+{
+    void *ptr = NULL;
+
+    hbw_posix_memalign_psize(&ptr, 2048, 2048, 2048);
+    EXPECT_TRUE(ptr != NULL);
+
+    EXPECT_EQ(hbw_set_policy(HBW_POLICY_BIND), MEMKIND_ERROR_REPPOLICY);
+    EXPECT_NE(hbw_get_policy(), HBW_POLICY_BIND);
+    EXPECT_EQ(hbw_get_policy(), HBW_POLICY_PREFERRED);
+
+    hbw_free(ptr);
+}
+
+
 TEST_F(NegativeTest, TC_Memkind_Negative_GBMemalignPsizeAllign)
 {
     void *ptr = NULL;
