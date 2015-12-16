@@ -165,10 +165,14 @@ AC_PROG_MAKE_SET
 LT_INIT
 AM_PROG_CC_C_O
 
-# Checks for libraries.
-AC_CHECK_LIB([gomp], [omp_get_num_threads], [], [
-    echo "OpenMP library is required for this library"
-    exit -1])
+# Below macro is setting OPENMP_CFLAGS, but it is not working correctly for CXXFLAGS
+# (even with lang pop/push trick). Current W/A is to use CFLAGS also for C++.
+AC_OPENMP
+
+if test "x$OPENMP_CFLAGS" = "x" ; then
+  echo "WARNING: Could not locate OpenMP support. This warning can also occur if compiler already supports OpenMP"
+fi
+
 AC_CHECK_HEADER([omp.h], [], [
     echo "omp.h is required for this library"
     exit -1])
@@ -211,6 +215,7 @@ AC_MSG_RESULT([CC                 : ${CC}])
 AC_MSG_RESULT([CPPFLAGS           : ${CPPFLAGS}])
 AC_MSG_RESULT([CFLAGS             : ${CFLAGS}])
 AC_MSG_RESULT([CXXFLAGS           : ${CXXFLAGS}])
+AC_MSG_RESULT([OPENMP_CFLAGS      : ${OPENMP_CFLAGS}])
 AC_MSG_RESULT([LDFLAGS            : ${LDFLAGS}])
 AC_MSG_RESULT([LD_LIBRARY_PATH    : ${LD_LIBRARY_PATH}])
 AC_MSG_RESULT([LIBS               : ${LIBS}])

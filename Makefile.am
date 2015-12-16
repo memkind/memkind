@@ -283,8 +283,8 @@ TESTS =
 XFAIL_TESTS =
 TESTS_ENVIRONMENT =
 
-AM_CFLAGS = -Wall -Werror -msse4.2 -fopenmp
-AM_CXXFLAGS = -Wall -Werror -msse4.2 -fopenmp
+AM_CFLAGS = -Wall -Werror -msse4.2
+AM_CXXFLAGS = -Wall -Werror -msse4.2
 if ENABLE_CXX11
 AM_CXXFLAGS += -std=c++11
 else

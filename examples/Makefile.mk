@@ -81,8 +81,11 @@ if ENABLE_CXX11
 examples_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 endif
 
-
 examples_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
+
+examples_stream_memkind_CFLAGS = $(AM_CFLAGS) $(OPENMP_CFLAGS)
+examples_stream_CFLAGS = $(AM_CFLAGS) $(OPENMP_CFLAGS)
+examples_numakind_test_CFLAGS = $(AM_CFLAGS) $(OPENMP_CFLAGS)
 
 NUMAKIND_MAX = 2048
 examples_libnumakind_la_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DNUMAKIND_MAX=$(NUMAKIND_MAX)
