@@ -24,6 +24,7 @@
 
 AM_CPPFLAGS += -I$(googletest)/include
 
+
 check_PROGRAMS += test/all_tests \
                   test/schedcpu_test \
                   test/mallocerr_test \
@@ -154,6 +155,7 @@ test_allocator_perf_tool_tests_CPPFLAGS += -std=c++11
 test_allocator_perf_tool_tests_CXXFLAGS += -std=c++11
 endif
 
+test_all_tests_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS)
 
 #Allocator Perf Tool stand alone app
 check_PROGRAMS += test/perf_tool
@@ -203,6 +205,9 @@ test_autohbw_candidates_LDADD = libmemkind.la \
 if ENABLE_CXX11
 test_memkind_allocated_LDADD = libmemkind.la
 endif
+
+test_stream_memkind_CFLAGS = $(AM_CFLAGS) $(CFLAGS) $(OPENMP_CFLAGS)
+test_stream_CFLAGS = $(AM_CFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS)
 
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c

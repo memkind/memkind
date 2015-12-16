@@ -95,14 +95,4 @@ Issues
       MEMKIND_HBW_NODES is not defined, use MPOL_INTERLEAVED across
       all NUMA nodes rather than erroring out.
 
-    * Remove the implicit dependency on the openMP runtime from the
-      memkind library. Although the tests and examples use openMP, the
-      memkind library itself should not identify libgomp.so as a
-      dependency when running readelf -d on libmemkind.so.  This is a
-      build issue.
-
     * PMTT parser does not properly handle empty memory controllers.
-
-    * readelf -d libmemkind.so lists libgomp.so as a dependency, but
-      this library is only required for tests
-
