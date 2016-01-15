@@ -89,7 +89,7 @@ memkind_pmtt_SOURCES = src/memkind_pmtt.c
 memkind_pmtt_LDADD = libmemkind.la
 
 EXTRA_DIST = autogen.sh \
-             init.d/memkind \
+             memkind.service \
              gtest-1.7.0.zip \
              examples/README \
              test/check.sh \
