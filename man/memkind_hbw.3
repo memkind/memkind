@@ -21,7 +21,7 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "MEMKIND_HBW" 3 "2015-04-21" "Intel Corporation" "MEMKIND_HBW" \" -*- nroff -*-
+.TH "MEMKIND_HBW" 3 "2016-06-13" "Intel Corporation" "MEMKIND_HBW" \" -*- nroff -*-
 .SH "NAME"
 memkind_hbw.h \- high bandwidth memory memkind operations.
 .br
@@ -39,6 +39,8 @@ Note: This is EXEPRIMENTAL API. The functionality and the header file itself can
 .BI "int memkind_hbw_gbtlb_check_available(struct memkind " "*kind" );
 .br
 .BI "int memkind_hbw_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
+.br
+.BI "int memkind_hbw_all_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
 .br
 .BI "void memkind_hbw_init_once(void);"
 .br
@@ -80,10 +82,23 @@ is done by memkind_hugetlb_check_available_1gb().
 sets the
 .I nodemask
 bit to one that corresponds to the high bandwidth NUMA node that has
-the closest NUMA distance to the CPU of the calling process and sets
-all other bits up to
+the closest NUMA distance to the CPU of the calling process.
+All other bits up to
 .I maxnode
-to zero.
+are set to zero.
+The
+.I nodemask
+can be used in conjuction with the
+.BR mbind (2)
+system call.
+.PP
+.BR memkind_hbw_all_get_mbind_nodemask ()
+sets the
+.I nodemask
+bits to one that correspond to the all high bandwidth NUMA nodes in
+the system. All other bits up to
+.I maxnode
+are set to zero.
 The
 .I nodemask
 can be used in conjuction with the
