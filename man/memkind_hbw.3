@@ -38,6 +38,8 @@ memkind_hbw.h \- high bandwidth memory memkind operations.
 .br
 .BI "int memkind_hbw_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
 .br
+.BI "int memkind_hbw_all_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
+.br
 .SH DESCRIPTION
 .PP
 High bandwidth memory memkind operations.  The ACPICA specification
@@ -78,7 +80,20 @@ bit to one that corresponds to the high bandwidth NUMA node that has
 the closest NUMA distance to the CPU of the calling process and sets
 all other bits up to
 .I maxnode
-to zero.
+are set to zero.
+The
+.I nodemask
+can be used in conjuction with the
+.BR mbind (2)
+system call.
+.PP
+.BR memkind_hbw_all_get_mbind_nodemask ()
+sets the
+.I nodemask
+bits to one that correspond to the all high bandwidth NUMA nodes in
+the system, all other bits up to
+.I maxnode
+are set to zero.
 The
 .I nodemask
 can be used in conjuction with the
