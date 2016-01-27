@@ -188,7 +188,7 @@ chunk_alloc_mmap_slow(size_t size, size_t alignment, bool *zero
 	void *ret, *pages;
 	size_t alloc_size, leadsize;
 
-	alloc_size = size + alignment - PAGE;
+	alloc_size = size + alignment;
 	/* Beware size_t wrap-around. */
 	if (alloc_size < size)
 		return (NULL);
