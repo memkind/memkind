@@ -24,6 +24,7 @@
 
 [Unit]
 Description=Service which parses PMTT table for memkind
+After=local-fs.target
 
 [Service]
 Type=oneshot
