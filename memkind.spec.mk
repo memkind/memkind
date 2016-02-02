@@ -168,29 +168,17 @@ rm -f %{buildroot}/%{_libdir}/lib{numakind,autohbw}.*
 $(extra_install)
 
 %pre
-%if %{defined suse_version}
-%service_add_pre %{namespace}.service
-%endif
 
 %post
 /sbin/ldconfig
 systemctl enable  %{namespace}.service >/dev/null 2>&1
 systemctl start  %{namespace}.service >/dev/null 2>&1
-%if %{defined suse_version}
-%{service_add_post %{namespace}.service}
-%endif
 
 %preun
 systemctl stop  %{namespace}.service >/dev/null 2>&1
 systemctl disable  %{namespace}.service >/dev/null 2>&1
-%if %{defined suse_version}
-%{service_del_preun %{namespace}.service}
-%endif
 
 %postun
-%if %{defined suse_version}
-%{service_del_postun %{namespace}.service}
-%endif
 /sbin/ldconfig
 
 %files
