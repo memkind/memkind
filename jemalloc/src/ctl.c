@@ -564,28 +564,45 @@ static bool
 ctl_growk(unsigned partition)
 #endif
 {
+	static unsigned arrays_size;
+	bool realloc_needed = ( (ctl_stats.narenas == narenas_auto) || (arrays_size <= ctl_stats.narenas) );
+
 	ctl_arena_stats_t *astats;
 	arena_t **tarenas;
 
-	/* Allocate extended arena stats and arenas arrays. */
-	astats = (ctl_arena_stats_t *)imalloc((ctl_stats.narenas + 2) *
-	    sizeof(ctl_arena_stats_t));
-	if (astats == NULL)
-		return (true);
-	tarenas = (arena_t **)imalloc((ctl_stats.narenas + 1) *
-	    sizeof(arena_t *));
-	if (tarenas == NULL) {
-		idalloc(astats);
-		return (true);
+	if(realloc_needed)
+	{
+		/* Allocate extended arena stats and arenas arrays. */
+		arrays_size = ctl_stats.narenas + (ctl_stats.narenas /  2);
+		astats = (ctl_arena_stats_t *)imalloc((arrays_size + 1) *
+		    sizeof(ctl_arena_stats_t));
+		if (astats == NULL)
+			return (true);
+		tarenas = (arena_t **)imalloc((arrays_size) *
+		    sizeof(arena_t *));
+		if (tarenas == NULL) {
+			idalloc(astats);
+			return (true);
+		}
+
+		memcpy(astats, ctl_stats.arenas, (ctl_stats.narenas + 1) *
+		    sizeof(ctl_arena_stats_t));
+	}
+	else
+	{
+		astats = ctl_stats.arenas;
+		tarenas = arenas;
 	}
 
 	/* Initialize the new astats element. */
-	memcpy(astats, ctl_stats.arenas, (ctl_stats.narenas + 1) *
-	    sizeof(ctl_arena_stats_t));
 	memset(&astats[ctl_stats.narenas + 1], 0, sizeof(ctl_arena_stats_t));
+
 	if (ctl_arena_init(&astats[ctl_stats.narenas + 1])) {
-		idalloc(tarenas);
-		idalloc(astats);
+		if(realloc_needed)
+		{
+			idalloc(tarenas);
+			idalloc(astats);
+		}
 		return (true);
 	}
 	/* Swap merged stats to their new location. */
@@ -611,9 +628,12 @@ ctl_growk(unsigned partition)
 		 * the protection of arenas_lock.
 		 */
 		malloc_mutex_lock(&arenas_lock);
-		memcpy(tarenas, arenas_old, ctl_stats.narenas *
-		    sizeof(arena_t *));
-		arenas = tarenas;
+		if(realloc_needed)
+		{
+			memcpy(tarenas, arenas_old, ctl_stats.narenas *
+			    sizeof(arena_t *));
+			arenas = tarenas;
+		}
 		narenas_total++;
 		arenas_extend(narenas_total - 1);
 #ifdef JEMALLOC_ENABLE_MEMKIND
@@ -624,12 +644,16 @@ ctl_growk(unsigned partition)
 		 * Deallocate arenas_old only if it came from imalloc() (not
 		 * base_alloc()).
 		 */
-		if (ctl_stats.narenas != narenas_auto)
+		if (realloc_needed && (ctl_stats.narenas != narenas_auto) )
 			idalloc(arenas_old);
 	}
-	if (ctl_stats.narenas != narenas_auto)
-		idalloc(ctl_stats.arenas);
-	ctl_stats.arenas = astats;
+
+	if(realloc_needed)
+	{
+		if (ctl_stats.narenas != narenas_auto)
+			idalloc(ctl_stats.arenas);
+		ctl_stats.arenas = astats;
+	}
 	ctl_stats.narenas++;
 
 	return (false);
