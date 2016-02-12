@@ -83,7 +83,7 @@ void StressIncreaseToMax::run()
 		if(task_conf.check_memory_availability)
 		{
 			size_t tmp_free_memory;
-			memkind_get_size(AllocatorFactory::get_kind_by_type(type), &total_memory, &tmp_free_memory);
+			memkind_get_size(allocator_factory.get_kind_by_type(type), &total_memory, &tmp_free_memory);
 			free_memory = convert_bytes_to_mb(tmp_free_memory);
 			allocated_memory = Numastat::get_total_memory(numa_node);
 			test_status.is_memory_available = ((convert_bytes_to_mb(task_conf.allocation_sizes_conf.size_from) + task_conf.allocation_sizes_conf.reserved_unallocated) < free_memory);

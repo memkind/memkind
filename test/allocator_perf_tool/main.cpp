@@ -58,7 +58,9 @@ Options:
 		'calls' - function calls performance test,
 		'all' - execute both above ('footprint' and 'calls') tests,
 		'self' - execute self tests
-		's1' - stress test (allocate memory to maximum* repeatedly, until specific time interval has been exceed), 
+		's1' - stress tests
+		(perform allocations until the maximum amount of allocated memory has been reached, than frees allocated memory.
+		If the time interval has not been exceed, than repeat the test),
 	- 'operations' - the number of memory operations per thread
 	- 'size_from' - lower bound for the random sizes of allocation
 	- 'size_to' - upper bound for the random sizes of allocation
@@ -69,6 +71,7 @@ Options:
 	- 'reserved_unallocated' - limit memory allocations to leave unallocated memory (in MB), where available_memory = free - reserved_unallocated
 	- 'csv_log' - if 'true' then log to csv file memory operations and statistics
 	- 'check_memory_availability' - when 'false' does not check memory avaiability before memory operation
+	- 'call' specify the allocation function call. This option can be used with the following values: 'malloc' (default), 'calloc', 'realloc',
 * - maximum of available memory in OS, or maximum memory based 'operations' parameter
 Example:
 1. Performance test:
@@ -105,11 +108,20 @@ int main(int argc, char* argv[])
 	unsigned reserved_unallocated = 0;
 	cmd_line.parse_with_strtol("reserved_unallocated", reserved_unallocated);
 
-	float before_init = Numastat::get_total_memory(0);
-	//Ensure library initialization at the first call.
-	memory_operation data = AllocatorFactory().initialize_allocator(AllocatorTypes::MEMKIND_HBW);
-	float memkind_initalization_overhead = Numastat::get_total_memory(0) - before_init;
-	printf("memkind HBW initialization overhead: %f MB/%d.s. \n", memkind_initalization_overhead, data.total_time);
+	//Heap Manager initialization
+	std::vector<AllocatorFactory::initialization_stat> stats = AllocatorFactory().initialization_test();
+
+	printf("\nInitialization overhead:\n");
+	for (int i=0; i<stats.size(); i++)
+	{
+		AllocatorFactory::initialization_stat stat = stats[i];
+		printf("%32s : time=%7.7f.s, ref_delta_time=%15f%, node0=%10fMB, node1=%7.7fMB\n",
+			AllocatorTypes::allocator_name(stat.allocator_type).c_str(),
+			stat.total_time,
+			stat.ref_delta_time,
+			stat.memory_overhead[0],
+			stat.memory_overhead[1]);
+	}
 
 	//Stress test by repeatedly increasing memory (to maximum), until given time interval has been exceed.
 	if(cmd_line.is_option_set("test", "s1"))
@@ -123,7 +135,7 @@ int main(int argc, char* argv[])
 		cmd_line.parse_with_strtol("time", time);
 
 		unsigned allocator = AllocatorTypes::MEMKIND_HBW;
-		if(cmd_line.is_option_present("kind"));
+		if(cmd_line.is_option_present("kind"))
 		{
 			//Enable memkind allocator and specify kind.
 			allocator = AllocatorTypes::allocator_type(cmd_line.get_option_value("kind"));
@@ -153,7 +165,7 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	printf("Test configuration: \n");
+	printf("\nTest configuration: \n");
 	printf("\t memory operations per thread = %u \n", mem_operations_num);
 	printf("\t seed = %d\n", seed);
 	printf("\t number of threads = %u\n", threads_number);
@@ -169,8 +181,17 @@ int main(int argc, char* argv[])
 
 
 	TypesConf func_calls;
-	func_calls.enable_type(FunctionCalls::MALLOC);
 	func_calls.enable_type(FunctionCalls::FREE);
+
+	if(cmd_line.is_option_present("call"))
+	{
+		//Enable heap manager function call.
+		func_calls.enable_type(FunctionCalls::function_type(cmd_line.get_option_value("call")));
+	}
+	else
+	{
+		func_calls.enable_type(FunctionCalls::MALLOC);
+	}
 
 	TypesConf allocator_types;
 	allocator_types.enable_type(AllocatorTypes::MEMKIND_DEFAULT);
@@ -237,7 +258,6 @@ int main(int argc, char* argv[])
 	if(cmd_line.is_option_set("test", "calls") || cmd_line.is_option_set("test", "all"))
 	{
 		TaskFactory task_factory;
-
 		std::vector<Thread*> threads;
 		std::vector<Task*> tasks;
 

@@ -32,17 +32,17 @@
 class ConsoleLog
 {
 public:
-	static void print_stats(TimeStats& stats, unsigned allocator_type, unsigned fuc_calls)
+	static void print_stats(TimeStats& stats, unsigned allocator_type, unsigned func_calls)
 	{
 		if(stats.stats.count(allocator_type))
 		{
-			if(stats.stats[allocator_type].count(fuc_calls))
+			if(stats.stats[allocator_type].count(func_calls))
 			{
-				MethodStats method_stats = stats.stats[allocator_type][fuc_calls];
+				MethodStats method_stats = stats.stats[allocator_type][func_calls];
 				printf(" %20s (%u) | %7s | %10f.s | %10f.s  | %u bytes/%f MB \n",
 					AllocatorTypes::allocator_name(allocator_type).c_str(),
 					allocator_type,
-					FunctionCalls::function_name(fuc_calls).c_str(),
+					FunctionCalls::function_name(func_calls).c_str(),
 					method_stats.total_time,
 					method_stats.average_time,
 					method_stats.allocation_size,
@@ -56,9 +56,12 @@ public:
 	{
 		printf("\n====== Allocators function calls performance =================================================\n");
 		printf(" %20s Id:   Method:    Total time:    Average time:  Allocated memory bytes/MB: \n", "Allocator:");
-		for (unsigned i=0; i<AllocatorTypes::NUM_OF_ALLOCATOR_TYPES; i++)
+		for (unsigned i=0; i<=AllocatorTypes::MEMKIND_HBW_PREFERRED; i++)
 		{
-			print_stats(stats,i,FunctionCalls::MALLOC);
+			for (unsigned func_call=FunctionCalls::FREE+1; func_call<FunctionCalls::NUM_OF_FUNCTIONS; func_call++)
+			{
+				print_stats(stats, i, func_call);
+			}
 		}
 		printf("==============================================================================================\n");
 	}

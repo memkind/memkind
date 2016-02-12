@@ -51,11 +51,12 @@ public:
 	}
 	memory_operation wrapped_realloc(void* ptr, size_t size)
 	{
-		START_TEST(AllocatorTypes::JEMALLOC, FunctionCalls::FREE)
+		START_TEST(AllocatorTypes::JEMALLOC, FunctionCalls::REALLOC)
 		data.ptr = realloc(ptr, size);
 		END_TEST
 	}
 
 	void wrapped_free(void* ptr) {free(ptr);}
 
+	unsigned type() {return AllocatorTypes::JEMALLOC;}
 };
