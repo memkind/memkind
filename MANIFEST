@@ -162,6 +162,7 @@ test/allocator_perf_tool/WrappersMacros.hpp
 test/allocator_perf_tool/main.cpp
 test/allocate_to_max_stress_test.cpp
 test/memkind_versioning_tests.cpp
+test/heap_manager_init_perf_test.cpp
 jemalloc/autogen.sh
 jemalloc/bin
 jemalloc/bin/jemalloc.sh.in

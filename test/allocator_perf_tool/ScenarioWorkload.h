@@ -43,12 +43,12 @@ public:
 
 	memory_operation* get_allocated_memory();
 
-	void malloc_op();
-
 	void enable_touch_memory_on_allocation(bool enable)
 	{
 		touch_memory_on_allocation = enable;
 	}
+
+	void post_allocation_check(const memory_operation& data);
 
 private:
 	std::vector<memory_operation> allocations;

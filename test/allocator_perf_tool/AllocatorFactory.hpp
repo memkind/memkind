@@ -29,20 +29,41 @@
 #include "Configuration.hpp"
 #include "JemallocAllocatorWithTimer.hpp"
 #include "MemkindAllocatorWithTimer.hpp"
+#include "Numastat.hpp"
 #include "memkind.h"
 
 #include <vector>
 #include <assert.h>
 #include <string.h>
+#include <map>
+
 
 class AllocatorFactory
 {
 public:
-	AllocatorFactory() :
-		memkind_default(MEMKIND_DEFAULT, AllocatorTypes::MEMKIND_DEFAULT),
-		memkind_hbw(MEMKIND_HBW, AllocatorTypes::MEMKIND_HBW),
-		memkind_interleave(MEMKIND_INTERLEAVE, AllocatorTypes::MEMKIND_INTERLEAVE)
-	{}
+	//Allocator initialization statistics
+	struct initialization_stat
+	{
+		float total_time; //Total time of initialization.
+		float ref_delta_time; //Delta Time.
+		unsigned allocator_type;
+		std::vector<float> memory_overhead; //Memory overhead per numa node.
+	};
+
+	AllocatorFactory()
+	{
+		memkind_allocators[AllocatorTypes::MEMKIND_DEFAULT] = MemkindAllocatorWithTimer(MEMKIND_DEFAULT, AllocatorTypes::MEMKIND_DEFAULT);
+		memkind_allocators[AllocatorTypes::MEMKIND_HBW] = MemkindAllocatorWithTimer(MEMKIND_HBW, AllocatorTypes::MEMKIND_HBW);
+		memkind_allocators[AllocatorTypes::MEMKIND_INTERLEAVE] = MemkindAllocatorWithTimer(MEMKIND_INTERLEAVE, AllocatorTypes::MEMKIND_INTERLEAVE);
+		memkind_allocators[AllocatorTypes::MEMKIND_HBW_INTERLEAVE] = MemkindAllocatorWithTimer(MEMKIND_HBW_INTERLEAVE, AllocatorTypes::MEMKIND_HBW_INTERLEAVE);
+		memkind_allocators[AllocatorTypes::MEMKIND_HBW_PREFERRED] = MemkindAllocatorWithTimer(MEMKIND_HBW_PREFERRED, AllocatorTypes::MEMKIND_HBW_PREFERRED);
+		memkind_allocators[AllocatorTypes::MEMKIND_HUGETLB] = MemkindAllocatorWithTimer(MEMKIND_HUGETLB, AllocatorTypes::MEMKIND_HUGETLB);
+		memkind_allocators[AllocatorTypes::MEMKIND_GBTLB] = MemkindAllocatorWithTimer(MEMKIND_GBTLB, AllocatorTypes::MEMKIND_GBTLB);
+		memkind_allocators[AllocatorTypes::MEMKIND_HBW_HUGETLB] = MemkindAllocatorWithTimer(MEMKIND_HBW_HUGETLB, AllocatorTypes::MEMKIND_HBW_HUGETLB);
+		memkind_allocators[AllocatorTypes::MEMKIND_HBW_PREFERRED_HUGETLB] = MemkindAllocatorWithTimer(MEMKIND_HBW_PREFERRED_HUGETLB, AllocatorTypes::MEMKIND_HBW_PREFERRED_HUGETLB);
+		memkind_allocators[AllocatorTypes::MEMKIND_HBW_GBTLB] = MemkindAllocatorWithTimer(MEMKIND_HBW_GBTLB, AllocatorTypes::MEMKIND_HBW_GBTLB);
+		memkind_allocators[AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB] = MemkindAllocatorWithTimer(MEMKIND_HBW_PREFERRED_GBTLB, AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB);
+	}
 
 	//Get existing allocator without creating new.
 	//The owner of existing allocator is AllocatorFactory object.
@@ -56,29 +77,80 @@ public:
 			case AllocatorTypes::JEMALLOC:
 				return &jemalloc;
 
-			case AllocatorTypes::MEMKIND_DEFAULT:
-				return &memkind_default;
-
-			case AllocatorTypes::MEMKIND_HBW:
-				return &memkind_hbw;
-
-			case AllocatorTypes::MEMKIND_INTERLEAVE:
-				return &memkind_interleave;
-
 			default:
-				assert(!"'type' out of range!");
+				{
+					if(memkind_allocators.count(type))
+						return &memkind_allocators[type];
+
+					assert(!"'type' out of range!");
+				}
 		}
 	}
 
-	memory_operation initialize_allocator(unsigned type)
+	initialization_stat initialize_allocator(Allocator& allocator)
 	{
 		size_t initial_size = 512;
-		Allocator* allocator = get_existing(type);
-		memory_operation data = allocator->wrapped_malloc(initial_size);
-		memset(data.ptr, 0, initial_size);
-		allocator->wrapped_free(data.ptr);
+		float before_node1 = Numastat::get_total_memory(0);
+		float before_node2 = Numastat::get_total_memory(1);
 
-		return data;
+		//malloc
+		memory_operation malloc_data = allocator.wrapped_malloc(initial_size);
+		double time = malloc_data.total_time;
+
+		//realloc
+		memory_operation realloc_data = allocator.wrapped_realloc(malloc_data.ptr, 256);
+		allocator.wrapped_free(realloc_data.ptr);
+
+		time += realloc_data.total_time;
+
+		//calloc
+		memory_operation calloc_data = allocator.wrapped_calloc(initial_size, 1);
+		allocator.wrapped_free(calloc_data.ptr);
+
+		initialization_stat stat;
+		stat.allocator_type = allocator.type();
+
+		//calc memory overhead
+		stat.memory_overhead.push_back(Numastat::get_total_memory(0) - before_node1);
+		stat.memory_overhead.push_back(Numastat::get_total_memory(1) - before_node2);
+
+		time += calloc_data.total_time;
+		stat.total_time = time;
+
+		return stat;
+	}
+
+	initialization_stat initialize_allocator(unsigned type)
+	{
+		return initialize_allocator(*get_existing(type));
+	}
+
+	//Calc percent delta between reference value and current value.
+	float calc_ref_delta(float ref_value, float value)
+	{
+		return ((value / ref_value)  - 1.0) * 100.0;
+	}
+
+	//Test initialization performance over available allocators.
+	//Return statistics.
+	std::vector<initialization_stat> initialization_test()
+	{
+		std::vector<initialization_stat> stats;
+		initialization_stat stat;
+
+		stat = initialize_allocator(standard_allocator);
+		float ref_time = stat.total_time;
+		stats.push_back(stat);
+
+		//Loop over available allocators to call initializer and compute stats.
+		for (unsigned i=1; i<AllocatorTypes::NUM_OF_ALLOCATOR_TYPES; i++)
+		{
+			stat = initialize_allocator(*get_existing(i));
+			stat.ref_delta_time = calc_ref_delta(ref_time, stat.total_time);
+			stats.push_back(stat);
+		}
+
+		return stats;
 	}
 
 	VectorIterator<Allocator*> generate_random_allocator_calls(int num, int seed)
@@ -88,7 +160,7 @@ public:
 
 		for (int i=0; i<num; i++)
 		{
-			int index = (rand() % AllocatorTypes::NUM_OF_ALLOCATOR_TYPES);
+			int index = (rand() % (AllocatorTypes::MEMKIND_HBW_PREFERRED+1));
 
 			allocators_calls.push_back(get_existing(index));
 		}
@@ -110,25 +182,17 @@ public:
 	}
 
 	//Return kind to the corresponding AllocatorTypes enum specified in argument.
-	static memkind_t get_kind_by_type(unsigned type)
+	memkind_t get_kind_by_type(unsigned type)
 	{
-		assert(AllocatorTypes::is_valid_memkind(type));
+		if(memkind_allocators.count(type))
+			return memkind_allocators[type].get_kind();
 
-		switch(type)
-		{
-		case AllocatorTypes::MEMKIND_DEFAULT:
-			return MEMKIND_DEFAULT;
-		case AllocatorTypes::MEMKIND_HBW:
-			return MEMKIND_HBW;
-		case AllocatorTypes::MEMKIND_INTERLEAVE:
-			return MEMKIND_INTERLEAVE;
-		}
+		assert(!"'type' out of range!");
 	}
 
 private:
 	StandardAllocatorWithTimer standard_allocator;
 	JemallocAllocatorWithTimer jemalloc;
-	MemkindAllocatorWithTimer memkind_default;
-	MemkindAllocatorWithTimer memkind_hbw;
-	MemkindAllocatorWithTimer memkind_interleave;
+
+	std::map<unsigned, MemkindAllocatorWithTimer> memkind_allocators;
 };

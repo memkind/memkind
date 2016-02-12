@@ -39,6 +39,8 @@ class MemkindAllocatorWithTimer
 	: public Allocator
 {
 public:
+	MemkindAllocatorWithTimer() : kind(MEMKIND_DEFAULT) {}
+
 	MemkindAllocatorWithTimer(memkind_t memory_kind, unsigned kind_type_id)
 	{
 		kind = memory_kind;
@@ -61,9 +63,10 @@ public:
 		data.error_code = errno;
 		END_TEST
 	}
+
 	memory_operation wrapped_realloc(void* ptr, size_t size)
 	{
-		START_TEST(type_id, FunctionCalls::FREE)
+		START_TEST(type_id, FunctionCalls::REALLOC)
 		data.ptr = memkind_realloc(kind, ptr, size);
 		data.error_code = errno;
 		END_TEST
@@ -76,6 +79,9 @@ public:
 		kind = memory_kind;
 		type_id = kind_type_id;
 	}
+
+	unsigned type() {return type_id;}
+	memkind_t get_kind() {return kind;}
 
 private:
 	memkind_t kind;

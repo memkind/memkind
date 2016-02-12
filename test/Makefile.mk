@@ -146,6 +146,7 @@ allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.h
 test_allocator_perf_tool_tests_SOURCES = test/main.cpp \
 									$(allocator_perf_tool_library_sources) \
                                     test/allocate_to_max_stress_test.cpp \
+                                    test/heap_manager_init_perf_test.cpp \
                                     # end
 
 

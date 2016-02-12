@@ -38,8 +38,27 @@ bool ScenarioWorkload::run()
 		switch(func_calls->next())
 		{
 		case FunctionCalls::MALLOC:
-			malloc_op();
-			break;
+			{
+				memory_operation data = allocators->next()->wrapped_malloc(alloc_sizes->next());
+				post_allocation_check(data);
+				break;
+			}
+		case FunctionCalls::CALLOC:
+			{
+				memory_operation data = allocators->next()->wrapped_calloc(1, alloc_sizes->next());
+				post_allocation_check(data);
+				break;
+			}
+		case FunctionCalls::REALLOC:
+			{
+				//Guarantee the memory for realloc.
+				Allocator* allocator = allocators->next();
+				memory_operation to_realloc = allocator->wrapped_malloc(512);
+
+				memory_operation data = allocator->wrapped_realloc(to_realloc.ptr ,alloc_sizes->next());
+				post_allocation_check(data);
+				break;
+			}
 		case FunctionCalls::FREE:
 			{
 				memory_operation* data = get_allocated_memory();
@@ -52,11 +71,6 @@ bool ScenarioWorkload::run()
 					memory_operation free_op = *data;
 					free_op.allocation_method = FunctionCalls::FREE;
 					allocations.push_back(free_op);
-				}
-				else
-				{
-					//perform malloc if there is no memory to free
-					malloc_op();
 				}
 
 				break;
@@ -94,11 +108,9 @@ memory_operation* ScenarioWorkload::get_allocated_memory()
 	return NULL;
 }
 
-void ScenarioWorkload::malloc_op()
+void ScenarioWorkload::post_allocation_check(const memory_operation& data)
 {
-	memory_operation data = allocators->next()->wrapped_malloc(alloc_sizes->next());
 	allocations.push_back(data);
-
 	if(touch_memory_on_allocation && (data.ptr != NULL) && (data.error_code != ENOMEM))
 	{
 		//Write memory to ensure physical allocation.

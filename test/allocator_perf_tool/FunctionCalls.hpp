@@ -42,6 +42,17 @@ public:
 		return names[type];
 	}
 
+	static unsigned function_type(const std::string& name)
+	{
+		for (unsigned i=0; i<NUM_OF_FUNCTIONS; i++)
+		{
+			if(function_name(i) == name)
+				return i;
+		}
+
+		assert(!"Invalid input argument!");
+	}
+
 	static VectorIterator<int> generate_random_allocator_func_calls(int call_num, int seed, TypesConf func_calls)
 	{
 		std::vector<unsigned> avail_types;
@@ -54,7 +65,7 @@ public:
 			int index;
 			do
 			{
-				index = rand() % (NUM_OF_FUNCTIONS-1);
+				index = rand() % (NUM_OF_FUNCTIONS);
 			}
 			while(!func_calls.is_enabled(index));
 
