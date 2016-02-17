@@ -92,30 +92,29 @@ public:
 		size_t initial_size = 512;
 		float before_node1 = Numastat::get_total_memory(0);
 		float before_node2 = Numastat::get_total_memory(1);
+		initialization_stat stat = {0};
 
 		//malloc
 		memory_operation malloc_data = allocator.wrapped_malloc(initial_size);
-		double time = malloc_data.total_time;
+		stat.total_time += malloc_data.total_time;
 
 		//realloc
 		memory_operation realloc_data = allocator.wrapped_realloc(malloc_data.ptr, 256);
 		allocator.wrapped_free(realloc_data.ptr);
 
-		time += realloc_data.total_time;
+		stat.total_time += realloc_data.total_time;
 
 		//calloc
 		memory_operation calloc_data = allocator.wrapped_calloc(initial_size, 1);
 		allocator.wrapped_free(calloc_data.ptr);
 
-		initialization_stat stat;
+		stat.total_time += calloc_data.total_time;
+
 		stat.allocator_type = allocator.type();
 
 		//calc memory overhead
 		stat.memory_overhead.push_back(Numastat::get_total_memory(0) - before_node1);
 		stat.memory_overhead.push_back(Numastat::get_total_memory(1) - before_node2);
-
-		time += calloc_data.total_time;
-		stat.total_time = time;
 
 		return stat;
 	}
