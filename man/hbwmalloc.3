@@ -251,19 +251,16 @@ as described in the
 section below on failure.
 .SH ERRORS
 .TP
+Error codes described here are the POSIX standard error codes as defined in <errno.h>
+.TP
 .BR hbw_check_available ()
-returns one of the error codes described in
-.BR memkind (3)
-if high bandwidth memory is not available.
+returns
+.BR ENOENT
+if couldn't find parsed PMTT table or
+.BR ENODEV
+if high-bandwidth memory is unavailable.
 .TP
 .BR "hbw_posix_memalign" "() and " "hbw_posix_memalign_psize" "()"
-return the one of the POSIX standard error codes
-.B EINVAL
-or
-.B ENOMEM
-as defined in
-.IR <errno.h>
-if an error occurs.
 If the
 .I alignment
 parameter is not a power of two, or was not a multiple of
@@ -276,9 +273,9 @@ is returned.
 .TP
 .BR hbw_set_policy ()
 returns
-.B MEMKIND_ERROR_REPPOLICY
+.B EPERM
 if hbw_set_policy () was called more than once, or
-.B MEMKIND_ERROR_BADPOLICY if
+.B EINVAL if
 .I mode
 argument was neither
 .B HBW_POLICY_PREFERRED,

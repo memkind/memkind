@@ -44,7 +44,6 @@ int hbw_get_policy(void)
 
 int hbw_set_policy(int mode)
 {
-    int err = 0;
     if (mode == HBW_POLICY_PREFERRED) {
         pthread_once(&hbw_policy_once_g, hbw_policy_preferred_init);
     }
@@ -55,20 +54,30 @@ int hbw_set_policy(int mode)
         pthread_once(&hbw_policy_once_g, hbw_policy_interleave_init);
     }
     else {
-        err = MEMKIND_ERROR_BADPOLICY;
-        goto exit;
+        return EINVAL;
     }
+
     if (mode != hbw_policy_g) {
-        err = MEMKIND_ERROR_REPPOLICY;
-        goto exit;
+        return EPERM;
     }
-exit:
-    return err;
+
+    return 0;
 }
 
 int hbw_check_available(void)
 {
-    return memkind_check_available(MEMKIND_HBW);
+    int result = memkind_check_available(MEMKIND_HBW);
+
+    switch (result) {
+        case 0:
+            return 0;
+
+        case MEMKIND_ERROR_PMTT:
+            return ENOENT;
+
+        default:
+            return ENODEV;
+    }
 }
 
 void *hbw_malloc(size_t size)
