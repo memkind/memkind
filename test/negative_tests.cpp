@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -284,7 +284,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterHbwPosixMemalignPsize)
 {
     void *ptr = NULL;
 
-    hbw_posix_memalign_psize(&ptr, 2048, 2048, 2048);
+    hbw_posix_memalign_psize(&ptr, 2048, 2048, HBW_PAGESIZE_4KB);
     EXPECT_TRUE(ptr != NULL);
 
     EXPECT_EQ(hbw_set_policy(HBW_POLICY_BIND), MEMKIND_ERROR_REPPOLICY);

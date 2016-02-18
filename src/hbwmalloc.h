@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,10 @@ extern "C" {
  *  This file defines the external API's and enumerations for the
  *  hbwmalloc library.  These interfaces define a heap manager that
  *  targets the high bandwidth memory numa nodes.
+ *
+ *  hbwmalloc.h functionality is considered as stable API (STANDARD API).
+ *
+ *  Please read hbwmalloc(3) man page for or more details.
  */
 
 /*
@@ -55,7 +59,8 @@ typedef enum {
      */
     HBW_POLICY_PREFERRED = 2,
     /*
-     *  Interleave pages accross high bandwidth nodes.
+     *  Interleave pages accross high bandwidth nodes. If insufficient memory
+     *  pages are available then OOM killer will be triggered.
      */
     HBW_POLICY_INTERLEAVE = 3
 } hbw_policy_t;
@@ -73,21 +78,118 @@ typedef enum {
      *  API.  Note with transparent huge pages enabled, these allocations
      *  may be promoted by the operating system to 2 megabyte pages.
      */
+
+    /*
+     * The four kilobyte page size option. Note that with transparent huge
+     * pages enabled these allocations may be promoted by the operating system
+     * to two megabyte pages.
+     */
     HBW_PAGESIZE_4KB           = 1,
+
+    /*
+     * The two megabyte page size option.
+     */
     HBW_PAGESIZE_2MB           = 2,
+   /*
+     * The one gigabyte page size option. The total size of the allocation must
+     * be a multiple of 1GB with this option, otherwise the allocation will
+     * fail.
+     */
     HBW_PAGESIZE_1GB_STRICT    = 3,
+
+     /*
+     * This option allows the user to specify arbitrary sizes backed by one
+     * gigabytes pages. Gigabyte pages are allocated even if the size is not a
+     * modulo of 1GB. A good example of using this feature with realloc is
+     * shown in gb_realloc_example.c
+     */
     HBW_PAGESIZE_1GB           = 4
 } hbw_pagesize_t;
 
+/*
+ * Returns the current fallback policy when insufficient high bandwith memory
+ * is available.
+ */
 int hbw_get_policy(void);
+
+/*
+ * Set  the current fallback policy, the policy can be modified only once in
+ * the life of an application. The policy in effect at the time when a buffer
+ * is allocated determines the policy for that buffer until it is freed.
+ */
 int hbw_set_policy(int mode);
+
+/*
+ * Returns 0 if high bandwidth memory is available and an error code
+ * described in the ERRORS section if not.
+ */
 int hbw_check_available(void);
+
+/*
+ * Allocates size bytes of uninitialized high bandwidth memory.
+ * The allocated space is  suitably  aligned (after  possible  pointer
+ * coercion) for storage of any type of object. If size is zero then
+ * hbw_malloc() returns NULL.
+ */
 void *hbw_malloc(size_t size);
+
+/*
+ * Allocates space for num objects in high bandwidth memory, each size bytes
+ * in length.
+ * The result is identical to calling hbw_malloc() with an argument of
+ * num*size, with the exception that the allocated memory is explicitly
+ * initialized to zero bytes.
+ * If num or size is 0, then hbw_calloc() returns NULL.
+ */
 void *hbw_calloc(size_t num, size_t size);
+
+/*
+ * Allocates size bytes of high bandwidth memory such that the allocation's
+ * base address is an even multiple of alignment, and returns the allocation
+ * in the value pointed to by memptr.  The requested alignment must be a power
+ * of 2 at least as large as sizeof(void *).
+ */
 int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
+
+/*
+ * Allocates size bytes of high bandwidth memory such that the allocation's
+ * base address is an even multiple of alignment, and returns the allocation
+ * in the value pointed to by memptr. The requested alignment must be a power
+ * of 2 at least as large as sizeof(void  *). The memory will be allocated
+ * using pages determined by the psize variable which may be one of the
+ * hbw_pagesize_t enumerated values.
+ */
 int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
-                             int pagesize);
+                             hbw_pagesize_t pagesize);
+
+/*
+ * Changes the size of the previously allocated memory referenced by ptr to
+ * size bytes of the specified kind. The contents of the memory are unchanged
+ * up to the lesser of the new and old size.
+ * If the new size is larger, the contents of the newly allocated portion
+ * of the memory are undefined.
+ * Upon success, the memory referenced by ptr is freed and a pointer to the
+ * newly allocated high bandwidth memory is returned.
+ * Note: memkind_realloc() may move the memory allocation, resulting in a
+ * different return value than ptr.
+ * If ptr is NULL, the hbw_realloc() function behaves identically to
+ * hbw_malloc() for the specified size. The address ptr, if not NULL,
+ * was returned by a previous call to hbw_malloc(), hbw_calloc(),
+ * hbw_realloc(), or hbw_posix_memalign(). Otherwise, or if hbw_free(ptr)
+ * was called before, undefined behavior occurs.
+ * Note: hbw_realloc() cannot be used with a pointer returned by
+ * hbw_posix_memalign_psize().
+ */
 void *hbw_realloc(void *ptr, size_t size);
+
+/*
+ * Causes the allocated high bandwidth memory referenced by ptr to be made
+ * available for future allocations. If ptr is NULL, no action occurs.
+ * The address ptr, if not NULL, must have been returned by a previous call
+ * to hbw_malloc(), hbw_calloc(), hbw_realloc(), hbw_posix_memalign(), or
+ * hbw_posix_memalign_psize(). Otherwise, if hbw_free(ptr) was called before,
+ * undefined behavior occurs.
+ */
 void hbw_free(void *ptr);
 
 #ifdef __cplusplus

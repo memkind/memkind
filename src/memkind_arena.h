@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,13 +22,20 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef memkind_arena_include_h
-#define memkind_arena_include_h
+#pragma once
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "memkind.h"
+
+/*
+ * Header file for the jemalloc arena allocation memkind operations.
+ * More details in memkind_arena(3) man page.
+ *
+ * Functionality defined in this header is considered as EXPERIMENTAL API.
+ * API standards are described in memkind(3) man page.
+ */
 
 int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
 int memkind_arena_create_map(struct memkind *kind);
@@ -42,5 +49,4 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t s
 
 #ifdef __cplusplus
 }
-#endif
 #endif

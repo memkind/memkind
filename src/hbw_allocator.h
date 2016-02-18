@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,19 +24,21 @@
 
 #pragma once
 
-
 #include <stddef.h>
 #include <new>
 
 #include "hbwmalloc.h"
-
+/*
+ * Header file for the C++ allocator compatible with the C++ standard library allocator concepts.
+ * More details in hbwallocator(3) man page.
+ * Note: memory heap management is based on hbwmalloc, refer to the hbwmalloc man page for more information.
+ *
+ * Functionality defined in this header is considered as EXPERIMENTAL API.
+ * API standards are described in memkind(3) man page.
+ */
 namespace hbw
 {
 
-/*
- *  The C++ allocator compatible with the C++ standard library allocator concepts.
- *  Note: memory heap management is based on hbwmalloc, refer to the hbwmalloc man page for more information.
- */
 template <class T>
 class allocator
 {

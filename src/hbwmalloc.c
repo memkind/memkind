@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@ int hbw_posix_memalign(void **memptr, size_t alignment, size_t size)
 }
 
 int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
-                             int pagesize)
+                             hbw_pagesize_t pagesize)
 {
     memkind_t kind;
     int err = 0;
