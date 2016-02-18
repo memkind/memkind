@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Intel Corporation.
+ * Copyright (C) 2015 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,8 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef memkind_pmem_include_h
-#define memkind_pmem_include_h
+#pragma once
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,6 +32,14 @@ extern "C" {
 #include "memkind.h"
 #include "memkind_default.h"
 #include "memkind_arena.h"
+
+/*
+ * Header file for the file-backed memory memkind operations.
+ * More details in memkind_pmem(3) man page.
+ *
+ * Functionality defined in this header is considered as EXPERIMENTAL API.
+ * API standards are described in memkind(3) man page.
+ */
 
 #define	MEMKIND_PMEM_MIN_SIZE (1024 * 1024 * 16)
 
@@ -54,5 +61,4 @@ extern const struct memkind_ops MEMKIND_PMEM_OPS;
 
 #ifdef __cplusplus
 }
-#endif
 #endif

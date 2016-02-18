@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,13 +22,20 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef memkind_hugetlb_include_h
-#define memkind_hugetlb_include_h
+#pragma once
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "memkind.h"
+
+/*
+ * Header file for the hugetlb memory memkind operations.
+ * More details in memkind_hugetlb(3) man page.
+ *
+ * Functionality defined in this header is considered as EXPERIMENTAL API.
+ * API standards are described in memkind(3) man page.
+ */
 
 int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags);
 void memkind_hugetlb_init_once(void);
@@ -39,5 +46,4 @@ extern const struct memkind_ops MEMKIND_HUGETLB_OPS;
 
 #ifdef __cplusplus
 }
-#endif
 #endif

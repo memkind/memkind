@@ -130,7 +130,7 @@ returns  NULL.
 .PP
 .BR memkind_calloc ()
 allocates space for
-.I nmemb
+.I num
 objects each
 .I size
 bytes in length in memory of the specified
@@ -138,11 +138,11 @@ bytes in length in memory of the specified
 The result is identical to calling
 .BR memkind_malloc ()
 with an argument of
-.IR nmemb * size ,
+.IR num * size ,
 with the exception that the allocated memory is explicitly
 initialized to zero bytes.
 If
-.I nmemb
+.I num
 or
 .I size
 is 0, then
@@ -243,7 +243,7 @@ can be given as the
 .I kind
 specified to
 .BR memkind_free ()
-but this will require a a look up that can be bypassed by specifying
+but this will require a look up that can be bypassed by specifying
 a non-zero value.
 .sp
 .B "ALLOCATOR CALLBACK FUNCTION:"
@@ -445,6 +445,15 @@ int memkind_get_version() return version number represented by a single integer 
 	major * 1000000 + minor * 1000 + patch
 .sp
 Note: major < 1 means unstable API.
+.sp
+API standards:
+.br
+	• STANDARD API – API is considered as stable
+.br
+	• NON-STANDARD API – API is considered as stable, however this is not a standard way to use memkind
+.br
+	• EXPERIMENTAL API – API is considered as unstable and the subject to change
+.br
 .sp
 .B "MEMKIND OPERATIONS:"
 .br
@@ -733,6 +742,7 @@ Same as
 except that the pages that support the allocation are interleaved
 across all high bandwidth nodes and transparent huge pages are
 disabled.
+.TP
 .B MEMKIND_PMEM
 Allocate from file-backed heap.  If the amount of allocated memory exceeds
 the total size of memory-mapped file associated with given kind, or if the actual

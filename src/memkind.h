@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,8 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef memkind_include_h
-#define memkind_include_h
+#pragma once
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,12 +30,21 @@ extern "C" {
 #include <pthread.h>
 #include <sys/types.h>
 
+/*
+ * Header file for the memkind heap manager.
+ * More details in memkind(3) man page.
+ *
+ * API standards are described in memkind(3) man page.
+ */
+
+/*EXPERIMENTAL API*/
 enum memkind_const {
     MEMKIND_MAX_KIND = 512,
     MEMKIND_ERROR_MESSAGE_SIZE = 128,
     MEMKIND_NAME_LENGTH = 64
 };
 
+/*EXPERIMENTAL API*/
 enum memkind_error {
     MEMKIND_ERROR_UNAVAILABLE = -1,
     MEMKIND_ERROR_MBIND = -2,
@@ -61,6 +69,7 @@ enum memkind_error {
     MEMKIND_ERROR_RUNTIME = -255
 };
 
+/*EXPERIMENTAL API*/
 enum memkind_base_partition {
     MEMKIND_PARTITION_DEFAULT = 0,
     MEMKIND_PARTITION_HBW = 1,
@@ -76,8 +85,10 @@ enum memkind_base_partition {
     MEMKIND_NUM_BASE_KIND
 };
 
+/*EXPERIMENTAL API*/
 struct memkind_ops;
 
+/*EXPERIMENTAL API*/
 struct memkind {
     const struct memkind_ops *ops;
     int partition;
@@ -91,6 +102,7 @@ struct memkind {
     void *priv;
 };
 
+/*EXPERIMENTAL API*/
 struct memkind_ops {
     int (* create)(struct memkind *kind, const struct memkind_ops *ops, const char *name);
     int (* destroy)(struct memkind *kind);
@@ -114,72 +126,111 @@ struct memkind_ops {
 
 typedef struct memkind * memkind_t;
 
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_DEFAULT;
+
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_HUGETLB;
+
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_HBW;
+
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_HBW_PREFERRED;
+
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_HBW_HUGETLB;
+
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_HBW_PREFERRED_HUGETLB;
+
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_HBW_GBTLB;
+
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
+
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_GBTLB;
+
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_HBW_INTERLEAVE;
+
+/*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_INTERLEAVE;
 
+
+/*STANDARD API*/
 /* API versioning */
 int memkind_get_version();
 
+
+/*EXPERIMENTAL API*/
 /* Convert error number into an error message */
 void memkind_error_message(int err, char *msg, size_t size);
 
+
+/*EXPERIMENTAL API*/
 /* Free all resources allocated by the library (must be last call to library by the process) */
 int memkind_finalize(void);
 
 /* KIND MANAGEMENT INTERFACE */
 
+/*EXPERIMENTAL API*/
 /* Create a new kind */
 int memkind_create(const struct memkind_ops *ops, const char *name, memkind_t *kind);
 
+/*EXPERIMENTAL API*/
 /* Create a new PMEM (file-backed) kind of given size on top of a temporary file */
 int memkind_create_pmem(const char *dir, size_t max_size, memkind_t *kind);
 
+/*EXPERIMENTAL API*/
 /* Query the number of kinds instantiated */
 int memkind_get_num_kind(int *num_kind);
 
+/*EXPERIMENTAL API*/
 /* Get kind associated with a partition (index from 0 to num_kind - 1) */
 int memkind_get_kind_by_partition(int partition, memkind_t *kind);
 
+/*EXPERIMENTAL API*/
 /* Get kind given the name of the kind */
 int memkind_get_kind_by_name(const char *name, memkind_t *kind);
 
+/*EXPERIMENTAL API*/
 /* Get the amount in bytes of total and free memory of the NUMA nodes associated with the kind */
 int memkind_get_size(memkind_t kind, size_t *total, size_t *free);
 
+/*EXPERIMENTAL API*/
 /* returns 0 if memory kind is available else returns error code */
 int memkind_check_available(memkind_t kind);
 
 /* HEAP MANAGEMENT INTERFACE */
 
+/*EXPERIMENTAL API*/
 /* malloc from the numa nodes of the specified kind */
 void *memkind_malloc(memkind_t kind, size_t size);
 
+/*EXPERIMENTAL API*/
 /* calloc from the numa nodes of the specified kind */
 void *memkind_calloc(memkind_t kind, size_t num, size_t size);
 
+/*EXPERIMENTAL API*/
 /* posix_memalign from the numa nodes of the specified kind */
 int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment,
                            size_t size);
 
+/*EXPERIMENTAL API*/
 /* realloc from the numa nodes of the specified kind */
 void *memkind_realloc(memkind_t kind, void *ptr, size_t size);
 
+/*EXPERIMENTAL API*/
 /* Free memory allocated with the memkind API */
 void memkind_free(memkind_t kind, void *ptr);
 
+/*EXPERIMENTAL API*/
 /* ALLOCATOR CALLBACK FUNCTION */
 void *memkind_partition_mmap(int partition, void *addr, size_t size);
 
 #ifdef __cplusplus
 }
-#endif
 #endif

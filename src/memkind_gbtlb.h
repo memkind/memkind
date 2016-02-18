@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,13 +22,20 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef memkind_gbtlb_include_h
-#define memkind_gbtlb_include_h
+#pragma once
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "memkind.h"
+
+/*
+ * Header file for the gigabyte TLB memkind operations.
+ * More details in memkind_gbtlb(3) man page.
+ *
+ * Functionality defined in this header is considered as EXPERIMENTAL API.
+ * API standards are described in memkind(3) man page.
+ */
 
 void *memkind_gbtlb_malloc(struct memkind *kind, size_t size);
 void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size);
@@ -44,5 +51,4 @@ extern const struct memkind_ops MEMKIND_GBTLB_OPS;
 
 #ifdef __cplusplus
 }
-#endif
 #endif

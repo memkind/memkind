@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,13 +22,20 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef memkind_hbw_include_h
-#define memkind_hbw_include_h
+#pragma once
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "memkind.h"
+
+/*
+ * Header file for the high bandwidth memory memkind operations.
+ * More details in memkind_hbw(3) man page.
+ *
+ * Functionality defined in this header is considered as EXPERIMENTAL API.
+ * API standards are described in memkind(3) man page.
+ */
 
 static const char * const MEMKIND_BANDWIDTH_PATH = "/var/run/memkind/node-bandwidth";
 
@@ -55,5 +62,4 @@ extern const struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS;
 
 #ifdef __cplusplus
 }
-#endif
 #endif
