@@ -46,11 +46,11 @@ protected:
     void TearDown() {}
 };
 
-int execute_policy(int set_policy, int size_in_megas)
+int execute_policy(hbw_policy_t set_policy, int size_in_megas)
 {
 
     uint64_t NUMBER_OF_ELEMENTS = 1024*1024*1024;
-    int DESIRED_POLICY = set_policy;
+    hbw_policy_t DESIRED_POLICY = set_policy;
 
     NUMBER_OF_ELEMENTS = size_in_megas;
     NUMBER_OF_ELEMENTS *= 1024*1024/8;

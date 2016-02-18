@@ -30,19 +30,19 @@
 #include "hbwmalloc.h"
 #include "memkind.h"
 
-static int hbw_policy_g = HBW_POLICY_PREFERRED;
+static hbw_policy_t hbw_policy_g = HBW_POLICY_PREFERRED;
 static pthread_once_t hbw_policy_once_g = PTHREAD_ONCE_INIT;
 static inline memkind_t hbw_get_kind(int pagesize);
 static inline void hbw_policy_preferred_init(void);
 static inline void hbw_policy_bind_init(void);
 static inline void hbw_policy_interleave_init(void);
 
-int hbw_get_policy(void)
+hbw_policy_t hbw_get_policy(void)
 {
     return hbw_policy_g;
 }
 
-int hbw_set_policy(int mode)
+int hbw_set_policy(hbw_policy_t mode)
 {
     if (mode == HBW_POLICY_PREFERRED) {
         pthread_once(&hbw_policy_once_g, hbw_policy_preferred_init);

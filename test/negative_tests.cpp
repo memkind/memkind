@@ -220,7 +220,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicy)
     EXPECT_EQ(hbw_set_policy(HBW_POLICY_BIND), EPERM);
     EXPECT_EQ(hbw_set_policy(HBW_POLICY_INTERLEAVE), EPERM);
     EXPECT_EQ(hbw_get_policy(), HBW_POLICY_PREFERRED);
-    EXPECT_EQ(hbw_set_policy(0xFF), EINVAL);
+    EXPECT_EQ(hbw_set_policy((hbw_policy_t)0xFF), EINVAL);
 }
 
 //Check if hbw_set_policy() will be ignored after malloc.
