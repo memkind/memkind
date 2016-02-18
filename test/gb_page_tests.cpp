@@ -103,15 +103,15 @@ TEST_F(GBPagesTest, TC_Memkind_GBPages_PosixMemalignRegular)
 
 TEST_F(GBPagesTest, TC_Memkind_HBW_GBPages_MemalignPsizeIncrementalBind)
 {
-    hbw_set_policy(1);
-    EXPECT_EQ(1, hbw_get_policy());
+    hbw_set_policy(HBW_POLICY_BIND);
+    EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
     tgen->generate_hbw_gb_incremental(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(GBPagesTest, TC_Memkind_HBW_GBPages_MemalignPsizeStrictBind)
 {
-    hbw_set_policy(1);
+    hbw_set_policy(HBW_POLICY_BIND);
     tgen->generate_hbw_gb_strict(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
 }
@@ -125,7 +125,7 @@ TEST_F(GBPagesTest, TC_Memkind_GBPages_GenerateMisalignPreferred)
 
 TEST_F(GBPagesTest, TC_Memkind_GBPages_GenerateMisalignBind)
 {
-    hbw_set_policy(1);
+    hbw_set_policy(HBW_POLICY_BIND);
     tgen->generate_gb_misalign(HBW_MEMALIGN_PSIZE,
                                2147483648);
     tgen->run(num_bandwidth, bandwidth);

@@ -110,14 +110,14 @@ typedef enum {
  * Returns the current fallback policy when insufficient high bandwith memory
  * is available.
  */
-int hbw_get_policy(void);
+hbw_policy_t hbw_get_policy(void);
 
 /*
  * Set  the current fallback policy, the policy can be modified only once in
  * the life of an application. The policy in effect at the time when a buffer
  * is allocated determines the policy for that buffer until it is freed.
  */
-int hbw_set_policy(int mode);
+int hbw_set_policy(hbw_policy_t mode);
 
 /*
  * Returns 0 if high bandwidth memory is available and an error code
