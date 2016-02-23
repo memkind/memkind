@@ -116,12 +116,19 @@ hbw_policy_t hbw_get_policy(void);
  * Set  the current fallback policy, the policy can be modified only once in
  * the life of an application. The policy in effect at the time when a buffer
  * is allocated determines the policy for that buffer until it is freed.
+ * Returns:
+ *   0: on success
+ *   EPERM: if hbw_set_policy () was called more than once
+ *   EINVAL: if mode argument was neither HBW_POLICY_PREFERRED, HBW_POLICY_BIND nor HBW_POLICY_INTERLEAVE
  */
 int hbw_set_policy(hbw_policy_t mode);
 
 /*
- * Returns 0 if high bandwidth memory is available and an error code
- * described in the ERRORS section if not.
+ * Verifies high bandwith memory availability.
+ * Returns:
+ *   0: if high bandwidth memory is available
+ *   ENOENT: if couldn't find parsed PMTT table
+ *   ENODEV: if high-bandwidth memory is unavailable.
  */
 int hbw_check_available(void);
 
@@ -148,6 +155,10 @@ void *hbw_calloc(size_t num, size_t size);
  * base address is an even multiple of alignment, and returns the allocation
  * in the value pointed to by memptr.  The requested alignment must be a power
  * of 2 at least as large as sizeof(void *).
+ * Returns:
+ *   0: on success
+ *   ENOMEM: if there was insufficient memory to satisfy the request
+ *   EINVAL: if the alignment parameter was not a power of two, or was less than sizeof(void *)
  */
 int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
 
@@ -158,6 +169,10 @@ int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
  * of 2 at least as large as sizeof(void  *). The memory will be allocated
  * using pages determined by the psize variable which may be one of the
  * hbw_pagesize_t enumerated values.
+ * Returns:
+ *   0: on success
+ *   ENOMEM: if there was insufficient memory to satisfy the request
+ *   EINVAL: if the alignment parameter was not a power of two, or was less than sizeof(void *)
  */
 int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
                              hbw_pagesize_t pagesize);
