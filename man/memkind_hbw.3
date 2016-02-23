@@ -38,6 +38,16 @@ memkind_hbw.h \- high bandwidth memory memkind operations.
 .br
 .BI "int memkind_hbw_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
 .br
+.BI "void memkind_hbw_init_once(void);"
+.br
+.BI "void memkind_hbw_hugetlb_init_once(void);"
+.br
+.BI "void memkind_hbw_preferred_init_once(void);"
+.br
+.BI "void memkind_hbw_preferred_hugetlb_init_once(void);"
+.br
+.BI "void memkind_hbw_interleave_init_once(void);"
+.br
 .SH DESCRIPTION
 .PP
 High bandwidth memory memkind operations.  The ACPICA specification
@@ -84,6 +94,36 @@ The
 can be used in conjuction with the
 .BR mbind (2)
 system call.
+.PP
+.BR memkind_hbw_init_once ()
+This function initializes MEMKIND_HBW kind and it should not be called more than once.
+Note:
+.BR memkind_hbw_init_once ()
+may reserve some extra memory.
+.PP
+.BR memkind_hbw_hugetlb_init_once ()
+This function initializes MEMKIND_HBW_HUGETLB kind and it should not be called more than once.
+Note:
+.BR memkind_hbw_hugetlb_init_once ()
+may reserve some extra memory.
+.PP
+.BR memkind_hbw_preferred_init_once ()
+This function initializes MEMKIND_HBW_PREFERRED kind and it should not be called more than once.
+Note:
+.BR memkind_hbw_preferred_init_once ()
+may reserve some extra memory.
+.PP
+.BR memkind_hbw_preferred_hugetlb_init_once ()
+This function initializes MEMKIND_HBW_PREFERRED_HUGETLB kind and it should not be called more than once.
+Note:
+.BR memkind_hbw_preferred_hugetlb_init_once ()
+may reserve some extra memory.
+.PP
+.BR memkind_hbw_interleave_init_once ()
+This function initializes MEMKIND_HBW_INTERLEAVE kind and it should not be called more than once.
+Note:
+.BR memkind_hbw_interleave_init_once ()
+may reserve some extra memory.
 .TP
 .B MEMKIND_BANDWIDTH_PATH
 Constant string that contains path to binary file that lists the

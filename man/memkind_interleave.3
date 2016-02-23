@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014, 2015 Intel Corporation.
+.\" Copyright (C) 2016 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -21,53 +21,26 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "MEMKIND_HUGETLB" 3 "2015-04-21" "Intel Corporation" "MEMKIND_HUGETLB" \" -*- nroff -*-
+.TH "MEMKIND_INTERLEAVE" 3 "2016-02-19" "Intel Corporation" "MEMKIND_INTERLEAVE" \" -*- nroff -*-
 .SH "NAME"
-memkind_hugetlb.h \- hugetlb memory memkind operations.
+memkind_interleave.h \- interleave memory memkind operations.
 .SH "SYNOPSIS"
 .nf
-.B #include <memkind_hugetlb.h>
+.B #include <memkind_interleave.h>
 .sp
 .B Link with -lmemkind
 .sp
-.BI "int memkind_hugetlb_check_available_2mb(struct memkind " "*kind" );
+.BI "void memkind_interleave_init_once(void);"
 .br
-.BI "int memkind_hugetlb_check_available_1gb(struct memkind " "*kind" );
-.br
-.BI "int memkind_hugetlb_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
-.br
-.BI "void memkind_hugetlb_init_once(void);"
-.br
-
 .SH DESCRIPTION
 .PP
-The hugetlb memory memkind operations enable memory kinds which use
-the Linux hugetlbfs file system.  For more information about the
-hugetlbfs see link below.
-.br
-.IR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
-.PP
-.BR memkind_hugetlb_check_available_2mb ()
-Check if there are 2MB pages reserved in the default hugetlbfs.  If
-the kind implements ops.get_mbind_nodemask(), then only the NUMA nodes
-set by the nodemask are checked, otherwise every NUMA node is checked.
-.PP
-.BR memkind_hugetlb_check_available_1gb ()
-Similar to memkind_hugetlb_check_available_2mb() except that the check
-is for 1GB pages instead of 2MB pages.
-.PP
-.BR memkind_hugetlb_get_mmap_flags ()
-Sets the flags for the
-.BR mmap ()
-system call such that the hugetlbfs is utilized for allocations.
-.PP
-.BR memkind_hugetlb_init_once ()
-This function initializes MEMKIND_HUGETLB kind and it should not be called more than once.
+memkind_interleave_init_once()
+This function initializes MEMKIND_INTERLEAVE kind and it should not be called more than once.
 .BR Note:
-.BR memkind_hugetlb_init_once ()
+.BR memkind_interleave_init_once ()
 may reserve some extra memory.
 .SH "COPYRIGHT"
-Copyright (C) 2014, 2015 Intel Corporation. All rights reserved.
+Copyright (C) 2016 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3),
 .BR memkind_arena (3),
