@@ -108,6 +108,7 @@ test/get_arena_test.cpp
 test/memkind_pmtt_tests.cpp
 test/memkind_pmem_tests.cpp
 test/slts_test.cpp
+test/huge_page_test.cpp
 test/mock-pmtt-2-nodes.hex
 test/mock-pmtt-empty-controller.hex
 test/memkind-afts.bts
@@ -159,6 +160,8 @@ test/allocator_perf_tool/TimerSysTime.hpp
 test/allocator_perf_tool/VectorIterator.hpp
 test/allocator_perf_tool/Workload.hpp
 test/allocator_perf_tool/WrappersMacros.hpp
+test/allocator_perf_tool/HugePageUnmap.hpp
+test/allocator_perf_tool/HugePageOrganizer.hpp
 test/allocator_perf_tool/main.cpp
 test/allocate_to_max_stress_test.cpp
 test/memkind_versioning_tests.cpp
