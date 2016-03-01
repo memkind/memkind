@@ -33,7 +33,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "memkind.h"
+#include <memkind.h>
 
 
 ///////////////////////////////////////////////////////////////////////////

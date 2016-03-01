@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
 
-#include "memkind_default.h"
+#include <memkind/internal/memkind_default.h>
 
 #ifndef MADV_NOHUGEPAGE
 #define MADV_NOHUGEPAGE 15

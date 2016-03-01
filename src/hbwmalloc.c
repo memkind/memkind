@@ -27,8 +27,8 @@
 #include <pthread.h>
 #include <errno.h>
 
-#include "hbwmalloc.h"
-#include "memkind.h"
+#include <hbwmalloc.h>
+#include <memkind.h>
 
 static hbw_policy_t hbw_policy_g = HBW_POLICY_PREFERRED;
 static pthread_once_t hbw_policy_once_g = PTHREAD_ONCE_INIT;

@@ -28,8 +28,8 @@
 #include <errno.h>
 
 #include <memkind.h>
-#include <memkind_default.h>
-#include <memkind_arena.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_arena.h>
 
 int node0_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
 int node1_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);

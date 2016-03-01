@@ -41,7 +41,7 @@
 #include <unistd.h>
 
 #include <memkind.h>
-#include <memkind_pmem.h>
+#include <memkind/internal/memkind_pmem.h>
 
 #define PMEM1_MAX_SIZE	(MEMKIND_PMEM_MIN_SIZE * 2)
 #define PMEM2_MAX_SIZE	((size_t)1024 * 1024 * 1024 * 1024)

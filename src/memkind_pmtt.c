@@ -47,8 +47,8 @@ enum {STRLEN = 512};
 #include "actypes.h"
 #include "actbl.h"
 
-#include "memkind.h"
-#include "memkind_hbw.h"
+#include <memkind.h>
+#include <memkind/internal/memkind_hbw.h>
 
 static const char *PMTT_PATH = "/sys/firmware/acpi/tables/PMTT";
 

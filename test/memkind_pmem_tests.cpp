@@ -26,7 +26,7 @@
 #include <sys/mman.h>
 #include <stdio.h>
 #include "common.h"
-#include "memkind_pmem.h"
+#include <memkind/internal/memkind_pmem.h>
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4096;
 static const char*  PMEM_DIR = "/tmp/";

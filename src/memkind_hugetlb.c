@@ -35,9 +35,9 @@
 #include <errno.h>
 #include <numa.h>
 
-#include "memkind_hugetlb.h"
-#include "memkind_default.h"
-#include "memkind_arena.h"
+#include <memkind/internal/memkind_hugetlb.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_arena.h>
 
 const struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .create = memkind_arena_create,

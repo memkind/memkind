@@ -165,7 +165,6 @@ touch %{buildroot}/%{statedir}/node-bandwidth
 rm -f %{buildroot}$(memkind_test_dir)/libautohbw.*
 rm -f %{buildroot}/%{_libdir}/lib%{namespace}.{l,}a
 rm -f %{buildroot}/%{_libdir}/lib{numakind,autohbw}.*
-$(extra_install)
 
 %pre
 
@@ -196,11 +195,15 @@ systemctl disable  %{namespace}.service >/dev/null 2>&1
 %ghost %dir %{statedir}
 %ghost %{statedir}/node-bandwidth
 %endif
+
+%define internal_include memkind/internal
+
 %files devel
 %defattr(-,root,root,-)
-%{_includedir}/%{namespace}*.h
 %{_includedir}/hbwmalloc.h
 %{_includedir}/hbw_allocator.h
+%{_includedir}/%{namespace}.h
+%{_includedir}/%{internal_include}/%{namespace}*.h
 %{_mandir}/man3/hbwmalloc.3.*
 %{_mandir}/man3/hbwallocator.3.*
 %{_mandir}/man3/%{namespace}*.3.*

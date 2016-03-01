@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-#include "memkind.h"
+#include <memkind.h>
 
 /*
  * Header file for the default implementations for memkind operations.
