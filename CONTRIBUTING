@@ -25,6 +25,17 @@ issue with a related subject.
 BUILDING
 ========
 
+Building and installing memkind can be as simple as typing the following while
+in the root directory of the source tree:
+
+    ./build_jemalloc.sh
+    ./autogen.sh
+    ./configure --prefix=$HOME/memkind_build
+    make
+    make install
+
+Then you can list installed files usign "find $HOME/memkind_build".
+
 The memkind library uses the GNU autotools (Autoconf, Automake,
 Libtool and m4) for configuration and build.  The configure scripts
 and gtest source code are distributed with the source tarball included
@@ -40,6 +51,8 @@ required for building the test content.  This is downloaded
 automatically prior to building the test content from the googlecode
 website based on a target describe in memkind/test/Makefile.mk.
 
+a) Building jemalloc
+
 The memkind library has a dependency on a related fork of jemalloc.
 Since there is little hope of cleanly rebasing against the head of
 jemalloc's public development branch (primarily due to the upstream
@@ -47,12 +60,12 @@ modifications to how "huge" allocations are done), we have included
 this source in the memkind repository with the intention of removing
 it when upstream jemalloc supports our requirements. In the mean time,
 the developer must configure and build jemalloc prior to configuring
-and building memkind. A simple example to build from the public memkind
-github follows:
+and building memkind. You can do that using included shell script:
 
-    git clone https://github.com/memkind/memkind.git
-    cd memkind
-    ./autogen.sh
+    ./build_jemalloc.sh
+
+Alternatively you can follow this step-by-step instruction:
+
     cd jemalloc
     autoconf
     mkdir obj
@@ -61,10 +74,19 @@ github follows:
                  --enable-memkind --enable-cc-silence
     make
     cd ../..
-    ./configure --prefix=$HOME/build
-    make
-    make install
-    find $HOME/build # This command just lists out what was installed
+
+b) Building memkind
+
+Briefly, the shell commands `./autogen.sh ./configure; make; make install'
+should configure, build, and install this package.
+
+See the output of:
+
+    ./configure --help
+
+for more information about either the memkind or the jemalloc
+configuration options.  Some useful information about building with autotools
+can also be found in the INSTALL file.
 
 
 TESTING

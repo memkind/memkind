@@ -68,25 +68,12 @@ before configuring and building the top level memkind directory.  The
 jemalloc build system supports using an object directory separate from
 the source tree.  To ensure the memkind is able to discover the output
 of the jemalloc build you must create an 'obj' directory, and build
-from within that directory.  In particular, issue the following
-configuration and build commands for jemalloc:
+from within that directory. You can achive that using attached script:
 
-    cd jemalloc
-    test -e configure || autoconf
-    mkdir obj
-    cd obj
-    ../configure --enable-autogen --enable-memkind \
-                 --with-jemalloc-prefix=jemk_
-    make
+    ./build_jemalloc.sh
 
-See the output of:
-
-    ./configure --help
-
-for more information about either the memkind or the jemalloc
-configuration options.  Some useful information can also be found in
-the INSTALL file.
-
+For more details about configuring and building jemalloc and memkind
+see "BUILDING" section of CONTRIBUTING document.
 
 RUN REQUIREMENTS
 ----------------
