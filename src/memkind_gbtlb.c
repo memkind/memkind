@@ -36,10 +36,10 @@
 #define MAP_HUGE_1GB (30 << 26)
 #endif
 
-#include "memkind_gbtlb.h"
-#include "memkind_hugetlb.h"
-#include "memkind_default.h"
-#include "memkind_hbw.h"
+#include <memkind/internal/memkind_gbtlb.h>
+#include <memkind/internal/memkind_hugetlb.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_hbw.h>
 
 const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .create = memkind_default_create,

@@ -27,27 +27,25 @@
 extern "C" {
 #endif
 
-#include "memkind.h"
+#include <memkind.h>
 
 /*
- * Header file for the gigabyte TLB memkind operations.
- * More details in memkind_gbtlb(3) man page.
+ * Header file for the jemalloc arena allocation memkind operations.
+ * More details in memkind_arena(3) man page.
  *
  * Functionality defined in this header is considered as EXPERIMENTAL API.
  * API standards are described in memkind(3) man page.
  */
 
-void *memkind_gbtlb_malloc(struct memkind *kind, size_t size);
-void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size);
-int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
-void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size);
-void memkind_gbtlb_free(struct memkind *kind, void *ptr);
-int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags);
-int memkind_gbtlb_check_addr(struct memkind *kind, void *addr);
-
-extern const struct memkind_ops MEMKIND_HBW_GBTLB_OPS;
-extern const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS;
-extern const struct memkind_ops MEMKIND_GBTLB_OPS;
+int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
+int memkind_arena_create_map(struct memkind *kind);
+int memkind_arena_destroy(struct memkind *kind);
+void *memkind_arena_malloc(struct memkind *kind, size_t size);
+void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size);
+int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
+void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size);
+int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena, size_t size);
+int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size);
 
 #ifdef __cplusplus
 }

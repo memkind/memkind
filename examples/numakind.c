@@ -43,8 +43,8 @@
 #include <numa.h>
 #include <errno.h>
 #include <memkind.h>
-#include <memkind_default.h>
-#include <memkind_arena.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_arena.h>
 
 static pthread_key_t numakind_key_g;
 static pthread_once_t numakind_init_once_g = PTHREAD_ONCE_INIT;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2015 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,25 +27,37 @@
 extern "C" {
 #endif
 
-#include "memkind.h"
+#include <pthread.h>
+
+#include <memkind.h>
+#include "memkind_default.h"
+#include "memkind_arena.h"
 
 /*
- * Header file for the jemalloc arena allocation memkind operations.
- * More details in memkind_arena(3) man page.
+ * Header file for the file-backed memory memkind operations.
+ * More details in memkind_pmem(3) man page.
  *
  * Functionality defined in this header is considered as EXPERIMENTAL API.
  * API standards are described in memkind(3) man page.
  */
 
-int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
-int memkind_arena_create_map(struct memkind *kind);
-int memkind_arena_destroy(struct memkind *kind);
-void *memkind_arena_malloc(struct memkind *kind, size_t size);
-void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size);
-int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
-void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size);
-int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena, size_t size);
-int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size);
+#define	MEMKIND_PMEM_MIN_SIZE (1024 * 1024 * 16)
+
+int memkind_pmem_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
+int memkind_pmem_destroy(struct memkind *kind);
+void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size);
+int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags);
+int memkind_pmem_get_size(struct memkind *kind, size_t *total, size_t *free);
+
+struct memkind_pmem {
+    int fd;
+    void *addr;
+    off_t offset;
+    size_t max_size;
+    pthread_mutex_t pmem_lock;
+};
+
+extern const struct memkind_ops MEMKIND_PMEM_OPS;
 
 #ifdef __cplusplus
 }

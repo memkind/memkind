@@ -28,8 +28,8 @@
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
 
-#include "memkind_arena.h"
-#include "memkind_pmem.h"
+#include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_pmem.h>
 
 const struct memkind_ops MEMKIND_PMEM_OPS = {
     .create = memkind_pmem_create,

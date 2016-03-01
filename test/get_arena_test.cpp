@@ -28,7 +28,7 @@
 #include <omp.h>
 #include <pthread.h>
 
-#include "memkind_arena.h"
+#include <memkind/internal/memkind_arena.h>
 
 class GetArenaTest: public :: testing::Test
 {

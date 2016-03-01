@@ -27,22 +27,38 @@
 extern "C" {
 #endif
 
-#include "memkind.h"
+#include <memkind.h>
 
 /*
- * Header file for the hugetlb memory memkind operations.
- * More details in memkind_hugetlb(3) man page.
+ * Header file for the high bandwidth memory memkind operations.
+ * More details in memkind_hbw(3) man page.
  *
  * Functionality defined in this header is considered as EXPERIMENTAL API.
  * API standards are described in memkind(3) man page.
  */
 
-int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags);
-void memkind_hugetlb_init_once(void);
-int memkind_hugetlb_check_available_2mb(struct memkind *kind);
-int memkind_hugetlb_check_available_1gb(struct memkind *kind);
+static const char * const MEMKIND_BANDWIDTH_PATH = "/var/run/memkind/node-bandwidth";
 
-extern const struct memkind_ops MEMKIND_HUGETLB_OPS;
+int memkind_hbw_check_available(struct memkind *kind);
+int memkind_hbw_hugetlb_check_available(struct memkind *kind);
+int memkind_hbw_gbtlb_check_available(struct memkind *kind);
+int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
+                                   unsigned long *nodemask,
+                                   unsigned long maxnode);
+int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
+                                       unsigned long *nodemask,
+                                       unsigned long maxnode);
+void memkind_hbw_init_once(void);
+void memkind_hbw_hugetlb_init_once(void);
+void memkind_hbw_preferred_init_once(void);
+void memkind_hbw_preferred_hugetlb_init_once(void);
+void memkind_hbw_interleave_init_once(void);
+
+extern const struct memkind_ops MEMKIND_HBW_OPS;
+extern const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS;
+extern const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS;
+extern const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS;
+extern const struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS;
 
 #ifdef __cplusplus
 }

@@ -23,7 +23,7 @@
 #
 
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/jemalloc/obj/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/obj/include
 
 lib_LTLIBRARIES = libmemkind.la
 
@@ -36,7 +36,6 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_hugetlb.c \
                         src/memkind_pmem.c \
                         src/memkind_interleave.c \
-                        src/memkind_interleave.h \
                         src/actbl1.h \
                         src/actbl2.h \
                         src/actbl3.h \
@@ -73,15 +72,19 @@ libmemkind_la_LIBADD = $(jemalloc_objects)
 
 libmemkind_la_LDFLAGS = -version-info $(memkind_abi_version)
 
-include_HEADERS = src/hbwmalloc.h \
-                  src/memkind_arena.h \
-                  src/memkind_default.h \
-                  src/memkind_gbtlb.h \
-                  src/memkind.h \
-                  src/memkind_hbw.h \
-                  src/memkind_hugetlb.h \
-                  src/memkind_pmem.h \
-                  src/hbw_allocator.h \
+include_HEADERS = include/hbwmalloc.h \
+                  include/hbw_allocator.h \
+                  include/memkind.h \
+                  # end
+
+nonstandardincludedir = $(includedir)/memkind/internal
+nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
+                  include/memkind/internal/memkind_default.h \
+                  include/memkind/internal/memkind_gbtlb.h \
+                  include/memkind/internal/memkind_hbw.h \
+                  include/memkind/internal/memkind_hugetlb.h \
+                  include/memkind/internal/memkind_interleave.h \
+                  include/memkind/internal/memkind_pmem.h \
                   # end
 
 sbin_PROGRAMS = memkind-pmtt

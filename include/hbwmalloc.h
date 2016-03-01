@@ -167,8 +167,7 @@ int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
  * base address is an even multiple of alignment, and returns the allocation
  * in the value pointed to by memptr. The requested alignment must be a power
  * of 2 at least as large as sizeof(void  *). The memory will be allocated
- * using pages determined by the psize variable which may be one of the
- * hbw_pagesize_t enumerated values.
+ * using pages determined by the pagesize variable.
  * Returns:
  *   0: on success
  *   ENOMEM: if there was insufficient memory to satisfy the request
@@ -198,7 +197,7 @@ int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
 void *hbw_realloc(void *ptr, size_t size);
 
 /*
- * Causes the allocated high bandwidth memory referenced by ptr to be made
+ * Causes the allocated memory referenced by ptr to be made
  * available for future allocations. If ptr is NULL, no action occurs.
  * The address ptr, if not NULL, must have been returned by a previous call
  * to hbw_malloc(), hbw_calloc(), hbw_realloc(), hbw_posix_memalign(), or
