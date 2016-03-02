@@ -133,7 +133,7 @@ cannot be used with a pointer returned by
 
 .PP
 .BR hbw_free ()
-causes the allocated high bandwidth memory referenced by
+causes the allocated memory referenced by
 .I ptr
 to be made available for future allocations. If
 .I ptr
@@ -177,7 +177,7 @@ The requested
 must be a power of 2 at least as large as
 .IR "sizeof(void *)" .
 The memory will be allocated using pages determined by the
-.IR "psize"
+.IR "pagesize"
 variable which may be one of the following enumerated values:
 .TP
 .B HBW_PAGESIZE_4KB
