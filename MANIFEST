@@ -6,9 +6,9 @@ INSTALL
 Makefile.am
 NEWS
 README
-TODO
 VERSION
 autogen.sh
+build_jemalloc.sh
 configure.ac
 config_tls.h.in
 examples/autohbw.c
