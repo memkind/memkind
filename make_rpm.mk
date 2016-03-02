@@ -39,7 +39,6 @@ source_tar = $(topdir)/SOURCES/memkind-$(version).tar.gz
 source_tmp_dir := $(topdir)/SOURCES/$(name)-tmp-$(shell date +%s)
 rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
-gtest_archive = /opt/mpss_toolchains/googletest/1.7.0/gtest-1.7.0.zip
 memkind_test_dir = $(MPSS_TEST_BASEDIR)/memkind-dt
 exclude_source_files = test/memkind-afts.bts test/memkind-slts.bts test/memkind-perf.bts
 
@@ -61,7 +60,7 @@ $(source_tar): $(topdir)/.setup $(src) MANIFEST
 	for f in $(exclude_source_files); do \
 		cp $$f $(source_tmp_dir)/$(name)-$(version)/$$f ; \
 	done
-	if [ -f "$(gtest_archive)" ]; then cp $(gtest_archive) $(source_tmp_dir)/$(name)-$(version); fi
+	if [ -f "$(memkind_gtest_archive)" ]; then cp $(memkind_gtest_archive) $(source_tmp_dir)/$(name)-$(version); fi
 	cd $(source_tmp_dir)/$(name)-$(version) && ./autogen.sh && ./configure && make dist
 	# tar.gz produced by "make dist" from above produces memkind-$(version).tar.gz
 	# If $(package_prefix) is not empty, then need to repackage that tar.gz to $(name)-$(version)
