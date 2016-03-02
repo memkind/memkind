@@ -1,4 +1,5 @@
 autogen.sh
+build_jemalloc.sh
 Makefile.am
 configure.ac
 config_tls.h.in
