@@ -107,9 +107,12 @@ typedef enum {
 hbw_policy_t hbw_get_policy(void);
 
 /*
- * Set  the current fallback policy, the policy can be modified only once in
- * the life of an application. The policy in effect at the time when a buffer
- * is allocated determines the policy for that buffer until it is freed.
+ * Sets the current fallback policy. The policy can be modified only once in
+ * the lifetime of an application and before calling hbw_*alloc() or
+ * hbw_posix_memalign*() function.
+ * Note: If the policy is not set, than HBW_POLICY_PREFERRED will be used by
+ * default.
+ *
  * Returns:
  *   0: on success
  *   EPERM: if hbw_set_policy () was called more than once
