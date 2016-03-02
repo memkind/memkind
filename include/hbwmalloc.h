@@ -72,12 +72,6 @@ typedef enum {
  *  select the page size from this enumerated list.
  */
 typedef enum {
-    /*
-     *  The 4 kilobyte page size option, this enables the same behavior
-     *  from hbw_posix_memalign_psize() as the hbw_posix_memalign()
-     *  API.  Note with transparent huge pages enabled, these allocations
-     *  may be promoted by the operating system to 2 megabyte pages.
-     */
 
     /*
      * The four kilobyte page size option. Note that with transparent huge
