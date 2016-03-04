@@ -145,7 +145,7 @@ int memkind_arena_destroy(struct memkind *kind)
         kind->arena_map = NULL;
 #ifndef MEMKIND_TLS
         if (kind->ops->get_arena == memkind_thread_get_arena) {
-           pthread_key_delete(kind->arena_key);
+            pthread_key_delete(kind->arena_key);
         }
 #endif
     }
