@@ -1,3 +1,23 @@
+* Thu March 03 2016 Artur Koziej <artur.koziej@intel.com> v1.0.0
+- hbwmalloc.h released as stable API.
+- Introduce API standards: STANDARD API, NON-STANDARD API, EXPERIMENTAL API.
+- Introduce memkind versioning API.
+- Fix type names in hbwmalloc API.
+- Change error codes to POSIX standard ones in hbwmalloc API.
+- Move API headers to include directory.
+- Move NON-STANDARD API, or EXPERIMENTAL API to include/memkind/internal directory.
+- New man page (memkind_interleave.3) describing interleave kind.
+- Significant documentation improvement.
+- Performance fix for jemalloc - significantly decrease of library initialization time.
+- Enforce 2MB alignment in jemalloc due to the Linux kernel bug (munmap() fails for huge pages, when the size is not aligned).
+- Move to systemd defined service (memkind.service), drop init.d script.
+- New rpm layout (memkind and memkind-devel).
+- Remove false dependency on OpenMP.
+- Extend test base for stress, longevity and initialization performance tests.
+- Fix memory leak in ctl_growk().
+- Rename namespace: hbwmalloc -> hbw.
+- Rename class: hbwmalloc_allocator -> allocator.
+
 * Thu Oct 15 2015 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v0.3.0
 - Added two new kinds: MEMKIND_INTERLEAVE and MEMKIND_HBW_INTERLEAVE
   (for details please take a look at man/memkind.3)
