@@ -20,7 +20,7 @@ test_zero(size_t sz_min, size_t sz_max)
 		if (sz_prev > 0) {
 			assert_c_eq(s[0], 'a',
 			    "Previously allocated byte %zu/%zu is corrupted",
-			    0, sz_prev);
+			    ZU(0), sz_prev);
 			assert_c_eq(s[sz_prev-1], 'a',
 			    "Previously allocated byte %zu/%zu is corrupted",
 			    sz_prev-1, sz_prev);
@@ -55,7 +55,7 @@ TEST_BEGIN(test_zero_large)
 {
 
 	test_skip_if(!config_fill);
-	test_zero(SMALL_MAXCLASS+1, arena_maxclass);
+	test_zero(SMALL_MAXCLASS+1, large_maxclass);
 }
 TEST_END
 
@@ -63,7 +63,7 @@ TEST_BEGIN(test_zero_huge)
 {
 
 	test_skip_if(!config_fill);
-	test_zero(arena_maxclass+1, chunksize*2);
+	test_zero(large_maxclass+1, chunksize*2);
 }
 TEST_END
 

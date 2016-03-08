@@ -22,7 +22,7 @@ TEST_BEGIN(test_grow_and_shrink)
 			    szs[j-1], szs[j-1]+1);
 			szs[j] = sallocx(q, 0);
 			assert_zu_ne(szs[j], szs[j-1]+1,
-			    "Expected size to at least: %zu", szs[j-1]+1);
+			    "Expected size to be at least: %zu", szs[j-1]+1);
 			p = q;
 		}
 
@@ -55,8 +55,9 @@ validate_fill(const void *p, uint8_t c, size_t offset, size_t len)
 	for (i = 0; i < len; i++) {
 		uint8_t b = buf[offset+i];
 		if (b != c) {
-			test_fail("Allocation at %p contains %#x rather than "
-			    "%#x at offset %zu", p, b, c, offset+i);
+			test_fail("Allocation at %p (len=%zu) contains %#x "
+			    "rather than %#x at offset %zu", p, len, b, c,
+			    offset+i);
 			ret = true;
 		}
 	}
@@ -95,7 +96,8 @@ TEST_BEGIN(test_zero)
 				    "Expected zeroed memory");
 			}
 			if (psz != qsz) {
-				memset(q+psz, FILL_BYTE, qsz-psz);
+				memset((void *)((uintptr_t)q+psz), FILL_BYTE,
+				    qsz-psz);
 				psz = qsz;
 			}
 			p = q;
@@ -112,7 +114,7 @@ TEST_BEGIN(test_align)
 {
 	void *p, *q;
 	size_t align;
-#define	MAX_ALIGN (ZU(1) << 29)
+#define	MAX_ALIGN (ZU(1) << 25)
 
 	align = ZU(1);
 	p = mallocx(1, MALLOCX_ALIGN(align));
@@ -137,7 +139,7 @@ TEST_BEGIN(test_lg_align_and_zero)
 {
 	void *p, *q;
 	size_t lg_align, sz;
-#define	MAX_LG_ALIGN 29
+#define	MAX_LG_ALIGN 25
 #define	MAX_VALIDATE (ZU(1) << 22)
 
 	lg_align = ZU(0);
@@ -159,8 +161,9 @@ TEST_BEGIN(test_lg_align_and_zero)
 		} else {
 			assert_false(validate_fill(q, 0, 0, MAX_VALIDATE),
 			    "Expected zeroed memory");
-			assert_false(validate_fill(q+sz-MAX_VALIDATE, 0, 0,
-			    MAX_VALIDATE), "Expected zeroed memory");
+			assert_false(validate_fill(
+			    (void *)((uintptr_t)q+sz-MAX_VALIDATE),
+			    0, 0, MAX_VALIDATE), "Expected zeroed memory");
 		}
 		p = q;
 	}

@@ -49,6 +49,9 @@
 #include "test/jemalloc_test.h"
 #include "test/SFMT-params.h"
 
+#if defined(JEMALLOC_BIG_ENDIAN) && !defined(BIG_ENDIAN64)
+#define BIG_ENDIAN64 1
+#endif
 #if defined(__BIG_ENDIAN__) && !defined(__amd64) && !defined(BIG_ENDIAN64)
 #define BIG_ENDIAN64 1
 #endif
@@ -460,11 +463,11 @@ uint32_t gen_rand32_range(sfmt_t *ctx, uint32_t limit) {
 
     above = 0xffffffffU - (0xffffffffU % limit);
     while (1) {
-        ret = gen_rand32(ctx);
-        if (ret < above) {
-            ret %= limit;
-            break;
-        }
+	ret = gen_rand32(ctx);
+	if (ret < above) {
+	    ret %= limit;
+	    break;
+	}
     }
     return ret;
 }
@@ -508,13 +511,13 @@ uint64_t gen_rand64(sfmt_t *ctx) {
 uint64_t gen_rand64_range(sfmt_t *ctx, uint64_t limit) {
     uint64_t ret, above;
 
-    above = 0xffffffffffffffffLLU - (0xffffffffffffffffLLU  % limit);
+    above = KQU(0xffffffffffffffff) - (KQU(0xffffffffffffffff) % limit);
     while (1) {
-        ret = gen_rand64(ctx);
-        if (ret < above) {
-            ret %= limit;
-            break;
-        }
+	ret = gen_rand64(ctx);
+	if (ret < above) {
+	    ret %= limit;
+	    break;
+	}
     }
     return ret;
 }
