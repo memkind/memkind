@@ -37,6 +37,7 @@
 #include <jemalloc/jemalloc.h>
 #include <utmpx.h>
 #include <sched.h>
+#include <stdint.h>
 
 
 #include <memkind/internal/memkind_hbw.h>
@@ -169,6 +170,21 @@ static int set_closest_numanode(int num_unique,
 
 static int numanode_bandwidth_compare(const void *a, const void *b);
 
+// This declaration is necesarry, cause it's missing in headers from libnuma 2.0.8
+extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
+
+static void assign_arbitrary_bandwidth_values(int* bandwidth, int bandwidth_len, struct bitmask* hbw_nodes);
+
+inline static void cpuid_asm(int leaf, int subleaf, uint32_t where[4]);
+
+static int is_cpu_xeon_phi_x200();
+
+static int fill_bandwidth_values_heuristically (int* bandwidth, int bandwidth_len);
+
+static int fill_bandwidth_values_from_enviroment(int* bandwidth, int bandwidth_len, char *hbw_nodes_env);
+
+static int fill_nodes_bandwidth(int* bandwidth, int bandwidth_len);
+
 int memkind_hbw_check_available(struct memkind *kind)
 {
     return kind->ops->get_mbind_nodemask(kind, NULL, 0);
@@ -236,6 +252,131 @@ int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
     return g->init_err;
 }
 
+static void assign_arbitrary_bandwidth_values(int* bandwidth, int bandwidth_len, struct bitmask* hbw_nodes)
+{
+    int i, nodes_num = numa_num_configured_nodes();
+
+    // Assigning arbitrary bandwidth values for nodes:
+    // 2 - high BW node (if bit set in hbw_nodes nodemask),
+    // 1 - low  BW node,
+    // 0 - node not present
+    for (i=0; i<NUMA_NUM_NODES; i++) {
+        if (i >= nodes_num) {
+            bandwidth[i] = 0;
+        }
+        else if (numa_bitmask_isbitset(hbw_nodes, i)) {
+            bandwidth[i] = 2;
+        }
+        else {
+            bandwidth[i] = 1;
+        }
+    }
+
+}
+
+#define CPUID_MODEL_MASK        (0xf<<4)
+#define CPUID_EXT_MODEL_MASK    (0xf<<16)
+
+inline static void cpuid_asm(int leaf, int subleaf, uint32_t where[4])
+{
+
+    asm volatile("cpuid":"=a"(where[0]),
+                         "=b"(where[1]),
+                         "=c"(where[2]),
+                         "=d"(where[2]):"0"(leaf), "2"(subleaf));
+}
+
+static int is_cpu_xeon_phi_x200()
+{
+    uint32_t xeon_phi_model = (0x7<<4);
+    uint32_t xeon_phi_ext_model = (0x5<<16);
+    uint32_t registers[4];
+    uint32_t expected = xeon_phi_model | xeon_phi_ext_model;
+    cpuid_asm(1, 0, registers);
+    uint32_t actual =  registers[0] & (CPUID_MODEL_MASK | CPUID_EXT_MODEL_MASK);
+
+    if (actual == expected) {
+        return 0;
+    }
+
+    return -1;
+}
+
+///This function tries to fill bandwidth array based on knowledge about known CPU models
+static int fill_bandwidth_values_heuristically(int* bandwidth, int bandwidth_len)
+{
+    int ret = MEMKIND_ERROR_PMTT; // Default error returned if heuristic aproach fails
+    int i, nodes_num, memory_only_nodes_num = 0;
+    struct bitmask *memory_only_nodes, *node_cpus;
+
+    if (is_cpu_xeon_phi_x200() == 0) {
+        nodes_num = numa_num_configured_nodes();
+
+        // Checking if number of numa-nodes meets expectations for
+        // supported configurations of Intel Xeon Phi x200
+        if( nodes_num != 2 && nodes_num != 4 && nodes_num!= 8 ) {
+            return ret;
+        }
+
+        memory_only_nodes = numa_allocate_nodemask();
+        node_cpus = numa_allocate_nodemask();
+
+        for(i=0; i<nodes_num; i++) {
+            numa_node_to_cpus(i, node_cpus);
+            if(numa_bitmask_weight(node_cpus) == 0) {
+                memory_only_nodes_num++;
+                numa_bitmask_setbit(memory_only_nodes, i);
+            }
+        }
+
+        // Checking if number of memory-only nodes is equal number of memory+cpu nodes
+        // If it pass we are changing ret to 0 (success) and filling bw table 
+        if ( memory_only_nodes_num == (nodes_num - memory_only_nodes_num) ) {
+
+            ret = 0;
+            assign_arbitrary_bandwidth_values(bandwidth, bandwidth_len, memory_only_nodes);
+        }
+
+        numa_bitmask_free(memory_only_nodes);
+        numa_bitmask_free(node_cpus);
+    }
+
+    return ret;
+}
+
+static int fill_bandwidth_values_from_enviroment(int* bandwidth, int bandwidth_len, char *hbw_nodes_env)
+{
+    struct bitmask *hbw_nodes_bm = numa_parse_nodestring(hbw_nodes_env);
+
+    if (!hbw_nodes_bm) {
+        return MEMKIND_ERROR_ENVIRON;
+    }
+    else {
+        assign_arbitrary_bandwidth_values(bandwidth, bandwidth_len, hbw_nodes_bm);
+        numa_bitmask_free(hbw_nodes_bm);
+    }
+
+    return 0;
+}
+
+static int fill_nodes_bandwidth(int* bandwidth, int bandwidth_len)
+{
+        char *hbw_nodes_env;
+        int err = 0;
+
+        hbw_nodes_env = getenv("MEMKIND_HBW_NODES");
+        if (hbw_nodes_env) {
+            return fill_bandwidth_values_from_enviroment(bandwidth, bandwidth_len, hbw_nodes_env);
+        }
+
+        err = parse_node_bandwidth(NUMA_NUM_NODES, bandwidth, MEMKIND_BANDWIDTH_PATH);
+        if (err) {
+            return fill_bandwidth_values_heuristically(bandwidth, bandwidth_len);
+        }
+
+        return err;
+}
+
 static void memkind_hbw_closest_numanode_init(void)
 {
     struct memkind_hbw_closest_numanode_t *g =
@@ -243,67 +384,45 @@ static void memkind_hbw_closest_numanode_init(void)
     int *bandwidth = NULL;
     int num_unique = 0;
     int high_bandwidth = 0;
-    int node;
+
     struct bandwidth_nodes_t *bandwidth_nodes = NULL;
-    char *hbw_nodes_env;
-    struct bitmask *hbw_nodes_bm;
 
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = (int *)jemk_malloc(sizeof(int) * g->num_cpu);
     bandwidth = (int *)jemk_malloc(sizeof(int) * NUMA_NUM_NODES);
+
     if (!(g->closest_numanode && bandwidth)) {
         g->init_err = MEMKIND_ERROR_MALLOC;
+        goto exit;
     }
-    if (!g->init_err) {
-        hbw_nodes_env = getenv("MEMKIND_HBW_NODES");
-        if (hbw_nodes_env) {
-            hbw_nodes_bm = numa_parse_nodestring(hbw_nodes_env);
-            if (!hbw_nodes_bm) {
-                g->init_err = MEMKIND_ERROR_ENVIRON;
-            }
-            else {
-                for (node = 0; node < NUMA_NUM_NODES; ++node) {
-                    if (numa_bitmask_isbitset(hbw_nodes_bm, node)) {
-                        bandwidth[node] = 2;
-                    }
-                    else {
-                        bandwidth[node] = 1;
-                    }
-                }
-                numa_bitmask_free(hbw_nodes_bm);
-            }
-        }
-        else {
-            g->init_err = parse_node_bandwidth(NUMA_NUM_NODES, bandwidth,
-                                               MEMKIND_BANDWIDTH_PATH);
-        }
-    }
-    if (!g->init_err) {
-        g->init_err = create_bandwidth_nodes(NUMA_NUM_NODES, bandwidth,
+
+    g->init_err = fill_nodes_bandwidth(bandwidth, NUMA_NUM_NODES);
+    if (g->init_err)
+        goto exit;
+
+    g->init_err = create_bandwidth_nodes(NUMA_NUM_NODES, bandwidth,
                                              &num_unique, &bandwidth_nodes);
+    if (g->init_err)
+        goto exit;
+
+    if (num_unique == 1) {
+       g->init_err = MEMKIND_ERROR_UNAVAILABLE;
+       goto exit;
     }
-    if (!g->init_err) {
-        if (num_unique == 1) {
-            g->init_err = MEMKIND_ERROR_UNAVAILABLE;
-        }
-    }
-    if (!g->init_err) {
-        high_bandwidth = bandwidth_nodes[num_unique-1].bandwidth;
-        g->init_err = set_closest_numanode(num_unique, bandwidth_nodes,
-                                           high_bandwidth, g->num_cpu,
-                                           g->closest_numanode);
-    }
-    if (bandwidth_nodes) {
-        jemk_free(bandwidth_nodes);
-    }
-    if (bandwidth) {
-        jemk_free(bandwidth);
-    }
+
+    high_bandwidth = bandwidth_nodes[num_unique-1].bandwidth;
+    g->init_err = set_closest_numanode(num_unique, bandwidth_nodes,
+                                       high_bandwidth, g->num_cpu,
+                                       g->closest_numanode);
+
+exit:
+
+    jemk_free(bandwidth_nodes);
+    jemk_free(bandwidth);
+
     if (g->init_err) {
-        if (g->closest_numanode) {
-            jemk_free(g->closest_numanode);
-            g->closest_numanode = NULL;
-        }
+        jemk_free(g->closest_numanode);
+        g->closest_numanode = NULL;
     }
 }
 
