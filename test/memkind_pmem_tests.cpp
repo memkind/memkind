@@ -113,6 +113,32 @@ TEST_F(MemkindPmemTests, PmemCalloc)
     memkind_free(pmem_kind, default_str);
 }
 
+TEST_F(MemkindPmemTests, PmemCallocHuge)
+{
+    const size_t size = CHUNK_SIZE;
+    const size_t num = 1;
+    char *default_str = NULL;
+
+    default_str = (char *)memkind_calloc(pmem_kind, num, size);
+    EXPECT_TRUE(NULL != default_str);
+    EXPECT_EQ(*default_str, 0);
+
+    sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
+    printf("%s", default_str);
+
+    memkind_free(pmem_kind, default_str);
+
+    // allocate the buffer of the same size (likely at the same address)
+    default_str = (char *)memkind_calloc(pmem_kind, num, size);
+    EXPECT_TRUE(NULL != default_str);
+    EXPECT_EQ(*default_str, 0);
+
+    sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
+    printf("%s", default_str);
+
+    memkind_free(pmem_kind, default_str);
+}
+
 TEST_F(MemkindPmemTests, PmemGetSize)
 {
     const size_t size = 512;

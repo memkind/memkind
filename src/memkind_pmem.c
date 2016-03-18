@@ -61,6 +61,9 @@ int memkind_pmem_create(struct memkind *kind, const struct memkind_ops *ops,
         goto exit;
     }
 
+    /* mark this kind/partition as file-mapped */
+    kind->partition |= JEMALLOC_MEMKIND_FILE_MAPPED;
+
     err = memkind_arena_create(kind, ops, name);
     if (err) {
         goto exit;
