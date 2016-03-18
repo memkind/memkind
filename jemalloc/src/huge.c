@@ -266,15 +266,26 @@ huge_dalloc(void *ptr, bool unmap)
 
 	/* Extract from tree of huge allocations. */
 	key.addr = ptr;
+
 #ifdef JEMALLOC_ENABLE_MEMKIND
 	key.partition = -1;
 	do {
 		key.partition++;
-#endif
 		node = extent_tree_ad_search(&huge, &key);
-#ifdef JEMALLOC_ENABLE_MEMKIND
 	} while ((node == NULL || node->partition != key.partition) &&
 		 key.partition < 256); /* FIXME hard coding partition max to 256 */
+
+	if (node == NULL) {
+		/* if not found, try with file-mapped partitions */
+		key.partition = (unsigned)JEMALLOC_MEMKIND_FILE_MAPPED - 1;
+		do {
+			key.partition++;
+			node = extent_tree_ad_search(&huge, &key);
+		} while ((node == NULL || node->partition != key.partition) &&
+			 key.partition < JEMALLOC_MEMKIND_FILE_MAPPED + 256); /* FIXME hard coding partition max to 256 */
+	}
+#else
+	node = extent_tree_ad_search(&huge, &key);
 #endif
 
 	assert(node != NULL);
@@ -310,21 +321,38 @@ huge_salloc(const void *ptr
 )
 {
 	size_t ret;
+#ifdef JEMALLOC_ENABLE_MEMKIND
+	extent_node_t *node = NULL, key;
+#else
 	extent_node_t *node, key;
+#endif
 
 	malloc_mutex_lock(&huge_mtx);
 
 	/* Extract from tree of huge allocations. */
 	key.addr = __DECONST(void *, ptr);
+
 #ifdef JEMALLOC_ENABLE_MEMKIND
-	key.partition = partition - 1;
-	do {
-		key.partition++;
-#endif
-		node = extent_tree_ad_search(&huge, &key);
-#ifdef JEMALLOC_ENABLE_MEMKIND
-	} while((node == NULL || node->partition != key.partition) &&
-		key.partition < 256); /* FIXME hard coding partition max to 256 */
+	if ((partition & JEMALLOC_MEMKIND_FILE_MAPPED) == 0) {
+		key.partition = partition - 1;
+		do {
+			key.partition++;
+			node = extent_tree_ad_search(&huge, &key);
+		} while ((node == NULL || node->partition != key.partition) &&
+			 key.partition < 256); /* FIXME hard coding partition max to 256 */
+	}
+
+	if (node == NULL) {
+		/* if not found, try with file-mapped partitions */
+		key.partition = (partition | JEMALLOC_MEMKIND_FILE_MAPPED) - 1;
+		do {
+			key.partition++;
+			node = extent_tree_ad_search(&huge, &key);
+		} while ((node == NULL || node->partition != key.partition) &&
+			 key.partition < JEMALLOC_MEMKIND_FILE_MAPPED + 256); /* FIXME hard coding partition max to 256 */
+	}
+#else
+	node = extent_tree_ad_search(&huge, &key);
 #endif
 
 	assert(node != NULL);
