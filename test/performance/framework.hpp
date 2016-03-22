@@ -87,6 +87,56 @@ namespace performance_tests
         void operator=(Barrier const&) = delete;
     };
 
+    // Data of a single test action, that is, memory operation (malloc, calloc, etc.)
+    // to perform and its parameters (size, alignment etc.)
+    class Action
+    {
+    protected:
+        Operation* m_operation;
+        Operation* m_freeOperation;
+        const memkind_t m_kind;
+        void* m_allocation;
+        const size_t m_size;
+        const size_t m_offset;
+        const size_t m_alignment;
+
+    public:
+        Action(
+            Operation* operation,
+            Operation* freeOperation,
+            const memkind_t kind,
+            const size_t size,
+            const size_t offset,
+            const size_t alignment)
+            : m_operation(operation)
+            , m_freeOperation(freeOperation)
+            , m_kind(kind)
+            , m_allocation(nullptr)
+            , m_size(size)
+            , m_offset(offset)
+            , m_alignment(alignment)
+        {}
+
+        Action(
+            Operation* operation,
+            Operation* freeOperation,
+            const memkind_t kind)
+            : Action(operation, freeOperation, kind, 0, 0, 0)
+        {
+        }
+
+        void alloc()
+        {
+            m_operation->perform(m_kind, m_allocation, m_size, m_offset, m_alignment);
+        }
+
+        void free()
+        {
+            m_freeOperation->perform(m_kind, m_allocation);
+        }
+
+    };
+
     // Performs and tracks requested memory operations in a separate thread
     class Worker
     {
@@ -104,8 +154,6 @@ namespace performance_tests
         Operation *m_freeOperation;
         // Operation kind (useful for memkind only)
         memkind_t m_kind;
-        // List for tracking allocations
-        vector <void*> m_allocations;
         // Working thread
         thread* m_thread;
 
@@ -119,7 +167,14 @@ namespace performance_tests
                 // Set operations list for the worker
         void setOperations(const vector<Operation*> &testOperations);
 
+<<<<<<< HEAD
             // Create & start thread
+=======
+        // Set operations list for the worker
+        void init(const vector<Operation*> &testOperations, Operation * &freeOperation);
+
+        // Create & start thread
+>>>>>>> 59367ef... Performance tests improvements & fixes
         void run();
 
         #ifdef __DEBUG
