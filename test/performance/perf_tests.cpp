@@ -79,12 +79,34 @@ protected:
 
     bool compareMetrics(Metrics metrics, Metrics reference, double delta)
     {
-	    bool result = true;
-	    result &= checkDelta(metrics.operationsPerSecond, reference.operationsPerSecond, "operationsPerSecond", delta, true);
-	    result &= checkDelta(metrics.avgOperationDuration, reference.avgOperationDuration, "avgOperationDuration", delta);
-	    result &= checkDelta(metrics.iterationDuration, reference.iterationDuration, "iterationDuration", delta);
-	    result &= checkDelta(metrics.repeatDuration, reference.repeatDuration, "repeatDuration", delta);
-	    return result;
+        bool result = true;
+        result &= checkDelta(metrics.operationsPerSecond, reference.operationsPerSecond, "operationsPerSecond", delta, true);
+        result &= checkDelta(metrics.avgOperationDuration, reference.avgOperationDuration, "avgOperationDuration", delta);
+        return result;
+    }
+
+    void writeMetrics(Metrics metrics, Metrics reference)
+    {
+        RecordProperty("ops_per_sec", metrics.operationsPerSecond);
+        RecordProperty("ops_per_sec_vs_ref",
+            (reference.operationsPerSecond - metrics.operationsPerSecond) * 100.0f
+            / reference.operationsPerSecond);
+        RecordProperty("avg_op_time_nsec", metrics.avgOperationDuration);
+        RecordProperty("avg_op_time_nsec_vs_ref",
+            (metrics.avgOperationDuration - reference.avgOperationDuration) * 100.0f
+            / reference.avgOperationDuration);
+    }
+
+    void run()
+    {
+        cout << "Running reference std::malloc test" << endl;
+        referenceMetrics = referenceTest.runTest();
+
+        cout << "Running memkind test" << endl;
+        performanceMetrics = performanceTest.runTest();
+
+        writeMetrics(performanceMetrics, referenceMetrics);
+        EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Tolerance + Confidence));
     }
 };
 

@@ -83,4 +83,5 @@ TEST_F(GetArenaTest, TC_Memkind_ThreadHash)
         }
     }
     EXPECT_LE(max_collisions, collisions_limit);
+    RecordProperty("max_collisions", max_collisions);
 }

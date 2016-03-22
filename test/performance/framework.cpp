@@ -66,16 +66,43 @@ namespace performance_tests
         memkind_t kind)
         : m_operationsCount(operationsCount)
         , m_allocationSizes(allocationSizes)
-        , m_freeOperation(freeOperation)
+        , m_actions(vector<Action*>(actionsCount, nullptr))
         , m_kind(kind)
-        , m_allocations(vector<void*>(operationsCount, nullptr))
     {
         assert(freeOperation->getName() == OperationName::Free);
     }
 
     void Worker::setOperations(const vector<Operation*> &testOperations)
     {
-        m_testOperations = testOperations;
+        for (Action *action : m_actions) //each action
+        {
+            delete action;
+        }
+
+    }
+
+    void Worker::init(const vector<Operation*> &testOperations, Operation* &freeOperation)
+    {
+        for(uint32_t i = 0 ; i < m_actionsCount ; i++)
+        {
+            int bucketSize = rand() % Operation::MaxBucketSize;
+
+            for (Operation *operation : testOperations) //each operation
+            {
+                if (operation->checkCondition(bucketSize))
+                {
+                    size_t size = m_allocationSizes[m_allocationSizes.size() > 1 ? rand() % m_allocationSizes.size() : 0];
+                    m_actions[i] = new Action(
+                        operation,
+                        freeOperation,
+                        m_kind,
+                        size,
+                        log2(rand() % size),
+                        sizeof(void*) * (1 << ((rand() % Operation::MemalignMaxMultiplier))));
+                    break;
+                }
+            }
+        }
     }
 
     void Worker::run()
@@ -122,27 +149,18 @@ namespace performance_tests
         EMIT(1, "Entering barrier " << m_threadId)
         Barrier::GetInstance().wait();
         EMIT(1, "Starting thread " << m_threadId)
-        for(uint32_t i = 0 ; i < m_operationsCount ; i++)
+        for (Action *action : m_actions)
         {
-            int bucketSize = rand() % Operation::MaxBucketSize;
-
-            for (const Operation *operation : m_testOperations) //each operation
-            {
-                if (operation->checkCondition(bucketSize))
-                {
-                    operation->perform(m_kind, pickAllocation(i), pickAllocationSize(i));
-                    break;
-                }
-            }
+            action->alloc();
         }
     }
 
     void Worker::clean()
     {
         EMIT(2, "Cleaning thread " << m_threadId)
-        for(void * &alloc : m_allocations)
+        for (Action *action : m_actions)
         {
-            m_freeOperation->perform(m_kind, alloc);
+            action->free();
         }
         EMIT(1, "Thread " << m_threadId << " finished")
     }
@@ -223,7 +241,7 @@ namespace performance_tests
             if (m_executionMode == ExecutionMode::SingleInteration)
             {
                 // In ManyIterations mode, operations will be set for each thread at the beginning of each iteration
-                m_workers.back()->setOperations(m_testOperations[threadId % m_testOperations.size()]);
+                m_workers.back()->init(m_testOperations[threadId % m_testOperations.size()], m_freeOperation);
             }
         }
     }
@@ -320,7 +338,7 @@ namespace performance_tests
                 {
                     for (Worker * worker : m_workers)
                     {
-                        worker->setOperations(ops);
+                        worker->init(ops, m_freeOperation);
                     }
                     runIteration();
                 }
