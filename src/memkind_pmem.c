@@ -66,8 +66,6 @@ void *pmem_chunk_alloc(void *chunk, size_t size, size_t alignment,
     }
 
 exit:
-    //printf("%s(chunk=%p size=%zu align=%zu zero=%d commit=%d arena=%u) = %p\n",
-    //   __func__, chunk, size, alignment, *zero, *commit, arena_ind, addr);
     return addr;
 }
 
@@ -88,8 +86,8 @@ bool pmem_chunk_commit(void *chunk, size_t size, size_t offset, size_t length,
 bool pmem_chunk_decommit(void *chunk, size_t size, size_t offset, size_t length,
                           unsigned arena_ind)
 {
-    /* do nothing - report failure (opt-out) */
-    return true;
+    /* do nothing - report success */
+    return false;
 }
 
 bool pmem_chunk_purge(void *chunk, size_t size, size_t offset, size_t length,
@@ -122,7 +120,6 @@ static chunk_hooks_t pmem_chunk_hooks = {
     pmem_chunk_split,
     pmem_chunk_merge
 };
-
 
 const struct memkind_ops MEMKIND_PMEM_OPS = {
     .create = memkind_pmem_create,

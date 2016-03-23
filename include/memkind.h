@@ -97,6 +97,7 @@ struct memkind {
     pthread_once_t init_once;
     int arena_map_len;
     unsigned int *arena_map;
+    unsigned int *tcache_map;
 #ifndef MEMKIND_TLS
     pthread_key_t arena_key;
 #endif
@@ -118,7 +119,7 @@ struct memkind_ops {
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
     int (* get_mbind_mode)(struct memkind *kind, int *mode);
     int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
-    int (* get_arena)(struct memkind *kind, unsigned int *arena, size_t size);
+    int (* get_arena)(struct memkind *kind, unsigned int *arena, unsigned int *tcache, size_t size);
     int (* get_size)(struct memkind *kind, size_t *total, size_t *free);
     int (* check_available)(struct memkind *kind);
     int (* check_addr)(struct memkind *kind, void *addr);
