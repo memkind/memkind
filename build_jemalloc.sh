@@ -26,6 +26,5 @@ cd jemalloc
 test -e configure || autoconf
 test -e obj || mkdir obj
 cd obj
-../configure --enable-autogen --enable-memkind \
-             --with-jemalloc-prefix=jemk_ --enable-cc-silence
+../configure --enable-autogen --with-jemalloc-prefix=jemk_ --enable-cc-silence
 make

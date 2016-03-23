@@ -86,8 +86,8 @@ bool pmem_chunk_commit(void *chunk, size_t size, size_t offset, size_t length,
 bool pmem_chunk_decommit(void *chunk, size_t size, size_t offset, size_t length,
                           unsigned arena_ind)
 {
-    /* do nothing - report success */
-    return false;
+    /* do nothing - report failure (opt-out) */
+    return true;
 }
 
 bool pmem_chunk_purge(void *chunk, size_t size, size_t offset, size_t length,
@@ -197,6 +197,7 @@ void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size)
         return MAP_FAILED;
     }
 
+    /* XXX - move to pmem_chunk_commit? */
     if ((errno = posix_fallocate(priv->fd, priv->offset, size)) != 0) {
         pthread_mutex_unlock(&priv->pmem_lock);
         return MAP_FAILED;

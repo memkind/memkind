@@ -67,12 +67,15 @@ jemalloc_objects = jemalloc/obj/src/jemalloc.lo \
                    jemalloc/obj/src/tsd.lo \
                    jemalloc/obj/src/pages.lo \
                    jemalloc/obj/src/valgrind.lo \
+                   jemalloc/obj/src/nstime.lo \
+                   jemalloc/obj/src/prng.lo \
+                   jemalloc/obj/src/ticker.lo \
                    # end
 
 libmemkind_la_LIBADD = $(jemalloc_objects)
 
 
-libmemkind_la_LDFLAGS = -version-info $(memkind_abi_version)
+libmemkind_la_LDFLAGS = -version-info $(memkind_abi_version) -lrt
 
 include_HEADERS = include/hbwmalloc.h \
                   include/hbw_allocator.h \
@@ -134,6 +137,9 @@ EXTRA_DIST = autogen.sh \
              jemalloc/src/rtree.c \
              jemalloc/src/pages.c \
              jemalloc/src/valgrind.c \
+             jemalloc/src/nstime.c \
+             jemalloc/src/prng.c \
+             jemalloc/src/ticker.c \
              jemalloc/.gitignore \
              jemalloc/configure.ac \
              jemalloc/include/jemalloc/internal/tcache.h \

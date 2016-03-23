@@ -115,8 +115,8 @@ bool arena_chunk_commit(void *chunk, size_t size, size_t offset, size_t length,
 bool arena_chunk_decommit(void *chunk, size_t size, size_t offset, size_t length,
                           unsigned arena_ind)
 {
-    /* do nothing - report success */
-    return false;
+    /* do nothing - report failure (opt-out) */
+    return true;
 }
 
 bool arena_chunk_purge(void *chunk, size_t size, size_t offset, size_t length,
