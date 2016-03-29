@@ -48,8 +48,8 @@ private:
     Operation *m_freeOperation;
     performance_tests::PerformanceTest *m_test;
     const unsigned m_seed = 1297654;
-    const unsigned m_repeats = 5;
-    const unsigned m_threads = 144;
+    const unsigned m_repeats = 50;
+    const unsigned m_threads = 64;
     const unsigned m_iterations = 100;
 
 public:

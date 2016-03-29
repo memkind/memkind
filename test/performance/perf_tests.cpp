@@ -31,17 +31,27 @@
 using std::cout;
 using std::endl;
 using std::abs;
+using std::ostringstream;
 
 // Memkind tests
 class PerformanceTest : public testing::Test
 {
 protected:
-    const double Delta = 0.15;
+    const double Tolerance = 0.15;
+    const double Confidence = 0.10;
 
     Metrics referenceMetrics;
     Metrics performanceMetrics;
     PerfTestCase<performance_tests::MallocOperation> referenceTest;
     PerfTestCase<performance_tests::MemkindOperation> performanceTest;
+
+    template<class T>
+    static void RecordProperty(const string& key, const T value)
+    {
+        ostringstream values;
+        values << value;
+        testing::Test::RecordProperty(key, values.str());
+    }
 
     void SetUp()
     {
@@ -51,30 +61,24 @@ protected:
     {
     }
 
-    bool checkDelta(double value, double reference, const string &info, double delta, bool notLessThan = false)
+    bool checkDelta(double value, double reference, const string &info, double delta, bool higherIsBetter = false)
     {
-        // If notLessThan is true, current value should be >= (reference - delta); otherwise, it should be <= (reference + delta)
-        double treshold;
-        if (notLessThan)
+        // If higherIsBetter is true, current value should be >= (reference - delta); otherwise, it should be <= (reference + delta)
+        double treshold = higherIsBetter ? reference * (1 - delta) : reference * (1 + delta);
+        cout <<
+            "Metric: " << info << ". Reference value: " << reference << ". "
+            "Expected: " << (higherIsBetter ? ">= " : "<= ") << treshold << " (delta = " << delta << ")."
+            "Actual: " << value << " (delta = " <<
+                ((value > reference ? (value / reference) : (reference / value)) - 1.0) /
+                ((higherIsBetter != (value > reference)) ? 1.0 : -1.0)
+            << ")."
+            << endl ;
+        if (higherIsBetter ? (value <= treshold) : (value >= treshold))
         {
-            treshold = reference * (1 - delta);
-        }
-        else
-        {
-            treshold = reference * (1 + delta);
-        }
-        cout << "Metric: " << info << ". Reference value: " << reference << ". "
-            "Expected: " << (notLessThan ? ">= " : "<= ") << treshold << " (delta = " << delta << ")."
-            "Actual: " << value << " (delta = " << (value - reference) * (notLessThan ? -1.0 : 1.0) / reference << ")." << endl;
-        if (notLessThan ? (value >= treshold) : (value <= treshold))
-        {
-            return true;
-        }
-        else
-        {
-            cout << "ERROR: Value of '" << info << "' outside expected bounds!" << endl;
+            cout << "WARNING : Value of '" << info << "' outside expected bounds!" << endl;
             return false;
         }
+        return true;
     }
 
     bool compareMetrics(Metrics metrics, Metrics reference, double delta)
@@ -113,59 +117,41 @@ protected:
 PERF_TEST(PerformanceTest, single_op_single_iter)
 {
     referenceTest.setupTest_singleOpSingleIter();
-    referenceMetrics = referenceTest.runTest();
-
     performanceTest.setupTest_singleOpSingleIter();
-    performanceMetrics = performanceTest.runTest();
-    EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Delta));
+    run();
 }
 
 PERF_TEST(PerformanceTest, many_ops_single_iter)
 {
     referenceTest.setupTest_manyOpsSingleIter();
-    referenceMetrics = referenceTest.runTest();
-
     performanceTest.setupTest_manyOpsSingleIter();
-    performanceMetrics = performanceTest.runTest();
-    EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Delta));
+    run();
 }
 
 PERF_TEST(PerformanceTest, many_ops_single_iter_huge_alloc)
 {
     referenceTest.setupTest_manyOpsSingleIterHugeAlloc();
-    referenceMetrics = referenceTest.runTest();
-
     performanceTest.setupTest_manyOpsSingleIterHugeAlloc();
-    performanceMetrics = performanceTest.runTest();
-    EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Delta));
+    run();
 }
 
 PERF_TEST(PerformanceTest, single_op_many_iters)
 {
     referenceTest.setupTest_singleOpManyIters();
-    referenceMetrics = referenceTest.runTest();
-
     performanceTest.setupTest_singleOpManyIters();
-    performanceMetrics = performanceTest.runTest();
-    EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Delta));
+    run();
 }
 
 PERF_TEST(PerformanceTest, many_ops_many_iters)
 {
     referenceTest.setupTest_manyOpsManyIters();
-    referenceMetrics = referenceTest.runTest();
-
     performanceTest.setupTest_manyOpsManyIters();
-    performanceMetrics = performanceTest.runTest();
-    EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Delta));
+    run();
 }
 
 PERF_TEST(PerformanceTest, many_ops_many_iters_many_kinds)
 {
     referenceTest.setupTest_manyOpsManyIters();
-    referenceMetrics = referenceTest.runTest({ MEMKIND_DEFAULT, MEMKIND_HBW_PREFERRED });
-
     performanceTest.setupTest_manyOpsManyIters();
-    performanceMetrics = performanceTest.runTest({ MEMKIND_DEFAULT, MEMKIND_HBW_PREFERRED });
-    EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Delta));
+    run();
 }
