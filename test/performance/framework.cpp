@@ -60,11 +60,11 @@ namespace performance_tests
 
     // Worker class
     Worker::Worker(
-        uint32_t operationsCount,
+        uint32_t actionsCount,
         const vector<size_t> &allocationSizes,
         Operation *freeOperation,
         memkind_t kind)
-        : m_operationsCount(operationsCount)
+        : m_actionsCount(actionsCount)
         , m_allocationSizes(allocationSizes)
         , m_actions(vector<Action*>(actionsCount, nullptr))
         , m_kind(kind)
@@ -72,7 +72,7 @@ namespace performance_tests
         assert(freeOperation->getName() == OperationName::Free);
     }
 
-    void Worker::setOperations(const vector<Operation*> &testOperations)
+    Worker::~Worker()
     {
         for (Action *action : m_actions) //each action
         {
@@ -110,7 +110,7 @@ namespace performance_tests
         m_thread = new thread(&Worker::work, this);
     }
 
-    #ifdef __DEBUG
+#ifdef __DEBUG
     uint16_t Worker::getId()
     {
         return m_threadId;
@@ -119,7 +119,7 @@ namespace performance_tests
     {
         m_threadId = threadId;
     }
-    #endif
+#endif
 
     void Worker::finish()
     {
@@ -128,20 +128,6 @@ namespace performance_tests
             m_thread->join();
             delete m_thread;
         }
-    }
-
-    inline size_t Worker::pickAllocationSize(int i)
-    {
-        // get random allocation size
-        return (m_allocationSizes.size() > 1 ?
-            m_allocationSizes[rand() % m_allocationSizes.size()] :
-            m_allocationSizes[0]);
-    }
-
-    inline void * &Worker::pickAllocation(int i)
-    {
-        // get random entry in allocations table
-        return m_allocations[rand() % m_operationsCount];
     }
 
     void Worker::work()
@@ -171,6 +157,7 @@ namespace performance_tests
         size_t threadsCount,
         size_t operationsCount)
         : m_repeatsCount(repeatsCount)
+        , m_discardCount(repeatsCount * (distardPercent / 100.0))
         , m_threadsCount(threadsCount)
         , m_operationsCount(operationsCount)
         , m_executionMode(ExecutionMode::SingleInteration)
@@ -212,16 +199,16 @@ namespace performance_tests
             worker->finish();
         }
         EMIT(1, "Alloc completed");
+        clock_gettime(CLOCK_MONOTONIC, &iterationStop);
+        iterationStart = Barrier::GetInstance().releasedAt();
+        m_durations.push_back(
+            (iterationStop.tv_sec  * NanoSecInSec + iterationStop.tv_nsec) -
+            (iterationStart.tv_sec * NanoSecInSec + iterationStart.tv_nsec)
+        );
         for (Worker * worker : m_workers)
         {
             worker->clean();
         }
-        clock_gettime(CLOCK_MONOTONIC, &iterationStop);
-        iterationStart = Barrier::GetInstance().releasedAt();
-        m_durations.push_back(
-            (iterationStop.tv_sec - iterationStart.tv_sec) * NanoSecInSec +
-            (iterationStop.tv_nsec -iterationStart.tv_nsec)
-        );
     }
 
     void PerformanceTest::prepareWorkers()
@@ -250,6 +237,9 @@ namespace performance_tests
     {
         uint64_t totalDuration = 0;
 
+        std::sort(m_durations.begin(), m_durations.end());
+
+        m_durations.erase(m_durations.end() - m_discardCount, m_durations.end());
         for (uint64_t& duration : m_durations)
         {
             totalDuration += duration;
@@ -257,8 +247,9 @@ namespace performance_tests
 
         Metrics metrics;
 
-        metrics.executedOperations = m_repeatsCount * m_threadsCount * m_operationsCount;
-        metrics.repeatDuration       = (double) totalDuration / ((uint64_t) m_repeatsCount * NanoSecInSec);
+        metrics.executedOperations = m_durations.size() * m_threadsCount * m_operationsCount;
+        metrics.totalDuration = totalDuration;
+        metrics.repeatDuration       = (double) totalDuration / ((uint64_t)m_durations.size() * NanoSecInSec);
         metrics.iterationDuration    = metrics.repeatDuration;
         if (m_executionMode == ExecutionMode::ManyIterations)
         {
@@ -314,16 +305,16 @@ namespace performance_tests
             cout << "ERROR: Test not initialized" << endl;
             return 1;
         }
-	    //warmup kinds
-	    void *alloc = nullptr;
-	    for (const memkind_t& kind : m_kinds)
-	    {
-		    m_testOperations[0][0]->perform(kind, alloc, 1e6);
-		    m_freeOperation->perform(kind, alloc);
-
-	    }
         // Create threads
         prepareWorkers();
+        //warmup kinds
+        void *alloc = nullptr;
+
+        for (const memkind_t& kind : m_kinds)
+        {
+            m_testOperations[0][0]->perform(kind, alloc, 1e6);
+            m_freeOperation->perform(kind, alloc);
+        }
         for (size_t repeat = 0; repeat < m_repeatsCount; repeat++)
         {
             EMIT(1, "Test run #" << repeat)

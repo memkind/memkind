@@ -141,17 +141,17 @@ namespace performance_tests
     class Worker
     {
     protected:
-    #ifdef __DEBUG
+        #ifdef __DEBUG
         uint16_t m_threadId;
         #endif
-            // Requested number of operations
-        const uint32_t m_operationsCount;
+        // Requested number of test actions
+        const uint32_t m_actionsCount;
         // List of memory block sizes - for each memory allocation operation actual value is chosen randomly
         const vector<size_t> &m_allocationSizes;
-        // List of test operations
-        vector<Operation*> m_testOperations;
-        // Memory free operation
-        Operation *m_freeOperation;
+        // List of test actions
+        vector<Action*> m_actions;
+        // Memory free action
+        Action *m_freeAction;
         // Operation kind (useful for memkind only)
         memkind_t m_kind;
         // Working thread
@@ -159,22 +159,17 @@ namespace performance_tests
 
     public:
         Worker(
-            uint32_t operationsCount,
+            uint32_t actionsCount,
             const vector<size_t> &allocationSizes,
             Operation *freeOperation,
             memkind_t kind);
 
-                // Set operations list for the worker
-        void setOperations(const vector<Operation*> &testOperations);
+        ~Worker();
 
-<<<<<<< HEAD
-            // Create & start thread
-=======
         // Set operations list for the worker
         void init(const vector<Operation*> &testOperations, Operation * &freeOperation);
 
         // Create & start thread
->>>>>>> 59367ef... Performance tests improvements & fixes
         void run();
 
         #ifdef __DEBUG
@@ -188,18 +183,11 @@ namespace performance_tests
             // Finish thread and free all allocations made
         void finish();
 
-            // Free allocated memory
+        // Free allocated memory
         virtual void clean();
 
     private:
-
-        // Draw an allocation size for current operation
-        size_t pickAllocationSize(int i);
-
-            // Draw an entry in allocations tracking table for current operation
-        void * &pickAllocation(int i);
-
-            // Actual thread function (allow inheritance)
+        // Actual thread function (allow inheritance)
         virtual void work();
     };
 
@@ -212,6 +200,7 @@ namespace performance_tests
     struct Metrics
     {
         uint64_t executedOperations;
+        uint64_t totalDuration;
         double operationsPerSecond;
         double avgOperationDuration;
         double iterationDuration;
@@ -222,8 +211,14 @@ namespace performance_tests
     class PerformanceTest
     {
     protected:
+        // empirically determined % of worst results needed to be discarded
+        // to eliminate malloc() performance results skewness
+        static constexpr double distardPercent = 20.0;
+    protected:
         // Number of test repeats
         size_t                      m_repeatsCount;
+        // Number of test repeats with worst results to be discarded
+        size_t                      m_discardCount;
         // Number of threads
         size_t                      m_threadsCount;
         // Number of memory operations in each thread

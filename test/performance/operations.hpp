@@ -155,22 +155,13 @@ namespace performance_tests
             return m_bucketSize;
         }
 
-            // perform memory operation (which does not need size paremeter)
-        virtual void perform(const memkind_t& kind, void * &mem, size_t size = 0) const = 0;
-
-    protected:
-        // Calculate split offest for splitting allocation size between number of elements and element size
-        // for calloc()
-        size_t random_offset(size_t size) const
-        {
-            return log2(rand() % size);
-        }
-
-            // Calculate alignment for memalign()
-        size_t random_alignment() const
-        {
-            return sizeof(void*) * (1 << ((rand() % MemalignMaxMultiplier)));
-        }
+            // perform memory operation
+        virtual void perform(const memkind_t& kind,
+            void * &mem,
+            size_t size = 0,
+            size_t offset=0,
+            size_t alignment=0)
+            const = 0;
 
     };
 
@@ -191,9 +182,17 @@ namespace performance_tests
         {
         }
 
-        virtual void perform(const memkind_t& kind, void * &mem, size_t size) const override
+        virtual void perform(const memkind_t& kind,
+            void * &mem,
+            size_t size,
+            size_t offset,
+            size_t alignment) const override
         {
-            EMIT(2, "Entering Operation::" << getNameStr() << ", size=" << size << ", mem=" << mem)
+            EMIT(2, "Entering Operation::" << getNameStr()
+                <<  ", size=" << size
+                << ", offset=" << offset
+                << ", alignment=" << alignment
+                << ", mem=" << mem)
             switch(m_name)
             {
             case Malloc:
@@ -213,7 +212,6 @@ namespace performance_tests
                     }
                     // split allocation size randomly
                     // between number of elements and element size
-                    size_t offset = random_offset(size);
                     mem = calloc((1 << offset), (size >> offset));
                     break;
                 }
@@ -229,7 +227,7 @@ namespace performance_tests
                         free(mem);
                     }
                     // randomly choose alignment from (8, 8 * MemalignMaxMultiplie)
-                    mem = memalign(random_alignment(), size);
+                    mem = memalign(alignment, size);
                     break;
                 }
             case Free:
@@ -243,7 +241,11 @@ namespace performance_tests
                 throw "Not implemented";
                 break;
             }
-            EMIT(2, "Exiting Operation::" << getNameStr() << ", size=" << size << ", mem=" << mem)
+            EMIT(2, "Exiting Operation::" << getNameStr()
+                <<  ", size=" << size
+                << ", offset=" << offset
+                << ", alignment=" << alignment
+                << ", mem=" << mem)
         }
     };
 
@@ -265,9 +267,17 @@ namespace performance_tests
         {
         }
 
-        virtual void perform(const memkind_t& kind, void * &mem, size_t size) const override
+        virtual void perform(const memkind_t& kind,
+            void * &mem,
+            size_t size,
+            size_t offset,
+            size_t alignment) const override
         {
-            EMIT(2, "Entering Operation::" << getNameStr() << ", size=" << size << ", mem=" << mem)
+            EMIT(2, "Entering Operation::" << getNameStr()
+                <<  ", size=" << size
+                << ", offset=" << offset
+                << ", alignment=" << alignment
+                << ", mem=" << mem)
             switch(m_name)
             {
             case Malloc:
@@ -287,8 +297,7 @@ namespace performance_tests
                     }
                     // split allocation size randomly
                     // between number of elements and element size
-                    size_t offset = random_offset(size);
-                    mem = jexx_calloc((1 << offset), (size >> offset));
+                    mem = jexx_calloc((1 << , offset), (size >> , offset));
                     break;
                 }
             case Realloc:
@@ -303,7 +312,7 @@ namespace performance_tests
                         jexx_free(mem);
                     }
                     // randomly choose alignment from (8, 8 * MemalignMaxMultiplie)
-                    mem = jexx_memalign(random_alignment(), size);
+                    mem = jexx_memalign(alignment, size);
                     break;
                 }
             case Free:
@@ -317,7 +326,11 @@ namespace performance_tests
                 throw "Not implemented";
                 break;
             }
-            EMIT(2, "Exiting Operation::" << getNameStr() << ", size=" << size << ", mem=" << mem)
+            EMIT(2, "Exiting Operation::" << getNameStr()
+                <<  ", size=" << size
+                << ", offset=" << offset
+                << ", alignment=" << alignment
+                << ", mem=" << mem)
         }
     };
     #endif
@@ -338,10 +351,18 @@ namespace performance_tests
         {
         }
 
-        virtual void perform(const memkind_t& kind, void * &mem, size_t size) const override
+        virtual void perform(const memkind_t& kind,
+            void * &mem,
+            size_t size,
+            size_t offset,
+            size_t alignment) const override
         {
         #ifdef JEMK
-            EMIT(2, "Entering Operation::" << getNameStr() << ", size=" << size << ", mem=" << mem)
+            EMIT(2, "Entering Operation::" << getNameStr()
+                <<  ", size=" << size
+                << ", offset=" << offset
+                << ", alignment=" << alignment
+                << ", mem=" << mem)
             switch(m_name)
             {
             case Malloc:
@@ -361,7 +382,6 @@ namespace performance_tests
                     }
                     // split allocation size randomly
                     // between number of elements and element size
-                    size_t offset = random_offset(size);
                     mem = jemk_calloc((1 << offset), (size >> offset));
                     break;
                 }
@@ -377,7 +397,7 @@ namespace performance_tests
                         jemk_free(mem);
                     }
                     // randomly choose alignment from (8, 8 * MemalignMaxMultiplie)
-                    mem = jemk_memalign(random_alignment(), size);
+                    mem = jemk_memalign(alignment, size);
                     break;
                 }
             case Free:
@@ -391,7 +411,11 @@ namespace performance_tests
                 throw "Not implemented";
                 break;
             }
-            EMIT(2, "Exiting Operation::" << getNameStr() << ", size=" << size << ", mem=" << mem)
+            EMIT(2, "Exiting Operation::" << getNameStr()
+                <<  ", size=" << size
+                << ", offset=" << offset
+                << ", alignment=" << alignment
+                << ", mem=" << mem)
             #endif // JE_MK
         }
     };
@@ -416,8 +440,17 @@ namespace performance_tests
         {
         }
 
-        virtual void perform(const memkind_t& kind, void * &mem, size_t size) const override
+        virtual void perform(const memkind_t& kind,
+            void * &mem,
+            size_t size,
+            size_t offset,
+            size_t alignment) const override
         {
+            EMIT(2, "Entering Operation::" << getNameStr()
+                <<  ", size=" << size
+                << ", offset=" << offset
+                << ", alignment=" << alignment
+                << ", mem=" << mem)
             switch (m_name)
             {
             case Malloc:
@@ -437,7 +470,6 @@ namespace performance_tests
                     }
                     // split allocation size randomly
                     // between number of elements and element size
-                    size_t offset = random_offset(size);
                     mem = memkind_calloc(kind, 1 << offset, size >> offset);
                     break;
                 }
@@ -455,7 +487,7 @@ namespace performance_tests
                         mem = nullptr;
                     }
                     // randomly choose alignment from (sizeof(void*), sizeof(void*) * MemalignMaxMultiplie)
-                    if (memkind_posix_memalign(kind, &mem, random_alignment(), size) != 0)
+                    if (memkind_posix_memalign(kind, &mem, alignment, size) != 0)
                     {
                         // failure
                         mem = nullptr;
@@ -472,6 +504,11 @@ namespace performance_tests
             default:
                 break;
             }
+            EMIT(2, "Exiting Operation::" << getNameStr()
+                <<  ", size=" << size
+                << ", offset=" << offset
+                << ", alignment=" << alignment
+                << ", mem=" << mem)
         }
     };
 }
