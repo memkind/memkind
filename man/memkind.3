@@ -430,31 +430,29 @@ of each heap management function by the decorators.
 .br
 The memkind library version scheme consist major, minor and patch numbers separated by dot. Combining those numbers, we got the following representation:
 .br
-	major.minor.patch,
+major.minor.patch, where:
 .br
-where:
+	-major number is incremented whenever API is changed (loss of backward compatibility),
 .br
-	• major number is incremented whenever API is changed (loss of backward compatibility),
+	-minor number is incremented whenever additional extensions are introduced, or behavior has been changed,
 .br
-	• minor number is incremented whenever additional extensions are introduced, or behavior has been changed,
-.br
-	• patch number is incremented whenever small bug fixes are added.
+	-patch number is incremented whenever small bug fixes are added.
 .sp
 memkind library provide numeric representation of the version by exposing the following API:
 .br
 int memkind_get_version() return version number represented by a single integer number, obtained from the formula:
 .br
-	major * 1000000 + minor * 1000 + patch
+major * 1000000 + minor * 1000 + patch
 .sp
 Note: major < 1 means unstable API.
 .sp
 API standards:
 .br
-	• STANDARD API – API is considered as stable
+-STANDARD API, API is considered as stable
 .br
-	• NON-STANDARD API – API is considered as stable, however this is not a standard way to use memkind
+-NON-STANDARD API, API is considered as stable, however this is not a standard way to use memkind
 .br
-	• EXPERIMENTAL API – API is considered as unstable and the subject to change
+-EXPERIMENTAL API, API is considered as unstable and the subject to change
 .br
 .sp
 .B "MEMKIND OPERATIONS:"
@@ -868,7 +866,7 @@ the cost of memory overhead. See section "IMPLEMENTATION NOTES" of
 .BR jemalloc (3)
 for more details about arenas.
 .SH "COPYRIGHT"
-Copyright (C) 2014, 2015 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2016 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR malloc (3),
 .BR numa (3),
