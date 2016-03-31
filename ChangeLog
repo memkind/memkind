@@ -1,4 +1,4 @@
-* Thu March 03 2016 Artur Koziej <artur.koziej@intel.com> v1.0.0
+* Thu Mar 03 2016 Artur Koziej <artur.koziej@intel.com> v1.0.0
 - hbwmalloc.h released as stable API.
 - Introduce API standards: STANDARD API, NON-STANDARD API, EXPERIMENTAL API.
 - Introduce memkind versioning API.
