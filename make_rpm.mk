@@ -40,7 +40,7 @@ source_tmp_dir := $(topdir)/SOURCES/$(name)-tmp-$(shell date +%s)
 rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
 memkind_test_dir = $(MPSS_TEST_BASEDIR)/memkind-dt
-exclude_source_files = test/memkind-afts.bts test/memkind-slts.bts test/memkind-perf.bts
+exclude_source_files = test/memkind-afts.ts test/memkind-slts.ts test/memkind-perf.ts test/memkind-hbw_detection.ts test/hbw_detection_test.py
 
 all: $(rpm)
 

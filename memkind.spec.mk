@@ -161,7 +161,7 @@ cd %{_builddir}/%{buildsubdir}
 %{__install} -d %{buildroot}/%{statedir}
 touch %{buildroot}/%{statedir}/node-bandwidth
 %endif
-%{__install} test/.libs/* test/*.sh test/*.hex test/*.bts test/*.so %{buildroot}$(memkind_test_dir)
+%{__install} test/.libs/* test/*.sh test/*.hex test/*.ts test/*.so test/*.py %{buildroot}$(memkind_test_dir)
 rm -f %{buildroot}$(memkind_test_dir)/libautohbw.*
 rm -f %{buildroot}/%{_libdir}/lib%{namespace}.{l,}a
 rm -f %{buildroot}/%{_libdir}/lib{numakind,autohbw}.*
@@ -234,10 +234,12 @@ $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/autohbw_candidates
 ${memkind_test_dir}/pmem
 ${memkind_test_dir}/allocator_perf_tool_tests
+${memkind_test_dir}/hbw_nodemask
 ${memkind_test_dir}/perf_tool
-$(memkind_test_dir)/memkind-afts.bts
-$(memkind_test_dir)/memkind-slts.bts
-$(memkind_test_dir)/memkind-perf.bts
+$(memkind_test_dir)/memkind-afts.ts
+$(memkind_test_dir)/memkind-slts.ts
+$(memkind_test_dir)/memkind-perf.ts
+$(memkind_test_dir)/memkind-hbw_detection.ts
 $(memkind_test_dir)/mock-pmtt-2-nodes.hex
 $(memkind_test_dir)/mock-pmtt-empty-controller.hex
 $(memkind_test_dir)/check.sh
@@ -248,6 +250,7 @@ $(memkind_test_dir)/libmallctl.so
 $(memkind_test_dir)/libmalloc.so
 $(memkind_test_dir)/libnumadist.so
 $(memkind_test_dir)/libsched.so
+$(memkind_test_dir)/hbw_detection_test.py
 
 %exclude $(memkind_test_dir)/*.pyo
 %exclude $(memkind_test_dir)/*.pyc

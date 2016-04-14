@@ -109,11 +109,13 @@ test/memkind_pmtt_tests.cpp
 test/memkind_pmem_tests.cpp
 test/slts_test.cpp
 test/huge_page_test.cpp
+test/hbw_detection_test.py
 test/mock-pmtt-2-nodes.hex
 test/mock-pmtt-empty-controller.hex
-test/memkind-afts.bts
-test/memkind-slts.bts
-test/memkind-perf.bts
+test/memkind-afts.ts
+test/memkind-slts.ts
+test/memkind-perf.ts
+test/memkind-hbw_detection.ts
 test/performance/framework.hpp
 test/performance/framework.cpp
 test/performance/operations.hpp
@@ -166,6 +168,7 @@ test/allocator_perf_tool/main.cpp
 test/allocate_to_max_stress_test.cpp
 test/memkind_versioning_tests.cpp
 test/heap_manager_init_perf_test.cpp
+test/hbw_nodemask.c
 jemalloc/autogen.sh
 jemalloc/bin
 jemalloc/bin/jemalloc.sh.in
