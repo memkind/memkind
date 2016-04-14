@@ -111,16 +111,19 @@ int main(int argc, char* argv[])
 	//Heap Manager initialization
 	std::vector<AllocatorFactory::initialization_stat> stats = AllocatorFactory().initialization_test();
 
-	printf("\nInitialization overhead:\n");
-	for (int i=0; i<stats.size(); i++)
+	if(!cmd_line.is_option_set("print_init_stats", "false"))
 	{
-		AllocatorFactory::initialization_stat stat = stats[i];
-		printf("%32s : time=%7.7f.s, ref_delta_time=%15f%, node0=%10fMB, node1=%7.7fMB\n",
-			AllocatorTypes::allocator_name(stat.allocator_type).c_str(),
-			stat.total_time,
-			stat.ref_delta_time,
-			stat.memory_overhead[0],
-			stat.memory_overhead[1]);
+		printf("\nInitialization overhead:\n");
+		for (int i=0; i<stats.size(); i++)
+		{
+			AllocatorFactory::initialization_stat stat = stats[i];
+			printf("%32s : time=%7.7f.s, ref_delta_time=%15f%, node0=%10fMB, node1=%7.7fMB\n",
+				AllocatorTypes::allocator_name(stat.allocator_type).c_str(),
+				stat.total_time,
+				stat.ref_delta_time,
+				stat.memory_overhead[0],
+				stat.memory_overhead[1]);
+		}
 	}
 
 	//Stress test by repeatedly increasing memory (to maximum), until given time interval has been exceed.
@@ -194,10 +197,17 @@ int main(int argc, char* argv[])
 	}
 
 	TypesConf allocator_types;
-	allocator_types.enable_type(AllocatorTypes::MEMKIND_DEFAULT);
-	allocator_types.enable_type(AllocatorTypes::MEMKIND_HBW);
-	allocator_types.enable_type(AllocatorTypes::JEMALLOC);
-	allocator_types.enable_type(AllocatorTypes::STANDARD_ALLOCATOR);
+	if(cmd_line.is_option_present("allocator"))
+	{
+		allocator_types.enable_type(AllocatorTypes::allocator_type(cmd_line.get_option_value("allocator")));
+	}
+	else
+	{
+		for(unsigned i=0; i<=AllocatorTypes::MEMKIND_HBW_PREFERRED; i++)
+		{
+			allocator_types.enable_type(i);
+		}
+	}
 
 	TaskConf conf = {
 		mem_operations_num, //number memory operations
@@ -217,6 +227,11 @@ int main(int argc, char* argv[])
 	//Footprint test
 	if(cmd_line.is_option_set("test", "footprint") || cmd_line.is_option_set("test", "all"))
 	{
+
+		TypesConf allocator_type;
+		allocator_type.enable_type(AllocatorTypes::MEMKIND_HBW);
+		conf.allocators_types = allocator_type;
+
 		std::vector<Thread*> threads;
 		std::vector<FootprintTask*> tasks;
 

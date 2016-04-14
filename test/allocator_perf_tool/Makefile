@@ -23,4 +23,4 @@
 #
 
 perf_tool: main.cpp ScenarioWorkload.cpp FootprintTask.cpp FunctionCallsPerformanceTask.cpp FootprintSampling.cpp StressIncreaseToMax.cpp Allocation_info.cpp
-	g++ -o perf_tool $^ -O0 -lmemkind -std=c++11 -lpthread -lnuma
+	g++ -o perf_tool $^ -O0 -lmemkind -std=c++11 -lpthread -lnuma -g

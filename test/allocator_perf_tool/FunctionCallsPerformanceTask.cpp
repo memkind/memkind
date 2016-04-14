@@ -30,8 +30,8 @@ void FunctionCallsPerformanceTask::run()
 
 	VectorIterator<int> func_calls = FunctionCalls::generate_random_allocator_func_calls(task_conf.n, task_conf.seed, task_conf.func_calls);
 
-	AllocatorFactory AllocatorFactory;
-	VectorIterator<Allocator*> allocators_calls = AllocatorFactory.generate_random_allocator_calls(task_conf.n, task_conf.seed);
+	AllocatorFactory allocator_types;
+	VectorIterator<Allocator*> allocators_calls = allocator_types.generate_random_allocator_calls(task_conf.n, task_conf.seed, task_conf.allocators_types);
 
 	ScenarioWorkload scenario_workload = ScenarioWorkload(
 		&allocators_calls,
