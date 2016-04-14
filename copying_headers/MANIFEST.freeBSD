@@ -142,6 +142,8 @@ test/allocator_perf_tool/main.cpp
 test/allocate_to_max_stress_test.cpp
 test/memkind_versioning_tests.cpp
 test/heap_manager_init_perf_test.cpp
+test/hbw_nodemask.c
+test/hbw_detection_test.py
 man/memkind_pmem.3
 src/memkind_pmem.c
 scripts/memkind-hbw-nodes
