@@ -152,29 +152,22 @@ public:
 		return stats;
 	}
 
-	VectorIterator<Allocator*> generate_random_allocator_calls(int num, int seed)
+	VectorIterator<Allocator*> generate_random_allocator_calls(int num, int seed, TypesConf allocator_calls)
 	{
 		srand(seed);
 		std::vector<Allocator*> allocators_calls;
 
 		for (int i=0; i<num; i++)
 		{
-			int index = (rand() % (AllocatorTypes::MEMKIND_HBW_PREFERRED+1));
+			int index;
+
+			do
+			{
+				index = (rand() % (AllocatorTypes::MEMKIND_HBW_PREFERRED+1));
+			}
+			while(!allocator_calls.is_enabled(index));
 
 			allocators_calls.push_back(get_existing(index));
-		}
-
-		return VectorIterator<Allocator*>::create(allocators_calls);
-	}
-
-	VectorIterator<Allocator*> generate_const_allocator_calls(unsigned allocator_type, int num, int seed)
-	{
-		srand(seed);
-		std::vector<Allocator*> allocators_calls;
-
-		for (int i=0; i<num; i++)
-		{
-			allocators_calls.push_back(get_existing(allocator_type));
 		}
 
 		return VectorIterator<Allocator*>::create(allocators_calls);
