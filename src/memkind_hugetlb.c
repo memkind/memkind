@@ -34,6 +34,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <numa.h>
+#include <pthread.h>
+#include <dirent.h>
+#include <jemalloc/jemalloc.h>
 
 #include <memkind/internal/memkind_hugetlb.h>
 #include <memkind/internal/memkind_default.h>
@@ -53,6 +56,9 @@ const struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .get_size = memkind_default_get_size,
     .init_once = memkind_hugetlb_init_once
 };
+
+static int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out);
+static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask, size_t* out);
 
 static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_size);
 
@@ -82,45 +88,12 @@ int memkind_hugetlb_check_available_1gb(struct memkind *kind)
 static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_size)
 {
     int err = 0;
-    int errno_before;
-    int num_read = 0;
-    unsigned int node, num_node;
-    FILE *fid = NULL;
     nodemask_t nodemask;
     struct bitmask nodemask_bm = {NUMA_NUM_NODES, nodemask.n};
-    char formatted_path[128];
-    int snprintf_ret = 0;
-    size_t value_read = 0;
 
-    size_t nr_persistent_hugepages = 0;
-    const char *nr_path_fmt = "/sys/devices/system/node/node%u/hugepages/hugepages-%zukB/nr_hugepages";
-
-    size_t nr_overcommit_hugepages = 0;
-    const char *nr_overcommit_path_fmt = "/sys/kernel/mm/hugepages/hugepages-%zukB/nr_overcommit_hugepages";
-
-    /* on x86 default huge page size is 2MB */
+    /* on x86_64 default huge page size is 2MB */
     if (huge_size == 0) {
         huge_size = 2097152;
-    }
-
-    /* convert input to kB */
-    huge_size >>= 10;
-
-    //read overcommit hugepages limit for this pagesize
-    snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_overcommit_path_fmt, huge_size);
-    if (snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
-        errno_before = errno;
-        fid = fopen(formatted_path, "r");
-        if (fid) {
-            num_read = fscanf(fid, "%zud", &value_read);
-            if(num_read) {
-                nr_overcommit_hugepages = value_read;
-            }
-            fclose(fid);
-        }
-        else {
-            errno = errno_before;
-        }
     }
 
     if (kind->ops->get_mbind_nodemask) {
@@ -129,32 +102,254 @@ static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_siz
     else {
         numa_bitmask_setall(&nodemask_bm);
     }
-    num_node = numa_num_configured_nodes();
-    for (node = 0; !err && node < num_node; ++node) {
-        if (numa_bitmask_isbitset(&nodemask_bm, node)) {
-            nr_persistent_hugepages = 0;
-            snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_path_fmt, node, huge_size);
-            if(snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
-                errno_before = errno;
-                fid = fopen(formatted_path, "r");
-                if (fid) {
-                    num_read = fscanf(fid, "%zud", &value_read);
-                    if(num_read) {
-                        nr_persistent_hugepages = value_read;
-                    }
-                    fclose(fid);
-                }
-                else {
-                    errno = errno_before;
-                }
-            }
 
-            //return error if there is no overcommit limit for that page size
-            //nor persistent hugepages for nodes of that kind
-            if (!nr_overcommit_hugepages && !nr_persistent_hugepages) {
-                err = MEMKIND_ERROR_HUGETLB;
-            }
-        }
+    size_t nr_persistent_hugepages, nr_overcommit_hugepages;
+
+    err = get_nr_hugepages_cached(huge_size, &nodemask_bm, &nr_persistent_hugepages);
+    if(err) {
+        return err;
     }
+
+    err = get_nr_overcommit_hugepages_cached(huge_size, &nr_overcommit_hugepages);
+    if(err) {
+        return err;
+    }
+
+    if (!nr_overcommit_hugepages && !nr_persistent_hugepages) {
+        return MEMKIND_ERROR_HUGETLB;
+    }
+
     return err;
 }
+
+struct hugepage_size_info {
+    size_t size;
+    size_t* nr_hugepages_per_node_array;
+    size_t  nr_overcommit;
+};
+
+struct memkind_hugepages_config_t {
+    struct hugepage_size_info **hugepages_info_array;
+    int hugepages_info_array_len;
+    int err; // 0 if sysfs parsing successful, appropriate memkind_error otherwise
+} memkind_hugepages_config;
+
+static pthread_once_t memkind_hugepages_config_once_g = PTHREAD_ONCE_INIT;
+
+static struct hugepage_size_info *allocate_hugepage_size_info()
+{
+    struct hugepage_size_info *newInfo = jemk_malloc(sizeof(struct hugepage_size_info));
+    if(newInfo == NULL) {
+        return NULL;
+    }
+
+    newInfo->nr_hugepages_per_node_array = jemk_calloc(NUMA_NUM_NODES, sizeof(size_t));
+    if(newInfo->nr_hugepages_per_node_array == NULL) {
+        jemk_free(newInfo);
+        return NULL;
+    }
+
+    return newInfo;
+}
+
+static size_t get_sysfs_entry_value(const char* entry_path)
+{
+    int errno_before;
+    FILE *fid;
+    int num_read;
+    size_t value_read, ret = 0;
+
+    errno_before = errno;
+    fid = fopen(entry_path, "r");
+    if (fid) {
+        num_read = fscanf(fid, "%zud", &value_read);
+        if(num_read) {
+            ret  = value_read;
+        }
+        fclose(fid);
+    }
+    else {
+        errno = errno_before;
+    }
+    return ret;
+}
+
+// construct hugepage_size_info object and fill it with data for provided pagesize
+static void init_hugepage_size_info(size_t pagesize, struct hugepage_size_info *newInfo)
+{
+    char formatted_path[128];
+    const char *nr_path_fmt = "/sys/devices/system/node/node%u/hugepages/hugepages-%zukB/nr_hugepages";
+    const char *nr_overcommit_path_fmt = "/sys/kernel/mm/hugepages/hugepages-%zukB/nr_overcommit_hugepages";
+    int snprintf_ret = 0;
+    size_t node;
+
+    size_t pagesize_kb = pagesize >> 10;
+
+    newInfo->size = pagesize;
+
+    //read overcommit hugepages limit for this pagesize
+    snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_overcommit_path_fmt, pagesize_kb);
+    if (snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
+        newInfo->nr_overcommit = get_sysfs_entry_value(formatted_path);
+    }
+
+    //read every node nr_hugepages for this pagesize
+    for (node = 0; node < NUMA_NUM_NODES; ++node) {
+        snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_path_fmt, node, pagesize_kb);
+        if(snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
+            newInfo->nr_hugepages_per_node_array[node] = get_sysfs_entry_value(formatted_path);
+        }
+    }
+}
+
+// get hugepage size in bytes out of sysfs dir name
+static int parse_pagesize_from_sysfs_entry(const char* entry, size_t *out)
+{
+    size_t pagesize;
+    int ret = sscanf(entry, "hugepages-%zukB", &pagesize);
+
+    if(ret == 1) {
+        *out = pagesize << 10; //we are using bytes but kernel is using kB
+        return 0;
+    }
+
+    return -1;
+}
+
+
+static void hugepages_config_init_once()
+{
+    unsigned j, i = 0;
+    size_t pagesize;
+    struct hugepage_size_info **hugepages_info_array = NULL;
+    struct dirent *dir;
+    DIR* hugepages_sysfs = opendir("/sys/kernel/mm/hugepages");
+    if(hugepages_sysfs == NULL) {
+        memkind_hugepages_config.err = MEMKIND_ERROR_HUGETLB;
+        return;
+    }
+
+    unsigned hugepages_info_array_len = 2; //initial size of array
+    hugepages_info_array = jemk_malloc(hugepages_info_array_len * sizeof(struct hugepage_size_info *));
+    if (hugepages_info_array == NULL) {
+        memkind_hugepages_config.err = MEMKIND_ERROR_MALLOC;
+        closedir(hugepages_sysfs);
+        return;
+    }
+
+    while ((dir = readdir(hugepages_sysfs)) != NULL) {
+        if(dir->d_type == DT_DIR && parse_pagesize_from_sysfs_entry(dir->d_name, &pagesize) == 0) {
+            struct hugepage_size_info *new_hugepage_info = allocate_hugepage_size_info();
+            if(new_hugepage_info == NULL) {
+                memkind_hugepages_config.err = MEMKIND_ERROR_MALLOC;
+                break;
+            }
+
+            init_hugepage_size_info(pagesize, new_hugepage_info);
+
+            //there is more hugepage sizes than expected, reallocation of array needed
+            if(i == hugepages_info_array_len) {
+                hugepages_info_array_len *= 2;
+                struct hugepage_size_info **swap_tmp = jemk_realloc(hugepages_info_array, hugepages_info_array_len * sizeof(struct hugepage_size_info *));
+                if(swap_tmp == NULL) {
+                    jemk_free(new_hugepage_info);
+                    memkind_hugepages_config.err = MEMKIND_ERROR_MALLOC;
+                    break;
+                }
+                hugepages_info_array = swap_tmp;
+
+            }
+            hugepages_info_array[i] = new_hugepage_info;
+            i++;
+        }
+    }
+
+    closedir(hugepages_sysfs);
+
+    if(memkind_hugepages_config.err == 0) {
+        memkind_hugepages_config.hugepages_info_array = hugepages_info_array;
+        memkind_hugepages_config.hugepages_info_array_len = i;
+    }
+    else {
+        for(j=0; j<i; j++) {
+            jemk_free(hugepages_info_array[i]);
+        }
+        jemk_free(hugepages_info_array);
+    }
+
+    return;
+}
+
+#ifdef __GNUC__
+__attribute__((destructor))
+#endif
+static void destroy_hugepages_per_node()
+{
+    int i;
+    for(i=0; i<memkind_hugepages_config.hugepages_info_array_len; i++) {
+        jemk_free(memkind_hugepages_config.hugepages_info_array[i]);
+    }
+    jemk_free(memkind_hugepages_config.hugepages_info_array);
+}
+
+// helper function that find and return hugepage_size_info object for specified pagesize
+static struct hugepage_size_info* get_hugepage_info_for_pagesize(size_t pagesize)
+{
+    int i;
+
+    for(i=0; i<memkind_hugepages_config.hugepages_info_array_len; i++) {
+        if(memkind_hugepages_config.hugepages_info_array[i]->size == pagesize) {
+            return memkind_hugepages_config.hugepages_info_array[i];
+        }
+    }
+    return NULL;
+}
+
+// returns sum of pre-allocated hugepage for specified pagesize and set of nodes
+static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask, size_t *out)
+{
+    int i;
+    size_t nr_hugepages = 0;
+    int num_node = numa_num_configured_nodes();
+    pthread_once(&memkind_hugepages_config_once_g,
+                 hugepages_config_init_once);
+
+
+    if(memkind_hugepages_config.err != 0) {
+        return memkind_hugepages_config.err;
+    }
+
+    struct hugepage_size_info* info = get_hugepage_info_for_pagesize(pagesize);
+    if(info == NULL) {
+        return MEMKIND_ERROR_HUGETLB;
+    }
+
+    for(i=0; i<num_node; i++) {
+        if(numa_bitmask_isbitset(nodemask, i)) {
+            nr_hugepages += info->nr_hugepages_per_node_array[i];
+        }
+    }
+
+    *out = nr_hugepages;
+    return 0;
+}
+
+// returns hugepages overcommit limit for specified pagesize
+static int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out)
+{
+    pthread_once(&memkind_hugepages_config_once_g,
+                 hugepages_config_init_once);
+
+    if(memkind_hugepages_config.err != 0) {
+        return memkind_hugepages_config.err;
+    }
+
+    struct hugepage_size_info* info = get_hugepage_info_for_pagesize(pagesize);
+    if(info == NULL) {
+        return MEMKIND_ERROR_HUGETLB;
+    }
+
+    *out = info->nr_overcommit;
+    return 0;
+}
+
