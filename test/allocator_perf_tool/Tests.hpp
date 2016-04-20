@@ -248,33 +248,6 @@ void execute_self_tests()
 		test_iterator(it, N);
 	}
 
-
-	AllocatorFactory allocator_factory;
-
-	{
-		TypesConf enable_func_calls;
-		enable_func_calls.enable_type(FunctionCalls::MALLOC);
-
-		VectorIterator<Allocator*> allocators_calls = allocator_factory.generate_random_allocator_calls(N, seed);
-		VectorIterator<size_t> allocation_sizes = AllocationSizes::generate_random_sizes(N, size_from, size_to, seed);
-		VectorIterator<int> func_calls = FunctionCalls::generate_random_allocator_func_calls(N, seed, enable_func_calls);
-
-		ScenarioWorkload scenario_workload = ScenarioWorkload(
-			&allocators_calls,
-			&allocation_sizes,
-			&func_calls
-		);
-
-		scenario_workload.enable_touch_memory_on_allocation(false);
-
-		test_workload(scenario_workload, N, "ScenarioWorkload");
-
-		TimeStats stats;
-		stats += scenario_workload.get_allocations_info();
-
-		ConsoleLog::print_table(stats);
-	}
-
 //Timer implementation __cplusplus < 201100L is based on CPU clocks counting and it will fail on this test.
 #if __cplusplus > 201100L
 	test_timer();

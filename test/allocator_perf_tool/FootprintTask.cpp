@@ -31,7 +31,7 @@ void FootprintTask::run()
 	VectorIterator<int> func_calls = FunctionCalls::generate_random_allocator_func_calls(task_conf.n, task_conf.seed, task_conf.func_calls);
 
 	AllocatorFactory allocator_factory;
-	VectorIterator<Allocator*> allocators_calls = allocator_factory.generate_const_allocator_calls(AllocatorTypes::MEMKIND_HBW ,task_conf.n, task_conf.seed);
+	VectorIterator<Allocator*> allocators_calls = allocator_factory.generate_random_allocator_calls(task_conf.n, task_conf.seed, task_conf.allocators_types);
 
 	scenario_workload = new ScenarioWorkload(
 		&allocators_calls,
