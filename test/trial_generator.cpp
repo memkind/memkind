@@ -24,6 +24,8 @@
 
 #include "trial_generator.h"
 #include "check.h"
+#include <vector>
+#include <numa.h>
 
 void TrialGenerator :: generate_incremental(alloc_api_t api)
 {
@@ -102,6 +104,7 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
     return ltrial;
 }
 
+
 void TrialGenerator :: generate_gb_misalign (alloc_api_t api,
         size_t talign)
 {
@@ -121,15 +124,24 @@ void TrialGenerator :: generate_gb_misalign (alloc_api_t api,
 void TrialGenerator :: generate_hbw_gb_strict (alloc_api_t api)
 {
 
-    size_t size[] = {GB,(2*GB), 3*GB};
+    std::vector<size_t> sizes_to_alloc;
+    sizes_to_alloc.push_back(GB);
+
+    // not enough memory with 8 configured nodes
+    if (numa_num_configured_nodes()!=8)
+    {
+        sizes_to_alloc.push_back(2*GB);
+        sizes_to_alloc.push_back(3*GB);
+    }
+
     size_t psize[] = {GB, GB, GB};
     size_t align[] = {GB, GB, GB};
     int k = 0;
     trial_vec.clear();
 
-    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i],
+    for (int i = 0; i< (int)sizes_to_alloc.size(); i++)
+    {
+        trial_vec.push_back(create_trial_tuple(api, sizes_to_alloc[i],
                                                align[i], psize[i],
                                                MEMKIND_HBW_PREFERRED_GBTLB,
                                                -1));
@@ -145,14 +157,20 @@ void TrialGenerator :: generate_hbw_gb_strict (alloc_api_t api)
 void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
 {
 
-    size_t size[] = {GB+1,(2*GB)+1};
+    std::vector<size_t> sizes_to_alloc;
+    sizes_to_alloc.push_back(GB);
+
+    // not enough memory with 8 configured nodes
+    if (numa_num_configured_nodes()!=8)
+        sizes_to_alloc.push_back(2*GB);
+
     size_t psize[] = {GB, GB};
     size_t align[] = {GB, GB};
     int k = 0;
     trial_vec.clear();
-    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i],
+    for (int i = 0; i< (int)sizes_to_alloc.size(); i++)
+    {
+        trial_vec.push_back(create_trial_tuple(api, sizes_to_alloc[i],
                                                align[i], psize[i],
                                                MEMKIND_HBW_PREFERRED_GBTLB,
                                                -1));
@@ -164,17 +182,23 @@ void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
     }
 }
 
+
 void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
 {
+    std::vector<size_t> sizes_to_alloc;
+    sizes_to_alloc.push_back(GB);
 
-    size_t size[] = {GB+1,(2*GB)+1};
+    // not enough memory with 8 configured nodes
+    if (numa_num_configured_nodes()!=8)
+        sizes_to_alloc.push_back(2*GB);
+
     size_t psize[] = {GB, GB};
     size_t align[] = {GB, GB};
     int k = 0;
     trial_vec.clear();
-    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i],
+    for (int i = 0; i< (int)sizes_to_alloc.size(); i++)
+    {
+        trial_vec.push_back(create_trial_tuple(api, sizes_to_alloc[i],
                                                align[i], psize[i],
                                                MEMKIND_HBW_GBTLB,-1));
         if (i > 0)
