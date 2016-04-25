@@ -39,16 +39,11 @@
 /test/all_tests
 /test/.deps/
 /test/.dirstamp
-/test/environerr_test
 /test/.libs/
 /test/mallctlerr_test
-/test/mallocerr_test
 /test/*.o
 /test/performance/.deps/
-/test/pmtterr_test
-/test/schedcpu_test
 /test/*.so
-/test/tieddisterr_test
 /VERSION
 /examples/.deps/
 /examples/.dirstamp

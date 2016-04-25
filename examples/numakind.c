@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,18 +42,21 @@
 #include <assert.h>
 #include <numa.h>
 #include <errno.h>
+#include <pthread.h>
 #include <memkind.h>
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
 
+
 static pthread_key_t numakind_key_g;
 static pthread_once_t numakind_init_once_g = PTHREAD_ONCE_INIT;
 static int numakind_init_err_g = 0;
-static int numakind_zero_partition_g;
 
 #ifndef NUMAKIND_MAX
 #define NUMAKIND_MAX 2048
 #endif
+
+static memkind_t numakind_arr[NUMAKIND_MAX];
 
 #define NUMAKIND_GET_MBIND_NODEMASK_MACRO(NODE)                   \
 int get_mbind_nodemask_numa_##NODE(struct memkind *kind,          \
@@ -146,7 +149,6 @@ static void numakind_init(void)
     int err = 0;
     char numakind_name[MEMKIND_NAME_LENGTH];
     int i, name_length, num_nodes;
-    memkind_t numakind;
 
     pthread_key_create(&numakind_key_g, numakind_free);
 
@@ -159,15 +161,7 @@ static void numakind_init(void)
         name_length = snprintf(numakind_name, MEMKIND_NAME_LENGTH - 1, "numakind_%.4d", i);
         assert(MEMKIND_NAME_LENGTH > 20 && name_length != MEMKIND_NAME_LENGTH - 1);
 
-        err = memkind_create(NUMAKIND_OPS + i, numakind_name, &numakind);
-        if (!err) {
-            if (i == 0) {
-                numakind_zero_partition_g = numakind->partition;
-            }
-            else if (numakind->partition != numakind_zero_partition_g + i) {
-                err = -1;
-            }
-        }
+        err = memkind_create(NUMAKIND_OPS + i, numakind_name, &numakind_arr[i]);
     }
     if (err) {
         numakind_init_err_g = err;
@@ -177,7 +171,6 @@ static void numakind_init(void)
 static int numakind_get_kind(memkind_t **kind)
 {
     int err = 0;
-    unsigned int thread_numa_node;
 
     pthread_once(&numakind_init_once_g, numakind_init);
     if (numakind_init_err_g) {
@@ -192,8 +185,7 @@ static int numakind_get_kind(memkind_t **kind)
                 err = MEMKIND_ERROR_MALLOC;
             }
             if (!err) {
-                thread_numa_node = numa_node_of_cpu(sched_getcpu());
-                err = memkind_get_kind_by_partition(numakind_zero_partition_g + thread_numa_node, *kind);
+                *kind = &numakind_arr[numa_node_of_cpu(sched_getcpu())];
             }
             if (!err) {
                 err = pthread_setspecific(numakind_key_g, *kind) ?

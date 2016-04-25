@@ -85,6 +85,7 @@ nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_hugetlb.h \
                   include/memkind/internal/memkind_interleave.h \
                   include/memkind/internal/memkind_pmem.h \
+                  include/memkind/internal/memkind_private.h \
                   # end
 
 sbin_PROGRAMS = memkind-pmtt

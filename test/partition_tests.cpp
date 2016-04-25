@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,18 +30,12 @@ class Partition: public :: testing::Test { };
 
 TEST_F(Partition, TC_Memkind_CheckBasePartitions)
 {
-    int i;
     memkind_t kind;
-    memkind_t other_kind;
-    void *ptr;
 
-    for (i = 0; i < MEMKIND_NUM_BASE_KIND; ++i) {
+    for (int i = 0; i < MEMKIND_NUM_BASE_KIND; ++i) {
         EXPECT_EQ(0, memkind_get_kind_by_partition(i, &kind));
-        EXPECT_EQ(kind->partition, i);
-        memkind_get_kind_by_name(kind->name, &other_kind);
-        EXPECT_EQ(other_kind->partition, i);
         if (memkind_check_available(kind) == 0) {
-            ptr = memkind_malloc(kind, 16);
+            void *ptr = memkind_malloc(kind, 16);
             EXPECT_TRUE(ptr != NULL);
             memkind_free(kind, ptr);
         }

@@ -213,15 +213,10 @@ systemctl disable  %{namespace}.service >/dev/null 2>&1
 %files tests
 %defattr(-,root,root,-)
 $(memkind_test_dir)/all_tests
-$(memkind_test_dir)/environerr_test
 $(memkind_test_dir)/environerr_hbw_malloc_test
 $(memkind_test_dir)/mallctlerr_test
-$(memkind_test_dir)/mallocerr_test
 $(memkind_test_dir)/memkind-pmtt
-$(memkind_test_dir)/pmtterr_test
-$(memkind_test_dir)/schedcpu_test
 $(memkind_test_dir)/decorator_test
-$(memkind_test_dir)/tieddisterr_test
 $(memkind_test_dir)/slts_test
 $(memkind_test_dir)/filter_memkind
 $(memkind_test_dir)/gb_realloc
@@ -235,7 +230,6 @@ $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/autohbw_candidates
 ${memkind_test_dir}/pmem
 ${memkind_test_dir}/allocator_perf_tool_tests
-${memkind_test_dir}/hbw_nodemask
 ${memkind_test_dir}/perf_tool
 $(memkind_test_dir)/memkind-afts.ts
 $(memkind_test_dir)/memkind-slts.ts

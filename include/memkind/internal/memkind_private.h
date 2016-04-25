@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,35 +22,26 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <fstream>
-#include <algorithm>
-#include <numa.h>
-#include <errno.h>
+#pragma once
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "common.h"
-#include "check.h"
-#include "omp.h"
-#include "memkind.h"
+#include <pthread.h>
 
-/* Sets conditions to create a MEMKIND_ERROR_MALLOC error type */
-class MallocErrTest: public :: testing::Test
-{
-
-protected:
-    void SetUp()
-    {}
-
-    void TearDown()
-    {}
-
+struct memkind {
+    const struct memkind_ops *ops;
+    int partition;
+    char name[MEMKIND_NAME_LENGTH];
+    pthread_once_t init_once;
+    int arena_map_len;
+    unsigned int *arena_map;
+#ifndef MEMKIND_TLS
+    pthread_key_t arena_key;
+#endif
+    void *priv;
 };
 
-TEST_F(MallocErrTest, TC_Memkind_ErrorMalloc)
-{
-    int ret = 0;
-    int err = MEMKIND_ERROR_MALLOC;
-    nodemask_t nodemask;
-    ret = MEMKIND_HBW->ops->get_mbind_nodemask(MEMKIND_HBW, nodemask.n, NUMA_NUM_NODES);
-
-    EXPECT_EQ(err, ret);
+#ifdef __cplusplus
 }
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,8 @@ TEST_F(GetArenaTest, TC_Memkind_ThreadHash)
     unsigned max_collisions, collisions;
     const unsigned collisions_limit = 5;
 
-    pthread_once(&(MEMKIND_HBW->init_once), MEMKIND_HBW->ops->init_once);
+    //Initialize kind
+    memkind_malloc(MEMKIND_HBW, 0);
 
     #pragma omp parallel shared(arena_idx) private(thread_idx)
     {

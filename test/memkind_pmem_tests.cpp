@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Intel Corporation.
+ * Copyright (C) 2015 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,21 +52,19 @@ protected:
 
 TEST_F(MemkindPmemTests, PmemPriv)
 {
-    struct memkind_pmem *priv = (struct memkind_pmem *)pmem_kind->priv;
+    size_t total_mem = 0;
+    size_t free_mem = 0;
 
-    EXPECT_EQ(priv->max_size, roundup(PMEM_PART_SIZE, CHUNK_SIZE));
-    EXPECT_LT((size_t)priv->offset, CHUNK_SIZE);
-    EXPECT_LT((size_t)priv->offset, priv->max_size);
-}
+    memkind_get_size(pmem_kind, &total_mem, &free_mem);
 
-TEST_F(MemkindPmemTests, PmemMmapFlags)
-{
-    int flags;
-    int err = 0;
+    ASSERT_TRUE(total_mem != 0);
+    ASSERT_TRUE(free_mem != 0);
 
-    err = pmem_kind->ops->get_mmap_flags(pmem_kind, &flags);
-    EXPECT_EQ(0, err);
-    EXPECT_EQ(flags, MAP_SHARED);
+    EXPECT_EQ(total_mem, roundup(PMEM_PART_SIZE, CHUNK_SIZE));
+
+    size_t offset = total_mem - free_mem;
+    EXPECT_LT(offset, CHUNK_SIZE);
+    EXPECT_LT(offset, total_mem);
 }
 
 TEST_F(MemkindPmemTests, PmemMalloc)

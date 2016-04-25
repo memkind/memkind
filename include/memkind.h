@@ -27,7 +27,6 @@
 extern "C" {
 #endif
 
-#include <pthread.h>
 #include <sys/types.h>
 
 /*
@@ -86,21 +85,7 @@ enum memkind_base_partition {
 };
 
 /*EXPERIMENTAL API*/
-struct memkind_ops;
-
-/*EXPERIMENTAL API*/
-struct memkind {
-    const struct memkind_ops *ops;
-    int partition;
-    char name[MEMKIND_NAME_LENGTH];
-    pthread_once_t init_once;
-    int arena_map_len;
-    unsigned int *arena_map;
-#ifndef MEMKIND_TLS
-    pthread_key_t arena_key;
-#endif
-    void *priv;
-};
+struct memkind;
 
 /*EXPERIMENTAL API*/
 struct memkind_ops {
