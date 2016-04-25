@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <memkind.h>
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_private.h>
 
 static void *jemk_mallocx_check(size_t size, int flags);
 static void *jemk_rallocx_check(void *ptr, size_t size, int flags);

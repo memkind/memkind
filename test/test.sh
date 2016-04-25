@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2014, 2015 Intel Corporation.
+#  Copyright (C) 2014 - 2016 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -69,33 +69,15 @@ $basedir/allocator_perf_tool_tests $@
 ret=$?
 if [ $err -eq 0 ]; then err=$ret; fi
 
-$basedir/environerr_test $@
-ret=$?
-if [ $err -eq 0 ]; then err=$ret; fi
-
 $basedir/environerr_hbw_malloc_test $@
 ret=$?
 if [ $err -eq 0 ]; then err=$ret; fi
 
-LD_PRELOAD=$basedir/libsched.so $basedir/schedcpu_test $@
-ret=$?
-if [ $err -eq 0 ]; then err=$ret; fi
-
-LD_PRELOAD=$basedir/libnumadist.so $basedir/tieddisterr_test $@
-ret=$?
-if [ $err -eq 0 ]; then err=$ret; fi
 #
 # These tests are broken.  Will avoid using LD_PRELOAD in future test
 # implementation.
 #
 # LD_PRELOAD=$basedir/libmallctl.so $basedir/mallctlerr_test $@
-# ret=$?
-# if [ $err -eq 0 ]; then err=$ret; fi
-# LD_PRELOAD=$basedir/libmalloc.so $basedir/mallocerr_test $@
-# ret=$?
-# if [ $err -eq 0 ]; then err=$ret; fi
-#
-# LD_PRELOAD=$basedir/libfopen.so $basedir/pmtterr_test $@
 # ret=$?
 # if [ $err -eq 0 ]; then err=$ret; fi
 

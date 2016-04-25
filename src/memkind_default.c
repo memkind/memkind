@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include <jemalloc/jemalloc.h>
 
 #include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_private.h>
 
 #ifndef MADV_NOHUGEPAGE
 #define MADV_NOHUGEPAGE 15

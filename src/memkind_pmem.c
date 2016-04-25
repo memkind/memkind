@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Intel Corporation.
+ * Copyright (C) 2015 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_pmem.h>
+#include <memkind/internal/memkind_private.h>
 
 const struct memkind_ops MEMKIND_PMEM_OPS = {
     .create = memkind_pmem_create,

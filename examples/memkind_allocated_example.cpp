@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,11 +70,11 @@ int main()
 {
     memkind_t specified_kind = MEMKIND_HBW_HUGETLB;
 
-    memkind_allocated_example* default_kind_example = new memkind_allocated_example( std::string("This object has been allocated using class default kind, which is: ") + std::string(memkind_allocated_example::getClassKind()->name));
+    memkind_allocated_example* default_kind_example = new memkind_allocated_example( std::string("This object has been allocated using class default kind, which is: MEMKIND_DEFAULT") );
     default_kind_example->print_message();
     delete default_kind_example;
 
-    memkind_allocated_example* specified_kind_example = new(specified_kind) memkind_allocated_example( std::string("This object has been allocated using specified kind, which is: ") + std::string(specified_kind->name));
+    memkind_allocated_example* specified_kind_example = new(specified_kind) memkind_allocated_example( std::string("This object has been allocated using specified kind, which is: MEMKIND_HBW_HUGETLB") );
     specified_kind_example->print_message();
     delete specified_kind_example;
 

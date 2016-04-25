@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Intel Corporation
+ * Copyright (c) 2015, 2016, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -94,7 +94,6 @@ int
 main(int argc, char *argv[])
 {
     struct memkind *pmem_kind1;
-    struct memkind *pmem_kind2;
     int err = 0;
     int fd;
     void *addr;
@@ -114,40 +113,16 @@ main(int argc, char *argv[])
         return errno ? -errno : 1;
     }
 
-    err = memkind_create(&MEMKIND_PMEM_OPS, "pmem2", &pmem_kind2);
-    if (err) {
-        perror("memkind_create()");
-        fprintf(stderr, "Unable to create partition\n");
-        return errno ? -errno : 1;
-    }
-
-    /* chunk size should be obtained from jemalloc */
-    void *aligned_addr = (void *)roundup((uintptr_t)addr, CHUNK_SIZE);
-    struct memkind_pmem *priv = pmem_kind2->priv;
-
-    priv->fd = fd;
-    priv->addr = addr;
-    priv->max_size = PMEM2_MAX_SIZE;
-    priv->offset = (uintptr_t)aligned_addr - (uintptr_t)addr;
-
     const size_t size = 512;
     char *pmem_str10 = NULL;
     char *pmem_str11 = NULL;
     char *pmem_str12 = NULL;
-    char *pmem_str20 = NULL;
     char *pmem_str = NULL;
 
     pmem_str10 = (char *)memkind_malloc(pmem_kind1, size);
     if (pmem_str10 == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate pmem string (pmem_str10)\n");
-        return errno ? -errno : 1;
-    }
-
-    pmem_str20 = (char *)memkind_malloc(pmem_kind2, size);
-    if (pmem_str20 == NULL) {
-        perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string (pmem_str20)\n");
         return errno ? -errno : 1;
     }
 
@@ -176,15 +151,12 @@ main(int argc, char *argv[])
     }
 
     sprintf(pmem_str10, "Hello world from persistent memory1\n");
-    sprintf(pmem_str20, "Hello world from persistent memory2\n");
 
     fprintf(stdout, "%s", pmem_str10);
-    fprintf(stdout, "%s", pmem_str20);
 
     memkind_free(pmem_kind1, pmem_str10);
     memkind_free(pmem_kind1, pmem_str11);
     memkind_free(pmem_kind1, pmem_str12);
-    memkind_free(pmem_kind2, pmem_str20);
 
     return 0;
 }

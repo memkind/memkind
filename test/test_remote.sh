@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2014, 2015 Intel Corporation.
+#  Copyright (C) 2014 - 2016 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -54,13 +54,9 @@ scp $mkrpm $remote_login@$remote_ip:
 popd
 
 scp $basedir/.libs/all_tests $remote_login@$remote_ip:
-scp $basedir/.libs/environerr_test $remote_login@$remote_ip:
 scp $basedir/.libs/environerr_hbw_malloc_test $remote_login@$remote_ip:
 scp $basedir/.libs/mallctlerr_test $remote_login@$remote_ip:
-scp $basedir/.libs/mallocerr_test $remote_login@$remote_ip:
 scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
-scp $basedir/.libs/schedcpu_test $remote_login@$remote_ip:
-scp $basedir/.libs/tieddisterr_test $remote_login@$remote_ip:
 scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
 scp $basedir/.libs/decorator_test $remote_login@$remote_ip:
 scp $basedir/.libs/allocator_perf_tool_tests $remote_login@$remote_ip:

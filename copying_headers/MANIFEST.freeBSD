@@ -50,6 +50,7 @@ include/memkind/internal/memkind_hbw.h
 include/memkind/internal/memkind_hugetlb.h
 include/memkind/internal/memkind_interleave.h
 include/memkind/internal/memkind_pmem.h
+include/memkind/internal/memkind_private.h
 test/Makefile.mk
 test/bat_tests.cpp
 test/bat_bind_tests.cpp
@@ -58,7 +59,6 @@ test/check.cpp
 test/check.h
 test/check.sh
 test/common.h
-test/environ_err_test.cpp
 test/environ_err_hbw_malloc_test.cpp
 test/extended_tests.cpp
 test/fopen_mock.c
@@ -67,16 +67,12 @@ test/jemalloc_mock.c
 test/main.cpp
 test/mallctl_err_test.cpp
 test/mallctl_mock.c
-test/malloc_err_test.cpp
 test/multithreaded_tests.cpp
 test/negative_tests.cpp
 test/numadist_mock.c
-test/pmtt_err_test.cpp
-test/sched_cpu_test.cpp
 test/sched_mock.c
 test/test.sh
 test/test_remote.sh
-test/tied_dist_test.cpp
 test/trial_generator.cpp
 test/trial_generator.h
 test/partition_tests.cpp
@@ -143,7 +139,6 @@ test/allocator_perf_tool/main.cpp
 test/allocate_to_max_stress_test.cpp
 test/memkind_versioning_tests.cpp
 test/heap_manager_init_perf_test.cpp
-test/hbw_nodemask.c
 test/hbw_detection_test.py
 man/memkind_pmem.3
 src/memkind_pmem.c

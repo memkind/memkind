@@ -60,16 +60,6 @@ TEST_F(NegativeTest, TC_Memkind_Negative_ErrorUnavailable)
     EXPECT_EQ(err, ret);
 }
 
-
-TEST_F(NegativeTest, TC_Memkind_Negative_ErrorMBind)
-{
-    int ret = 0;
-    int err = MEMKIND_ERROR_MBIND;
-
-    ret = MEMKIND_HBW->ops->mbind(MEMKIND_HBW, NULL, 1024);
-    EXPECT_EQ(err, ret);
-}
-
 TEST_F(NegativeTest, TC_Memkind_Negative_ErrorMemAlign)
 {
     int ret = 0;
