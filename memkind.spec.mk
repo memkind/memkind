@@ -187,7 +187,7 @@ systemctl disable  %{namespace}.service >/dev/null 2>&1
 %doc %{_docdir}/%{namespace}/VERSION
 %dir %{_docdir}/%{namespace}
 %dir %{_unitdir}
-%{_libdir}/lib%{namespace}.so*
+%{_libdir}/lib%{namespace}.so.*
 %{_bindir}/%{namespace}-hbw-nodes
 %{_sbindir}/%{namespace}-pmtt
 %{_unitdir}/%{namespace}.service
@@ -202,6 +202,7 @@ systemctl disable  %{namespace}.service >/dev/null 2>&1
 %defattr(-,root,root,-)
 %{_includedir}/hbwmalloc.h
 %{_includedir}/hbw_allocator.h
+%{_libdir}/lib%{namespace}.so
 %{_includedir}/%{namespace}.h
 %{_includedir}/%{internal_include}/%{namespace}*.h
 %{_mandir}/man3/hbwmalloc.3.*
