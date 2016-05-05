@@ -77,12 +77,7 @@ public:
     void generate_recycle_psize_2GB(alloc_api_t api);
     void generate_multi_app_stress(int num_types, test_t test);
     void generate_size_1KB_2GB(alloc_api_t api);
-    void generate_hbw_gb_incremental(alloc_api_t api);
-    void generate_gb_regular(alloc_api_t api);
-    void generate_hbw_gb_strict(alloc_api_t api);
-    void generate_gb_strict(alloc_api_t api);
-    void generate_gb_incremental(alloc_api_t api);
-    void generate_gb_misalign(alloc_api_t api, size_t align);
+    void generate_gb(alloc_api_t api, int number_of_gb_pages, memkind_t memkind, alloc_api_t api_free, bool psize_strict=false, size_t align = GB);
     void generate_size_4GB_8GB(alloc_api_t api);
     void run(int num_bandwidth, int *bandwidths);
     void generate_interleave(alloc_api_t api);

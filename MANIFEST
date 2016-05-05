@@ -100,6 +100,7 @@ test/slts_test.cpp
 test/huge_page_test.cpp
 test/hbw_detection_test.py
 test/memkind-afts.ts
+test/memkind-afts-ext.ts
 test/memkind-slts.ts
 test/memkind-perf.ts
 test/memkind-hbw_detection.ts

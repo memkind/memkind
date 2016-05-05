@@ -1,0 +1,43 @@
+MEMKIND TESTS
+=============
+
+
+DISCLAIMER
+==========
+SEE COPYING FILE FOR LICENSE INFORMATION.
+
+THIS SOFTWARE IS PROVIDED AS A DEVELOPMENT SNAPSHOT TO AID
+COLLABORATION AND WAS NOT ISSUED AS A RELEASED PRODUCT BY INTEL.
+
+LAST UPDATE
+===========
+Agata Wozniak <agata.wozniak@intel.com>
+Wednesday May 11 2016
+
+TESTS SCENARIOS
+===============
+
+memkind-afts
+------------
+This is scenario for basic functional tests. Maximum number of allocations per numa node:
+- 512 x 4KB pages (summary: 2GB)
+- 16 x 2MB pages
+- 1 x GB pages
+
+memkind-afts-ext
+----------------
+The same tests as in memkind-afts, however this tests are more ravenous and needs more memory
+available. Special test cases prepared only for this scenario are described as ravenous
+and needs at least:
+- 512 x 4KB pages (summary: 2GB)
+- 16 x 2MB pages
+- 3 x GB pages
+memory available per numa node.
+
+memkind-perf
+------------
+This is scenario for all performance tests.
+
+memkind-slts
+------------
+This is scenario for all stress and longevity tests.

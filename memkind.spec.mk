@@ -213,6 +213,7 @@ ${memkind_test_dir}/pmem
 ${memkind_test_dir}/allocator_perf_tool_tests
 ${memkind_test_dir}/perf_tool
 $(memkind_test_dir)/memkind-afts.ts
+$(memkind_test_dir)/memkind-afts-ext.ts
 $(memkind_test_dir)/memkind-slts.ts
 $(memkind_test_dir)/memkind-perf.ts
 $(memkind_test_dir)/memkind-hbw_detection.ts
