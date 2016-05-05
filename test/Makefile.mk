@@ -36,6 +36,7 @@ check_PROGRAMS += test/all_tests \
 TESTS += test/check.sh
 
 EXTRA_DIST += test/memkind-afts.ts \
+              test/memkind-afts-ext.ts \
               test/memkind-slts.ts \
               test/memkind-perf.ts \
               test/memkind-hbw_detection.ts \

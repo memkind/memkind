@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,102 +31,171 @@
 #include "memkind.h"
 #include "trial_generator.h"
 
-/* This set of tests are itended to use GB pages allocation, it is needed to have
+/* This set of tests are intended to use GB pages allocation, it is needed to have
  * GB pages enabled or ignore its execution in case GB can't be enabled on an
- * specifc machibe. It uses the trial generator to run the tests and validate
+ * specifc machine. It uses the trial generator to run the tests and validate
  * its output.
  */
 class GBPagesTest : public TGTest
-{
-};
+{};
 
-TEST_F(GBPagesTest, TC_Memkind_HBW_GBPages_MemalignPsizeIncremental)
+TEST_F(GBPagesTest, TC_GBPages_HBW_Misalign_Preferred_Strict)
 {
-    tgen->generate_hbw_gb_incremental(HBW_MEMALIGN_PSIZE);
+    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true, 2147483648);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_Memkind_GBPages_Malloc)
+TEST_F(GBPagesTest, TC_GBPages_HBW_Misalign_Preferred_Bind_Strict)
 {
-    tgen->generate_gb_incremental(MEMKIND_MALLOC);
+    hbw_set_policy(HBW_POLICY_BIND);
+    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true, 2147483648);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_Memkind_GBPages_Calloc)
+TEST_F(GBPagesTest, TC_GBPages_HBW_Memalign_Psize_Preferred_Strict)
 {
-    tgen->generate_gb_incremental(MEMKIND_CALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, TC_Memkind_GBPages_Realloc)
-{
-    tgen->generate_gb_incremental(MEMKIND_REALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, TC_Memkind_GBPages_PosixMemalign)
-{
-    tgen->generate_gb_incremental(MEMKIND_POSIX_MEMALIGN);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, TC_Memkind_HBW_GBPages_MemalignPsizeIncrementalStrict)
-{
-    tgen->generate_hbw_gb_strict(HBW_MEMALIGN_PSIZE);
+    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(GBPagesTest, TC_Memkind_GBPages_MallocRegular)
+TEST_F(GBPagesTest, TC_GBPages_HBW_Malloc)
 {
-    tgen->generate_gb_regular(MEMKIND_MALLOC);
+    tgen->generate_gb (MEMKIND_MALLOC, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_Memkind_GBPages_CallocRegular)
+
+TEST_F(GBPagesTest, TC_GBPages_HBW_Calloc)
 {
-    tgen->generate_gb_regular(MEMKIND_CALLOC);
+    tgen->generate_gb (MEMKIND_CALLOC, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_Memkind_GBPages_ReallocRegular)
+
+TEST_F(GBPagesTest, TC_GBPages_HBW_Realloc)
 {
-    tgen->generate_gb_regular(MEMKIND_REALLOC);
+    tgen->generate_gb (MEMKIND_REALLOC, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_Memkind_GBPages_PosixMemalignRegular)
+TEST_F(GBPagesTest, TC_GBPages_HBW_Posix_Memalign)
 {
-    tgen->generate_gb_regular(MEMKIND_POSIX_MEMALIGN);
+    tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_Memkind_HBW_GBPages_MemalignPsizeIncrementalBind)
+TEST_F(GBPagesTest, TC_GBPages_Malloc_Regular)
+{
+    tgen->generate_gb (MEMKIND_MALLOC, 1, MEMKIND_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+TEST_F(GBPagesTest, TC_GBPages_Calloc_Regular)
+{
+    tgen->generate_gb (MEMKIND_CALLOC, 1, MEMKIND_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+TEST_F(GBPagesTest, TC_GBPages_Realloc_Regular)
+{
+    tgen->generate_gb (MEMKIND_REALLOC, 1, MEMKIND_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+TEST_F(GBPagesTest, TC_GBPages_Posix_Memalign_Regular)
+{
+    tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 1, MEMKIND_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+TEST_F(GBPagesTest, TC_GBPages_HBW_Memalign_Psize_Bind)
 {
     hbw_set_policy(HBW_POLICY_BIND);
     EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
-    tgen->generate_hbw_gb_incremental(HBW_MEMALIGN_PSIZE);
+    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_Memkind_HBW_GBPages_MemalignPsizeStrictBind)
+/*
+ * Below tests allocate GB pages incrementally.
+*/
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Memalign_Psize)
+{
+    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 2, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Malloc)
+{
+    tgen->generate_gb (MEMKIND_MALLOC, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Calloc)
+{
+    tgen->generate_gb (MEMKIND_CALLOC, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Realloc)
+{
+    tgen->generate_gb (MEMKIND_REALLOC, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Posix_Memalign)
+{
+    tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Memalign_Psize_Strict)
+{
+    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 3, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_Malloc_Regular)
+{
+    tgen->generate_gb (MEMKIND_MALLOC, 2, MEMKIND_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_Calloc_Regular)
+{
+    tgen->generate_gb (MEMKIND_CALLOC, 2, MEMKIND_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_Realloc_Regular)
+{
+    tgen->generate_gb (MEMKIND_REALLOC, 2, MEMKIND_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_Posix_Memalign_Regular)
+{
+    tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 2, MEMKIND_GBTLB, MEMKIND_FREE);
+    tgen->run(num_bandwidth, bandwidth);
+}
+
+TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Memalign_Psize_Bind)
 {
     hbw_set_policy(HBW_POLICY_BIND);
-    tgen->generate_hbw_gb_strict(HBW_MEMALIGN_PSIZE);
+    EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
+    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 2, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_Memkind_GBPages_GenerateMisalignPreferred)
-{
-    tgen->generate_gb_misalign(HBW_MEMALIGN_PSIZE,
-                               2147483648);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTest, TC_Memkind_GBPages_GenerateMisalignBind)
+TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Memalign_Psize_Strict_Bind)
 {
     hbw_set_policy(HBW_POLICY_BIND);
-    tgen->generate_gb_misalign(HBW_MEMALIGN_PSIZE,
-                               2147483648);
+    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 3, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);
     tgen->run(num_bandwidth, bandwidth);
 }

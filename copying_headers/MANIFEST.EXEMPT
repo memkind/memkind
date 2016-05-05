@@ -10,6 +10,7 @@ ChangeLog
 examples/README
 examples/autohbw_README
 test/memkind-afts.ts
+test/memkind-afts-ext.ts
 test/memkind-slts.ts
 test/memkind-perf.ts
 test/memkind-hbw_detection.ts

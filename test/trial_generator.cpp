@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2015 Intel Corporation.
+ * Copyright (C) 2014 - 2016 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,130 +106,30 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
 }
 
 
-void TrialGenerator :: generate_gb_misalign (alloc_api_t api,
-        size_t talign)
+void TrialGenerator :: generate_gb (alloc_api_t api, int number_of_gb_pages, memkind_t memkind, alloc_api_t api_free, bool psize_strict, size_t align)
 {
-
-    trial_vec.clear();
-    trial_vec.push_back(create_trial_tuple(api,
-                                           GB, talign, GB,
-                                           MEMKIND_HBW_PREFERRED_GBTLB,
-                                           -1));
-    trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
-                                           MEMKIND_HBW_PREFERRED_GBTLB,
-                                           0));
-
-}
-
-
-void TrialGenerator :: generate_hbw_gb_strict (alloc_api_t api)
-{
-
     std::vector<size_t> sizes_to_alloc;
-    sizes_to_alloc.push_back(GB);
-
-    // not enough memory with 8 configured nodes
-    if (numa_num_configured_nodes()!=8)
-    {
-        sizes_to_alloc.push_back(2*GB);
-        sizes_to_alloc.push_back(3*GB);
+    //When API = HBW_MEMALIGN_PSIZE: psize is set to HBW_PAGESIZE_1GB_STRICT when allocation is a multiple of 1GB. Otherwise it is set to HBW_PAGESIZE_1GB.
+    for (int i=1; i <= number_of_gb_pages; i++) {
+            if (psize_strict || api!=HBW_MEMALIGN_PSIZE)
+                sizes_to_alloc.push_back(i*GB);
+            else
+                sizes_to_alloc.push_back(i*GB+1);
     }
-
-    size_t psize[] = {GB, GB, GB};
-    size_t align[] = {GB, GB, GB};
     int k = 0;
     trial_vec.clear();
 
     for (int i = 0; i< (int)sizes_to_alloc.size(); i++)
     {
         trial_vec.push_back(create_trial_tuple(api, sizes_to_alloc[i],
-                                               align[i], psize[i],
-                                               MEMKIND_HBW_PREFERRED_GBTLB,
+                                               align, GB,
+                                               memkind,
                                                -1));
         if (i > 0)
             k++;
-        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
-                                               MEMKIND_HBW_PREFERRED_GBTLB,
+        trial_vec.push_back(create_trial_tuple(api_free,0,0,0,
+                                               memkind,
                                                k++));
-    }
-}
-
-
-void TrialGenerator :: generate_hbw_gb_incremental(alloc_api_t api)
-{
-
-    std::vector<size_t> sizes_to_alloc;
-    sizes_to_alloc.push_back(GB);
-
-    // not enough memory with 8 configured nodes
-    if (numa_num_configured_nodes()!=8)
-        sizes_to_alloc.push_back(2*GB);
-
-    size_t psize[] = {GB, GB};
-    size_t align[] = {GB, GB};
-    int k = 0;
-    trial_vec.clear();
-    for (int i = 0; i< (int)sizes_to_alloc.size(); i++)
-    {
-        trial_vec.push_back(create_trial_tuple(api, sizes_to_alloc[i],
-                                               align[i], psize[i],
-                                               MEMKIND_HBW_PREFERRED_GBTLB,
-                                               -1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
-                                               MEMKIND_HBW_PREFERRED_GBTLB,
-                                               k++));
-    }
-}
-
-
-void TrialGenerator :: generate_gb_incremental(alloc_api_t api)
-{
-    std::vector<size_t> sizes_to_alloc;
-    sizes_to_alloc.push_back(GB);
-
-    // not enough memory with 8 configured nodes
-    if (numa_num_configured_nodes()!=8)
-        sizes_to_alloc.push_back(2*GB);
-
-    size_t psize[] = {GB, GB};
-    size_t align[] = {GB, GB};
-    int k = 0;
-    trial_vec.clear();
-    for (int i = 0; i< (int)sizes_to_alloc.size(); i++)
-    {
-        trial_vec.push_back(create_trial_tuple(api, sizes_to_alloc[i],
-                                               align[i], psize[i],
-                                               MEMKIND_HBW_GBTLB,-1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
-                                               MEMKIND_HBW_GBTLB,
-                                               k++));
-
-    }
-}
-
-void TrialGenerator :: generate_gb_regular(alloc_api_t api)
-{
-
-    size_t size[] = {GB+1,(2*GB)+1};
-    size_t psize[] = {GB, GB};
-    size_t align[] = {GB, GB};
-    int k = 0;
-    trial_vec.clear();
-    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i],
-                                               align[i], psize[i],
-                                               MEMKIND_GBTLB,-1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
-                                               MEMKIND_GBTLB,
-                                               k++));
-
     }
 }
 
