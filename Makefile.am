@@ -275,7 +275,11 @@ dist_man_MANS = man/hbwmalloc.3 \
 CLEANFILES = memkind-$(VERSION).spec
 DISTCLEANFILES = VERSION
 
-bin_PROGRAMS =
+bin_PROGRAMS = memkind-hbw-nodes
+
+memkind_hbw_nodes_SOURCES = src/memkind-hbw-nodes.c
+memkind_hbw_nodes_LDADD= libmemkind.la
+
 bin_SCRIPTS =
 check_PROGRAMS =
 noinst_PROGRAMS =
@@ -316,4 +320,3 @@ rpm: dist
 
 include test/Makefile.mk
 include examples/Makefile.mk
-include scripts/Makefile.mk
