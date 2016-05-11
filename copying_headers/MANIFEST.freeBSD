@@ -38,6 +38,7 @@ src/memkind_gbtlb.c
 src/memkind_hbw.c
 src/memkind_hugetlb.c
 src/memkind_interleave.c
+src/memkind-hbw-nodes.c
 src/memkind_pmtt.c
 include/hbwmalloc.h
 include/memkind.h
@@ -146,5 +147,4 @@ test/hbw_nodemask.c
 test/hbw_detection_test.py
 man/memkind_pmem.3
 src/memkind_pmem.c
-scripts/memkind-hbw-nodes
-scripts/Makefile.mk
+

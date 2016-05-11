@@ -57,6 +57,7 @@ src/memkind_hbw.c
 src/memkind_hugetlb.c
 src/memkind_interleave.c
 src/memkind_pmtt.c
+src/memkind-hbw-nodes.c
 src/memkind_pmem.c
 include/hbwmalloc.h
 include/memkind.h
@@ -324,5 +325,4 @@ jemalloc/test/unit/stats.c
 jemalloc/test/unit/tsd.c
 jemalloc/test/unit/util.c
 jemalloc/test/unit/zero.c
-scripts/memkind-hbw-nodes
-scripts/Makefile.mk
+
