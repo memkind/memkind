@@ -32,7 +32,6 @@ else
         TEST_OUTDIR=gtest_output
     fi
     mkdir -p $TEST_OUTDIR
-    cp -f $basedir/*.hex $basedir/.libs/
     $basedir/test.sh --gtest_output=xml:$TEST_OUTDIR/ 2>&1| tee $TEST_OUTDIR/test.out
     err=${PIPESTATUS[0]}
 fi

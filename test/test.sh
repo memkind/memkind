@@ -81,8 +81,6 @@ if [ $err -eq 0 ]; then err=$ret; fi
 # ret=$?
 # if [ $err -eq 0 ]; then err=$ret; fi
 
-
-
 #
 # Run the examples as tests
 #

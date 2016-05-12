@@ -220,9 +220,6 @@ void memkind_error_message(int err, char *msg, size_t size)
         case MEMKIND_ERROR_GETCPU:
             strncpy(msg, "<memkind> Call to sched_getcpu() returned out of range", size);
             break;
-        case MEMKIND_ERROR_PMTT:
-            snprintf(msg, size, "<memkind> Unable to find parsed PMTT table or Invalid PMTT table entries in: %s", MEMKIND_BANDWIDTH_PATH);
-            break;
         case MEMKIND_ERROR_TIEDISTANCE:
             strncpy(msg, "<memkind> Two NUMA memory nodes are equidistant from target cpu node", size);
             break;

@@ -124,7 +124,6 @@ int hbw_set_policy(hbw_policy_t mode);
  * Verifies high bandwith memory availability.
  * Returns:
  *   0: if high bandwidth memory is available
- *   ENOENT: if couldn't find parsed PMTT table
  *   ENODEV: if high-bandwidth memory is unavailable.
  */
 int hbw_check_available(void);

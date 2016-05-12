@@ -37,8 +37,6 @@ extern "C" {
  * API standards are described in memkind(3) man page.
  */
 
-static const char * const MEMKIND_BANDWIDTH_PATH = "/var/run/memkind/node-bandwidth";
-
 int memkind_hbw_check_available(struct memkind *kind);
 int memkind_hbw_hugetlb_check_available(struct memkind *kind);
 int memkind_hbw_gbtlb_check_available(struct memkind *kind);

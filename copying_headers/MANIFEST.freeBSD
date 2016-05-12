@@ -20,7 +20,6 @@ examples/numakind.h
 examples/numakind_test.c
 examples/memkind_decorator_debug.c
 examples/autohbw_test.sh
-memkind.service
 man/hbwmalloc.3
 man/memkind.3
 man/memkind_arena.3
@@ -39,7 +38,6 @@ src/memkind_hbw.c
 src/memkind_hugetlb.c
 src/memkind_interleave.c
 src/memkind-hbw-nodes.c
-src/memkind_pmtt.c
 include/hbwmalloc.h
 include/memkind.h
 include/hbw_allocator.h
@@ -83,7 +81,6 @@ test/create_tests_helper.c
 test/memkind_default_tests.cpp
 test/policy_tests.cpp
 test/get_arena_test.cpp
-test/memkind_pmtt_tests.cpp
 test/memkind_pmem_tests.cpp
 test/slts_test.cpp
 test/huge_page_test.cpp

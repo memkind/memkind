@@ -56,12 +56,9 @@ popd
 scp $basedir/.libs/all_tests $remote_login@$remote_ip:
 scp $basedir/.libs/environerr_hbw_malloc_test $remote_login@$remote_ip:
 scp $basedir/.libs/mallctlerr_test $remote_login@$remote_ip:
-scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
-scp $basedir/.libs/pmtterr_test $remote_login@$remote_ip:
 scp $basedir/.libs/decorator_test $remote_login@$remote_ip:
 scp $basedir/.libs/allocator_perf_tool_tests $remote_login@$remote_ip:
 
-scp $basedir/*.hex $remote_login@$remote_ip:
 scp $basedir/libfopen.so $remote_login@$remote_ip:
 scp $basedir/libmallctl.so $remote_login@$remote_ip:
 scp $basedir/libmalloc.so $remote_login@$remote_ip:

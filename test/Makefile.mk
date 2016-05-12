@@ -35,9 +35,7 @@ check_PROGRAMS += test/all_tests \
 
 TESTS += test/check.sh
 
-EXTRA_DIST += test/mock-pmtt-2-nodes.hex \
-              test/mock-pmtt-empty-controller.hex \
-              test/memkind-afts.ts \
+EXTRA_DIST += test/memkind-afts.ts \
               test/memkind-slts.ts \
               test/memkind-perf.ts \
               test/memkind-hbw_detection.ts \
@@ -74,7 +72,6 @@ test_all_tests_SOURCES = test/common.h \
                          test/memkind_default_tests.cpp \
                          test/policy_tests.cpp \
                          test/get_arena_test.cpp \
-                         test/memkind_pmtt_tests.cpp \
                          test/memkind_pmem_tests.cpp \
                          test/performance/operations.hpp \
                          test/performance/perf_tests.hpp \
@@ -218,11 +215,6 @@ if ENABLE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 endif
 test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
-
-
-check_PROGRAMS += test/memkind-pmtt
-test_memkind_pmtt_SOURCES = src/memkind_pmtt.c
-test_memkind_pmtt_LDADD = libmemkind.la
 
 # All of the non-standard requirements for testing (gtest and mock .so)
 .PHONY: test clean-local-gtest clean-local-mock

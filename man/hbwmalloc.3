@@ -256,8 +256,6 @@ Error codes described here are the POSIX standard error codes as defined in <err
 .TP
 .BR hbw_check_available ()
 returns
-.BR ENOENT
-if couldn't find parsed PMTT table or
 .BR ENODEV
 if high-bandwidth memory is unavailable.
 .TP
@@ -291,26 +289,13 @@ library. These interfaces define a heap manager that targets high
 bandwidth memory numa nodes.
 .SH "FILES"
 .TP
-.I /var/run/memkind/node-bandwidth
-File that contains the bandwidth values for each numa node.
-.TP
-.I /etc/rc/d/init.d/memkind
-Initialization script that creates the node-bandwidth file by calling
-the PMTT table parser.
-.TP
-.I /usr/sbin/memkind-pmtt
-The PMTT table parser.
-.TP
 .I /usr/bin/memkind-hbw-nodes
-Parses /var/run/memkind/node-bandwidth and prints a comma separated list
-of high bandwidth nodes.
+Prints a comma separated list of high bandwidth nodes.
 .SH "ENVIRONMENT"
 .TP
 .B MEMKIND_HBW_NODES
 This environment varaible is a comma separated list of NUMA nodes that
-are treated as high bandwidth. This environment variable should be set
-if the PMTT file is not present, or to override the PMTT table if it
-is present. Uses the
+are treated as high bandwidth. Uses the
 .I libnuma
 routine
 .BR numa_parse_nodestring ()
