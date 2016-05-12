@@ -66,9 +66,6 @@ Provides: memkind
 %define docdir %{_defaultdocdir}/%{namespace}-%{version}
 %endif
 
-%define statedir %{_localstatedir}/run/%{namespace}
-
-
 # x86_64 is the only arch memkind will build due to its
 # current dependency on SSE4.2 CRC32 instruction which
 # is used to compute thread local storage arena mappings
@@ -156,12 +153,7 @@ cd %{_builddir}/%{buildsubdir}
 %{__make} DESTDIR=%{buildroot} install
 %{__install} -d %{buildroot}$(memkind_test_dir)
 %{__install} -d %{buildroot}/%{_unitdir}
-%{__install} %{namespace}.service %{buildroot}/%{_unitdir}/%{namespace}.service
-%if 0%{?suse_version} <= 1310
-%{__install} -d %{buildroot}/%{statedir}
-touch %{buildroot}/%{statedir}/node-bandwidth
-%endif
-%{__install} test/.libs/* test/*.sh test/*.hex test/*.ts test/*.so test/*.py %{buildroot}$(memkind_test_dir)
+%{__install} test/.libs/* test/*.sh test/*.ts test/*.so test/*.py %{buildroot}$(memkind_test_dir)
 rm -f %{buildroot}$(memkind_test_dir)/libautohbw.*
 rm -f %{buildroot}/%{_libdir}/lib%{namespace}.{l,}a
 rm -f %{buildroot}/%{_libdir}/lib{numakind,autohbw}.*
@@ -170,12 +162,8 @@ rm -f %{buildroot}/%{_libdir}/lib{numakind,autohbw}.*
 
 %post
 /sbin/ldconfig
-systemctl enable  %{namespace}.service >/dev/null 2>&1
-systemctl start  %{namespace}.service >/dev/null 2>&1
 
 %preun
-systemctl stop  %{namespace}.service >/dev/null 2>&1
-systemctl disable  %{namespace}.service >/dev/null 2>&1
 
 %postun
 /sbin/ldconfig
@@ -189,12 +177,6 @@ systemctl disable  %{namespace}.service >/dev/null 2>&1
 %dir %{_unitdir}
 %{_libdir}/lib%{namespace}.so.*
 %{_bindir}/%{namespace}-hbw-nodes
-%{_sbindir}/%{namespace}-pmtt
-%{_unitdir}/%{namespace}.service
-%if 0%{?suse_version} <= 1310
-%ghost %dir %{statedir}
-%ghost %{statedir}/node-bandwidth
-%endif
 
 %define internal_include memkind/internal
 
@@ -215,7 +197,6 @@ systemctl disable  %{namespace}.service >/dev/null 2>&1
 $(memkind_test_dir)/all_tests
 $(memkind_test_dir)/environerr_hbw_malloc_test
 $(memkind_test_dir)/mallctlerr_test
-$(memkind_test_dir)/memkind-pmtt
 $(memkind_test_dir)/decorator_test
 $(memkind_test_dir)/slts_test
 $(memkind_test_dir)/filter_memkind
@@ -235,8 +216,6 @@ $(memkind_test_dir)/memkind-afts.ts
 $(memkind_test_dir)/memkind-slts.ts
 $(memkind_test_dir)/memkind-perf.ts
 $(memkind_test_dir)/memkind-hbw_detection.ts
-$(memkind_test_dir)/mock-pmtt-2-nodes.hex
-$(memkind_test_dir)/mock-pmtt-empty-controller.hex
 $(memkind_test_dir)/check.sh
 $(memkind_test_dir)/test.sh
 $(memkind_test_dir)/test_remote.sh

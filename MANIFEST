@@ -32,7 +32,6 @@ examples/memkind_decorator_debug.c
 examples/pmem_example.c
 examples/autohbw_README
 examples/autohbw_test.sh
-memkind.service
 man/hbwmalloc.3
 man/memkind.3
 man/memkind_arena.3
@@ -43,11 +42,6 @@ man/memkind_hugetlb.3
 man/memkind_pmem.3
 man/hbwallocator.3
 memkind.spec.mk
-src/actbl.h
-src/actbl1.h
-src/actbl2.h
-src/actbl3.h
-src/actypes.h
 src/hbwmalloc.c
 src/memkind.c
 src/memkind_arena.c
@@ -56,9 +50,8 @@ src/memkind_gbtlb.c
 src/memkind_hbw.c
 src/memkind_hugetlb.c
 src/memkind_interleave.c
-src/memkind_pmtt.c
-src/memkind-hbw-nodes.c
 src/memkind_pmem.c
+src/memkind-hbw-nodes.c
 include/hbwmalloc.h
 include/memkind.h
 include/hbw_allocator.h
@@ -102,13 +95,10 @@ test/create_tests_helper.c
 test/memkind_default_tests.cpp
 test/policy_tests.cpp
 test/get_arena_test.cpp
-test/memkind_pmtt_tests.cpp
 test/memkind_pmem_tests.cpp
 test/slts_test.cpp
 test/huge_page_test.cpp
 test/hbw_detection_test.py
-test/mock-pmtt-2-nodes.hex
-test/mock-pmtt-empty-controller.hex
 test/memkind-afts.ts
 test/memkind-slts.ts
 test/memkind-perf.ts

@@ -52,21 +52,14 @@ Note: This is EXEPRIMENTAL API. The functionality and the header file itself can
 .br
 .SH DESCRIPTION
 .PP
-High bandwidth memory memkind operations.  The ACPICA specification
-provides the PMTT table which defines a bandwidth value for each
-NUMA node.  This table is used to idenify the set of NUMA nodes
-that share the highest bandwidth value.  When the memkind library
-is installed the application
-.I /usr/sbin/memkind-pmtt
-is executed which creates the file identified by the constant
-.BR MEMKIND_BANDWIDTH_PATH .
+High bandwidth memory memkind operations.
 .PP
 .BR memkind_hbw_check_available ()
-returns zero if the PMTT table defines heterogeneous NUMA node
+returns zero if library was able to detect heterogeneous NUMA node
 bandwidths.   Returns
 .B MEMKIND_UNAVAILABLE
-if the PMTT table does not exist, or exists and defines uniform NUMA
-node bandwidth values.  The PMTT table can be overridden by the
+if the detection mechanism failed.
+Detection mechanism can be also overridden by the
 environment variable
 .B MEMKIND_HBW_NODES
 as described in the
@@ -126,14 +119,6 @@ This function initializes MEMKIND_HBW_INTERLEAVE kind and it should not be calle
 Note:
 .BR memkind_hbw_interleave_init_once ()
 may reserve some extra memory.
-.TP
-.B MEMKIND_BANDWIDTH_PATH
-Constant string that contains path to binary file that lists the
-bandwidths of all NUMA nodes.  Flat binary file containing
-.B NUMA_NUM_NODES
-integers of type
-.BR int ,
-where the value is set to zero for undetermined nodes.
 .SH "COPYRIGHT"
 Copyright (C) 2014, 2015 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"

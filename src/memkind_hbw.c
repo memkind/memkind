@@ -159,9 +159,6 @@ static pthread_once_t memkind_hbw_closest_numanode_once_g = PTHREAD_ONCE_INIT;
 
 static void memkind_hbw_closest_numanode_init(void);
 
-static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
-                                const char *bandwidth_path);
-
 static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
                                   int *num_unique, struct bandwidth_nodes_t **bandwidth_nodes);
 
@@ -306,7 +303,7 @@ static int is_cpu_xeon_phi_x200()
 ///This function tries to fill bandwidth array based on knowledge about known CPU models
 static int fill_bandwidth_values_heuristically(int* bandwidth, int bandwidth_len)
 {
-    int ret = MEMKIND_ERROR_PMTT; // Default error returned if heuristic aproach fails
+    int ret = MEMKIND_ERROR_UNAVAILABLE; // Default error returned if heuristic aproach fails
     int i, nodes_num, memory_only_nodes_num = 0;
     struct bitmask *memory_only_nodes, *node_cpus;
 
@@ -363,19 +360,13 @@ static int fill_bandwidth_values_from_enviroment(int* bandwidth, int bandwidth_l
 static int fill_nodes_bandwidth(int* bandwidth, int bandwidth_len)
 {
         char *hbw_nodes_env;
-        int err = 0;
 
         hbw_nodes_env = getenv("MEMKIND_HBW_NODES");
         if (hbw_nodes_env) {
             return fill_bandwidth_values_from_enviroment(bandwidth, bandwidth_len, hbw_nodes_env);
         }
 
-        err = parse_node_bandwidth(NUMA_NUM_NODES, bandwidth, MEMKIND_BANDWIDTH_PATH);
-        if (err) {
-            return fill_bandwidth_values_heuristically(bandwidth, bandwidth_len);
-        }
-
-        return err;
+        return fill_bandwidth_values_heuristically(bandwidth, bandwidth_len);
 }
 
 static void memkind_hbw_closest_numanode_init(void)
@@ -427,36 +418,6 @@ exit:
     }
 }
 
-static int parse_node_bandwidth(int num_bandwidth, int *bandwidth,
-                                const char *bandwidth_path)
-{
-    FILE *fid = NULL;
-    struct stat st;
-    size_t nread = 0;
-    int stat_ret = 0;
-    int err = 0;
-    fid = fopen(bandwidth_path, "r");
-    if (fid == NULL) {
-        err = MEMKIND_ERROR_PMTT ? MEMKIND_ERROR_PMTT : -1;
-        goto exit;
-    }
-    stat_ret = stat(bandwidth_path, &st);
-    if (stat_ret || !st.st_size) {
-        err = MEMKIND_ERROR_PMTT ? MEMKIND_ERROR_PMTT : -1;
-        goto exit;
-    }
-    nread = fread(bandwidth, sizeof(int), num_bandwidth, fid);
-    if (nread != num_bandwidth) {
-        err = MEMKIND_ERROR_PMTT;
-        goto exit;
-    }
-
-exit:
-    if (fid != NULL) {
-        fclose(fid);
-    }
-    return err;
-}
 
 static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
                                   int *num_unique, struct bandwidth_nodes_t **bandwidth_nodes)
@@ -499,7 +460,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
         /* ignore zero bandwidths */
         num_bandwidth = j;
         if (num_bandwidth == 0) {
-            err = MEMKIND_ERROR_PMTT;
+            err = MEMKIND_ERROR_UNAVAILABLE;
         }
     }
     if (!err) {
@@ -585,7 +546,7 @@ static int set_closest_numanode(int num_unique,
         }
     }
     if (match.bandwidth == -1) {
-        err = MEMKIND_ERROR_PMTT;
+        err = MEMKIND_ERROR_UNAVAILABLE;
     }
     else {
         for (i = 0; i < num_cpunode; ++i) {

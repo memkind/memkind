@@ -695,10 +695,7 @@ pages disabled.
 .TP
 .B MEMKIND_HBW
 Allocate from the closest high bandwidth memory NUMA node at time
-of allocation.  High bandwidth nodes are defined by the PMTT
-table, or the environment variable
-.BR "MEMKIND_HBW_NODES" .
-If there is not enough high bandwidth memory to satisfy the request
+of allocation. If there is not enough high bandwidth memory to satisfy the request
 .I errno
 is set to ENOMEM and the allocated poitner is set to NULL.
 .TP
@@ -809,11 +806,6 @@ Call to
 .BR sched_getcpu ()
 returned out of range
 .TP
-.B MEMKIND_ERROR_PMTT
-Unable to find parsed PMTT table or
-invalid PMTT table entries in
-.I /var/run/memkind/node-bandwidth
-.TP
 .B MEMKIND_ERROR_TIEDISTANCE
 Two NUMA memory nodes are equidistant from target cpu node
 .TP
@@ -832,22 +824,13 @@ Error parsing environment variable (MEMKIND_*)
 Invalid input arguments to memkind routine
 .SH "FILES"
 .TP
-.I /var/run/memkind/node-bandwidth
-File that contains the bandwidth values for each NUMA node.
-.TP
-.I /etc/rc/d/init.d/memkind
-Initialization script that creates the node-bandwidth file by calling
-the PMTT table parser.
-.TP
-.I /usr/sbin/memkind-pmtt
-The PMTT table parser.
+.I /usr/bin/memkind-hbw-nodes
+Prints a comma separated list of high bandwidth nodes.
 .SH "ENVIRONMENT"
 .TP
 .B MEMKIND_HBW_NODES
 This environment variable is a comma separated list of NUMA nodes that
-are treated as high bandwidth. This environment variable should be set
-if the PMTT file is not present, or to override the PMTT table if it
-is present. Uses the
+are treated as high bandwidth. Uses the
 .I libnuma
 routine
 .BR numa_parse_nodestring ()

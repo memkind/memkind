@@ -74,9 +74,6 @@ int hbw_check_available(void)
         case 0:
             return 0;
 
-        case MEMKIND_ERROR_PMTT:
-            return ENOENT;
-
         default:
             return ENODEV;
     }

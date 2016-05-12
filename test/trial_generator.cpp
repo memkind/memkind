@@ -26,6 +26,7 @@
 #include "check.h"
 #include <vector>
 #include <numa.h>
+#include <memkind/internal/memkind_hbw.h>
 
 void TrialGenerator :: generate_incremental(alloc_api_t api)
 {
@@ -609,16 +610,30 @@ void TGTest :: SetUp()
         }
     }
     else {
-        const char *node_bandwidth_path = "/var/run/memkind/node-bandwidth";
-        std::ifstream nbw_file;
 
-        nbw_file.open(node_bandwidth_path, std::ifstream::binary);
-        nbw_file.seekg(0, nbw_file.end);
-        num_bandwidth = nbw_file.tellg() / sizeof(int);
-        nbw_file.seekg(0, nbw_file.beg);
+        num_bandwidth = NUMA_NUM_NODES;
         bandwidth = new int[num_bandwidth];
-        nbw_file.read((char *)bandwidth, num_bandwidth*sizeof(int));
-        nbw_file.close();
+
+        nodemask_t nodemask;
+        struct bitmask nodemask_bm = {NUMA_NUM_NODES, nodemask.n};
+        numa_bitmask_clearall(&nodemask_bm);
+
+        memkind_hbw_all_get_mbind_nodemask(NULL, nodemask.n, NUMA_NUM_NODES);
+
+        int i, nodes_num = numa_num_configured_nodes();
+        for (i=0; i<NUMA_NUM_NODES; i++) {
+            if (i >= nodes_num) {
+                bandwidth[i] = 0;
+            }
+            else if (numa_bitmask_isbitset(&nodemask_bm, i)) {
+                bandwidth[i] = 2;
+            }
+            else {
+                bandwidth[i] = 1;
+            }
+        }
+
+
     }
 }
 

@@ -36,11 +36,6 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_hugetlb.c \
                         src/memkind_pmem.c \
                         src/memkind_interleave.c \
-                        src/actbl1.h \
-                        src/actbl2.h \
-                        src/actbl3.h \
-                        src/actbl.h \
-                        src/actypes.h \
                         # end
 
 jemalloc_objects = jemalloc/obj/src/jemalloc.lo \
@@ -88,12 +83,9 @@ nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_private.h \
                   # end
 
-sbin_PROGRAMS = memkind-pmtt
-memkind_pmtt_SOURCES = src/memkind_pmtt.c
-memkind_pmtt_LDADD = libmemkind.la
+sbin_PROGRAMS =
 
 EXTRA_DIST = autogen.sh \
-             memkind.service \
              gtest-1.7.0.zip \
              examples/README \
              test/check.sh \
