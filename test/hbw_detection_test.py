@@ -28,7 +28,7 @@ import tempfile
 import subprocess
 
 class Test_hbw_detection(object):
-
+    binary_path = "/usr/bin/memkind-hbw-nodes"
     fail_msg = "Test failed with:\n {0}"
 
     def execute_cmd(self, command, sudo=False):
@@ -60,7 +60,7 @@ class Test_hbw_detection(object):
     def get_nodemask_default(self):
         """ This function executes memkind function 'get_mbind_nodemask' and returns its output """
         hbw_nodemask_default = None
-        command = self.get_command_path("hbw_nodemask")
+        command = self.get_command_path(self.binary_path)
         output, retcode = self.execute_cmd(command, sudo=False)
         if retcode == 0:
             hbw_nodemask_default = output
@@ -72,7 +72,7 @@ class Test_hbw_detection(object):
         """ This function overrides environment variable MEMKIND_HBW_NODES with values returned from 'memkind-hbw-nodes',
         executes memkind function 'get_mbind_nodemask' and returns its output """
         hbw_nodemask_env_variable = None
-        command = "MEMKIND_HBW_NODES=`memkind-hbw-nodes` " + self.get_command_path("hbw_nodemask")
+        command = "MEMKIND_HBW_NODES=`memkind-hbw-nodes` " + self.get_command_path(self.binary_path)
         output, retcode = self.execute_cmd(command, sudo=False)
         if retcode == 0:
             hbw_nodemask_env_variable = output
@@ -86,7 +86,7 @@ class Test_hbw_detection(object):
         hbw_nodemask_heuristic = None
         command = "mv /var/run/memkind/node-bandwidth /var/run/memkind/node-bandwidth_disabled"
         self.execute_cmd(command, sudo=True)
-        command = self.get_command_path("hbw_nodemask")
+        command = self.get_command_path(self.binary_path)
         output, retcode = self.execute_cmd(command, sudo=False)
         """ Before processing output and retcode node-bandwidth should be recovered """
         command = "mv /var/run/memkind/node-bandwidth_disabled /var/run/memkind/node-bandwidth"
