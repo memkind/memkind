@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (C) 2015 Intel Corporation.
+#  Copyright (C) 2015 - 2016 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
