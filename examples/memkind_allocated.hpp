@@ -74,6 +74,11 @@ public:
         return deriving_class::operator new(size, memory_kind);
     }
 
+    void operator delete(void* ptr, memkind_t memory_kind)
+    {
+        memkind_free(memory_kind, ptr);
+    }
+
     void operator delete(void* ptr)
     {
         memkind_free(0, ptr);
@@ -82,6 +87,11 @@ public:
     void operator delete[](void* ptr)
     {
         deriving_class::operator delete(ptr);
+    }
+
+    void operator delete[](void* ptr, memkind_t memory_kind)
+    {
+	deriving_class::operator delete(ptr, memory_kind);
     }
 
 protected:
