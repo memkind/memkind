@@ -29,6 +29,8 @@ extern "C" {
 
 #include <pthread.h>
 
+#include "memkind.h"
+
 struct memkind {
     const struct memkind_ops *ops;
     int partition;
