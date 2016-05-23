@@ -91,7 +91,7 @@ public:
 
     void operator delete[](void* ptr, memkind_t memory_kind)
     {
-	deriving_class::operator delete(ptr, memory_kind);
+        deriving_class::operator delete(ptr, memory_kind);
     }
 
 protected:
