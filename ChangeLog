@@ -1,3 +1,17 @@
+* Mon May 23 2016 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v1.1.0
+- Implemented algorithm for detecting high-bandwidth memory on Intel Xeon Phi X200
+  without parsing PMTT.
+- PMTT-parsing service has been removed.
+- memkind struct definition from memkind.h has been replaced by forward
+  declaration. Definition has been moved to /internal/memkind_private.h and
+  shouldn't be considered as part of library interface anymore.
+- Performance improvment for hugetlb kinds (check_available() is no longer
+  parsing sysfs every time).
+- Performance fix by removing --enable-safe from jemmaloc build flags.
+- New tests for validating high-bandwidth memory detection has been added.
+- AFTS has been split into two groups: memkind-afts.ts and memkind-afts-ext.ts,
+  based on amount of required memory (for details view test/README).
+
 * Thu Mar 03 2016 Artur Koziej <artur.koziej@intel.com> v1.0.0
 - hbwmalloc.h released as stable API.
 - Introduce API standards: STANDARD API, NON-STANDARD API, EXPERIMENTAL API.
