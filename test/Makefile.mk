@@ -39,6 +39,7 @@ EXTRA_DIST += test/memkind-afts.ts \
               test/memkind-afts-ext.ts \
               test/memkind-slts.ts \
               test/memkind-perf.ts \
+              test/memkind-perf-ext.ts \
               test/memkind-hbw_detection.ts \
               test/hbw_detection_test.py
 

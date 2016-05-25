@@ -36,7 +36,17 @@ memory available per numa node.
 
 memkind-perf
 ------------
-This is scenario for all performance tests.
+This is scenario for performance tests, excluding tests that allocate more than:
+- 512 x 4KB pages (summary: 2GB)
+- 16 x 2MB pages
+- 1 x GB pages
+
+memkind-perf-ext
+----------------
+This test scenario extend memkind-perf for tests that allocate more than:
+- 512 x 4KB pages (summary: 2GB)
+- 16 x 2MB pages
+- 1 x GB pages
 
 memkind-slts
 ------------
