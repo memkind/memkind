@@ -54,7 +54,7 @@ protected:
         if (config_numa_nodes >= MIN_NUMA_NODES_INTERLEAVE) {
             num_bandwidth = NUMA_NUM_NODES;
             bandwidth = new int[num_bandwidth];
-
+            tgen = new TrialGenerator();
             nodemask_t nodemask;
             struct bitmask nodemask_bm = {NUMA_NUM_NODES, nodemask.n};
             numa_bitmask_clearall(&nodemask_bm);
