@@ -216,6 +216,7 @@ $(memkind_test_dir)/memkind-afts.ts
 $(memkind_test_dir)/memkind-afts-ext.ts
 $(memkind_test_dir)/memkind-slts.ts
 $(memkind_test_dir)/memkind-perf.ts
+$(memkind_test_dir)/memkind-perf-ext.ts
 $(memkind_test_dir)/memkind-hbw_detection.ts
 $(memkind_test_dir)/check.sh
 $(memkind_test_dir)/test.sh
