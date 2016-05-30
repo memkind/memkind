@@ -45,7 +45,7 @@ protected:
 };
 
 //Test memkind_get_version().
-TEST_F(MemkindVersioningTests, TC_Memkind_GetVersionFunc)
+TEST_F(MemkindVersioningTests, test_TC_MEMKIND_GetVersionFunc)
 {
     int max_return_val =
         1000000 * max_version_value

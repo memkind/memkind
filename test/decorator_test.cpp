@@ -44,7 +44,7 @@ protected:
     }
 };
 
-TEST_F(DecoratorTest, DT_malloc)
+TEST_F(DecoratorTest, test_TC_MEMKIND_DT_malloc)
 {
     void *buffer = memkind_malloc(kind, size);
 
@@ -55,7 +55,7 @@ TEST_F(DecoratorTest, DT_malloc)
     memkind_free(0, buffer);
 }
 
-TEST_F(DecoratorTest, DT_calloc)
+TEST_F(DecoratorTest, test_TC_MEMKIND_DT_calloc)
 {
     void *buffer = memkind_calloc(kind, 1, size);
 
@@ -66,7 +66,7 @@ TEST_F(DecoratorTest, DT_calloc)
     memkind_free(0, buffer);
 }
 
-TEST_F(DecoratorTest, DT_posix_memalign)
+TEST_F(DecoratorTest, test_TC_MEMKIND_DT_posix_memalign)
 {
     void *buffer;
 
@@ -80,7 +80,7 @@ TEST_F(DecoratorTest, DT_posix_memalign)
     memkind_free(0, buffer);
 }
 
-TEST_F(DecoratorTest, DT_realloc)
+TEST_F(DecoratorTest, test_TC_MEMKIND_DT_realloc)
 {
     void *buffer = memkind_realloc(kind, NULL, size);
 
@@ -91,7 +91,7 @@ TEST_F(DecoratorTest, DT_realloc)
     memkind_free(0, buffer);
 }
 
-TEST_F(DecoratorTest, DT_free)
+TEST_F(DecoratorTest, test_TC_MEMKIND_DT_free)
 {
     void *buffer = memkind_malloc(kind, size);
 

@@ -91,19 +91,19 @@ protected:
 };
 
 
-TEST_F(BATInterleaveTests, TC_Memkind_HBW_Interleave_CheckAvailable)
+TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_CheckAvailable)
 {
     hbw_set_policy(HBW_POLICY_INTERLEAVE);
     ASSERT_EQ(0, hbw_check_available());
 }
 
-TEST_F(BATInterleaveTests,TC_Memkind_HBW_Interleave_Policy)
+TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_Policy)
 {
     hbw_set_policy(HBW_POLICY_INTERLEAVE);
     EXPECT_EQ(HBW_POLICY_INTERLEAVE, hbw_get_policy());
 }
 
-TEST_F(BATInterleaveTests, TC_Memkind_HBW_Interleave_MallocIncremental)
+TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_MallocIncremental)
 {
     if (can_interleave) {
         hbw_set_policy(HBW_POLICY_INTERLEAVE);
@@ -116,7 +116,7 @@ TEST_F(BATInterleaveTests, TC_Memkind_HBW_Interleave_MallocIncremental)
     }
 }
 
-TEST_F(BATInterleaveTests, TC_Memkind_HBW_Interleave_CallocIncremental)
+TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_CallocIncremental)
 {
     if (can_interleave) {
         hbw_set_policy(HBW_POLICY_INTERLEAVE);
@@ -130,7 +130,7 @@ TEST_F(BATInterleaveTests, TC_Memkind_HBW_Interleave_CallocIncremental)
 }
 
 
-TEST_F(BATInterleaveTests, TC_Memkind_HBW_Interleave_ReallocInremental)
+TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_ReallocInremental)
 {
     if (can_interleave) {
         hbw_set_policy(HBW_POLICY_INTERLEAVE);

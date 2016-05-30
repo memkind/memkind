@@ -40,7 +40,7 @@ protected:
 };
 
 //Test standard memory allocation and deallocation.
-TEST_F(HbwAllocatorTests, DetaultAllocatorTest)
+TEST_F(HbwAllocatorTests, test_TC_MEMKIND_DetaultAllocatorTest)
 {
     const size_t size = 512;
     hbw::allocator<size_t> allocator;
@@ -58,7 +58,7 @@ TEST_F(HbwAllocatorTests, DetaultAllocatorTest)
 }
 
 //Test address convertion functionality.
-TEST_F(HbwAllocatorTests, AddressConvertion)
+TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AddressConvertion)
 {
     const size_t size = 512;
     hbw::allocator<int> allocator;
@@ -87,7 +87,7 @@ TEST_F(HbwAllocatorTests, AddressConvertion)
 
 //Test for boundaries of allocation sizes.
 //We expect to catch allocation exceptions caused by out of bound sizes.
-TEST_F(HbwAllocatorTests, AllocationSizeOutOfBounds)
+TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AllocationSizeOutOfBounds)
 {
     hbw::allocator<size_t> allocator;
 
@@ -103,7 +103,7 @@ TEST_F(HbwAllocatorTests, AllocationSizeOutOfBounds)
 }
 
 //Test if variable will be constructed.
-TEST_F(HbwAllocatorTests, AllocatorConstruct)
+TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AllocatorConstruct)
 {
     hbw::allocator<int> allocator;
 
@@ -115,7 +115,7 @@ TEST_F(HbwAllocatorTests, AllocatorConstruct)
 }
 
 //Test the integration with std::vector.
-TEST_F(HbwAllocatorTests, StandardVector)
+TEST_F(HbwAllocatorTests, test_TC_MEMKIND_StandardVector)
 {
     std::vector<int, hbw::allocator<int> > vec;
     const size_t size = 10000;

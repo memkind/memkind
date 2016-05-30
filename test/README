@@ -51,3 +51,13 @@ This test scenario extend memkind-perf for tests that allocate more than:
 memkind-slts
 ------------
 This is scenario for all stress and longevity tests.
+
+
+MANUAL TESTING
+==============
+In order to run tests on local machine, check.sh or test.sh should be executed.
+While running tests with check.sh, script is determining if 2MB pages and 1GB pages are enabled
+on the machine as well as whether it contains MCDRAM nodes. Based on this information test.sh
+is executed with parameters that skip tests that would fail because of machine configuration.
+When test.sh is run, all tests are executed as long as -d (skip MCDRAM nodes detection), -m (skip
+tests that require 2MB pages) or -g (skip tests that require 1GB pages) parameters are not used.

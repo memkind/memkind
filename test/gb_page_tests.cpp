@@ -39,77 +39,77 @@
 class GBPagesTest : public TGTest
 {};
 
-TEST_F(GBPagesTest, TC_GBPages_HBW_Misalign_Preferred_Strict)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_HBW_Misalign_Preferred_Strict)
 {
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true, 2147483648);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_HBW_Misalign_Preferred_Bind_Strict)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_HBW_Misalign_Preferred_Bind_Strict)
 {
     hbw_set_policy(HBW_POLICY_BIND);
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true, 2147483648);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_HBW_Memalign_Psize_Preferred_Strict)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_HBW_Memalign_Psize_Preferred_Strict)
 {
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(GBPagesTest, TC_GBPages_HBW_Malloc)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_HBW_Malloc)
 {
     tgen->generate_gb (MEMKIND_MALLOC, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(GBPagesTest, TC_GBPages_HBW_Calloc)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_HBW_Calloc)
 {
     tgen->generate_gb (MEMKIND_CALLOC, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(GBPagesTest, TC_GBPages_HBW_Realloc)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_HBW_Realloc)
 {
     tgen->generate_gb (MEMKIND_REALLOC, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_HBW_Posix_Memalign)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_HBW_Posix_Memalign)
 {
     tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Malloc_Regular)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_Malloc_Regular)
 {
     tgen->generate_gb (MEMKIND_MALLOC, 1, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Calloc_Regular)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_Calloc_Regular)
 {
     tgen->generate_gb (MEMKIND_CALLOC, 1, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Realloc_Regular)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_Realloc_Regular)
 {
     tgen->generate_gb (MEMKIND_REALLOC, 1, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Posix_Memalign_Regular)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_Posix_Memalign_Regular)
 {
     tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 1, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_HBW_Memalign_Psize_Bind)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_HBW_Memalign_Psize_Bind)
 {
     hbw_set_policy(HBW_POLICY_BIND);
     EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
@@ -121,71 +121,71 @@ TEST_F(GBPagesTest, TC_GBPages_HBW_Memalign_Psize_Bind)
  * Below tests allocate GB pages incrementally.
 */
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Memalign_Psize)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize)
 {
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 2, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Malloc)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_HBW_Malloc)
 {
     tgen->generate_gb (MEMKIND_MALLOC, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Calloc)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_HBW_Calloc)
 {
     tgen->generate_gb (MEMKIND_CALLOC, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Realloc)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_HBW_Realloc)
 {
     tgen->generate_gb (MEMKIND_REALLOC, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Posix_Memalign)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_HBW_Posix_Memalign)
 {
     tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Memalign_Psize_Strict)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Strict)
 {
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 3, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_Malloc_Regular)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_Malloc_Regular)
 {
     tgen->generate_gb (MEMKIND_MALLOC, 2, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_Calloc_Regular)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_Calloc_Regular)
 {
     tgen->generate_gb (MEMKIND_CALLOC, 2, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_Realloc_Regular)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_Realloc_Regular)
 {
     tgen->generate_gb (MEMKIND_REALLOC, 2, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_Posix_Memalign_Regular)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_Posix_Memalign_Regular)
 {
     tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 2, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Memalign_Psize_Bind)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bind)
 {
     hbw_set_policy(HBW_POLICY_BIND);
     EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
@@ -193,7 +193,7 @@ TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Memalign_Psize_Bind)
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTest, TC_GBPages_Incremental_HBW_Memalign_Psize_Strict_Bind)
+TEST_F(GBPagesTest, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Strict_Bind)
 {
     hbw_set_policy(HBW_POLICY_BIND);
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 3, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);

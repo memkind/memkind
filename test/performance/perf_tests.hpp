@@ -30,10 +30,6 @@
 using std::vector;
 using std::string;
 
-// produce name with expected prefix
-#define PERF_TEST(CLASS, NAME) \
-TEST_F(CLASS, TC_##Performance_##NAME)
-
 using performance_tests::Operation;
 using performance_tests::OperationName;
 using performance_tests::Metrics;

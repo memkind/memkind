@@ -99,7 +99,7 @@ protected:
 
 
 // Test passes when there is no crash.
-TEST_F(HugePageTest, TC_MEMKIND_UNMAP_HUGE_PAGE)
+TEST_F(HugePageTest, test_TC_MEMKIND_UNMAP_HUGE_PAGE)
 {
 	int iterations = 10;
 	for (int i=0; i<iterations; i++) {

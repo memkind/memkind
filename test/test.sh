@@ -23,142 +23,323 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-err=0
 basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROGNAME=`basename $0`
+
+# Default path (to installation dir of memkind-tests RPM)
+TEST_PATH="$basedir/"
+
+# Gtest binaries executed by Berta
+GTEST_BINARIES=(all_tests decorator_test allocator_perf_tool_tests)
+
+# Pytest files executed by Berta
+PYTEST_FILES=(hbw_detection_test.py)
+
+red=`tput setaf 1`
+green=`tput setaf 2`
+yellow=`tput setaf 3`
+default=`tput sgr0`
+
+err=0
+
+function usage () {
+   cat <<EOF
+
+Usage: $PROGNAME [-c csv_file] [-l log_file] [-f test_filter] [-T tests_dir] [-d] [-m] [-g] [-h]
+
+OPTIONS
+    -c,
+        path to CSV file
+    -l,
+        path to LOG file
+    -f,
+        test filter
+    -T,
+        path to tests directory
+    -d,
+        parameter added to skip high bandwidth memory nodes detection tests
+    -m,
+        parameter added to skip tests that require 2MB pages configured on the machine
+    -g,
+        parameter added to skip tests that require GB pages configured on the machine
+    -h,
+        parameter added to display script usage
+
+EOF
+}
+
+function emit() {
+    if [ "$LOG_FILE" != "" ]; then
+        echo "$@" 2>&1 | tee -a $LOG_FILE;
+    else
+        echo "$@"
+    fi
+}
+
+function normalize_path {
+    local PATH=$1
+    if [ ! -d $PATH ];
+    then
+        echo "Not a directory: '$PATH'"
+        usage
+        exit 1
+    fi
+    if [[ $PATH != /* ]]; then
+        PATH=`pwd`/$PATH
+    fi
+    echo $PATH
+}
+
+function show_skipped_tests()
+{
+    SKIP_PATTERN=$1
+    DEFAULT_IFS=$IFS
+
+    # Search for gtests that match given pattern
+    for i in ${!GTEST_BINARIES[*]}; do
+        GTEST_BINARY_PATH=$TEST_PATH${GTEST_BINARIES[$i]}
+        for LINE in $($GTEST_BINARY_PATH --gtest_list_tests); do
+            if [[ $LINE == *. ]]; then
+                TEST_SUITE=$LINE;
+            else
+                if [[ "$TEST_SUITE$LINE" == *"$SKIP_PATTERN"* ]]; then
+                    emit "$TEST_SUITE$LINE,${yellow}SKIPPED${default}"
+                fi
+            fi
+        done
+    done
+
+    # Search for pytests that match given pattern
+    for i in ${!PYTEST_FILES[*]}; do
+        PTEST_BINARY_PATH=$TEST_PATH${PYTEST_FILES[$i]}
+        IFS=$'\n'
+        for LINE in $(py.test $PTEST_BINARY_PATH --collect-only); do
+            if [[ $LINE == *"<Class "* ]]; then
+                TEST_SUITE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
+            elif [[ $LINE == *"<Function "* ]]; then
+                LINE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
+                if [[ "$TEST_SUITE.$LINE" == *"$SKIP_PATTERN"* ]]; then
+                    emit "$TEST_SUITE.$LINE,${yellow}SKIPPED${default}"
+                fi
+            fi
+        done
+    done
+
+    IFS=$DEFAULT_IFS
+    emit ""
+}
+
+function execute_gtest()
+{
+    ret_val=1
+    TESTCMD=$1
+    TEST=$2
+    # Apply filter (if provided)
+    if [ "$TEST_FILTER" != "" ]; then
+        if [[ $TEST != $TEST_FILTER ]]; then
+            return
+        fi
+    fi
+    # Concatenate test command
+    TESTCMD=$(printf "$TESTCMD" "$TEST""$SKIPPED_GTESTS")
+    # And test prefix if applicable
+    if [ "$TEST_PREFIX" != "" ]; then
+        TESTCMD=$(printf "$TEST_PREFIX" "$TESTCMD")
+    fi
+    OUTPUT=`eval $TESTCMD`
+    PATOK='.*OK ].*'
+    PATFAILED='.*FAILED  ].*'
+        PATSKIPPED='.*PASSED  ] 0.*'
+    if [[ $OUTPUT =~ $PATOK ]]; then
+        RESULT="$TEST,${green}PASSED${default}"
+        ret_val=0
+    elif [[ $OUTPUT =~ $PATFAILED ]]; then
+        RESULT="$TEST,${red}FAILED${default}"
+    elif [[ $OUTPUT =~ $PATSKIPPED ]]; then
+        return 0
+    else
+        RESULT="$TEST,${red}CRASH${default}"
+    fi
+    if [ "$CSV" != "" ]; then
+        emit "$OUTPUT"
+        echo $RESULT >> $CSV
+    else
+        echo $RESULT
+    fi
+    return $ret_val
+}
+
+function execute_pytest()
+{
+    ret=1
+    TESTCMD=$1
+    TEST_SUITE=$2
+    TEST=$3
+    # Apply filter (if provided)
+    if [ "$TEST_FILTER" != "" ]; then
+        if [[ $TEST_SUITE.$TEST != $TEST_FILTER ]]; then
+            return
+        fi
+    fi
+    # Concatenate test command
+    TESTCMD=$(printf "$TESTCMD" "$TEST$SKIPPED_PYTEST")
+    # And test prefix if applicable
+    if [ "$TEST_PREFIX" != "" ]; then
+        TESTCMD=$(printf "$TEST_PREFIX" "$TESTCMD")
+    fi
+    OUTPUT=`eval $TESTCMD`
+    PATOK='.*1 passed.*'
+    PATFAILED='.*1 failed.*'
+    PATSKIPPED='.*deselected.*'
+    if [[ $OUTPUT =~ $PATOK ]]; then
+        RESULT="$TEST_SUITE.$TEST,${green}PASSED${default}"
+        ret=0
+    elif [[ $OUTPUT =~ $PATFAILED ]]; then
+        RESULT="$TEST_SUITE.$TEST,${red}FAILED${default}"
+    elif [[ $OUTPUT =~ $PATSKIPPED ]]; then
+        return 0
+    else
+        RESULT="$TEST_SUITE.$TEST,${red}CRASH${default}"
+    fi
+    if [ "$CSV" != "" ]; then
+        emit "$OUTPUT"
+        echo $RESULT >> $CSV
+    else
+        echo $RESULT
+    fi
+    return $ret
+}
+
 numactl --hardware | grep "^node 1" > /dev/null
 if [ $? -ne 0 ]; then
     echo "ERROR: $0 requires a NUMA enabled system with more than one node."
-    exit -1
+    exit 1
 fi
 
-unset MEMKIND_HBW_NODES
-
-#hugetot=$(cat /proc/meminfo | grep HugePages_Total | awk '{print $2}')
-#if [ $hugetot -lt 4000 ]; then
-#    echo "ERROR: $0 requires at least 4000 HugePages_Total total (see /proc/meminfo)"
-#    exit -1
-#fi
-
-if [ ! -f /sys/firmware/acpi/tables/PMTT ]; then
+if [ ! -f /usr/bin/memkind-hbw-nodes ]; then
+    cp ./memkind-hbw-nodes /usr/bin/memkind-hbw-nodes
+    remove_file=true
+fi
+ret=$(/usr/bin/memkind-hbw-nodes)
+if [[ $ret == "" ]]; then
     export MEMKIND_HBW_NODES=1
-    test_prefix='numactl --membind=0'
+    TEST_PREFIX="numactl --membind=0 %s"
 fi
-for line in $($basedir/all_tests --gtest_list_tests); do
-    if [[ $line == *. ]]; then
-        test_main=$line;
-    else
-        if [[ $test_main == GBPagesTest. ]]; then
-            if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then
-                $test_prefix $basedir/all_tests --gtest_filter="$test_main$line" $@
-                ret=$?
-                if [ $err -eq 0 ]; then err=$ret; fi
+
+# Execute getopt
+ARGS=$(getopt -o T:c:f:l:hdmg -- "$@");
+
+#Bad arguments
+if [ $? -ne 0 ];
+then
+    usage
+fi
+
+eval set -- "$ARGS";
+
+while true; do
+    case "$1" in
+        -T)
+            TEST_PATH=$2;
+            shift 2;
+            ;;
+        -c)
+            CSV=$2;
+            shift 2;
+            ;;
+        -f)
+            TEST_FILTER=$2;
+            shift 2;
+            ;;
+        -l)
+            LOG_FILE=$2;
+            shift 2;
+            ;;
+        -m)
+            echo "Skipping tests that require 2MB pages due to unsatisfactory system conditions"
+            if [[ "$SKIPPED_GTESTS" == "" ]]; then
+                SKIPPED_GTESTS=":-*test_TC_MEMKIND_2MBPages_*"
+            else
+                SKIPPED_GTESTS=$SKIPPED_GTESTS":*test_TC_MEMKIND_2MBPages_*"
             fi
+            show_skipped_tests "test_TC_MEMKIND_2MBPages_"
+            shift
+            ;;
+        -g)
+            echo "Skipping tests that require GB pages due to unsatisfactory system conditions"
+            if [[ "$SKIPPED_GTESTS" == "" ]]; then
+                SKIPPED_GTESTS=":-*test_TC_MEMKIND_GBPages_*"
+            else
+                SKIPPED_GTESTS=$SKIPPED_GTESTS":*test_TC_MEMKIND_GBPages_*"
+            fi
+            show_skipped_tests "test_TC_MEMKIND_GBPages_"
+            shift
+            ;;
+        -d)
+            echo "Skipping tests that detect high bandwidth memory nodes due to unsatisfactory system conditions"
+            if [[ $SKIPPED_PYTEST == "" ]]; then
+                SKIPPED_PYTEST=" and not hbw_detection"
+            else
+                SKIPPED_PYTEST=$SKIPPED_PYTEST" and not hbw_detection"
+            fi
+            show_skipped_tests "test_TC_MEMKIND_hbw_detection"
+            shift
+            ;;
+        -h)
+            usage;
+            shift;
+            ;;
+        --)
+            shift;
+            break;
+            ;;
+    esac
+done
+
+TEST_PATH=`normalize_path "$TEST_PATH"`
+
+# Clear any remnants of previous execution(s)
+rm -rf $CSV
+rm -rf $LOG_FILE
+
+# Run tests written in gtest
+for i in ${!GTEST_BINARIES[*]}; do
+    GTEST_BINARY_PATH=$TEST_PATH${GTEST_BINARIES[$i]}
+    emit
+    emit "### Processing gtest binary '$GTEST_BINARY_PATH' ###"
+    for LINE in $($GTEST_BINARY_PATH --gtest_list_tests); do
+        if [[ $LINE == *. ]]; then
+            TEST_SUITE=$LINE;
         else
-            $test_prefix $basedir/all_tests --gtest_filter="$test_main$line" $@
+            TEST_CMD="$GTEST_BINARY_PATH --gtest_filter=%s 2>&1"
+            execute_gtest "$TEST_CMD" "$TEST_SUITE$LINE"
             ret=$?
             if [ $err -eq 0 ]; then err=$ret; fi
         fi
-    fi
-done
-
-$basedir/decorator_test $@
-ret=$?
-if [ $err -eq 0 ]; then err=$ret; fi
-
-$basedir/allocator_perf_tool_tests $@
-ret=$?
-if [ $err -eq 0 ]; then err=$ret; fi
-
-$basedir/environerr_hbw_malloc_test $@
-ret=$?
-if [ $err -eq 0 ]; then err=$ret; fi
-
-#
-# These tests are broken.  Will avoid using LD_PRELOAD in future test
-# implementation.
-#
-# LD_PRELOAD=$basedir/libmallctl.so $basedir/mallctlerr_test $@
-# ret=$?
-# if [ $err -eq 0 ]; then err=$ret; fi
-
-#
-# Run the examples as tests
-#
-$basedir/hello_memkind
-ret=$?
-if [ $ret -ne 0 ]; then echo "FAIL: hello_memkind" 1>&2; fi
-if [ $err -eq 0 ]; then err=$ret; fi
-
-LD_PRELOAD=$basedir/libautohbw.so AUTO_HBW_SIZE=4K $basedir/autohbw_candidates
-ret=$?
-if [ $ret -ne 0 ]; then echo "FAIL: autohbw_candidates" 1>&2; fi
-if [ $err -eq 0 ]; then err=$ret; fi
-
-$basedir/hello_memkind_debug
-ret=$?
-if [ $ret -ne 0 ]; then echo "FAIL: hello_memkind_debug" 1>&2; fi
-if [ $err -eq 0 ]; then err=$ret; fi
-
-$basedir/hello_hbw
-ret=$?
-if [ $ret -ne 0 ]; then echo "FAIL: hello_hbw" 1>&2; fi
-if [ $err -eq 0 ]; then err=$ret; fi
-
-$basedir/memkind_allocated
-ret=$?
-if [ $ret -ne 0 ]; then echo "FAIL: memkind_allocated" 1>&2; fi
-if [ $err -eq 0 ]; then err=$ret; fi
-
-$basedir/filter_memkind
-ret=$?
-if [ $ret -ne 0 ]; then echo "FAIL: filter_memkind" 1>&2; fi
-if [ $err -eq 0 ]; then err=$ret; fi
-
-$basedir/new_kind
-ret=$?
-if [ $ret -ne 0 ]; then echo "FAIL: new_kind" 1>&2; fi
-if [ $err -eq 0 ]; then err=$ret; fi
-
-$basedir/pmem
-ret=$?
-if [ $ret -ne 0 ]; then echo "FAIL: pmem" 1>&2; fi
-if [ $err -eq 0 ]; then err=$ret; fi
-
-$basedir/stream
-ret=$?
-if [ $ret -ne 0 ]; then echo "FAIL: stream" 1>&2; fi
-if [ $err -eq 0 ]; then err=$ret; fi
-
-
-
-
-
-
-
-for kind in memkind_default \
-            memkind_hbw \
-            memkind_hbw_hugetlb \
-            memkind_hbw_preferred \
-            memkind_hbw_preferred_hugetlb; do
-    $basedir/stream_memkind $kind
-    ret=$?
-    if [ $ret -ne 0 ]; then echo "FAIL: stream_memkind $kind" 1>&2; fi
-    if [ $err -eq 0 ]; then err=$ret; fi
-done
-
-if [ -f /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages ]; then
-    for kind in memkind_gbtlb \
-                memkind_hbw_gbtlb \
-                memkind_hbw_preferred_gbtlb; do
-        $basedir/stream_memkind $kind
-        ret=$?
-        if [ $ret -ne 0 ]; then echo "FAIL: stream_memkind $kind" 1>&2; fi
-        if [ $err -eq 0 ]; then err=$ret; fi
     done
-    $basedir/gb_realloc
-    ret=$?
-    if [ $ret -ne 0 ]; then echo "FAIL: gb_realloc" 1>&2; fi
-    if [ $err -eq 0 ]; then err=$ret; fi
+done
+
+# Run tests written in pytest
+for i in ${!PYTEST_FILES[*]}; do
+    PTEST_BINARY_PATH=$TEST_PATH${PYTEST_FILES[$i]}
+    emit
+    emit "### Processing pytest file '$PTEST_BINARY_PATH' ###"
+    IFS=$'\n'
+    for LINE in $(py.test $PTEST_BINARY_PATH --collect-only); do
+        if [[ $LINE == *"<Class "* ]]; then
+            TEST_SUITE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
+        elif [[ $LINE == *"<Function "* ]]; then
+            LINE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
+            TEST_CMD="py.test $PTEST_BINARY_PATH -k='%s' 2>&1"
+            execute_pytest "$TEST_CMD" "$TEST_SUITE" "$LINE"
+            ret=$?
+            if [ $err -eq 0 ]; then err=$ret; fi
+        fi
+    done
+done
+
+if [[ $remove_file = true ]]; then
+    rm /usr/bin/memkind-hbw-nodes
 fi
 
 exit $err

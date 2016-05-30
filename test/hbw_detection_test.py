@@ -80,15 +80,15 @@ class Test_hbw_detection(object):
         assert retcode == 0, self.fail_msg.format("Error: hbw_nodemask returned {0}".format(retcode))
         return hbw_nodemask_env_variable
 
-    def test_hbw_detection_default(self):
+    def test_TC_MEMKIND_hbw_detection_default(self):
         """ This test checks whether hbw_nodemask_default is not None """
         assert self.get_nodemask_default() is not None, self.fail_msg.format("Error: hbw_nodemask_default is None")
 
-    def test_hbw_detection_env_variable(self):
+    def test_TC_MEMKIND_hbw_detection_env_variable(self):
         """ This test checks whether hbw_nodemask_env_variable is not None """
         assert self.get_nodemask_env_variable() is not None, self.fail_msg.format("Error: hbw_nodemask_env_variable is None")
 
-    def test_hbw_detection_compare_nodemask_default_and_env_variable(self):
+    def test_TC_MEMKIND_hbw_detection_compare_nodemask_default_and_env_variable(self):
         """ This test checks whether hbw_nodemask_default and hbw_nodemask_env_variable has the same value """
         hbw_nodemask_default = self.get_nodemask_default()
         hbw_nodemask_env_variable = self.get_nodemask_env_variable()

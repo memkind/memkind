@@ -114,42 +114,42 @@ protected:
     }
 };
 
-PERF_TEST(PerformanceTest, single_op_single_iter)
+TEST_F(PerformanceTest, test_TC_MEMKIND_perf_single_op_single_iter)
 {
     referenceTest.setupTest_singleOpSingleIter();
     performanceTest.setupTest_singleOpSingleIter();
     run();
 }
 
-PERF_TEST(PerformanceTest, many_ops_single_iter)
+TEST_F(PerformanceTest, test_TC_MEMKIND_perf_many_ops_single_iter)
 {
     referenceTest.setupTest_manyOpsSingleIter();
     performanceTest.setupTest_manyOpsSingleIter();
     run();
 }
 
-PERF_TEST(PerformanceTest, many_ops_single_iter_huge_alloc)
+TEST_F(PerformanceTest, test_TC_MEMKIND_perf_many_ops_single_iter_huge_alloc)
 {
     referenceTest.setupTest_manyOpsSingleIterHugeAlloc();
     performanceTest.setupTest_manyOpsSingleIterHugeAlloc();
     run();
 }
 
-PERF_TEST(PerformanceTest, single_op_many_iters)
+TEST_F(PerformanceTest, test_TC_MEMKIND_perf_single_op_many_iters)
 {
     referenceTest.setupTest_singleOpManyIters();
     performanceTest.setupTest_singleOpManyIters();
     run();
 }
 
-PERF_TEST(PerformanceTest, many_ops_many_iters)
+TEST_F(PerformanceTest, test_TC_MEMKIND_perf_many_ops_many_iters)
 {
     referenceTest.setupTest_manyOpsManyIters();
     performanceTest.setupTest_manyOpsManyIters();
     run();
 }
 
-PERF_TEST(PerformanceTest, many_ops_many_iters_many_kinds)
+TEST_F(PerformanceTest, test_TC_MEMKIND_perf_many_ops_many_iters_many_kinds)
 {
     referenceTest.setupTest_manyOpsManyIters();
     performanceTest.setupTest_manyOpsManyIters();
