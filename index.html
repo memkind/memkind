@@ -1,54 +1,77 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>memkind</title>
+    <meta name="description" content="Memkind : User Extensible Heap Manager">
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-      ga('create', 'UA-62435102-1', 'auto');
-      ga('send', 'pageview');
-
-    </script>
+    <title>Memkind</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>memkind</h1>
-        <p>User Extensible Heap Manager</p>
 
-        <p class="view"><a href="https://github.com/memkind">View the Memkind Organization on GitHub</a></p>
-      </header>
-      <section>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/memkind/memkind">View on GitHub</a>
+
+          <h1 id="project_title">Memkind</h1>
+          <h2 id="project_tagline">User Extensible Heap Manager</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/memkind/memkind/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/memkind/memkind/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
         <h3>
-            <a name="welcome-to-memkind" class="anchor" href="#welcome-to-memkind"><span class="octicon octicon-link"></span></a>Welcome to memkind.
-        </h3>
+<a id="welcome-to-memkind" class="anchor" href="#welcome-to-memkind" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Welcome to memkind.</h3>
 
-        <p>The memkind man pages: </br>
-        <ul>
-        <li><a href="man_pages/memkind.html">memkind.html</a></br>
-        <li><a href="man_pages/hbwmalloc.html">hbwmalloc.html</a></p>
-        </ul>
+<p>Few useful links:</p>
 
-        <p>The memkind architecture document: </br><a href="memkind_arch_20150318.pdf">memkind_arch_20150318.pdf</a></p>
-        <p>For source and binary RPMs of latest tagged release from OpenSuSE builds: </br><a href="http://download.opensuse.org/repositories/home:/cmcantalupo/">http://download.opensuse.org/repositories/home:/cmcantalupo/</a></p>
-        <p>Please join the memkind mailing list: </br><a href="https://lists.01.org/mailman/listinfo/memkind">https://lists.01.org/mailman/listinfo/memkind</a></p>
-        <p>Packages available from <a href="https://apps.fedoraproject.org/packages/memkind">Fedora</a>:
-           <a href="https://dl.fedoraproject.org/pub/epel/7/x86_64/m/">EPEL 7</a>,
-           <a href="http://dl.fedoraproject.org/pub/fedora/linux/updates/21/x86_64/m/">Fedroa 21</a>,
-           <a href="http://dl.fedoraproject.org/pub/fedora/linux/updates/22/x86_64/m/">Fedora 22</a></p>
-        <p>For access to the latest code, clone the git repos (primarily for developers).</p>
-        <pre><code>$ git clone https://github.com/memkind/memkind.git</code></pre>
+<ul>
+<li>Based on memkind man pages:
+
+<ul>
+<li><a href="http://memkind.github.io/memkind/man_pages/memkind.html">memkind API</a></li>
+<li><a href="http://memkind.github.io/memkind/man_pages/hbwmalloc.html">hbwmalloc API</a></li>
+</ul>
+</li>
+<li>
+<a href="http://memkind.github.io/memkind/memkind_arch_20150318.pdf">Architecture document</a> </li>
+</ul>
+
+<p>For source and binary RPMs of latest tagged release from OpenSuSE builds: 
+<a href="http://download.opensuse.org/repositories/home:/cmcantalupo/">http://download.opensuse.org/repositories/home:/cmcantalupo/</a></p>
+
+<p>Please join the memkind mailing list: 
+<a href="https://lists.01.org/mailman/listinfo/memkind">https://lists.01.org/mailman/listinfo/memkind</a></p>
+
+<p>Packages available from Fedora: EPEL 7, Fedroa 21, Fedora 22</p>
+
+<p>For access to the latest code, clone the git repos (primarily for developers).</p>
+
+<pre><code>$ git clone https://github.com/memkind/memkind.git
+</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Memkind maintained by <a href="https://github.com/memkind">memkind</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
   </body>
 </html>
