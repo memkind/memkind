@@ -51,7 +51,7 @@ protected:
 };
 
 
-TEST_F(NegativeTest, TC_Memkind_Negative_ErrorUnavailable)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorUnavailable)
 {
     void *ret;
     void *err = (void *)(-1); /* MAP_FAILED */
@@ -60,7 +60,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_ErrorUnavailable)
     EXPECT_EQ(err, ret);
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_ErrorMemAlign)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorMemAlign)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -75,7 +75,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_ErrorMemAlign)
     EXPECT_EQ(errno, 0);
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_ErrorAlignment)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorAlignment)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -91,7 +91,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_ErrorAlignment)
 }
 
 
-TEST_F(NegativeTest, TC_Memkind_Negative_ErrorAllocM)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorAllocM)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -106,7 +106,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_ErrorAllocM)
     EXPECT_EQ(errno, 0);
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeMalloc)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_InvalidSizeMalloc)
 {
     void *ptr = NULL;
     for (int i = -1; i <= 0; i++) {
@@ -120,7 +120,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeMalloc)
     }
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeCalloc)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_InvalidSizeCalloc)
 {
     void *ptr = NULL;
     for (int i = -1; i <= 0; i++) {
@@ -136,7 +136,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeCalloc)
     }
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeRealloc)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_InvalidSizeRealloc)
 {
     void *ptr = NULL;
     for (int i = -1; i <= 0; i++) {
@@ -152,7 +152,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeRealloc)
     }
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeMemalign)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_InvalidSizeMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -171,7 +171,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_InvalidSizeMemalign)
     EXPECT_EQ(errno, 0);
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_GBFailureMemalign)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBFailureMemalign)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -185,7 +185,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_GBFailureMemalign)
     EXPECT_TRUE(ptr == NULL);
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_RegularReallocWithMemAllign)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_RegularReallocWithMemAllign)
 {
     int ret = 0;
     void *ptr = NULL;
@@ -202,7 +202,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_RegularReallocWithMemAllign)
     hbw_free(ptr);
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicy)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_SetPolicy)
 {
     // First call should be successfull, consequent should generate a warning
     // and be ignored
@@ -214,7 +214,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicy)
 }
 
 //Check if hbw_set_policy() will be ignored after malloc.
-TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterMalloc)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_SetPolicyAfterMalloc)
 {
     void *ptr = hbw_malloc(512);
     EXPECT_TRUE(ptr != NULL);
@@ -227,7 +227,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterMalloc)
 }
 
 //Check if hbw_set_policy() will be ignored after calloc.
-TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterCalloc)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_SetPolicyAfterCalloc)
 {
     void *ptr = hbw_calloc(512, 1);
     EXPECT_TRUE(ptr != NULL);
@@ -240,7 +240,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterCalloc)
 }
 
 //Check if hbw_set_policy() will be ignored after realloc.
-TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterRealloc)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_SetPolicyAfterRealloc)
 {
     void *ptr = hbw_malloc(512);
     EXPECT_TRUE(ptr != NULL);
@@ -255,7 +255,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterRealloc)
 }
 
 //Check if hbw_set_policy() will be ignored after hbw_posix_memalign.
-TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterHbwPosixMemalign)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_SetPolicyAfterHbwPosixMemalign)
 {
     void *ptr = NULL;
 
@@ -270,7 +270,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterHbwPosixMemalign)
 }
 
 //Check if hbw_set_policy() will be ignored after hbw_posix_memalign_psize.
-TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterHbwPosixMemalignPsize)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_SetPolicyAfterHbwPosixMemalignPsize)
 {
     void *ptr = NULL;
 
@@ -285,7 +285,7 @@ TEST_F(NegativeTest, TC_Memkind_Negative_SetPolicyAfterHbwPosixMemalignPsize)
 }
 
 
-TEST_F(NegativeTest, TC_Memkind_Negative_GBMemalignPsizeAllign)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBMemalignPsizeAllign)
 {
     void *ptr = NULL;
     int ret = 0;
@@ -295,14 +295,14 @@ TEST_F(NegativeTest, TC_Memkind_Negative_GBMemalignPsizeAllign)
     EXPECT_EQ(err, ret);
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_GBNullRealloc)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBNullRealloc)
 {
     void *ptr = NULL;
     ptr = memkind_gbtlb_realloc(MEMKIND_HBW_GBTLB, NULL, -1);
     EXPECT_TRUE(ptr == NULL);
 }
 
-TEST_F(NegativeTest, TC_Memkind_Negative_GBNullFree)
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBNullFree)
 {
     memkind_free(MEMKIND_GBTLB, NULL);
 }

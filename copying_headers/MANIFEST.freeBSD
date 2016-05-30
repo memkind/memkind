@@ -72,7 +72,6 @@ test/negative_tests.cpp
 test/numadist_mock.c
 test/sched_mock.c
 test/test.sh
-test/test_remote.sh
 test/trial_generator.cpp
 test/trial_generator.h
 test/partition_tests.cpp

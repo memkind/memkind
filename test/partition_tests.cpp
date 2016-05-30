@@ -28,7 +28,7 @@
 /* Test to check each memkind parititon through memkind_get_kind_by_partition API */
 class Partition: public :: testing::Test { };
 
-TEST_F(Partition, TC_Memkind_CheckBasePartitions)
+TEST_F(Partition, test_TC_MEMKIND_CheckBasePartitions)
 {
     memkind_t kind;
 

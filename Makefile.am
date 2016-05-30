@@ -90,7 +90,6 @@ EXTRA_DIST = autogen.sh \
              examples/README \
              test/check.sh \
              test/test.sh \
-             test/test_remote.sh \
              test/*_mock.c \
              VERSION \
              CONTRIBUTING \

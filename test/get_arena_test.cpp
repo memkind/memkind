@@ -47,7 +47,7 @@ bool uint_comp(unsigned int a, unsigned int b)
     return (a < b);
 }
 
-TEST_F(GetArenaTest, TC_Memkind_ThreadHash)
+TEST_F(GetArenaTest, test_TC_MEMKIND_ThreadHash)
 {
     int num_threads = omp_get_max_threads();
     std::vector<unsigned int> arena_idx(num_threads);

@@ -58,7 +58,7 @@ protected:
 
 //Allocate memory to max using MEMKIND_HBW kind.
 //NOTE: Allocated memory is limited (allocated_memory = total_free - reserved_unallocated).
-TEST_F(AllocateToMaxStressTests, TC_ALLOCATE_TO_MAX_MEMKIND_HBW)
+TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW)
 {
     unsigned allocator_id = AllocatorTypes::MEMKIND_HBW;
     RecordProperty("kind", AllocatorTypes::allocator_name(allocator_id));
@@ -101,7 +101,7 @@ TEST_F(AllocateToMaxStressTests, TC_ALLOCATE_TO_MAX_MEMKIND_HBW)
 
 //Allocate memory to max using MEMKIND_INTERLEAVE kind.
 //NOTE: Allocated memory is limited (allocated_memory = total_free - reserved_unallocated).
-TEST_F(AllocateToMaxStressTests, TC_ALLOCATE_TO_MAX_MEMKIND_INTERLEAVE)
+TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_INTERLEAVE)
 {
     unsigned allocator_id = AllocatorTypes::MEMKIND_INTERLEAVE;
     RecordProperty("kind", AllocatorTypes::allocator_name(allocator_id));

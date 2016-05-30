@@ -40,55 +40,55 @@ class BATest: public TGTest
 };
 
 
-TEST_F(BATest, TC_Memkind_HBW_Pref_CheckAvailable)
+TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_CheckAvailable)
 {
     ASSERT_EQ(0, hbw_check_available());
 }
 
-TEST_F(BATest, TC_Memkind_HBW_Pref_Policy)
+TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_Policy)
 {
     hbw_set_policy(HBW_POLICY_PREFERRED);
     EXPECT_EQ(HBW_POLICY_PREFERRED, hbw_get_policy());
 }
 
-TEST_F(BATest, TC_Memkind_HBW_Pref_MallocIncremental)
+TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_MallocIncremental)
 {
     tgen->generate_incremental(HBW_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, TC_Memkind_HBW_Pref_CallocIncremental)
+TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_CallocIncremental)
 {
     tgen->generate_incremental(HBW_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(BATest, TC_Memkind_HBW_Pref_ReallocIncremental)
+TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_ReallocIncremental)
 {
     tgen->generate_incremental(HBW_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, TC_Memkind_HBW_Pref_MemalignIncremental)
+TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_MemalignIncremental)
 {
     tgen->generate_incremental(HBW_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, TC_Memkind_HBW_Pref_MemalignPsizeIncremental)
+TEST_F(BATest, test_TC_MEMKIND_2MBPages_HBW_Pref_MemalignPsizeIncremental)
 {
     tgen->generate_incremental(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, TC_Memkind_HBW_Pref_MallocRecycle)
+TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_MallocRecycle)
 {
     tgen->generate_recycle_incremental(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, TC_Memkind_HBW_Pref_MallocRecyclePsize)
+TEST_F(BATest, test_TC_MEMKIND_2MBPages_HBW_Pref_MallocRecyclePsize)
 {
     tgen->generate_recycle_psize_incremental(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);

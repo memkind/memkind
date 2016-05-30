@@ -68,7 +68,7 @@ protected:
     }
 };
 
-TEST_F(ErrorMessage, TC_Memkind_ErrorMsgLength)
+TEST_F(ErrorMessage, test_TC_MEMKIND_ErrorMsgLength)
 {
     int i;
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
@@ -79,7 +79,7 @@ TEST_F(ErrorMessage, TC_Memkind_ErrorMsgLength)
     memkind_error_message(MEMKIND_ERROR_UNAVAILABLE, NULL, 0);
 }
 
-TEST_F(ErrorMessage, TC_Memkind_ErrorMsgFormat)
+TEST_F(ErrorMessage, test_TC_MEMKIND_ErrorMsgFormat)
 {
     int i;
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
@@ -89,7 +89,7 @@ TEST_F(ErrorMessage, TC_Memkind_ErrorMsgFormat)
     }
 }
 
-TEST_F(ErrorMessage, TC_Memkind_ErrorMsgUndefMesg)
+TEST_F(ErrorMessage, test_TC_MEMKIND_ErrorMsgUndefMesg)
 {
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
     memkind_error_message(-0xdeadbeef, error_message, MEMKIND_ERROR_MESSAGE_SIZE);

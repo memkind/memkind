@@ -50,7 +50,7 @@ protected:
 };
 
 
-TEST_F(MemkindPmemTests, PmemPriv)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPriv)
 {
     size_t total_mem = 0;
     size_t free_mem = 0;
@@ -67,7 +67,7 @@ TEST_F(MemkindPmemTests, PmemPriv)
     EXPECT_LT(offset, total_mem);
 }
 
-TEST_F(MemkindPmemTests, PmemMalloc)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMalloc)
 {
     const size_t size = 1024;
     char *default_str = NULL;
@@ -85,7 +85,7 @@ TEST_F(MemkindPmemTests, PmemMalloc)
     EXPECT_EQ(NULL, default_str);
 }
 
-TEST_F(MemkindPmemTests, PmemCalloc)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCalloc)
 {
     const size_t size = 1024;
     const size_t num = 1;
@@ -111,7 +111,7 @@ TEST_F(MemkindPmemTests, PmemCalloc)
     memkind_free(pmem_kind, default_str);
 }
 
-TEST_F(MemkindPmemTests, PmemCallocHuge)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHuge)
 {
     const size_t size = CHUNK_SIZE;
     const size_t num = 1;
@@ -137,7 +137,7 @@ TEST_F(MemkindPmemTests, PmemCallocHuge)
     memkind_free(pmem_kind, default_str);
 }
 
-TEST_F(MemkindPmemTests, PmemGetSize)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemGetSize)
 {
     const size_t size = 512;
     char *default_str = NULL;
@@ -157,7 +157,7 @@ TEST_F(MemkindPmemTests, PmemGetSize)
     memkind_free(pmem_kind, default_str);
 }
 
-TEST_F(MemkindPmemTests, PmemRealloc)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
 {
     const size_t size1 = 512;
     const size_t size2 = 1024;

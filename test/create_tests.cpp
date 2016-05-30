@@ -37,7 +37,7 @@ extern const struct memkind_ops deadbeef_ops;
 class MemkindCreate: public :: testing :: Test { };
 
 /* bad_ops -> tests a set of invalid operations */
-TEST_F(MemkindCreate, TC_Memkind_CreateBadOps)
+TEST_F(MemkindCreate, test_TC_MEMKIND_CreateBadOps)
 {
     size_t i;
     int err;
@@ -52,7 +52,7 @@ TEST_F(MemkindCreate, TC_Memkind_CreateBadOps)
 /* rep_name-> test will verify that memkind does not allows to add a repeated
  * kind name
  */
-TEST_F(MemkindCreate, TC_Memkind_CreateRepName)
+TEST_F(MemkindCreate, test_TC_MEMKIND_CreateRepName)
 {
     int i, err;
     int num_bad_ops = sizeof(*MEMKIND_BAD_OPS)/sizeof(memkind_ops);
@@ -67,7 +67,7 @@ TEST_F(MemkindCreate, TC_Memkind_CreateRepName)
 /* partitions-> will verify that a user can defined its own way to treat mmaps as
  * defined in its ops list
  */
-TEST_F(MemkindCreate, TC_Memkind_CreatePartitions)
+TEST_F(MemkindCreate, test_TC_MEMKIND_CreatePartitions)
 {
     int res;
     size_t SIZE = 8*1024*1024;

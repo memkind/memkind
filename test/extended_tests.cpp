@@ -42,14 +42,14 @@ class EXTendedTest : public TGTest
 };
 
 
-TEST_F(EXTendedTest, TC_Memkind_HBW_Malloc_2bytes_2KB_2MB_sizes)
+TEST_F(EXTendedTest, test_TC_MEMKIND_HBW_Malloc_2bytes_2KB_2MB_sizes)
 {
     tgen->generate_size_2bytes_2KB_2MB(HBW_MALLOC);
     tgen->run(num_bandwidth,
               bandwidth);
 }
 
-TEST_F(EXTendedTest, TC_Memkind_HBW_Realloc_2bytes_2KB_2MB_sizes)
+TEST_F(EXTendedTest, test_TC_MEMKIND_HBW_Realloc_2bytes_2KB_2MB_sizes)
 {
     tgen->generate_size_2bytes_2KB_2MB(HBW_REALLOC);
     tgen->run(num_bandwidth,
@@ -57,14 +57,14 @@ TEST_F(EXTendedTest, TC_Memkind_HBW_Realloc_2bytes_2KB_2MB_sizes)
 }
 
 
-TEST_F(EXTendedTest, TC_Memkind_HBW_Calloc_2bytes_2KB_2MB_sizes)
+TEST_F(EXTendedTest, test_TC_MEMKIND_HBW_Calloc_2bytes_2KB_2MB_sizes)
 {
     tgen->generate_size_2bytes_2KB_2MB(HBW_CALLOC);
     tgen->run(num_bandwidth,
               bandwidth);
 }
 
-TEST_F(EXTendedTest, TC_Memkind_HBW_Memalign_2bytes_2KB_2MB_sizes)
+TEST_F(EXTendedTest, test_TC_MEMKIND_HBW_Memalign_2bytes_2KB_2MB_sizes)
 {
     tgen->generate_size_2bytes_2KB_2MB(HBW_MEMALIGN);
     tgen->run(num_bandwidth,
@@ -72,7 +72,7 @@ TEST_F(EXTendedTest, TC_Memkind_HBW_Memalign_2bytes_2KB_2MB_sizes)
 }
 
 
-TEST_F(EXTendedTest, TC_Memkind_HBW_MemalignPsize_2bytes_2KB_2MB_sizes)
+TEST_F(EXTendedTest, test_TC_MEMKIND_HBW_MemalignPsize_2bytes_2KB_2MB_sizes)
 {
     tgen->generate_size_2bytes_2KB_2MB(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth,

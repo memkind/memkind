@@ -105,20 +105,7 @@ kernel is quite recent.
 
 To test memkind simply execute the "make check" target after building.
 This target calls memkind/test/check.sh which in turn calls
-memkind/test/test.sh or memkind/test/test_remote.sh depending on the
-environment.  The remote testing is only triggered when the
-environment variables "TEST_HOST" "TEST_LOGIN" and "TEST_RPMDIR" are
-set, otherwise the tests are run on the local machine.  When testing
-on the local machine the local build is used.  When testing on a
-remote machine the locally built tests are used but they are run
-against the RPMs located in $TEST_RPMDIR which are installed on the
-remote system as part of the test (hence root access is required).
-The tests will be run on the machine that the domain name server
-resolves $TEST_HOST to.  If remote testing is enabled, be sure to run
-ssh-copy-id for both the $TEST_LOGIN user and the root user prior to
-executing the tests to enable passwordless SSH.  To run the local
-tests against a set of built RPMs on the local machine, set TEST_HOST
-to localhost.
+memkind/test/test.sh with parameters depending on the environment.
 
 Most of the tests are written within the gtest framework, however, as
 part of testing the example programs are also executed and the return

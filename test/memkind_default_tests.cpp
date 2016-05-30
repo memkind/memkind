@@ -43,7 +43,7 @@ protected:
 
 };
 
-TEST_F(MemkindDefaultTests, TC_Memkind_DefaultCalloc)
+TEST_F(MemkindDefaultTests, test_TC_MEMKIND_DefaultCalloc)
 {
     const size_t size = 1024;
     const size_t num = 1;
@@ -58,7 +58,7 @@ TEST_F(MemkindDefaultTests, TC_Memkind_DefaultCalloc)
     memkind_free(MEMKIND_DEFAULT, default_str);
 }
 
-TEST_F(MemkindDefaultTests, TC_Memkind_DefaultGetSize)
+TEST_F(MemkindDefaultTests, test_TC_MEMKIND_DefaultGetSize)
 {
     const size_t size = 512;
     char *default_str = NULL;
@@ -77,7 +77,7 @@ TEST_F(MemkindDefaultTests, TC_Memkind_DefaultGetSize)
     memkind_free(MEMKIND_DEFAULT, default_str);
 }
 
-TEST_F(MemkindDefaultTests, TC_Memkind_DefaultRealloc)
+TEST_F(MemkindDefaultTests, test_TC_MEMKIND_DefaultRealloc)
 {
     const size_t size1 = 512;
     const size_t size2 = 1024;

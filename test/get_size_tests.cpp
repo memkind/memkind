@@ -28,7 +28,7 @@
 /* Verifies output of size and free values returned by get size API */
 class GetSize: public :: testing::Test { };
 
-TEST_F(GetSize, TC_Memkind_GetSizeTest)
+TEST_F(GetSize, test_TC_MEMKIND_GetSizeTest)
 {
     size_t total = 0;
     size_t free = 0;

@@ -222,7 +222,6 @@ $(memkind_test_dir)/memkind-perf-ext.ts
 $(memkind_test_dir)/memkind-hbw_detection.ts
 $(memkind_test_dir)/check.sh
 $(memkind_test_dir)/test.sh
-$(memkind_test_dir)/test_remote.sh
 $(memkind_test_dir)/libfopen.so
 $(memkind_test_dir)/libmallctl.so
 $(memkind_test_dir)/libmalloc.so
