@@ -54,6 +54,11 @@ public:
     typedef const T& const_reference;
     typedef T value_type;
 
+    template <class U>
+    struct rebind {
+        typedef hbw::allocator<U> other;
+    };
+
     /*
      *  Public member functions required and defined by the standard library allocator concepts.
      */
