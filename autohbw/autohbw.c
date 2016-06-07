@@ -25,7 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////
 // File   : autohbw.c
 // Purpose: Library to automatically allocate HBW (MCDRAM)
-// Author : Ruchira Sasanka (ruchira.sasanka@intel.com)
+// Author : Ruchira Sasanka (ruchira DOT sasanka AT intel DOT com)
 // Date   : Jan 30, 2015
 ///////////////////////////////////////////////////////////////////////////
 
@@ -44,20 +44,24 @@
 #define TRUE 1
 #define BOOL int
 
-
-// Debug level. Increase the debug level to print more messages
-// 1: Info only
-// 2: Messages about allocation/failures
-//
-static int DbgLevel = 0;
-
 // Log level:
-// 1: Logs only failures
-// 2: Logs failures and allocations
 //
-static int LogLevel = 1;
+//-1 = no messages are printed
+// 0 = no log messages for allocations are printed but INFO messages
+//     are printed
+// 1 = a log message is printed for each allocation (Default)
+// 2 = a log message is printed for each allocation with a backtrace
 //
-enum {LOG_NONE, LOG_ALLOC, LOG_ALL};
+enum {LOG_NONE=-1, LOG_INFO=0, LOG_ALLOC, LOG_ALL};
+//
+// Default is to print allocations
+//
+static int LogLevel = LOG_ALLOC;
+//
+// Where the logging from AutoHBW is printed
+// This can be stderr, or stdout
+//
+static FILE *LogF;
 
 // The low limit for automatically promoting an allocation to HBW. Allocations
 // of size greater than the following will ber promoted.
@@ -87,7 +91,6 @@ static memkind_t HBW_Type;
 //
 #include "autohbw_helper.h"
 
-
 ////////////////////////////////////////////////////////////////////////////
 // This function is executed at library load time.
 // Initilize HBW arena by making a dummy allocation/free at library load
@@ -96,6 +99,9 @@ static memkind_t HBW_Type;
 ////////////////////////////////////////////////////////////////////////////
 void __attribute__ ((constructor)) autohbw_load(void)
 {
+    // Where we want log messages to go. This can be stderr, or stdout
+    //
+    LogF = stderr;
 
     // First set the default memory type this library allocates. This can
     // be overridden by env variable
@@ -109,8 +115,9 @@ void __attribute__ ((constructor)) autohbw_load(void)
       ret = memkind_get_kind_by_name("memkind_hbw_preferred", &HBW_Type);
     }
     else {
-      printf("WARN: *** No HBM found in system. Will use default (DDR) "
-             "OR user specifid type ***\n");
+      fprintf(LogF,
+              "WARN: *** No HBM found in system. Will use default (DDR) "
+              "OR user specifid type ***\n");
       ret = memkind_get_kind_by_name("memkind_default", &HBW_Type);
     }
     assert(!ret && "FATAL: Could not find default memory type\n");
@@ -120,36 +127,33 @@ void __attribute__ ((constructor)) autohbw_load(void)
     //
     setEnvValues();                // read any env variables
 
-    DBG(1) printf("INFO: autohbw.so loaded!\n");
+    LOG(LOG_INFO) fprintf(LogF, "INFO: autohbw.so loaded!\n");
 
     // dummy HBW call to initialize HBW arena
     //
     void *pp = memkind_malloc(HBW_Type, 16);
     //
     if (pp) {
-
         // We have successfully initilized HBW arena
         //
-        DBG(2) printf("\t-HBW int call succeeded\n");
+        LOG(LOG_ALL) fprintf(LogF, "\t-HBW int call succeeded\n");
         memkind_free(0, pp);
 
         MemkindInitDone = TRUE;        // enable HBW allocation
-
     }
     else {
-        errPrn("\t-HBW init call FAILED. Is required memory type present on your system?\n");
+        errPrn("\t-HBW init call FAILED. "
+            "Is required memory type present on your system?\n");
         assert(0 && "HBW/memkind initialization faild");
     }
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // My malloc implementation calling memkind_malloc.
 ////////////////////////////////////////////////////////////////////////////
 void *myMemkindMalloc(size_t size)
 {
-
-    DBG(2) printf("In my memkind malloc sz:%ld .. ", size);
+    LOG(LOG_ALL) fprintf(LogF, "In my memkind malloc sz:%ld .. ", size);
 
     void *pp;
 
@@ -159,27 +163,22 @@ void *myMemkindMalloc(size_t size)
     if (!MemkindInitDone || !isAllocInHBW(size))
         pp = memkind_malloc(MEMKIND_DEFAULT, size);
     else {
-        DBG(2) printf("\tHBW");
+        LOG(LOG_ALL) fprintf(LogF, "\tHBW");
         pp =  memkind_malloc(HBW_Type, size);
         logHBW(pp, size);
     }
 
-    DBG(2) printf("\tptr:%p\n", pp);
+    LOG(LOG_ALL) fprintf(LogF, "\tptr:%p\n", pp);
 
     return pp;
-
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // My calloc implementation calling memkind_calloc.
 ////////////////////////////////////////////////////////////////////////////
 void *myMemkindCalloc(size_t nmemb, size_t size)
 {
-
-    DBG(2) printf("In my memkind calloc sz:%ld ..", size*nmemb);
-
-    //setLibcSymbols();
+    LOG(LOG_ALL) fprintf(LogF, "In my memkind calloc sz:%ld ..", size*nmemb);
 
     void *pp;
 
@@ -188,26 +187,23 @@ void *myMemkindCalloc(size_t nmemb, size_t size)
     if (!MemkindInitDone || !isAllocInHBW(size*nmemb))
         pp = memkind_calloc(MEMKIND_DEFAULT, nmemb, size);
     else {
-        DBG(2) printf("\tHBW");
+        LOG(LOG_ALL) fprintf(LogF, "\tHBW");
         pp = memkind_calloc(HBW_Type, nmemb, size);
         logHBW(pp, size*nmemb);
     }
 
-    DBG(2) printf("\tptr:%p\n", pp);
+    LOG(LOG_ALL) fprintf(LogF, "\tptr:%p\n", pp);
 
     return pp;
-
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // My realloc implementation calling memkind_realloc
 ////////////////////////////////////////////////////////////////////////////
 void *myMemkindRealloc(void *ptr, size_t size)
 {
-
-    DBG(2) printf("In my memkind realloc sz:%ld, p1:%p ..", size, ptr);
-
+    LOG(LOG_ALL) fprintf(LogF,
+                   "In my memkind realloc sz:%ld, p1:%p ..", size, ptr);
     void *pp;
 
     // if we have not initialized memkind HBW arena yet, call default kind
@@ -215,24 +211,22 @@ void *myMemkindRealloc(void *ptr, size_t size)
     if (!MemkindInitDone  || !isAllocInHBW(size))
         pp = memkind_realloc(MEMKIND_DEFAULT, ptr, size);
     else {
-        DBG(2) printf("\tHBW");
+        LOG(LOG_ALL) fprintf(LogF, "\tHBW");
         pp = memkind_realloc(HBW_Type, ptr, size);
         logHBW(pp, size);
     }
 
-    DBG(2) printf("\tptr=%p\n", pp);
+    LOG(LOG_ALL) fprintf(LogF, "\tptr=%p\n", pp);
 
     return pp;
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Posix alignment
 ////////////////////////////////////////////////////////////////////////////
 int myMemkindAlign(void **memptr, size_t alignment, size_t size)
 {
-
-    DBG(2) printf("In my memkind align sz:%ld .. ", size);
+    LOG(LOG_ALL) fprintf(LogF, "In my memkind align sz:%ld .. ", size);
 
     int ret;
 
@@ -240,19 +234,16 @@ int myMemkindAlign(void **memptr, size_t alignment, size_t size)
     // Similarly, if the hueristic decides not to alloc in HBW, use default
     //
     if (!MemkindInitDone || !isAllocInHBW(size))
-
         ret = memkind_posix_memalign(MEMKIND_DEFAULT, memptr, alignment, size);
     else {
-        DBG(2) printf("\tHBW");
+        LOG(LOG_ALL) fprintf(LogF, "\tHBW");
         ret = memkind_posix_memalign(HBW_Type, memptr, alignment, size);
         logHBW(*memptr, size);
     }
-    DBG(2) printf("\tptr:%p\n", *memptr);
+    LOG(LOG_ALL) fprintf(LogF, "\tptr:%p\n", *memptr);
 
     return ret;
-
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // My memkind free function calling memkind_free (with Kind=0).
@@ -261,24 +252,20 @@ int myMemkindAlign(void **memptr, size_t alignment, size_t size)
 ////////////////////////////////////////////////////////////////////////////
 void myMemkindFree(void *ptr)
 {
-
-    DBG(2) printf("In my memkind free, ptr:%p\n", ptr);
+    LOG(LOG_ALL) fprintf(LogF, "In my memkind free, ptr:%p\n", ptr);
 
     memkind_free(0, ptr);
 }
 
-
 //--------------------------------------------------------------------------
 // ------------------ Section B: Interposer Functions ----------------------
 //--------------------------------------------------------------------------
-
 
 ////////////////////////////////////////////////////////////////////////////
 // My interposer for malloc
 ////////////////////////////////////////////////////////////////////////////
 void *malloc(size_t size)
 {
-
     return myMemkindMalloc(size);
 }
 
@@ -287,7 +274,6 @@ void *malloc(size_t size)
 ////////////////////////////////////////////////////////////////////////////
 void *calloc(size_t nmemb, size_t size)
 {
-
     return myMemkindCalloc(nmemb, size);
 }
 
@@ -296,20 +282,16 @@ void *calloc(size_t nmemb, size_t size)
 ////////////////////////////////////////////////////////////////////////////
 void *realloc(void *ptr, size_t size)
 {
-
     return myMemkindRealloc(ptr, size);
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // My interposer for posix_memalign
 ////////////////////////////////////////////////////////////////////////////
 int posix_memalign(void **memptr, size_t alignment, size_t size)
 {
-
     return myMemkindAlign(memptr, alignment, size);
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Capture deprecated valloc. We don't allow the use of this func because
@@ -319,11 +301,9 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
 ////////////////////////////////////////////////////////////////////////////
 void *valloc(size_t size)
 {
-
     fprintf(stderr, "use of deprecated valloc. Use posix_memalign instead\n");
     assert(0 && "valloc is deprecated. Not supported by this library");
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Capture deprecated memalign. We don't allow the use of this func because
@@ -333,10 +313,8 @@ void *valloc(size_t size)
 ////////////////////////////////////////////////////////////////////////////
 void *memalign(size_t boundary, size_t size)
 {
-
     fprintf(stderr, "use of deprecated memalign. Use posix_memalign instead\n");
     assert(0 && "memalign is deprecated. Not supported by this library");
-
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -344,10 +322,7 @@ void *memalign(size_t boundary, size_t size)
 ////////////////////////////////////////////////////////////////////////////
 void free(void *ptr)
 {
-
     if (ptr)
         return myMemkindFree(ptr);
 }
-
-
 
