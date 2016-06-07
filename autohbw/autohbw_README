@@ -1,5 +1,5 @@
 README for auothbw library
-Ruchira Sasanka (ruchira.sasanka AT intel.com)
+Ruchira Sasanka (ruchira DOT sasanka AT intel DOT com)
 2015 April 8
 
 PURPOSE
@@ -26,7 +26,7 @@ the latter approach is given in ./autohbw_test.sh. Make sure that
 LD_LIBRARY_PATH enviornment variable contains the path to libautohbw.so
 and libmekind.so before you exeute the above command.
 
-To use the statically linked library, inset -lautohbw -lmemkind -ljemalloc
+To use the statically linked library, insert -lautohbw -lmemkind
 on your link line. You will have to provide the library path with -L to
 point to the above libraries. If you are linking your program statically
 (e.g., with -static or -fast flags in ifort/icc), you must use the static
@@ -60,9 +60,11 @@ library:
 
   AUTO_HBW_LOG=level
   Sets the value of logging (printing) level. If level is:
-    0 = no messages are printed for allocations
+   -1 = no messages are printed
+    0 = no log messages for allocations are printed but INFO messages
+        are printed
     1 = a log message is printed for each allocation (Default)
-    2 = a log message is printed for each allocation with a backtrace.
+    2 = a log message is printed for each allocation with a backtrace
         Redirect this output and use autohbw_get_src_lines.pl to find
         source lines for each allocation. Your application must be compiled
         with -g to see source lines.

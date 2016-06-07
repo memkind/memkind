@@ -18,6 +18,7 @@ examples/hello_memkind_example.c
 examples/gb_realloc_example.c
 examples/memkind_decorator_debug.c
 make_rpm.mk
+man/autohbw.7
 man/hbwmalloc.3
 man/memkind.3
 man/memkind_arena.3
