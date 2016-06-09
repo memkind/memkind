@@ -1,0 +1,7 @@
+{
+  "name": "Memkind",
+  "tagline": "User Extensible Heap Manager",
+  "body": "### Welcome to memkind.\r\n\r\nFew useful links:\r\n* Based on memkind man pages:\r\n  * [memkind API](http://memkind.github.io/memkind/man_pages/memkind.html)\r\n  * [hbwmalloc API](http://memkind.github.io/memkind/man_pages/hbwmalloc.html)\r\n* [Architecture document](http://memkind.github.io/memkind/memkind_arch_20150318.pdf) \r\n\r\nFor source and binary RPMs of latest tagged release from OpenSuSE builds: \r\n[http://download.opensuse.org/repositories/home:/cmcantalupo/](http://download.opensuse.org/repositories/home:/cmcantalupo/)\r\n\r\nPlease join the memkind mailing list: \r\n[https://lists.01.org/mailman/listinfo/memkind](https://lists.01.org/mailman/listinfo/memkind)\r\n\r\nPackages available from Fedora: EPEL 7, Fedroa 21, Fedora 22\r\n\r\nFor access to the latest code, clone the git repos (primarily for developers).\r\n```\r\n$ git clone https://github.com/memkind/memkind.git\r\n```\r\n",
+  "google": "",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}

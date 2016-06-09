@@ -1,171 +1,77 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Memkind</title>
-  <meta name='viewport' content='width=device-width, initial-scale=1'>
-  <link rel='stylesheet' href='/build/memkind-doc-latest.min.css' />
-  <link rel='shortcut icon' type='image/png' href='/favicon.png' />
-</head>
-<body>
-  <header id="top" class="bs-docs-header">
-    <div class="container">
-      <h1>Memkind</h1>
-      <p>
-        User Extensible Heap Manager built on top of jemalloc which enables control of memory characteristics and a partitioning of the heap between kinds of memory. 
-      </p>
-      <p>
-        <a href="https://github.com/memkind/memkind/tarball/master" class="btn btn-outline-inverse btn-lg btn-default">Download</a>
-        <p class="version">Currently v1.1.0</p>
-      </p>
-    </div>
-  </header>
-  <div class='container'>
-    <div class='row'>
-      <div role="main" class='col-md-9'>
-        <div id="overview" class='bs-docs-section'>
-          <h1 class="page-header">
-            Overview
-          </h1>
-          <p class="lead">
-          The kinds of memory are defined by operating system memory policies that have been applied to virtual address ranges.  Memory characteristics supported by memkind without user extension include control of NUMA and page size features.  The jemalloc non-standard interface has been extended to enable specialized arenas to make requests for virtual memory from the operating system through the memkind partition interface. Through the other memkind interfaces the user can control and extend memory partition features and allocate memory while selecting enabled features.<br>
-Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
-          </p>
-          <h2>
-            How to get source code
-          </h2>
-          <p>
-          <pre> <code>$ git clone https://github.com/memkind/memkind.git</code> </pre>
-          </p>
-        </div>
-        <div id="downloads" class='bs-docs-section'>
-          <h1 class="page-header">
-            Downloads
-          </h1>
-          <h2>
-            Documentation
-          </h2>
-          <p>
-            <a href="http://memkind.github.io/memkind/memkind_arch_20150318.pdf" class="btn btn-link">Architecture [PDF]</a>
-            <a href="http://memkind.github.io/memkind/man_pages/memkind.html" class="btn btn-link">memkind API</a>
-            <a href="http://memkind.github.io/memkind/man_pages/hbwmalloc.html" class="btn btn-link">hbwmalloc API</a>
-          </p>
-          <h2>
-            Binaries
-          </h2>
-          <p>
-            <a href="https://github.com/memkind/memkind/tarball/master" class="btn btn-link">Tarball</a>
-            <a href="https://github.com/memkind/memkind/zipball/master" class="btn btn-link">ZIP</a>
-            <a href="http://download.opensuse.org/repositories/home:/cmcantalupo/" class="btn btn-link">RPMs for misc OSes</a>
-          </p>
-        </div>
-        <div id="faq" class='bs-docs-section'>
-          <h1 class="page-header">
-            FAQ
-          </h1>
-          <h2>
-            Is memkind package part of any official Linux Distribution?
-          </h2>
-          <p>
-          Memkind package is currently available as part of Fedora 22, Fedora 23 and Fedora 24. Also, it is available in EPEL repository. <a href="https://admin.fedoraproject.org/pkgdb/package/rpms/memkind/">Fedora package database</a>
-          </p>
-        </div>
-        <div id="blog" class='bs-docs-section'>
-          <h1 class="page-header">
-            Blog
-          </h1>
-          <p class="lead">Release 1.1.0 is available</p><span class="post-date">Mon May 23 2016</span><p>I would like to announce memkind release <strong>1.1.0</strong>. Changes since 1.0.0:</p>
-<ul>
-<li>Implemented algorithm for detecting high-bandwidth memory on Intel Xeon Phi X200 without parsing PMTT.</li>
-<li>PMTT-parsing service has been removed.</li>
-<li>memkind struct definition from <code>memkind.h</code> has been replaced by forward declaration. Definition has been moved to <code>/internal/memkind_private.h</code> and shouldn&#39;t be considered as part of library interface anymore.</li>
-<li>Performance improvment for hugetlb kinds (<code>check_available()</code> is no longer parsing sysfs every time).</li>
-<li>Performance fix by removing <code>--enable-safe</code> from jemmaloc build flags.</li>
-<li>New tests for validating high-bandwidth memory detection has been added.</li>
-<li>AFTS has been split into two groups: memkind-afts.ts and memkind-afts-ext.ts, based on amount of required memory (for details view test/README).</li>
-</ul>
-<p>Sources are available on:
-<a href="https://github.com/memkind/memkind/releases/tag/v1.1.0">https://github.com/memkind/memkind/releases/tag/v1.1.0</a></p>
-<p>Best Regards,</p>
-<p><em>Krzysztof Kulakowski</em></p>
-<p class="lead">Release 1.0.0 is available</p><span class="post-date">Mon Mar 07 2016</span><p>I would like to announce memkind release <strong>1.0.0.</strong> Changes since 0.3.0 (beta):</p>
-<ul>
-<li>hbwmalloc.h released as stable API.</li>
-<li>Introduce API standards: STANDARD API, NON-STANDARD API, EXPERIMENTAL API.</li>
-<li>Introduce memkind versioning API.</li>
-<li>Fix type names in hbwmalloc API.</li>
-<li>Change error codes to POSIX standard ones in hbwmalloc API.</li>
-<li>Move API headers to include directory.</li>
-<li>Move NON-STANDARD API, or EXPERIMENTAL API to <code>include/memkind/internal</code> directory.</li>
-<li>New man page (memkind_interleave.3) describing interleave kind.</li>
-<li>Significant documentation improvement.</li>
-<li>Performance fix for jemalloc - significantly decrease of library initialization time.</li>
-<li>Enforce 2MB alignment in jemalloc due to the Linux kernel bug (munmap() fails for huge pages, when the size is not aligned).</li>
-<li>Move to systemd defined service (memkind.service), drop init.d script.</li>
-<li>New rpm layout (memkind and memkind-devel).</li>
-<li>Remove false dependency on OpenMP.</li>
-<li>Extend test base for stress, longevity and initialization performance tests.</li>
-<li>Fix memory leak in ctl_growk().</li>
-<li>Rename namespace: hbwmalloc -&gt; hbw.</li>
-<li>Rename class: hbwmalloc_allocator -&gt; allocator.</li>
-</ul>
-<p>Sources are available on:
-<a href="https://github.com/memkind/memkind/releases/tag/v1.0.0">https://github.com/memkind/memkind/releases/tag/v1.0.0</a></p>
-<p>Best Regards,</p>
-<p><em>Krzysztof Kulakowski</em></p>
-<p class="lead">Release 0.3.0 (beta) is available</p><span class="post-date">Mon Oct 19 2015</span><p>I would like to announce memkind release <strong>0.3.0</strong> (beta). Changes since 0.2.2:</p>
-<ul>
-<li>Added two new kinds: <strong>MEMKIND_INTERLEAVE</strong> and <strong>MEMKIND_HBW_INTERLEAVE</strong> (for details please take a look at man/memkind.3)</li>
-<li>Added support for file-backed memory heaps (for details please take a look at man/memkind_pmem.3)</li>
-</ul>
-<ul>
-<li>Added autohbw library, that intercepts the standard heap allocations, which let use high-bandwidth memory without modifying existing codebase (for details please take a look at examples/autohbw_README)</li>
-<li>jemalloc is now, statically linked, internal component of memkind RPM instead of rpm dependency.</li>
-<li>Added <code>memkind_allocated</code> example which demonstrates usage of memkind with <code>alignas()</code> alignment specifier introduced in C++11 (for details please take a look at examples/README)</li>
-<li>Added support for using thread local storage to improve performance in multithreaded applications (enabled by configure time option: <code>--enable-tls</code>)</li>
-<li>Added possibility to set number of jemalloc arenas per kind by configure time parameter or environmental variable (for details please take a look at <strong>MEMKIND_ARENA_NUM_PER_KIND</strong> section of man/memkind.3).</li>
-<li>Added decorators to the memkind allocation APIs.  These are weak symbols (pre and post for each API) which can modify the input and output of each of the calls.</li>
-<li>Significantly extended test base (new groups of tests: performance, multithreaded, PMTT, negative, stress).</li>
-</ul>
-<p>Sources are available on:
-<a href="https://github.com/memkind/memkind/releases/tag/v0.3.0">https://github.com/memkind/memkind/releases/tag/v0.3.0</a></p>
-<p>Best Regards,</p>
-<p><em>Krzysztof Kulakowski</em></p>
 
-        </div>
-      </div>
-      <div class="col-md-3" role="complementary">
-        <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix-top">
-          <ul class="nav bs-docs-sidenav">
-            <li class="">
-              <a href="#overview">Overview</a>
-            </li>
-            <li class="">
-              <a href="#downloads">Downloads</a>
-            </li>
-            <li class="">
-              <a href="#faq">FAQ</a>
-            </li>
-            <li>
-              <a href="#blog">Blog</a>
-            </li>
-          </ul>
-        </nav>
-      </div>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Memkind : User Extensible Heap Manager">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Memkind</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/memkind/memkind">View on GitHub</a>
+
+          <h1 id="project_title">Memkind</h1>
+          <h2 id="project_tagline">User Extensible Heap Manager</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/memkind/memkind/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/memkind/memkind/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
     </div>
-  </div>
-  <footer class="bs-docs-footer" role="contentinfo">
-    <div class="container">
-      <ul class="bs-docs-footer-links">
-        <li>
-        <p>
-          <a href="https://github.com/memkind">memkind at GitHub</a>
-          </p>
-          <p>
-          <a href="mailto:krzysztof.kulakowski@intel.com">Contact maintainer</a>
-          </p>
-        </li>
-      </ul>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>
+<a id="welcome-to-memkind" class="anchor" href="#welcome-to-memkind" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Welcome to memkind.</h3>
+
+<p>Few useful links:</p>
+
+<ul>
+<li>Based on memkind man pages:
+
+<ul>
+<li><a href="http://memkind.github.io/memkind/man_pages/memkind.html">memkind API</a></li>
+<li><a href="http://memkind.github.io/memkind/man_pages/hbwmalloc.html">hbwmalloc API</a></li>
+</ul>
+</li>
+<li>
+<a href="http://memkind.github.io/memkind/memkind_arch_20150318.pdf">Architecture document</a> </li>
+</ul>
+
+<p>For source and binary RPMs of latest tagged release from OpenSuSE builds: 
+<a href="http://download.opensuse.org/repositories/home:/cmcantalupo/">http://download.opensuse.org/repositories/home:/cmcantalupo/</a></p>
+
+<p>Please join the memkind mailing list: 
+<a href="https://lists.01.org/mailman/listinfo/memkind">https://lists.01.org/mailman/listinfo/memkind</a></p>
+
+<p>Packages available from Fedora: EPEL 7, Fedroa 21, Fedora 22</p>
+
+<p>For access to the latest code, clone the git repos (primarily for developers).</p>
+
+<pre><code>$ git clone https://github.com/memkind/memkind.git
+</code></pre>
+      </section>
     </div>
-  </footer>
-</body>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Memkind maintained by <a href="https://github.com/memkind">memkind</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
 </html>
