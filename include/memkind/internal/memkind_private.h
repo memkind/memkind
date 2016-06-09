@@ -44,6 +44,9 @@ struct memkind {
     void *priv;
 };
 
+// common function for registring kinds on creation or first use (in case of static kinds)
+void memkind_register_kind(struct memkind *kind);
+
 #ifdef __cplusplus
 }
 #endif

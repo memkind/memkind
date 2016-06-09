@@ -44,7 +44,8 @@ const struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .posix_memalign = memkind_default_posix_memalign,
     .realloc = memkind_default_realloc,
     .free = memkind_default_free,
-    .get_size = memkind_default_get_size
+    .get_size = memkind_default_get_size,
+    .init_once = memkind_default_init_once
 };
 
 int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
@@ -229,4 +230,9 @@ int memkind_posix_check_alignment(struct memkind *kind, size_t alignment)
         err = EINVAL;
     }
     return err;
+}
+
+void memkind_default_init_once(void)
+{
+    memkind_register_kind(MEMKIND_DEFAULT);
 }
