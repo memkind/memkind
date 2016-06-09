@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Memkind</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <link rel='stylesheet' href='/<%= cssFile %>' />
+  <link rel='shortcut icon' type='image/png' href='/favicon.png' />
+</head>
+<body>
+  <header id="top" class="bs-docs-header">
+    <div class="container">
+      <h1>Memkind</h1>
+      <p>
+        User Extensible Heap Manager built on top of jemalloc which enables control of memory characteristics and a partitioning of the heap between kinds of memory. 
+      </p>
+      <p>
+        <a href="https://github.com/memkind/memkind/tarball/master" class="btn btn-outline-inverse btn-lg btn-default">Download</a>
+        <p class="version">Currently v1.1.0</p>
+      </p>
+    </div>
+  </header>
+  <div class='container'>
+    <div class='row'>
+      <div role="main" class='col-md-9'>
+        <div id="overview" class='bs-docs-section'>
+          <h1 class="page-header">
+            Overview
+          </h1>
+          <p class="lead">
+          The kinds of memory are defined by operating system memory policies that have been applied to virtual address ranges.  Memory characteristics supported by memkind without user extension include control of NUMA and page size features.  The jemalloc non-standard interface has been extended to enable specialized arenas to make requests for virtual memory from the operating system through the memkind partition interface. Through the other memkind interfaces the user can control and extend memory partition features and allocate memory while selecting enabled features.<br>
+Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
+          </p>
+          <h2>
+            How to get source code
+          </h2>
+          <p>
+          <pre> <code>$ git clone https://github.com/memkind/memkind.git</code> </pre>
+          </p>
+        </div>
+        <div id="downloads" class='bs-docs-section'>
+          <h1 class="page-header">
+            Downloads
+          </h1>
+          <h2>
+            Documentation
+          </h2>
+          <p>
+            <a href="http://memkind.github.io/memkind/memkind_arch_20150318.pdf" class="btn btn-link">Architecture [PDF]</a>
+            <a href="http://memkind.github.io/memkind/man_pages/memkind.html" class="btn btn-link">memkind API</a>
+            <a href="http://memkind.github.io/memkind/man_pages/hbwmalloc.html" class="btn btn-link">hbwmalloc API</a>
+          </p>
+          <h2>
+            Binaries
+          </h2>
+          <p>
+            <a href="https://github.com/memkind/memkind/tarball/master" class="btn btn-link">Tarball</a>
+            <a href="https://github.com/memkind/memkind/zipball/master" class="btn btn-link">ZIP</a>
+            <a href="http://download.opensuse.org/repositories/home:/cmcantalupo/" class="btn btn-link">RPMs for misc OSes</a>
+          </p>
+        </div>
+        <div id="faq" class='bs-docs-section'>
+          <h1 class="page-header">
+            FAQ
+          </h1>
+          <h2>
+            Is memkind package part of any official Linux Distribution?
+          </h2>
+          <p>
+          Memkind package is currently available as part of Fedora 22, Fedora 23 and Fedora 24. Also, it is available in EPEL repository. <a href="https://admin.fedoraproject.org/pkgdb/package/rpms/memkind/">Fedora package database</a>
+          </p>
+        </div>
+        <div id="blog" class='bs-docs-section'>
+          <h1 class="page-header">
+            Blog
+          </h1>
+          <%= blogHtml %>
+        </div>
+      </div>
+      <div class="col-md-3" role="complementary">
+        <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix-top">
+          <ul class="nav bs-docs-sidenav">
+            <li class="">
+              <a href="#overview">Overview</a>
+            </li>
+            <li class="">
+              <a href="#downloads">Downloads</a>
+            </li>
+            <li class="">
+              <a href="#faq">FAQ</a>
+            </li>
+            <li>
+              <a href="#blog">Blog</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <footer class="bs-docs-footer" role="contentinfo">
+    <div class="container">
+      <ul class="bs-docs-footer-links">
+        <li>
+        <p>
+          <a href="https://github.com/memkind">memkind at GitHub</a>
+          </p>
+          <p>
+          <a href="mailto:krzysztof.kulakowski@intel.com">Contact maintainer</a>
+          </p>
+        </li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>
