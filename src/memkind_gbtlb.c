@@ -56,7 +56,8 @@ const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .get_mbind_mode = memkind_default_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size,
-    .check_addr = memkind_gbtlb_check_addr
+    .check_addr = memkind_gbtlb_check_addr,
+    .init_once = memkind_hbw_gbtlb_init_once
 };
 
 const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
@@ -73,7 +74,9 @@ const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_size = memkind_default_get_size,
-    .check_addr = memkind_gbtlb_check_addr
+    .check_addr = memkind_gbtlb_check_addr,
+    .init_once = memkind_hbw_preferred_gbtlb_init_once
+
 };
 
 const struct memkind_ops MEMKIND_GBTLB_OPS = {
@@ -87,7 +90,8 @@ const struct memkind_ops MEMKIND_GBTLB_OPS = {
     .check_available = memkind_hugetlb_check_available_1gb,
     .get_mmap_flags = memkind_gbtlb_get_mmap_flags,
     .get_size = memkind_default_get_size,
-    .check_addr = memkind_gbtlb_check_addr
+    .check_addr = memkind_gbtlb_check_addr,
+    .init_once = memkind_gbtlb_init_once
 };
 
 const size_t ONE_GB = 1073741824ULL;
@@ -388,4 +392,19 @@ static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)
         }
     }
     return err;
+}
+
+void memkind_hbw_gbtlb_init_once(void)
+{
+    memkind_register_kind(MEMKIND_HBW_GBTLB);
+}
+
+void memkind_hbw_preferred_gbtlb_init_once(void)
+{
+    memkind_register_kind(MEMKIND_HBW_PREFERRED_GBTLB);
+}
+
+void memkind_gbtlb_init_once(void)
+{
+    memkind_register_kind(MEMKIND_GBTLB);
 }

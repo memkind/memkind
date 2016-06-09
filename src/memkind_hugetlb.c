@@ -73,6 +73,7 @@ void memkind_hugetlb_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HUGETLB);
     assert(err == 0);
+    memkind_register_kind(MEMKIND_HUGETLB);
 }
 
 int memkind_hugetlb_check_available_2mb(struct memkind *kind)

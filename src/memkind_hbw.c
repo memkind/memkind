@@ -596,6 +596,7 @@ void memkind_hbw_init_once(void)
     assert(err == 0);
     err = numa_available();
     assert(err == 0);
+    memkind_register_kind(MEMKIND_HBW);
 }
 
 void memkind_hbw_hugetlb_init_once(void)
@@ -604,6 +605,7 @@ void memkind_hbw_hugetlb_init_once(void)
     assert(err == 0);
     err = numa_available();
     assert(err == 0);
+    memkind_register_kind(MEMKIND_HBW_HUGETLB);
 }
 
 void memkind_hbw_preferred_init_once(void)
@@ -612,6 +614,7 @@ void memkind_hbw_preferred_init_once(void)
     assert(err == 0);
     err = numa_available();
     assert(err == 0);
+    memkind_register_kind(MEMKIND_HBW_PREFERRED);
 }
 
 void memkind_hbw_preferred_hugetlb_init_once(void)
@@ -620,6 +623,7 @@ void memkind_hbw_preferred_hugetlb_init_once(void)
     assert(err == 0);
     err = numa_available();
     assert(err == 0);
+    memkind_register_kind(MEMKIND_HBW_PREFERRED_HUGETLB);
 }
 
 void memkind_hbw_interleave_init_once(void)
@@ -628,4 +632,5 @@ void memkind_hbw_interleave_init_once(void)
     assert(err == 0);
     err = numa_available();
     assert(err == 0);
+    memkind_register_kind(MEMKIND_HBW_INTERLEAVE);
 }

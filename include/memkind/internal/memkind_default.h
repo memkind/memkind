@@ -54,6 +54,7 @@ int memkind_interleave_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_nohugepage_madvise(struct memkind *kind, void *addr, size_t size);
 int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free);
 int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
+void memkind_default_init_once(void);
 
 extern const struct memkind_ops MEMKIND_DEFAULT_OPS;
 

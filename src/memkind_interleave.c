@@ -28,6 +28,7 @@
 #include <memkind/internal/memkind_interleave.h>
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_private.h>
 
 const struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .create = memkind_arena_create,
@@ -54,4 +55,5 @@ void memkind_interleave_init_once(void)
     assert(err == 0);
     err = numa_available();
     assert(err == 0);
+    memkind_register_kind(MEMKIND_INTERLEAVE);
 }
