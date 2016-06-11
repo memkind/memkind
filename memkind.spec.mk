@@ -182,10 +182,12 @@ rm -f %{buildroot}/%{_libdir}/lib{numakind,autohbw}.*
 
 %files devel
 %defattr(-,root,root,-)
+%{_includedir}
 %{_includedir}/hbwmalloc.h
 %{_includedir}/hbw_allocator.h
 %{_libdir}/lib%{namespace}.so
 %{_includedir}/%{namespace}.h
+%{_includedir}/%{internal_include}
 %{_includedir}/%{internal_include}/%{namespace}*.h
 %{_mandir}/man3/hbwmalloc.3.*
 %{_mandir}/man3/hbwallocator.3.*
