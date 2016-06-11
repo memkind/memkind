@@ -38,7 +38,7 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
-#include <hbwmalloc.h>
+#include <memkind.h>
 
 #define FALSE 0
 #define TRUE 1
