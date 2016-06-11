@@ -46,7 +46,7 @@ License: BSD-2-Clause
 Group: System Environment/Libraries
 URL: http://memkind.github.io/memkind
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: automake libtool
+BuildRequires: automake libtool gcc-c++ unzip
 %if %{defined suse_version}
 BuildRequires: libnuma-devel
 %else
