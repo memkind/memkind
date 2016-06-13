@@ -37,7 +37,7 @@ public:
             getline (file,line);
             file.close();
         }
-        return std::stoi(line, NULL, 10);
+        return strtol(line.c_str(), 0, 10);
     }
 
     static int set_nr_hugepages(int nr_hugepages)
@@ -47,3 +47,4 @@ public:
         return system(cmd);
     }
 };
+
