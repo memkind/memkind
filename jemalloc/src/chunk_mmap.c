@@ -42,6 +42,7 @@ pages_map(void *addr, size_t size
 	    PAGE_READWRITE);
 #else
 #ifdef JEMALLOC_ENABLE_MEMKIND
+	partition &= ~JEMALLOC_MEMKIND_FILE_MAPPED;
 	if (partition && memkind_partition_mmap) {
 		ret = memkind_partition_mmap(partition, addr, size);
 	}
