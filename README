@@ -50,12 +50,12 @@ BUILD REQUIREMENTS
 To build the memkind libraries on a RHEL Linux system first install
 the required packages with the following command:
 
-    sudo yum install numactl-devel gcc-c++
+    sudo yum install numactl-devel gcc-c++ unzip
 
 On a SLES Linux system install the dependencies with the following
 command:
 
-    sudo zypper install libnuma-devel gcc-c++
+    sudo zypper install libnuma-devel gcc-c++ unzip
 
 The jemalloc source was forked from jemalloc version 3.5.1 and
 modified for the memkind extension.  This source tree is located
