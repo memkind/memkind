@@ -191,7 +191,6 @@ test_new_kind_LDADD = libmemkind.la
 test_gb_realloc_LDADD = libmemkind.la
 test_pmem_LDADD = libmemkind.la
 test_autohbw_candidates_LDADD = libmemkind.la \
-                                test/libautohbw.la \
                                 # end
 if ENABLE_CXX11
 test_memkind_allocated_LDADD = libmemkind.la

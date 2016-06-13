@@ -118,9 +118,9 @@ TEST_F(HbwAllocatorTests, AllocatorConstruct)
 TEST_F(HbwAllocatorTests, StandardVector)
 {
     std::vector<int, hbw::allocator<int> > vec;
-    const int size = 10000;
+    const size_t size = 10000;
 
-    for (int i=0; i<size; i++) {
+    for (size_t i=0; i<size; i++) {
         vec.push_back(i);
     }
 
@@ -129,5 +129,5 @@ TEST_F(HbwAllocatorTests, StandardVector)
 
     vec.clear();
 
-    EXPECT_EQ(0, vec.size());
+    EXPECT_EQ((size_t)0, vec.size());
 }
