@@ -379,8 +379,8 @@ if test "x${je_cv_attribute}" = "xyes" ; then
   fi
 fi
 dnl Check for tls_model attribute support (clang 3.0 still lacks support).
-SAVED_CFLAGS="${CFLAGS}"
 JE_CFLAGS_APPEND([-Werror])
+SAVED_CFLAGS="${CFLAGS}"
 JE_COMPILABLE([tls_model attribute], [],
               [static __thread int
                __attribute__((tls_model("initial-exec"))) foo;
@@ -1030,9 +1030,10 @@ AC_CACHE_CHECK([STATIC_PAGE_SHIFT],
 #include <unistd.h>
 #endif
 #include <stdio.h>
+int ffsl(long int i);
 ]],
 [[
-    int result;
+    long result;
     FILE *f;
 
 #ifdef _WIN32
@@ -1051,7 +1052,7 @@ AC_CACHE_CHECK([STATIC_PAGE_SHIFT],
     if (f == NULL) {
 	return 1;
     }
-    fprintf(f, "%d\n", result);
+    fprintf(f, "%ld\n", result);
     fclose(f);
 
     return 0;
@@ -1199,6 +1200,7 @@ JE_COMPILABLE([a program using ffsl], [
 #include <stdio.h>
 #include <strings.h>
 #include <string.h>
+int ffsl(long int i);
 ], [
 	{
 		int rv = ffsl(0x08);

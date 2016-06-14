@@ -1575,7 +1575,7 @@ arenas_extendk_ctl(const size_t *mib, size_t miblen, void *oldp, size_t *oldlenp
 {
 	int ret;
 	unsigned narenas;
-	unsigned partition;
+	unsigned partition = 0;
 
 	malloc_mutex_lock(&ctl_mtx);
 	WRITE(partition, unsigned);
