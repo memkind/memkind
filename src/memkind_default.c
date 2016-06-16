@@ -30,6 +30,7 @@
 
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_private.h>
+#include <stdint.h>
 
 #ifndef MADV_NOHUGEPAGE
 #define MADV_NOHUGEPAGE 15
@@ -154,7 +155,14 @@ void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
 
 int memkind_nohugepage_madvise(struct memkind *kind, void *addr, size_t size)
 {
-    return madvise(addr, size, MADV_NOHUGEPAGE);
+    int err = madvise(addr, size, MADV_NOHUGEPAGE);
+
+    //checking if EINVAL was returned due to lack of THP support in kernel
+    if ((err == EINVAL) && (((uintptr_t) addr & (uintptr_t) 0xfff) == 0) && (size > 0))
+    {
+        return 0;
+    }
+    return err;
 }
 
 int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size)
