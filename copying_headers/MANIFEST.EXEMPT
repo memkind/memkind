@@ -7,6 +7,7 @@ NEWS
 README
 VERSION
 ChangeLog
+.travis.yml
 examples/README
 examples/autohbw_README
 test/memkind-afts.ts
