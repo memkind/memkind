@@ -1,0 +1,21 @@
+sudo: false
+language: cpp
+before_install:
+        - ./autogen.sh
+        - ./build_jemalloc.sh
+install:
+        - CXX="g++-4.8" CC="gcc-4.8" ./configure --enable-cxx11
+script:
+        - make
+# Testing currently fails. Needs fixing.
+# Uncomment once travis testing is ok
+#       - make test
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
+    - libnuma-dev
+    - numactl

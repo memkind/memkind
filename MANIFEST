@@ -7,6 +7,7 @@ Makefile.am
 NEWS
 README
 VERSION
+.travis.yml
 autogen.sh
 build_jemalloc.sh
 configure.ac
@@ -32,6 +33,7 @@ examples/memkind_decorator_debug.c
 examples/pmem_example.c
 examples/autohbw_README
 examples/autohbw_test.sh
+make_rpm.mk
 man/hbwmalloc.3
 man/memkind.3
 man/memkind_arena.3
