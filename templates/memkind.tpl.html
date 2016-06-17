@@ -40,24 +40,6 @@
           The kinds of memory are defined by operating system memory policies that have been applied to virtual address ranges.  Memory characteristics supported by memkind without user extension include control of NUMA and page size features.  The jemalloc non-standard interface has been extended to enable specialized arenas to make requests for virtual memory from the operating system through the memkind partition interface. Through the other memkind interfaces the user can control and extend memory partition features and allocate memory while selecting enabled features.<br>
 Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
           </p>
-          <h2>
-            How to get source code
-          </h2>
-          <p>
-          <pre> <code>$ git clone https://github.com/memkind/memkind.git</code> </pre>
-          </p>
-          <h2>
-            Contacting us
-          </h2>
-          <p>
-          The Memkind Library team at Intel Corporation, led by <a href="mailto:lukasz.anaczkowski@intel.com">Lukasz Anaczkowski</a>, created this project on GitHub to encourage community development. Your participation, feedback, and questions are welcome. You can:
-          </p>
-          <p>
-          <a href="https://github.com/memkind/memkind/issues/">Create an issue</a> in our GitHub issues database. This is a good way to report problems or request new features.
-          </p>
-          <p>
-          Join our <a href="https://lists.01.org/mailman/listinfo/memkind">mail list</a> to participate in discussions on memkind, including the design of th API and future directions.
-          </p>
         </div>
         <div id="downloads" class='bs-docs-section'>
           <h1 class="page-header">
@@ -72,11 +54,17 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
             <a href="http://memkind.github.io/memkind/man_pages/hbwmalloc.html" class="btn btn-link">hbwmalloc API</a>
           </p>
           <h2>
-            Binaries
+            Sources
           </h2>
+          <pre> <code>$ git clone https://github.com/memkind/memkind.git</code> </pre>
           <p>
             <a href="https://github.com/memkind/memkind/tarball/master" class="btn btn-link">Tarball (master)</a>
             <a href="https://github.com/memkind/memkind/zipball/master" class="btn btn-link">ZIP (master)</a>
+          </p>
+          <h2>
+            Binaries
+          </h2>
+          <p>
             <a href="http://download.opensuse.org/repositories/home:/lanaczko/" class="btn btn-link">RPMs for misc OSes (memkind 1.1.0)</a>
           </p>
         </div>
@@ -97,6 +85,24 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
           </h1>
           <%= blogHtml %>
         </div>
+        <div id="contactus" class='bs-docs-section'>
+          <h1 class="page-header">
+            Contact us
+          </h1>
+             <p>
+                The Memkind Library team at Intel Corporation, led by <a href="mailto:lukasz.anaczkowski@intel.com">Lukasz Anaczkowski</a>, created this project on GitHub to encourage community development. Your participation, feedback, and questions are welcome. You can:
+                <ul>
+                        <li>
+                <a href="https://github.com/memkind/memkind/issues/">Create an issue</a> in our GitHub issues database. This is a good way to report problems or request new features.
+                </li>
+                <li>
+                Join our <a href="https://lists.01.org/mailman/listinfo/memkind">mail list</a> to participate in discussions on memkind, including the design of th API and future directions.
+                </li>
+
+
+                </ul>
+             </p>
+        </div>
       </div>
       <div class="col-md-3" role="complementary">
         <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix-top">
@@ -112,6 +118,9 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
             </li>
             <li>
               <a href="#blog">Blog</a>
+            </li>
+            <li>
+              <a href="#contactus">Contact us</a>
             </li>
           </ul>
         </nav>
