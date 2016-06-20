@@ -192,32 +192,33 @@ int execute_policy(hbw_policy_t set_policy, int size_in_megas)
     return 0;
 }
 
-TEST_F(PolicyTest, TC_Memkind_PolicyBind_1MB)
+TEST_F(PolicyTest, test_TC_MEMKIND_PolicyBind_1MB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_BIND, 1));
 }
 
-TEST_F(PolicyTest, TC_Memkind_PolicyPreferred_1MB)
+TEST_F(PolicyTest, test_TC_MEMKIND_PolicyPreferred_1MB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_PREFERRED, 1));
 }
 
-TEST_F(PolicyTest, TC_Memkind_PolicyBind_1GB)
+// Extended TC, because it may allocate 2GB pages when reallocating pages using realloc()
+TEST_F(PolicyTest, test_TC_MEMKIND_ext_PolicyBind_1GB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_BIND, 1024));
 }
 
-TEST_F(PolicyTest, TC_Memkind_PolicyPreferred_1GB)
+TEST_F(PolicyTest, test_TC_MEMKIND_PolicyPreferred_1GB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_PREFERRED, 1024));
 }
 
-TEST_F(PolicyTest, TC_Memkind_PolicyInterleave_1MB)
+TEST_F(PolicyTest, test_TC_MEMKIND_PolicyInterleave_1MB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_INTERLEAVE, 1));
 }
 
-TEST_F(PolicyTest, TC_Memkind_PolicyInterleave_1GB)
+TEST_F(PolicyTest, test_TC_MEMKIND_PolicyInterleave_1GB)
 {
     EXPECT_EQ(0, execute_policy(HBW_POLICY_INTERLEAVE, 1024));
 }
