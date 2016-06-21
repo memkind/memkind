@@ -47,21 +47,21 @@ else
 fi
 
 # Check if MCDRAM nodes exists on system
-if [ ! -f /usr/bin/memkind-hbw-nodes ]; then
-    cp ./memkind-hbw-nodes /usr/bin/memkind-hbw-nodes
-    remove_file=true
+if [ ! -x /usr/bin/memkind-hbw-nodes ]; then
+        if [ -x ./memkind-hbw-nodes ]; then
+                export PATH=$PATH:$PWD
+        else
+                echo "Cannot find 'memkind-hbw-nodes' in $PWD. Did you run 'make'?"
+                exit 1
+        fi
 fi
-ret=$(/usr/bin/memkind-hbw-nodes)
+ret=$(memkind-hbw-nodes)
 if [[ $ret == "" ]]; then
     # Add parameter that disables tests that detects high bandwidth nodes
     params=$params" -d"
 fi
 
 $basedir/test.sh $params
-
-if [[ $remove_file = true ]]; then
-    rm /usr/bin/memkind-hbw-nodes
-fi
 
 err=${PIPESTATUS[0]}
 

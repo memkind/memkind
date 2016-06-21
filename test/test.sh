@@ -217,10 +217,14 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ ! -f /usr/bin/memkind-hbw-nodes ]; then
-    cp ./memkind-hbw-nodes /usr/bin/memkind-hbw-nodes
-    remove_file=true
+        if [ -x ./memkind-hbw-nodes ]; then
+                export PATH=$PATH:$PWD
+        else
+                echo "Cannot find 'memkind-hbw-nodes' in $PWD. Did you run 'make'?"
+                exit 1
+        fi
 fi
-ret=$(/usr/bin/memkind-hbw-nodes)
+ret=$(memkind-hbw-nodes)
 if [[ $ret == "" ]]; then
     export MEMKIND_HBW_NODES=1
     TEST_PREFIX="numactl --membind=0 %s"
@@ -337,9 +341,5 @@ for i in ${!PYTEST_FILES[*]}; do
         fi
     done
 done
-
-if [[ $remove_file = true ]]; then
-    rm /usr/bin/memkind-hbw-nodes
-fi
 
 exit $err
