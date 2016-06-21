@@ -27,8 +27,10 @@ import os
 import tempfile
 import subprocess
 
+from distutils.spawn import find_executable
+
 class Test_hbw_detection(object):
-    binary_path = "/usr/bin/memkind-hbw-nodes"
+    binary_path = find_executable("memkind-hbw-nodes")
     fail_msg = "Test failed with:\n {0}"
 
     def execute_cmd(self, command, sudo=False):
