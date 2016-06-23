@@ -20,6 +20,7 @@ examples/numakind.h
 examples/numakind_test.c
 examples/memkind_decorator_debug.c
 examples/autohbw_test.sh
+gtest-1.7.0.zip
 make_rpm.mk
 man/hbwmalloc.3
 man/memkind.3
