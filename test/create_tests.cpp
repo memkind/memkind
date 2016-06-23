@@ -28,6 +28,7 @@
 
 
 extern const struct memkind_ops MEMKIND_BAD_OPS[];
+extern const struct memkind_ops MEMKIND_GOOD_OPS;
 extern const size_t MEMKIND_BAD_OPS_LEN;
 extern const struct memkind_ops deadbeef_ops;
 
@@ -58,7 +59,7 @@ TEST_F(MemkindCreate, test_TC_MEMKIND_CreateRepName)
     int num_bad_ops = sizeof(*MEMKIND_BAD_OPS)/sizeof(memkind_ops);
     memkind_t kind;
     for (i = 0; i < num_bad_ops; ++i) {
-        err = memkind_create(&MEMKIND_DEFAULT_OPS, "memkind_default", &kind);
+        err = memkind_create(&MEMKIND_GOOD_OPS, "memkind_default", &kind);
         EXPECT_TRUE(err == MEMKIND_ERROR_REPNAME);
         EXPECT_TRUE(kind == NULL);
     }
