@@ -10,6 +10,7 @@ ChangeLog
 .travis.yml
 examples/README
 examples/autohbw_README
+gtest-1.7.0.zip
 test/memkind-afts.ts
 test/memkind-afts-ext.ts
 test/memkind-slts.ts
