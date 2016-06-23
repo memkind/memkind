@@ -10,6 +10,10 @@ script:
 # Testing currently fails. Needs fixing.
 # Uncomment once travis testing is ok
 #       - make test
+after_failure:
+  - echo "Sad memking"
+  - find . -name config.log -exec cat {} ";"
+  - find . -name check.sh.log -exec cat {} ";"
 addons:
   apt:
     sources:
