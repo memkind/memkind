@@ -1,5 +1,5 @@
 sudo: false
-language: cpp
+language: cpp python
 before_install:
         - ./autogen.sh
         - ./build_jemalloc.sh
@@ -7,13 +7,11 @@ install:
         - CXX="g++-4.8" CC="gcc-4.8" ./configure --enable-cxx11
 script:
         - make
-# Testing currently fails. Needs fixing.
-# Uncomment once travis testing is ok
-#       - make test
+        - make test
 after_failure:
   - echo "Sad memking"
   - find . -name config.log -exec cat {} ";"
-  - find . -name check.sh.log -exec cat {} ";"
+  - find . -name test-suite.log -exec cat {} ";"
 addons:
   apt:
     sources:
