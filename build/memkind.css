@@ -7274,3 +7274,8 @@ input[type="checkbox"] {
   margin-bottom: 1rem;
   color: #9a9a9a;
 }
+.blog .lead {
+  color: #000;
+  font-weight: 400;
+  margin-top: 24px;
+}
