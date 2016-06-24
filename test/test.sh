@@ -57,11 +57,13 @@ OPTIONS
     -T,
         path to tests directory
     -d,
-        parameter added to skip high bandwidth memory nodes detection tests
+        skip high bandwidth memory nodes detection tests
     -m,
-        parameter added to skip tests that require 2MB pages configured on the machine
+        skip tests that require 2MB pages configured on the machine
     -g,
-        parameter added to skip tests that require GB pages configured on the machine
+        skip tests that require GB pages configured on the machine
+    -x,
+        skip tests that are passed as value
     -h,
         parameter added to display script usage
 
@@ -231,7 +233,7 @@ if [[ $ret == "" ]]; then
 fi
 
 # Execute getopt
-ARGS=$(getopt -o T:c:f:l:hdmg -- "$@");
+ARGS=$(getopt -o T:c:f:l:hdmgx: -- "$@");
 
 #Bad arguments
 if [ $? -ne 0 ];
@@ -288,6 +290,16 @@ while true; do
             fi
             show_skipped_tests "test_TC_MEMKIND_hbw_detection"
             shift
+            ;;
+        -x)
+            echo "Skipping some tests on demand '$2'"
+            if [[ $SKIPPED_GTESTS == "" ]]; then
+                SKIPPED_GTESTS=":-"$2
+            else
+                SKIPPED_GTESTS=$SKIPPED_GTESTS":"$2
+            fi
+            show_skipped_tests "$2"
+            shift 2;
             ;;
         -h)
             usage;
