@@ -79,7 +79,7 @@ public:
     void generate_size_1KB_2GB(alloc_api_t api);
     void generate_gb(alloc_api_t api, int number_of_gb_pages, memkind_t memkind, alloc_api_t api_free, bool psize_strict=false, size_t align = GB);
     void generate_size_4GB_8GB(alloc_api_t api);
-    void run(int num_bandwidth, int *bandwidths);
+    void run(int num_bandwidth, std::vector<int> &bandwidths);
     void generate_interleave(alloc_api_t api);
     void generate_size_2bytes_2KB_2MB(alloc_api_t api);
     /*For debugging purposes*/
@@ -100,8 +100,8 @@ class TGTest : public::testing::Test
 {
 protected:
     size_t num_bandwidth;
-    int *bandwidth;
-    TrialGenerator *tgen;
+    std::vector<int> bandwidth;
+    std::unique_ptr<TrialGenerator> tgen;
     void SetUp();
     void TearDown();
 };

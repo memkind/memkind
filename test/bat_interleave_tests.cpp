@@ -32,63 +32,12 @@
 #include <memkind/internal/memkind_hbw.h>
 
 
-#define MIN_NUMA_NODES_INTERLEAVE 4
-
 /* Set of basic acceptance tests for INTERLEAVE policy, the goal of this set of tests
  * is to prove that you can do incremental allocations of memory with different
  * sizes and that pages are actually allocated alternately in HBW and DRAM nodes.
  */
-class BATInterleaveTests: public :: testing::Test
-{
-
-protected:
-    size_t num_bandwidth;
-    int *bandwidth;
-    TrialGenerator *tgen;
-    bool can_interleave;
-
-    void SetUp()
-    {
-        //Check system numa nodes, interleave tests need at least 4.
-        int config_numa_nodes = numa_num_configured_nodes();
-        if (config_numa_nodes >= MIN_NUMA_NODES_INTERLEAVE) {
-            num_bandwidth = NUMA_NUM_NODES;
-            bandwidth = new int[num_bandwidth];
-            tgen = new TrialGenerator();
-            nodemask_t nodemask;
-            struct bitmask nodemask_bm = {NUMA_NUM_NODES, nodemask.n};
-            numa_bitmask_clearall(&nodemask_bm);
-
-            memkind_hbw_all_get_mbind_nodemask(NULL, nodemask.n, NUMA_NUM_NODES);
-
-            int i, nodes_num = numa_num_configured_nodes();
-            for (i=0; i<NUMA_NUM_NODES; i++) {
-                if (i >= nodes_num) {
-                    bandwidth[i] = 0;
-                }
-                else if (numa_bitmask_isbitset(&nodemask_bm, i)) {
-                    bandwidth[i] = 2;
-                }
-                else {
-                    bandwidth[i] = 1;
-                }
-            }
-        }
-        else {
-            //No node-bandwidth available to parse, can't interleave
-            can_interleave = false;
-        }
-    }
-
-    void TearDown()
-    {
-        if (can_interleave) {
-            delete[] bandwidth;
-            delete tgen;
-        }
-    }
-
-};
+class BATInterleaveTests: public TGTest
+{};
 
 
 TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_CheckAvailable)
@@ -105,40 +54,22 @@ TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_Policy)
 
 TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_MallocIncremental)
 {
-    if (can_interleave) {
-        hbw_set_policy(HBW_POLICY_INTERLEAVE);
-        tgen->generate_interleave(HBW_MALLOC);
-        tgen->run(num_bandwidth, bandwidth);
-    }
-    else {
-        printf("System needs PMMT table and at least 4 HBW nodes \
-                to run interleave allocation tests\n");
-    }
+    hbw_set_policy(HBW_POLICY_INTERLEAVE);
+    tgen->generate_interleave(HBW_MALLOC);
+    tgen->run(num_bandwidth, bandwidth);
 }
 
 TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_CallocIncremental)
 {
-    if (can_interleave) {
-        hbw_set_policy(HBW_POLICY_INTERLEAVE);
-        tgen->generate_interleave(HBW_CALLOC);
-        tgen->run(num_bandwidth, bandwidth);
-    }
-    else {
-        printf("System needs PMMT table and at least 4 HBW nodes \
-                to run interleave allocation tests\n");
-    }
+    hbw_set_policy(HBW_POLICY_INTERLEAVE);
+    tgen->generate_interleave(HBW_CALLOC);
+    tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_ReallocInremental)
+TEST_F(BATInterleaveTests, test_TC_MEMKIND_HBW_Interleave_ReallocIncremental)
 {
-    if (can_interleave) {
-        hbw_set_policy(HBW_POLICY_INTERLEAVE);
-        tgen->generate_interleave(HBW_REALLOC);
-        tgen->run(num_bandwidth, bandwidth);
-    }
-    else {
-        printf("System needs PMMT table and at least 4 HBW nodes \
-                to run interleave allocation tests\n");
-    }
+    hbw_set_policy(HBW_POLICY_INTERLEAVE);
+    tgen->generate_interleave(HBW_REALLOC);
+    tgen->run(num_bandwidth, bandwidth);
 }
