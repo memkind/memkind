@@ -51,6 +51,7 @@ public:
 		if((file = popen(cmd.str().c_str(), "r")))
 		{
 			while(fgets(buff, 256, file));
+			pclose(file);
 
 			//We got: "Total                     1181.90            2.00         1183.90".
 			//2.00 is our memory usage from Node 1.
@@ -77,7 +78,6 @@ public:
 			result = atof(&buff[number_begin]);
 #endif
 		}
-		pclose(file);
 
 		assert(result > -0.01);
 
