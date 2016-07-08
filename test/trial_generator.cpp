@@ -459,7 +459,7 @@ void TrialGenerator :: run(int num_bandwidth, std::vector<int> &bandwidth)
                     EXPECT_EQ(0, check.check_page_size(trial_vec[i].page_size));
                 }
                 else {
-                    EXPECT_EQ(0, check.check_node_hbw(num_bandwidth, bandwidth));
+                    check.check_node_hbw();
                 }
             }
             if (trial_vec[i].api == HBW_CALLOC) {

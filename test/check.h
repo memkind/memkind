@@ -46,7 +46,7 @@ public:
     Check(const void *p, const size_t size, const size_t page_size);
     Check(const Check &);
     ~Check();
-    int check_node_hbw(size_t num_bandwidth, std::vector<int> &bandwidth);
+    void check_node_hbw();
     void check_node_hbw_interleave();
     int check_page_size(size_t page_size);
     int check_zero(void);
