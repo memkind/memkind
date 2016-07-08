@@ -76,8 +76,8 @@ TEST_F(MemkindCreate, test_TC_MEMKIND_CreatePartitions)
     void *buffer = NULL;
 
     res = memkind_create(&deadbeef_ops, "deadbeef_ops", &deadbeef_kind);
-    EXPECT_EQ(res, 0);
-    EXPECT_FALSE(deadbeef_kind == NULL);
+    ASSERT_EQ(res, 0);
+    ASSERT_FALSE(deadbeef_kind == NULL);
 
     buffer = memkind_malloc(MEMKIND_DEFAULT, SIZE);
     memkind_free(MEMKIND_DEFAULT, buffer);
