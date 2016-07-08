@@ -58,7 +58,7 @@ Check::Check(const void *p, const size_t size, const size_t page_size)
     this->ptr = p;
     this->size = size;
     size_t psize = (page_size >= min_page_size ? page_size : min_page_size);
-    if (p && size) {
+    if (p && size && psize) {
         num_address = size / psize;
         num_address += size % psize ? 1 : 0;
 
@@ -71,6 +71,7 @@ Check::Check(const void *p, const size_t size, const size_t page_size)
     }
     else {
         address = NULL;
+        num_address = 0;
     }
 }
 
@@ -89,40 +90,20 @@ Check::Check(const Check &other)
     }
 }
 
-int Check::check_node_hbw(size_t num_bandwidth, std::vector<int> &bandwidth)
+void Check::check_node_hbw()
 {
-    int err = 0;
-    int max_bandwidth;
-    size_t i, j;
-    int *status = NULL;
+    int status = -1;
+    struct bitmask *expected_nodemask = numa_allocate_nodemask(), *returned_nodemask = numa_allocate_nodemask();
 
-    status = new int [num_address];
+    memkind_hbw_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
 
-    for (i = 0; i < num_address; i++) {
-        get_mempolicy(&status[i], NULL, 0, address[i], MPOL_F_NODE | MPOL_F_ADDR);
+    for (size_t i = 0; i < num_address; i++) {
+        ASSERT_EQ(get_mempolicy(&status, returned_nodemask->maskp, returned_nodemask->size, address[i], MPOL_F_ADDR), 0);
+        EXPECT_TRUE(numa_bitmask_equal(expected_nodemask, returned_nodemask));
     }
 
-    max_bandwidth = 0;
-    for (j = 0; j < num_bandwidth; ++j) {
-        max_bandwidth = bandwidth[j] > max_bandwidth ?
-                        bandwidth[j] : max_bandwidth;
-    }
-
-    if ((size_t)status[0] >= num_bandwidth ||
-        bandwidth[status[0]] != max_bandwidth) {
-        err = -1;
-    }
-    for (i = 1; i < num_address && !err; ++i) {
-        if ((size_t)status[i] >= num_bandwidth ||
-            bandwidth[status[i]] != max_bandwidth) {
-            err = i;
-        }
-    }
-
-    delete[] status;
-
-    return err;
-
+    numa_free_nodemask(expected_nodemask);
+    numa_free_nodemask(returned_nodemask);
 }
 
 void Check::check_node_hbw_interleave()
