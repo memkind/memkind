@@ -63,7 +63,7 @@ TEST_F(EnvHbwMallocTest, TC_Memkind_Negative_Hbw_Malloc)
     EXPECT_EQ(strncmp(numa_warning, buf, strlen(numa_warning)), 0);
 
     Check c(ptr, t);
-    EXPECT_NE(c.check_node_hbw(num_bandwidth, bandwidth), 0);
+    c.check_node_hbw();
 
     hbw_free(ptr);
     buf[0] = '\0';
