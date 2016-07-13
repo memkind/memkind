@@ -25,7 +25,7 @@
       </p>
       <p>
         <a href="https://github.com/memkind/memkind/tarball/master" class="btn btn-outline-inverse btn-lg btn-default">Download</a>
-        <p class="version">Currently v1.1.0</p>
+        <p class="version">Currently v1.1.1</p>
       </p>
     </div>
   </header>
@@ -83,7 +83,25 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
           <h1 class="page-header">
             Blog
           </h1>
-          <p class="lead">Travis CI is here!</p><span class="post-date">Fri Jun 17 2016</span><p><a href="https://travis-ci.org/memkind/memkind">Travis-CI for memkind</a> has been enabled and integrated.
+          <p class="lead">Release 1.1.1 is available</p><span class="post-date">Wed Jul 13 2016</span><p>I would like to announce memkind release <strong>1.1.1</strong>. Changes since 1.1.0:</p>
+<ul>
+<li>Performance improvement for <code>memkind_free()</code> in scenario where <code>NULL</code>
+was passed as kind (reduced by 60%).</li>
+<li>Introduced integration with <a href="https://travis-ci.org/memkind/memkind">Travis CI</a>.</li>
+<li>Fixed issue where memory returned from <code>calloc</code> was not filled with zeroes
+when using <code>memkind_pmem</code> kinds.</li>
+<li>Fixed issue where interleave kinds was failing on systems without
+Transparent Huge Pages module configured.</li>
+<li>Resolved several issues that was causing compilation errors on some systems.</li>
+<li><code>test/test.sh</code> is now able to detect system configuration, and run only those
+tests which requirements are meet.</li>
+<li>Added gtest to repo to avoid downloading it during build proecess.</li>
+</ul>
+<p>Sources are available on:
+<a href="https://github.com/memkind/memkind/releases/tag/v1.1.1">https://github.com/memkind/memkind/releases/tag/v1.1.1</a></p>
+<p>Best Regards,</p>
+<p><em>Krzysztof Kulakowski</em></p>
+<p class="lead">Travis CI is here!</p><span class="post-date">Fri Jun 17 2016</span><p><a href="https://travis-ci.org/memkind/memkind">Travis-CI for memkind</a> has been enabled and integrated.
 <a href="https://github.com/memkind/memkind/blob/dev/.travis.yml">Here</a> you can find memkind&#39;s yaml file that is used by Travis to fire-up CI builds and tests. <del>Please note that CI testing is disabled at the moment, as &#39;make test&#39; needs to be tuned for Travis infrastructure.</del></p>
 <p>In case of any issues, do not hesitate to <a href="http://memkind.github.io/memkind/#contactus">contact us</a>!</p>
 <p class="lead">Release 1.1.0 is available</p><span class="post-date">Mon May 23 2016</span><p>I would like to announce memkind release <strong>1.1.0</strong>. Changes since 1.0.0:</p>
