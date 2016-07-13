@@ -108,6 +108,7 @@ allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.h
                                     test/allocator_perf_tool/FunctionCalls.hpp \
                                     test/allocator_perf_tool/FunctionCallsPerformanceTask.cpp \
                                     test/allocator_perf_tool/FunctionCallsPerformanceTask.h \
+                                    test/allocator_perf_tool/GTestAdapter.hpp \
                                     test/allocator_perf_tool/Iterator.hpp \
                                     test/allocator_perf_tool/JemallocAllocatorWithTimer.hpp \
                                     test/allocator_perf_tool/MemkindAllocatorWithTimer.hpp \
@@ -139,6 +140,7 @@ test_allocator_perf_tool_tests_SOURCES = test/main.cpp \
                                     test/allocate_to_max_stress_test.cpp \
                                     test/heap_manager_init_perf_test.cpp \
                                     test/huge_page_test.cpp \
+                                    test/alloc_performance_tests.cpp \
                                     # end
 
 
