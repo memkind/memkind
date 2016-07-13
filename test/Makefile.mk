@@ -82,6 +82,8 @@ test_all_tests_SOURCES = test/common.h \
                          test/performance/framework.cpp \
                          test/hbw_allocator_tests.cpp \
                          test/memkind_versioning_tests.cpp \
+                         test/new_kind_test.cpp \
+                         test/numakind_test.cpp \
 			 #end
 
 test_mallctlerr_test_SOURCES = test/main.cpp test/mallctl_err_test.cpp
@@ -147,7 +149,8 @@ test_allocator_perf_tool_tests_CPPFLAGS += -std=c++11
 test_allocator_perf_tool_tests_CXXFLAGS += -std=c++11
 endif
 
-test_all_tests_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS)
+NUMAKIND_MAX = 2048
+test_all_tests_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS) -DNUMAKIND_MAX=$(NUMAKIND_MAX)
 
 #Allocator Perf Tool stand alone app
 check_PROGRAMS += test/perf_tool
@@ -173,7 +176,6 @@ check_PROGRAMS += test/hello_memkind \
                   test/filter_memkind \
                   test/stream \
                   test/stream_memkind \
-                  test/new_kind \
                   test/gb_realloc \
                   test/pmem \
                   # end
@@ -188,7 +190,6 @@ test_hello_hbw_LDADD = libmemkind.la
 test_filter_memkind_LDADD = libmemkind.la
 test_stream_LDADD = libmemkind.la
 test_stream_memkind_LDADD = libmemkind.la
-test_new_kind_LDADD = libmemkind.la
 test_gb_realloc_LDADD = libmemkind.la
 test_pmem_LDADD = libmemkind.la
 test_autohbw_candidates_LDADD = libmemkind.la \
@@ -206,7 +207,6 @@ test_hello_hbw_SOURCES = examples/hello_hbw_example.c
 test_filter_memkind_SOURCES = examples/filter_example.c
 test_stream_SOURCES = examples/stream_example.c
 test_stream_memkind_SOURCES = examples/stream_example.c
-test_new_kind_SOURCES = examples/new_kind_example.c
 test_gb_realloc_SOURCES = examples/gb_realloc_example.c
 test_pmem_SOURCES = examples/pmem_example.c
 test_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
@@ -265,3 +265,17 @@ test/libfopen.so: test/fopen_mock.c
 clean-local-mock:
 	rm -f test/*.so
 	rm -f test/*.aml
+
+CLEANFILES += test/numakind_macro.h
+test/numakind_test.cpp: test/numakind_macro.h
+test/numakind_macro.h:
+	for ((i=0;i<$(NUMAKIND_MAX);i++)); do \
+		echo "NUMAKIND_GET_MBIND_NODEMASK_MACRO($$i)" >> $@; \
+		done
+	echo 'const struct memkind_ops NUMAKIND_OPS[NUMAKIND_MAX] = {' >> $@
+	for ((i=0;i<$(NUMAKIND_MAX);i++)); do \
+		echo "NUMAKIND_OPS_MACRO($$i)," >> $@; \
+		done
+	echo '};' >> $@
+	echo >> $@
+

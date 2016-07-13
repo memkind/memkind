@@ -323,6 +323,11 @@ static inline int subregistry_size(struct memkind_subregistry* subregistry)
 
 int memkind_create(const struct memkind_ops *ops, const char *name, struct memkind **kind)
 {
+    return memkind_create_private(ops, name, kind);
+}
+
+int memkind_create_private(const struct memkind_ops *ops, const char *name, struct memkind **kind)
+{
     int err = 0;
     int tmp = 0;
     int i;
@@ -675,7 +680,7 @@ int memkind_create_pmem(const char *dir, size_t max_size,
 
     snprintf(name, sizeof (name), "pmem%08x", fd);
 
-    err = memkind_create(&MEMKIND_PMEM_OPS, name, kind);
+    err = memkind_create_private(&MEMKIND_PMEM_OPS, name, kind);
     if (err) {
         goto exit;
     }

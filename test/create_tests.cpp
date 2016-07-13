@@ -23,6 +23,7 @@
  */
 
 #include <memkind.h>
+#include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_default.h>
 #include <gtest/gtest.h>
 
@@ -33,18 +34,18 @@ extern const size_t MEMKIND_BAD_OPS_LEN;
 extern const struct memkind_ops deadbeef_ops;
 
 /*These set of test cases are using defined ops (operations) structures to
- * validate the memkind_create API.
+ * validate the memkind_create_private API.
  */
-class MemkindCreate: public :: testing :: Test { };
+class MemkindCreatePrivate: public :: testing :: Test { };
 
 /* bad_ops -> tests a set of invalid operations */
-TEST_F(MemkindCreate, test_TC_MEMKIND_CreateBadOps)
+TEST_F(MemkindCreatePrivate, test_TC_MEMKIND_CreateBadOps)
 {
     size_t i;
     int err;
     memkind_t kind;
     for (i = 0; i < MEMKIND_BAD_OPS_LEN; ++i) {
-        err = memkind_create(MEMKIND_BAD_OPS + i, "bad_ops", &kind);
+        err = memkind_create_private(MEMKIND_BAD_OPS + i, "bad_ops", &kind);
         EXPECT_TRUE(err == MEMKIND_ERROR_BADOPS);
         EXPECT_TRUE(kind == NULL);
     }
@@ -53,13 +54,13 @@ TEST_F(MemkindCreate, test_TC_MEMKIND_CreateBadOps)
 /* rep_name-> test will verify that memkind does not allows to add a repeated
  * kind name
  */
-TEST_F(MemkindCreate, test_TC_MEMKIND_CreateRepName)
+TEST_F(MemkindCreatePrivate, test_TC_MEMKIND_CreateRepName)
 {
     int i, err;
     int num_bad_ops = sizeof(*MEMKIND_BAD_OPS)/sizeof(memkind_ops);
     memkind_t kind;
     for (i = 0; i < num_bad_ops; ++i) {
-        err = memkind_create(&MEMKIND_GOOD_OPS, "memkind_default", &kind);
+        err = memkind_create_private(&MEMKIND_GOOD_OPS, "memkind_default", &kind);
         EXPECT_TRUE(err == MEMKIND_ERROR_REPNAME);
         EXPECT_TRUE(kind == NULL);
     }
@@ -68,14 +69,14 @@ TEST_F(MemkindCreate, test_TC_MEMKIND_CreateRepName)
 /* partitions-> will verify that a user can defined its own way to treat mmaps as
  * defined in its ops list
  */
-TEST_F(MemkindCreate, test_TC_MEMKIND_CreatePartitions)
+TEST_F(MemkindCreatePrivate, test_TC_MEMKIND_CreatePartitions)
 {
     int res;
     size_t SIZE = 8*1024*1024;
     memkind_t deadbeef_kind;
     void *buffer = NULL;
 
-    res = memkind_create(&deadbeef_ops, "deadbeef_ops", &deadbeef_kind);
+    res = memkind_create_private(&deadbeef_ops, "deadbeef_ops", &deadbeef_kind);
     ASSERT_EQ(res, 0);
     ASSERT_FALSE(deadbeef_kind == NULL);
 

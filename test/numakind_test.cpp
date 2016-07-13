@@ -22,8 +22,23 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <numa.h>
+#include <numaif.h>
+#include <omp.h>
+#include <sched.h>
+#include <assert.h>
+#include <errno.h>
+#include <pthread.h>
+#include <memkind.h>
+#include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_arena.h>
+#include "common.h"
+
 /*
- * In this example we try to create an optimal allocator for use on a
+ * In this test we try to create an optimal allocator for use on a
  * NUMA system with threading.  We assume that by the time a thread
  * makes an allocation call it is being run on the CPU that it will
  * remain on for the thread lifetime.  If this is not the case, and
@@ -34,19 +49,6 @@
  * partition will be bound.  There will be one arena per CPU, and the
  * index for the arena will be kept in thread local storage.
  */
-
-#define _GNU_SOURCE
-#include <stdlib.h>
-#include <stdio.h>
-#include <sched.h>
-#include <assert.h>
-#include <numa.h>
-#include <errno.h>
-#include <pthread.h>
-#include <memkind.h>
-#include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_arena.h>
-
 
 static pthread_key_t numakind_key_g;
 static pthread_once_t numakind_init_once_g = PTHREAD_ONCE_INIT;
@@ -71,16 +73,24 @@ int get_mbind_nodemask_numa_##NODE(struct memkind *kind,          \
 
 #define NUMAKIND_OPS_MACRO(NODE)                                  \
 {                                                                 \
-    .create = memkind_arena_create,                               \
-    .destroy = memkind_arena_destroy,                             \
-    .malloc = memkind_arena_malloc,                               \
-    .calloc = memkind_arena_calloc,                               \
-    .posix_memalign = memkind_arena_posix_memalign,               \
-    .realloc = memkind_arena_realloc,                             \
-    .free = memkind_default_free,                                 \
-    .get_arena = memkind_thread_get_arena,                        \
-    .get_size = memkind_default_get_size,                         \
-    .get_mbind_nodemask = get_mbind_nodemask_numa_##NODE          \
+    create : memkind_arena_create,                               \
+    destroy : memkind_arena_destroy,                             \
+    malloc : memkind_arena_malloc,                               \
+    calloc : memkind_arena_calloc,                               \
+    posix_memalign : memkind_arena_posix_memalign,               \
+    realloc : memkind_arena_realloc,                             \
+    free : memkind_default_free,                                 \
+    mmap : 0,                                                    \
+    mbind : 0,                                                   \
+    madvise : 0,                                                 \
+    get_mmap_flags : 0,                                          \
+    get_mbind_mode : 0,                                          \
+    get_mbind_nodemask : 0,                                      \
+    get_arena : memkind_thread_get_arena,                        \
+    get_size : memkind_default_get_size,                         \
+    check_available : 0,                                         \
+    check_addr : 0,                                              \
+    init_once : 0,                                               \
 }
 
 #include "numakind_macro.h"
@@ -161,7 +171,7 @@ static void numakind_init(void)
         name_length = snprintf(numakind_name, MEMKIND_NAME_LENGTH - 1, "numakind_%.4d", i);
         assert(MEMKIND_NAME_LENGTH > 20 && name_length != MEMKIND_NAME_LENGTH - 1);
 
-        err = memkind_create(NUMAKIND_OPS + i, numakind_name, &numakind_arr[i]);
+        err = memkind_create_private(NUMAKIND_OPS + i, numakind_name, &numakind_arr[i]);
     }
     if (err) {
         numakind_init_err_g = err;
@@ -178,7 +188,7 @@ static int numakind_get_kind(memkind_t **kind)
     }
 
     if (!err) {
-        *kind = pthread_getspecific(numakind_key_g);
+        *kind = (memkind_t*)pthread_getspecific(numakind_key_g);
         if (*kind == NULL) {
             *kind = (memkind_t *)memkind_malloc(MEMKIND_DEFAULT, sizeof(memkind_t));
             if (*kind == NULL) {
@@ -194,4 +204,37 @@ static int numakind_get_kind(memkind_t **kind)
         }
     }
     return err;
+}
+
+class MemkindNumakindTests: public :: testing::Test
+{
+protected:
+    void SetUp()
+    {}
+
+    void TearDown()
+    {}
+};
+
+TEST_F(MemkindNumakindTests, test_TC_MEMKIND_numakind)
+{
+    // err is passing information about success/failure as
+    // cannot return/exit from omp section
+    int err = 0;
+    #pragma omp parallel shared(err)
+    {
+        char *data;
+        int status;
+
+        data = (char*)numakind_malloc(1024);
+        if (!data) {
+            err = 1;
+        }
+        else {
+            data[0] = '\0';
+            move_pages(0, 1, (void **)&data, NULL, &status, MPOL_MF_MOVE);
+        }
+        numakind_free(data);
+    }
+    EXPECT_EQ(err, 0);
 }
