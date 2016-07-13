@@ -1,3 +1,16 @@
+* Wed Jul 13 2016 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v1.1.1
+- Performance improvement for memkind_free() in scenario where NULL
+  was passed as kind (reduced by 60%).
+- Introduced integration with Travis CI.
+- Fixed issue where memory returned from calloc was not filled with zeroes
+  when using memkind_pmem kinds.
+- Fixed issue where interleave kinds was failing on systems without
+  Transparent Huge Pages module configured.
+- Resolved several issues that was causing compilation errors on some systems.
+- test/test.sh is now able to detect system configuration, and run only those
+  tests which requirements are meet.
+- Added gtest to repo to avoid downloading it during build proecess.
+
 * Mon May 23 2016 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v1.1.0
 - Implemented algorithm for detecting high-bandwidth memory on Intel Xeon Phi X200
   without parsing PMTT.
@@ -23,7 +36,8 @@
 - New man page (memkind_interleave.3) describing interleave kind.
 - Significant documentation improvement.
 - Performance fix for jemalloc - significantly decrease of library initialization time.
-- Enforce 2MB alignment in jemalloc due to the Linux kernel bug (munmap() fails for huge pages, when the size is not aligned).
+- Enforce 2MB alignment in jemalloc due to the Linux kernel bug (munmap() fails for
+  huge pages, when the size is not aligned).
 - Move to systemd defined service (memkind.service), drop init.d script.
 - New rpm layout (memkind and memkind-devel).
 - Remove false dependency on OpenMP.

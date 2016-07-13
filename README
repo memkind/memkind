@@ -153,6 +153,6 @@ bandwidth allocations will be local to the process CPU.
 
 STATUS
 ------
-The memkind library version is 1.1.0. Diffrent interfaces can represent
+The memkind library version is 1.1.1. Diffrent interfaces can represent
 diffrent maturity level (as described in coresponding man pages).
 Feedback on design and implementation is greatly appreciated.
