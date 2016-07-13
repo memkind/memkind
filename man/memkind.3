@@ -54,7 +54,7 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .sp
 .B "KIND MANAGMENT:"
 .br
-.BI "int memkind_create(const struct memkind_ops " "*ops" ", const char " "*name" ", memkind_t " "*kind" );
+.BI "int memkind_create(const struct memkind_ops " "*ops" ", const char " "*name" ", memkind_t " "*kind" ); (DEPRECATED)
 .br
 .BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
 .br
@@ -280,7 +280,7 @@ section.  The user can also create their own kinds of memory.  This
 section describes the API's that enable the tracking of the different
 kinds of memory and determining their properties.
 .PP
-.BR memkind_create ()
+.BR memkind_create () (DEPRECATED)
 is used to create a new kind of memory.  It takes as input a pointer
 to a vtable called
 .I ops

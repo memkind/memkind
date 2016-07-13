@@ -20,15 +20,11 @@ examples/filter_example.c
 examples/hello_memkind_example.c
 examples/stream_example.c
 examples/README
-examples/new_kind_example.c
 examples/Makefile.mk
 examples/hello_hbw_example.c
 examples/memkind_allocated_example.cpp
 examples/memkind_allocated.hpp
 examples/gb_realloc_example.c
-examples/numakind.c
-examples/numakind.h
-examples/numakind_test.c
 examples/memkind_decorator_debug.c
 examples/pmem_example.c
 examples/autohbw_README
@@ -57,6 +53,7 @@ src/memkind_pmem.c
 src/memkind-hbw-nodes.c
 include/hbwmalloc.h
 include/memkind.h
+include/memkind_deprecated.h
 include/hbw_allocator.h
 include/memkind/internal/memkind_arena.h
 include/memkind/internal/memkind_default.h
@@ -98,6 +95,8 @@ test/memkind_default_tests.cpp
 test/policy_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmem_tests.cpp
+test/new_kind_test.cpp
+test/numakind_test.cpp
 test/slts_test.cpp
 test/huge_page_test.cpp
 test/hbw_detection_test.py

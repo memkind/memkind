@@ -87,29 +87,9 @@ enum memkind_base_partition {
 /*EXPERIMENTAL API*/
 struct memkind;
 
-/*EXPERIMENTAL API*/
-struct memkind_ops {
-    int (* create)(struct memkind *kind, const struct memkind_ops *ops, const char *name);
-    int (* destroy)(struct memkind *kind);
-    void *(* malloc)(struct memkind *kind, size_t size);
-    void *(* calloc)(struct memkind *kind, size_t num, size_t size);
-    int (* posix_memalign)(struct memkind *kind, void **memptr, size_t alignment, size_t size);
-    void *(* realloc)(struct memkind *kind, void *ptr, size_t size);
-    void (* free)(struct memkind *kind, void *ptr);
-    void *(* mmap)(struct memkind *kind, void *addr, size_t size);
-    int (* mbind)(struct memkind *kind, void *ptr, size_t size);
-    int (* madvise)(struct memkind *kind, void *addr, size_t size);
-    int (* get_mmap_flags)(struct memkind *kind, int *flags);
-    int (* get_mbind_mode)(struct memkind *kind, int *mode);
-    int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
-    int (* get_arena)(struct memkind *kind, unsigned int *arena, size_t size);
-    int (* get_size)(struct memkind *kind, size_t *total, size_t *free);
-    int (* check_available)(struct memkind *kind);
-    int (* check_addr)(struct memkind *kind, void *addr);
-    void (*init_once)(void);
-};
-
 typedef struct memkind * memkind_t;
+
+#include "memkind_deprecated.h"
 
 /*EXPERIMENTAL API*/
 extern memkind_t MEMKIND_DEFAULT;
@@ -160,10 +140,6 @@ void memkind_error_message(int err, char *msg, size_t size);
 int memkind_finalize(void);
 
 /* KIND MANAGEMENT INTERFACE */
-
-/*EXPERIMENTAL API*/
-/* Create a new kind */
-int memkind_create(const struct memkind_ops *ops, const char *name, memkind_t *kind);
 
 /*EXPERIMENTAL API*/
 /* Create a new PMEM (file-backed) kind of given size on top of a temporary file */

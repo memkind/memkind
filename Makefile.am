@@ -70,6 +70,7 @@ libmemkind_la_LDFLAGS = -version-info $(memkind_abi_version)
 include_HEADERS = include/hbwmalloc.h \
                   include/hbw_allocator.h \
                   include/memkind.h \
+                  include/memkind_deprecated.h \
                   # end
 
 nonstandardincludedir = $(includedir)/memkind/internal

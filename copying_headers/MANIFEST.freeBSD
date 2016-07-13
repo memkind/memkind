@@ -13,11 +13,7 @@ examples/hello_hbw_example.c
 examples/memkind_allocated_example.cpp
 examples/memkind_allocated.hpp
 examples/hello_memkind_example.c
-examples/new_kind_example.c
 examples/gb_realloc_example.c
-examples/numakind.c
-examples/numakind.h
-examples/numakind_test.c
 examples/memkind_decorator_debug.c
 examples/autohbw_test.sh
 make_rpm.mk
@@ -41,6 +37,7 @@ src/memkind_interleave.c
 src/memkind-hbw-nodes.c
 include/hbwmalloc.h
 include/memkind.h
+include/memkind_deprecated.h
 include/hbw_allocator.h
 include/memkind/internal/memkind_arena.h
 include/memkind/internal/memkind_default.h
@@ -79,6 +76,8 @@ test/error_message_tests.cpp
 test/create_tests.cpp
 test/create_tests_helper.c
 test/memkind_default_tests.cpp
+test/new_kind_test.cpp
+test/numakind_test.cpp
 test/policy_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmem_tests.cpp
