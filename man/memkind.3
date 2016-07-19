@@ -684,10 +684,12 @@ The available kinds of memory
 Default allocation using standard memory and default page size.
 .TP
 .B MEMKIND_HUGETLB
-Allocate from standard memory using huge pages.
+Allocate from standard memory using huge pages. Note: This kind requires
+huge pages configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B MEMKIND_GBTLB
-Allocate from standard memory using giga byte huge pages.
+Allocate from standard memory using giga byte huge pages. Note: This kind
+requires gigabyte pages configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B MEMKIND_INTERLEAVE
 Allocate pages interleaved across all NUMA nodes with transparent huge
@@ -702,7 +704,8 @@ is set to ENOMEM and the allocated poitner is set to NULL.
 .B MEMKIND_HBW_HUGETLB
 Same as
 .B MEMKIND_HBW
-except the allocation is backed by huge pages.
+except the allocation is backed by huge pages. Note: This kind requires
+huge pages configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B MEMKIND_HBW_PREFERRED
 Same as
@@ -713,7 +716,8 @@ the request, the allocation will fall back on standard memory.
 .B MEMKIND_HBW_PREFERRED_HUGETLB
 Same as
 .B MEMKIND_HBW_PREFERRED
-except the allocation is backed by huge pages.
+except the allocation is backed by huge pages. Note: This kind requires huge pages
+configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B MEMKIND_HBW_GBTLB
 Same as
@@ -726,12 +730,15 @@ scenario is to grow a buffer in the course of an application with reallocs.
 In this case, if there is enough memory available within in already allocated
 gigabyte page, newer pages are not fetched. This is demonstrated in the
 examples directory with gb_realloc_example.c
+This kind requires gigabyte pages configuration described in SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_HBW_PREFERRED_GBTLB
 Same as
 .B MEMKIND_HBW_GBTLB
 except that if there is not enough high bandwidth memory to satisfy
-the request, the allocation will fall back on standard memory.
+the request, the allocation will fall back on standard memory. Note: This kind
+requires gigabyte pages configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B MEMKIND_HBW_INTERLEAVE
 Same as
@@ -848,6 +855,21 @@ provide better performance in extremely multithreaded applications at
 the cost of memory overhead. See section "IMPLEMENTATION NOTES" of
 .BR jemalloc (3)
 for more details about arenas.
+.SH "SYSTEM CONFIGURATION"
+Interfaces for obtaining 2MB and 1GB pages (HUGETLB and GBTLB) need allocated
+huge pages in the kernel's huge page pool.
+.TP
+.B HUGETLB (huge pages)
+Current number of "persistent" huge pages can be read from /proc/sys/vm/nr_hugepages file.
+Proposed way of setting hugepages is: "sudo sysctl vm.nr_hugepages=<number_of_hugepages>".
+More informations can be found here:
+https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+.TP
+.B GBTLB (gigabyte pages)
+Number of preallocated gigabyte pages can be read from /proc/cmdline
+(hugepagesz=1G nr_hugepages=N). Setting gigabyte hugepages is available
+by kernel commandline. From 3.16 and later kernels, users can allocate
+gigabyte pages like its done for 2MB pages.
 .SH "COPYRIGHT"
 Copyright (C) 2014 - 2016 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
