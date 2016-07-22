@@ -69,8 +69,7 @@ public:
 	{
 		for (int i=0; i<tasks.size(); i++)
 		{
-			delete tasks.back();
-			tasks.pop_back();
+			delete tasks[i];
 		}
 	}
 
