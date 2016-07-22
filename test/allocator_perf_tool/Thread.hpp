@@ -60,6 +60,10 @@ class ThreadsManager
 {
 public:
 	ThreadsManager(std::vector<Thread*>& threads_vec) : threads(threads_vec) {}
+	~ThreadsManager()
+	{
+		release();
+	}
 
 	void start()
 	{
@@ -71,7 +75,7 @@ public:
 
 	void barrier()
 	{
-		 for (int i=0; i<threads.size(); i++)
+		for (int i=0; i<threads.size(); i++)
 		{
 			threads[i]->wait();
 		}
@@ -83,6 +87,7 @@ public:
 		{
 			delete threads[i];
 		}
+		threads.clear();
 	}
 
 private:
