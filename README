@@ -150,6 +150,11 @@ threads to CPUs associated with NUMA node 0.  With this configuration
 standard allocations will be fetched across the QPI bus, and high
 bandwidth allocations will be local to the process CPU.
 
+NOTES
+-----
+* Using memkind with Transparent Huge Pages enabled may result in
+ undesirably high memory footprint. To avoid that disable THP using following
+ instruction: https://www.kernel.org/doc/Documentation/vm/transhuge.txt
 
 STATUS
 ------
