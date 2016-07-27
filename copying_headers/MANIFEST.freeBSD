@@ -3,10 +3,12 @@ build_jemalloc.sh
 Makefile.am
 configure.ac
 config_tls.h.in
+autohbw/Makefile.mk
+autohbw/autohbw.c
+autohbw/autohbw_get_src_lines.pl
+autohbw/autohbw_helper.h
+autohbw/autohbw_test.sh
 examples/Makefile.mk
-examples/autohbw.c
-examples/autohbw_get_src_lines.pl
-examples/autohbw_helper.h
 examples/autohbw_candidates.c
 examples/filter_example.c
 examples/hello_hbw_example.c
@@ -15,7 +17,6 @@ examples/memkind_allocated.hpp
 examples/hello_memkind_example.c
 examples/gb_realloc_example.c
 examples/memkind_decorator_debug.c
-examples/autohbw_test.sh
 make_rpm.mk
 man/hbwmalloc.3
 man/memkind.3

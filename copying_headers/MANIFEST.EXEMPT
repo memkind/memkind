@@ -8,8 +8,8 @@ README
 VERSION
 ChangeLog
 .travis.yml
+autohbw/autohbw_README
 examples/README
-examples/autohbw_README
 gtest-1.7.0.zip
 test/memkind-afts.ts
 test/memkind-afts-ext.ts

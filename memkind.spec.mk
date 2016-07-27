@@ -156,7 +156,8 @@ cd %{_builddir}/%{buildsubdir}
 %{__install} test/.libs/* test/*.sh test/*.ts test/*.so test/*.py %{buildroot}$(memkind_test_dir)
 rm -f %{buildroot}$(memkind_test_dir)/libautohbw.*
 rm -f %{buildroot}/%{_libdir}/lib%{namespace}.{l,}a
-rm -f %{buildroot}/%{_libdir}/lib{numakind,autohbw}.*
+rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
+rm -f %{buildroot}/%{_libdir}/lib{numakind}.*
 
 %pre
 
@@ -176,6 +177,7 @@ rm -f %{buildroot}/%{_libdir}/lib{numakind,autohbw}.*
 %dir %{_docdir}/%{namespace}
 %dir %{_unitdir}
 %{_libdir}/lib%{namespace}.so.*
+%{_libdir}/libautohbw.so.*
 %{_bindir}/%{namespace}-hbw-nodes
 
 %define internal_include memkind/internal
@@ -186,6 +188,7 @@ rm -f %{buildroot}/%{_libdir}/lib{numakind,autohbw}.*
 %{_includedir}/hbwmalloc.h
 %{_includedir}/hbw_allocator.h
 %{_libdir}/lib%{namespace}.so
+%{_libdir}/libautohbw.so
 %{_includedir}/%{namespace}.h
 %{_includedir}/%{internal_include}
 %{_includedir}/%{internal_include}/%{namespace}*.h

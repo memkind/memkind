@@ -212,7 +212,7 @@ test_stream_memkind_SOURCES = examples/stream_example.c
 test_gb_realloc_SOURCES = examples/gb_realloc_example.c
 test_pmem_SOURCES = examples/pmem_example.c
 test_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
-test_libautohbw_la_SOURCES = examples/autohbw.c examples/autohbw_helper.h
+test_libautohbw_la_SOURCES = autohbw/autohbw.c autohbw/autohbw_helper.h
 noinst_LTLIBRARIES += test/libautohbw.la
 if ENABLE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
