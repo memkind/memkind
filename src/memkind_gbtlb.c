@@ -94,7 +94,7 @@ const struct memkind_ops MEMKIND_GBTLB_OPS = {
     .init_once = memkind_gbtlb_init_once
 };
 
-const size_t ONE_GB = 1073741824ULL;
+#define ONE_GB 1073741824ULL
 
 enum {
     GBTLB_STORE_INSERT,

@@ -97,7 +97,14 @@ typedef enum {
      * modulo of 1GB. A good example of using this feature with realloc is
      * shown in gb_realloc_example.c
      */
-    HBW_PAGESIZE_1GB           = 4
+    HBW_PAGESIZE_1GB           = 4,
+
+    /*
+     * Helper representing value of the last enum element incremented by 1.
+     * Shall not be treated as a valid value for functions taking hbw_pagesize_t
+     * as parameter.
+     */
+    HBW_PAGESIZE_MAX_VALUE
 } hbw_pagesize_t;
 
 /*
