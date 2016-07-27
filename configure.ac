@@ -110,6 +110,21 @@ if test "x${enable_tls}" = "x1" ; then
 fi
 AC_SUBST([enable_tls])
 
+AC_ARG_ENABLE([decorators],
+  [AS_HELP_STRING([--enable-decorators], [Enable decorators 111])],
+[if test "x$enable_decorators" = "xyes" ; then
+  enable_decorators="1"
+else
+  enable_decorators="0"
+fi
+],
+[enable_decorators="0"]
+)
+if test "x${enable_decorators}" = "x1" ; then
+  AC_DEFINE([MEMKIND_DECORATION_ENABLED], [ ], [Enables decorators])
+fi
+AC_SUBST([enable_decorators])
+
 arena_limit=256;
 AC_ARG_VAR(ARENA_LIMIT,
   [Upper bound for number of arenas per kind, if set to 0 then no limit]
@@ -232,4 +247,5 @@ AC_MSG_RESULT([])
 AC_MSG_RESULT([arena_limit        : ${arena_limit}])
 AC_MSG_RESULT([debug              : ${enable_debug}])
 AC_MSG_RESULT([tls                : ${enable_tls}])
+AC_MSG_RESULT([decorators         : ${enable_decorators}])
 AC_MSG_RESULT([===============================================================================])
