@@ -311,5 +311,6 @@ rpm: dist
 	$(MAKE) version="$(VERSION)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
 		-f memkind.spec.mk $@
 
+include autohbw/Makefile.mk
 include test/Makefile.mk
 include examples/Makefile.mk

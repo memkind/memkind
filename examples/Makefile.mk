@@ -36,12 +36,6 @@ if ENABLE_CXX11
 noinst_PROGRAMS += examples/memkind_allocated
 endif
 
-
-lib_LTLIBRARIES += examples/libautohbw.la \
-                   # end
-
-EXTRA_DIST += examples/autohbw_get_src_lines.pl
-
 examples_hello_memkind_LDADD = libmemkind.la
 examples_hello_memkind_debug_LDADD = libmemkind.la
 examples_hello_hbw_LDADD = libmemkind.la
@@ -51,8 +45,6 @@ examples_stream_memkind_LDADD = libmemkind.la
 examples_pmem_memkind_LDADD = libmemkind.la
 examples_gb_realloc_LDADD = libmemkind.la
 examples_autohbw_candidates_LDADD = libmemkind.la
-examples_libautohbw_la_LIBADD = libmemkind.la
-examples_libautohbw_la_LDFLAGS = -version-info $(memkind_abi_version)
 
 if ENABLE_CXX11
 examples_memkind_allocated_LDADD = libmemkind.la
@@ -66,7 +58,6 @@ examples_stream_SOURCES = examples/stream_example.c
 examples_stream_memkind_SOURCES = examples/stream_example.c
 examples_pmem_memkind_SOURCES = examples/pmem_example.c
 examples_gb_realloc_SOURCES = examples/gb_realloc_example.c
-examples_libautohbw_la_SOURCES = examples/autohbw.c examples/autohbw_helper.h
 examples_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
 if ENABLE_CXX11
 examples_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
