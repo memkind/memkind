@@ -52,91 +52,80 @@
 
 
 static struct memkind MEMKIND_DEFAULT_STATIC = {
-    &MEMKIND_DEFAULT_OPS,
-    MEMKIND_PARTITION_DEFAULT,
-    "memkind_default",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops =  &MEMKIND_DEFAULT_OPS,
+    .partition = MEMKIND_PARTITION_DEFAULT,
+    .name = "memkind_default",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HUGETLB_STATIC = {
-    &MEMKIND_HUGETLB_OPS,
-    MEMKIND_PARTITION_HUGETLB,
-    "memkind_hugetlb",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops = &MEMKIND_HUGETLB_OPS,
+    .partition = MEMKIND_PARTITION_HUGETLB,
+    .name = "memkind_hugetlb",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_INTERLEAVE_STATIC = {
-    &MEMKIND_INTERLEAVE_OPS,
-    MEMKIND_PARTITION_INTERLEAVE,
-    "memkind_interleave",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops = &MEMKIND_INTERLEAVE_OPS,
+    .partition = MEMKIND_PARTITION_INTERLEAVE,
+    .name = "memkind_interleave",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_STATIC = {
-    &MEMKIND_HBW_OPS,
-    MEMKIND_PARTITION_HBW,
-    "memkind_hbw",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops = &MEMKIND_HBW_OPS,
+    .partition = MEMKIND_PARTITION_HBW,
+    .name = "memkind_hbw",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_PREFERRED_STATIC = {
-    &MEMKIND_HBW_PREFERRED_OPS,
-    MEMKIND_PARTITION_HBW_PREFERRED,
-    "memkind_hbw_preferred",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops = &MEMKIND_HBW_PREFERRED_OPS,
+    .partition = MEMKIND_PARTITION_HBW_PREFERRED,
+    .name = "memkind_hbw_preferred",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_HUGETLB_STATIC = {
-    &MEMKIND_HBW_HUGETLB_OPS,
-    MEMKIND_PARTITION_HBW_HUGETLB,
-    "memkind_hbw_hugetlb",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops = &MEMKIND_HBW_HUGETLB_OPS,
+    .partition = MEMKIND_PARTITION_HBW_HUGETLB,
+    .name = "memkind_hbw_hugetlb",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_PREFERRED_HUGETLB_STATIC = {
-    &MEMKIND_HBW_PREFERRED_HUGETLB_OPS,
-    MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB,
-    "memkind_hbw_preferred_hugetlb",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops = &MEMKIND_HBW_PREFERRED_HUGETLB_OPS,
+    .partition = MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB,
+    .name = "memkind_hbw_preferred_hugetlb",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_GBTLB_STATIC = {
-    &MEMKIND_HBW_GBTLB_OPS,
-    MEMKIND_PARTITION_HBW_GBTLB,
-    "memkind_hbw_gbtlb",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops = &MEMKIND_HBW_GBTLB_OPS,
+    .partition = MEMKIND_PARTITION_HBW_GBTLB,
+    .name = "memkind_hbw_gbtlb",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_PREFERRED_GBTLB_STATIC = {
-    &MEMKIND_HBW_PREFERRED_GBTLB_OPS,
-    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB,
-    "memkind_hbw_preferred_gbtlb",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops = &MEMKIND_HBW_PREFERRED_GBTLB_OPS,
+    .partition = MEMKIND_PARTITION_HBW_PREFERRED_GBTLB,
+    .name = "memkind_hbw_preferred_gbtlb",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_GBTLB_STATIC = {
-    &MEMKIND_GBTLB_OPS,
-    MEMKIND_PARTITION_GBTLB,
-    "memkind_gbtlb",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops = &MEMKIND_GBTLB_OPS,
+    .partition = MEMKIND_PARTITION_GBTLB,
+    .name = "memkind_gbtlb",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_INTERLEAVE_STATIC = {
-    &MEMKIND_HBW_INTERLEAVE_OPS,
-    MEMKIND_PARTITION_HBW_INTERLEAVE,
-    "memkind_hbw_interleave",
-    PTHREAD_ONCE_INIT,
-    0, NULL
+    .ops = &MEMKIND_HBW_INTERLEAVE_OPS,
+    .partition = MEMKIND_PARTITION_HBW_INTERLEAVE,
+    .name = "memkind_hbw_interleave",
+    .init_once = PTHREAD_ONCE_INIT,
 };
 
 struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
