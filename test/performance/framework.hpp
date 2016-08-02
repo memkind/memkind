@@ -26,9 +26,6 @@
 
 #include <thread>
 #include <vector>
-#include <algorithm> // log2
-#include <cassert>
-#include <iostream>
 #include <mutex>
 #include <condition_variable>
 #include <memkind.h>

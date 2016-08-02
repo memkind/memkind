@@ -22,6 +22,10 @@
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <algorithm> // sort
+#include <math.h> // log2
+#include <cassert>
+#include <iostream>
 #include "framework.hpp"
 
 namespace performance_tests
