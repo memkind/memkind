@@ -26,6 +26,7 @@
 
 #include <malloc.h>
 #include <memkind.h>
+#include <cassert>
 #include "jemalloc/jemalloc.h"
 
 // Malloc, jemalloc, memkind jemalloc and memkind memory operations definitions
