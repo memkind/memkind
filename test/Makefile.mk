@@ -24,7 +24,6 @@
 
 AM_CPPFLAGS += -I$(googletest)/include
 
-
 check_PROGRAMS += test/all_tests \
                   test/mallctlerr_test \
                   test/environerr_hbw_malloc_test \
@@ -33,6 +32,10 @@ check_PROGRAMS += test/all_tests \
                   test/allocator_perf_tool_tests \
                   test/autohbw_test_helper \
                   # end
+
+if USE_HWLOC
+check_PROGRAMS += test/get_knl_modes
+endif
 
 TESTS += test/check.sh
 
@@ -55,7 +58,10 @@ test_slts_test_LDADD = libgtest.a libmemkind.la
 test_decorator_test_LDADD = libgtest.a libmemkind.la
 test_allocator_perf_tool_tests_LDADD = libgtest.a libmemkind.la
 test_autohbw_test_helper_LDADD = libmemkind.la
-
+if USE_HWLOC
+test_get_knl_modes_SOURCES = test/get_knl_modes.c
+test_get_knl_modes_LDADD = $(LIBHWLOC) libmemkind.la
+endif
 
 test_all_tests_SOURCES = test/common.h \
                          test/bat_tests.cpp \
@@ -175,7 +181,6 @@ if ENABLE_CXX11
 test_perf_tool_CPPFLAGS += -std=c++11
 test_perf_tool_CXXFLAGS += -std=c++11
 endif
-
 
 # Examples as tests
 check_PROGRAMS += test/hello_memkind \

@@ -41,6 +41,15 @@ rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
 memkind_test_dir = $(MPSS_TEST_BASEDIR)/memkind-dt
 exclude_source_files = test/memkind-afts.ts test/memkind-afts-ext.ts test/memkind-slts.ts test/memkind-perf.ts test/memkind-perf-ext.ts test/memkind-hbw_detection.ts test/memkind-autohbw.ts test/hbw_detection_test.py test/autohbw_test.py
+memkind_depends_root ?=
+
+ifeq ($(memkind_depends_root),)
+        hwloc_config_opt:=--with-hwloc=check
+        memkind_include_knl_mode :=
+else
+        hwloc_config_opt:=--with-hwloc=$(memkind_depends_root)/lib64 --with-hwloc-include=$(memkind_depends_root)/include
+        memkind_include_knl_mode := $(memkind_test_dir)/get_knl_modes
+endif
 
 all: $(rpm)
 
@@ -61,7 +70,7 @@ $(source_tar): $(topdir)/.setup $(src) MANIFEST
 		cp $$f $(source_tmp_dir)/$(name)-$(version)/$$f ; \
 	done
 	if [ -f "$(memkind_gtest_archive)" ]; then cp $(memkind_gtest_archive) $(source_tmp_dir)/$(name)-$(version); fi
-	cd $(source_tmp_dir)/$(name)-$(version) && ./autogen.sh && ./configure && make dist
+	cd $(source_tmp_dir)/$(name)-$(version) && ./autogen.sh && ./configure $(hwloc_config_opt) && make dist; \
 	# tar.gz produced by "make dist" from above produces memkind-$(version).tar.gz
 	# If $(package_prefix) is not empty, then need to repackage that tar.gz to $(name)-$(version)
 	# thus below command. Otherwise, rpmbuild will fail.
