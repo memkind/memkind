@@ -145,7 +145,8 @@ echo %{version} > %{_builddir}/%{buildsubdir}/VERSION
 test -f configure || ./autogen.sh
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} \
            --includedir=%{_includedir} --sbindir=%{_sbindir} --enable-cxx11 \
-           --mandir=%{_mandir} --docdir=%{_docdir}/%{namespace}
+           --mandir=%{_mandir} --docdir=%{_docdir}/%{namespace} \
+           $(hwloc_config_opt)
 $(make_prefix)%{__make} %{?_smp_mflags} libgtest.a $(make_postfix)
 $(make_prefix)%{__make} %{?_smp_mflags} checkprogs $(make_postfix)
 
@@ -235,6 +236,7 @@ $(memkind_test_dir)/libnumadist.so
 $(memkind_test_dir)/libsched.so
 $(memkind_test_dir)/hbw_detection_test.py
 $(memkind_test_dir)/autohbw_test.py
+$(memkind_include_knl_mode)
 
 %exclude $(memkind_test_dir)/*.pyo
 %exclude $(memkind_test_dir)/*.pyc
