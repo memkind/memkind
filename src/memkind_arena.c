@@ -53,7 +53,7 @@ int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, co
     int err = 0;
 
     err = memkind_default_create(kind, ops, name);
-    if (!err) {
+    if (likely(!err)) {
         err = memkind_arena_create_map(kind);
     }
     return err;
@@ -161,10 +161,10 @@ void *memkind_arena_malloc(struct memkind *kind, size_t size)
     int err = 0;
     unsigned int arena;
 
-    if (!err) {
+    if (likely(!err)) {
         err = kind->ops->get_arena(kind, &arena, size);
     }
-    if (!err) {
+    if (likely(!err)) {
         result = jemk_mallocx_check(size, MALLOCX_ARENA(arena));
     }
     return result;
@@ -233,9 +233,9 @@ int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena, size_
 {
     int err = 0;
 
-    if (kind->arena_map != NULL) {
+    if (likely(kind->arena_map != NULL)) {
         *arena = *(kind->arena_map);
-        if (*arena == UINT_MAX) {
+        if (unlikely(*arena == UINT_MAX)) {
             err = MEMKIND_ERROR_MALLCTL;
         }
     }
@@ -269,7 +269,7 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t s
     unsigned int *arena_tsd;
 
     arena_tsd = pthread_getspecific(kind->arena_key);
-    if (arena_tsd == NULL) {
+    if (unlikely(arena_tsd == NULL)) {
         arena_tsd = jemk_malloc(sizeof(unsigned int));
         if (arena_tsd == NULL) {
             err = MEMKIND_ERROR_MALLOC;
@@ -281,7 +281,7 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t s
                   MEMKIND_ERROR_PTHREAD : 0;
         }
     }
-    if (!err) {
+    if (likely(!err)) {
         *arena = kind->arena_map[*arena_tsd];
         if (*arena == UINT_MAX) {
             err = MEMKIND_ERROR_MALLCTL;
@@ -301,7 +301,7 @@ static void *jemk_mallocx_check(size_t size, int flags)
      */
     void *result = NULL;
 
-    if (size >= LLONG_MAX) {
+    if (unlikely(size >= LLONG_MAX)) {
         errno = ENOMEM;
     }
     else if (size != 0) {
@@ -320,7 +320,7 @@ static void *jemk_rallocx_check(void *ptr, size_t size, int flags)
      */
     void *result = NULL;
 
-    if (size >= LLONG_MAX) {
+    if (unlikely(size >= LLONG_MAX)) {
         errno = ENOMEM;
     }
     else {

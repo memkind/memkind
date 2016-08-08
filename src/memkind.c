@@ -421,9 +421,9 @@ int memkind_get_kind_by_partition(int partition, struct memkind **kind)
 {
     int err = 0;
 
-    if (partition >= 0 &&
+    if (likely(partition >= 0 &&
         partition < MEMKIND_MAX_KIND &&
-        memkind_registry_g.partition_map[partition] != NULL) {
+        memkind_registry_g.partition_map[partition] != NULL)) {
         *kind = memkind_registry_g.partition_map[partition];
     }
     else {
@@ -458,10 +458,10 @@ void *memkind_partition_mmap(int partition, void *addr, size_t size)
     struct memkind *kind;
 
     err = memkind_get_kind_by_partition(partition, &kind);
-    if (!err) {
+    if (likely(!err)) {
         err = memkind_check_available(kind);
     }
-    if (!err) {
+    if (likely(!err)) {
         if (kind->ops->mmap) {
             result = kind->ops->mmap(kind, addr, size);
         }
@@ -476,7 +476,7 @@ int memkind_check_available(struct memkind *kind)
 {
     int err = 0;
 
-    if (kind->ops->check_available) {
+    if (likely(kind->ops->check_available)) {
         err = kind->ops->check_available(kind);
     }
     return err;
@@ -486,7 +486,7 @@ void *memkind_malloc(struct memkind *kind, size_t size)
 {
     void *result;
 
-    if (kind->ops->init_once) {
+    if (likely(kind->ops->init_once)) {
         pthread_once(&(kind->init_once), kind->ops->init_once);
     }
 
@@ -511,7 +511,7 @@ void *memkind_calloc(struct memkind *kind, size_t num, size_t size)
 {
     void *result;
 
-    if (kind->ops->init_once) {
+    if (likely(kind->ops->init_once)) {
         pthread_once(&(kind->init_once), kind->ops->init_once);
     }
 
@@ -537,7 +537,7 @@ int memkind_posix_memalign(struct memkind *kind, void **memptr, size_t alignment
 {
     int err;
 
-    if (kind->ops->init_once) {
+    if (likely(kind->ops->init_once)) {
         pthread_once(&(kind->init_once), kind->ops->init_once);
     }
 
@@ -562,7 +562,7 @@ void *memkind_realloc(struct memkind *kind, void *ptr, size_t size)
 {
     void *result;
 
-    if (kind->ops->init_once) {
+    if (likely(kind->ops->init_once)) {
         pthread_once(&(kind->init_once), kind->ops->init_once);
     }
 
