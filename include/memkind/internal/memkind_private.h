@@ -54,6 +54,14 @@ void memkind_register_kind(struct memkind *kind);
 int memkind_create_private(const struct memkind_ops *ops, const char *name,
                            struct memkind **kind);
 
+#ifdef __GNUC__
+#   define likely(x)       __builtin_expect(!!(x), 1)
+#   define unlikely(x)     __builtin_expect(!!(x), 0)
+#else
+#   define likely(x)       (x)
+#   define unlikely(x)     (x)
+#endif
+
 #ifdef __cplusplus
 }
 #endif

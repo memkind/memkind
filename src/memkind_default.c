@@ -134,21 +134,23 @@ void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
     else {
         err = memkind_default_get_mmap_flags(kind, &flags);
     }
-    if (!err) {
+    if (likely(!err)) {
         result = mmap(addr, size, PROT_READ | PROT_WRITE, flags, -1, 0);
-    }
-    if (result != MAP_FAILED && kind->ops->mbind) {
-        err = kind->ops->mbind(kind, result, size);
-        if (err) {
-            munmap(result, size);
-            result = MAP_FAILED;
+    } 
+    if (likely(result != MAP_FAILED)) {
+        if (kind->ops->mbind) {
+            err = kind->ops->mbind(kind, result, size);
+            if (err) {
+                munmap(result, size);
+                result = MAP_FAILED;
+            }
         }
-    }
-    if (result != MAP_FAILED && kind->ops->madvise) {
-        err = kind->ops->madvise(kind, result, size);
-        if (err) {
-            munmap(result, size);
-            result = MAP_FAILED;
+        if (kind->ops->madvise) {
+            err = kind->ops->madvise(kind, result, size);
+            if (err) {
+                munmap(result, size);
+                result = MAP_FAILED;
+            }
         }
     }
     return result;
@@ -172,17 +174,17 @@ int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size)
     int err = 0;
     int mode;
 
-    if (kind->ops->get_mbind_nodemask == NULL ||
-        kind->ops->get_mbind_mode == NULL) {
+    if (unlikely(kind->ops->get_mbind_nodemask == NULL ||
+        kind->ops->get_mbind_mode == NULL)) {
         err = MEMKIND_ERROR_BADOPS;
     }
-    if (!err) {
+    if (likely(!err)) {
         err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
     }
-    if (!err) {
+    if (likely(!err)) {
         err = kind->ops->get_mbind_mode(kind, &mode);
     }
-    if (!err) {
+    if (likely(!err)) {
         err = mbind(ptr, size, mode, nodemask.n, NUMA_NUM_NODES, 0);
         err = err ? MEMKIND_ERROR_MBIND : 0;
     }
