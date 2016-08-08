@@ -317,6 +317,8 @@ int memkind_create(const struct memkind_ops *ops, const char *name, struct memki
     return memkind_create_private(ops, name, kind);
 }
 
+static void nop(void) {}
+
 int memkind_create_private(const struct memkind_ops *ops, const char *name, struct memkind **kind)
 {
     int err = 0;
@@ -366,6 +368,8 @@ int memkind_create_private(const struct memkind_ops *ops, const char *name, stru
     ++memkind_registry_g.num_kind;
     memkind_register_kind(*kind);
 
+    (*kind)->init_once = PTHREAD_ONCE_INIT;
+    pthread_once(&(*kind)->init_once, nop); //this is done to avoid init_once for dynamic kinds
 exit:
     if (err != MEMKIND_ERROR_PTHREAD) {
         tmp = pthread_mutex_unlock(&(memkind_registry_g.lock));
@@ -486,9 +490,7 @@ void *memkind_malloc(struct memkind *kind, size_t size)
 {
     void *result;
 
-    if (likely(kind->ops->init_once)) {
-        pthread_once(&(kind->init_once), kind->ops->init_once);
-    }
+    pthread_once(&kind->init_once, kind->ops->init_once);
 
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memkind_malloc_pre) {
@@ -511,9 +513,7 @@ void *memkind_calloc(struct memkind *kind, size_t num, size_t size)
 {
     void *result;
 
-    if (likely(kind->ops->init_once)) {
-        pthread_once(&(kind->init_once), kind->ops->init_once);
-    }
+    pthread_once(&kind->init_once, kind->ops->init_once);
 
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memkind_calloc_pre) {
@@ -537,9 +537,7 @@ int memkind_posix_memalign(struct memkind *kind, void **memptr, size_t alignment
 {
     int err;
 
-    if (likely(kind->ops->init_once)) {
-        pthread_once(&(kind->init_once), kind->ops->init_once);
-    }
+    pthread_once(&kind->init_once, kind->ops->init_once);
 
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memkind_posix_memalign_pre) {
@@ -562,9 +560,7 @@ void *memkind_realloc(struct memkind *kind, void *ptr, size_t size)
 {
     void *result;
 
-    if (likely(kind->ops->init_once)) {
-        pthread_once(&(kind->init_once), kind->ops->init_once);
-    }
+    pthread_once(&kind->init_once, kind->ops->init_once);
 
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memkind_realloc_pre) {
@@ -588,9 +584,7 @@ void memkind_free(struct memkind *kind, void *ptr)
     if (!kind) {
         memkind_get_kind_for_free(ptr, &kind);
     }
-    if (kind->ops->init_once) {
-        pthread_once(&(kind->init_once), kind->ops->init_once);
-    }
+    pthread_once(&kind->init_once, kind->ops->init_once);
 
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memkind_free_pre) {
