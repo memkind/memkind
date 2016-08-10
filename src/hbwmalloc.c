@@ -121,12 +121,12 @@ static inline memkind_t hbw_get_kind(hbw_pagesize_t pagesize)
 }
 
 
-hbw_policy_t hbw_get_policy(void)
+MEMKIND_EXPORT hbw_policy_t hbw_get_policy(void)
 {
     return hbw_policy_g;
 }
 
-int hbw_set_policy(hbw_policy_t mode)
+MEMKIND_EXPORT int hbw_set_policy(hbw_policy_t mode)
 {
     switch(mode) {
         case HBW_POLICY_PREFERRED:
@@ -149,27 +149,27 @@ int hbw_set_policy(hbw_policy_t mode)
     return 0;
 }
 
-int hbw_check_available(void)
+MEMKIND_EXPORT int hbw_check_available(void)
 {
     return  (memkind_check_available(MEMKIND_HBW) == 0) ? 0 : ENODEV;
 }
 
-void *hbw_malloc(size_t size)
+MEMKIND_EXPORT void *hbw_malloc(size_t size)
 {
     return memkind_malloc(hbw_get_kind(HBW_PAGESIZE_4KB), size);
 }
 
-void *hbw_calloc(size_t num, size_t size)
+MEMKIND_EXPORT void *hbw_calloc(size_t num, size_t size)
 {
     return memkind_calloc(hbw_get_kind(HBW_PAGESIZE_4KB), num, size);
 }
 
-int hbw_posix_memalign(void **memptr, size_t alignment, size_t size)
+MEMKIND_EXPORT int hbw_posix_memalign(void **memptr, size_t alignment, size_t size)
 {
     return memkind_posix_memalign(hbw_get_kind(HBW_PAGESIZE_4KB), memptr, alignment, size);
 }
 
-int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
+MEMKIND_EXPORT int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
                              hbw_pagesize_t pagesize)
 {
     memkind_t kind;
@@ -183,7 +183,7 @@ int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
     return memkind_posix_memalign(kind, memptr, alignment, size);
 }
 
-void *hbw_realloc(void *ptr, size_t size)
+MEMKIND_EXPORT void *hbw_realloc(void *ptr, size_t size)
 {
     int i;
     memkind_t kind;
@@ -202,7 +202,7 @@ void *hbw_realloc(void *ptr, size_t size)
     return memkind_realloc(kind, ptr, size);
 }
 
-void hbw_free(void *ptr)
+MEMKIND_EXPORT void hbw_free(void *ptr)
 {
     memkind_free(0, ptr);
 }

@@ -47,7 +47,7 @@ static BOOL isAutoHBWEnabled = TRUE;
 ////////////////////////////////////////////////////////////////////////////
 // API functions to enable and disable AutoHBW
 ////////////////////////////////////////////////////////////////////////////
-void enableAutoHBW()
+AUTOHBW_EXPORT void enableAutoHBW()
 {
     isAutoHBWEnabled = TRUE;
     LOG(LOG_INFO) fprintf(LogF,
@@ -55,7 +55,7 @@ void enableAutoHBW()
         "(for this rank)\n");
 }
 
-void disableAutoHBW()
+AUTOHBW_EXPORT void disableAutoHBW()
 {
     isAutoHBWEnabled = FALSE;
     LOG(LOG_INFO) fprintf(LogF,

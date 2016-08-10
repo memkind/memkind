@@ -204,4 +204,10 @@
 /* sizeof(intmax_t) == 2^LG_SIZEOF_INTMAX_T. */
 #undef LG_SIZEOF_INTMAX_T
 
+/*
+ * If defined, jemalloc symbols are not exported (doesn't work when
+ * JEMALLOC_PREFIX is not defined).
+ */
+#undef JEMALLOC_EXPORT
+
 #endif /* JEMALLOC_INTERNAL_DEFS_H_ */

@@ -64,6 +64,10 @@ int memkind_create_private(const struct memkind_ops *ops, const char *name,
 #   define unlikely(x)     (x)
 #endif
 
+#ifndef MEMKIND_EXPORT
+#   define MEMKIND_EXPORT __attribute__((visibility("default")))
+#endif
+
 #ifdef __cplusplus
 }
 #endif

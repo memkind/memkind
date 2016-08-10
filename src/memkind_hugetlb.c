@@ -43,7 +43,7 @@
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_private.h>
 
-const struct memkind_ops MEMKIND_HUGETLB_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_arena_destroy,
     .malloc = memkind_arena_malloc,
@@ -63,25 +63,25 @@ static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask, si
 
 static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_size);
 
-int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags)
+MEMKIND_EXPORT int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_2MB;
     return 0;
 }
 
-void memkind_hugetlb_init_once(void)
+MEMKIND_EXPORT void memkind_hugetlb_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HUGETLB);
     assert(err == 0);
     memkind_register_kind(MEMKIND_HUGETLB);
 }
 
-int memkind_hugetlb_check_available_2mb(struct memkind *kind)
+MEMKIND_EXPORT int memkind_hugetlb_check_available_2mb(struct memkind *kind)
 {
     return memkind_hugetlb_check_available(kind, 2097152);
 }
 
-int memkind_hugetlb_check_available_1gb(struct memkind *kind)
+MEMKIND_EXPORT int memkind_hugetlb_check_available_1gb(struct memkind *kind)
 {
     return memkind_hugetlb_check_available(kind, 1073741824);
 }

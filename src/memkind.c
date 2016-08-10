@@ -130,17 +130,17 @@ static struct memkind MEMKIND_HBW_INTERLEAVE_STATIC = {
     .init_once = PTHREAD_ONCE_INIT,
 };
 
-struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
-struct memkind *MEMKIND_HUGETLB = &MEMKIND_HUGETLB_STATIC;
-struct memkind *MEMKIND_INTERLEAVE = &MEMKIND_INTERLEAVE_STATIC;
-struct memkind *MEMKIND_HBW = &MEMKIND_HBW_STATIC;
-struct memkind *MEMKIND_HBW_PREFERRED = &MEMKIND_HBW_PREFERRED_STATIC;
-struct memkind *MEMKIND_HBW_HUGETLB = &MEMKIND_HBW_HUGETLB_STATIC;
-struct memkind *MEMKIND_HBW_PREFERRED_HUGETLB = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC;
-struct memkind *MEMKIND_HBW_GBTLB = &MEMKIND_HBW_GBTLB_STATIC;
-struct memkind *MEMKIND_HBW_PREFERRED_GBTLB = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC;
-struct memkind *MEMKIND_GBTLB = &MEMKIND_GBTLB_STATIC;
-struct memkind *MEMKIND_HBW_INTERLEAVE = &MEMKIND_HBW_INTERLEAVE_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HUGETLB = &MEMKIND_HUGETLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_INTERLEAVE = &MEMKIND_INTERLEAVE_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW = &MEMKIND_HBW_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED = &MEMKIND_HBW_PREFERRED_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_HUGETLB = &MEMKIND_HBW_HUGETLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED_HUGETLB = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_GBTLB = &MEMKIND_HBW_GBTLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED_GBTLB = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_GBTLB = &MEMKIND_GBTLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_INTERLEAVE = &MEMKIND_HBW_INTERLEAVE_STATIC;
 
 struct memkind_registry {
     struct memkind *partition_map[MEMKIND_MAX_KIND];
@@ -205,12 +205,12 @@ extern void memkind_realloc_post(struct memkind *, void *, size_t, void **) __at
 extern void memkind_free_pre(struct memkind **, void **) __attribute__((weak));
 extern void memkind_free_post(struct memkind *, void *) __attribute__((weak));
 
-int memkind_get_version()
+MEMKIND_EXPORT int memkind_get_version()
 {
     return MEMKIND_VERSION_MAJOR * 1000000 + MEMKIND_VERSION_MINOR * 1000 + MEMKIND_VERSION_PATCH;
 }
 
-void memkind_error_message(int err, char *msg, size_t size)
+MEMKIND_EXPORT void memkind_error_message(int err, char *msg, size_t size)
 {
     switch (err) {
         case MEMKIND_ERROR_UNAVAILABLE:
@@ -312,14 +312,14 @@ static inline int subregistry_size(struct memkind_subregistry* subregistry)
     return subregistry->num_kind;
 }
 
-int memkind_create(const struct memkind_ops *ops, const char *name, struct memkind **kind)
+MEMKIND_EXPORT int memkind_create(const struct memkind_ops *ops, const char *name, struct memkind **kind)
 {
     return memkind_create_private(ops, name, kind);
 }
 
 static void nop(void) {}
 
-int memkind_create_private(const struct memkind_ops *ops, const char *name, struct memkind **kind)
+MEMKIND_EXPORT int memkind_create_private(const struct memkind_ops *ops, const char *name, struct memkind **kind)
 {
     int err = 0;
     int tmp = 0;
@@ -381,7 +381,7 @@ exit:
 #ifdef __GNUC__
 __attribute__((destructor))
 #endif
-int memkind_finalize(void)
+MEMKIND_EXPORT int memkind_finalize(void)
 {
     struct memkind *kind;
     int i;
@@ -415,13 +415,13 @@ exit:
     return err;
 }
 
-int memkind_get_num_kind(int *num_kind)
+MEMKIND_EXPORT int memkind_get_num_kind(int *num_kind)
 {
     *num_kind = memkind_registry_g.num_kind;
     return 0;
 }
 
-int memkind_get_kind_by_partition(int partition, struct memkind **kind)
+MEMKIND_EXPORT int memkind_get_kind_by_partition(int partition, struct memkind **kind)
 {
     int err = 0;
 
@@ -437,7 +437,7 @@ int memkind_get_kind_by_partition(int partition, struct memkind **kind)
     return err;
 }
 
-int memkind_get_kind_by_name(const char *name, struct memkind **kind)
+MEMKIND_EXPORT int memkind_get_kind_by_name(const char *name, struct memkind **kind)
 {
     int err = 0;
     int i;
@@ -455,7 +455,7 @@ int memkind_get_kind_by_name(const char *name, struct memkind **kind)
     return err;
 }
 
-void *memkind_partition_mmap(int partition, void *addr, size_t size)
+MEMKIND_EXPORT void *memkind_partition_mmap(int partition, void *addr, size_t size)
 {
     int err;
     void *result = MAP_FAILED;
@@ -476,7 +476,7 @@ void *memkind_partition_mmap(int partition, void *addr, size_t size)
     return result;
 }
 
-int memkind_check_available(struct memkind *kind)
+MEMKIND_EXPORT int memkind_check_available(struct memkind *kind)
 {
     int err = 0;
 
@@ -486,7 +486,7 @@ int memkind_check_available(struct memkind *kind)
     return err;
 }
 
-void *memkind_malloc(struct memkind *kind, size_t size)
+MEMKIND_EXPORT void *memkind_malloc(struct memkind *kind, size_t size)
 {
     void *result;
 
@@ -509,7 +509,7 @@ void *memkind_malloc(struct memkind *kind, size_t size)
     return result;
 }
 
-void *memkind_calloc(struct memkind *kind, size_t num, size_t size)
+MEMKIND_EXPORT void *memkind_calloc(struct memkind *kind, size_t num, size_t size)
 {
     void *result;
 
@@ -532,7 +532,7 @@ void *memkind_calloc(struct memkind *kind, size_t num, size_t size)
     return result;
 }
 
-int memkind_posix_memalign(struct memkind *kind, void **memptr, size_t alignment,
+MEMKIND_EXPORT int memkind_posix_memalign(struct memkind *kind, void **memptr, size_t alignment,
                            size_t size)
 {
     int err;
@@ -556,7 +556,7 @@ int memkind_posix_memalign(struct memkind *kind, void **memptr, size_t alignment
     return err;
 }
 
-void *memkind_realloc(struct memkind *kind, void *ptr, size_t size)
+MEMKIND_EXPORT void *memkind_realloc(struct memkind *kind, void *ptr, size_t size)
 {
     void *result;
 
@@ -579,7 +579,7 @@ void *memkind_realloc(struct memkind *kind, void *ptr, size_t size)
     return result;
 }
 
-void memkind_free(struct memkind *kind, void *ptr)
+MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
 {
     if (!kind) {
         memkind_get_kind_for_free(ptr, &kind);
@@ -601,7 +601,7 @@ void memkind_free(struct memkind *kind, void *ptr)
 #endif
 }
 
-int memkind_get_size(memkind_t kind, size_t *total, size_t *free)
+MEMKIND_EXPORT int memkind_get_size(memkind_t kind, size_t *total, size_t *free)
 {
     return kind->ops->get_size(kind, total, free);
 }
@@ -670,7 +670,7 @@ exit:
     return err;
 }
 
-int memkind_create_pmem(const char *dir, size_t max_size,
+MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
                         struct memkind **kind)
 {
     int err = 0;
