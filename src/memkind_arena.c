@@ -48,22 +48,41 @@
 static void *jemk_mallocx_check(size_t size, int flags);
 static void *jemk_rallocx_check(void *ptr, size_t size, int flags);
 
+static unsigned int integer_log2(unsigned int v)
+{
+    return (sizeof(unsigned) * 8) - (__builtin_clz(v) + 1);
+}
+
+static unsigned int round_pow2_up(unsigned int v)
+{
+        unsigned int v_log2 = integer_log2(v);
+
+        if (v != 1 << v_log2) {
+            v = 1 << (v_log2 + 1);
+        }
+        return v;
+}
+
 int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
 {
     int err = 0;
 
     err = memkind_default_create(kind, ops, name);
-    if (likely(!err)) {
+    if (!err) {
         err = memkind_arena_create_map(kind);
     }
     return err;
+}
+
+static int min_int(int a, int b)
+{
+    return a > b ? b : a;
 }
 
 int memkind_set_arena_map_len(struct memkind *kind)
 {
     if (kind->ops->get_arena == memkind_bijective_get_arena) {
         kind->arena_map_len = 1;
-
     }
     else if (kind->ops->get_arena == memkind_thread_get_arena) {
         char *arena_num_env = getenv("MEMKIND_ARENA_NUM_PER_KIND");
@@ -80,55 +99,43 @@ int memkind_set_arena_map_len(struct memkind *kind)
         else {
             int calculated_arena_num = numa_num_configured_cpus() * 4;
 
-#if ARENA_LIMIT_PER_KIND > 0
-            kind->arena_map_len = ((ARENA_LIMIT_PER_KIND < calculated_arena_num) ? ARENA_LIMIT_PER_KIND : calculated_arena_num);
-#else
-            kind->arena_map_len = calculated_arena_num;
+#if ARENA_LIMIT_PER_KIND != 0
+            calculated_arena_num = min_int(ARENA_LIMIT_PER_KIND, calculated_arena_num);
 #endif
-
+            kind->arena_map_len = calculated_arena_num;
         }
+
+        kind->arena_map_len = round_pow2_up(kind->arena_map_len);
     }
 
+    kind->arena_map_mask = kind->arena_map_len - 1;
     return 0;
 }
 
 int memkind_arena_create_map(struct memkind *kind)
 {
     int err = 0;
-    int i;
     size_t unsigned_size = sizeof(unsigned int);
+    unsigned int arenas_extendk_params[2];
 
-    if (kind->arena_map_len == 0) {
-        err = memkind_set_arena_map_len(kind);
+    err = memkind_set_arena_map_len(kind);
+    if(err) {
+        return err;
     }
-#ifndef MEMKIND_TLS
+#ifdef MEMKIND_TLS
     if (kind->ops->get_arena == memkind_thread_get_arena) {
         pthread_key_create(&(kind->arena_key), jemk_free);
     }
 #endif
 
-    if (kind->arena_map_len) {
-        kind->arena_map = (unsigned int *)jemk_malloc(sizeof(unsigned int) * kind->arena_map_len);
-        if (kind->arena_map == NULL) {
-            err = MEMKIND_ERROR_MALLOC;
-        }
-    }
-    if (!err) {
-        for (i = 0; i < kind->arena_map_len; ++i) {
-            kind->arena_map[i] = UINT_MAX;
-        }
-        for (i = 0; !err && i < kind->arena_map_len; ++i) {
-            err = jemk_mallctl("arenas.extendk", kind->arena_map + i,
-                               &unsigned_size, &(kind->partition),
-                               unsigned_size);
-        }
-        if (err) {
-            if (kind->arena_map) {
-                jemk_free(kind->arena_map);
-            }
-            err = MEMKIND_ERROR_MALLCTL;
-        }
-    }
+    arenas_extendk_params[0] = kind->partition;
+    arenas_extendk_params[1] = kind->arena_map_len;
+
+
+    err = jemk_mallctl("arenas.extendk", &(kind->arena_zero),
+            &unsigned_size, arenas_extendk_params,
+            sizeof(unsigned int*));
+
     return err;
 }
 
@@ -137,14 +144,12 @@ int memkind_arena_destroy(struct memkind *kind)
     char cmd[128];
     int i;
 
-    if (kind->arena_map) {
+    if (kind->arena_map_len) {
         for (i = 0; i < kind->arena_map_len; ++i) {
-            snprintf(cmd, 128, "arena.%u.purge", kind->arena_map[i]);
+            snprintf(cmd, 128, "arena.%u.purge", kind->arena_zero + i);
             jemk_mallctl(cmd, NULL, NULL, NULL, 0);
         }
-        jemk_free(kind->arena_map);
-        kind->arena_map = NULL;
-#ifndef MEMKIND_TLS
+#ifdef MEMKIND_TLS
         if (kind->ops->get_arena == memkind_thread_get_arena) {
             pthread_key_delete(kind->arena_key);
         }
@@ -161,9 +166,7 @@ void *memkind_arena_malloc(struct memkind *kind, size_t size)
     int err = 0;
     unsigned int arena;
 
-    if (likely(!err)) {
-        err = kind->ops->get_arena(kind, &arena, size);
-    }
+    err = kind->ops->get_arena(kind, &arena, size);
     if (likely(!err)) {
         result = jemk_mallocx_check(size, MALLOCX_ARENA(arena));
     }
@@ -181,7 +184,7 @@ void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size)
     }
     else {
         err = kind->ops->get_arena(kind, &arena, size);
-        if (!err) {
+        if (likely(!err)) {
             if (ptr == NULL) {
                 ptr = jemk_mallocx_check(size, MALLOCX_ARENA(arena));
             }
@@ -200,7 +203,7 @@ void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size)
     unsigned int arena;
 
     err = kind->ops->get_arena(kind, &arena, size);
-    if (!err) {
+    if (likely(!err)) {
         result = jemk_mallocx_check(num * size, MALLOCX_ARENA(arena) | MALLOCX_ZERO);
     }
     return result;
@@ -215,10 +218,10 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 
     *memptr = NULL;
     err = kind->ops->get_arena(kind, &arena, size);
-    if (!err) {
+    if (likely(!err)) {
         err = memkind_posix_check_alignment(kind, alignment);
     }
-    if (!err) {
+    if (likely(!err)) {
         /* posix_memalign should not change errno.
            Set it to its previous value after calling jemalloc */
         errno_before = errno;
@@ -231,44 +234,30 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 
 int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
 {
-    int err = 0;
+    *arena = kind->arena_zero;
+    return 0;
+}
 
-    if (likely(kind->arena_map != NULL)) {
-        *arena = *(kind->arena_map);
-        if (unlikely(*arena == UINT_MAX)) {
-            err = MEMKIND_ERROR_MALLCTL;
-        }
-    }
-    else {
-        err = MEMKIND_ERROR_RUNTIME;
-    }
-    return err;
+
+/*
+ *
+ * We use thread control block as unique thread identifier
+ * For more read: https://www.akkadia.org/drepper/tls.pdf
+ * We could consider using rdfsbase when it will arrive to linux kernel
+ *
+ */
+static uintptr_t get_fs_base() {
+    uintptr_t fs_base;
+    asm ("movq %%fs:0, %0" : "=r" (fs_base));
+    return fs_base;
 }
 
 #ifdef MEMKIND_TLS
 int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
 {
-    static __thread unsigned int MEMKIND_TLS_MODEL arena_tls = UINT_MAX;
-    int err = 0;
-
-    if (arena_tls == UINT_MAX) {
-        arena_tls = _mm_crc32_u64(0, (uint64_t)pthread_self());
-    }
-    if (kind->arena_map != NULL) {
-        *arena = kind->arena_map[arena_tls % kind->arena_map_len];
-    }
-    else {
-        err = MEMKIND_ERROR_RUNTIME;
-    }
-    return err;
-}
-#else
-int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
-{
-    int err = 0;
     unsigned int *arena_tsd;
-
     arena_tsd = pthread_getspecific(kind->arena_key);
+
     if (unlikely(arena_tsd == NULL)) {
         arena_tsd = jemk_malloc(sizeof(unsigned int));
         if (arena_tsd == NULL) {
@@ -281,15 +270,22 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t s
                   MEMKIND_ERROR_PTHREAD : 0;
         }
     }
-    if (likely(!err)) {
-        *arena = kind->arena_map[*arena_tsd];
-        if (*arena == UINT_MAX) {
-            err = MEMKIND_ERROR_MALLCTL;
-        }
-    }
+    *arena = kind->arena_zero + *arena_tsd;
     return err;
 }
-#endif /* MEMKIND_TLS */
+
+#else
+
+int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
+{
+    unsigned int arena_idx;
+    // it's likely that each thread control block lies on diffrent page
+    // so we extracting page number with >> 12 to improve hashing
+    arena_idx = (get_fs_base() >> 12) & kind->arena_map_mask;
+    *arena = kind->arena_zero + arena_idx;
+    return 0;
+}
+#endif //MEMKIND_TLS
 
 static void *jemk_mallocx_check(size_t size, int flags)
 {
