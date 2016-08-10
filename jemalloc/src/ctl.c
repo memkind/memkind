@@ -1569,24 +1569,38 @@ label_return:
 }
 
 #ifdef JEMALLOC_ENABLE_MEMKIND
+/*
+ * expects 2 parameters unsigned array via newp
+ *  [0] - partition number
+ *  [1] - number of arenas to be added
+ *
+ * returns index of first added via oldp
+ */
 static int
 arenas_extendk_ctl(const size_t *mib, size_t miblen, void *oldp, size_t *oldlenp,
     void *newp, size_t newlen)
 {
-	int ret;
-	unsigned narenas;
-	unsigned partition = 0;
+    int ret = 0;
+    unsigned i;
+    unsigned narenas;
+    unsigned partition, arena_map_len;
+    unsigned *arenas_extendk_params;
 
-	malloc_mutex_lock(&ctl_mtx);
-	WRITE(partition, unsigned);
-	if (ctl_growk(partition)) {
-		ret = EAGAIN;
-		goto label_return;
-	}
-	narenas = ctl_stats.narenas - 1;
-	READ(narenas, unsigned);
+    malloc_mutex_lock(&ctl_mtx);
 
-	ret = 0;
+    arenas_extendk_params = (unsigned *)newp;
+    partition = arenas_extendk_params[0];
+    arena_map_len = arenas_extendk_params[1];
+    narenas = ctl_stats.narenas;
+
+    for(i = 0; i < arena_map_len; i++) {
+        if (ctl_growk(partition)) {
+            ret = EAGAIN;
+            goto label_return;
+        }
+    }
+    READ(narenas, unsigned);
+
 label_return:
 	malloc_mutex_unlock(&ctl_mtx);
 	return (ret);
