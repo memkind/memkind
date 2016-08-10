@@ -103,12 +103,14 @@ test/slts_test.cpp
 test/static_kinds_tests.cpp
 test/huge_page_test.cpp
 test/hbw_detection_test.py
+test/autohbw_test.py
 test/memkind-afts.ts
 test/memkind-afts-ext.ts
 test/memkind-slts.ts
 test/memkind-perf.ts
 test/memkind-perf-ext.ts
 test/memkind-hbw_detection.ts
+test/memkind-autohbw.ts
 test/performance/framework.hpp
 test/performance/framework.cpp
 test/performance/operations.hpp
@@ -163,6 +165,7 @@ test/allocator_perf_tool/main.cpp
 test/allocate_to_max_stress_test.cpp
 test/memkind_versioning_tests.cpp
 test/heap_manager_init_perf_test.cpp
+test/autohbw_test_helper.c
 jemalloc/autogen.sh
 jemalloc/bin
 jemalloc/bin/jemalloc.sh.in

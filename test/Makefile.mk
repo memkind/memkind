@@ -31,6 +31,7 @@ check_PROGRAMS += test/all_tests \
                   test/slts_test \
                   test/decorator_test \
                   test/allocator_perf_tool_tests \
+                  test/autohbw_test_helper \
                   # end
 
 TESTS += test/check.sh
@@ -41,7 +42,9 @@ EXTRA_DIST += test/memkind-afts.ts \
               test/memkind-perf.ts \
               test/memkind-perf-ext.ts \
               test/memkind-hbw_detection.ts \
-              test/hbw_detection_test.py
+              test/memkind-autohbw.ts \
+              test/hbw_detection_test.py \
+              test/autohbw_test.py
 
 
 #test_all_tests_LDADD = libgtest.a libmemkind.la test/liballocatorperftool.la
@@ -51,6 +54,7 @@ test_environerr_hbw_malloc_test_LDADD = libgtest.a libmemkind.la
 test_slts_test_LDADD = libgtest.a libmemkind.la
 test_decorator_test_LDADD = libgtest.a libmemkind.la
 test_allocator_perf_tool_tests_LDADD = libgtest.a libmemkind.la
+test_autohbw_test_helper_LDADD = libmemkind.la
 
 
 test_all_tests_SOURCES = test/common.h \
@@ -91,6 +95,7 @@ test_mallctlerr_test_SOURCES = test/main.cpp test/mallctl_err_test.cpp
 test_environerr_hbw_malloc_test_SOURCES = test/main.cpp test/environ_err_hbw_malloc_test.cpp test/trial_generator.cpp test/check.cpp
 test_slts_test_SOURCES = test/slts_test.cpp
 test_decorator_test_SOURCES = test/main.cpp test/decorator_test.cpp test/decorator_test.h
+test_autohbw_test_helper_SOURCES = test/autohbw_test_helper.c
 
 #Tests based on Allocator Perf Tool
 allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.hpp \

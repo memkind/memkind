@@ -216,12 +216,14 @@ $(memkind_test_dir)/autohbw_candidates
 ${memkind_test_dir}/pmem
 ${memkind_test_dir}/allocator_perf_tool_tests
 ${memkind_test_dir}/perf_tool
+${memkind_test_dir}/autohbw_test_helper
 $(memkind_test_dir)/memkind-afts.ts
 $(memkind_test_dir)/memkind-afts-ext.ts
 $(memkind_test_dir)/memkind-slts.ts
 $(memkind_test_dir)/memkind-perf.ts
 $(memkind_test_dir)/memkind-perf-ext.ts
 $(memkind_test_dir)/memkind-hbw_detection.ts
+$(memkind_test_dir)/memkind-autohbw.ts
 $(memkind_test_dir)/check.sh
 $(memkind_test_dir)/test.sh
 $(memkind_test_dir)/libfopen.so
@@ -230,6 +232,7 @@ $(memkind_test_dir)/libmalloc.so
 $(memkind_test_dir)/libnumadist.so
 $(memkind_test_dir)/libsched.so
 $(memkind_test_dir)/hbw_detection_test.py
+$(memkind_test_dir)/autohbw_test.py
 
 %exclude $(memkind_test_dir)/*.pyo
 %exclude $(memkind_test_dir)/*.pyc
