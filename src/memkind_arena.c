@@ -63,7 +63,7 @@ static unsigned int round_pow2_up(unsigned int v)
         return v;
 }
 
-int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
+MEMKIND_EXPORT int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
 {
     int err = 0;
 
@@ -79,7 +79,7 @@ static int min_int(int a, int b)
     return a > b ? b : a;
 }
 
-int memkind_set_arena_map_len(struct memkind *kind)
+MEMKIND_EXPORT int memkind_set_arena_map_len(struct memkind *kind)
 {
     if (kind->ops->get_arena == memkind_bijective_get_arena) {
         kind->arena_map_len = 1;
@@ -112,7 +112,7 @@ int memkind_set_arena_map_len(struct memkind *kind)
     return 0;
 }
 
-int memkind_arena_create_map(struct memkind *kind)
+MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind)
 {
     int err = 0;
     size_t unsigned_size = sizeof(unsigned int);
@@ -139,7 +139,7 @@ int memkind_arena_create_map(struct memkind *kind)
     return err;
 }
 
-int memkind_arena_destroy(struct memkind *kind)
+MEMKIND_EXPORT int memkind_arena_destroy(struct memkind *kind)
 {
     char cmd[128];
     int i;
@@ -160,7 +160,7 @@ int memkind_arena_destroy(struct memkind *kind)
     return 0;
 }
 
-void *memkind_arena_malloc(struct memkind *kind, size_t size)
+MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
 {
     void *result = NULL;
     int err = 0;
@@ -173,7 +173,7 @@ void *memkind_arena_malloc(struct memkind *kind, size_t size)
     return result;
 }
 
-void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size)
+MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size)
 {
     int err = 0;
     unsigned int arena;
@@ -196,7 +196,7 @@ void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size)
     return ptr;
 }
 
-void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size)
+MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size)
 {
     void *result = NULL;
     int err = 0;
@@ -209,7 +209,7 @@ void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size)
     return result;
 }
 
-int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t alignment,
+MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t alignment,
                                  size_t size)
 {
     int err = 0;
@@ -232,12 +232,11 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
     return err;
 }
 
-int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
+MEMKIND_EXPORT int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
 {
     *arena = kind->arena_zero;
     return 0;
 }
-
 
 /*
  *
@@ -253,7 +252,7 @@ static uintptr_t get_fs_base() {
 }
 
 #ifdef MEMKIND_TLS
-int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
+MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
 {
     unsigned int *arena_tsd;
     arena_tsd = pthread_getspecific(kind->arena_key);
@@ -276,7 +275,7 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t s
 
 #else
 
-int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
+MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
 {
     unsigned int arena_idx;
     // it's likely that each thread control block lies on diffrent page

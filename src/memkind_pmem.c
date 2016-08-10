@@ -32,7 +32,7 @@
 #include <memkind/internal/memkind_pmem.h>
 #include <memkind/internal/memkind_private.h>
 
-const struct memkind_ops MEMKIND_PMEM_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_PMEM_OPS = {
     .create = memkind_pmem_create,
     .destroy = memkind_pmem_destroy,
     .malloc = memkind_arena_malloc,
@@ -46,7 +46,7 @@ const struct memkind_ops MEMKIND_PMEM_OPS = {
     .get_size = memkind_pmem_get_size,
 };
 
-int memkind_pmem_create(struct memkind *kind, const struct memkind_ops *ops,
+MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind, const struct memkind_ops *ops,
                         const char *name)
 {
     struct memkind_pmem *priv;
@@ -81,7 +81,7 @@ exit:
     return err;
 }
 
-int memkind_pmem_destroy(struct memkind *kind)
+MEMKIND_EXPORT int memkind_pmem_destroy(struct memkind *kind)
 {
     struct memkind_pmem *priv = kind->priv;
 
@@ -95,7 +95,7 @@ int memkind_pmem_destroy(struct memkind *kind)
     return 0;
 }
 
-void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size)
+MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size)
 {
     struct memkind_pmem *priv = kind->priv;
     void *result;
@@ -122,13 +122,13 @@ void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size)
     return result;
 }
 
-int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags)
+MEMKIND_EXPORT int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_SHARED;
     return 0;
 }
 
-int memkind_pmem_get_size(struct memkind *kind, size_t *total, size_t *free)
+MEMKIND_EXPORT int memkind_pmem_get_size(struct memkind *kind, size_t *total, size_t *free)
 {
     struct memkind_pmem *priv = kind->priv;
 

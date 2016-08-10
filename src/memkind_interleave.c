@@ -30,7 +30,7 @@
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_private.h>
 
-const struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_arena_destroy,
     .malloc = memkind_arena_malloc,
@@ -49,7 +49,7 @@ const struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .init_once = memkind_interleave_init_once,
 };
 
-void memkind_interleave_init_once(void)
+MEMKIND_EXPORT void memkind_interleave_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_INTERLEAVE);
     assert(err == 0);

@@ -46,7 +46,7 @@
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_private.h>
 
-const struct memkind_ops MEMKIND_HBW_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_arena_destroy,
     .malloc = memkind_arena_malloc,
@@ -64,7 +64,7 @@ const struct memkind_ops MEMKIND_HBW_OPS = {
     .init_once = memkind_hbw_init_once,
 };
 
-const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_arena_destroy,
     .malloc = memkind_arena_malloc,
@@ -82,7 +82,7 @@ const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .init_once = memkind_hbw_hugetlb_init_once,
 };
 
-const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_arena_destroy,
     .malloc = memkind_arena_malloc,
@@ -100,7 +100,7 @@ const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .init_once = memkind_hbw_preferred_init_once,
 };
 
-const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_arena_destroy,
     .malloc = memkind_arena_malloc,
@@ -118,7 +118,7 @@ const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .init_once = memkind_hbw_preferred_hugetlb_init_once,
 };
 
-const struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_arena_destroy,
     .malloc = memkind_arena_malloc,
@@ -183,12 +183,12 @@ static int fill_bandwidth_values_from_enviroment(int* bandwidth, int bandwidth_l
 
 static int fill_nodes_bandwidth(int* bandwidth, int bandwidth_len);
 
-int memkind_hbw_check_available(struct memkind *kind)
+MEMKIND_EXPORT int memkind_hbw_check_available(struct memkind *kind)
 {
     return kind->ops->get_mbind_nodemask(kind, NULL, 0);
 }
 
-int memkind_hbw_hugetlb_check_available(struct memkind *kind)
+MEMKIND_EXPORT int memkind_hbw_hugetlb_check_available(struct memkind *kind)
 {
     int err = memkind_hbw_check_available(kind);
     if (!err) {
@@ -197,7 +197,7 @@ int memkind_hbw_hugetlb_check_available(struct memkind *kind)
     return err;
 }
 
-int memkind_hbw_gbtlb_check_available(struct memkind *kind)
+MEMKIND_EXPORT int memkind_hbw_gbtlb_check_available(struct memkind *kind)
 {
     int err = memkind_hbw_check_available(kind);
     if (!err) {
@@ -206,7 +206,7 @@ int memkind_hbw_gbtlb_check_available(struct memkind *kind)
     return err;
 }
 
-int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
+MEMKIND_EXPORT int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
                                    unsigned long *nodemask,
                                    unsigned long maxnode)
 {
@@ -229,7 +229,7 @@ int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
     return g->init_err;
 }
 
-int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
+MEMKIND_EXPORT int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
                                        unsigned long *nodemask,
                                        unsigned long maxnode)
 {
@@ -589,7 +589,7 @@ static int numanode_bandwidth_compare(const void *a, const void *b)
     return result;
 }
 
-void memkind_hbw_init_once(void)
+MEMKIND_EXPORT void memkind_hbw_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW);
     assert(err == 0);
@@ -598,7 +598,7 @@ void memkind_hbw_init_once(void)
     memkind_register_kind(MEMKIND_HBW);
 }
 
-void memkind_hbw_hugetlb_init_once(void)
+MEMKIND_EXPORT void memkind_hbw_hugetlb_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_HUGETLB);
     assert(err == 0);
@@ -607,7 +607,7 @@ void memkind_hbw_hugetlb_init_once(void)
     memkind_register_kind(MEMKIND_HBW_HUGETLB);
 }
 
-void memkind_hbw_preferred_init_once(void)
+MEMKIND_EXPORT void memkind_hbw_preferred_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_PREFERRED);
     assert(err == 0);
@@ -616,7 +616,7 @@ void memkind_hbw_preferred_init_once(void)
     memkind_register_kind(MEMKIND_HBW_PREFERRED);
 }
 
-void memkind_hbw_preferred_hugetlb_init_once(void)
+MEMKIND_EXPORT void memkind_hbw_preferred_hugetlb_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_PREFERRED_HUGETLB);
     assert(err == 0);
@@ -625,7 +625,7 @@ void memkind_hbw_preferred_hugetlb_init_once(void)
     memkind_register_kind(MEMKIND_HBW_PREFERRED_HUGETLB);
 }
 
-void memkind_hbw_interleave_init_once(void)
+MEMKIND_EXPORT void memkind_hbw_interleave_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_INTERLEAVE);
     assert(err == 0);

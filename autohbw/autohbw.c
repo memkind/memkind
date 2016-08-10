@@ -44,6 +44,10 @@
 #define TRUE 1
 #define BOOL int
 
+#ifndef AUTOHBW_EXPORT
+#    define AUTOHBW_EXPORT __attribute__((visibility("default")))
+#endif
+
 // Log level:
 //
 //-1 = no messages are printed
@@ -264,7 +268,7 @@ void myMemkindFree(void *ptr)
 ////////////////////////////////////////////////////////////////////////////
 // My interposer for malloc
 ////////////////////////////////////////////////////////////////////////////
-void *malloc(size_t size)
+AUTOHBW_EXPORT void *malloc(size_t size)
 {
     return myMemkindMalloc(size);
 }
@@ -272,7 +276,7 @@ void *malloc(size_t size)
 ////////////////////////////////////////////////////////////////////////////
 // My interposer for calloc
 ////////////////////////////////////////////////////////////////////////////
-void *calloc(size_t nmemb, size_t size)
+AUTOHBW_EXPORT void *calloc(size_t nmemb, size_t size)
 {
     return myMemkindCalloc(nmemb, size);
 }
@@ -280,7 +284,7 @@ void *calloc(size_t nmemb, size_t size)
 ////////////////////////////////////////////////////////////////////////////
 // My interposer for realloc
 ////////////////////////////////////////////////////////////////////////////
-void *realloc(void *ptr, size_t size)
+AUTOHBW_EXPORT void *realloc(void *ptr, size_t size)
 {
     return myMemkindRealloc(ptr, size);
 }
@@ -288,7 +292,7 @@ void *realloc(void *ptr, size_t size)
 ////////////////////////////////////////////////////////////////////////////
 // My interposer for posix_memalign
 ////////////////////////////////////////////////////////////////////////////
-int posix_memalign(void **memptr, size_t alignment, size_t size)
+AUTOHBW_EXPORT int posix_memalign(void **memptr, size_t alignment, size_t size)
 {
     return myMemkindAlign(memptr, alignment, size);
 }
@@ -299,10 +303,11 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
 // (2) To warn the use of a deprecated function.
 // However, if really needed we can support this method using posix_memalign
 ////////////////////////////////////////////////////////////////////////////
-void *valloc(size_t size)
+AUTOHBW_EXPORT void *valloc(size_t size)
 {
     fprintf(stderr, "use of deprecated valloc. Use posix_memalign instead\n");
     assert(0 && "valloc is deprecated. Not supported by this library");
+    return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -311,16 +316,17 @@ void *valloc(size_t size)
 // (2) To warn the use of a deprecated function.
 // However, if really needed we can support this method using posix_memalign
 ////////////////////////////////////////////////////////////////////////////
-void *memalign(size_t boundary, size_t size)
+AUTOHBW_EXPORT void *memalign(size_t boundary, size_t size)
 {
     fprintf(stderr, "use of deprecated memalign. Use posix_memalign instead\n");
     assert(0 && "memalign is deprecated. Not supported by this library");
+    return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // My interposer for free
 ////////////////////////////////////////////////////////////////////////////
-void free(void *ptr)
+AUTOHBW_EXPORT void free(void *ptr)
 {
     if (ptr)
         return myMemkindFree(ptr);

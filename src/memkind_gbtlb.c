@@ -42,7 +42,7 @@
 #include <memkind/internal/memkind_hbw.h>
 #include <memkind/internal/memkind_private.h>
 
-const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_gbtlb_malloc,
@@ -60,7 +60,7 @@ const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .init_once = memkind_hbw_gbtlb_init_once
 };
 
-const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_gbtlb_malloc,
@@ -79,7 +79,7 @@ const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
 
 };
 
-const struct memkind_ops MEMKIND_GBTLB_OPS = {
+MEMKIND_EXPORT const struct memkind_ops MEMKIND_GBTLB_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_gbtlb_malloc,
@@ -123,7 +123,7 @@ static int memkind_gbtlb_mmap(struct memkind *kind, size_t size,
                               void **result);
 static void memkind_gbtlb_ceil_size(size_t *size);
 
-void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
+MEMKIND_EXPORT void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
 {
     void *result = NULL;
     int err = 0;
@@ -145,12 +145,12 @@ void *memkind_gbtlb_malloc(struct memkind *kind, size_t size)
     return result;
 }
 
-void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size)
+MEMKIND_EXPORT void *memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size)
 {
     return kind->ops->malloc(kind, num * size);
 }
 
-int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size)
+MEMKIND_EXPORT int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size)
 {
     int err = 0;
     int do_shift = 0;
@@ -190,7 +190,7 @@ int memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 }
 
 /*FIXME : Handle scenario when 2MB and 1GB pages are mixed with realloc*/
-void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
+MEMKIND_EXPORT void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
 {
     void *result = NULL;
     void *mmap_ptr = NULL;
@@ -234,7 +234,7 @@ void *memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size)
     return result;
 }
 
-void memkind_gbtlb_free(struct memkind *kind, void *ptr)
+MEMKIND_EXPORT void memkind_gbtlb_free(struct memkind *kind, void *ptr)
 {
     int err;
     void *mmapptr = NULL;
@@ -247,13 +247,13 @@ void memkind_gbtlb_free(struct memkind *kind, void *ptr)
     }
 }
 
-int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags)
+MEMKIND_EXPORT int memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_PRIVATE | MAP_HUGETLB | MAP_HUGE_1GB | MAP_ANONYMOUS;
     return 0;
 }
 
-int memkind_gbtlb_check_addr(struct memkind *kind, void *addr)
+MEMKIND_EXPORT int memkind_gbtlb_check_addr(struct memkind *kind, void *addr)
 {
 
     void *mmapptr = NULL;
@@ -394,17 +394,17 @@ static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)
     return err;
 }
 
-void memkind_hbw_gbtlb_init_once(void)
+MEMKIND_EXPORT void memkind_hbw_gbtlb_init_once(void)
 {
     memkind_register_kind(MEMKIND_HBW_GBTLB);
 }
 
-void memkind_hbw_preferred_gbtlb_init_once(void)
+MEMKIND_EXPORT void memkind_hbw_preferred_gbtlb_init_once(void)
 {
     memkind_register_kind(MEMKIND_HBW_PREFERRED_GBTLB);
 }
 
-void memkind_gbtlb_init_once(void)
+MEMKIND_EXPORT void memkind_gbtlb_init_once(void)
 {
     memkind_register_kind(MEMKIND_GBTLB);
 }
