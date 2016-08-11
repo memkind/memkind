@@ -292,7 +292,9 @@ void memkind_register_kind(memkind_t kind)
 static void subregistry_add(struct memkind_subregistry* subregistry, memkind_t kind)
 {
     assert(subregistry && kind && subregistry->num_kind < MEMKIND_MAX_KIND);
-    pthread_mutex_lock(&subregistry->lock);
+    if (pthread_mutex_lock(&subregistry->lock) != 0)
+        assert(0 && "failed to acquire mutex");
+
     subregistry->kind_partition[subregistry->num_kind++]= kind->partition;
     pthread_mutex_unlock(&subregistry->lock);
 }
@@ -321,16 +323,13 @@ static void nop(void) {}
 
 MEMKIND_EXPORT int memkind_create_private(const struct memkind_ops *ops, const char *name, struct memkind **kind)
 {
-    int err = 0;
-    int tmp = 0;
+    int err;
     int i;
 
     *kind = NULL;
-    err = pthread_mutex_lock(&(memkind_registry_g.lock));
-    if (err) {
-        err = MEMKIND_ERROR_PTHREAD;
-        goto exit;
-    }
+    if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
+        assert(0 && "failed to acquire mutex");
+
     if (memkind_registry_g.num_kind == MEMKIND_MAX_KIND) {
         err = MEMKIND_ERROR_TOOMANY;
         goto exit;
@@ -371,10 +370,9 @@ MEMKIND_EXPORT int memkind_create_private(const struct memkind_ops *ops, const c
     (*kind)->init_once = PTHREAD_ONCE_INIT;
     pthread_once(&(*kind)->init_once, nop); //this is done to avoid init_once for dynamic kinds
 exit:
-    if (err != MEMKIND_ERROR_PTHREAD) {
-        tmp = pthread_mutex_unlock(&(memkind_registry_g.lock));
-        err = err ? err : tmp;
-    }
+    if (pthread_mutex_unlock(&memkind_registry_g.lock) != 0)
+        assert(0 && "failed to release mutex");
+
     return err;
 }
 
@@ -387,11 +385,8 @@ MEMKIND_EXPORT int memkind_finalize(void)
     int i;
     int err;
 
-    err = pthread_mutex_lock(&(memkind_registry_g.lock));
-    if (err) {
-        err = MEMKIND_ERROR_PTHREAD;
-        goto exit;
-    }
+    if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
+        assert(0 && "failed to acquire mutex");
 
     for (i = 0; i < memkind_registry_g.num_kind; ++i) {
         kind = memkind_registry_g.partition_map[i];
@@ -408,10 +403,9 @@ MEMKIND_EXPORT int memkind_finalize(void)
     }
 
 exit:
-    if (err != MEMKIND_ERROR_PTHREAD) {
-        err = pthread_mutex_unlock(&(memkind_registry_g.lock)) ?
-              MEMKIND_ERROR_PTHREAD : 0;
-    }
+    if (pthread_mutex_unlock(&memkind_registry_g.lock) != 0)
+        assert(0 && "failed to release mutex");
+
     return err;
 }
 
