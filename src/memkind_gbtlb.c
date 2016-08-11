@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
 #include <sys/mman.h>
+#include <assert.h>
 #ifndef MAP_HUGETLB
 #define MAP_HUGETLB 0x40000
 #endif
@@ -289,7 +290,9 @@ static int memkind_store(void *memptr, void **mmapptr, struct memkind **kind,
     }
 
     if (!is_init) {
-        pthread_mutex_lock(&init_mutex);
+        if (pthread_mutex_lock(&init_mutex) != 0)
+            assert(0 && "failed to acquire mutex");
+
         if (!is_init) {
             table_len = numa_num_configured_cpus();
             table = jemk_malloc(sizeof(memkind_table_node_t) * table_len);
@@ -298,7 +301,7 @@ static int memkind_store(void *memptr, void **mmapptr, struct memkind **kind,
             }
             else {
                 for (i = 0; i < table_len; ++i) {
-                    pthread_mutex_init(&(table[i].mutex), NULL);
+                    pthread_mutex_init(&table[i].mutex, NULL);
                     table[i].list = NULL;
                 }
                 is_init = 1;
@@ -308,7 +311,9 @@ static int memkind_store(void *memptr, void **mmapptr, struct memkind **kind,
     }
     if (is_init) {
         hash = ptr_hash(memptr, table_len);
-        pthread_mutex_lock(&(table[hash].mutex));
+        if (pthread_mutex_lock(&table[hash].mutex) != 0)
+            assert(0 && "failed to acquire mutex");
+
         if (mode == GBTLB_STORE_REMOVE || mode == GBTLB_STORE_QUERY) {
             /*
                memkind_store() call is a query
@@ -351,7 +356,7 @@ static int memkind_store(void *memptr, void **mmapptr, struct memkind **kind,
             table[hash].list->kind = *kind;
             table[hash].list->next = storeptr;
         }
-        pthread_mutex_unlock(&(table[hash].mutex));
+        pthread_mutex_unlock(&table[hash].mutex);
     }
     else {
         err = MEMKIND_ERROR_MALLOC;

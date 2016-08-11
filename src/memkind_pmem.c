@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
+#include <assert.h>
 
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_pmem.h>
@@ -100,9 +101,8 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t 
     struct memkind_pmem *priv = kind->priv;
     void *result;
 
-    if (pthread_mutex_lock(&priv->pmem_lock)) {
-        return MAP_FAILED;
-    }
+    if (pthread_mutex_lock(&priv->pmem_lock) != 0)
+        assert(0 && "failed to acquire mutex");
 
     if (priv->offset + size > priv->max_size) {
         pthread_mutex_unlock(&priv->pmem_lock);
