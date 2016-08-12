@@ -214,10 +214,8 @@ int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
     struct bitmask nodemask_bm = {maxnode, nodemask};
     struct memkind_hbw_closest_numanode_t *g =
             &memkind_hbw_closest_numanode_g;
-    if(unlikely(memkind_hbw_closest_numanode_once_g == PTHREAD_ONCE_INIT)) {
-        pthread_once(&memkind_hbw_closest_numanode_once_g,
+    pthread_once(&memkind_hbw_closest_numanode_once_g,
                 memkind_hbw_closest_numanode_init);
-    }
     if (likely(!g->init_err && nodemask)) {
         numa_bitmask_clearall(&nodemask_bm);
         cpu = sched_getcpu();
@@ -239,10 +237,8 @@ int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
     struct bitmask nodemask_bm = {maxnode, nodemask};
     struct memkind_hbw_closest_numanode_t *g =
             &memkind_hbw_closest_numanode_g;
-    if(unlikely(memkind_hbw_closest_numanode_once_g == PTHREAD_ONCE_INIT)) {
-        pthread_once(&memkind_hbw_closest_numanode_once_g,
+    pthread_once(&memkind_hbw_closest_numanode_once_g,
                 memkind_hbw_closest_numanode_init);
-    }
 
     if (likely(!g->init_err && nodemask)) {
         numa_bitmask_clearall(&nodemask_bm);
