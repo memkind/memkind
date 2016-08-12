@@ -56,10 +56,7 @@ static memkind_t hbw_choose_kind(hbw_pagesize_t pagesize)
 {
     memkind_t result = NULL;
 
-    if(hbw_policy_once_g == PTHREAD_ONCE_INIT) {
-        //hbw_policy_g is statically initialized
-        hbw_set_policy(hbw_policy_g);
-    }
+    hbw_set_policy(hbw_policy_g);
 
     int policy = hbw_get_policy();
 
