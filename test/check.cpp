@@ -95,11 +95,15 @@ void Check::check_node_hbw()
     int status = -1;
     struct bitmask *expected_nodemask = numa_allocate_nodemask(), *returned_nodemask = numa_allocate_nodemask();
 
-    memkind_hbw_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
+    memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
 
     for (size_t i = 0; i < num_address; i++) {
         ASSERT_EQ(get_mempolicy(&status, returned_nodemask->maskp, returned_nodemask->size, address[i], MPOL_F_ADDR), 0);
-        EXPECT_TRUE(numa_bitmask_equal(expected_nodemask, returned_nodemask));
+        for(int i=0; i < numa_num_possible_nodes(); i++) {
+            if(numa_bitmask_isbitset(returned_nodemask, i)) {
+                EXPECT_TRUE(numa_bitmask_isbitset(expected_nodemask, i));
+            }
+        }
     }
 
     numa_free_nodemask(expected_nodemask);
