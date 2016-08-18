@@ -1,3 +1,13 @@
+* Thu Aug 18 2016 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v1.2.0
+- memkind_create() and memkind_ops have been deprecated (moved to
+  memkind_deprecated.h).
+- Deprecated the headers from memkind/internal and added compile-time
+  warnings to them (plan is to remove those from rpm packages).
+- autohbw files have been moved to memkind/autohbw directory.
+- API decorators (memkind_malloc_pre, memkind_malloc_post etc.) now
+  need to be enabled with configure-time option --enable-decorators.
+- Allocation time optimizations with up to 20% improvement.
+
 * Wed Jul 13 2016 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v1.1.1
 - Performance improvement for memkind_free() in scenario where NULL
   was passed as kind (reduced by 60%).
