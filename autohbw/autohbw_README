@@ -18,7 +18,7 @@ USAGE
 To use the dynamic library, insert LD_PRELOAD=libautohbw.so and libmekind.so
 before your commandline. For instance,
 
-   LD_PRELOAD=libautohbw.so:libmemkind.so /bin/ls
+   LD_PRELOAD=libautohbw.so /bin/ls
 
 executes Unix ls utility with autohbw library. You can execute the
 above command on the prompt or put it in a shell script. An example of
@@ -90,7 +90,3 @@ library:
     AUTO_HBW_MEM_TYPE=MEMKIND_HBW_HUGETLB
     AUTO_HBW_MEM_TYPE=MEMKIND_HUGETLB
 
-
-  AUTO_HBW_DEBUG=0|1|2
-  Set the debug message printing level. Default is 0. This is mainly for
-  development.

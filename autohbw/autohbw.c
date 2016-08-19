@@ -31,303 +31,425 @@
 
 #include <memkind.h>
 
-#include <stdlib.h>
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <errno.h>
-#include <assert.h>
+#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <unistd.h>
 
-#define FALSE 0
-#define TRUE 1
-#define BOOL int
+#define AUTOHBW_EXPORT __attribute__((visibility("default")))
+#define AUTOHBW_INIT __attribute__((constructor))
 
-#ifndef AUTOHBW_EXPORT
-#    define AUTOHBW_EXPORT __attribute__((visibility("default")))
-#endif
-
-// Log level:
-//
-//-1 = no messages are printed
-// 0 = no log messages for allocations are printed but INFO messages
-//     are printed
+//-2 = nothing is printed
+//-1 = critical messages are printed
+// 0 = no log messages for allocations are printed but INFO messages are printed
 // 1 = a log message is printed for each allocation (Default)
 // 2 = a log message is printed for each allocation with a backtrace
-//
-enum {LOG_NONE=-1, LOG_INFO=0, LOG_ALLOC, LOG_ALL};
-//
+enum {
+    ALWAYS = -1,
+    INFO,
+    ALLOC,
+    VERBOSE
+};
+
 // Default is to print allocations
-//
-static int LogLevel = LOG_ALLOC;
-//
-// Where the logging from AutoHBW is printed
-// This can be stderr, or stdout
-//
-static FILE *LogF;
+static int LogLevel = ALLOC;
 
-// The low limit for automatically promoting an allocation to HBW. Allocations
-// of size greater than the following will ber promoted.
-//
-static long int HBWLowLimit = 1 * 1024 * 1024;
-
+// Allocations of size greater than low limit promoted to HBW memory.
 // If there is a high limit specified, allocations larger than this limit
-// will not be allocated in HBW. By default, it is -1, indicating no
-// high limit
-//
-static long int HBWHighLimit = -1;
+// will not be allocated in HBW.
+static size_t HBWLowLimit = 1 * 1024 * 1024;
+static size_t HBWHighLimit = -1ull;
 
 // Whether we have initialized HBW arena of memkind library -- by making
 // a dummy call to it. HBW arena (and hence any memkind_* call with kind
 // HBW) must NOT be used until this flag is set true.
-//
-static int MemkindInitDone = FALSE;
+static bool MemkindInitDone = false;
 
 // Following is the type of HBW memory that is allocated using memkind.
 // By changing this type, this library can be used to allocate other
 // types of memory types (e.g., MEMKIND_HUGETLB, MEMKIND_GBTLB,
 // MEMKIND_HBW_HUGETLB etc.)
-//
-static memkind_t HBW_Type;
+static memkind_t hbw_kind;
 
-// Include helper file
-//
-#include "autohbw_helper.h"
+// API control for HBW allocations.
+static bool isAutoHBWEnabled = true;
 
-////////////////////////////////////////////////////////////////////////////
+#define LOG(level, ...)                                                                            \
+    do {                                                                                           \
+        if (LogLevel >= level) {                                                                   \
+            fprintf(stderr, __VA_ARGS__);                                                          \
+        }                                                                                          \
+    } while (0)
+
+static bool isAllocInHBW(size_t size)
+{
+    if (!MemkindInitDone)
+        return false;
+
+    if (!isAutoHBWEnabled)
+        return false;
+
+    if (size < HBWLowLimit)
+        return false;
+
+    if (size > HBWHighLimit)
+        return false;
+
+    return true;
+}
+
+// Returns the limit in bytes using a limit value and a multiplier
+// character like K, M, G
+static size_t getLimit(size_t limit, char lchar)
+{
+    // Now read the trailing character (e.g., K, M, G)
+    // Based on the character, determine the multiplier
+    if ((limit > 0) && isalpha(lchar)) {
+        long mult = 1;
+
+        switch (toupper(lchar)) {
+        case 'G':
+            mult *= 1024;
+        case 'M':
+            mult *= 1024;
+        case 'K':
+            mult *= 1024;
+        }
+
+        // check for overflow, saturate at max
+        if (limit >= -1ull / mult)
+            return -1ull;
+
+        return limit * mult;
+    }
+
+    return limit;
+}
+
+// Once HBWLowLimit (and HBWHighLimit) are set, call this method to
+// inform the user about the size range of arrays that will be allocated
+// in HBW
+static void printLimits()
+{
+    // Inform according to the limits set
+    if ((HBWLowLimit > 0) && (HBWHighLimit < -1ull)) {
+        // if both high and low limits are specified, we use a range
+        LOG(INFO, "INFO: Allocations between %ldK - %ldK will be allocated in "
+                  "HBW. Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
+            HBWLowLimit / 1024, HBWHighLimit / 1024);
+    } else if (HBWLowLimit > 0) {
+        // if only a low limit is provided, use that
+        LOG(INFO, "INFO: Allocations greater than %ldK will be allocated in HBW."
+                  " Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
+            HBWLowLimit / 1024);
+    } else if (HBWHighLimit < -1ull) {
+        // if only a high limit is provided, use that
+        LOG(INFO, "INFO: Allocations smaller than %ldK will be allocated in HBW. "
+                  "Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
+            HBWHighLimit / 1024);
+    } else {
+        // none of limits is set to non-edge value, everything goes to HBW
+        LOG(INFO, "INFO: All allocation will be done in HBW.");
+    }
+}
+
+struct kind_name_t {
+    memkind_t* kind;
+    const char* name;
+};
+
+static struct kind_name_t named_kinds[] = {
+    { &MEMKIND_DEFAULT, "memkind_default" },
+    { &MEMKIND_HUGETLB, "memkind_hugetlb" },
+    { &MEMKIND_INTERLEAVE, "memkind_interleave" },
+    { &MEMKIND_HBW, "memkind_hbw" },
+    { &MEMKIND_HBW_PREFERRED, "memkind_hbw_preferred" },
+    { &MEMKIND_HBW_HUGETLB, "memkind_hbw_hugetlb" },
+    { &MEMKIND_HBW_PREFERRED, "memkind_hbw_preferred_hugetlb" },
+    { &MEMKIND_HBW_GBTLB, "memkind_hbw_gbtlb" },
+    { &MEMKIND_HBW_PREFERRED_GBTLB, "memkind_hbw_preferred_gbtlb" },
+    { &MEMKIND_GBTLB, "memkind_gbtlb" },
+    { &MEMKIND_HBW_INTERLEAVE, "memkind_hbw_interleave" },
+};
+
+static memkind_t get_kind_by_name(const char* name)
+{
+    int i;
+    for (i = 0; i < sizeof(named_kinds) / sizeof(named_kinds[0]); ++i)
+        if (strcasecmp(named_kinds[i].name, name) == 0)
+            return *named_kinds[i].kind;
+
+    return 0;
+}
+
+// Read from the environment and sets global variables
+// Env variables are:
+//   AUTO_HBW_SIZE = gives the size for auto HBW allocation
+//   AUTO_HBW_LOG = gives logging level
+static void setEnvValues()
+{
+    // STEP: Read the log level from the env variable. Do this early because
+    //       printing depends on this
+    char* log_str = getenv("AUTO_HBW_LOG");
+    if (log_str && strlen(log_str)) {
+        int level = atoi(log_str);
+        LogLevel = level;
+        LOG(ALWAYS, "INFO: Setting log level to %d\n", LogLevel);
+    }
+
+    if (LogLevel == INFO) {
+        LOG(INFO, "INFO: HBW allocation stats will not be printed. "
+                  "Set AUTO_HBW_LOG to enable.\n");
+    } else if (LogLevel == ALLOC) {
+        LOG(INFO, "INFO: Only HBW allocations will be printed. "
+                  "Set AUTO_HBW_LOG to disable/enable.\n");
+    } else if (LogLevel == VERBOSE) {
+        LOG(INFO, "INFO: HBW allocation with backtrace info will be printed. "
+                  "Set AUTO_HBW_LOG to disable.\n");
+    }
+
+    // Set the memory type allocated by this library. By default, it is
+    // MEMKIND_HBW, but we can use this library to allocate other memory
+    // types
+    const char* memtype_str = getenv("AUTO_HBW_MEM_TYPE");
+    if (memtype_str && strlen(memtype_str)) {
+        // Find the memkind_t using the name the user has provided in the env variable
+        memkind_t mty = get_kind_by_name(memtype_str);
+        if (mty != 0) {
+            hbw_kind = mty;
+            LOG(INFO, "INFO: Setting HBW memory type to %s\n", memtype_str);
+        } else {
+            LOG(ALWAYS, "WARN: Memory type %s not recognized. Using default type\n", memtype_str);
+        }
+    }
+
+    // STEP: Set the size limits (thresholds) for HBW allocation
+    //
+    // Reads the environment variable
+    const char* size_str = getenv("AUTO_HBW_SIZE");
+    if (size_str) {
+        size_t lowlim = HBWLowLimit / 1024;
+        size_t highlim = HBWHighLimit / 1024;
+        char lowC = 'K', highC = 'K';
+
+        if (size_str) {
+            char* ptr = (char*)size_str;
+            lowlim = strtoll(ptr, &ptr, 10);
+            if (*ptr != 0 && *ptr != ':')
+                lowC = *ptr++;
+            else
+                lowC = ' ';
+
+            if (*ptr++ == ':') {
+                highlim = strtoll(ptr, &ptr, 10);
+                if (*ptr)
+                    highC = *ptr;
+                else
+                    highC = ' ';
+            }
+
+            LOG(INFO, "INFO: lowlim=%zu(%c), highlim=%zu(%c)\n", lowlim, lowC, highlim, highC);
+        }
+
+        HBWLowLimit = getLimit(lowlim, lowC);
+        HBWHighLimit = getLimit(highlim, highC);
+
+        if (HBWLowLimit >= HBWLowLimit) {
+            LOG(ALWAYS, "WARN: In AUTO_HBW_SIZE=X:Y, X cannot be greater or equal to Y. "
+                        "None of allocations will use HBW memory.\n");
+        }
+    } else {
+        // if the user did not specify any limits, inform that we are using
+        // default limits
+        LOG(INFO, "INFO: Using default values for array size thresholds. "
+                  "Set AUTO_HBW_SIZE=X:Y to change.\n");
+    }
+
+    // inform the user about limits
+    printLimits();
+}
+
 // This function is executed at library load time.
-// Initilize HBW arena by making a dummy allocation/free at library load
+// Initialize HBW arena by making a dummy allocation/free at library load
 // time. Until HBW initialization is complete, we must not call any
 // allocation routines with HBW as kind.
-////////////////////////////////////////////////////////////////////////////
-void __attribute__ ((constructor)) autohbw_load(void)
+static void AUTOHBW_INIT autohbw_load(void)
 {
-    // Where we want log messages to go. This can be stderr, or stdout
-    //
-    LogF = stderr;
-
     // First set the default memory type this library allocates. This can
     // be overridden by env variable
     // Note: 'memkind_hbw_preferred' will allow falling back to DDR but
     //       'memkind_hbw will not'
     // Note: If HBM is not installed on a system, memkind_hbw_preferred call
-    //       woudl fail. Therefore, we need to check for availability first.
-    //
-    int ret = 0;
-    if (memkind_check_available(MEMKIND_HBW) == 0) {
-        HBW_Type = MEMKIND_HBW_PREFERRED;
+    //       would fail. Therefore, we need to check for availability first.
+    if (memkind_check_available(MEMKIND_HBW) != 0) {
+        LOG(ALWAYS, "WARN: *** No HBM found in system. Will use default (DDR) "
+                    "OR user specified type ***\n");
+        hbw_kind = MEMKIND_DEFAULT;
+    } else {
+        hbw_kind = MEMKIND_HBW_PREFERRED;
     }
-    else {
-        fprintf(LogF,
-                "WARN: *** No HBM found in system. Will use default (DDR) "
-                "OR user specifid type ***\n");
-        HBW_Type = MEMKIND_DEFAULT;
-    }
-    assert(!ret && "FATAL: Could not find default memory type\n");
 
     // Read any env variables. This has to be done first because DbgLevel
     // is set using env variables and debug printing is used below
-    //
-    setEnvValues();                // read any env variables
+    setEnvValues(); // read any env variables
 
-    LOG(LOG_INFO) fprintf(LogF, "INFO: autohbw.so loaded!\n");
+    LOG(INFO, "INFO: autohbw.so loaded!\n");
 
     // dummy HBW call to initialize HBW arena
-    //
-    void *pp = memkind_malloc(HBW_Type, 16);
-    //
-    if (pp) {
-        // We have successfully initilized HBW arena
-        //
-        LOG(LOG_ALL) fprintf(LogF, "\t-HBW int call succeeded\n");
-        memkind_free(0, pp);
+    void* pp = memkind_malloc(hbw_kind, 16);
+    if (pp == 0) {
+        LOG(ALWAYS, "\t-HBW init call FAILED. "
+                    "Is required memory type present on your system?\n");
+        abort();
+    }
 
-        MemkindInitDone = TRUE;        // enable HBW allocation
-    }
-    else {
-        errPrn("\t-HBW init call FAILED. "
-            "Is required memory type present on your system?\n");
-        assert(0 && "HBW/memkind initialization faild");
-    }
+    LOG(ALWAYS, "\t-HBW int call succeeded\n");
+    memkind_free(hbw_kind, pp);
+
+    MemkindInitDone = true; // enable HBW allocation
 }
 
-////////////////////////////////////////////////////////////////////////////
-// My malloc implementation calling memkind_malloc.
-////////////////////////////////////////////////////////////////////////////
-void *myMemkindMalloc(size_t size)
+static void* MemkindMalloc(size_t size)
 {
-    LOG(LOG_ALL) fprintf(LogF, "In my memkind malloc sz:%ld .. ", size);
+    LOG(VERBOSE, "In my memkind malloc sz:%ld ... ", size);
 
-    void *pp;
+    bool useHbw = isAllocInHBW(size);
+    memkind_t kind = useHbw ? hbw_kind : MEMKIND_DEFAULT;
 
-    // if we have not initialized memkind HBW arena yet, call default kind
-    // Similarly, if the hueristic decides not to alloc in HBW, use default
-    //
-    if (!MemkindInitDone || !isAllocInHBW(size))
-        pp = memkind_malloc(MEMKIND_DEFAULT, size);
-    else {
-        LOG(LOG_ALL) fprintf(LogF, "\tHBW");
-        pp =  memkind_malloc(HBW_Type, size);
-        logHBW(pp, size);
-    }
+    if (useHbw)
+        LOG(VERBOSE, "\tHBW");
 
-    LOG(LOG_ALL) fprintf(LogF, "\tptr:%p\n", pp);
+    void* ptr = memkind_malloc(kind, size);
 
-    return pp;
+    LOG(VERBOSE, "\tptr:%p\n", ptr);
+    return ptr;
 }
 
-////////////////////////////////////////////////////////////////////////////
-// My calloc implementation calling memkind_calloc.
-////////////////////////////////////////////////////////////////////////////
-void *myMemkindCalloc(size_t nmemb, size_t size)
+static void* MemkindCalloc(size_t nmemb, size_t size)
 {
-    LOG(LOG_ALL) fprintf(LogF, "In my memkind calloc sz:%ld ..", size*nmemb);
+    LOG(VERBOSE, "In my memkind calloc sz:%ld ..", size * nmemb);
 
-    void *pp;
+    bool useHbw = isAllocInHBW(size);
+    memkind_t kind = useHbw ? hbw_kind : MEMKIND_DEFAULT;
 
-    // if we have not initialized memkind HBW arena yet, call default kind
-    //
-    if (!MemkindInitDone || !isAllocInHBW(size*nmemb))
-        pp = memkind_calloc(MEMKIND_DEFAULT, nmemb, size);
-    else {
-        LOG(LOG_ALL) fprintf(LogF, "\tHBW");
-        pp = memkind_calloc(HBW_Type, nmemb, size);
-        logHBW(pp, size*nmemb);
-    }
+    if (useHbw)
+        LOG(VERBOSE, "\tHBW");
 
-    LOG(LOG_ALL) fprintf(LogF, "\tptr:%p\n", pp);
+    void* ptr = memkind_calloc(kind, nmemb, size);
 
-    return pp;
+    LOG(VERBOSE, "\tptr:%p\n", ptr);
+    return ptr;
 }
 
-////////////////////////////////////////////////////////////////////////////
-// My realloc implementation calling memkind_realloc
-////////////////////////////////////////////////////////////////////////////
-void *myMemkindRealloc(void *ptr, size_t size)
+static void* MemkindRealloc(void* ptr, size_t size)
 {
-    LOG(LOG_ALL) fprintf(LogF,
-                   "In my memkind realloc sz:%ld, p1:%p ..", size, ptr);
-    void *pp;
+    LOG(VERBOSE, "In my memkind realloc sz:%ld, p1:%p ..", size, ptr);
 
-    // if we have not initialized memkind HBW arena yet, call default kind
-    //
-    if (!MemkindInitDone  || !isAllocInHBW(size))
-        pp = memkind_realloc(MEMKIND_DEFAULT, ptr, size);
-    else {
-        LOG(LOG_ALL) fprintf(LogF, "\tHBW");
-        pp = memkind_realloc(HBW_Type, ptr, size);
-        logHBW(pp, size);
-    }
+    bool useHbw = isAllocInHBW(size);
+    memkind_t kind = useHbw ? hbw_kind : MEMKIND_DEFAULT;
 
-    LOG(LOG_ALL) fprintf(LogF, "\tptr=%p\n", pp);
+    if (useHbw)
+        LOG(VERBOSE, "\tHBW");
 
-    return pp;
+    void* nptr = memkind_realloc(kind, ptr, size);
+
+    LOG(VERBOSE, "\tptr=%p\n", nptr);
+    return nptr;
 }
 
-////////////////////////////////////////////////////////////////////////////
-// Posix alignment
-////////////////////////////////////////////////////////////////////////////
-int myMemkindAlign(void **memptr, size_t alignment, size_t size)
+static int MemkindAlign(void** memptr, size_t alignment, size_t size)
 {
-    LOG(LOG_ALL) fprintf(LogF, "In my memkind align sz:%ld .. ", size);
+    LOG(VERBOSE, "In my memkind align sz:%ld .. ", size);
 
-    int ret;
+    bool useHbw = isAllocInHBW(size);
+    memkind_t kind = useHbw ? hbw_kind : MEMKIND_DEFAULT;
 
-    // if we have not initialized memkind HBW arena yet, call default kind
-    // Similarly, if the hueristic decides not to alloc in HBW, use default
-    //
-    if (!MemkindInitDone || !isAllocInHBW(size))
-        ret = memkind_posix_memalign(MEMKIND_DEFAULT, memptr, alignment, size);
-    else {
-        LOG(LOG_ALL) fprintf(LogF, "\tHBW");
-        ret = memkind_posix_memalign(HBW_Type, memptr, alignment, size);
-        logHBW(*memptr, size);
-    }
-    LOG(LOG_ALL) fprintf(LogF, "\tptr:%p\n", *memptr);
+    if (useHbw)
+        LOG(VERBOSE, "\tHBW");
 
+    int ret = memkind_posix_memalign(kind, memptr, alignment, size);
+
+    LOG(VERBOSE, "\tptr:%p\n", *memptr);
     return ret;
 }
 
-////////////////////////////////////////////////////////////////////////////
-// My memkind free function calling memkind_free (with Kind=0).
-// Note: memkind_free does not need the exact kind, if kind is 0. Then
-//       the library can figure out the proper kind itself.
-////////////////////////////////////////////////////////////////////////////
-void myMemkindFree(void *ptr)
+// memkind_free does not need the exact kind, if kind is 0. Then
+// the library can figure out the proper kind itself.
+static void MemkindFree(void* ptr)
 {
-    LOG(LOG_ALL) fprintf(LogF, "In my memkind free, ptr:%p\n", ptr);
-
+    // avoid to many useless logs
+    if (ptr)
+        LOG(VERBOSE, "In my memkind free, ptr:%p\n", ptr);
     memkind_free(0, ptr);
 }
 
 //--------------------------------------------------------------------------
-// ------------------ Section B: Interposer Functions ----------------------
+// ------------------ Public API of autohbw           ----------------------
 //--------------------------------------------------------------------------
 
-////////////////////////////////////////////////////////////////////////////
-// My interposer for malloc
-////////////////////////////////////////////////////////////////////////////
-AUTOHBW_EXPORT void *malloc(size_t size)
+AUTOHBW_EXPORT void enableAutoHBW()
 {
-    return myMemkindMalloc(size);
+    isAutoHBWEnabled = true;
+    LOG(INFO, "INFO: HBW allocations enabled by application (for this rank)\n");
 }
 
-////////////////////////////////////////////////////////////////////////////
-// My interposer for calloc
-////////////////////////////////////////////////////////////////////////////
-AUTOHBW_EXPORT void *calloc(size_t nmemb, size_t size)
+AUTOHBW_EXPORT void disableAutoHBW()
 {
-    return myMemkindCalloc(nmemb, size);
+    isAutoHBWEnabled = false;
+    LOG(INFO, "INFO: HBW allocations disabled by application (for this rank)\n");
 }
 
-////////////////////////////////////////////////////////////////////////////
-// My interposer for realloc
-////////////////////////////////////////////////////////////////////////////
-AUTOHBW_EXPORT void *realloc(void *ptr, size_t size)
+AUTOHBW_EXPORT void* malloc(size_t size)
 {
-    return myMemkindRealloc(ptr, size);
+    return MemkindMalloc(size);
 }
 
-////////////////////////////////////////////////////////////////////////////
-// My interposer for posix_memalign
-////////////////////////////////////////////////////////////////////////////
-AUTOHBW_EXPORT int posix_memalign(void **memptr, size_t alignment, size_t size)
+AUTOHBW_EXPORT void* calloc(size_t nmemb, size_t size)
 {
-    return myMemkindAlign(memptr, alignment, size);
+    return MemkindCalloc(nmemb, size);
 }
 
-////////////////////////////////////////////////////////////////////////////
-// Capture deprecated valloc. We don't allow the use of this func because
-// (1) A ptr obtained by this can be passed to free()
-// (2) To warn the use of a deprecated function.
-// However, if really needed we can support this method using posix_memalign
-////////////////////////////////////////////////////////////////////////////
-AUTOHBW_EXPORT void *valloc(size_t size)
+AUTOHBW_EXPORT void* realloc(void* ptr, size_t size)
 {
-    fprintf(stderr, "use of deprecated valloc. Use posix_memalign instead\n");
-    assert(0 && "valloc is deprecated. Not supported by this library");
+    return MemkindRealloc(ptr, size);
+}
+
+AUTOHBW_EXPORT int posix_memalign(void** memptr, size_t alignment, size_t size)
+{
+    return MemkindAlign(memptr, alignment, size);
+}
+
+// Warn about deprecated function usage.
+AUTOHBW_EXPORT void* valloc(size_t size)
+{
+    LOG(ALWAYS, "use of deprecated valloc. Use posix_memalign instead\n");
+    void* memptr = 0;
+    size_t boundary = sysconf(_SC_PAGESIZE);
+    int status = MemkindAlign(&memptr, boundary, size);
+    if (status == 0 && memptr != 0)
+        return memptr;
+
     return 0;
 }
 
-////////////////////////////////////////////////////////////////////////////
-// Capture deprecated memalign. We don't allow the use of this func because
-// (1) A ptr obtained by this can be passed to free()
-// (2) To warn the use of a deprecated function.
-// However, if really needed we can support this method using posix_memalign
-////////////////////////////////////////////////////////////////////////////
-AUTOHBW_EXPORT void *memalign(size_t boundary, size_t size)
+// Warn about deprecated function usage.
+AUTOHBW_EXPORT void* memalign(size_t boundary, size_t size)
 {
-    fprintf(stderr, "use of deprecated memalign. Use posix_memalign instead\n");
-    assert(0 && "memalign is deprecated. Not supported by this library");
+    LOG(ALWAYS, "use of deprecated memalign. Use posix_memalign instead\n");
+    void* memptr = 0;
+    int status = MemkindAlign(&memptr, boundary, size);
+    if (status == 0 && memptr != 0)
+        return memptr;
+
     return 0;
 }
 
-////////////////////////////////////////////////////////////////////////////
-// My interposer for free
-////////////////////////////////////////////////////////////////////////////
-AUTOHBW_EXPORT void free(void *ptr)
+AUTOHBW_EXPORT void free(void* ptr)
 {
-    if (ptr)
-        return myMemkindFree(ptr);
+    return MemkindFree(ptr);
 }
-

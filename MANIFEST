@@ -15,7 +15,6 @@ config_tls.h.in
 autohbw/Makefile.mk
 autohbw/autohbw.c
 autohbw/autohbw_get_src_lines.pl
-autohbw/autohbw_helper.h
 autohbw/autohbw_README
 autohbw/autohbw_test.sh
 examples/autohbw_candidates.c
