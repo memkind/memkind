@@ -32,12 +32,18 @@
 #ifndef AUTOHBW_API_H
 #define AUTOHBW_API_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Temporarily enable HBM allocations
-//
-extern void enableAutoHBW();
+void enableAutoHBW();
 
 // Temporarily disable HBM allocations
-//
-extern void disableAutoHBW();
+void disableAutoHBW();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
