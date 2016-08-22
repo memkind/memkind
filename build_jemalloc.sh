@@ -28,5 +28,6 @@ test -e obj || mkdir obj
 cd obj
 
 ../configure --enable-autogen --enable-memkind \
-             --with-jemalloc-prefix=jemk_ --enable-cc-silence --without-export
+             --with-jemalloc-prefix=jemk_ --enable-cc-silence --without-export \
+             --disable-stats --disable-fill --disable-valgrind --disable-experimental
 make -j`nproc`
