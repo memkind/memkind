@@ -189,6 +189,25 @@ void setEnvValues()
     // types
     //
     const char *memtype_str = getenv("AUTO_HBW_MEM_TYPE");
+    struct list_of_kind_struct {
+        memkind_t   handle;
+        char* name;
+    } ;
+
+    struct list_of_kind_struct kinds_list[] = {
+        { MEMKIND_DEFAULT, "memkind_default" },
+        { MEMKIND_HBW, "memkind_hbw" },
+        { MEMKIND_HBW_HUGETLB, "memkind_hbw_hugetlb" },
+        { MEMKIND_HBW_PREFERRED, "memkind_hbw_preferred" },
+        { MEMKIND_HBW_PREFERRED_HUGETLB, "memkind_hbw_preferred_hugetlb" },
+        { MEMKIND_HUGETLB, "memkind_hugetlb" },
+        { MEMKIND_HBW_GBTLB, "memkind_hbw_gbtlb" },
+        { MEMKIND_HBW_PREFERRED_GBTLB, "memkind_hbw_preferred_gbtlb" },
+        { MEMKIND_GBTLB, "memkind_gbtlb" },
+        { MEMKIND_HBW_INTERLEAVE, "memkind_hbw_interleave" },
+        { MEMKIND_INTERLEAVE, "memkind_interleave" },
+    };
+
     if (memtype_str && strlen(memtype_str)) {
         const int BLEN=80, slen = strlen(memtype_str);
         char buf[BLEN];
@@ -204,8 +223,14 @@ void setEnvValues()
         // Find the memkind_t using the name the user has provided in the env
         // variable
         //
-        memkind_t mty;
-        if (!memkind_get_kind_by_name(buf, &mty)) {
+        memkind_t mty = NULL;
+        for (i=0; i < (sizeof(kinds_list)/sizeof(kinds_list[0])); i++) {
+            if (strcmp(buf, kinds_list[i].name) == 0) {
+                mty = kinds_list[i].handle;
+                break;
+            }
+        }
+        if (mty != NULL) {
             HBW_Type = mty;
             LOG(LOG_INFO) fprintf(LogF,
                 "INFO: Setting HBW memory type to %s\n",

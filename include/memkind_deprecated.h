@@ -48,6 +48,27 @@ extern "C" {
 #define DEPRECATED(func) func
 #endif
 
+enum memkind_const_deprecated {
+    MEMKIND_NAME_LENGTH = 64
+};
+
+
+enum memkind_base_partition {
+    MEMKIND_PARTITION_DEFAULT = 0,
+    MEMKIND_PARTITION_HBW = 1,
+    MEMKIND_PARTITION_HBW_HUGETLB = 2,
+    MEMKIND_PARTITION_HBW_PREFERRED = 3,
+    MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB = 4,
+    MEMKIND_PARTITION_HUGETLB = 5,
+    MEMKIND_PARTITION_HBW_GBTLB = 6,
+    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 7,
+    MEMKIND_PARTITION_GBTLB = 8,
+    MEMKIND_PARTITION_HBW_INTERLEAVE = 9,
+    MEMKIND_PARTITION_INTERLEAVE = 10,
+    MEMKIND_NUM_BASE_KIND
+};
+
+
 struct memkind_ops {
     int (* create)(struct memkind *kind, const struct memkind_ops *ops, const char *name);
     int (* destroy)(struct memkind *kind);
@@ -70,11 +91,63 @@ struct memkind_ops {
 };
 
 /*
- * There is work in progress to implement new functionality that allows
- * for dynamic kind creation.
+ * Create a new kind
+ *
+ * DEPRECATION REASON:
+ *   There is work in progress to implement new functionality that allows
+ *   for dynamic kind creation.
+ *
  */
-/* Create a new kind */
 int DEPRECATED(memkind_create(const struct memkind_ops *ops, const char *name, memkind_t *kind));
+
+
+/*
+ * Free all resources allocated by the library (must be last call to library by the process)
+ *
+ * DEPRECATION REASON:
+ *   The function is called automatically in destructor of library. It should not be exposed in API
+ */
+int DEPRECATED(memkind_finalize(void));
+
+/*
+ * Get kind associated with a partition (index from 0 to num_kind - 1)
+ *
+ * DEPRECATION REASON:
+ *   Partition is internal mechanism related to jemalloc
+ */
+int DEPRECATED(memkind_get_kind_by_partition(int partition, memkind_t *kind));
+
+
+/*
+ * Get kind given the name of the kind
+ *
+ * DEPRECATION REASON:
+ *   Current API does not allow to get/set name of kind. Therefore
+ *   choosing kind by name does not make a sense.
+ */
+int DEPRECATED(memkind_get_kind_by_name(const char *name, memkind_t *kind));
+
+
+/*
+ * Query the number of kinds instantiated
+ *
+ * DEPRECATION REASON:
+ *   No other API calls related to number of kinds (e.g. dynamic creating of kind).
+ */
+int DEPRECATED(memkind_get_num_kind(int *num_kind));
+
+
+/*
+ * ALLOCATOR CALLBACK FUNCTION
+ *
+ * DEPRECATION REASON:
+ *   The current design of allocator back-end API is incompleted, e.g. needed
+ *   also unmap() function and maybe more functions for allocator management.
+ *   There is work in progress to implement new functionality that allows
+ *   connecting other allocator than jemalloc 3.5 that is tightly coupled
+ *   today with memkind.
+ */
+void* DEPRECATED(memkind_partition_mmap(int partition, void *addr, size_t size));
 
 #ifdef __cplusplus
 }

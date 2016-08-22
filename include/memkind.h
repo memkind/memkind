@@ -39,8 +39,7 @@ extern "C" {
 /*EXPERIMENTAL API*/
 enum memkind_const {
     MEMKIND_MAX_KIND = 512,
-    MEMKIND_ERROR_MESSAGE_SIZE = 128,
-    MEMKIND_NAME_LENGTH = 64
+    MEMKIND_ERROR_MESSAGE_SIZE = 128
 };
 
 /*EXPERIMENTAL API*/
@@ -66,22 +65,6 @@ enum memkind_error {
     MEMKIND_ERROR_BADPOLICY = -19,
     MEMKIND_ERROR_REPPOLICY = -20,
     MEMKIND_ERROR_RUNTIME = -255
-};
-
-/*EXPERIMENTAL API*/
-enum memkind_base_partition {
-    MEMKIND_PARTITION_DEFAULT = 0,
-    MEMKIND_PARTITION_HBW = 1,
-    MEMKIND_PARTITION_HBW_HUGETLB = 2,
-    MEMKIND_PARTITION_HBW_PREFERRED = 3,
-    MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB = 4,
-    MEMKIND_PARTITION_HUGETLB = 5,
-    MEMKIND_PARTITION_HBW_GBTLB = 6,
-    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 7,
-    MEMKIND_PARTITION_GBTLB = 8,
-    MEMKIND_PARTITION_HBW_INTERLEAVE = 9,
-    MEMKIND_PARTITION_INTERLEAVE = 10,
-    MEMKIND_NUM_BASE_KIND
 };
 
 /*EXPERIMENTAL API*/
@@ -135,27 +118,11 @@ int memkind_get_version();
 void memkind_error_message(int err, char *msg, size_t size);
 
 
-/*EXPERIMENTAL API*/
-/* Free all resources allocated by the library (must be last call to library by the process) */
-int memkind_finalize(void);
-
 /* KIND MANAGEMENT INTERFACE */
 
 /*EXPERIMENTAL API*/
 /* Create a new PMEM (file-backed) kind of given size on top of a temporary file */
 int memkind_create_pmem(const char *dir, size_t max_size, memkind_t *kind);
-
-/*EXPERIMENTAL API*/
-/* Query the number of kinds instantiated */
-int memkind_get_num_kind(int *num_kind);
-
-/*EXPERIMENTAL API*/
-/* Get kind associated with a partition (index from 0 to num_kind - 1) */
-int memkind_get_kind_by_partition(int partition, memkind_t *kind);
-
-/*EXPERIMENTAL API*/
-/* Get kind given the name of the kind */
-int memkind_get_kind_by_name(const char *name, memkind_t *kind);
 
 /*EXPERIMENTAL API*/
 /* Get the amount in bytes of total and free memory of the NUMA nodes associated with the kind */
@@ -187,10 +154,6 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size);
 /*EXPERIMENTAL API*/
 /* Free memory allocated with the memkind API */
 void memkind_free(memkind_t kind, void *ptr);
-
-/*EXPERIMENTAL API*/
-/* ALLOCATOR CALLBACK FUNCTION */
-void *memkind_partition_mmap(int partition, void *addr, size_t size);
 
 #ifdef __cplusplus
 }

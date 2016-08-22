@@ -116,13 +116,13 @@ void __attribute__ ((constructor)) autohbw_load(void)
     //
     int ret = 0;
     if (memkind_check_available(MEMKIND_HBW) == 0) {
-      ret = memkind_get_kind_by_name("memkind_hbw_preferred", &HBW_Type);
+        HBW_Type = MEMKIND_HBW_PREFERRED;
     }
     else {
-      fprintf(LogF,
-              "WARN: *** No HBM found in system. Will use default (DDR) "
-              "OR user specifid type ***\n");
-      ret = memkind_get_kind_by_name("memkind_default", &HBW_Type);
+        fprintf(LogF,
+                "WARN: *** No HBM found in system. Will use default (DDR) "
+                "OR user specifid type ***\n");
+        HBW_Type = MEMKIND_DEFAULT;
     }
     assert(!ret && "FATAL: Could not find default memory type\n");
 

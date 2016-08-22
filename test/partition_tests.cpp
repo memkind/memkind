@@ -24,6 +24,7 @@
 
 #include <memkind.h>
 #include <gtest/gtest.h>
+#include "static_kinds_list.h"
 
 /* Test to check each memkind parititon through memkind_get_kind_by_partition API */
 class Partition: public :: testing::Test { };
@@ -32,14 +33,12 @@ TEST_F(Partition, test_TC_MEMKIND_CheckBasePartitions)
 {
     memkind_t kind;
 
-    for (int i = 0; i < MEMKIND_NUM_BASE_KIND; ++i) {
-        EXPECT_EQ(0, memkind_get_kind_by_partition(i, &kind));
+    for (size_t i = 0; i < (sizeof(static_kinds_list)/sizeof(static_kinds_list[0])); i++) {
+        kind = static_kinds_list[i];
         if (memkind_check_available(kind) == 0) {
             void *ptr = memkind_malloc(kind, 16);
             EXPECT_TRUE(ptr != NULL);
             memkind_free(kind, ptr);
         }
     }
-    EXPECT_EQ(MEMKIND_ERROR_UNAVAILABLE,
-              memkind_get_kind_by_partition(0xdeadbeef, &kind));
 }

@@ -157,7 +157,7 @@ void numakind_free(void *ptr)
 static void numakind_init(void)
 {
     int err = 0;
-    char numakind_name[MEMKIND_NAME_LENGTH];
+    char numakind_name[MEMKIND_NAME_LENGTH_PRIV];
     int i, name_length, num_nodes;
 
     pthread_key_create(&numakind_key_g, numakind_free);
@@ -168,8 +168,8 @@ static void numakind_init(void)
     }
 
     for (i = 0; !err && i < num_nodes; ++i) {
-        name_length = snprintf(numakind_name, MEMKIND_NAME_LENGTH - 1, "numakind_%.4d", i);
-        assert(MEMKIND_NAME_LENGTH > 20 && name_length != MEMKIND_NAME_LENGTH - 1);
+        name_length = snprintf(numakind_name, MEMKIND_NAME_LENGTH_PRIV - 1, "numakind_%.4d", i);
+        assert(MEMKIND_NAME_LENGTH_PRIV > 20 && name_length != MEMKIND_NAME_LENGTH_PRIV - 1);
 
         err = memkind_create_private(NUMAKIND_OPS + i, numakind_name, &numakind_arr[i]);
     }

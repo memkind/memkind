@@ -27,6 +27,7 @@
 #include <vector>
 #include <numa.h>
 #include <memkind/internal/memkind_hbw.h>
+#include "static_kinds_list.h"
 
 void TrialGenerator :: generate_incremental(alloc_api_t api)
 {
@@ -149,9 +150,11 @@ void TrialGenerator :: generate_multi_app_stress(int num_types, test_t test)
 
     srandom(0);
     trial_vec.clear();
+    ASSERT_TRUE((size_t)num_types > (sizeof(static_kinds_list)/sizeof(static_kinds_list[0])))
+        << num_types << " is out of range related to known list if static kinds!";
     for (i = 0; i < num_trials; i++) {
         if (n_random(3) || num_alloc == 0) {
-            memkind_get_kind_by_partition(n_random(num_types), &kind);
+            kind = static_kinds_list[n_random(num_types)];
             trial_t ltrial = create_trial_tuple(MEMKIND_MALLOC,
                                                 n_random(8*MB - 1) + 1,
                                                 0, 2097152,
