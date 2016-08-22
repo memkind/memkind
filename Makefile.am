@@ -36,6 +36,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_hugetlb.c \
                         src/memkind_pmem.c \
                         src/memkind_interleave.c \
+                        src/memkind_log.c \
                         # end
 
 jemalloc_objects = jemalloc/obj/src/jemalloc.lo \
@@ -82,6 +83,7 @@ nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_interleave.h \
                   include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
+                  include/memkind/internal/memkind_log.h \
                   # end
 
 sbin_PROGRAMS =

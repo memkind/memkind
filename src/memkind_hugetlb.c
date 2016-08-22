@@ -26,6 +26,7 @@
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_log.h>
 
 #include <assert.h>
 #include <sys/mman.h>
@@ -193,6 +194,7 @@ static void init_hugepage_size_info(size_t pagesize, struct hugepage_size_info *
     snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_overcommit_path_fmt, pagesize_kb);
     if (snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
         newInfo->nr_overcommit = get_sysfs_entry_value(formatted_path);
+        log_info("Overcommit limit for %zu kB hugepages is %zu", pagesize, newInfo->nr_overcommit);
     }
 
     //read every node nr_hugepages for this pagesize
@@ -200,6 +202,9 @@ static void init_hugepage_size_info(size_t pagesize, struct hugepage_size_info *
         snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_path_fmt, node, pagesize_kb);
         if(snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
             newInfo->nr_hugepages_per_node_array[node] = get_sysfs_entry_value(formatted_path);
+            if(node < numa_num_configured_nodes()) {
+                log_info("Number of %zu kB hugepages on node %zu equals %zu", pagesize, node, newInfo->nr_hugepages_per_node_array[node]);
+            }
         }
     }
 }
