@@ -25,7 +25,7 @@
       </p>
       <p>
         <a href="https://github.com/memkind/memkind/tarball/master" class="btn btn-outline-inverse btn-lg btn-default">Download</a>
-        <p class="version">Currently v1.1.1</p>
+        <p class="version">Currently v1.2.0</p>
       </p>
     </div>
   </header>
@@ -84,7 +84,22 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
           <h1 class="page-header">
             Blog
           </h1>
-          <p class="lead">RPMs based on dev branch are here!</p><span class="post-date">Wed Aug 03 2016</span><p>Memkind source code is tracked with two git branches:</p>
+          <p class="lead">Release 1.2.0 is available</p><span class="post-date">Mon Aug 22 2016</span><p>I would like to announce memkind release <strong>1.2.0</strong>. Changes since 1.1.1:</p>
+<ul>
+<li><code>memkind_create()</code> and <code>memkind_ops</code> have been deprecated (moved to
+<code>memkind_deprecated.h</code>).</li>
+<li>Deprecated the headers from <code>memkind/internal</code> and added compile-time
+warnings to them (plan is to remove those from rpm packages).</li>
+<li>autohbw files have been moved to <code>memkind/autohbw</code> directory.</li>
+<li>API decorators (<code>memkind_malloc_pre</code>, <code>memkind_malloc_post</code> etc.) now
+need to be enabled with configure-time option --enable-decorators.</li>
+<li>Allocation time optimizations with up to 20% improvement.</li>
+</ul>
+<p>Sources are available on:
+<a href="https://github.com/memkind/memkind/releases/tag/v1.2.0">https://github.com/memkind/memkind/releases/tag/v1.2.0</a></p>
+<p>Best Regards,</p>
+<p><em>Krzysztof Kulakowski</em></p>
+<p class="lead">RPMs based on dev branch are here!</p><span class="post-date">Wed Aug 03 2016</span><p>Memkind source code is tracked with two git branches:</p>
 <ul>
 <li>master - stable, production-quality source code. Here memkind releases are done and tagged</li>
 <li>dev - development branch which contains not-yet-finished features, new proposals, etc.</li>
