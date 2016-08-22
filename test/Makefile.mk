@@ -46,8 +46,10 @@ EXTRA_DIST += test/memkind-afts.ts \
               test/memkind-perf-ext.ts \
               test/memkind-hbw_detection.ts \
               test/memkind-autohbw.ts \
+              test/memkind-knl_modes.ts \
               test/hbw_detection_test.py \
-              test/autohbw_test.py
+              test/autohbw_test.py \
+              test/knl_modes_test.py
 
 
 #test_all_tests_LDADD = libgtest.a libmemkind.la test/liballocatorperftool.la

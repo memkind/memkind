@@ -106,6 +106,7 @@ test/static_kinds_tests.cpp
 test/huge_page_test.cpp
 test/hbw_detection_test.py
 test/autohbw_test.py
+test/knl_modes_test.py
 test/memkind-afts.ts
 test/memkind-afts-ext.ts
 test/memkind-slts.ts
@@ -113,6 +114,7 @@ test/memkind-perf.ts
 test/memkind-perf-ext.ts
 test/memkind-hbw_detection.ts
 test/memkind-autohbw.ts
+test/memkind-knl_modes.ts
 test/performance/framework.hpp
 test/performance/framework.cpp
 test/performance/operations.hpp
