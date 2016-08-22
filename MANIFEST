@@ -85,6 +85,7 @@ test/mallctl_err_test.cpp
 test/mallctl_mock.c
 test/main.cpp
 test/common.h
+test/static_kinds_list.h
 test/numadist_mock.c
 test/check.cpp
 test/extended_tests.cpp

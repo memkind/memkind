@@ -35,10 +35,15 @@ extern "C" {
 
 #include "memkind.h"
 
+enum memkind_const_private {
+    MEMKIND_NAME_LENGTH_PRIV = 64
+};
+
+
 struct memkind {
     const struct memkind_ops *ops;
     unsigned int partition;
-    char name[MEMKIND_NAME_LENGTH];
+    char name[MEMKIND_NAME_LENGTH_PRIV];
     pthread_once_t init_once;
     unsigned int arena_map_len; // is power of 2
     unsigned int *arena_map; // To be deleted beyond 1.2.0+

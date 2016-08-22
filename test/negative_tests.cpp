@@ -51,15 +51,6 @@ protected:
 };
 
 
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorUnavailable)
-{
-    void *ret;
-    void *err = (void *)(-1); /* MAP_FAILED */
-
-    ret = memkind_partition_mmap(-1, NULL, 1024);
-    EXPECT_EQ(err, ret);
-}
-
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorMemAlign)
 {
     int ret = 0;

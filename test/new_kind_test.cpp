@@ -201,6 +201,5 @@ TEST_F(MemkindNewKindTests, test_TC_MEMKIND_new_kind)
         memkind_free(node_kind[i], str);
     }
 
-    memkind_finalize();
     SUCCEED();
 }

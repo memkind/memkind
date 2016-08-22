@@ -421,7 +421,7 @@ MEMKIND_EXPORT int memkind_get_num_kind(int *num_kind)
     return 0;
 }
 
-MEMKIND_EXPORT int memkind_get_kind_by_partition(int partition, struct memkind **kind)
+static int memkind_get_kind_by_partition_internal(int partition, struct memkind **kind)
 {
     int err = 0;
 
@@ -435,6 +435,11 @@ MEMKIND_EXPORT int memkind_get_kind_by_partition(int partition, struct memkind *
         err = MEMKIND_ERROR_UNAVAILABLE;
     }
     return err;
+}
+
+MEMKIND_EXPORT int memkind_get_kind_by_partition(int partition, struct memkind **kind)
+{
+    return memkind_get_kind_by_partition_internal(partition, kind);
 }
 
 MEMKIND_EXPORT int memkind_get_kind_by_name(const char *name, struct memkind **kind)
@@ -461,7 +466,7 @@ MEMKIND_EXPORT void *memkind_partition_mmap(int partition, void *addr, size_t si
     void *result = MAP_FAILED;
     struct memkind *kind;
 
-    err = memkind_get_kind_by_partition(partition, &kind);
+    err = memkind_get_kind_by_partition_internal(partition, &kind);
     if (likely(!err)) {
         err = memkind_check_available(kind);
     }

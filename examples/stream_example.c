@@ -188,6 +188,7 @@ static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET],
 #include <stdlib.h>
 #include <string.h>
 #include <memkind.h>
+
 static STREAM_TYPE *a = NULL, *b = NULL, *c = NULL;
 enum {ERR_MSG_SIZE = 256};
 #endif
@@ -216,6 +217,8 @@ extern void tuned_STREAM_Triad(STREAM_TYPE scalar);
 #ifdef _OPENMP
 extern int omp_get_num_threads();
 #endif
+
+
 int
 main(int argc, char **argv)
     {
@@ -226,15 +229,35 @@ main(int argc, char **argv)
     STREAM_TYPE		scalar;
     double		t, times[4][NTIMES];
 #ifdef ENABLE_DYNAMIC_ALLOC
+    struct list_of_kind_struct {
+        memkind_t   handle;
+        char* name;
+    } ;
+
+    struct list_of_kind_struct kinds_list[] = {
+        { MEMKIND_DEFAULT, "memkind_default" },
+        { MEMKIND_HBW, "memkind_hbw" },
+        { MEMKIND_HBW_HUGETLB, "memkind_hbw_hugetlb" },
+        { MEMKIND_HBW_PREFERRED, "memkind_hbw_preferred" },
+        { MEMKIND_HBW_PREFERRED_HUGETLB, "memkind_hbw_preferred_hugetlb" },
+        { MEMKIND_HUGETLB, "memkind_hugetlb" },
+        { MEMKIND_HBW_GBTLB, "memkind_hbw_gbtlb" },
+        { MEMKIND_HBW_PREFERRED_GBTLB, "memkind_hbw_preferred_gbtlb" },
+        { MEMKIND_GBTLB, "memkind_gbtlb" },
+        { MEMKIND_HBW_INTERLEAVE, "memkind_hbw_interleave" },
+        { MEMKIND_INTERLEAVE, "memkind_interleave" },
+    };
+
     int	err = 0;
     memkind_t kind;
+    size_t i;
     char err_msg[ERR_MSG_SIZE];
     if (argc > 1 && (strncmp("--help", argv[1], strlen("--help")) == 0 ||
                      strncmp("-h", argv[1], strlen("-h")) == 0)) {
         printf("Usage: %s [memkind_default | memkind_hbw | memkind_hbw_hugetlb | \n" 
                "    memkind_hbw_preferred | memkind_hbw_preferred_hugetlb | \n"
                "    memkind_hbw_gbtlb | memkind_hbw_preferred_gbtlb | memkind_gbtlb | \n"
-               "    memkind_hbw_interleave | memkind_interleave]\n",
+               "    memkind_hbw_interleave | memkind_interleave | memkind_hugetlb]\n",
                argv[0]);
         return 0;
     }
@@ -294,10 +317,25 @@ main(int argc, char **argv)
 
 #ifdef ENABLE_DYNAMIC_ALLOC
     if (argc > 1) {
-        err = memkind_get_kind_by_name(argv[1], &kind);
+        kind = NULL;
+        for (i=0; i < (sizeof(kinds_list)/sizeof(kinds_list[0])); i++) {
+            if (strcmp(argv[1], kinds_list[i].name) == 0) {
+                kind = kinds_list[i].handle;
+                break;
+            }
+        }
+        if (kind == NULL) {
+            fprintf(stderr, "ERROR: wrong name of kind %s\n", argv[1]);
+            fprintf(stderr, "       expected names are: ");
+            for (i=0; i < (sizeof(kinds_list)/sizeof(kinds_list[0])); i++) {
+                fprintf(stderr, " %s ", kinds_list[i].name);
+            }
+            fprintf(stderr, "\n");
+            return -1;
+        }
     }
     else {
-        err = memkind_get_kind_by_name("memkind_default", &kind);
+        kind = MEMKIND_DEFAULT;
     }
     if (err) {
         memkind_error_message(err, err_msg, ERR_MSG_SIZE);

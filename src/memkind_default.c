@@ -53,13 +53,12 @@ MEMKIND_EXPORT int memkind_default_create(struct memkind *kind, const struct mem
     int err = 0;
 
     kind->ops = ops;
-    if (strlen(name) >= MEMKIND_NAME_LENGTH) {
+    if (strlen(name) >= MEMKIND_NAME_LENGTH_PRIV) {
         kind->name[0] = '\0';
         err = MEMKIND_ERROR_INVALID;
     }
-    if (!err) {
-        kind->name[MEMKIND_NAME_LENGTH-1] = '\0';
-        strncpy(kind->name, name, MEMKIND_NAME_LENGTH-1);
+    else {
+        strcpy(kind->name, name);
     }
     return err;
 }

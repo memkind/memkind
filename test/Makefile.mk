@@ -67,6 +67,7 @@ test_all_tests_SOURCES = test/common.h \
                          test/main.cpp \
                          test/multithreaded_tests.cpp \
                          test/trial_generator.h \
+                         test/static_kinds_list.h \
                          test/check.h \
                          test/extended_tests.cpp \
                          test/negative_tests.cpp \
