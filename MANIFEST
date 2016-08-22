@@ -51,6 +51,7 @@ src/memkind_hbw.c
 src/memkind_hugetlb.c
 src/memkind_interleave.c
 src/memkind_pmem.c
+src/memkind_log.c
 src/memkind-hbw-nodes.c
 include/hbwmalloc.h
 include/memkind.h
@@ -64,6 +65,7 @@ include/memkind/internal/memkind_hugetlb.h
 include/memkind/internal/memkind_interleave.h
 include/memkind/internal/memkind_pmem.h
 include/memkind/internal/memkind_private.h
+include/memkind/internal/memkind_log.h
 test/Makefile.mk
 test/check.sh
 test/test.sh

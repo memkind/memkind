@@ -27,6 +27,7 @@
 #include <memkind/internal/memkind_hugetlb.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_log.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -373,6 +374,7 @@ static void memkind_hbw_closest_numanode_init(void)
     int *bandwidth = NULL;
     int num_unique = 0;
     int high_bandwidth = 0;
+    int i;
 
     struct bandwidth_nodes_t *bandwidth_nodes = NULL;
 
@@ -403,6 +405,11 @@ static void memkind_hbw_closest_numanode_init(void)
     g->init_err = set_closest_numanode(num_unique, bandwidth_nodes,
                                        high_bandwidth, g->num_cpu,
                                        g->closest_numanode);
+
+    for(i=0; i<bandwidth_nodes[num_unique-1].num_numanodes; i++) {
+        log_info("NUMA node %d is high-bandwidth memory.",
+                 bandwidth_nodes[num_unique-1].numanodes[i]);
+    }
 
 exit:
 
@@ -474,7 +481,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
         }
         /* allocate output array */
         *bandwidth_nodes = (struct bandwidth_nodes_t*)jemk_malloc(
-                               sizeof(struct bandwidth_nodes_t) **num_unique +
+                               sizeof(struct bandwidth_nodes_t) * (*num_unique) +
                                sizeof(int) * num_bandwidth);
         if (!*bandwidth_nodes) {
             err = MEMKIND_ERROR_MALLOC;
