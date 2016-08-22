@@ -88,11 +88,11 @@ int main(int argc, char **argv)
     fprintf(stdout, "%s", hbw_preferred_str);
     fprintf(stdout, "%s", hbw_preferred_hugetlb_str);
 
-    memkind_free(MEMKIND_DEFAULT, hbw_preferred_hugetlb_str);
-    memkind_free(MEMKIND_DEFAULT, hbw_preferred_str);
-    memkind_free(MEMKIND_DEFAULT, hbw_hugetlb_str);
-    memkind_free(MEMKIND_DEFAULT, hbw_str);
-    memkind_free(MEMKIND_DEFAULT, hugetlb_str);
+    memkind_free(MEMKIND_HBW_PREFERRED_HUGETLB, hbw_preferred_hugetlb_str);
+    memkind_free(MEMKIND_HBW_PREFERRED, hbw_preferred_str);
+    memkind_free(MEMKIND_HBW_HUGETLB, hbw_hugetlb_str);
+    memkind_free(MEMKIND_HBW, hbw_str);
+    memkind_free(MEMKIND_HUGETLB, hugetlb_str);
     memkind_free(MEMKIND_DEFAULT, default_str);
 
     return 0;
