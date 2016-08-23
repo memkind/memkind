@@ -25,6 +25,16 @@
 #define MEMKIND_VERSION_MINOR 2
 #define MEMKIND_VERSION_PATCH 0
 
+#include <memkind.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_hugetlb.h>
+#include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_hbw.h>
+#include <memkind/internal/memkind_gbtlb.h>
+#include <memkind/internal/memkind_pmem.h>
+#include <memkind/internal/memkind_interleave.h>
+#include <memkind/internal/memkind_private.h>
+
 #include "config.h"
 
 #include <sys/param.h>
@@ -41,16 +51,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <jemalloc/jemalloc.h>
-
-#include <memkind.h>
-#include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_hugetlb.h>
-#include <memkind/internal/memkind_arena.h>
-#include <memkind/internal/memkind_hbw.h>
-#include <memkind/internal/memkind_gbtlb.h>
-#include <memkind/internal/memkind_pmem.h>
-#include <memkind/internal/memkind_interleave.h>
-#include <memkind/internal/memkind_private.h>
 
 
 static struct memkind MEMKIND_DEFAULT_STATIC = {

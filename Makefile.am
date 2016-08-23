@@ -283,8 +283,8 @@ TESTS =
 XFAIL_TESTS =
 TESTS_ENVIRONMENT =
 
-AM_CFLAGS =  -fvisibility=hidden -Wall -Werror -msse4.2 -DMEMKIND_INTERNAL_API
-AM_CXXFLAGS = -fvisibility=hidden -Wall -Werror -msse4.2 -DMEMKIND_INTERNAL_API
+AM_CFLAGS =  -fvisibility=hidden -Wall -Werror -msse4.2 -D_GNU_SOURCE -DMEMKIND_INTERNAL_API
+AM_CXXFLAGS = -fvisibility=hidden -Wall -Werror -msse4.2 -D_GNU_SOURCE -DMEMKIND_INTERNAL_API
 if ENABLE_CXX11
 AM_CXXFLAGS += -std=c++11
 else

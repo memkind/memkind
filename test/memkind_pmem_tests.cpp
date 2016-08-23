@@ -22,11 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind/internal/memkind_pmem.h>
+
 #include <sys/param.h>
 #include <sys/mman.h>
 #include <stdio.h>
 #include "common.h"
-#include <memkind/internal/memkind_pmem.h>
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4096;
 static const char*  PMEM_DIR = "/tmp/";

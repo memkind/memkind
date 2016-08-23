@@ -22,7 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define _GNU_SOURCE
+#include <memkind/internal/memkind_hbw.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_hugetlb.h>
+#include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_private.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -38,13 +43,6 @@
 #include <utmpx.h>
 #include <sched.h>
 #include <stdint.h>
-
-
-#include <memkind/internal/memkind_hbw.h>
-#include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_hugetlb.h>
-#include <memkind/internal/memkind_arena.h>
-#include <memkind/internal/memkind_private.h>
 
 MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,

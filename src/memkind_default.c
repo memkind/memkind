@@ -22,14 +22,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_private.h>
+
 #include <numa.h>
 #include <numaif.h>
 #include <sys/mman.h>
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
-
-#include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_private.h>
 #include <stdint.h>
 
 #ifndef MADV_NOHUGEPAGE

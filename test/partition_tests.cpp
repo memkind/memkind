@@ -23,6 +23,7 @@
  */
 
 #include <memkind.h>
+
 #include <gtest/gtest.h>
 #include "static_kinds_list.h"
 

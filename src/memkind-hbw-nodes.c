@@ -23,6 +23,7 @@
  */
 
 #include <memkind/internal/memkind_hbw.h>
+
 #include <numa.h>
 #include <stdio.h>
 

@@ -24,6 +24,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <memkind.h>
+#include "memkind_allocated.hpp"
+
 // This code is example usage of C++11 features with custom allocator,
 // support for C++11 is required.
 #include <iostream>
@@ -33,9 +36,6 @@
 #include <cstdlib>
 #include <new>
 #include <string>
-
-#include <memkind.h>
-#include "memkind_allocated.hpp"
 
 //example class definition, which derive from  memkind_allocated template to
 //have objects allocated with memkind, and have alignment specified by alignas()

@@ -22,9 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind.h>
+
 #include <stdlib.h>
 #include <stdio.h>
-#include <memkind.h>
 
 /* This is an example that enables debug printing on every alloction call */
 

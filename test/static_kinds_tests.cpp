@@ -22,9 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "common.h"
 #include "memkind.h"
 #include "memkind/internal/memkind_private.h"
+
+#include "common.h"
 #include "static_kinds_list.h"
 
 /*

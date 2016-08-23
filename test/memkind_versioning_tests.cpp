@@ -23,9 +23,9 @@
  */
 
 
+#include "memkind.h"
 
 #include "common.h"
-#include "memkind.h"
 
 /*
  * memkind versioning tests.

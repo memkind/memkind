@@ -22,6 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind/internal/memkind_hbw.h>
+
 #include <fstream>
 #include <numa.h>
 
@@ -29,7 +31,6 @@
 #include "check.h"
 #include "trial_generator.h"
 #include <numa.h>
-#include <memkind/internal/memkind_hbw.h>
 
 
 /* Set of basic acceptance tests for INTERLEAVE policy, the goal of this set of tests

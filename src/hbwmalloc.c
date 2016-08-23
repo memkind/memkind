@@ -22,15 +22,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <hbwmalloc.h>
+#include <memkind.h>
+#include <memkind/internal/memkind_private.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
 #include <errno.h>
-
-#include <hbwmalloc.h>
-#include <memkind.h>
-
-#include <memkind/internal/memkind_private.h>
 
 static hbw_policy_t hbw_policy_g = HBW_POLICY_PREFERRED;
 static pthread_once_t hbw_policy_once_g = PTHREAD_ONCE_INIT;

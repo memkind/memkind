@@ -22,6 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind/internal/memkind_hbw.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -37,7 +39,6 @@
 #include <string>
 #include <cstring>
 #include <numa.h>
-#include <memkind/internal/memkind_hbw.h>
 
 #include "check.h"
 

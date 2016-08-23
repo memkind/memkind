@@ -25,11 +25,12 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <hbwmalloc.h>
+
 #include <iostream>
 #include <stdint.h>
 #include <stdlib.h>
 #include <gtest/gtest.h>
-#include <hbwmalloc.h>
 
 #define MB 1048576ULL
 #define GB 1073741824ULL

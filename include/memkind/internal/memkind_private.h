@@ -31,9 +31,9 @@ extern "C" {
 #warning "DO NOT INCLUDE THIS FILE! IT IS INTERNAL MEMKIND API AND SOON WILL BE REMOVED FROM BIN & DEVEL PACKAGES"
 #endif
 
-#include <pthread.h>
-
 #include "memkind.h"
+
+#include <pthread.h>
 
 enum memkind_const_private {
     MEMKIND_NAME_LENGTH_PRIV = 64

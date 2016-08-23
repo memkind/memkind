@@ -22,13 +22,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "memkind.h"
+
 #include <fstream>
 #include <algorithm>
 
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "memkind.h"
 #include "trial_generator.h"
 
 /* This set of test cases are meant to use the trial_generator which is used to

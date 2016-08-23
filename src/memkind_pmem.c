@@ -22,16 +22,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_pmem.h>
+#include <memkind/internal/memkind_private.h>
+
 #include <sys/mman.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
 #include <assert.h>
-
-#include <memkind/internal/memkind_arena.h>
-#include <memkind/internal/memkind_pmem.h>
-#include <memkind/internal/memkind_private.h>
 
 MEMKIND_EXPORT const struct memkind_ops MEMKIND_PMEM_OPS = {
     .create = memkind_pmem_create,

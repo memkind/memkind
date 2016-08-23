@@ -23,6 +23,7 @@
  */
 
 #include <memkind.h>
+
 #include <gtest/gtest.h>
 
 /* Verifies output of size and free values returned by get size API */

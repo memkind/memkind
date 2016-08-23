@@ -25,6 +25,7 @@
 #include <memkind.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_default.h>
+
 #include <gtest/gtest.h>
 
 

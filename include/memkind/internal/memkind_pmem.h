@@ -31,11 +31,11 @@ extern "C" {
 #warning "DO NOT INCLUDE THIS FILE! IT IS INTERNAL MEMKIND API AND SOON WILL BE REMOVED FROM BIN & DEVEL PACKAGES"
 #endif
 
-#include <pthread.h>
-
 #include <memkind.h>
 #include "memkind_default.h"
 #include "memkind_arena.h"
+
+#include <pthread.h>
 
 /*
  * Header file for the file-backed memory memkind operations.
