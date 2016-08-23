@@ -33,11 +33,11 @@ features.
 API
 ---
 The memkind library delivers two interfaces:
- * hbwmalloc.h - recomended for high-bandwidth memory usecases (stable)
+ * hbwmalloc.h - recommended for high-bandwidth memory use cases (stable)
  * memkind.h - generic interface for more complex use cases (partially unstable)
 
 For more detailed information about those interfaces see
-coresponding manpages (located in man/ subdir):
+corresponding manpages (located in man/ subdir):
 
     man memkind
 
@@ -68,7 +68,7 @@ before configuring and building the top level memkind directory.  The
 jemalloc build system supports using an object directory separate from
 the source tree.  To ensure the memkind is able to discover the output
 of the jemalloc build you must create an 'obj' directory, and build
-from within that directory. You can achive that using attached script:
+from within that directory. You can achieve that using attached script:
 
     ./build_jemalloc.sh
 
@@ -87,7 +87,7 @@ memkind even though this kernel version predates v3.11.
 Functionality related to hugepages allocation require patches
 e0ec90ee7e6f6cbaa6d59ffb48d2a7af5e80e61d and
 099730d67417dfee273e9b10ac2560ca7fac7eb9 from kernel org. Without them
-physical memory may end up being located on incorrect numa node.
+physical memory may end up being located on incorrect NUMA node.
 
 Applications using the memkind library require that libnuma and
 libpthread be available for dynamic linking at run time.  Both of
@@ -103,7 +103,7 @@ and on a SLES Linux system with:
 To use the interfaces for obtaining 2MB and 1GB pages please be sure
 to follow the instructions here:
     https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
-and pay particular attention to the use of the proc files:
+and pay particular attention to the use of the procfs files:
     /proc/sys/vm/nr_hugepages
     /proc/sys/vm/nr_overcommit_hugepages
 for enabling the kernel's huge page pool.
@@ -158,6 +158,6 @@ NOTES
 
 STATUS
 ------
-The memkind library version is 1.1.1. Diffrent interfaces can represent
-diffrent maturity level (as described in coresponding man pages).
+Different interfaces can represent different maturity level
+(as described in corresponding man pages).
 Feedback on design and implementation is greatly appreciated.
