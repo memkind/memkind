@@ -25,6 +25,9 @@
 #ifndef execute_trials_include_h
 #define execute_trials_include_h
 
+#include "hbwmalloc.h"
+#include "memkind.h"
+
 #include <vector>
 #include <stdlib.h>
 #include <vector>
@@ -33,8 +36,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "hbwmalloc.h"
-#include "memkind.h"
 #include "common.h"
 
 

@@ -23,6 +23,7 @@
  */
 
 #include <memkind.h>
+
 #include <errno.h>
 #include <gtest/gtest.h>
 

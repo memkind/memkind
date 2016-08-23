@@ -22,8 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "common.h"
 #include <hbw_allocator.h>
+
+#include "common.h"
 #include <vector>
 
 // Tests for hbw::allocator class.

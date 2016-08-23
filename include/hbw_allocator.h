@@ -24,10 +24,10 @@
 
 #pragma once
 
+#include <hbwmalloc.h>
+
 #include <stddef.h>
 #include <new>
-
-#include <hbwmalloc.h>
 /*
  * Header file for the C++ allocator compatible with the C++ standard library allocator concepts.
  * More details in hbwallocator(3) man page.

@@ -22,6 +22,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind.h>
+#include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_arena.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <numa.h>
@@ -31,10 +36,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <pthread.h>
-#include <memkind.h>
-#include <memkind/internal/memkind_private.h>
-#include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_arena.h>
 #include "common.h"
 
 /*

@@ -22,11 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind/internal/memkind_hbw.h>
+
 #include "trial_generator.h"
 #include "check.h"
 #include <vector>
 #include <numa.h>
-#include <memkind/internal/memkind_hbw.h>
 #include "static_kinds_list.h"
 
 void TrialGenerator :: generate_incremental(alloc_api_t api)

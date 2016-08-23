@@ -22,15 +22,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind.h>
+#include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_arena.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <numa.h>
 #include <errno.h>
 
-#include <memkind.h>
-#include <memkind/internal/memkind_private.h>
-#include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_arena.h>
 #include "common.h"
 
 int node0_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);

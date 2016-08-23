@@ -22,13 +22,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <assert.h>
-#include <numa.h>
-
 #include <memkind/internal/memkind_interleave.h>
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_private.h>
+
+#include <assert.h>
+#include <numa.h>
 
 MEMKIND_EXPORT const struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .create = memkind_arena_create,

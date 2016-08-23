@@ -23,6 +23,7 @@
  */
 
 #include "memkind.h"
+
 #include "common.h"
 #include "decorator_test.h"
 #include "config.h"

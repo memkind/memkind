@@ -22,13 +22,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind/internal/memkind_arena.h>
+
 #include <algorithm>
 #include <vector>
 #include <gtest/gtest.h>
 #include <omp.h>
 #include <pthread.h>
-
-#include <memkind/internal/memkind_arena.h>
 
 class GetArenaTest: public :: testing::Test
 {

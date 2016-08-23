@@ -22,6 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind/internal/memkind_gbtlb.h>
+#include <memkind/internal/memkind_hugetlb.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_hbw.h>
+#include <memkind/internal/memkind_private.h>
+
 #include <numa.h>
 #include <numaif.h>
 #include <smmintrin.h>
@@ -36,12 +42,6 @@
 #ifndef MAP_HUGE_1GB
 #define MAP_HUGE_1GB (30 << 26)
 #endif
-
-#include <memkind/internal/memkind_gbtlb.h>
-#include <memkind/internal/memkind_hugetlb.h>
-#include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_hbw.h>
-#include <memkind/internal/memkind_private.h>
 
 MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .create = memkind_default_create,

@@ -22,10 +22,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <memkind.h>
 
 int main(int argc, char **argv)
 {

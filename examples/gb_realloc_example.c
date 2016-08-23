@@ -22,9 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <hbwmalloc.h>
+
 #include <stdio.h>
 #include <string.h>
-#include <hbwmalloc.h>
 
 
 int main (int argc, char *argv[])

@@ -22,15 +22,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind.h>
+#include <hbwmalloc.h>
+#include <memkind/internal/memkind_gbtlb.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <sys/time.h>
 
 #include "common.h"
-#include <memkind.h>
-#include <hbwmalloc.h>
-#include <memkind/internal/memkind_gbtlb.h>
 
 static int v_lvl;
 static int l_flag;

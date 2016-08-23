@@ -22,6 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind.h>
+#include <memkind/internal/memkind_gbtlb.h>
+
 #include <fstream>
 #include <algorithm>
 #include <numa.h>
@@ -31,8 +34,6 @@
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include <memkind.h>
-#include <memkind/internal/memkind_gbtlb.h>
 #include "trial_generator.h"
 
 /* Set of negative test cases for memkind, its main goal are to verify that the

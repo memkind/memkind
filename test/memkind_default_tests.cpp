@@ -22,11 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "memkind.h"
+
 #include <numa.h>
 #include <stdio.h>
 
 #include "common.h"
-#include "memkind.h"
 
 /* Calling the basic APIs (calloc, realloc and get_size) with
  * MEMKIND_DEFAULT kind.

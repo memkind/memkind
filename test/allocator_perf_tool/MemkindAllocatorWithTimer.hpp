@@ -24,13 +24,14 @@
 
 #pragma once
 
+#include <memkind.h>
+
 #include "Allocator.hpp"
 #include "Allocation_info.hpp"
 #include "Configuration.hpp"
 #include "WrappersMacros.hpp"
 #include "FunctionCalls.hpp"
 #include <cerrno>
-#include <memkind.h>
 
 #include <stdlib.h>
 

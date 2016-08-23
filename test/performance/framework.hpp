@@ -24,11 +24,12 @@
 
 #pragma once
 
+#include <memkind.h>
+
 #include <thread>
 #include <vector>
 #include <mutex>
 #include <condition_variable>
-#include <memkind.h>
 // Malloc, jemalloc, memkind jemalloc and memkind memory operations definitions
 #include "operations.hpp"
 

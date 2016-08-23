@@ -24,9 +24,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <memkind.h>
+
 #include <cstdlib>
 #include <new>
-#include <memkind.h>
 
 template <class deriving_class>
 class memkind_allocated

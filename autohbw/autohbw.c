@@ -29,16 +29,15 @@
 // Date   : Jan 30, 2015
 ///////////////////////////////////////////////////////////////////////////
 
+#include <memkind.h>
+
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <errno.h>
-#include <stdio.h>
-#include <memkind.h>
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
-#include <memkind.h>
 
 #define FALSE 0
 #define TRUE 1

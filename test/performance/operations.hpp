@@ -24,8 +24,9 @@
 
 #pragma once
 
-#include <malloc.h>
 #include <memkind.h>
+
+#include <malloc.h>
 #include <cassert>
 #include "jemalloc/jemalloc.h"
 

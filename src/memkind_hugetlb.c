@@ -22,6 +22,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memkind/internal/memkind_hugetlb.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_private.h>
+
 #include <assert.h>
 #include <sys/mman.h>
 #ifndef MAP_HUGETLB
@@ -37,11 +42,6 @@
 #include <pthread.h>
 #include <dirent.h>
 #include <jemalloc/jemalloc.h>
-
-#include <memkind/internal/memkind_hugetlb.h>
-#include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_arena.h>
-#include <memkind/internal/memkind_private.h>
 
 MEMKIND_EXPORT const struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .create = memkind_arena_create,

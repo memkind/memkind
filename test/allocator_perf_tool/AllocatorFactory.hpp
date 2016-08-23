@@ -23,6 +23,8 @@
 */
 #pragma once
 
+#include "memkind.h"
+
 #include "Allocator.hpp"
 #include "StandardAllocatorWithTimer.hpp"
 #include "VectorIterator.hpp"
@@ -30,7 +32,6 @@
 #include "JemallocAllocatorWithTimer.hpp"
 #include "MemkindAllocatorWithTimer.hpp"
 #include "Numastat.hpp"
-#include "memkind.h"
 
 #include <vector>
 #include <assert.h>

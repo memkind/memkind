@@ -22,13 +22,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "memkind.h"
+
 #include <fstream>
 #include <algorithm>
 
 #include "common.h"
 #include "check.h"
 #include "omp.h"
-#include "memkind.h"
 #include "trial_generator.h"
 
 /* Set of basic acceptance tests for PREFERRED policy, the goal of this set of tests
