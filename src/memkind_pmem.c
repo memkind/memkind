@@ -59,7 +59,7 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind, const struct memkin
     }
 
     if (pthread_mutex_init(&priv->pmem_lock, NULL) != 0) {
-        err = MEMKIND_ERROR_PTHREAD;
+        err = MEMKIND_ERROR_RUNTIME;
         goto exit;
     }
 
@@ -75,10 +75,9 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind, const struct memkin
     return 0;
 
 exit:
-    if (priv) {
-        pthread_mutex_destroy(&priv->pmem_lock);
-        jemk_free(priv);
-    }
+    /* err is set, please don't overwrite it with result of pthread_mutex_destroy */
+    pthread_mutex_destroy(&priv->pmem_lock);
+    jemk_free(priv);
     return err;
 }
 

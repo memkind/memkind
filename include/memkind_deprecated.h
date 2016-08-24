@@ -53,6 +53,28 @@ enum memkind_const_deprecated {
 };
 
 
+/*
+ * There is a list of error codes that have been removed from memkind.h
+ * and in memkind_private.h have been defined internal errors.
+ * When the deprecated error codes will be removed then private error codes
+ * may be translated to other more appropriate error codes.
+ */
+enum memkind_error_deprecated {
+    MEMKIND_ERROR_MEMALIGN = -4,
+    MEMKIND_ERROR_MALLCTL = -5,
+    MEMKIND_ERROR_GETCPU = -7,
+    MEMKIND_ERROR_PMTT = -8,
+    MEMKIND_ERROR_TIEDISTANCE = -9,
+    MEMKIND_ERROR_ALIGNMENT = -10,
+    MEMKIND_ERROR_MALLOCX = -11,
+    MEMKIND_ERROR_REPNAME = -14,
+    MEMKIND_ERROR_PTHREAD = -16,
+    MEMKIND_ERROR_BADPOLICY = -19,
+    MEMKIND_ERROR_REPPOLICY = -20,
+
+};
+
+
 enum memkind_base_partition {
     MEMKIND_PARTITION_DEFAULT = 0,
     MEMKIND_PARTITION_HBW = 1,

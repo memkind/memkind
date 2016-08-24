@@ -50,7 +50,7 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .sp
 .B "ALLOCATOR CALLBACK FUNCTION:"
 .br
-.BI "void *memkind_partition_mmap(int " "partition" ", void " "*addr" ", size_t " "size" );
+.BI "void *memkind_partition_mmap(int " "partition" ", void " "*addr" ", size_t " "size" ); (DEPRECATED)
 .sp
 .B "KIND MANAGMENT:"
 .br
@@ -58,13 +58,13 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .br
 .BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
 .br
-.BI "int memkind_finalize(void);"
+.BI "int memkind_finalize(void);" (DEPRECATED)
 .br
-.BI "int memkind_get_num_kind(int " "*num_kind" );
+.BI "int memkind_get_num_kind(int " "*num_kind" ); (DEPRECATED)
 .br
-.BI "int memkind_get_kind_by_partition(int " "partition" ", memkind_t " "*kind" );
+.BI "int memkind_get_kind_by_partition(int " "partition" ", memkind_t " "*kind" ); (DEPRECATED)
 .br
-.BI "int memkind_get_kind_by_name(const char " "*name" ", memkind_t " "*kind" );
+.BI "int memkind_get_kind_by_name(const char " "*name" ", memkind_t " "*kind" ); (DEPRECATED)
 .br
 .BI "int memkind_get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
 .br
@@ -793,12 +793,12 @@ Call to
 .BR mmap (2)
 failed
 .TP
-.B MEMKIND_ERROR_MEMALIGN
+.B MEMKIND_ERROR_MEMALIGN (DEPRECATED)
 Call to
 .BR jemk_posix_memalign ()
 failed
 .TP
-.B MEMKIND_ERROR_MALLCTL
+.B MEMKIND_ERROR_MALLCTL (DEPRECATED)
 Call to
 .BR jemk_mallctl ()
 failed
@@ -808,15 +808,15 @@ Call to
 .BR jemk_malloc ()
 failed
 .TP
-.B MEMKIND_ERROR_GETCPU
+.B MEMKIND_ERROR_GETCPU (DEPRECATED)
 Call to
 .BR sched_getcpu ()
 returned out of range
 .TP
-.B MEMKIND_ERROR_TIEDISTANCE
+.B MEMKIND_ERROR_TIEDISTANCE (DEPRECATED)
 Two NUMA memory nodes are equidistant from target cpu node
 .TP
-.B MEMKIND_ERROR_ALIGNMENT
+.B MEMKIND_ERROR_ALIGNMENT (DEPRECATED)
 Alignment must be a power of two and larger than sizeof(void *)
 .TP
 .B MEMKIND_ERROR_ALLOCM

@@ -61,7 +61,7 @@ TEST_F(MemkindCreatePrivate, test_TC_MEMKIND_CreateRepName)
     memkind_t kind;
     for (i = 0; i < num_bad_ops; ++i) {
         err = memkind_create_private(&MEMKIND_GOOD_OPS, "memkind_default", &kind);
-        EXPECT_TRUE(err == MEMKIND_ERROR_REPNAME);
+        EXPECT_TRUE(err == MEMKIND_ERROR_INVALID);
         EXPECT_TRUE(kind == NULL);
     }
 }

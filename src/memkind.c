@@ -222,20 +222,8 @@ MEMKIND_EXPORT void memkind_error_message(int err, char *msg, size_t size)
         case MEMKIND_ERROR_MMAP:
             strncpy(msg, "<memkind> Call to mmap() failed", size);
             break;
-        case MEMKIND_ERROR_MEMALIGN:
-            strncpy(msg, "<memkind> Call to posix_memalign() failed", size);
-            break;
-        case MEMKIND_ERROR_MALLCTL:
-            strncpy(msg, "<memkind> Call to jemk_mallctl() failed", size);
-            break;
         case MEMKIND_ERROR_MALLOC:
             strncpy(msg, "<memkind> Call to jemk_malloc() failed", size);
-            break;
-        case MEMKIND_ERROR_GETCPU:
-            strncpy(msg, "<memkind> Call to sched_getcpu() returned out of range", size);
-            break;
-        case MEMKIND_ERROR_TIEDISTANCE:
-            strncpy(msg, "<memkind> Two NUMA memory nodes are equidistant from target cpu node", size);
             break;
         case MEMKIND_ERROR_ENVIRON:
             strncpy(msg, "<memkind> Error parsing environment variable (MEMKIND_*)", size);
@@ -249,28 +237,17 @@ MEMKIND_EXPORT void memkind_error_message(int err, char *msg, size_t size)
         case MEMKIND_ERROR_RUNTIME:
             strncpy(msg, "<memkind> Unspecified run-time error", size);
             break;
-        case MEMKIND_ERROR_ALIGNMENT:
         case EINVAL:
             strncpy(msg, "<memkind> Alignment must be a power of two and larger than sizeof(void *)", size);
             break;
-        case MEMKIND_ERROR_MALLOCX:
         case ENOMEM:
             strncpy(msg, "<memkind> Call to jemk_mallocx() failed", size);
-            break;
-        case MEMKIND_ERROR_PTHREAD:
-            strncpy(msg, "<memkind> Call to pthread library failed", size);
-            break;
-        case MEMKIND_ERROR_BADOPS:
-            strncpy(msg, "<memkind> memkind_ops structure is poorly formed (missing or incorrect functions)", size);
             break;
         case MEMKIND_ERROR_HUGETLB:
             strncpy(msg, "<memkind> unable to allocate huge pages", size);
             break;
-        case MEMKIND_ERROR_BADPOLICY:
-            strncpy(msg, "<memkind> invalid policy value", size);
-            break;
-        case MEMKIND_ERROR_REPPOLICY:
-            strncpy(msg, "<memkind> policy initialized more than once", size);
+        case MEMKIND_ERROR_BADOPS:
+            strncpy(msg, "<memkind> memkind_ops structure is poorly formed (missing or incorrect functions)", size);
             break;
         default:
             snprintf(msg, size, "<memkind> Undefined error number: %i", err);
@@ -348,7 +325,7 @@ MEMKIND_EXPORT int memkind_create_private(const struct memkind_ops *ops, const c
     }
     for (i = 0; i < memkind_registry_g.num_kind; ++i) {
         if (strcmp(name, memkind_registry_g.partition_map[i]->name) == 0) {
-            err = MEMKIND_ERROR_REPNAME;
+            err = MEMKIND_ERROR_INVALID;
             goto exit;
         }
     }
@@ -680,7 +657,7 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
     if (Chunksize == 0) {
         err = jemk_mallctl("opt.lg_chunk", &Chunksize, &s, NULL, 0);
         if (err) {
-            return MEMKIND_ERROR_MALLCTL;
+            return MEMKIND_ERROR_RUNTIME;
         }
         Chunksize = 1 << Chunksize; /* 2^N */
     }
