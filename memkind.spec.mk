@@ -132,9 +132,11 @@ mkdir %{_builddir}/%{buildsubdir}/jemalloc/obj
 ln -s %{_builddir}/%{buildsubdir}/jemalloc/configure %{_builddir}/%{buildsubdir}/jemalloc/obj/
 cd %{_builddir}/%{buildsubdir}/jemalloc/obj
 ../configure --enable-autogen --with-jemalloc-prefix=jemk_ --enable-memkind \
-             --enable-cc-silence \
+             --enable-cc-silence --without-export --disable-stats --disable-fill \
+             --disable-valgrind --disable-experimental \
              --prefix=%{_prefix} --includedir=%{_includedir} --libdir=%{_libdir} \
              --bindir=%{_bindir} --docdir=%{_docdir} --mandir=%{_mandir}
+
 $(make_prefix)%{__make} %{?_smp_mflags} $(make_postfix)
 
 # Build memkind lib and tools
