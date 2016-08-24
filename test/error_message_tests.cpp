@@ -29,50 +29,39 @@
 /* Tests which calls APIS in wrong ways to generate Error Messages thrown by the
  * the memkind library
  */
+
+const int all_error_code[] = {
+    MEMKIND_ERROR_UNAVAILABLE,
+    MEMKIND_ERROR_MBIND,
+    MEMKIND_ERROR_MMAP,
+    MEMKIND_ERROR_MALLOC,
+    MEMKIND_ERROR_RUNTIME,
+    MEMKIND_ERROR_ENVIRON,
+    MEMKIND_ERROR_INVALID,
+    MEMKIND_ERROR_TOOMANY,
+    MEMKIND_ERROR_BADOPS,
+    MEMKIND_ERROR_HUGETLB,
+    EINVAL,
+    ENOMEM
+};
+
 class ErrorMessage: public :: testing :: Test
 {
 protected:
-    int num_error_code;
-    int *all_error_code;
 
     void SetUp()
     {
-        num_error_code = 22;
-        all_error_code = new int[num_error_code];
-        all_error_code[0] = MEMKIND_ERROR_UNAVAILABLE;
-        all_error_code[1] = MEMKIND_ERROR_MBIND;
-        all_error_code[2] = MEMKIND_ERROR_MMAP;
-        all_error_code[3] = MEMKIND_ERROR_MEMALIGN;
-        all_error_code[4] = MEMKIND_ERROR_MALLCTL;
-        all_error_code[5] = MEMKIND_ERROR_MALLOC;
-        all_error_code[6] = MEMKIND_ERROR_GETCPU;
-        all_error_code[7] = MEMKIND_ERROR_RUNTIME;
-        all_error_code[8] = MEMKIND_ERROR_TIEDISTANCE;
-        all_error_code[9] = MEMKIND_ERROR_ALIGNMENT;
-        all_error_code[10] = MEMKIND_ERROR_MALLOCX;
-        all_error_code[11] = MEMKIND_ERROR_ENVIRON;
-        all_error_code[12] = MEMKIND_ERROR_INVALID;
-        all_error_code[13] = MEMKIND_ERROR_REPNAME;
-        all_error_code[14] = MEMKIND_ERROR_TOOMANY;
-        all_error_code[15] = MEMKIND_ERROR_PTHREAD;
-        all_error_code[16] = MEMKIND_ERROR_BADOPS;
-        all_error_code[17] = MEMKIND_ERROR_HUGETLB;
-        all_error_code[18] = MEMKIND_ERROR_BADPOLICY;
-        all_error_code[19] = MEMKIND_ERROR_REPPOLICY;
-        all_error_code[20] = EINVAL;
-        all_error_code[21] = ENOMEM;
     }
     void TearDown()
     {
-        delete all_error_code;
     }
 };
 
 TEST_F(ErrorMessage, test_TC_MEMKIND_ErrorMsgLength)
 {
-    int i;
+    size_t i;
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    for (i = 0; i < num_error_code; ++i) {
+    for (i = 0; i < sizeof(all_error_code)/sizeof(all_error_code[0]); ++i) {
         memkind_error_message(all_error_code[i], error_message, MEMKIND_ERROR_MESSAGE_SIZE);
         EXPECT_TRUE(strlen(error_message) < MEMKIND_ERROR_MESSAGE_SIZE - 1);
     }
@@ -81,9 +70,9 @@ TEST_F(ErrorMessage, test_TC_MEMKIND_ErrorMsgLength)
 
 TEST_F(ErrorMessage, test_TC_MEMKIND_ErrorMsgFormat)
 {
-    int i;
+    size_t i;
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    for (i = 0; i < num_error_code; ++i) {
+    for (i = 0; i < sizeof(all_error_code)/sizeof(all_error_code[0]); ++i) {
         memkind_error_message(all_error_code[i], error_message, MEMKIND_ERROR_MESSAGE_SIZE);
         EXPECT_TRUE(strncmp(error_message, "<memkind>", strlen("<memkind>")) == 0);
     }

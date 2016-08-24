@@ -266,7 +266,7 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind, unsigned int *
             *arena_tsd = _mm_crc32_u64(0, (uint64_t)pthread_self()) %
                          kind->arena_map_len;
             err = pthread_setspecific(kind->arena_key, arena_tsd) ?
-                  MEMKIND_ERROR_PTHREAD : 0;
+                  MEMKIND_ERROR_RUNTIME : 0;
         }
     }
     *arena = kind->arena_zero + *arena_tsd;

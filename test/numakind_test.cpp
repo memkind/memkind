@@ -164,7 +164,7 @@ static void numakind_init(void)
 
     num_nodes = numa_num_configured_nodes();
     if (num_nodes > NUMAKIND_MAX) {
-        err = MEMKIND_ERROR_TOOMANY;
+        err = MEMKIND_ERROR_INVALID;
     }
 
     for (i = 0; !err && i < num_nodes; ++i) {
@@ -199,7 +199,7 @@ static int numakind_get_kind(memkind_t **kind)
             }
             if (!err) {
                 err = pthread_setspecific(numakind_key_g, *kind) ?
-                      MEMKIND_ERROR_PTHREAD : 0;
+                      MEMKIND_ERROR_RUNTIME : 0;
             }
         }
     }

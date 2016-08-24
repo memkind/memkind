@@ -223,7 +223,7 @@ MEMKIND_EXPORT int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
             numa_bitmask_setbit(&nodemask_bm, g->closest_numanode[cpu]);
         }
         else {
-            return MEMKIND_ERROR_GETCPU;
+            return MEMKIND_ERROR_RUNTIME;
         }
     }
     return g->init_err;
@@ -566,7 +566,7 @@ static int set_closest_numanode(int num_unique,
                 }
             }
             if (!min_unique) {
-                err = MEMKIND_ERROR_TIEDISTANCE;
+                err = MEMKIND_ERROR_RUNTIME;
             }
         }
     }
