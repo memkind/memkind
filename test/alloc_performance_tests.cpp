@@ -474,7 +474,7 @@ TEST_F(AllocPerformanceTest, test_TC_MEMKIND_MEMKIND_HBW_calloc_72_thread_1001_b
     run_test(AllocatorTypes::MEMKIND_HBW, FunctionCalls::CALLOC, 72, 1001, 10000);
 }
 
-TEST_F(AllocPerformanceTest, test_TC_MEMKIND_MEMKIND_HBW_calloc_72_thread_1572864_bytes)
+TEST_F(AllocPerformanceTest, test_TC_MEMKIND_ext_MEMKIND_HBW_calloc_72_thread_1572864_bytes)
 {
     run_test(AllocatorTypes::MEMKIND_HBW, FunctionCalls::CALLOC, 72, 1572864, 10000);
 }
