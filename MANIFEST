@@ -82,8 +82,6 @@ test/trial_generator.h
 test/bat_tests.cpp
 test/bat_bind_tests.cpp
 test/bat_interleave_tests.cpp
-test/mallctl_err_test.cpp
-test/mallctl_mock.c
 test/main.cpp
 test/common.h
 test/static_kinds_list.h

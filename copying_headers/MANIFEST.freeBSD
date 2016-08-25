@@ -64,8 +64,6 @@ test/fopen_mock.c
 test/gb_page_tests.cpp
 test/jemalloc_mock.c
 test/main.cpp
-test/mallctl_err_test.cpp
-test/mallctl_mock.c
 test/multithreaded_tests.cpp
 test/negative_tests.cpp
 test/numadist_mock.c
