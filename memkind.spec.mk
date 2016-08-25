@@ -204,7 +204,6 @@ rm -f %{buildroot}/%{_libdir}/lib{numakind}.*
 %defattr(-,root,root,-)
 $(memkind_test_dir)/all_tests
 $(memkind_test_dir)/environerr_hbw_malloc_test
-$(memkind_test_dir)/mallctlerr_test
 $(memkind_test_dir)/decorator_test
 $(memkind_test_dir)/slts_test
 $(memkind_test_dir)/filter_memkind
@@ -231,7 +230,6 @@ $(memkind_test_dir)/memkind-knl_modes.ts
 $(memkind_test_dir)/check.sh
 $(memkind_test_dir)/test.sh
 $(memkind_test_dir)/libfopen.so
-$(memkind_test_dir)/libmallctl.so
 $(memkind_test_dir)/libmalloc.so
 $(memkind_test_dir)/libnumadist.so
 $(memkind_test_dir)/libsched.so

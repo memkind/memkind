@@ -25,7 +25,6 @@
 AM_CPPFLAGS += -I$(googletest)/include
 
 check_PROGRAMS += test/all_tests \
-                  test/mallctlerr_test \
                   test/environerr_hbw_malloc_test \
                   test/slts_test \
                   test/decorator_test \
@@ -54,7 +53,6 @@ EXTRA_DIST += test/memkind-afts.ts \
 
 #test_all_tests_LDADD = libgtest.a libmemkind.la test/liballocatorperftool.la
 test_all_tests_LDADD = libgtest.a libmemkind.la
-test_mallctlerr_test_LDADD = libgtest.a libmemkind.la
 test_environerr_hbw_malloc_test_LDADD = libgtest.a libmemkind.la
 test_slts_test_LDADD = libgtest.a libmemkind.la
 test_decorator_test_LDADD = libgtest.a libmemkind.la
@@ -100,7 +98,6 @@ test_all_tests_SOURCES = test/common.h \
                          test/static_kinds_tests.cpp \
                          #end
 
-test_mallctlerr_test_SOURCES = test/main.cpp test/mallctl_err_test.cpp
 test_environerr_hbw_malloc_test_SOURCES = test/main.cpp test/environ_err_hbw_malloc_test.cpp test/trial_generator.cpp test/check.cpp
 test_slts_test_SOURCES = test/slts_test.cpp
 test_decorator_test_SOURCES = test/main.cpp test/decorator_test.cpp test/decorator_test.h
@@ -238,7 +235,7 @@ test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
 
 test: check-am
 
-check-am: libgtest.a test/libsched.so test/libnumadist.so test/libmalloc.so test/libmallctl.so test/libfopen.so
+check-am: libgtest.a test/libsched.so test/libnumadist.so test/libmalloc.so test/libfopen.so
 
 clean-local: clean-local-gtest clean-local-mock
 
@@ -265,15 +262,13 @@ clean-local-gtest:
 	rm -rf libgtest.a $(googletest)
 
 # shared libraries to enable mocks using LD_PRELOAD
-test-mock-so: test/libsched.so test/libnumadist.so test/libmalloc.so test/libmallctl.so test/libfopen.so
+test-mock-so: test/libsched.so test/libnumadist.so test/libmalloc.so test/libfopen.so
 
 test/libsched.so: test/sched_mock.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $^ -o $@
 test/libnumadist.so: test/numadist_mock.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $^ -o $@
 test/libmalloc.so: test/jemalloc_mock.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $^ -o $@
-test/libmallctl.so: test/mallctl_mock.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $^ -o $@
 test/libfopen.so: test/fopen_mock.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $^ -o $@
