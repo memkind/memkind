@@ -230,14 +230,14 @@ test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples
 endif
 test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
 
-# All of the non-standard requirements for testing (gtest and mock .so)
-.PHONY: test clean-local-gtest clean-local-mock
+# All of the non-standard requirements for testing (gtest)
+.PHONY: test clean-local-gtest
 
 test: check-am
 
-check-am: libgtest.a test/libsched.so test/libnumadist.so test/libmalloc.so test/libfopen.so
+check-am: libgtest.a
 
-clean-local: clean-local-gtest clean-local-mock
+clean-local: clean-local-gtest
 
 googletest_version = 1.7.0
 googletest = gtest-$(googletest_version)
@@ -260,22 +260,6 @@ libgtest.a: $(googletest)/VERSION
 
 clean-local-gtest:
 	rm -rf libgtest.a $(googletest)
-
-# shared libraries to enable mocks using LD_PRELOAD
-test-mock-so: test/libsched.so test/libnumadist.so test/libmalloc.so test/libfopen.so
-
-test/libsched.so: test/sched_mock.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $^ -o $@
-test/libnumadist.so: test/numadist_mock.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $^ -o $@
-test/libmalloc.so: test/jemalloc_mock.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $^ -o $@
-test/libfopen.so: test/fopen_mock.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $^ -o $@
-
-clean-local-mock:
-	rm -f test/*.so
-	rm -f test/*.aml
 
 CLEANFILES += test/numakind_macro.h
 test/numakind_test.cpp: test/numakind_macro.h
