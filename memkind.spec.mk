@@ -156,7 +156,7 @@ cd %{_builddir}/%{buildsubdir}
 %{__make} DESTDIR=%{buildroot} install
 %{__install} -d %{buildroot}$(memkind_test_dir)
 %{__install} -d %{buildroot}/%{_unitdir}
-%{__install} test/.libs/* test/*.sh test/*.ts test/*.so test/*.py %{buildroot}$(memkind_test_dir)
+%{__install} test/.libs/* test/*.sh test/*.ts test/*.py %{buildroot}$(memkind_test_dir)
 rm -f %{buildroot}$(memkind_test_dir)/libautohbw.*
 rm -f %{buildroot}/%{_libdir}/lib%{namespace}.{l,}a
 rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
@@ -229,10 +229,6 @@ $(memkind_test_dir)/memkind-autohbw.ts
 $(memkind_test_dir)/memkind-knl_modes.ts
 $(memkind_test_dir)/check.sh
 $(memkind_test_dir)/test.sh
-$(memkind_test_dir)/libfopen.so
-$(memkind_test_dir)/libmalloc.so
-$(memkind_test_dir)/libnumadist.so
-$(memkind_test_dir)/libsched.so
 $(memkind_test_dir)/hbw_detection_test.py
 $(memkind_test_dir)/autohbw_test.py
 $(memkind_test_dir)/knl_modes_test.py

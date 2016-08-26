@@ -91,7 +91,6 @@ EXTRA_DIST = autogen.sh \
              examples/README \
              test/check.sh \
              test/test.sh \
-             test/*_mock.c \
              VERSION \
              CONTRIBUTING \
              memkind-$(VERSION).spec \
@@ -302,7 +301,7 @@ $(jemalloc_objects): jemalloc/obj/src/%.lo: jemalloc/obj/src/%.pic.o jemalloc/ob
 	@echo "non_pic_object='$*.o'" >> $@
 
 # build check programs without running tests (requires libgtest.a)
-checkprogs: $(check_PROGRAMS) test-mock-so
+checkprogs: $(check_PROGRAMS)
 
 memkind-$(VERSION).spec:
 	$(MAKE) version="$(VERSION)" -f memkind.spec.mk $@

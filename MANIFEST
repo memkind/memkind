@@ -71,11 +71,8 @@ test/multithreaded_tests.cpp
 test/gb_page_tests.cpp
 test/get_knl_modes.c
 test/environ_err_hbw_malloc_test.cpp
-test/jemalloc_mock.c
 test/negative_tests.cpp
-test/sched_mock.c
 test/trial_generator.cpp
-test/fopen_mock.c
 test/check.h
 test/trial_generator.h
 test/bat_tests.cpp
@@ -84,7 +81,6 @@ test/bat_interleave_tests.cpp
 test/main.cpp
 test/common.h
 test/static_kinds_list.h
-test/numadist_mock.c
 test/check.cpp
 test/extended_tests.cpp
 test/partition_tests.cpp
