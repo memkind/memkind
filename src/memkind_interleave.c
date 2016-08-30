@@ -26,8 +26,8 @@
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_log.h>
 
-#include <assert.h>
 #include <numa.h>
 
 MEMKIND_EXPORT const struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
@@ -52,8 +52,14 @@ MEMKIND_EXPORT const struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
 MEMKIND_EXPORT void memkind_interleave_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_INTERLEAVE);
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_INTERLEAVE] Failed creating arena map (error code:%d)", err);
+        abort();
+    }
     err = numa_available();
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_INTERLEAVE] There is no numa available (error code:%d)", err);
+        abort();
+    }
     memkind_register_kind(MEMKIND_INTERLEAVE);
 }

@@ -37,7 +37,6 @@
 #include <numa.h>
 #include <numaif.h>
 #include <errno.h>
-#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <jemalloc/jemalloc.h>
@@ -597,44 +596,74 @@ static int numanode_bandwidth_compare(const void *a, const void *b)
 MEMKIND_EXPORT void memkind_hbw_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW);
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HBW] Failed creating arena map (error code:%d)", err);
+        abort();
+    }
     err = numa_available();
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HBW] There is no numa available (error code:%d)", err);
+        abort();
+    }
     memkind_register_kind(MEMKIND_HBW);
 }
 
 MEMKIND_EXPORT void memkind_hbw_hugetlb_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_HUGETLB);
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HBW_HUGETLB] Failed creating arena map (error code:%d)", err);
+        abort();
+    }
     err = numa_available();
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HBW_HUGETLB] There is no numa available (error code:%d)", err);
+        abort();
+    }
     memkind_register_kind(MEMKIND_HBW_HUGETLB);
 }
 
 MEMKIND_EXPORT void memkind_hbw_preferred_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_PREFERRED);
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HBW_PREFERRED] Failed creating arena map (error code:%d)", err);
+        abort();
+    }
     err = numa_available();
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HBW_PREFERRED] There is no numa available (error code:%d)", err);
+        abort();
+    }
     memkind_register_kind(MEMKIND_HBW_PREFERRED);
 }
 
 MEMKIND_EXPORT void memkind_hbw_preferred_hugetlb_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_PREFERRED_HUGETLB);
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HBW_PREFERRED_HUGETLB] Failed creating arena map (error code:%d)", err);
+        abort();
+    }
     err = numa_available();
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HBW_PREFERRED_HUGETLB] There is no numa available (error code:%d)", err);
+        abort();
+    }
     memkind_register_kind(MEMKIND_HBW_PREFERRED_HUGETLB);
 }
 
 MEMKIND_EXPORT void memkind_hbw_interleave_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HBW_INTERLEAVE);
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HBW_INTERLEAVE] Failed creating arena map (error code:%d)", err);
+        abort();
+    }
     err = numa_available();
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HBW_INTERLEAVE] There is no numa available (error code:%d)", err);
+        abort();
+    }
     memkind_register_kind(MEMKIND_HBW_INTERLEAVE);
 }
