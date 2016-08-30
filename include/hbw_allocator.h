@@ -88,7 +88,7 @@ public:
         if (n > this->max_size()) {
             throw std::bad_alloc();
         }
-        pointer result = static_cast<T*>(hbw_malloc(n * sizeof(T)));
+        pointer result = static_cast<pointer>(hbw_malloc(n * sizeof(T)));
         if (!result) {
             throw std::bad_alloc();
         }
@@ -108,7 +108,7 @@ public:
         return size_t(-1) / sizeof(T);
     }
 
-    void construct(pointer p, const value_type& val)
+    void construct(pointer p, const_reference val)
     {
         ::new(p) value_type(val);
     }
@@ -118,5 +118,17 @@ public:
         p->~T();
     }
 };
+
+template <class T, class U>
+bool operator==(const allocator<T>&, const allocator<U>&)
+{
+    return true;
+}
+
+template <class T, class U>
+bool operator!=(const allocator<T>&, const allocator<U>&)
+{
+    return false;
+}
 
 }
