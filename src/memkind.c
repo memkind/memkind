@@ -360,7 +360,7 @@ MEMKIND_EXPORT int memkind_finalize(void)
 {
     struct memkind *kind;
     int i;
-    int err;
+    int err = 0;
 
     if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
         assert(0 && "failed to acquire mutex");
