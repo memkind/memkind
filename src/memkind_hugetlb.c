@@ -28,7 +28,6 @@
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
 
-#include <assert.h>
 #include <sys/mman.h>
 #ifndef MAP_HUGETLB
 #define MAP_HUGETLB 0x40000
@@ -73,7 +72,10 @@ MEMKIND_EXPORT int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *fla
 MEMKIND_EXPORT void memkind_hugetlb_init_once(void)
 {
     int err = memkind_arena_create_map(MEMKIND_HUGETLB);
-    assert(err == 0);
+    if (err) {
+        log_fatal("[MEMKIND_HUGETLB] Failed creating arena map (error code:%d)", err);
+        abort();
+    }
     memkind_register_kind(MEMKIND_HUGETLB);
 }
 
