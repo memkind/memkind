@@ -119,4 +119,16 @@ public:
     }
 };
 
+template <class T, class U>
+bool operator==(const allocator<T>& lhs, const allocator<U>& rhs)
+{
+    return true;
+}
+
+template <class T, class U>
+bool operator!=(const allocator<T>& lhs, const allocator<U>& rhs)
+{
+    return false;
+}
+
 }
