@@ -178,7 +178,6 @@ rm -f %{buildroot}/%{_libdir}/lib{numakind}.*
 %doc %{_docdir}/%{namespace}/README
 %doc %{_docdir}/%{namespace}/VERSION
 %dir %{_docdir}/%{namespace}
-%dir %{_unitdir}
 %{_libdir}/lib%{namespace}.so.*
 %{_libdir}/libautohbw.so.*
 %{_bindir}/%{namespace}-hbw-nodes
