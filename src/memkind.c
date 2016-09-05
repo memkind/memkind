@@ -604,8 +604,13 @@ static int memkind_tmpfile(const char *dir, size_t size, int *fd, void **addr)
     static char template[] = "/memkind.XXXXXX";
     int err = 0;
     int oerrno;
+    int dir_len = strlen(dir);
 
-    char fullname[strlen(dir) + sizeof (template)];
+    if (dir_len > PATH_MAX) {
+        return MEMKIND_ERROR_RUNTIME;
+    }
+
+    char fullname[dir_len + sizeof (template)];
     (void) strcpy(fullname, dir);
     (void) strcat(fullname, template);
 
