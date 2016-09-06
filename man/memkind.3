@@ -855,6 +855,12 @@ provide better performance in extremely multithreaded applications at
 the cost of memory overhead. See section "IMPLEMENTATION NOTES" of
 .BR jemalloc (3)
 for more details about arenas.
+.TP
+.B MEMKIND_DEBUG
+Controls tracing mechanism in memkind. Setting
+.B MEMKIND_DEBUG
+to "1" enables printing messages like errors and general informations about environment to
+.I stderr.
 .SH "SYSTEM CONFIGURATION"
 Interfaces for obtaining 2MB and 1GB pages (HUGETLB and GBTLB) need allocated
 huge pages in the kernel's huge page pool.
