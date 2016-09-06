@@ -57,12 +57,13 @@ if test "x$with_numa_lib" != x; then
   LDFLAGS="$LDFLAGS -L$with_numa_lib"
 fi
 
+AC_PROG_CC
+
 # arg to provide path to hwloc headers
 AC_ARG_WITH([hwloc-include], [AS_HELP_STRING([--with-hwloc-include=PATH],
             [specify directory for the installed hwloc include files.])])
 if test "x$with_hwloc_include" != x; then
   CPPFLAGS="$CPPFLAGS -I$with_hwloc_include"
-  CFLAGS="$CFLAGS -I$with_hwloc_include"
 fi
 # arg to provide path to hwloc lib
 AC_ARG_WITH([hwloc], [AS_HELP_STRING([--with-hwloc=PATH],
@@ -89,8 +90,6 @@ if test "x$with_hwloc" != xno; then
               ], "")
 fi
 AM_CONDITIONAL([USE_HWLOC], [test x$with_hwloc != x])
-
-AC_PROG_CC
 
 # Check for tls_model attribute support
 SAVED_CFLAGS="${CFLAGS}"
