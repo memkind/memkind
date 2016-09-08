@@ -238,22 +238,10 @@ MEMKIND_EXPORT int memkind_bijective_get_arena(struct memkind *kind, unsigned in
     return 0;
 }
 
-/*
- *
- * We use thread control block as unique thread identifier
- * For more read: https://www.akkadia.org/drepper/tls.pdf
- * We could consider using rdfsbase when it will arrive to linux kernel
- *
- */
-static uintptr_t get_fs_base() {
-    uintptr_t fs_base;
-    asm ("movq %%fs:0, %0" : "=r" (fs_base));
-    return fs_base;
-}
-
 #ifdef MEMKIND_TLS
 MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
 {
+    int err = 0;
     unsigned int *arena_tsd;
     arena_tsd = pthread_getspecific(kind->arena_key);
 
@@ -274,6 +262,19 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind, unsigned int *
 }
 
 #else
+
+/*
+ *
+ * We use thread control block as unique thread identifier
+ * For more read: https://www.akkadia.org/drepper/tls.pdf
+ * We could consider using rdfsbase when it will arrive to linux kernel
+ *
+ */
+static uintptr_t get_fs_base() {
+    uintptr_t fs_base;
+    asm ("movq %%fs:0, %0" : "=r" (fs_base));
+    return fs_base;
+}
 
 MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size)
 {
