@@ -37,6 +37,8 @@ AC_SUBST(memkind_abi_version)
 
 LT_PREREQ([2.2.6])
 
+# all modifications to CFLAGS/CXXFLAGS shall be done *after* this line
+AC_PROG_CC
 
 AC_ARG_WITH([numa], [AS_HELP_STRING([--with-numa=PATH],
             [specify prefix directory for installed numa package.])])
@@ -57,8 +59,7 @@ if test "x$with_numa_lib" != x; then
   LDFLAGS="$LDFLAGS -L$with_numa_lib"
 fi
 
-AC_PROG_CC
-
+#============================hwloc=============================================
 # arg to provide path to hwloc headers
 AC_ARG_WITH([hwloc-include], [AS_HELP_STRING([--with-hwloc-include=PATH],
             [specify directory for the installed hwloc include files.])])
@@ -91,6 +92,7 @@ if test "x$with_hwloc" != xno; then
 fi
 AM_CONDITIONAL([USE_HWLOC], [test x$with_hwloc != x])
 
+#============================tls===============================================
 # Check for tls_model attribute support
 SAVED_CFLAGS="${CFLAGS}"
 CFLAGS="$CFLAGS -Werror"
@@ -142,6 +144,7 @@ if test "x${enable_tls}" = "x1" ; then
 fi
 AC_SUBST([enable_tls])
 
+#============================decorators========================================
 AC_ARG_ENABLE([decorators],
   [AS_HELP_STRING([--enable-decorators], [Enable decorators 111])],
 [if test "x$enable_decorators" = "xyes" ; then
@@ -157,6 +160,7 @@ if test "x${enable_decorators}" = "x1" ; then
 fi
 AC_SUBST([enable_decorators])
 
+#============================arena_limit=======================================
 arena_limit=256;
 AC_ARG_VAR(ARENA_LIMIT,
   [Upper bound for number of arenas per kind, if set to 0 then no limit]
@@ -167,6 +171,7 @@ fi
 
 AC_DEFINE_UNQUOTED([ARENA_LIMIT_PER_KIND], $arena_limit, [Upper bound for number of arenas per kind])
 
+#============================debug=============================================
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING([--enable-debug], [Build debugging code and compile with -O0 -g])],
 [if test "x$enable_debug" = "xno" ; then
@@ -184,6 +189,31 @@ if test "x$enable_debug" = "x1" ; then
 fi
 AC_SUBST([enable_debug])
 
+#============================secure_flags======================================
+AC_ARG_ENABLE([secure],
+  [AS_HELP_STRING([--enable-secure], [Build library with security enchantments])],
+[if test "x$enable_secure" = "xno" ; then
+  enable_secure="0"
+else
+  enable_secure="1"
+fi
+],
+[enable_secure="1"]
+)
+if test "x$enable_secure" = "x1" ; then
+  CFLAGS="$CFLAGS -fstack-protector"
+  LDFLAGS="$LDFLAGS -Wl,-z,relro,-z,now"
+
+  if test "$CFLAGS" != "${CFLAGS%-O0*}" ; then # if CFLAGS contains -O0
+      echo "WARNING: Could not apply FORTIFY_SOURCE=2 due to lack of optimization (-O0)"
+  else
+      CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2" #FORTITFY_SOURCE does not work with -O0 (ex. if enable_debug=1)
+  fi
+fi
+
+AC_SUBST([enable_secure])
+
+#============================cxx11=============================================
 AC_ARG_ENABLE([cxx11],
   [AS_HELP_STRING([--enable-cxx11], [Enable tests and examples that use C++11 features])],
 [if test "x$enable_cxx11" = "xno" ; then
@@ -281,4 +311,5 @@ AC_MSG_RESULT([arena_limit        : ${arena_limit}])
 AC_MSG_RESULT([debug              : ${enable_debug}])
 AC_MSG_RESULT([tls                : ${enable_tls}])
 AC_MSG_RESULT([decorators         : ${enable_decorators}])
+AC_MSG_RESULT([secure             : ${enable_secure}])
 AC_MSG_RESULT([===============================================================================])
