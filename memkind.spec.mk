@@ -156,7 +156,9 @@ cd %{_builddir}/%{buildsubdir}
 %{__make} DESTDIR=%{buildroot} install
 %{__install} -d %{buildroot}$(memkind_test_dir)
 %{__install} -d %{buildroot}/%{_unitdir}
+%{__install} -d %{buildroot}/$(memkind_test_dir)/python_framework
 %{__install} test/.libs/* test/*.sh test/*.ts test/*.py %{buildroot}$(memkind_test_dir)
+%{__install} test/python_framework/*.py %{buildroot}/$(memkind_test_dir)/python_framework
 rm -f %{buildroot}$(memkind_test_dir)/libautohbw.*
 rm -f %{buildroot}/%{_libdir}/lib%{namespace}.{l,}a
 rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
@@ -218,6 +220,7 @@ ${memkind_test_dir}/pmem
 ${memkind_test_dir}/allocator_perf_tool_tests
 ${memkind_test_dir}/perf_tool
 ${memkind_test_dir}/autohbw_test_helper
+${memkind_test_dir}/trace_mechanism_test_helper
 $(memkind_test_dir)/memkind-afts.ts
 $(memkind_test_dir)/memkind-afts-ext.ts
 $(memkind_test_dir)/memkind-slts.ts
@@ -225,16 +228,22 @@ $(memkind_test_dir)/memkind-perf.ts
 $(memkind_test_dir)/memkind-perf-ext.ts
 $(memkind_test_dir)/memkind-hbw_detection.ts
 $(memkind_test_dir)/memkind-autohbw.ts
+$(memkind_test_dir)/memkind-logging.ts
 $(memkind_test_dir)/memkind-knl_modes.ts
 $(memkind_test_dir)/check.sh
 $(memkind_test_dir)/test.sh
 $(memkind_test_dir)/hbw_detection_test.py
 $(memkind_test_dir)/autohbw_test.py
 $(memkind_test_dir)/knl_modes_test.py
+$(memkind_test_dir)/trace_mechanism_test.py
+$(memkind_test_dir)/python_framework/cmd_helper.py
+$(memkind_test_dir)/python_framework/__init__.py
 $(memkind_include_knl_mode)
 
 %exclude $(memkind_test_dir)/*.pyo
 %exclude $(memkind_test_dir)/*.pyc
+%exclude $(memkind_test_dir)/python_framework/*.pyo
+%exclude $(memkind_test_dir)/python_framework/*.pyc
 
 %changelog
 endef

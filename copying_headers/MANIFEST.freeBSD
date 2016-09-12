@@ -137,9 +137,13 @@ test/allocate_to_max_stress_test.cpp
 test/memkind_versioning_tests.cpp
 test/heap_manager_init_perf_test.cpp
 test/autohbw_test_helper.c
+test/trace_mechanism_test_helper.c
 test/hbw_detection_test.py
 test/autohbw_test.py
+test/trace_mechanism_test.py
 test/knl_modes_test.py
+test/python_framework/cmd_helper.py
+test/python_framework/__init__.py
 man/memkind_pmem.3
 src/memkind_pmem.c
 

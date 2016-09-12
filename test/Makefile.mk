@@ -30,6 +30,7 @@ check_PROGRAMS += test/all_tests \
                   test/decorator_test \
                   test/allocator_perf_tool_tests \
                   test/autohbw_test_helper \
+                  test/trace_mechanism_test_helper \
                   # end
 
 if USE_HWLOC
@@ -46,9 +47,13 @@ EXTRA_DIST += test/memkind-afts.ts \
               test/memkind-hbw_detection.ts \
               test/memkind-autohbw.ts \
               test/memkind-knl_modes.ts \
+              test/memkind-logging.ts \
               test/hbw_detection_test.py \
               test/autohbw_test.py \
-              test/knl_modes_test.py
+              test/knl_modes_test.py \
+              test/trace_mechanism_test.py \
+              test/python_framework/cmd_helper.py \
+              test/python_framework/__init__.py
 
 
 #test_all_tests_LDADD = libgtest.a libmemkind.la test/liballocatorperftool.la
@@ -58,6 +63,7 @@ test_slts_test_LDADD = libgtest.a libmemkind.la
 test_decorator_test_LDADD = libgtest.a libmemkind.la
 test_allocator_perf_tool_tests_LDADD = libgtest.a libmemkind.la
 test_autohbw_test_helper_LDADD = libmemkind.la
+test_trace_mechanism_test_helper_LDADD = libmemkind.la
 if USE_HWLOC
 test_get_knl_modes_SOURCES = test/get_knl_modes.c
 test_get_knl_modes_LDADD = $(LIBHWLOC) libmemkind.la
@@ -102,6 +108,7 @@ test_environerr_hbw_malloc_test_SOURCES = test/main.cpp test/environ_err_hbw_mal
 test_slts_test_SOURCES = test/slts_test.cpp
 test_decorator_test_SOURCES = test/main.cpp test/decorator_test.cpp test/decorator_test.h
 test_autohbw_test_helper_SOURCES = test/autohbw_test_helper.c
+test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c
 
 #Tests based on Allocator Perf Tool
 allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.hpp \

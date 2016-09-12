@@ -19,6 +19,7 @@ test/memkind-perf-ext.ts
 test/memkind-hbw_detection.ts
 test/memkind-autohbw.ts
 test/memkind-knl_modes.ts
+test/memkind-logging.ts
 jemalloc/.gitignore
 jemalloc/autogen.sh
 jemalloc/bin
