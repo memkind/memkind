@@ -40,7 +40,19 @@ source_tmp_dir := $(topdir)/SOURCES/$(name)-tmp-$(shell date +%s)
 rpmbuild_flags = -E '%define _topdir $(topdir)'
 rpmclean_flags = $(rpmbuild_flags) --clean --rmsource --rmspec
 memkind_test_dir = $(MPSS_TEST_BASEDIR)/memkind-dt
-exclude_source_files = test/memkind-afts.ts test/memkind-afts-ext.ts test/memkind-slts.ts test/memkind-perf.ts test/memkind-perf-ext.ts test/memkind-hbw_detection.ts test/memkind-autohbw.ts test/hbw_detection_test.py test/autohbw_test.py
+exclude_source_files = test/memkind-afts.ts \
+test/memkind-afts-ext.ts \
+test/memkind-slts.ts \
+test/memkind-perf.ts \
+test/memkind-perf-ext.ts \
+test/memkind-hbw_detection.ts \
+test/memkind-autohbw.ts \
+test/memkind-logging.ts \
+test/python_framework/cmd_helper.py \
+test/python_framework/__init__.py \
+test/hbw_detection_test.py test/autohbw_test.py \
+test/trace_mechanism_test.py
+
 memkind_depends_root ?=
 
 ifeq ($(memkind_depends_root),)
@@ -59,14 +71,16 @@ $(rpm): $(specfile) $(source_tar)
 	mv $(topdir)/RPMS/$(arch)/$(name)-tests-$(version)-$(release).$(arch).rpm $(trpm)
 
 $(source_tar): $(topdir)/.setup $(src) MANIFEST
-	set -x
 	mkdir -p $(source_tmp_dir)
+	set -e ; \
 	for f in $(exclude_source_files); do \
 		echo $$f >> $(source_tmp_dir)/EXCLUDE ; \
 	done
 	tar cf $(source_tmp_dir)/tmp.tar -T MANIFEST --transform="s|^|$(name)-$(version)/|" -X $(source_tmp_dir)/EXCLUDE
 	cd $(source_tmp_dir) && tar xf tmp.tar
+	set -e ; \
 	for f in $(exclude_source_files); do \
+		mkdir -p `dirname $(source_tmp_dir)/$(name)-$(version)/$$f` ; \
 		cp $$f $(source_tmp_dir)/$(name)-$(version)/$$f ; \
 	done
 	if [ -f "$(memkind_gtest_archive)" ]; then cp $(memkind_gtest_archive) $(source_tmp_dir)/$(name)-$(version); fi

@@ -102,6 +102,7 @@ test/huge_page_test.cpp
 test/hbw_detection_test.py
 test/autohbw_test.py
 test/knl_modes_test.py
+test/trace_mechanism_test.py
 test/memkind-afts.ts
 test/memkind-afts-ext.ts
 test/memkind-slts.ts
@@ -110,6 +111,7 @@ test/memkind-perf-ext.ts
 test/memkind-hbw_detection.ts
 test/memkind-autohbw.ts
 test/memkind-knl_modes.ts
+test/memkind-logging.ts
 test/performance/framework.hpp
 test/performance/framework.cpp
 test/performance/operations.hpp
@@ -165,6 +167,9 @@ test/allocate_to_max_stress_test.cpp
 test/memkind_versioning_tests.cpp
 test/heap_manager_init_perf_test.cpp
 test/autohbw_test_helper.c
+test/trace_mechanism_test_helper.c
+test/python_framework/cmd_helper.py
+test/python_framework/__init__.py
 jemalloc/autogen.sh
 jemalloc/bin
 jemalloc/bin/jemalloc.sh.in
