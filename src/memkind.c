@@ -34,9 +34,11 @@
 #include <memkind/internal/memkind_pmem.h>
 #include <memkind/internal/memkind_interleave.h>
 #include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_log.h>
 
 #include "config.h"
 
+#include <numa.h>
 #include <sys/param.h>
 #include <sys/mman.h>
 #include <stdint.h>
@@ -258,6 +260,24 @@ MEMKIND_EXPORT void memkind_error_message(int err, char *msg, size_t size)
     }
 }
 
+void memkind_init(memkind_t kind, bool check_numa)
+{
+    log_info("Initializing kind %s.", kind->name);
+    int err = memkind_arena_create_map(kind);
+    if (err) {
+        log_fatal("[%s] Failed to create arena map (error code:%d).", kind->name, err);
+        abort();
+    }
+    if (check_numa) {
+        err = numa_available();
+        if (err) {
+            log_fatal("[%s] NUMA not available (error code:%d).", kind->name, err);
+            abort();
+        }
+    }
+    memkind_register_kind(kind);
+}
+
 void memkind_register_kind(memkind_t kind)
 {
     if(kind && kind->ops->check_addr)
@@ -308,6 +328,7 @@ MEMKIND_EXPORT int memkind_create_private(const struct memkind_ops *ops, const c
         assert(0 && "failed to acquire mutex");
 
     if (memkind_registry_g.num_kind == MEMKIND_MAX_KIND) {
+        log_err("Attempted to initialize more than maximum (%i) number of kinds.", MEMKIND_MAX_KIND);
         err = MEMKIND_ERROR_TOOMANY;
         goto exit;
     }
@@ -332,6 +353,7 @@ MEMKIND_EXPORT int memkind_create_private(const struct memkind_ops *ops, const c
     *kind = (struct memkind *)jemk_calloc(1, sizeof(struct memkind));
     if (!*kind) {
         err = MEMKIND_ERROR_MALLOC;
+        log_err("jemk_calloc() failed.");
         goto exit;
     }
 
@@ -634,6 +656,7 @@ static int memkind_tmpfile(const char *dir, size_t size, int *fd, void **addr)
     *addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, *fd, 0);
     if (*addr == MAP_FAILED) {
         err = MEMKIND_ERROR_RUNTIME;
+        log_err("mmap() returned MAP_FAILED.");
         goto exit;
     }
 

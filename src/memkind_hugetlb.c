@@ -71,12 +71,7 @@ MEMKIND_EXPORT int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *fla
 
 MEMKIND_EXPORT void memkind_hugetlb_init_once(void)
 {
-    int err = memkind_arena_create_map(MEMKIND_HUGETLB);
-    if (err) {
-        log_fatal("[MEMKIND_HUGETLB] Failed creating arena map (error code:%d)", err);
-        abort();
-    }
-    memkind_register_kind(MEMKIND_HUGETLB);
+    memkind_init(MEMKIND_HUGETLB, false);
 }
 
 MEMKIND_EXPORT int memkind_hugetlb_check_available_2mb(struct memkind *kind)
@@ -121,6 +116,7 @@ static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_siz
     }
 
     if (!nr_overcommit_hugepages && !nr_persistent_hugepages) {
+        log_err("Persistent hugepages and overcommit hugepages are not available.");
         return MEMKIND_ERROR_HUGETLB;
     }
 
@@ -145,12 +141,14 @@ static struct hugepage_size_info *allocate_hugepage_size_info()
 {
     struct hugepage_size_info *newInfo = jemk_malloc(sizeof(struct hugepage_size_info));
     if(newInfo == NULL) {
+        log_err("jemk_malloc() failed.");
         return NULL;
     }
 
     newInfo->nr_hugepages_per_node_array = jemk_calloc(NUMA_NUM_NODES, sizeof(size_t));
     if(newInfo->nr_hugepages_per_node_array == NULL) {
         jemk_free(newInfo);
+        log_err("jemk_calloc() failed.");
         return NULL;
     }
 
@@ -196,7 +194,7 @@ static void init_hugepage_size_info(size_t pagesize, struct hugepage_size_info *
     snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_overcommit_path_fmt, pagesize_kb);
     if (snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
         newInfo->nr_overcommit = get_sysfs_entry_value(formatted_path);
-        log_info("Overcommit limit for %zu kB hugepages is %zu", pagesize, newInfo->nr_overcommit);
+        log_info("Overcommit limit for %zu kB hugepages is %zu.", pagesize, newInfo->nr_overcommit);
     }
 
     //read every node nr_hugepages for this pagesize
@@ -205,7 +203,7 @@ static void init_hugepage_size_info(size_t pagesize, struct hugepage_size_info *
         if(snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
             newInfo->nr_hugepages_per_node_array[node] = get_sysfs_entry_value(formatted_path);
             if(node < numa_num_configured_nodes()) {
-                log_info("Number of %zu kB hugepages on node %zu equals %zu", pagesize, node, newInfo->nr_hugepages_per_node_array[node]);
+                log_info("Number of %zu kB hugepages on node %zu equals %zu.", pagesize, node, newInfo->nr_hugepages_per_node_array[node]);
             }
         }
     }
@@ -235,6 +233,7 @@ static void hugepages_config_init_once()
     DIR* hugepages_sysfs = opendir("/sys/kernel/mm/hugepages");
     if(hugepages_sysfs == NULL) {
         memkind_hugepages_config.err = MEMKIND_ERROR_HUGETLB;
+        log_err("/sys/kernel/mm/hugepages directory is not available.");
         return;
     }
 
@@ -243,6 +242,7 @@ static void hugepages_config_init_once()
     if (hugepages_info_array == NULL) {
         memkind_hugepages_config.err = MEMKIND_ERROR_MALLOC;
         closedir(hugepages_sysfs);
+        log_err("jemk_malloc() failed.");
         return;
     }
 
@@ -263,6 +263,7 @@ static void hugepages_config_init_once()
                 if(swap_tmp == NULL) {
                     jemk_free(new_hugepage_info);
                     memkind_hugepages_config.err = MEMKIND_ERROR_MALLOC;
+                    log_err("jemk_realloc() failed.");
                     break;
                 }
                 hugepages_info_array = swap_tmp;
@@ -330,6 +331,7 @@ static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask, si
 
     struct hugepage_size_info* info = get_hugepage_info_for_pagesize(pagesize);
     if(info == NULL) {
+        log_err("Unable to allocate hugepages, because info about pre-allocated hugepages is not available.");
         return MEMKIND_ERROR_HUGETLB;
     }
 
@@ -355,6 +357,7 @@ static int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out)
 
     struct hugepage_size_info* info = get_hugepage_info_for_pagesize(pagesize);
     if(info == NULL) {
+        log_err("Unable to allocate hugepages, because info about overcommit hugepages is not available.");
         return MEMKIND_ERROR_HUGETLB;
     }
 

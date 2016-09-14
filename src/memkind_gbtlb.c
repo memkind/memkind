@@ -27,6 +27,7 @@
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_hbw.h>
 #include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_log.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -297,6 +298,7 @@ static int memkind_store(void *memptr, void **mmapptr, struct memkind **kind,
             table_len = numa_num_configured_cpus();
             table = jemk_malloc(sizeof(memkind_table_node_t) * table_len);
             if (table == NULL) {
+                log_err("jemk_malloc() failed.");
                 err = MEMKIND_ERROR_MALLOC;
             }
             else {
@@ -360,6 +362,7 @@ static int memkind_store(void *memptr, void **mmapptr, struct memkind **kind,
     }
     else {
         err = MEMKIND_ERROR_MALLOC;
+        log_err("jemk_malloc() failed.");
     }
     return err;
 }
@@ -382,6 +385,7 @@ static int memkind_gbtlb_mmap(struct memkind *kind, size_t size, void **result)
 
     *result = NULL;
     if (kind->ops->get_mmap_flags == NULL) {
+        log_err("memkind_ops->mmap_flags is NULL.");
         err = MEMKIND_ERROR_BADOPS;
     }
     if (!err) {

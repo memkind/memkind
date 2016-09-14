@@ -33,6 +33,7 @@ extern "C" {
 
 #include "memkind.h"
 
+#include <stdbool.h>
 #include <pthread.h>
 
 enum memkind_const_private {
@@ -52,6 +53,8 @@ struct memkind {
     unsigned int arena_map_mask; // arena_map_len - 1 to optimize modulo operation on arena_map_len
     unsigned int arena_zero; // index first jemalloc arena of this kind
 };
+
+void memkind_init(memkind_t kind, bool check_numa);
 
 // common function for registring kinds on creation or first use (in case of static kinds)
 void memkind_register_kind(struct memkind *kind);

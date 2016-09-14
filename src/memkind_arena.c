@@ -26,6 +26,7 @@
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_log.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -91,6 +92,7 @@ MEMKIND_EXPORT int memkind_set_arena_map_len(struct memkind *kind)
             unsigned long int arena_num_value = strtoul(arena_num_env, NULL, 10);
 
             if ((arena_num_value == 0) || (arena_num_value > INT_MAX)) {
+                log_err("Wrong MEMKIND_ARENA_NUM_PER_KIND environment value: %lu.", arena_num_value);
                 return MEMKIND_ERROR_ENVIRON;
             }
 
@@ -249,6 +251,7 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind, unsigned int *
         arena_tsd = jemk_malloc(sizeof(unsigned int));
         if (arena_tsd == NULL) {
             err = MEMKIND_ERROR_MALLOC;
+            log_err("jemk_malloc() failed.");
         }
         if (!err) {
             *arena_tsd = _mm_crc32_u64(0, (uint64_t)pthread_self()) %
