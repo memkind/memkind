@@ -24,6 +24,7 @@
 
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_log.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -175,6 +176,7 @@ MEMKIND_EXPORT int memkind_default_mbind(struct memkind *kind, void *ptr, size_t
 
     if (MEMKIND_UNLIKELY(kind->ops->get_mbind_nodemask == NULL ||
         kind->ops->get_mbind_mode == NULL)) {
+        log_err("memkind_ops->mbind_mode or memkind_ops->bind_nodemask is NULL.");
         err = MEMKIND_ERROR_BADOPS;
     }
     if (MEMKIND_LIKELY(!err)) {

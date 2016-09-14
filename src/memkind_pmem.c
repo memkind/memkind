@@ -25,6 +25,7 @@
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_pmem.h>
 #include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_log.h>
 
 #include <sys/mman.h>
 #include <unistd.h>
@@ -55,6 +56,7 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind, const struct memkin
 
     priv = (struct memkind_pmem *)jemk_malloc(sizeof(struct memkind_pmem));
     if (!priv) {
+        log_err("jemk_malloc() failed.");
         return MEMKIND_ERROR_MALLOC;
     }
 

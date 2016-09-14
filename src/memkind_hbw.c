@@ -305,9 +305,10 @@ static int fill_bandwidth_values_heuristically(int* bandwidth, int bandwidth_len
     struct bitmask *memory_only_nodes, *node_cpus;
 
     if (is_cpu_xeon_phi_x200() == 0) {
+        log_info("Known CPU model detected: Intel(R) Xeon Phi(TM) x200.");
         nodes_num = numa_num_configured_nodes();
 
-        // Checking if number of numa-nodes meets expectations for
+        // Check if number of numa-nodes meets expectations for
         // supported configurations of Intel Xeon Phi x200
         if( nodes_num != 2 && nodes_num != 4 && nodes_num!= 8 ) {
             return ret;
@@ -324,8 +325,8 @@ static int fill_bandwidth_values_heuristically(int* bandwidth, int bandwidth_len
             }
         }
 
-        // Checking if number of memory-only nodes is equal number of memory+cpu nodes
-        // If it pass we are changing ret to 0 (success) and filling bw table 
+        // Check if number of memory-only nodes is equal number of memory+cpu nodes
+        // If it passes change ret to 0 (success) and fill bw table
         if ( memory_only_nodes_num == (nodes_num - memory_only_nodes_num) ) {
 
             ret = 0;
@@ -344,6 +345,7 @@ static int fill_bandwidth_values_from_enviroment(int* bandwidth, int bandwidth_l
     struct bitmask *hbw_nodes_bm = numa_parse_nodestring(hbw_nodes_env);
 
     if (!hbw_nodes_bm) {
+        log_err("Wrong MEMKIND_HBW_NODES environment value.");
         return MEMKIND_ERROR_ENVIRON;
     }
     else {
@@ -360,6 +362,7 @@ static int fill_nodes_bandwidth(int* bandwidth, int bandwidth_len)
 
         hbw_nodes_env = getenv("MEMKIND_HBW_NODES");
         if (hbw_nodes_env) {
+            log_info("Environment variable MEMKIND_HBW_NODES detected: %s.", hbw_nodes_env);
             return fill_bandwidth_values_from_enviroment(bandwidth, bandwidth_len, hbw_nodes_env);
         }
 
@@ -383,6 +386,7 @@ static void memkind_hbw_closest_numanode_init(void)
 
     if (!(g->closest_numanode && bandwidth)) {
         g->init_err = MEMKIND_ERROR_MALLOC;
+        log_err("jemk_malloc() failed.");
         goto exit;
     }
 
@@ -449,6 +453,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
                                      num_bandwidth);
     if (!numanode_bandwidth) {
         err = MEMKIND_ERROR_MALLOC;
+        log_err("jemk_malloc() failed.");
     }
     if (!err) {
         /* set sorting array */
@@ -484,6 +489,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
                                sizeof(int) * num_bandwidth);
         if (!*bandwidth_nodes) {
             err = MEMKIND_ERROR_MALLOC;
+            log_err("jemk_malloc() failed.");
         }
     }
     if (!err) {
@@ -595,75 +601,25 @@ static int numanode_bandwidth_compare(const void *a, const void *b)
 
 MEMKIND_EXPORT void memkind_hbw_init_once(void)
 {
-    int err = memkind_arena_create_map(MEMKIND_HBW);
-    if (err) {
-        log_fatal("[MEMKIND_HBW] Failed creating arena map (error code:%d)", err);
-        abort();
-    }
-    err = numa_available();
-    if (err) {
-        log_fatal("[MEMKIND_HBW] There is no numa available (error code:%d)", err);
-        abort();
-    }
-    memkind_register_kind(MEMKIND_HBW);
+    memkind_init(MEMKIND_HBW, true);
 }
 
 MEMKIND_EXPORT void memkind_hbw_hugetlb_init_once(void)
 {
-    int err = memkind_arena_create_map(MEMKIND_HBW_HUGETLB);
-    if (err) {
-        log_fatal("[MEMKIND_HBW_HUGETLB] Failed creating arena map (error code:%d)", err);
-        abort();
-    }
-    err = numa_available();
-    if (err) {
-        log_fatal("[MEMKIND_HBW_HUGETLB] There is no numa available (error code:%d)", err);
-        abort();
-    }
-    memkind_register_kind(MEMKIND_HBW_HUGETLB);
+    memkind_init(MEMKIND_HBW_HUGETLB, true);
 }
 
 MEMKIND_EXPORT void memkind_hbw_preferred_init_once(void)
 {
-    int err = memkind_arena_create_map(MEMKIND_HBW_PREFERRED);
-    if (err) {
-        log_fatal("[MEMKIND_HBW_PREFERRED] Failed creating arena map (error code:%d)", err);
-        abort();
-    }
-    err = numa_available();
-    if (err) {
-        log_fatal("[MEMKIND_HBW_PREFERRED] There is no numa available (error code:%d)", err);
-        abort();
-    }
-    memkind_register_kind(MEMKIND_HBW_PREFERRED);
+    memkind_init(MEMKIND_HBW_PREFERRED, true);
 }
 
 MEMKIND_EXPORT void memkind_hbw_preferred_hugetlb_init_once(void)
 {
-    int err = memkind_arena_create_map(MEMKIND_HBW_PREFERRED_HUGETLB);
-    if (err) {
-        log_fatal("[MEMKIND_HBW_PREFERRED_HUGETLB] Failed creating arena map (error code:%d)", err);
-        abort();
-    }
-    err = numa_available();
-    if (err) {
-        log_fatal("[MEMKIND_HBW_PREFERRED_HUGETLB] There is no numa available (error code:%d)", err);
-        abort();
-    }
-    memkind_register_kind(MEMKIND_HBW_PREFERRED_HUGETLB);
+    memkind_init(MEMKIND_HBW_PREFERRED_HUGETLB, true);
 }
 
 MEMKIND_EXPORT void memkind_hbw_interleave_init_once(void)
 {
-    int err = memkind_arena_create_map(MEMKIND_HBW_INTERLEAVE);
-    if (err) {
-        log_fatal("[MEMKIND_HBW_INTERLEAVE] Failed creating arena map (error code:%d)", err);
-        abort();
-    }
-    err = numa_available();
-    if (err) {
-        log_fatal("[MEMKIND_HBW_INTERLEAVE] There is no numa available (error code:%d)", err);
-        abort();
-    }
-    memkind_register_kind(MEMKIND_HBW_INTERLEAVE);
+    memkind_init(MEMKIND_HBW_INTERLEAVE, true);
 }
