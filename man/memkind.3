@@ -66,7 +66,7 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .br
 .BI "int memkind_get_kind_by_name(const char " "*name" ", memkind_t " "*kind" ); (DEPRECATED)
 .br
-.BI "int memkind_get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
+.BI "int memkind_get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" ); (DEPRECATED)
 .br
 .BI "int memkind_check_available(memkind_t " "kind" );
 .sp
@@ -382,7 +382,7 @@ section (for example: MEMKIND_DEFAULT has
 .I name
 "memkind_default")
 .PP
-.BR memkind_get_size ()
+.BR memkind_get_size () (DEPRECATED)
 sets
 .I total
 to the number of bytes on the system which can be allocated with the specified

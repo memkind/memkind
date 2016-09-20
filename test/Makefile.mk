@@ -22,7 +22,7 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-AM_CPPFLAGS += -I$(googletest)/include
+AM_CPPFLAGS += -I$(googletest)/include -DDEPRECATED\(x\)=x
 
 check_PROGRAMS += test/all_tests \
                   test/environerr_hbw_malloc_test \

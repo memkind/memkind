@@ -39,6 +39,8 @@
 extern "C" {
 #endif
 
+#ifndef DEPRECATED
+
 #ifdef __GNUC__
 #define DEPRECATED(func) func __attribute__ ((deprecated))
 #elif defined(_MSC_VER)
@@ -46,6 +48,8 @@ extern "C" {
 #else
 #pragma message("WARNING: You need to implement DEPRECATED for this compiler")
 #define DEPRECATED(func) func
+#endif
+
 #endif
 
 enum memkind_const_deprecated {
@@ -170,6 +174,15 @@ int DEPRECATED(memkind_get_num_kind(int *num_kind));
  *   today with memkind.
  */
 void* DEPRECATED(memkind_partition_mmap(int partition, void *addr, size_t size));
+
+
+/*
+ * Get the amount in bytes of total and free memory of the NUMA nodes associated with the kind
+ *
+ * DEPRECATION REASON:
+ *   This function is no longer supported.
+ */
+int DEPRECATED(memkind_get_size(memkind_t kind, size_t *total, size_t *free));
 
 #ifdef __cplusplus
 }
