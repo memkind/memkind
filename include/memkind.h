@@ -114,10 +114,6 @@ void memkind_error_message(int err, char *msg, size_t size);
 int memkind_create_pmem(const char *dir, size_t max_size, memkind_t *kind);
 
 /*EXPERIMENTAL API*/
-/* Get the amount in bytes of total and free memory of the NUMA nodes associated with the kind */
-int memkind_get_size(memkind_t kind, size_t *total, size_t *free);
-
-/*EXPERIMENTAL API*/
 /* returns 0 if memory kind is available else returns error code */
 int memkind_check_available(memkind_t kind);
 
