@@ -33,7 +33,7 @@ TEST_PATH="$basedir/"
 GTEST_BINARIES=(all_tests decorator_test allocator_perf_tool_tests)
 
 # Pytest files executed by Berta
-PYTEST_FILES=(hbw_detection_test.py)
+PYTEST_FILES=(hbw_detection_test.py autohbw_test.py trace_mechanism_test.py)
 
 red=`tput setaf 1`
 green=`tput setaf 2`
