@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Mar 17 16:40:07 2016 -->
+<!-- CreationDate: Thu Sep 22 13:06:06 2016 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -250,11 +250,11 @@ on failure.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Error codes
-described here are the POSIX standard error codes as defined in &lt;errno.h&gt; <b><br>
+described here are the POSIX standard error codes as <br>
+defined in &lt;errno.h&gt; <b><br>
 hbw_check_available</b>()</p>
 
-<p style="margin-left:22%;">returns <b>ENOENT</b> if
-couldn&rsquo;t find parsed PMTT table or <b>ENODEV</b> if
+<p style="margin-left:22%;">returns <b>ENODEV</b> if
 high-bandwidth memory is unavailable.</p>
 
 <p style="margin-left:11%;"><b>hbw_posix_memalign</b>() and
@@ -291,29 +291,10 @@ numa nodes.</p>
 
 
 
-<p style="margin-left:11%; margin-top: 1em"><i>/var/run/memkind/node-bandwidth</i></p>
+<p style="margin-left:11%; margin-top: 1em"><i>/usr/bin/memkind-hbw-nodes</i></p>
 
-<p style="margin-left:22%;">File that contains the
-bandwidth values for each numa node.</p>
-
-
-<p style="margin-left:11%;"><i>/etc/rc/d/init.d/memkind</i></p>
-
-<p style="margin-left:22%;">Initialization script that
-creates the node-bandwidth file by calling the PMTT table
-parser.</p>
-
-
-<p style="margin-left:11%;"><i>/usr/sbin/memkind-pmtt</i></p>
-
-<p style="margin-left:22%;">The PMTT table parser.</p>
-
-
-<p style="margin-left:11%;"><i>/usr/bin/memkind-hbw-nodes</i></p>
-
-<p style="margin-left:22%;">Parses
-/var/run/memkind/node-bandwidth and prints a comma separated
-list of high bandwidth nodes.</p>
+<p style="margin-left:22%;">Prints a comma separated list
+of high bandwidth nodes.</p>
 
 <h2>ENVIRONMENT
 <a name="ENVIRONMENT"></a>
@@ -325,9 +306,7 @@ list of high bandwidth nodes.</p>
 
 <p style="margin-left:22%;">This environment varaible is a
 comma separated list of NUMA nodes that are treated as high
-bandwidth. This environment variable should be set if the
-PMTT file is not present, or to override the PMTT table if
-it is present. Uses the <i>libnuma</i> routine
+bandwidth. Uses the <i>libnuma</i> routine
 <b>numa_parse_nodestring</b>() for parsing, so the syntax
 described in the <b>numa</b>(3) man page for this routine
 applies for example: 1-3,5 is a valid setting.</p>
