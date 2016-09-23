@@ -396,7 +396,7 @@ static int memkind_get_kind_by_partition_internal(int partition, struct memkind 
 {
     int err = 0;
 
-    if (likely(partition >= 0 &&
+    if (MEMKIND_LIKELY(partition >= 0 &&
         partition < MEMKIND_MAX_KIND &&
         memkind_registry_g.partition_map[partition] != NULL)) {
         *kind = memkind_registry_g.partition_map[partition];
@@ -438,10 +438,10 @@ MEMKIND_EXPORT void *memkind_partition_mmap(int partition, void *addr, size_t si
     struct memkind *kind;
 
     err = memkind_get_kind_by_partition_internal(partition, &kind);
-    if (likely(!err)) {
+    if (MEMKIND_LIKELY(!err)) {
         err = memkind_check_available(kind);
     }
-    if (likely(!err)) {
+    if (MEMKIND_LIKELY(!err)) {
         if (kind->ops->mmap) {
             result = kind->ops->mmap(kind, addr, size);
         }
@@ -456,7 +456,7 @@ MEMKIND_EXPORT int memkind_check_available(struct memkind *kind)
 {
     int err = 0;
 
-    if (likely(kind->ops->check_available)) {
+    if (MEMKIND_LIKELY(kind->ops->check_available)) {
         err = kind->ops->check_available(kind);
     }
     return err;

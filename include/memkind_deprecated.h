@@ -39,15 +39,15 @@
 extern "C" {
 #endif
 
-#ifndef DEPRECATED
+#ifndef MEMKIND_DEPRECATED
 
 #ifdef __GNUC__
-#define DEPRECATED(func) func __attribute__ ((deprecated))
+#define MEMKIND_DEPRECATED(func) func __attribute__ ((deprecated))
 #elif defined(_MSC_VER)
-#define DEPRECATED(func) __declspec(deprecated) func
+#define MEMKIND_DEPRECATED(func) __declspec(deprecated) func
 #else
-#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-#define DEPRECATED(func) func
+#pragma message("WARNING: You need to implement MEMKIND_DEPRECATED for this compiler")
+#define MEMKIND_DEPRECATED(func) func
 #endif
 
 #endif
@@ -124,7 +124,7 @@ struct memkind_ops {
  *   for dynamic kind creation.
  *
  */
-int DEPRECATED(memkind_create(const struct memkind_ops *ops, const char *name, memkind_t *kind));
+int MEMKIND_DEPRECATED(memkind_create(const struct memkind_ops *ops, const char *name, memkind_t *kind));
 
 
 /*
@@ -133,7 +133,7 @@ int DEPRECATED(memkind_create(const struct memkind_ops *ops, const char *name, m
  * DEPRECATION REASON:
  *   The function is called automatically in destructor of library. It should not be exposed in API
  */
-int DEPRECATED(memkind_finalize(void));
+int MEMKIND_DEPRECATED(memkind_finalize(void));
 
 /*
  * Get kind associated with a partition (index from 0 to num_kind - 1)
@@ -141,7 +141,7 @@ int DEPRECATED(memkind_finalize(void));
  * DEPRECATION REASON:
  *   Partition is internal mechanism related to jemalloc
  */
-int DEPRECATED(memkind_get_kind_by_partition(int partition, memkind_t *kind));
+int MEMKIND_DEPRECATED(memkind_get_kind_by_partition(int partition, memkind_t *kind));
 
 
 /*
@@ -151,7 +151,7 @@ int DEPRECATED(memkind_get_kind_by_partition(int partition, memkind_t *kind));
  *   Current API does not allow to get/set name of kind. Therefore
  *   choosing kind by name does not make a sense.
  */
-int DEPRECATED(memkind_get_kind_by_name(const char *name, memkind_t *kind));
+int MEMKIND_DEPRECATED(memkind_get_kind_by_name(const char *name, memkind_t *kind));
 
 
 /*
@@ -160,7 +160,7 @@ int DEPRECATED(memkind_get_kind_by_name(const char *name, memkind_t *kind));
  * DEPRECATION REASON:
  *   No other API calls related to number of kinds (e.g. dynamic creating of kind).
  */
-int DEPRECATED(memkind_get_num_kind(int *num_kind));
+int MEMKIND_DEPRECATED(memkind_get_num_kind(int *num_kind));
 
 
 /*
@@ -173,7 +173,7 @@ int DEPRECATED(memkind_get_num_kind(int *num_kind));
  *   connecting other allocator than jemalloc 3.5 that is tightly coupled
  *   today with memkind.
  */
-void* DEPRECATED(memkind_partition_mmap(int partition, void *addr, size_t size));
+void* MEMKIND_DEPRECATED(memkind_partition_mmap(int partition, void *addr, size_t size));
 
 
 /*
@@ -182,7 +182,7 @@ void* DEPRECATED(memkind_partition_mmap(int partition, void *addr, size_t size))
  * DEPRECATION REASON:
  *   This function is no longer supported.
  */
-int DEPRECATED(memkind_get_size(memkind_t kind, size_t *total, size_t *free));
+int MEMKIND_DEPRECATED(memkind_get_size(memkind_t kind, size_t *total, size_t *free));
 
 #ifdef __cplusplus
 }

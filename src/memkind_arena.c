@@ -167,7 +167,7 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
     unsigned int arena;
 
     err = kind->ops->get_arena(kind, &arena, size);
-    if (likely(!err)) {
+    if (MEMKIND_LIKELY(!err)) {
         result = jemk_mallocx_check(size, MALLOCX_ARENA(arena));
     }
     return result;
@@ -184,7 +184,7 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr, size
     }
     else {
         err = kind->ops->get_arena(kind, &arena, size);
-        if (likely(!err)) {
+        if (MEMKIND_LIKELY(!err)) {
             if (ptr == NULL) {
                 ptr = jemk_mallocx_check(size, MALLOCX_ARENA(arena));
             }
@@ -203,7 +203,7 @@ MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num, size
     unsigned int arena;
 
     err = kind->ops->get_arena(kind, &arena, size);
-    if (likely(!err)) {
+    if (MEMKIND_LIKELY(!err)) {
         result = jemk_mallocx_check(num * size, MALLOCX_ARENA(arena) | MALLOCX_ZERO);
     }
     return result;
@@ -218,10 +218,10 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind, void **mem
 
     *memptr = NULL;
     err = kind->ops->get_arena(kind, &arena, size);
-    if (likely(!err)) {
+    if (MEMKIND_LIKELY(!err)) {
         err = memkind_posix_check_alignment(kind, alignment);
     }
-    if (likely(!err)) {
+    if (MEMKIND_LIKELY(!err)) {
         /* posix_memalign should not change errno.
            Set it to its previous value after calling jemalloc */
         errno_before = errno;
@@ -245,7 +245,7 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind, unsigned int *
     unsigned int *arena_tsd;
     arena_tsd = pthread_getspecific(kind->arena_key);
 
-    if (unlikely(arena_tsd == NULL)) {
+    if (MEMKIND_UNLIKELY(arena_tsd == NULL)) {
         arena_tsd = jemk_malloc(sizeof(unsigned int));
         if (arena_tsd == NULL) {
             err = MEMKIND_ERROR_MALLOC;
@@ -297,7 +297,7 @@ static void *jemk_mallocx_check(size_t size, int flags)
      */
     void *result = NULL;
 
-    if (unlikely(size >= LLONG_MAX)) {
+    if (MEMKIND_UNLIKELY(size >= LLONG_MAX)) {
         errno = ENOMEM;
     }
     else if (size != 0) {
@@ -316,7 +316,7 @@ static void *jemk_rallocx_check(void *ptr, size_t size, int flags)
      */
     void *result = NULL;
 
-    if (unlikely(size >= LLONG_MAX)) {
+    if (MEMKIND_UNLIKELY(size >= LLONG_MAX)) {
         errno = ENOMEM;
     }
     else {

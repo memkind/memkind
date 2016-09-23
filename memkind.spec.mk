@@ -200,6 +200,7 @@ rm -f %{buildroot}/%{_libdir}/lib{numakind}.*
 %{_mandir}/man3/hbwallocator.3.*
 %{_mandir}/man3/%{namespace}*.3.*
 
+%exclude %{_includedir}/%{internal_include}/%{namespace}_log.h
 
 %files tests
 %defattr(-,root,root,-)

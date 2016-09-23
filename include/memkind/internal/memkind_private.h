@@ -60,11 +60,11 @@ int memkind_create_private(const struct memkind_ops *ops, const char *name,
                            struct memkind **kind);
 
 #ifdef __GNUC__
-#   define likely(x)       __builtin_expect(!!(x), 1)
-#   define unlikely(x)     __builtin_expect(!!(x), 0)
+#   define MEMKIND_LIKELY(x)       __builtin_expect(!!(x), 1)
+#   define MEMKIND_UNLIKELY(x)     __builtin_expect(!!(x), 0)
 #else
-#   define likely(x)       (x)
-#   define unlikely(x)     (x)
+#   define MEMKIND_LIKELY(x)       (x)
+#   define MEMKIND_UNLIKELY(x)     (x)
 #endif
 
 #ifndef MEMKIND_EXPORT
