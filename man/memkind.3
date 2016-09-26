@@ -306,7 +306,7 @@ The file is truncated to a size of
 .I max_size
 bytes and the resulting space is memory-mapped.  Then, the actual pmem
 .I kind
-is created by calling 
+is created by calling
 .BR memkind_create ()
 with a unique
 .I name
@@ -746,13 +746,6 @@ Same as
 except that the pages that support the allocation are interleaved
 across all high bandwidth nodes and transparent huge pages are
 disabled.
-.TP
-.B MEMKIND_PMEM
-Allocate from file-backed heap.  If the amount of allocated memory exceeds
-the total size of memory-mapped file associated with given kind, or if the actual
-file system space cannot be allocated
-.I errno
-is set to ENOMEM and the allocated poitner is set to NULL.
 .SH "ERRORS"
 .TP
 .BR memkind_posix_memalign ()
