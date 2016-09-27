@@ -45,9 +45,7 @@ test/memkind-afts-ext.ts \
 test/memkind-slts.ts \
 test/memkind-perf.ts \
 test/memkind-perf-ext.ts \
-test/memkind-hbw_detection.ts \
-test/memkind-autohbw.ts \
-test/memkind-logging.ts \
+test/memkind-pytests.ts \
 test/python_framework/cmd_helper.py \
 test/python_framework/__init__.py \
 test/hbw_detection_test.py test/autohbw_test.py \

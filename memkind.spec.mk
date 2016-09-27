@@ -227,10 +227,7 @@ $(memkind_test_dir)/memkind-afts-ext.ts
 $(memkind_test_dir)/memkind-slts.ts
 $(memkind_test_dir)/memkind-perf.ts
 $(memkind_test_dir)/memkind-perf-ext.ts
-$(memkind_test_dir)/memkind-hbw_detection.ts
-$(memkind_test_dir)/memkind-autohbw.ts
-$(memkind_test_dir)/memkind-logging.ts
-$(memkind_test_dir)/memkind-knl_modes.ts
+$(memkind_test_dir)/memkind-pytests.ts
 $(memkind_test_dir)/check.sh
 $(memkind_test_dir)/test.sh
 $(memkind_test_dir)/hbw_detection_test.py
