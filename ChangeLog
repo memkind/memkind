@@ -1,3 +1,22 @@
+* Tue Sep 27 2016 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v1.3.0
+- Introduced logging mechanism (for details please take a look at
+  man/memkind.3).
+- Deprecated symbols: memkind_finalize(), memkind_get_num_kind(),
+  memkind_get_kind_by_partition(), memkind_get_kind_by_name(),
+  memkind_partition_mmap(), memkind_get_size(), MEMKIND_ERROR_MEMALIGN,
+  MEMKIND_ERROR_MALLCTL,  MEMKIND_ERROR_GETCPU, MEMKIND_ERROR_PMTT,
+  MEMKIND_ERROR_TIEDISTANCE, MEMKIND_ERROR_ALIGNMENT, MEMKIND_ERROR_MALLOCX,
+  MEMKIND_ERROR_REPNAME, MEMKIND_ERROR_PTHREAD, MEMKIND_ERROR_BADPOLICY,
+  MEMKIND_ERROR_REPPOLICY.
+- Added integration with hwloc (turned on with --with-hwloc).
+- Cleanup of symbols exposed by libmemkind.so (e.g. no longer exposing libnuma
+  and jemalloc symbols).
+- AutoHBW files have been moved to "memkind/autohbw" directory, code has
+  been refactored and tests have been added to appropriate scenarios.
+- Library is now built with flags improving security (can be turned off
+  with --disable-secure configure time option).
+- Changed configuration of jemalloc to turn off unused features.
+
 * Thu Aug 18 2016 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v1.2.0
 - memkind_create() and memkind_ops have been deprecated (moved to
   memkind_deprecated.h).
