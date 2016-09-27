@@ -1,1 +1,0 @@
--k "test_TC_MEMKIND_logging_"

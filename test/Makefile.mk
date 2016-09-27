@@ -44,10 +44,7 @@ EXTRA_DIST += test/memkind-afts.ts \
               test/memkind-slts.ts \
               test/memkind-perf.ts \
               test/memkind-perf-ext.ts \
-              test/memkind-hbw_detection.ts \
-              test/memkind-autohbw.ts \
-              test/memkind-knl_modes.ts \
-              test/memkind-logging.ts \
+              test/memkind-pytests.ts \
               test/hbw_detection_test.py \
               test/autohbw_test.py \
               test/knl_modes_test.py \
