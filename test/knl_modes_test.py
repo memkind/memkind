@@ -23,24 +23,18 @@
 #
 
 import pytest
-import os
-import tempfile
-import subprocess
 
 from distutils.spawn import find_executable
+from python_framework import CMD_helper
 
 class Test_KNL_modes(object):
-    binary_path = "get_knl_modes"
-
-    def get_command_path(self, binary):
-        """ Get the path to the binary. """
-        path = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(path, binary)
+    binary_path = "../get_knl_modes"
+    cmd_helper = CMD_helper()
 
     def test_TC_MEMKIND_get_knl_modes(self):
-        command = self.get_command_path(self.binary_path)
+        command = self.cmd_helper.get_command_path(self.binary_path)
         try:
-                output = subprocess.check_output(command, stderr = subprocess.STDOUT, shell=True)
+                output = self.cmd_helper.execute_cmd(command, sudo=False)
         except:
                 print "get_knl_modes failed"
                 raise

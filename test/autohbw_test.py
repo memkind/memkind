@@ -23,12 +23,10 @@
 #
 
 import pytest
-import os
-import tempfile
-import subprocess
+from python_framework import CMD_helper
 
 class Test_autohbw(object):
-    binary = "autohbw_test_helper"
+    binary = "../autohbw_test_helper"
     fail_msg = "Test failed with:\n {0}"
     test_prefix = "AUTO_HBW_LOG=2 LD_PRELOAD=/usr/lib64/libautohbw.so.0 "
     memkind_malloc_log = "In my memkind malloc"
@@ -36,65 +34,40 @@ class Test_autohbw(object):
     memkind_realloc_log = "In my memkind realloc"
     memkind_posix_memalign_log = "In my memkind align"
     memkind_free_log = "In my memkind free"
-
-    def execute_cmd(self, command, sudo=False):
-        if sudo:
-            command = "sudo {0}".format(command)
-        """ Initialize temp file for stdout. Will be removed when closed. """
-        outfile = tempfile.SpooledTemporaryFile()
-        try:
-            """ Invoke process """
-            p = subprocess.Popen(command, stdout=outfile, stderr=subprocess.STDOUT, shell=True)
-            p.communicate()
-            """ Read stdout from file """
-            outfile.seek(0)
-            stdout = outfile.read()
-            outfile.close()
-        except:
-            raise
-        finally:
-            """ Make sure the file is closed """
-            outfile.close()
-        retcode = p.returncode
-        return stdout, retcode
-
-    def get_command_path(self, binary):
-        """ Get the path to the binary. """
-        path = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(path, binary)
+    cmd_helper = CMD_helper()
 
     def test_TC_MEMKIND_autohbw_malloc_and_free(self):
         """ This test executes ./autohbw_test_helper with LD_PRELOAD that is overriding malloc() and free() to equivalent autohbw functions"""
-        command = self.test_prefix + self.get_command_path(self.binary) + " malloc"
+        command = self.test_prefix + self.cmd_helper.get_command_path(self.binary) + " malloc"
         print "Executing command: {0}".format(command)
-        output, retcode = self.execute_cmd(command, sudo=False)
+        output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         assert retcode == 0, self.fail_msg.format("Error: autohbw_test_helper returned {0} with output: {1}".format(retcode,output))
         assert self.memkind_malloc_log in output, self.fail_msg.format("Error: malloc was not overrided by autohbw equivalent (output: {0})").format(output)
         assert self.memkind_free_log in output, self.fail_msg.format("Error: free was not overrided by autohbw equivalent (output: {0})").format(output)
 
     def test_TC_MEMKIND_autohbw_calloc_and_free(self):
         """ This test executes ./autohbw_test_helper with LD_PRELOAD that is overriding calloc() and free() to equivalent autohbw functions"""
-        command = self.test_prefix + self.get_command_path(self.binary) + " calloc"
+        command = self.test_prefix + self.cmd_helper.get_command_path(self.binary) + " calloc"
         print "Executing command: {0}".format(command)
-        output, retcode = self.execute_cmd(command, sudo=False)
+        output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         assert retcode == 0, self.fail_msg.format("Error: autohbw_test_helper returned {0} with output: {1}".format(retcode,output))
         assert self.memkind_calloc_log in output, self.fail_msg.format("Error: calloc was not overrided by autohbw equivalent (output: {0})").format(output)
         assert self.memkind_free_log in output, self.fail_msg.format("Error: free was not overrided by autohbw equivalent (output: {0})").format(output)
 
     def test_TC_MEMKIND_autohbw_realloc_and_free(self):
         """ This test executes ./autohbw_test_helper with LD_PRELOAD that is overriding realloc() and free() to equivalent autohbw functions"""
-        command = self.test_prefix + self.get_command_path(self.binary) + " realloc"
+        command = self.test_prefix + self.cmd_helper.get_command_path(self.binary) + " realloc"
         print "Executing command: {0}".format(command)
-        output, retcode = self.execute_cmd(command, sudo=False)
+        output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         assert retcode == 0, self.fail_msg.format("Error: autohbw_test_helper returned {0} with output: {1}".format(retcode,output))
         assert self.memkind_realloc_log in output, self.fail_msg.format("Error: realloc was not overrided by autohbw equivalent (output: {0})").format(output)
         assert self.memkind_free_log in output, self.fail_msg.format("Error: free was not overrided by autohbw equivalent (output: {0})").format(output)
 
     def test_TC_MEMKIND_autohbw_posix_memalign_and_free(self):
         """ This test executes ./autohbw_test_helper with LD_PRELOAD that is overriding posix_memalign() and free() to equivalent autohbw functions"""
-        command = self.test_prefix + self.get_command_path(self.binary) + " posix_memalign"
+        command = self.test_prefix + self.cmd_helper.get_command_path(self.binary) + " posix_memalign"
         print "Executing command: {0}".format(command)
-        output, retcode = self.execute_cmd(command, sudo=False)
+        output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         assert retcode == 0, self.fail_msg.format("Error: autohbw_test_helper returned {0} with output: {1}".format(retcode,output))
         assert self.memkind_posix_memalign_log in output, self.fail_msg.format("Error: posix_memalign was not overrided by autohbw equivalent (output: {0})").format(output)
         assert self.memkind_free_log in output, self.fail_msg.format("Error: free was not overrided by autohbw equivalent (output: {0})").format(output)
