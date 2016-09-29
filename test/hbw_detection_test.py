@@ -23,47 +23,20 @@
 #
 
 import pytest
-import os
-import tempfile
-import subprocess
 
 from distutils.spawn import find_executable
+from python_framework import CMD_helper
 
 class Test_hbw_detection(object):
     binary_path = find_executable("memkind-hbw-nodes")
     fail_msg = "Test failed with:\n {0}"
-
-    def execute_cmd(self, command, sudo=False):
-        if sudo:
-            command = "sudo {0}".format(command)
-        """ Initialize temp file for stdout. Will be removed when closed. """
-        outfile = tempfile.SpooledTemporaryFile()
-        try:
-            """ Invoke process """
-            p = subprocess.Popen(command, stdout=outfile, stderr=subprocess.STDOUT, shell=True)
-            p.communicate()
-            """ Read stdout from file """
-            outfile.seek(0)
-            stdout = outfile.read()
-            outfile.close()
-        except:
-            raise
-        finally:
-            """ Make sure the file is closed """
-            outfile.close()
-        retcode = p.returncode
-        return stdout, retcode
-
-    def get_command_path(self, binary):
-        """ Get the path to the binary. """
-        path = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(path, binary)
+    cmd_helper = CMD_helper()
 
     def get_nodemask_default(self):
         """ This function executes memkind function 'get_mbind_nodemask' and returns its output """
         hbw_nodemask_default = None
-        command = self.get_command_path(self.binary_path)
-        output, retcode = self.execute_cmd(command, sudo=False)
+        command = self.cmd_helper.get_command_path(self.binary_path)
+        output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         if retcode == 0:
             hbw_nodemask_default = output
             print "Nodemask detected in test_hbw_detection_default: {0}".format(hbw_nodemask_default)
@@ -74,8 +47,8 @@ class Test_hbw_detection(object):
         """ This function overrides environment variable MEMKIND_HBW_NODES with values returned from 'memkind-hbw-nodes',
         executes memkind function 'get_mbind_nodemask' and returns its output """
         hbw_nodemask_env_variable = None
-        command = "MEMKIND_HBW_NODES=`memkind-hbw-nodes` " + self.get_command_path(self.binary_path)
-        output, retcode = self.execute_cmd(command, sudo=False)
+        command = "MEMKIND_HBW_NODES=`memkind-hbw-nodes` " + self.cmd_helper.get_command_path(self.binary_path)
+        output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         if retcode == 0:
             hbw_nodemask_env_variable = output
             print "Nodemask detected in test_hbw_detection_env_variable: {0}".format(hbw_nodemask_env_variable)
