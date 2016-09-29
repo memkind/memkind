@@ -314,7 +314,7 @@ static int fill_bandwidth_values_heuristically(int* bandwidth, int bandwidth_len
         }
 
         memory_only_nodes = numa_allocate_nodemask();
-        node_cpus = numa_allocate_nodemask();
+        node_cpus = numa_allocate_cpumask();
 
         for(i=0; i<nodes_num; i++) {
             numa_node_to_cpus(i, node_cpus);
