@@ -59,9 +59,6 @@ void memkind_init(memkind_t kind, bool check_numa);
 // common function for registring kinds on creation or first use (in case of static kinds)
 void memkind_register_kind(struct memkind *kind);
 
-int memkind_create_private(const struct memkind_ops *ops, const char *name,
-                           struct memkind **kind);
-
 #ifdef __GNUC__
 #   define MEMKIND_LIKELY(x)       __builtin_expect(!!(x), 1)
 #   define MEMKIND_UNLIKELY(x)     __builtin_expect(!!(x), 0)

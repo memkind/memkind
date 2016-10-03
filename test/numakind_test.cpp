@@ -172,7 +172,7 @@ static void numakind_init(void)
         name_length = snprintf(numakind_name, MEMKIND_NAME_LENGTH_PRIV - 1, "numakind_%.4d", i);
         assert(MEMKIND_NAME_LENGTH_PRIV > 20 && name_length != MEMKIND_NAME_LENGTH_PRIV - 1);
 
-        err = memkind_create_private(NUMAKIND_OPS + i, numakind_name, &numakind_arr[i]);
+        err = memkind_create(NUMAKIND_OPS + i, numakind_name, &numakind_arr[i]);
     }
     if (err) {
         numakind_init_err_g = err;
