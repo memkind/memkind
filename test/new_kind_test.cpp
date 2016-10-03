@@ -178,15 +178,15 @@ TEST_F(MemkindNewKindTests, test_TC_MEMKIND_new_kind)
         max = 4;
     }
 
-    err = memkind_create_private(&NODE0_OPS, "node0", node_kind + 0);
+    err = memkind_create(&NODE0_OPS, "node0", node_kind + 0);
     if (!err) {
-        err = memkind_create_private(&NODE1_OPS, "node1", node_kind + 1);
+        err = memkind_create(&NODE1_OPS, "node1", node_kind + 1);
     }
     if (!err) {
-        err = memkind_create_private(&NODE2_OPS, "node2", node_kind + 2);
+        err = memkind_create(&NODE2_OPS, "node2", node_kind + 2);
     }
     if (!err) {
-        err = memkind_create_private(&NODE3_OPS, "node3", node_kind + 3);
+        err = memkind_create(&NODE3_OPS, "node3", node_kind + 3);
     }
     if (err) {
         memkind_error_message(err, err_msg, SIZE);
