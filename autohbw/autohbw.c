@@ -259,7 +259,7 @@ static void setEnvValues()
         HBWLowLimit = getLimit(lowlim, lowC);
         HBWHighLimit = getLimit(highlim, highC);
 
-        if (HBWLowLimit >= HBWLowLimit) {
+        if (HBWLowLimit >= HBWHighLimit) {
             LOG(ALWAYS, "WARN: In AUTO_HBW_SIZE=X:Y, X cannot be greater or equal to Y. "
                         "None of allocations will use HBW memory.\n");
         }
