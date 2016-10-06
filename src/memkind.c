@@ -54,6 +54,8 @@
 #include <unistd.h>
 #include <jemalloc/jemalloc.h>
 
+/* Clear bits in x, but only this specified in mask. */
+#define CLEAR_BIT(x, mask) ((x) &= (~(mask)))
 
 static struct memkind MEMKIND_DEFAULT_STATIC = {
     .ops =  &MEMKIND_DEFAULT_OPS,
@@ -194,6 +196,122 @@ static struct memkind_subregistry memkind_check_addr_subregistry_g = {
 static size_t Chunksize = 0;
 
 static int memkind_get_kind_for_free(void *ptr, struct memkind **kind);
+
+static int validate_memtype_bits(memkind_memtype_t memtype) {
+    if(memtype == 0) return -1;
+
+    CLEAR_BIT(memtype, MEMKIND_MEMTYPE_DEFAULT);
+    CLEAR_BIT(memtype, MEMKIND_MEMTYPE_HIGH_BANDWIDTH);
+
+    if(memtype != 0) return -1;
+    return 0;
+}
+
+static int validate_flags_bits(memkind_bits_t flags) {
+    CLEAR_BIT(flags, MEMKIND_MASK_PAGE_SIZE_2MB);
+
+    if(flags != 0) return -1;
+    return 0;
+}
+
+static int validate_policy(memkind_policy_t policy) {
+    if((policy >= 0) && (policy < MEMKIND_POLICY_MAX_VALUE)) return 0;
+    return -1;
+}
+
+/* Kind creation */
+MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
+                                       memkind_policy_t policy,
+                                       memkind_bits_t flags,
+                                       memkind_t* kind)
+{
+    if(validate_memtype_bits(memtype_flags) != 0) {
+        log_err("Cannot create kind: incorrect memtype_flags.");
+        return MEMKIND_ERROR_INVALID;
+    }
+
+    if(validate_flags_bits(flags) != 0) {
+        log_err("Cannot create kind: incorrect flags.");
+        return MEMKIND_ERROR_INVALID;
+    }
+
+    if(validate_policy(policy) != 0) {
+        log_err("Cannot create kind: incorrect policy.");
+        return MEMKIND_ERROR_INVALID;
+    }
+
+    if(kind == NULL) {
+        log_err("Cannot create kind: 'kind' is NULL pointer.");
+        return MEMKIND_ERROR_INVALID;
+    }
+
+    memkind_t tmp_kind = NULL;
+
+    /* This implementation reuse old static kinds, which means that kind object
+     * is not created here. */
+    if(memtype_flags == MEMKIND_MEMTYPE_DEFAULT) {
+        if(policy == MEMKIND_POLICY_PREFERRED_LOCAL) {
+            if(flags & MEMKIND_MASK_PAGE_SIZE_2MB)
+                tmp_kind = MEMKIND_HUGETLB;
+            else
+                tmp_kind = MEMKIND_DEFAULT;
+        }
+    }
+
+    if(memtype_flags == MEMKIND_MEMTYPE_HIGH_BANDWIDTH) {
+        if(policy == MEMKIND_POLICY_BIND_LOCAL) {
+            if(flags & MEMKIND_MASK_PAGE_SIZE_2MB)
+                tmp_kind = MEMKIND_HBW_HUGETLB;
+            else
+                tmp_kind = MEMKIND_HBW;
+        }
+
+        if(policy == MEMKIND_POLICY_PREFERRED_LOCAL) {
+            if(flags & MEMKIND_MASK_PAGE_SIZE_2MB)
+                tmp_kind = MEMKIND_HBW_PREFERRED_HUGETLB;
+            else
+                tmp_kind = MEMKIND_HBW_PREFERRED;
+        }
+
+        if((policy == MEMKIND_POLICY_INTERLEAVE_ALL)
+            && !(flags & MEMKIND_MASK_PAGE_SIZE_2MB))
+        {
+            tmp_kind = MEMKIND_HBW_INTERLEAVE;
+        }
+    }
+
+    if((memtype_flags & MEMKIND_MEMTYPE_HIGH_BANDWIDTH)
+        && (memtype_flags & MEMKIND_MEMTYPE_DEFAULT)
+        && (policy == MEMKIND_POLICY_INTERLEAVE_ALL)
+        && !(flags & MEMKIND_MASK_PAGE_SIZE_2MB))
+    {
+        tmp_kind = MEMKIND_INTERLEAVE;
+    }
+
+    if(tmp_kind == NULL) {
+        log_err("Cannot create kind: invalid argument.");
+        return MEMKIND_ERROR_INVALID;
+    }
+
+    if(memkind_check_available(tmp_kind) != 0) {
+        if(policy == MEMKIND_POLICY_PREFERRED_LOCAL) {
+            tmp_kind = MEMKIND_DEFAULT;
+        } else {
+            log_err("Cannot create kind: requested memory type is not available.");
+            return MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
+        }
+    }
+
+    *kind = tmp_kind;
+    return MEMKIND_SUCCESS;
+}
+
+/* Kind destruction. */
+MEMKIND_EXPORT int memkind_destroy_kind(memkind_t kind) {
+    /* For now the implementation is based on old static kinds, so we don't destroy
+     * kind object here. This might be changed in furue. */
+    return MEMKIND_SUCCESS;
+}
 
 /* Declare weak symbols for alloctor decorators */
 extern void memkind_malloc_pre(struct memkind **, size_t *) __attribute__((weak));

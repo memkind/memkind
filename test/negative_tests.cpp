@@ -51,6 +51,235 @@ protected:
     {}
 };
 
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_zero_memtype)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        memkind_memtype_t(), //Set incorrect value.
+        MEMKIND_POLICY_PREFERRED_LOCAL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_incorrect_memtype)
+{
+    memkind_memtype_t memtype_flags;
+    //Set incorrect value.
+    memset(&memtype_flags, -1, sizeof(memtype_flags));
+
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        memtype_flags,
+        MEMKIND_POLICY_PREFERRED_LOCAL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_incorrect_policy)
+{
+    memkind_policy_t policy;
+    //Set incorrect value.
+    memset(&policy, -1, sizeof(policy));
+
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        policy,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_incorrect_mask)
+{
+    memkind_bits_t flags;
+
+    //Set incorrect value.
+    memset(&flags, 255, sizeof(flags));
+
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_PREFERRED_LOCAL,
+        flags,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_BIND_LOCAL)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_BIND_LOCAL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_BIND_LOCAL_PAGE_SIZE_2MB)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_BIND_LOCAL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_BIND_ALL)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_BIND_ALL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_BIND_ALL_PAGE_SIZE_2MB)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_BIND_ALL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_INTERLEAVE_LOCAL)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_INTERLEAVE_LOCAL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_INTERLEAVE_LOCAL_PAGE_SIZE_2MB)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_INTERLEAVE_LOCAL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_INTERLEAVE_ALL)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_INTERLEAVE_ALL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_INTERLEAVE_ALL_PAGE_SIZE_2MB)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_INTERLEAVE_ALL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_HIGH_BANDWIDTH_BIND_ALL)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+        MEMKIND_POLICY_BIND_ALL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_HIGH_BANDWIDTH_BIND_ALL_PAGE_SIZE_2MB)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+        MEMKIND_POLICY_BIND_ALL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_HIGH_BANDWIDTH_INTERLEAVE_LOCAL)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+        MEMKIND_POLICY_INTERLEAVE_LOCAL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_HIGH_BANDWIDTH_INTERLEAVE_LOCAL_PAGE_SIZE_2MB)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+        MEMKIND_POLICY_INTERLEAVE_LOCAL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_HIGH_BANDWIDTH_INTERLEAVE_ALL_PAGE_SIZE_2MB)
+{
+    memkind_t kind;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+        MEMKIND_POLICY_INTERLEAVE_ALL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_HIGH_BANDWIDTH_BIND_ALL)
+{
+    memkind_t kind;
+    int flags_tmp = MEMKIND_MEMTYPE_DEFAULT | MEMKIND_MEMTYPE_HIGH_BANDWIDTH;
+    memkind_memtype_t memtype_flags;
+    memcpy(&memtype_flags, &flags_tmp, sizeof(memtype_flags));
+
+    int ret = memkind_create_kind(
+        memtype_flags,
+        MEMKIND_POLICY_BIND_ALL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_HIGH_BANDWIDTH_INTERLEAVE_ALL_PAGE_SIZE_2MB)
+{
+    memkind_t kind;
+    int flags_tmp = MEMKIND_MEMTYPE_DEFAULT | MEMKIND_MEMTYPE_HIGH_BANDWIDTH;
+    memkind_memtype_t memtype_flags;
+    memcpy(&memtype_flags, &flags_tmp, sizeof(memtype_flags));
+
+    int ret = memkind_create_kind(
+        memtype_flags,
+        MEMKIND_POLICY_INTERLEAVE_ALL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
+}
 
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorMemAlign)
 {

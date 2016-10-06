@@ -32,14 +32,154 @@
 #include "omp.h"
 #include "trial_generator.h"
 
-/* Set of basic acceptance tests for PREFERRED policy, the goal of this set of tests
- * is to prove that you can do incremental allocations of memory with different
- * sizes and that pages are actually allocated in HBW node.
+/*
+ * Set of basic acceptance tests.
  */
 class BATest: public TGTest
 {
 };
 
+void test_allocation(memkind_t kind, size_t size)
+{
+    ASSERT_TRUE(kind != NULL);
+    void* ptr = memkind_malloc(kind, size);
+    ASSERT_TRUE(ptr != NULL);
+    void* memset_ret = memset(ptr, 3, size);
+    ASSERT_TRUE(memset_ret != NULL);
+    memkind_free(kind, ptr);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL)
+{
+    memkind_t kind = NULL;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_PREFERRED_LOCAL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+
+    test_allocation(kind, 4096);
+
+    ret = memkind_destroy_kind(kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB)
+{
+    memkind_t kind = NULL;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_DEFAULT,
+        MEMKIND_POLICY_PREFERRED_LOCAL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+
+    test_allocation(kind, 4096);
+
+    ret = memkind_destroy_kind(kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL)
+{
+    memkind_t kind = NULL;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+        MEMKIND_POLICY_BIND_LOCAL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+
+    test_allocation(kind, 4096);
+
+    ret = memkind_destroy_kind(kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB)
+{
+    memkind_t kind = NULL;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+        MEMKIND_POLICY_BIND_LOCAL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+
+    test_allocation(kind, 4096);
+
+    ret = memkind_destroy_kind(kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL)
+{
+    memkind_t kind = NULL;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+        MEMKIND_POLICY_PREFERRED_LOCAL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+
+    test_allocation(kind, 4096);
+
+    ret = memkind_destroy_kind(kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB)
+{
+    memkind_t kind = NULL;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+        MEMKIND_POLICY_PREFERRED_LOCAL,
+        MEMKIND_MASK_PAGE_SIZE_2MB,
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+
+    test_allocation(kind, 4096);
+
+    ret = memkind_destroy_kind(kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_INTERLEAVE_ALL)
+{
+    memkind_t kind = NULL;
+    int ret = memkind_create_kind(
+        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+        MEMKIND_POLICY_INTERLEAVE_ALL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+
+    test_allocation(kind, 4096);
+
+    ret = memkind_destroy_kind(kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_HIGH_BANDWIDTH_INTERLEAVE_ALL)
+{
+    memkind_t kind = NULL;
+    int flags_tmp = MEMKIND_MEMTYPE_DEFAULT | MEMKIND_MEMTYPE_HIGH_BANDWIDTH;
+    memkind_memtype_t memtype_flags;
+    memcpy(&memtype_flags, &flags_tmp, sizeof(memtype_flags));
+
+    int ret = memkind_create_kind(
+        memtype_flags,
+        MEMKIND_POLICY_INTERLEAVE_ALL,
+        memkind_bits_t(),
+        &kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+
+    test_allocation(kind, 4096);
+
+    ret = memkind_destroy_kind(kind);
+    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+}
 
 TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_CheckAvailable)
 {
