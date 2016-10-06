@@ -234,6 +234,7 @@ $(memkind_test_dir)/hbw_detection_test.py
 $(memkind_test_dir)/autohbw_test.py
 $(memkind_test_dir)/knl_modes_test.py
 $(memkind_test_dir)/trace_mechanism_test.py
+$(memkind_test_dir)/python_framework
 $(memkind_test_dir)/python_framework/cmd_helper.py
 $(memkind_test_dir)/python_framework/__init__.py
 $(memkind_include_knl_mode)
