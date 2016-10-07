@@ -322,7 +322,7 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorAllocM)
     ret = memkind_posix_memalign(MEMKIND_HBW,
                                  &ptr,
                                  16,
-                                 100*GB);
+                                 200*GB);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
 }
