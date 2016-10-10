@@ -104,7 +104,7 @@ converts an error number
 returned by a member of the memkind
 interface to an error message
 .I msg
-where the maximium size of the message is passed by the
+where the maximum size of the message is passed by the
 .I size
 parameter.
 
@@ -236,7 +236,7 @@ The value of
 can be given as the
 .I kind
 for all buffers allocated by a kind that leverages the jemalloc
-allocator.  This includes all interally defined kinds other than those
+allocator.  This includes all internally defined kinds other than those
 that use gigabyte pages.  In cases where the kind is unknown in the
 context of the call to
 .BR memkind_free ()
@@ -345,7 +345,7 @@ will use some of that space for its own metadata.
 .PP
 .BR memkind_finalize ()
 releases all resources associated with the memkind library including
-the resouces used by all of the kinds that were created, but it does
+the resources used by all of the kinds that were created, but it does
 not free memory allocated with the
 .B HEAP MANAGEMENT
 interface.  This must be the last call to the memkind library before
@@ -463,7 +463,7 @@ structure is a vtable that defines the operations which determine the
 kind of memory.  This design pattern is modeled after the "mix-in"
 pattern used in the Linux kernel to enable some of the features of an
 object oriented language in C.  This section defines the inputs,
-outputs and responsiblities of each function pointer enumerated in the
+outputs and responsibilities of each function pointer enumerated in the
 .I memkind_ops
 structure.  Each of these methods takes a
 .B memkind_t
@@ -482,7 +482,7 @@ shall instantiate all of the dynamic resources associated with the
 It takes a pointer to the vtable structure
 .I ops
 which has a function pointer for each of methods defined in this section
-of the man page.  If any methods are unnessary to the implementation of
+of the man page.  If any methods are unnecessary to the implementation of
 the
 .I kind
 these function pointers shall be set to
@@ -573,7 +573,7 @@ the start address
 .I ptr
 to be bound, and the number of bytes
 .I size
-from that address to be bound.  The other parmeters to
+from that address to be bound.  The other parameters to
 .BR mbind (2)
 shall be determined by calling other functions resolved by the
 .B kind.ops
@@ -631,7 +631,7 @@ allocation
 .I size,
 and CPU when using the jemalloc arena allocation through the
 .BR jemk_mallocx ()
-API. Size parameter is not used at the moment, but will be necesary for integration with jemalloc 4.0.x (planned for one of the future releases).
+API. Size parameter is not used at the moment, but will be necessary for integration with jemalloc 4.0.x (planned for one of the future releases).
 .PP
 .BI "int ops.get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
 .br
@@ -699,7 +699,7 @@ pages disabled.
 Allocate from the closest high bandwidth memory NUMA node at time
 of allocation. If there is not enough high bandwidth memory to satisfy the request
 .I errno
-is set to ENOMEM and the allocated poitner is set to NULL.
+is set to ENOMEM and the allocated pointer is set to NULL.
 .TP
 .B MEMKIND_HBW_HUGETLB
 Same as
