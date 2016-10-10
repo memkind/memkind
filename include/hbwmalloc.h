@@ -59,7 +59,7 @@ typedef enum {
      */
     HBW_POLICY_PREFERRED = 2,
     /*
-     *  Interleave pages accross high bandwidth nodes. If insufficient memory
+     *  Interleave pages across high bandwidth nodes. If insufficient memory
      *  pages are available then OOM killer will be triggered.
      */
     HBW_POLICY_INTERLEAVE = 3
@@ -108,7 +108,7 @@ typedef enum {
 } hbw_pagesize_t;
 
 /*
- * Returns the current fallback policy when insufficient high bandwith memory
+ * Returns the current fallback policy when insufficient high bandwidth memory
  * is available.
  */
 hbw_policy_t hbw_get_policy(void);
@@ -128,7 +128,7 @@ hbw_policy_t hbw_get_policy(void);
 int hbw_set_policy(hbw_policy_t mode);
 
 /*
- * Verifies high bandwith memory availability.
+ * Verifies high bandwidth memory availability.
  * Returns:
  *   0: if high bandwidth memory is available
  *   ENODEV: if high-bandwidth memory is unavailable.
