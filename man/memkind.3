@@ -869,6 +869,11 @@ Number of preallocated gigabyte pages can be read from /proc/cmdline
 (hugepagesz=1G nr_hugepages=N). Setting gigabyte hugepages is available
 by kernel commandline. From 3.16 and later kernels, users can allocate
 gigabyte pages like its done for 2MB pages.
+.SH "KNOWN ISSUES"
+.TP
+.B HUGETLB (huge pages)
+There might be some overhead in huge pages consumption caused by heap management.
+If your allocation fails because of OOM, please try to allocate extra huge pages (e.g. 8 huge pages).
 .SH "COPYRIGHT"
 Copyright (C) 2014 - 2016 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
