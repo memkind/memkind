@@ -30,6 +30,7 @@
 #include <numa.h>
 #include <errno.h>
 #include <limits.h>
+#include <sys/sysinfo.h>
 
 #include "common.h"
 #include "check.h"
@@ -317,12 +318,26 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorAllocM)
     int ret = 0;
     void *ptr = NULL;
     int err = ENOMEM;
+    struct sysinfo info;
+    unsigned long long MemTotal = 0;
+
+    errno = 0;
+    ret = sysinfo(&info);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(errno, 0);
+
+    //Determine total memory size as totalram (total usable main memory size)
+    //multipled by mem_unit (memory unit size in bytes). This value is equal
+    //to MemTotal field in /proc/meminfo.
+    MemTotal = info.totalram * info.mem_unit;
+
+    RecordProperty("MemTotal_kB", MemTotal/KB);
 
     errno = 0;
     ret = memkind_posix_memalign(MEMKIND_HBW,
                                  &ptr,
                                  16,
-                                 200*GB);
+                                 2*MemTotal);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
 }
