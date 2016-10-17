@@ -164,7 +164,7 @@ public:
 
 			do
 			{
-				index = (rand() % (AllocatorTypes::MEMKIND_HBW_PREFERRED+1));
+				index = (rand() % (AllocatorTypes::NUM_OF_ALLOCATOR_TYPES));
 			}
 			while(!allocator_calls.is_enabled(index));
 
