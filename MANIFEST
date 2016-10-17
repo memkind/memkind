@@ -96,7 +96,6 @@ test/get_arena_test.cpp
 test/memkind_pmem_tests.cpp
 test/new_kind_test.cpp
 test/numakind_test.cpp
-test/slts_test.cpp
 test/static_kinds_tests.cpp
 test/huge_page_test.cpp
 test/hbw_detection_test.py

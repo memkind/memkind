@@ -26,7 +26,6 @@ AM_CPPFLAGS += -I$(googletest)/include -DMEMKIND_DEPRECATED\(x\)=x
 
 check_PROGRAMS += test/all_tests \
                   test/environerr_hbw_malloc_test \
-                  test/slts_test \
                   test/decorator_test \
                   test/allocator_perf_tool_tests \
                   test/autohbw_test_helper \
@@ -56,7 +55,6 @@ EXTRA_DIST += test/memkind-afts.ts \
 #test_all_tests_LDADD = libgtest.a libmemkind.la test/liballocatorperftool.la
 test_all_tests_LDADD = libgtest.a libmemkind.la
 test_environerr_hbw_malloc_test_LDADD = libgtest.a libmemkind.la
-test_slts_test_LDADD = libgtest.a libmemkind.la
 test_decorator_test_LDADD = libgtest.a libmemkind.la
 test_allocator_perf_tool_tests_LDADD = libgtest.a libmemkind.la
 test_autohbw_test_helper_LDADD = libmemkind.la
@@ -102,7 +100,6 @@ test_all_tests_SOURCES = test/common.h \
                          #end
 
 test_environerr_hbw_malloc_test_SOURCES = test/main.cpp test/environ_err_hbw_malloc_test.cpp test/trial_generator.cpp test/check.cpp
-test_slts_test_SOURCES = test/slts_test.cpp
 test_decorator_test_SOURCES = test/main.cpp test/decorator_test.cpp test/decorator_test.h
 test_autohbw_test_helper_SOURCES = test/autohbw_test_helper.c
 test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c

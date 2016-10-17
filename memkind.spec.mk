@@ -207,7 +207,6 @@ rm -f %{buildroot}/%{_libdir}/lib{numakind}.*
 $(memkind_test_dir)/all_tests
 $(memkind_test_dir)/environerr_hbw_malloc_test
 $(memkind_test_dir)/decorator_test
-$(memkind_test_dir)/slts_test
 $(memkind_test_dir)/filter_memkind
 $(memkind_test_dir)/gb_realloc
 $(memkind_test_dir)/hello_hbw

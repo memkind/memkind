@@ -28,7 +28,6 @@
 #include "check.h"
 #include <vector>
 #include <numa.h>
-#include "static_kinds_list.h"
 
 void TrialGenerator :: generate_incremental(alloc_api_t api)
 {
@@ -103,7 +102,6 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
     ltrial.page_size = page_size;
     ltrial.memkind = memkind;
     ltrial.free_index = free_index;
-    ltrial.test = MEMALLOC;
     return ltrial;
 }
 
@@ -138,62 +136,6 @@ void TrialGenerator :: generate_gb (alloc_api_t api, int number_of_gb_pages, mem
 int n_random(int i)
 {
     return random() % i;
-}
-
-void TrialGenerator :: generate_multi_app_stress(int num_types, test_t test)
-{
-    int i;
-    int num_trials = 1000;
-    int index = 0;
-    int k = 0;
-    int num_alloc = 0;
-    memkind_t kind;
-
-    srandom(0);
-    trial_vec.clear();
-    ASSERT_TRUE((size_t)num_types > (sizeof(static_kinds_list)/sizeof(static_kinds_list[0])))
-        << num_types << " is out of range related to known list if static kinds!";
-    for (i = 0; i < num_trials; i++) {
-        if (n_random(3) || num_alloc == 0) {
-            kind = static_kinds_list[n_random(num_types)];
-            trial_t ltrial = create_trial_tuple(MEMKIND_MALLOC,
-                                                n_random(8*MB - 1) + 1,
-                                                0, 2097152,
-                                                kind,
-                                                k++);
-            if (test == DATACHECK) ltrial.test = DATACHECK;
-            trial_vec.push_back(ltrial);
-            num_alloc++;
-        }
-        else {
-            index = n_random(trial_vec.size());
-            while (trial_vec[index].api == MEMKIND_FREE ||
-                   trial_vec[index].free_index == -1) {
-                index = n_random(trial_vec.size());
-            }
-            trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,
-                                                   0,
-                                                   0, 2097152,
-                                                   trial_vec[index].memkind,
-                                                   trial_vec[index].free_index));
-            trial_vec[index].free_index = -1;
-            k++;
-            num_alloc--;
-        }
-    }
-
-    /* Adding free's for remaining malloc's*/
-    for (i = 0; i <(int) trial_vec.size(); i++) {
-        if (trial_vec[i].api != MEMKIND_FREE &&
-            trial_vec[i].free_index > 0) {
-            trial_t ltrial = create_trial_tuple(MEMKIND_FREE,
-                                                0, 0, 2097152,
-                                                trial_vec[i].memkind,
-                                                trial_vec[i].free_index);
-            trial_vec[i].free_index = -1;
-            trial_vec.push_back(ltrial);
-        }
-    }
 }
 
 void TrialGenerator :: generate_recycle_psize_2GB(alloc_api_t api)
@@ -452,9 +394,6 @@ void TrialGenerator :: run(int num_bandwidth, std::vector<int> &bandwidth)
             ASSERT_TRUE(ptr_vec[i] != NULL);
             memset(ptr_vec[i], 0, trial_vec[i].size);
             Check check(ptr_vec[i], trial_vec[i]);
-            if (trial_vec[i].test == DATACHECK) {
-                EXPECT_EQ(0, check.check_data(0x0A));
-            }
             if (trial_vec[i].memkind != MEMKIND_DEFAULT &&
                 trial_vec[i].memkind != MEMKIND_HUGETLB &&
                 trial_vec[i].memkind != MEMKIND_GBTLB) {
