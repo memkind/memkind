@@ -81,6 +81,7 @@ test/get_arena_test.cpp
 test/memkind_pmem_tests.cpp
 test/static_kinds_tests.cpp
 test/huge_page_test.cpp
+test/hbw_verify_function_test.cpp
 test/performance/framework.hpp
 test/performance/framework.cpp
 test/performance/operations.hpp

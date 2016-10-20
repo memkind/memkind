@@ -98,6 +98,7 @@ test/new_kind_test.cpp
 test/numakind_test.cpp
 test/static_kinds_tests.cpp
 test/huge_page_test.cpp
+test/hbw_verify_function_test.cpp
 test/hbw_detection_test.py
 test/autohbw_test.py
 test/knl_modes_test.py
