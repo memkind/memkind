@@ -97,6 +97,7 @@ test_all_tests_SOURCES = test/common.h \
                          test/new_kind_test.cpp \
                          test/numakind_test.cpp \
                          test/static_kinds_tests.cpp \
+                         test/hbw_verify_function_test.cpp \
                          #end
 
 test_environerr_hbw_malloc_test_SOURCES = test/main.cpp test/environ_err_hbw_malloc_test.cpp test/trial_generator.cpp test/check.cpp
