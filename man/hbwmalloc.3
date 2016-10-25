@@ -49,6 +49,8 @@ Note: hbwmalloc.h functionality is considered as stable API (STANDARD API).
 .B hbw_policy_t hbw_get_policy(void);
 .br
 .BI "int hbw_set_policy(hbw_policy_t " "mode" );
+.br
+.BI "int hbw_verify_ptr(void " "*ptr" ", size_t " "size" ", int " "flags" );
 .fi
 .SH "DESCRIPTION"
 .BR hbw_check_available ()
@@ -230,6 +232,25 @@ with the smallest NUMA distance.
 Interleave faulted pages from across all high bandwidth NUMA nodes
 using standard size pages (the Transparent Huge Page feature is
 disabled).
+.PP
+.BR hbw_verify_ptr ()
+verifies if memory region fully fall into high bandwidth memory. Returns:
+0 if whole memory region specified by
+.IR "addr"
+and
+.IR "size"
+is backed by high-bandwidth memory,
+-1 if any fragment of memory was not backed by high bandwidth memory [e.g. when memory is not initalized]
+or one of error codes described in ERRORS section.
+
+Using this function in production code may result in serious performance penalty.
+
+.IR Flags
+argument may include optional flags that modifies function behaviour:
+.TP
+.B HBW_VERIFY_SET_MEMORY
+Before checking pages, function will set all bytes in memory region to 0 enforcing physical memory binding.
+Note: this option is intended to be used with uninitialized memory.
 .SH "RETURN VALUE"
 .BR hbw_get_policy ()
 returns
@@ -284,6 +305,21 @@ argument was neither
 .B HBW_POLICY_BIND
 nor
 .B HBW_POLICY_INTERLEAVE.
+.TP
+.BR hbw_verify_ptr ()
+returns
+.B EINVAL
+if
+.IR "addr"
+is NULL,
+.IR "size"
+equals 0 or
+.IR "flags"
+contained unsupported bit set. If memory pointed by
+.IR "addr"
+could not be verified then
+.B EFAULT
+is returned.
 .SH "NOTES"
 The
 .I hbwmalloc.h
