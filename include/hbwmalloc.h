@@ -108,6 +108,18 @@ typedef enum {
 } hbw_pagesize_t;
 
 /*
+ * Flags for hbw_verify_ptr function
+ */
+enum {
+
+    /*
+     * This option set "size" bytes of the block of memory pointed by "addr" with "0" value
+     * to enforce physical memory pinning.
+     */
+    HBW_VERIFY_SET_MEMORY      = (1 << 0)
+};
+
+/*
  * Returns the current fallback policy when insufficient high bandwidth memory
  * is available.
  */
@@ -134,6 +146,16 @@ int hbw_set_policy(hbw_policy_t mode);
  *   ENODEV: if high-bandwidth memory is unavailable.
  */
 int hbw_check_available(void);
+
+/*
+ * Verifies if allocated memory fully fall into high bandwidth memory.
+ * Returns:
+ *   0: if memory was fully allocated in high bandwidth memory
+ *   -1: if any region of memory was not allocated in high bandwidth memory
+ *   EINVAL: if size equals 0, or flags contained unsupported bit set
+ *   EFAULT: could not verify memory
+ */
+int hbw_verify_ptr(void* addr, size_t size, int flags);
 
 /*
  * Allocates size bytes of uninitialized high bandwidth memory.
