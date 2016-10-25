@@ -25,11 +25,16 @@
 #include <hbwmalloc.h>
 #include <memkind.h>
 #include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_hbw.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
 #include <errno.h>
+#include <numa.h>
+#include <numaif.h>
+#include <unistd.h>
+#include <stdint.h>
 
 static hbw_policy_t hbw_policy_g = HBW_POLICY_PREFERRED;
 static pthread_once_t hbw_policy_once_g = PTHREAD_ONCE_INIT;
@@ -151,6 +156,83 @@ MEMKIND_EXPORT int hbw_set_policy(hbw_policy_t mode)
 MEMKIND_EXPORT int hbw_check_available(void)
 {
     return  (memkind_check_available(MEMKIND_HBW) == 0) ? 0 : ENODEV;
+}
+
+MEMKIND_EXPORT int hbw_verify_ptr(void* addr, size_t size, int flags)
+{
+    //if size is invalid, or flags have unsupported bit set
+    if(size == 0 || flags & ~HBW_VERIFY_SET_MEMORY) {
+        return EINVAL;
+    }
+
+    //4KB is the smallest pagesize. When pagesize is bigger, pages are verified more than once
+    const size_t page_size = sysconf(_SC_PAGESIZE);
+    const size_t page_mask = ~(page_size-1);
+
+    //block size should be power of two to enable compiler optimizations
+    const unsigned block_size = 64;
+
+    unsigned i, block_number;
+    nodemask_t nodemask;
+    struct bitmask expected_nodemask = {NUMA_NUM_NODES, nodemask.n};
+    uintptr_t addr_value = (uintptr_t) addr;
+    uintptr_t current_page_addr = addr_value & page_mask;
+
+    // get pages from first aligned address until last aligned address + optional page for unaligned addr
+    size_t pages_number = (((addr_value+size) & page_mask) - (addr_value & page_mask)) / page_size;
+    // if allocation doesn't end on page boundary, add 1 additional page
+    if ( (addr_value + size) & ~page_mask )
+        pages_number += 1;
+
+    size_t number_of_blocks = pages_number / block_size;
+
+    if(number_of_blocks * block_size < pages_number) {
+        number_of_blocks++;
+    }
+
+    if (flags & HBW_VERIFY_SET_MEMORY) {
+        memset(addr, 0, size);
+    }
+
+    memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask.maskp, expected_nodemask.size);
+
+    //all addresses are checked in blocks of pages
+    for (block_number = 0; block_number < number_of_blocks; block_number++) {
+
+        void* addresses[block_size]; //pages to check
+        int nodes[block_size];
+
+        // almost every block has block_size pages...
+        int page_count = block_size;
+
+        // ...only last one is different and can hold less
+        if (block_number == (number_of_blocks - 1)) {
+            page_count = pages_number - (number_of_blocks - 1) * block_size;
+        }
+
+        for (i = 0; i < page_count; i++) {
+            addresses[i] = (void*)current_page_addr;
+            current_page_addr += page_size;
+        }
+
+        if (move_pages(0, page_count, addresses, NULL, nodes, MPOL_MF_MOVE)) {
+            return EFAULT;
+        }
+        for (i = 0; i < page_count; i++) {
+            if(nodes[i] < 0) {
+                // negative value of nodes[i] indicates that move_pages could not establish
+                // page location, e.g. addr is not pointing to valid virtual mapping
+                return -1;
+            }
+            if (!numa_bitmask_isbitset(&expected_nodemask, nodes[i])) {
+                // if nodes[i] is not present in expected_nodemask then
+                // physical memory backing page is not hbw
+                return -1;
+            }
+        }
+    }
+
+    return 0;
 }
 
 MEMKIND_EXPORT void *hbw_malloc(size_t size)
