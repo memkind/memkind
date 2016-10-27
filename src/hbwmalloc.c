@@ -160,35 +160,29 @@ MEMKIND_EXPORT int hbw_check_available(void)
 
 MEMKIND_EXPORT int hbw_verify_ptr(void* addr, size_t size, int flags)
 {
-    //if size is invalid, or flags have unsupported bit set
-    if(size == 0 || flags & ~HBW_VERIFY_SET_MEMORY) {
+    /*
+     * if size is invalid, or flags have unsupported bit set
+     * or if addr is NULL(we call memset below we need to check it).
+     */
+    if (addr == NULL || size == 0 || flags & ~HBW_VERIFY_SET_MEMORY) {
         return EINVAL;
     }
 
-    //4KB is the smallest pagesize. When pagesize is bigger, pages are verified more than once
+    /*
+     * 4KB is the smallest pagesize. When pagesize is bigger, pages are verified more than once
+     */
     const size_t page_size = sysconf(_SC_PAGESIZE);
     const size_t page_mask = ~(page_size-1);
 
-    //block size should be power of two to enable compiler optimizations
+    /*
+     * block size should be power of two to enable compiler optimizations
+     */
     const unsigned block_size = 64;
 
-    unsigned i, block_number;
+    char *end = addr + size;
+    char *aligned_beg = (char*)((uintptr_t)addr & page_mask);
     nodemask_t nodemask;
     struct bitmask expected_nodemask = {NUMA_NUM_NODES, nodemask.n};
-    uintptr_t addr_value = (uintptr_t) addr;
-    uintptr_t current_page_addr = addr_value & page_mask;
-
-    // get pages from first aligned address until last aligned address + optional page for unaligned addr
-    size_t pages_number = (((addr_value+size) & page_mask) - (addr_value & page_mask)) / page_size;
-    // if allocation doesn't end on page boundary, add 1 additional page
-    if ( (addr_value + size) & ~page_mask )
-        pages_number += 1;
-
-    size_t number_of_blocks = pages_number / block_size;
-
-    if(number_of_blocks * block_size < pages_number) {
-        number_of_blocks++;
-    }
 
     if (flags & HBW_VERIFY_SET_MEMORY) {
         memset(addr, 0, size);
@@ -196,37 +190,38 @@ MEMKIND_EXPORT int hbw_verify_ptr(void* addr, size_t size, int flags)
 
     memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask.maskp, expected_nodemask.size);
 
-    //all addresses are checked in blocks of pages
-    for (block_number = 0; block_number < number_of_blocks; block_number++) {
-
-        void* addresses[block_size]; //pages to check
+    while(aligned_beg < end) {
         int nodes[block_size];
+        void* pages[block_size];
+        int i = 0, page_count = 0;
+        char *iter_end = aligned_beg + block_size*page_size;
 
-        // almost every block has block_size pages...
-        int page_count = block_size;
-
-        // ...only last one is different and can hold less
-        if (block_number == (number_of_blocks - 1)) {
-            page_count = pages_number - (number_of_blocks - 1) * block_size;
+        if (iter_end > end) {
+            iter_end = end;
         }
 
-        for (i = 0; i < page_count; i++) {
-            addresses[i] = (void*)current_page_addr;
-            current_page_addr += page_size;
+        while (aligned_beg < iter_end) {
+            pages[page_count++] = aligned_beg;
+            aligned_beg += page_size;
         }
 
-        if (move_pages(0, page_count, addresses, NULL, nodes, MPOL_MF_MOVE)) {
+        if (move_pages(0, page_count, pages, NULL, nodes, MPOL_MF_MOVE)) {
             return EFAULT;
         }
+
         for (i = 0; i < page_count; i++) {
+            /*
+             * negative value of nodes[i] indicates that move_pages could not establish
+             * page location, e.g. addr is not pointing to valid virtual mapping
+             */
             if(nodes[i] < 0) {
-                // negative value of nodes[i] indicates that move_pages could not establish
-                // page location, e.g. addr is not pointing to valid virtual mapping
                 return -1;
             }
+            /*
+             * if nodes[i] is not present in expected_nodemask then
+             * physical memory backing page is not hbw
+             */
             if (!numa_bitmask_isbitset(&expected_nodemask, nodes[i])) {
-                // if nodes[i] is not present in expected_nodemask then
-                // physical memory backing page is not hbw
                 return -1;
             }
         }
