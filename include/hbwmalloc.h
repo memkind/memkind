@@ -113,10 +113,10 @@ typedef enum {
 enum {
 
     /*
-     * This option set "size" bytes of the block of memory pointed by "addr" with "0" value
-     * to enforce physical memory pinning.
+     * This option touches first byte of all pages in address range starting from "addr" to "addr" + "size"
+     * by read and write (so the content will be overwitten by the same data as it was read).
      */
-    HBW_VERIFY_SET_MEMORY      = (1 << 0)
+    HBW_TOUCH_PAGES      = (1 << 0)
 };
 
 /*
@@ -150,12 +150,12 @@ int hbw_check_available(void);
 /*
  * Verifies if allocated memory fully fall into high bandwidth memory.
  * Returns:
- *   0: if memory was fully allocated in high bandwidth memory
+ *   0: if memory in address range from "addr" to "addr" + "size" is allocated in high bandwidth memory
  *   -1: if any region of memory was not allocated in high bandwidth memory
- *   EINVAL: if size equals 0, or flags contained unsupported bit set
+ *   EINVAL: if addr is NULL, size equals 0 or flags contained unsupported bit set
  *   EFAULT: could not verify memory
  */
-int hbw_verify_ptr(void* addr, size_t size, int flags);
+int hbw_verify_memory_region(void* addr, size_t size, int flags);
 
 /*
  * Allocates size bytes of uninitialized high bandwidth memory.

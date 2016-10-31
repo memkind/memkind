@@ -158,13 +158,19 @@ MEMKIND_EXPORT int hbw_check_available(void)
     return  (memkind_check_available(MEMKIND_HBW) == 0) ? 0 : ENODEV;
 }
 
-MEMKIND_EXPORT int hbw_verify_ptr(void* addr, size_t size, int flags)
+static inline void hbw_touch_page(void* addr)
+{
+    volatile char* temp_ptr = (volatile char*) addr;
+    char value = temp_ptr[0];
+    temp_ptr[0] = value;
+}
+
+MEMKIND_EXPORT int hbw_verify_memory_region(void* addr, size_t size, int flags)
 {
     /*
-     * if size is invalid, or flags have unsupported bit set
-     * or if addr is NULL(we call memset below we need to check it).
+     * if size is invalid, flags have unsupported bit set or if addr is NULL.
      */
-    if (addr == NULL || size == 0 || flags & ~HBW_VERIFY_SET_MEMORY) {
+    if (addr == NULL || size == 0 || flags & ~HBW_TOUCH_PAGES) {
         return EINVAL;
     }
 
@@ -184,10 +190,6 @@ MEMKIND_EXPORT int hbw_verify_ptr(void* addr, size_t size, int flags)
     nodemask_t nodemask;
     struct bitmask expected_nodemask = {NUMA_NUM_NODES, nodemask.n};
 
-    if (flags & HBW_VERIFY_SET_MEMORY) {
-        memset(addr, 0, size);
-    }
-
     memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask.maskp, expected_nodemask.size);
 
     while(aligned_beg < end) {
@@ -201,6 +203,9 @@ MEMKIND_EXPORT int hbw_verify_ptr(void* addr, size_t size, int flags)
         }
 
         while (aligned_beg < iter_end) {
+            if (flags & HBW_TOUCH_PAGES) {
+                hbw_touch_page(aligned_beg);
+            }
             pages[page_count++] = aligned_beg;
             aligned_beg += page_size;
         }
