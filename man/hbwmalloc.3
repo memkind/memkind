@@ -50,7 +50,7 @@ Note: hbwmalloc.h functionality is considered as stable API (STANDARD API).
 .br
 .BI "int hbw_set_policy(hbw_policy_t " "mode" );
 .br
-.BI "int hbw_verify_ptr(void " "*ptr" ", size_t " "size" ", int " "flags" );
+.BI "int hbw_verify_memory_region(void " "*addr" ", size_t " "size" ", int " "flags" );
 .fi
 .SH "DESCRIPTION"
 .BR hbw_check_available ()
@@ -233,13 +233,15 @@ Interleave faulted pages from across all high bandwidth NUMA nodes
 using standard size pages (the Transparent Huge Page feature is
 disabled).
 .PP
-.BR hbw_verify_ptr ()
+.BR hbw_verify_memory_region ()
 verifies if memory region fully fall into high bandwidth memory. Returns:
-0 if whole memory region specified by
+0 if memory in address range from
 .IR "addr"
-and
+to
+.IR "addr"
++
 .IR "size"
-is backed by high-bandwidth memory,
+is allocated in high bandwidth memory,
 -1 if any fragment of memory was not backed by high bandwidth memory [e.g. when memory is not initalized]
 or one of error codes described in ERRORS section.
 
@@ -248,9 +250,15 @@ Using this function in production code may result in serious performance penalty
 .IR Flags
 argument may include optional flags that modifies function behaviour:
 .TP
-.B HBW_VERIFY_SET_MEMORY
-Before checking pages, function will set all bytes in memory region to 0 enforcing physical memory binding.
-Note: this option is intended to be used with uninitialized memory.
+.B HBW_TOUCH_PAGES
+Before checking pages, function will touch first byte of all pages in address range starting from
+.IR "addr"
+to
+.IR "addr"
++
+.IR "size"
+by read and write (so the content will be overwitten by the same data as it was read).
+Using this option may trigger Out Of Memory killer.
 .SH "RETURN VALUE"
 .BR hbw_get_policy ()
 returns
@@ -306,7 +314,7 @@ argument was neither
 nor
 .B HBW_POLICY_INTERLEAVE.
 .TP
-.BR hbw_verify_ptr ()
+.BR hbw_verify_memory_region ()
 returns
 .B EINVAL
 if
