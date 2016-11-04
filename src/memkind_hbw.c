@@ -43,6 +43,7 @@
 #include <utmpx.h>
 #include <sched.h>
 #include <stdint.h>
+#include <assert.h>
 
 MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
@@ -171,10 +172,6 @@ extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
 
 static void assign_arbitrary_bandwidth_values(int* bandwidth, int bandwidth_len, struct bitmask* hbw_nodes);
 
-inline static void cpuid_asm(int leaf, int subleaf, uint32_t where[4]);
-
-static int is_cpu_xeon_phi_x200();
-
 static int fill_bandwidth_values_heuristically (int* bandwidth, int bandwidth_len);
 
 static int fill_bandwidth_values_from_enviroment(int* bandwidth, int bandwidth_len, char *hbw_nodes_env);
@@ -269,75 +266,110 @@ static void assign_arbitrary_bandwidth_values(int* bandwidth, int bandwidth_len,
 
 }
 
-#define CPUID_MODEL_MASK        (0xf<<4)
-#define CPUID_EXT_MODEL_MASK    (0xf<<16)
+typedef struct registers_t {
+    uint32_t eax;
+    uint32_t ebx;
+    uint32_t ecx;
+    uint32_t edx;
+} registers_t;
 
-inline static void cpuid_asm(int leaf, int subleaf, uint32_t where[4])
-{
-
-    asm volatile("cpuid":"=a"(where[0]),
-                         "=b"(where[1]),
-                         "=c"(where[2]),
-                         "=d"(where[2]):"0"(leaf), "2"(subleaf));
+inline static void cpuid_asm(int leaf, int subleaf, registers_t* registers) {
+    asm volatile("cpuid":"=a"(registers->eax),
+                         "=b"(registers->ebx),
+                         "=c"(registers->ecx),
+                         "=d"(registers->edx):"0"(leaf), "2"(subleaf));
 }
 
-static int is_cpu_xeon_phi_x200()
-{
-    uint32_t xeon_phi_model = (0x7<<4);
-    uint32_t xeon_phi_ext_model = (0x5<<16);
-    uint32_t registers[4];
-    uint32_t expected = xeon_phi_model | xeon_phi_ext_model;
-    cpuid_asm(1, 0, registers);
-    uint32_t actual =  registers[0] & (CPUID_MODEL_MASK | CPUID_EXT_MODEL_MASK);
+#define CPUID_MODEL_SHIFT       (4)
+#define CPUID_MODEL_MASK        (0xf)
+#define CPUID_EXT_MODEL_MASK    (0xf)
+#define CPUID_EXT_MODEL_SHIFT   (16)
+#define CPUID_FAMILY_MASK       (0xf)
+#define CPUID_FAMILY_SHIFT      (8)
+#define CPU_MODEL_KNL           (0x57)
+#define CPU_MODEL_KNM           (0x85)
+#define CPU_FAMILY_INTEL        (0x06)
 
-    if (actual == expected) {
-        return 0;
-    }
+typedef struct {
+    uint32_t model;
+    uint32_t family;
+} cpu_model_data_t;
 
-    return -1;
+static cpu_model_data_t get_cpu_model_data() {
+    registers_t registers;
+    cpuid_asm(1, 0, &registers);
+    uint32_t model = (registers.eax >> CPUID_MODEL_SHIFT) & CPUID_MODEL_MASK;
+    uint32_t model_ext = (registers.eax >> CPUID_EXT_MODEL_SHIFT) & CPUID_EXT_MODEL_MASK;
+
+    cpu_model_data_t data;
+    data.model = model | (model_ext << 4);
+    data.family = (registers.eax >> CPUID_FAMILY_SHIFT) & CPUID_FAMILY_MASK;
+    return data;
 }
 
-///This function tries to fill bandwidth array based on knowledge about known CPU models
-static int fill_bandwidth_values_heuristically(int* bandwidth, int bandwidth_len)
-{
-    int ret = MEMKIND_ERROR_UNAVAILABLE; // Default error returned if heuristic aproach fails
-    int i, nodes_num, memory_only_nodes_num = 0;
-    struct bitmask *memory_only_nodes, *node_cpus;
+static bool is_hbm_supported(cpu_model_data_t cpu) {
+    return cpu.family == CPU_FAMILY_INTEL &&
+        (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
+}
 
-    if (is_cpu_xeon_phi_x200() == 0) {
-        log_info("Known CPU model detected: Intel(R) Xeon Phi(TM) x200.");
-        nodes_num = numa_num_configured_nodes();
+static int get_high_bandwidth_nodes(struct bitmask* hbw_node_mask) {
+    int nodes_num = numa_num_configured_nodes();
+    // Check if NUMA configuration is supported.
+    if(nodes_num == 2 || nodes_num == 4 || nodes_num == 8) {
+        struct bitmask* node_cpus = numa_allocate_cpumask();
 
-        // Check if number of numa-nodes meets expectations for
-        // supported configurations of Intel Xeon Phi x200
-        if( nodes_num != 2 && nodes_num != 4 && nodes_num!= 8 ) {
-            return ret;
-        }
-
-        memory_only_nodes = numa_allocate_nodemask();
-        node_cpus = numa_allocate_cpumask();
-
+        assert(hbw_node_mask->size >= nodes_num);
+        assert(node_cpus->size >= nodes_num);
+        int i;
         for(i=0; i<nodes_num; i++) {
             numa_node_to_cpus(i, node_cpus);
             if(numa_bitmask_weight(node_cpus) == 0) {
-                memory_only_nodes_num++;
-                numa_bitmask_setbit(memory_only_nodes, i);
+                //NUMA nodes without CPU are HBW nodes.
+                numa_bitmask_setbit(hbw_node_mask, i);
             }
         }
 
-        // Check if number of memory-only nodes is equal number of memory+cpu nodes
-        // If it passes change ret to 0 (success) and fill bw table
-        if ( memory_only_nodes_num == (nodes_num - memory_only_nodes_num) ) {
-
-            ret = 0;
-            assign_arbitrary_bandwidth_values(bandwidth, bandwidth_len, memory_only_nodes);
-        }
-
-        numa_bitmask_free(memory_only_nodes);
         numa_bitmask_free(node_cpus);
+
+        if(2*numa_bitmask_weight(hbw_node_mask) == nodes_num) {
+            return 0;
+        }
     }
 
+    return MEMKIND_ERROR_UNAVAILABLE;
+}
+
+static int fill_bandwidth(int* bandwidth, int bandwidth_len) {
+    struct bitmask* hbw_node_mask = numa_allocate_nodemask();
+    int ret = get_high_bandwidth_nodes(hbw_node_mask);
+    if(ret == 0) {
+        assign_arbitrary_bandwidth_values(bandwidth, bandwidth_len, hbw_node_mask);
+    }
+    numa_bitmask_free(hbw_node_mask);
+
     return ret;
+}
+
+///This function tries to fill bandwidth array based on knowledge about known CPU models
+static int fill_bandwidth_values_heuristically(int* bandwidth, int bandwidth_len) {
+    cpu_model_data_t cpu = get_cpu_model_data();
+
+    if(!is_hbm_supported(cpu)) {
+        return MEMKIND_ERROR_UNAVAILABLE;
+    }
+
+    switch(cpu.model) {
+        case CPU_MODEL_KNL:
+        case CPU_MODEL_KNM: {
+                int ret = fill_bandwidth(bandwidth, bandwidth_len);
+                if(ret == 0) {
+                    log_info("Detected High Bandwidth Memory.");
+                }
+                return ret;
+            }
+        default:
+            return MEMKIND_ERROR_UNAVAILABLE;
+    }
 }
 
 static int fill_bandwidth_values_from_enviroment(int* bandwidth, int bandwidth_len, char *hbw_nodes_env)
