@@ -81,7 +81,6 @@ $(source_tar): $(topdir)/.setup $(src) MANIFEST
 		mkdir -p `dirname $(source_tmp_dir)/$(name)-$(version)/$$f` ; \
 		cp $$f $(source_tmp_dir)/$(name)-$(version)/$$f ; \
 	done
-	if [ -f "$(memkind_gtest_archive)" ]; then cp $(memkind_gtest_archive) $(source_tmp_dir)/$(name)-$(version); fi
 	cd $(source_tmp_dir)/$(name)-$(version) && ./autogen.sh && ./configure $(hwloc_config_opt) && make dist; \
 	# tar.gz produced by "make dist" from above produces memkind-$(version).tar.gz
 	# If $(package_prefix) is not empty, then need to repackage that tar.gz to $(name)-$(version)
