@@ -10,7 +10,6 @@ ChangeLog
 .travis.yml
 autohbw/autohbw_README
 examples/README
-gtest-1.7.0.zip
 test/memkind-afts.ts
 test/memkind-afts-ext.ts
 test/memkind-slts.ts
@@ -176,3 +175,6 @@ jemalloc/test/unit/stats.c
 jemalloc/test/unit/tsd.c
 jemalloc/test/unit/util.c
 jemalloc/test/unit/zero.c
+test/gtest_fused/gtest/gtest-all.cc
+test/gtest_fused/gtest/gtest.h
+

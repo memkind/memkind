@@ -21,8 +21,6 @@ autom4te.cache/
 /configure
 /depcomp
 /config_tls.h
-/gtest-1.7.0/
-/gtest_output/
 /install-sh
 /libtool
 /ltmain.sh

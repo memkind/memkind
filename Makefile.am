@@ -89,7 +89,6 @@ nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
 sbin_PROGRAMS =
 
 EXTRA_DIST = autogen.sh \
-             gtest-1.7.0.zip \
              examples/README \
              test/check.sh \
              test/test.sh \
@@ -302,7 +301,7 @@ $(jemalloc_objects): jemalloc/obj/src/%.lo: jemalloc/obj/src/%.pic.o jemalloc/ob
 	@echo "pic_object='$*.pic.o'" >> $@
 	@echo "non_pic_object='$*.o'" >> $@
 
-# build check programs without running tests (requires libgtest.a)
+# build check programs without running tests
 checkprogs: $(check_PROGRAMS)
 
 memkind-$(VERSION).spec:

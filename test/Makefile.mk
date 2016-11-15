@@ -22,7 +22,7 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-AM_CPPFLAGS += -I$(googletest)/include -DMEMKIND_DEPRECATED\(x\)=x
+AM_CPPFLAGS += -Itest/gtest_fused -DMEMKIND_DEPRECATED\(x\)=x
 
 check_PROGRAMS += test/all_tests \
                   test/environerr_hbw_malloc_test \
@@ -49,14 +49,17 @@ EXTRA_DIST += test/memkind-afts.ts \
               test/knl_modes_test.py \
               test/trace_mechanism_test.py \
               test/python_framework/cmd_helper.py \
-              test/python_framework/__init__.py
+              test/python_framework/__init__.py \
+              test/gtest_fused/gtest/gtest-all.cc \
+              test/gtest_fused/gtest/gtest.h \
+              # end
 
 
-#test_all_tests_LDADD = libgtest.a libmemkind.la test/liballocatorperftool.la
-test_all_tests_LDADD = libgtest.a libmemkind.la
-test_environerr_hbw_malloc_test_LDADD = libgtest.a libmemkind.la
-test_decorator_test_LDADD = libgtest.a libmemkind.la
-test_allocator_perf_tool_tests_LDADD = libgtest.a libmemkind.la
+
+test_all_tests_LDADD = libmemkind.la
+test_environerr_hbw_malloc_test_LDADD = libmemkind.la
+test_decorator_test_LDADD = libmemkind.la
+test_allocator_perf_tool_tests_LDADD = libmemkind.la
 test_autohbw_test_helper_LDADD = libmemkind.la
 test_trace_mechanism_test_helper_LDADD = libmemkind.la
 if USE_HWLOC
@@ -64,14 +67,18 @@ test_get_knl_modes_SOURCES = test/get_knl_modes.c
 test_get_knl_modes_LDADD = $(LIBHWLOC) libmemkind.la
 endif
 
-test_all_tests_SOURCES = test/common.h \
+fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
+              test/main.cpp \
+              # end
+
+test_all_tests_SOURCES = $(fused_gtest) \
+                         test/common.h \
                          test/bat_tests.cpp \
                          test/bat_bind_tests.cpp \
                          test/bat_interleave_tests.cpp \
                          test/gb_page_tests.cpp \
                          test/trial_generator.cpp \
                          test/check.cpp \
-                         test/main.cpp \
                          test/multithreaded_tests.cpp \
                          test/trial_generator.h \
                          test/static_kinds_list.h \
@@ -100,66 +107,66 @@ test_all_tests_SOURCES = test/common.h \
                          test/hbw_verify_function_test.cpp \
                          #end
 
-test_environerr_hbw_malloc_test_SOURCES = test/main.cpp test/environ_err_hbw_malloc_test.cpp test/trial_generator.cpp test/check.cpp
-test_decorator_test_SOURCES = test/main.cpp test/decorator_test.cpp test/decorator_test.h
+test_environerr_hbw_malloc_test_SOURCES = $(fused_gtest) test/environ_err_hbw_malloc_test.cpp test/trial_generator.cpp test/check.cpp
+test_decorator_test_SOURCES = $(fused_gtest) test/decorator_test.cpp test/decorator_test.h
 test_autohbw_test_helper_SOURCES = test/autohbw_test_helper.c
 test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c
 
 #Tests based on Allocator Perf Tool
 allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.hpp \
-                                    test/allocator_perf_tool/Allocation_info.hpp \
-                                    test/allocator_perf_tool/Allocation_info.cpp \
-                                    test/allocator_perf_tool/Allocator.hpp \
-                                    test/allocator_perf_tool/AllocatorFactory.hpp \
-                                    test/allocator_perf_tool/CSVLogger.hpp \
-                                    test/allocator_perf_tool/CommandLine.hpp \
-                                    test/allocator_perf_tool/Configuration.hpp \
-                                    test/allocator_perf_tool/ConsoleLog.hpp \
-                                    test/allocator_perf_tool/FootprintSampling.cpp \
-                                    test/allocator_perf_tool/FootprintSampling.h \
-                                    test/allocator_perf_tool/FootprintTask.cpp \
-                                    test/allocator_perf_tool/FootprintTask.h \
-                                    test/allocator_perf_tool/FunctionCalls.hpp \
-                                    test/allocator_perf_tool/FunctionCallsPerformanceTask.cpp \
-                                    test/allocator_perf_tool/FunctionCallsPerformanceTask.h \
-                                    test/allocator_perf_tool/GTestAdapter.hpp \
-                                    test/allocator_perf_tool/Iterator.hpp \
-                                    test/allocator_perf_tool/JemallocAllocatorWithTimer.hpp \
-                                    test/allocator_perf_tool/MemkindAllocatorWithTimer.hpp \
-                                    test/allocator_perf_tool/MemoryFootprintStats.hpp \
-                                    test/allocator_perf_tool/Numastat.hpp \
-                                    test/allocator_perf_tool/Runnable.hpp \
-                                    test/allocator_perf_tool/Sample.hpp \
-                                    test/allocator_perf_tool/ScenarioWorkload.cpp \
-                                    test/allocator_perf_tool/ScenarioWorkload.h \
-                                    test/allocator_perf_tool/StandardAllocatorWithTimer.hpp \
-                                    test/allocator_perf_tool/Stats.hpp \
-                                    test/allocator_perf_tool/StressIncreaseToMax.cpp \
-                                    test/allocator_perf_tool/StressIncreaseToMax.h \
-                                    test/allocator_perf_tool/Task.hpp \
-                                    test/allocator_perf_tool/TaskFactory.hpp \
-                                    test/allocator_perf_tool/Tests.hpp \
-                                    test/allocator_perf_tool/Thread.hpp \
-                                    test/allocator_perf_tool/TimerSysTime.hpp \
-                                    test/allocator_perf_tool/VectorIterator.hpp \
-                                    test/allocator_perf_tool/Workload.hpp \
-                                    test/allocator_perf_tool/WrappersMacros.hpp \
-                                    test/allocator_perf_tool/HugePageUnmap.hpp \
-                                    test/allocator_perf_tool/HugePageOrganizer.hpp \
-									#end
+                                      test/allocator_perf_tool/Allocation_info.hpp \
+                                      test/allocator_perf_tool/Allocation_info.cpp \
+                                      test/allocator_perf_tool/Allocator.hpp \
+                                      test/allocator_perf_tool/AllocatorFactory.hpp \
+                                      test/allocator_perf_tool/CSVLogger.hpp \
+                                      test/allocator_perf_tool/CommandLine.hpp \
+                                      test/allocator_perf_tool/Configuration.hpp \
+                                      test/allocator_perf_tool/ConsoleLog.hpp \
+                                      test/allocator_perf_tool/FootprintSampling.cpp \
+                                      test/allocator_perf_tool/FootprintSampling.h \
+                                      test/allocator_perf_tool/FootprintTask.cpp \
+                                      test/allocator_perf_tool/FootprintTask.h \
+                                      test/allocator_perf_tool/FunctionCalls.hpp \
+                                      test/allocator_perf_tool/FunctionCallsPerformanceTask.cpp \
+                                      test/allocator_perf_tool/FunctionCallsPerformanceTask.h \
+                                      test/allocator_perf_tool/GTestAdapter.hpp \
+                                      test/allocator_perf_tool/Iterator.hpp \
+                                      test/allocator_perf_tool/JemallocAllocatorWithTimer.hpp \
+                                      test/allocator_perf_tool/MemkindAllocatorWithTimer.hpp \
+                                      test/allocator_perf_tool/MemoryFootprintStats.hpp \
+                                      test/allocator_perf_tool/Numastat.hpp \
+                                      test/allocator_perf_tool/Runnable.hpp \
+                                      test/allocator_perf_tool/Sample.hpp \
+                                      test/allocator_perf_tool/ScenarioWorkload.cpp \
+                                      test/allocator_perf_tool/ScenarioWorkload.h \
+                                      test/allocator_perf_tool/StandardAllocatorWithTimer.hpp \
+                                      test/allocator_perf_tool/Stats.hpp \
+                                      test/allocator_perf_tool/StressIncreaseToMax.cpp \
+                                      test/allocator_perf_tool/StressIncreaseToMax.h \
+                                      test/allocator_perf_tool/Task.hpp \
+                                      test/allocator_perf_tool/TaskFactory.hpp \
+                                      test/allocator_perf_tool/Tests.hpp \
+                                      test/allocator_perf_tool/Thread.hpp \
+                                      test/allocator_perf_tool/TimerSysTime.hpp \
+                                      test/allocator_perf_tool/VectorIterator.hpp \
+                                      test/allocator_perf_tool/Workload.hpp \
+                                      test/allocator_perf_tool/WrappersMacros.hpp \
+                                      test/allocator_perf_tool/HugePageUnmap.hpp \
+                                      test/allocator_perf_tool/HugePageOrganizer.hpp \
+                                      # end
 
 
-test_allocator_perf_tool_tests_SOURCES = test/main.cpp \
-									$(allocator_perf_tool_library_sources) \
-                                    test/allocate_to_max_stress_test.cpp \
-                                    test/heap_manager_init_perf_test.cpp \
-                                    test/huge_page_test.cpp \
-                                    test/alloc_performance_tests.cpp \
-                                    # end
+test_allocator_perf_tool_tests_SOURCES = $(allocator_perf_tool_library_sources) \
+                                         $(fused_gtest) \
+                                         test/allocate_to_max_stress_test.cpp \
+                                         test/heap_manager_init_perf_test.cpp \
+                                         test/huge_page_test.cpp \
+                                         test/alloc_performance_tests.cpp \
+                                         # end
 
 
-test_allocator_perf_tool_tests_CPPFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error -I$(googletest)/include $(AM_CPPFLAGS)
-test_allocator_perf_tool_tests_CXXFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error -I$(googletest)/include $(AM_CPPFLAGS)
+test_allocator_perf_tool_tests_CPPFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
+test_allocator_perf_tool_tests_CXXFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
 if ENABLE_CXX11
 test_allocator_perf_tool_tests_CPPFLAGS += -std=c++11
 test_allocator_perf_tool_tests_CXXFLAGS += -std=c++11
@@ -172,8 +179,8 @@ test_all_tests_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS) -DNUMAKIND
 check_PROGRAMS += test/perf_tool
 test_perf_tool_LDADD = libmemkind.la
 test_perf_tool_SOURCES = $(allocator_perf_tool_library_sources) \
-						test/allocator_perf_tool/main.cpp \
-						# end
+                         test/allocator_perf_tool/main.cpp \
+                         # end
 
 
 test_perf_tool_CPPFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
@@ -231,37 +238,6 @@ if ENABLE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 endif
 test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
-
-# All of the non-standard requirements for testing (gtest)
-.PHONY: test clean-local-gtest
-
-test: check-am
-
-check-am: libgtest.a
-
-clean-local: clean-local-gtest
-
-googletest_version = 1.7.0
-googletest = gtest-$(googletest_version)
-googletest_archive = $(googletest).zip
-googletest_sha1 = f85f6d2481e2c6c4a18539e391aa4ea8ab0394af
-
-$(googletest_archive):
-	wget http://googletest.googlecode.com/files/$(googletest_archive)
-	if [ $$(sha1sum $(googletest_archive) | awk '{print $$1}') != $(googletest_sha1) ]; then exit -1; fi
-
-$(googletest)/VERSION: $(googletest_archive)
-	rm -rf $(googletest)
-	unzip $(googletest_archive)
-	echo $(googletest_version) > $(googletest)/VERSION
-
-libgtest.a: $(googletest)/VERSION
-	$(CXX) $(CXXFLAGS) -isystem $(googletest)/include -I$(googletest) -pthread \
-	      -c $(googletest)/src/gtest-all.cc
-	ar -rv libgtest.a gtest-all.o
-
-clean-local-gtest:
-	rm -rf libgtest.a $(googletest)
 
 CLEANFILES += test/numakind_macro.h
 test/numakind_test.cpp: test/numakind_macro.h

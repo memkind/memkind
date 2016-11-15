@@ -147,7 +147,6 @@ test -f configure || ./autogen.sh
            --includedir=%{_includedir} --sbindir=%{_sbindir} --enable-cxx11 \
            --mandir=%{_mandir} --docdir=%{_docdir}/%{namespace} \
            $(hwloc_config_opt)
-$(make_prefix)%{__make} %{?_smp_mflags} libgtest.a $(make_postfix)
 $(make_prefix)%{__make} %{?_smp_mflags} checkprogs $(make_postfix)
 
 

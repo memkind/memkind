@@ -29,7 +29,6 @@ examples/memkind_allocated.hpp
 examples/gb_realloc_example.c
 examples/memkind_decorator_debug.c
 examples/pmem_example.c
-gtest-1.7.0.zip
 make_rpm.mk
 man/hbwmalloc.3
 man/memkind.3
@@ -322,4 +321,6 @@ jemalloc/test/unit/stats.c
 jemalloc/test/unit/tsd.c
 jemalloc/test/unit/util.c
 jemalloc/test/unit/zero.c
+test/gtest_fused/gtest/gtest-all.cc
+test/gtest_fused/gtest/gtest.h
 
