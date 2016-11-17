@@ -1,3 +1,15 @@
+* Thu Nov 17 2016 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v1.4.0
+- Introduced hbw_verify_memory_region() for verifying if provided memory
+  region fully falls into high-bandwidth memory (for details please take a look
+  at man/hbwmalloc.3).
+- New API for creating kinds using set of predefined attributes:
+  memkind_create_kind(), memkind_destroy_kind() (for details please take a look
+  at man/memkind.3).
+- Fixed issue in autohbw where it was reporting limit error regardless of
+  value provided.
+- Added logging on error paths.
+- Test base fixes and improvements.
+
 * Tue Sep 27 2016 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v1.3.0
 - Introduced logging mechanism (for details please take a look at
   man/memkind.3).
