@@ -25,7 +25,6 @@
       </p>
       <p>
         <a href="https://github.com/memkind/memkind/tarball/master" class="btn btn-outline-inverse btn-lg btn-default">Download</a>
-        <p class="version">Currently v1.3.0</p>
       </p>
     </div>
   </header>
@@ -65,7 +64,7 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
             Binaries
           </h2>
           <p>
-            <a href="http://download.opensuse.org/repositories/home:/kakulako/" class="btn btn-link">RPMs for misc OSes - memkind 1.3.0 </a>
+            <a href="http://download.opensuse.org/repositories/home:/kakulako/" class="btn btn-link">RPMs for misc OSes</a>
           </p>
         </div>
         <div id="faq" class='bs-docs-section'>
@@ -83,7 +82,27 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
           <h1 class="page-header">
             Blog
           </h1>
-          <p class="lead">Release 1.3.0 is available</p><span class="post-date">Thu Oct 06 2016</span><p>I would like to announce memkind release <strong>1.3.0</strong>. Changes since 1.2.0:</p>
+          <p class="lead">Release 1.4.0 is available</p><span class="post-date">Fri Nov 18 2016</span><p>I would like to announce memkind release <strong>1.4.0</strong>. Changes since 1.3.0:</p>
+<ul>
+<li>Thu Nov 17 2016 Krzysztof Kulakowski <a href="&#x6d;&#97;&#x69;&#108;&#116;&#111;&#x3a;&#107;&#x72;&#122;&#121;&#x73;&#122;&#x74;&#111;&#102;&#x2e;&#x6b;&#117;&#x6c;&#97;&#x6b;&#x6f;&#119;&#x73;&#107;&#105;&#x40;&#105;&#110;&#x74;&#101;&#108;&#x2e;&#99;&#x6f;&#109;">&#107;&#x72;&#122;&#121;&#x73;&#122;&#x74;&#111;&#102;&#x2e;&#x6b;&#117;&#x6c;&#97;&#x6b;&#x6f;&#119;&#x73;&#107;&#105;&#x40;&#105;&#110;&#x74;&#101;&#108;&#x2e;&#99;&#x6f;&#109;</a> v1.4.0</li>
+</ul>
+<ul>
+<li>Introduced hbw_verify_memory_region() for verifying if provided memory
+region fully falls into high-bandwidth memory (for details please take a look
+at man/hbwmalloc.3).</li>
+<li>New API for creating kinds using set of predefined attributes:
+memkind_create_kind(), memkind_destroy_kind() (for details please take a look
+at man/memkind.3).</li>
+<li>Fixed issue in autohbw where it was reporting limit error regardless of
+value provided.</li>
+<li>Added logging on error paths.</li>
+<li>Test base fixes and improvements.</li>
+</ul>
+<p>Sources are available on:
+<a href="https://github.com/memkind/memkind/releases/tag/v1.4.0">https://github.com/memkind/memkind/releases/tag/v1.4.0</a></p>
+<p>Best Regards,</p>
+<p><em>Krzysztof Kulakowski</em></p>
+<p class="lead">Release 1.3.0 is available</p><span class="post-date">Thu Oct 06 2016</span><p>I would like to announce memkind release <strong>1.3.0</strong>. Changes since 1.2.0:</p>
 <ul>
 <li>Introduced logging mechanism (for details please take a look at
 <code>man/memkind.3</code>).</li>
