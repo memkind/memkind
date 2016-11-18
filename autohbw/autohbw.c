@@ -170,7 +170,7 @@ static struct kind_name_t named_kinds[] = {
     { &MEMKIND_HBW, "memkind_hbw" },
     { &MEMKIND_HBW_PREFERRED, "memkind_hbw_preferred" },
     { &MEMKIND_HBW_HUGETLB, "memkind_hbw_hugetlb" },
-    { &MEMKIND_HBW_PREFERRED, "memkind_hbw_preferred_hugetlb" },
+    { &MEMKIND_HBW_PREFERRED_HUGETLB, "memkind_hbw_preferred_hugetlb" },
     { &MEMKIND_HBW_GBTLB, "memkind_hbw_gbtlb" },
     { &MEMKIND_HBW_PREFERRED_GBTLB, "memkind_hbw_preferred_gbtlb" },
     { &MEMKIND_GBTLB, "memkind_gbtlb" },
