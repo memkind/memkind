@@ -25,14 +25,14 @@
 .SH "NAME"
 libautohbw.so \- An interposer library for redirecting heap allocations
 .SH "SYNOPSIS"
-.BR LD_PRELOAD=libautohbw.so:libmemkind.so
+.BR LD_PRELOAD=libautohbw.so
 command {arguments ...}
 .SH "DESCRIPTION"
 .B AutoHBW
 library
 .BR (libautohbw.so)
 is an interposer library for redirecting heap allocations
-.B (malloc, calloc, realloc, posix_memalign)
+.B (malloc, calloc, realloc, valloc, posix_memalign, memlign)
 to high-bandwidth
 .B (HBW)
 memory. Consequently, AutoHBW library can be used to
@@ -44,7 +44,7 @@ For instance, the following command-line runs existing binary /bin/ls with
 AutoHBW library, automatically redirecting heap allocations (larger than a given
 threshold) to high-bandwidth memory.
 .IP
-.B LD_PRELOAD=libautohbw.so:libmemkind.so
+.B LD_PRELOAD=libautohbw.so
 /bin/ls
 
 .SH "ENVIRONMENT"
@@ -120,7 +120,15 @@ default, this type is MEMKIND_HBW_PREFERRED, if MCDRAM is found in your
 system; otherwise, the default is MEMKIND_DEFAULT. The names of memory
 types are defined in
 .B memkind(3)
-man page. If you are requesting any huge
+man page.
+.B memory_type
+has to be one of
+.B MEMKIND_DEFAULT, MEMKIND_HUGETLB, MEMKIND_INTERLEAVE, MEMKIND_HBW,
+.B MEMKIND_HBW_PREFERRED, MEMKIND_HBW_HUGETLB, MEMKIND_HBW_PREFERRED_HUGETLB,
+.B MEMKIND_HBW_GBTLB, MEMKIND_HBW_PREFERRED_GBTLB, MEMKIND_GBTLB,
+.B MEMKIND_HBW_INTERLEAVE
+
+If you are requesting any huge
 TLB pages, please make sure that the requested type is currently enabled
 in your OS.
 
@@ -160,12 +168,12 @@ The following will run /bin/ls with AutoHBW library. Make sure that paths to
 both libautohbw.so and libmemkind.so are included in
 .B LD_LIBRARY_PATH.
 .IP
-.B LD_PRELOAD=libautohbw.so:libmemkind.so
+.B LD_PRELOAD=libautohbw.so
 /bin/ls -l
 .PP
 To run with MPI, a shell script must be created, with the correct LD_PRELOAD
 command for each rank. For example, if we put
-.B LD_PRELOAD=libautohbw.so:libmemkind.so /bin/ls
+.B LD_PRELOAD=libautohbw.so /bin/ls
 in a shell script named autohbw_test.sh, it can be executed with 2 MPI ranks as:
 .br
 .IP
