@@ -1,1 +1,1 @@
--k "test_TC_MEMKIND_autohbw or test_TC_MEMKIND_hbw_detection or test_TC_MEMKIND_logging"
+-k "test_TC_MEMKIND_"
