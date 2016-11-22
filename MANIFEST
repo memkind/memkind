@@ -70,7 +70,6 @@ test/check.sh
 test/test.sh
 test/multithreaded_tests.cpp
 test/gb_page_tests.cpp
-test/get_knl_modes.c
 test/environ_err_hbw_malloc_test.cpp
 test/negative_tests.cpp
 test/trial_generator.cpp
@@ -100,7 +99,6 @@ test/huge_page_test.cpp
 test/hbw_verify_function_test.cpp
 test/hbw_detection_test.py
 test/autohbw_test.py
-test/knl_modes_test.py
 test/trace_mechanism_test.py
 test/memkind-afts.ts
 test/memkind-afts-ext.ts

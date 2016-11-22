@@ -59,39 +59,6 @@ if test "x$with_numa_lib" != x; then
   LDFLAGS="$LDFLAGS -L$with_numa_lib"
 fi
 
-#============================hwloc=============================================
-# arg to provide path to hwloc headers
-AC_ARG_WITH([hwloc-include], [AS_HELP_STRING([--with-hwloc-include=PATH],
-            [specify directory for the installed hwloc include files.])])
-if test "x$with_hwloc_include" != x; then
-  CPPFLAGS="$CPPFLAGS -I$with_hwloc_include"
-fi
-# arg to provide path to hwloc lib
-AC_ARG_WITH([hwloc], [AS_HELP_STRING([--with-hwloc=PATH],
-            [use the hwloc @<:@default=check@:>@])],
-            [],
-            [with_hwloc=check])
-LIBHWLOC=
-if test "x$with_hwloc" != xno; then
-  if test "x$with_hwloc" != xcheck; then
-    LD_LIBRARY_PATH="$with_hwloc:$LD_LIBRARY_PATH"
-    LDFLAGS="$LDFLAGS -L$with_hwloc"
-  fi
-# TODO change to KNL-specific symbol
-  AC_CHECK_LIB([hwloc], [hwloc_get_api_version],
-              [AC_SUBST([LIBHWLOC], ["-lhwloc"])
-               AC_DEFINE([HAVE_LIBHWLOC], [1],
-                         [Define if you have libhwloc])
-              ],
-              [if test "x$with_hwloc" != xcheck; then
-                 AC_MSG_FAILURE(
-                   [--with-hwloc was given, but test for libhwloc failed])
-               fi
-               with_hwloc=
-              ], "")
-fi
-AM_CONDITIONAL([USE_HWLOC], [test x$with_hwloc != x])
-
 #============================tls===============================================
 # Check for tls_model attribute support
 SAVED_CFLAGS="${CFLAGS}"
@@ -296,7 +263,6 @@ AC_MSG_RESULT([OPENMP_CFLAGS      : ${OPENMP_CFLAGS}])
 AC_MSG_RESULT([LDFLAGS            : ${LDFLAGS}])
 AC_MSG_RESULT([LD_LIBRARY_PATH    : ${LD_LIBRARY_PATH}])
 AC_MSG_RESULT([LIBS               : ${LIBS}])
-AC_MSG_RESULT([LIBHWLOC           : ${LIBHWLOC}])
 AC_MSG_RESULT([])
 AC_MSG_RESULT([prefix             : ${prefix}])
 AC_MSG_RESULT([exec_prefix        : ${exec_prefix}])

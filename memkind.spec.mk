@@ -145,8 +145,7 @@ echo %{version} > %{_builddir}/%{buildsubdir}/VERSION
 test -f configure || ./autogen.sh
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} \
            --includedir=%{_includedir} --sbindir=%{_sbindir} --enable-cxx11 \
-           --mandir=%{_mandir} --docdir=%{_docdir}/%{namespace} \
-           $(hwloc_config_opt)
+           --mandir=%{_mandir} --docdir=%{_docdir}/%{namespace}
 $(make_prefix)%{__make} %{?_smp_mflags} checkprogs $(make_postfix)
 
 
@@ -230,12 +229,10 @@ $(memkind_test_dir)/check.sh
 $(memkind_test_dir)/test.sh
 $(memkind_test_dir)/hbw_detection_test.py
 $(memkind_test_dir)/autohbw_test.py
-$(memkind_test_dir)/knl_modes_test.py
 $(memkind_test_dir)/trace_mechanism_test.py
 $(memkind_test_dir)/python_framework
 $(memkind_test_dir)/python_framework/cmd_helper.py
 $(memkind_test_dir)/python_framework/__init__.py
-$(memkind_include_knl_mode)
 
 %exclude $(memkind_test_dir)/*.pyo
 %exclude $(memkind_test_dir)/*.pyc

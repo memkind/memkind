@@ -51,16 +51,6 @@ test/python_framework/__init__.py \
 test/hbw_detection_test.py test/autohbw_test.py \
 test/trace_mechanism_test.py
 
-memkind_depends_root ?=
-
-ifeq ($(memkind_depends_root),)
-        hwloc_config_opt:=--with-hwloc=check
-        memkind_include_knl_mode :=
-else
-        hwloc_config_opt:=--with-hwloc=$(memkind_depends_root)/lib64 --with-hwloc-include=$(memkind_depends_root)/include
-        memkind_include_knl_mode := $(memkind_test_dir)/get_knl_modes
-endif
-
 all: $(rpm)
 
 $(rpm): $(specfile) $(source_tar)
@@ -81,7 +71,7 @@ $(source_tar): $(topdir)/.setup $(src) MANIFEST
 		mkdir -p `dirname $(source_tmp_dir)/$(name)-$(version)/$$f` ; \
 		cp $$f $(source_tmp_dir)/$(name)-$(version)/$$f ; \
 	done
-	cd $(source_tmp_dir)/$(name)-$(version) && ./autogen.sh && ./configure $(hwloc_config_opt) && make dist; \
+	cd $(source_tmp_dir)/$(name)-$(version) && ./autogen.sh && ./configure && make dist
 	# tar.gz produced by "make dist" from above produces memkind-$(version).tar.gz
 	# If $(package_prefix) is not empty, then need to repackage that tar.gz to $(name)-$(version)
 	# thus below command. Otherwise, rpmbuild will fail.

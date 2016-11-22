@@ -32,10 +32,6 @@ check_PROGRAMS += test/all_tests \
                   test/trace_mechanism_test_helper \
                   # end
 
-if USE_HWLOC
-check_PROGRAMS += test/get_knl_modes
-endif
-
 TESTS += test/check.sh
 
 EXTRA_DIST += test/memkind-afts.ts \
@@ -46,7 +42,6 @@ EXTRA_DIST += test/memkind-afts.ts \
               test/memkind-pytests.ts \
               test/hbw_detection_test.py \
               test/autohbw_test.py \
-              test/knl_modes_test.py \
               test/trace_mechanism_test.py \
               test/python_framework/cmd_helper.py \
               test/python_framework/__init__.py \
@@ -62,10 +57,6 @@ test_decorator_test_LDADD = libmemkind.la
 test_allocator_perf_tool_tests_LDADD = libmemkind.la
 test_autohbw_test_helper_LDADD = libmemkind.la
 test_trace_mechanism_test_helper_LDADD = libmemkind.la
-if USE_HWLOC
-test_get_knl_modes_SOURCES = test/get_knl_modes.c
-test_get_knl_modes_LDADD = $(LIBHWLOC) libmemkind.la
-endif
 
 fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
               test/main.cpp \
