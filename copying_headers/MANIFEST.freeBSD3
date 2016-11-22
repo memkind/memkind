@@ -1,2 +1,1 @@
 examples/pmem_example.c
-test/get_knl_modes.c
