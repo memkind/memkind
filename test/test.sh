@@ -184,7 +184,7 @@ function execute_pytest()
         fi
     fi
     # Concatenate test command
-    TESTCMD=$(printf "$TESTCMD" "$TEST$SKIPPED_PYTEST")
+    TESTCMD=$(printf "$TESTCMD" "$TEST$SKIPPED_PYTESTS")
     # And test prefix if applicable
     if [ "$TEST_PREFIX" != "" ]; then
         TESTCMD=$(printf "$TEST_PREFIX" "$TESTCMD")
@@ -268,6 +268,11 @@ while true; do
             else
                 SKIPPED_GTESTS=$SKIPPED_GTESTS":*test_TC_MEMKIND_2MBPages_*"
             fi
+            if [[ "$SKIPPED_PYTESTS" == "" ]]; then
+                SKIPPED_PYTESTS=" and not test_TC_MEMKIND_2MBPages_"
+            else
+                SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not test_TC_MEMKIND_2MBPages_"
+            fi
             show_skipped_tests "test_TC_MEMKIND_2MBPages_"
             shift
             ;;
@@ -278,15 +283,20 @@ while true; do
             else
                 SKIPPED_GTESTS=$SKIPPED_GTESTS":*test_TC_MEMKIND_GBPages_*"
             fi
+            if [[ "$SKIPPED_PYTESTS" == "" ]]; then
+                SKIPPED_PYTESTS=" and not test_TC_MEMKIND_GBPages_"
+            else
+                SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not test_TC_MEMKIND_GBPages_"
+            fi
             show_skipped_tests "test_TC_MEMKIND_GBPages_"
             shift
             ;;
         -d)
             echo "Skipping tests that detect high bandwidth memory nodes due to unsatisfactory system conditions"
-            if [[ $SKIPPED_PYTEST == "" ]]; then
-                SKIPPED_PYTEST=" and not hbw_detection"
+            if [[ $SKIPPED_PYTESTS == "" ]]; then
+                SKIPPED_PYTESTS=" and not hbw_detection"
             else
-                SKIPPED_PYTEST=$SKIPPED_PYTEST" and not hbw_detection"
+                SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not hbw_detection"
             fi
             show_skipped_tests "test_TC_MEMKIND_hbw_detection"
             shift

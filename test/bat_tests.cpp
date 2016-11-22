@@ -97,7 +97,7 @@ TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL)
     ASSERT_EQ(ret, MEMKIND_SUCCESS);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB)
+TEST_F(BATest, test_TC_MEMKIND_2MBPages_malloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB)
 {
     memkind_t kind = NULL;
     int ret = memkind_create_kind(

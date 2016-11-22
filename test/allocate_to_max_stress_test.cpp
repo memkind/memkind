@@ -118,7 +118,7 @@ TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HB
 
 //Allocate memory to max using MEMKIND_HBW_HUGETLB kind.
 //NOTE: Allocated memory is limited (allocated_memory = total_free - reserved_unallocated).
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_HUGETLB)
+TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_2MBPages_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_HUGETLB)
 {
     run(AllocatorTypes::MEMKIND_HBW_HUGETLB, 10000, 2048, 2048, 8);
 }

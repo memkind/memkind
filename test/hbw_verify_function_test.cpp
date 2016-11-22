@@ -158,7 +158,7 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_HBW_iterate_not_round)
 /*
  * Tests for other kinds and malloc
  */
-TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_HBW_HUGETLB)
+TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_2MBPages_HBW_HUGETLB)
 {
     size_t size = 2 * 1024 * 1024 * 10; //10 * 2MB pages
     char* ptr = (char*) memkind_malloc(MEMKIND_HBW_HUGETLB, size);
