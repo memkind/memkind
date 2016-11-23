@@ -30,6 +30,10 @@ check_PROGRAMS += test/all_tests \
                   test/allocator_perf_tool_tests \
                   test/autohbw_test_helper \
                   test/trace_mechanism_test_helper \
+                  test/gb_page_tests_bind_policy \
+                  test/gb_page_tests_preferred_policy \
+                  test/bat_bind_tests \
+                  test/bat_interleave_tests \
                   # end
 
 TESTS += test/check.sh
@@ -56,6 +60,10 @@ test_environerr_hbw_malloc_test_LDADD = libmemkind.la
 test_decorator_test_LDADD = libmemkind.la
 test_allocator_perf_tool_tests_LDADD = libmemkind.la
 test_autohbw_test_helper_LDADD = libmemkind.la
+test_gb_page_tests_bind_policy_LDADD = libmemkind.la
+test_gb_page_tests_preferred_policy_LDADD = libmemkind.la
+test_bat_bind_tests_LDADD = libmemkind.la
+test_bat_interleave_tests_LDADD = libmemkind.la
 test_trace_mechanism_test_helper_LDADD = libmemkind.la
 
 fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
@@ -65,9 +73,6 @@ fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
 test_all_tests_SOURCES = $(fused_gtest) \
                          test/common.h \
                          test/bat_tests.cpp \
-                         test/bat_bind_tests.cpp \
-                         test/bat_interleave_tests.cpp \
-                         test/gb_page_tests.cpp \
                          test/trial_generator.cpp \
                          test/check.cpp \
                          test/multithreaded_tests.cpp \
@@ -101,6 +106,10 @@ test_all_tests_SOURCES = $(fused_gtest) \
 test_environerr_hbw_malloc_test_SOURCES = $(fused_gtest) test/environ_err_hbw_malloc_test.cpp test/trial_generator.cpp test/check.cpp
 test_decorator_test_SOURCES = $(fused_gtest) test/decorator_test.cpp test/decorator_test.h
 test_autohbw_test_helper_SOURCES = test/autohbw_test_helper.c
+test_gb_page_tests_bind_policy_SOURCES = $(fused_gtest) test/gb_page_tests_bind_policy.cpp test/trial_generator.cpp test/check.cpp
+test_gb_page_tests_preferred_policy_SOURCES = $(fused_gtest) test/gb_page_tests_preferred_policy.cpp test/trial_generator.cpp test/check.cpp
+test_bat_bind_tests_SOURCES = $(fused_gtest) test/bat_bind_tests.cpp test/trial_generator.cpp test/check.cpp
+test_bat_interleave_tests_SOURCES = $(fused_gtest) test/bat_interleave_tests.cpp test/trial_generator.cpp test/check.cpp
 test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c
 
 #Tests based on Allocator Perf Tool
