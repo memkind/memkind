@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 		for (int i=0; i<stats.size(); i++)
 		{
 			AllocatorFactory::initialization_stat stat = stats[i];
-			printf("%32s : time=%7.7f.s, ref_delta_time=%15f%, node0=%10fMB, node1=%7.7fMB\n",
+			printf("%32s : time=%7.7f.s, ref_delta_time=%15f, node0=%10fMB, node1=%7.7fMB\n",
 				AllocatorTypes::allocator_name(stat.allocator_type).c_str(),
 				stat.total_time,
 				stat.ref_delta_time,

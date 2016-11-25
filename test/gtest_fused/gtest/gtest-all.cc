@@ -3734,6 +3734,7 @@ void ReportInvalidTestCaseType(const char* test_case_name,
 
 }  // namespace internal
 
+#if 0
 namespace {
 
 // A predicate that checks the test name of a TestInfo against a known
@@ -3762,6 +3763,7 @@ class TestNameIs {
 };
 
 }  // namespace
+#endif
 
 namespace internal {
 
