@@ -23,7 +23,8 @@
  */
 
 #include "memkind.h"
-
+#include "hbwmalloc.h"
+#include "common.h"
 #include "trial_generator.h"
 
 /* This set of tests are intended to use GB pages allocation, it is needed to have
@@ -32,22 +33,41 @@
  * its output.
  */
 class GBPagesTestBindPolicy : public TGTest
-{};
+{
+protected:
+    void run(int iterations, size_t alignment, bool psize_strict)
+    {
+        std::vector<void*> addr_to_free;
+        hbw_set_policy(HBW_POLICY_BIND);
+        EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
+
+        for (int i = 0; i < iterations; i++) {
+            void* ptr = NULL;
+            if (psize_strict) {
+                hbw_posix_memalign_psize(&ptr, alignment, GB, HBW_PAGESIZE_1GB_STRICT);
+            }
+            else {
+                hbw_posix_memalign_psize(&ptr, alignment, GB, HBW_PAGESIZE_1GB);
+            }
+            ASSERT_FALSE(ptr == NULL);
+            ASSERT_EQ(0, hbw_verify_memory_region(ptr, GB, HBW_TOUCH_PAGES));
+            addr_to_free.push_back(ptr);
+        }
+
+        for (int i = 0; i < iterations; i++) {
+            hbw_free(addr_to_free[i]);
+        }
+    }
+};
 
 TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_HBW_Misalign_Preferred_Bind_Strict)
 {
-    hbw_set_policy(HBW_POLICY_BIND);
-    EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
-    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true, 2147483648);
-    tgen->run(num_bandwidth, bandwidth);
+    run(1, 2*GB, true);
 }
 
 TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_HBW_Memalign_Psize_Bind)
 {
-    hbw_set_policy(HBW_POLICY_BIND);
-    EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
-    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);
-    tgen->run(num_bandwidth, bandwidth);
+    run(1, GB, true);
 }
 
 /*
@@ -56,16 +76,10 @@ TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_HBW_Memalign_Psize_Bind)
 
 TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bind)
 {
-    hbw_set_policy(HBW_POLICY_BIND);
-    EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
-    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 2, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE);
-    tgen->run(num_bandwidth, bandwidth);
+    run(2, GB, false);
 }
 
 TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Strict_Bind)
 {
-    hbw_set_policy(HBW_POLICY_BIND);
-    EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
-    tgen->generate_gb (HBW_MEMALIGN_PSIZE, 3, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);
-    tgen->run(num_bandwidth, bandwidth);
+    run(3, GB, true);
 }
