@@ -29,6 +29,8 @@ from python_framework import CMD_helper
 
 class Test_hbw_detection(object):
     binary_path = find_executable("memkind-hbw-nodes")
+    environ_err_test = "../environ_err_hbw_malloc_test"
+    expected_libnuma_warning = "libnuma: Warning: node argument -1 is out of range\n\n"
     fail_msg = "Test failed with:\n {0}"
     cmd_helper = CMD_helper()
 
@@ -67,5 +69,14 @@ class Test_hbw_detection(object):
         """ This test checks whether hbw_nodemask_default and hbw_nodemask_env_variable has the same value """
         hbw_nodemask_default = self.get_nodemask_default()
         hbw_nodemask_env_variable = self.get_nodemask_env_variable()
-        assert hbw_nodemask_default == hbw_nodemask_env_variable, self.fail_msg.format("Error: Nodemask hbw_nodemask_default ({0}) is not the same as nodemask hbw_nodemask_env_variable ({1})".format(hbw_nodemask_default, hbw_nodemask_env_variable))
+        assert hbw_nodemask_default == hbw_nodemask_env_variable, self.fail_msg.format("Error: Nodemask hbw_nodemask_default ({0}) " \
+               "is not the same as nodemask hbw_nodemask_env_variable ({1})".format(hbw_nodemask_default, hbw_nodemask_env_variable))
 
+    def test_TC_MEMKIND_hbw_detection_negative_hbw_malloc(self):
+        """ This test sets usupported value of MEMKIND_HBW_NODES, then try to perform a successfull allocation from DRAM using hbw_malloc()
+        thanks to default HBW_POLICY_PREFERRED policy """
+        command = "MEMKIND_HBW_NODES=-1 " + self.cmd_helper.get_command_path(self.environ_err_test)
+        output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
+        assert retcode != 0, self.fail_msg.format("Error: hbw_nodemask returned {0} with output {1}".format(retcode, output))
+        assert self.expected_libnuma_warning == output, self.fail_msg.format("Error: expected libnuma warning ({0}) " \
+               "was not found (output: {1})").format(self.expected_libnuma_warning, output)
