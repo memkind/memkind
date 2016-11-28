@@ -205,7 +205,7 @@ rm -f %{buildroot}/%{_libdir}/lib{numakind}.*
 $(memkind_test_dir)/all_tests
 $(memkind_test_dir)/bat_bind_tests
 $(memkind_test_dir)/bat_interleave_tests
-$(memkind_test_dir)/environerr_hbw_malloc_test
+$(memkind_test_dir)/environ_err_hbw_malloc_test
 $(memkind_test_dir)/decorator_test
 $(memkind_test_dir)/gb_page_tests_bind_policy
 $(memkind_test_dir)/gb_page_tests_preferred_policy

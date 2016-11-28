@@ -22,51 +22,64 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "memkind.h"
+#include <hbwmalloc.h>
+#include <memkind.h>
+#include "memkind/internal/memkind_hbw.h"
 
-#include <fstream>
-#include <algorithm>
+#include <numa.h>
+#include <numaif.h>
 
 #include "common.h"
-#include "check.h"
-#include "omp.h"
-#include "trial_generator.h"
 
-/* Set of basic acceptance tests for PREFERRED policy, the goal of this set of tests
- * is to prove that you can do incremental allocations of memory with different
- * sizes and that pages are actually allocated in HBW node.
+/* This test is run with overridden MEMKIND_HBW_NODES environment variable
+ * and tries to perform allocation from DRAM using hbw_malloc() using
+ * default HBW_POLICY_PREFERRED policy.
  */
-class EnvHbwMallocTest : public TGTest
+int main()
 {
-};
-
-
-TEST_F(EnvHbwMallocTest, TC_Memkind_Negative_Hbw_Malloc)
-{
-    /* Set usupported value of MEMKIND_HBW_NODES, then try to perform
-      a successfull allocation from DRAM using hbw_malloc()
-      thanks to default HBW_POLICY_PREFERRED policy*/
-
-    static const char numa_warning[] = "libnuma: Warning: node argument -1 is out of range";
-    char buf[KB];
-    trial_t t;
-    t.size = KB;
-    t.page_size = 0;
-
-    ASSERT_EQ(setenv("MEMKIND_HBW_NODES", "-1", 1), 0);
-
+    struct bitmask *expected_nodemask = NULL;
+    struct bitmask *returned_nodemask = NULL;
     void *ptr = NULL;
+    int ret = 0;
+    int status = 0;
 
-    buf[0] = '\0';
-    setbuf(stderr, buf);
     ptr = hbw_malloc(KB);
-    EXPECT_EQ(ptr != NULL, true);
-    EXPECT_EQ(strncmp(numa_warning, buf, strlen(numa_warning)), 0);
+    if (ptr == NULL) {
+        printf("Error: allocation failed\n");
+        goto exit;
+    }
 
-    Check c(ptr, t);
-    c.check_node_hbw();
+    expected_nodemask = numa_allocate_nodemask();
+    status = memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
+    if (status != MEMKIND_ERROR_ENVIRON) {
+        printf("Error: wrong return value from memkind_hbw_all_get_mbind_nodemask()\n");
+        printf("Expected: %d\n", MEMKIND_ERROR_ENVIRON);
+        printf("Actual: %d\n", status);
+        goto exit;
+    }
 
-    hbw_free(ptr);
-    buf[0] = '\0';
-    setbuf(stderr, NULL);
+    returned_nodemask = numa_allocate_nodemask();
+    status = get_mempolicy(NULL, returned_nodemask->maskp, returned_nodemask->size, ptr, MPOL_F_ADDR);
+    if (status) {
+        printf("Error: get_mempolicy() returned %d\n", status);
+        goto exit;
+    }
+
+    ret = numa_bitmask_equal(returned_nodemask, expected_nodemask);
+    if (!ret) {
+        printf("Error: Memkind hbw and allocated pointer nodemasks are not equal\n");
+    }
+
+exit:
+    if (expected_nodemask) {
+        numa_free_nodemask(expected_nodemask);
+    }
+    if (returned_nodemask) {
+        numa_free_nodemask(returned_nodemask);
+    }
+    if (ptr) {
+        hbw_free(ptr);
+    }
+
+    return ret;
 }
