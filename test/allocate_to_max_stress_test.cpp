@@ -26,6 +26,7 @@
 #include "common.h"
 #include "allocator_perf_tool/Configuration.hpp"
 #include "allocator_perf_tool/StressIncreaseToMax.h"
+#include "allocator_perf_tool/HugePageOrganizer.hpp"
 
 //memkind stress and longevity tests using Allocatr Perf Tool.
 class AllocateToMaxStressTests: public :: testing::Test
@@ -120,6 +121,7 @@ TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HB
 //NOTE: Allocated memory is limited (allocated_memory = total_free - reserved_unallocated).
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_2MBPages_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_HUGETLB)
 {
+    ASSERT_HUGEPAGES_AVAILABILITY();
     run(AllocatorTypes::MEMKIND_HBW_HUGETLB, 10000, 2048, 2048, 8);
 }
 

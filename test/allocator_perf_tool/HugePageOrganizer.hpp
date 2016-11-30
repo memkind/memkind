@@ -23,27 +23,42 @@
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include <fstream>
+#include <string.h>
+
+#define ASSERT_HUGEPAGES_AVAILABILITY() ASSERT_TRUE(HugePageOrganizer::get_nr_hugepages() > 0) << "No hugepages (2MB pages) found.";
+#define ASSERT_GBPAGES_AVAILABILITY() ASSERT_TRUE(HugePageOrganizer::get_nr_1GB_pages() > 0) << "No gigabyte pages found.";
 
 class HugePageOrganizer
 {
 
 public:
+
+    static bool get_nr_1GB_pages()
+    {
+        std::string line;
+        std::ifstream file("/sys/kernel/mm/hugepages/hugepages-1048576kB/nr_hugepages");
+        if (!file.is_open()) {
+            return -1;
+        }
+        std::getline(file, line);
+        return strtol(line.c_str(), 0, 10);
+    }
+
     static int get_nr_hugepages()
     {
         std::string line;
-        std::ifstream file("/proc/sys/vm/nr_hugepages");
-        if (file.is_open())
-        {
-            getline (file,line);
-            file.close();
+        std::ifstream file("/sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages");
+        if (!file.is_open()) {
+            return -1;
         }
+        std::getline(file, line);
         return strtol(line.c_str(), 0, 10);
     }
 
     static int set_nr_hugepages(int nr_hugepages)
     {
         char cmd[128];
-        sprintf (cmd, "sudo sysctl vm.nr_hugepages=%d", nr_hugepages);
+        sprintf(cmd, "sudo sysctl vm.nr_hugepages=%d", nr_hugepages);
         return system(cmd);
     }
 };

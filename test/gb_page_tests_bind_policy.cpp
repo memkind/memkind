@@ -26,6 +26,7 @@
 #include "hbwmalloc.h"
 #include "common.h"
 #include "trial_generator.h"
+#include "allocator_perf_tool/HugePageOrganizer.hpp"
 
 /* This set of tests are intended to use GB pages allocation, it is needed to have
  * GB pages enabled or ignore its execution in case GB can't be enabled on an
@@ -37,6 +38,7 @@ class GBPagesTestBindPolicy : public TGTest
 protected:
     void run(int iterations, size_t alignment, bool psize_strict)
     {
+        ASSERT_GBPAGES_AVAILABILITY();
         std::vector<void*> addr_to_free;
         hbw_set_policy(HBW_POLICY_BIND);
         EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
