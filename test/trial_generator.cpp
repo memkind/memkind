@@ -23,6 +23,7 @@
  */
 
 #include <memkind/internal/memkind_hbw.h>
+#include "allocator_perf_tool/HugePageOrganizer.hpp"
 
 #include "trial_generator.h"
 #include "check.h"
@@ -108,6 +109,7 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
 
 void TrialGenerator :: generate_gb (alloc_api_t api, int number_of_gb_pages, memkind_t memkind, alloc_api_t api_free, bool psize_strict, size_t align)
 {
+    ASSERT_GBPAGES_AVAILABILITY();
     std::vector<size_t> sizes_to_alloc;
     //When API = HBW_MEMALIGN_PSIZE: psize is set to HBW_PAGESIZE_1GB_STRICT when allocation is a multiple of 1GB. Otherwise it is set to HBW_PAGESIZE_1GB.
     for (int i=1; i <= number_of_gb_pages; i++) {
@@ -140,7 +142,7 @@ int n_random(int i)
 
 void TrialGenerator :: generate_recycle_psize_2GB(alloc_api_t api)
 {
-
+    ASSERT_HUGEPAGES_AVAILABILITY();
     trial_vec.clear();
     trial_vec.push_back(create_trial_tuple(api, 2*GB, 32, 4096,
                                            MEMKIND_HBW,-1));
@@ -155,7 +157,7 @@ void TrialGenerator :: generate_recycle_psize_2GB(alloc_api_t api)
 
 void TrialGenerator :: generate_recycle_psize_incremental(alloc_api_t api)
 {
-
+    ASSERT_HUGEPAGES_AVAILABILITY();
     size_t size[] = {2*KB, 2*MB};
 
     int k = 0;

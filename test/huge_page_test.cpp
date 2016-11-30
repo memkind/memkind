@@ -75,9 +75,9 @@ protected:
 
         // This bug occurs more frequently under stress of multithreaded allocations.
         for (int i=0; i<threads_number; i++) {
-		Task* task = new HugePageUnmap(mem_operations_num, touch_memory, alignment, alloc_size, HBW_PAGESIZE_2MB);
-		tasks.push_back(task);
-		threads.push_back(new Thread(task));
+            Task* task = new HugePageUnmap(mem_operations_num, touch_memory, alignment, alloc_size, HBW_PAGESIZE_2MB);
+            tasks.push_back(task);
+            threads.push_back(new Thread(task));
         }
 
         float elapsed_time = timer.getElapsedTime();
@@ -89,7 +89,7 @@ protected:
 
         //task release
         for (int i=0; i<tasks.size(); i++) {
-		delete tasks[i];
+            delete tasks[i];
         }
 
         RecordProperty("threads_number", threads_number);
@@ -103,8 +103,9 @@ protected:
 // Test passes when there is no crash.
 TEST_F(HugePageTest, test_TC_MEMKIND_UNMAP_HUGE_PAGE)
 {
-	int iterations = 10;
-	for (int i=0; i<iterations; i++) {
-		run();
-	}
+    ASSERT_HUGEPAGES_AVAILABILITY();
+    int iterations = 10;
+    for (int i=0; i<iterations; i++) {
+        run();
+    }
 }

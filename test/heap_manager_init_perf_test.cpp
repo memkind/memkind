@@ -27,6 +27,7 @@
 #include "common.h"
 #include "allocator_perf_tool/Configuration.hpp"
 #include "allocator_perf_tool/AllocatorFactory.hpp"
+#include "allocator_perf_tool/HugePageOrganizer.hpp"
 
 //Test heap managers initialization performance.
 class HeapManagerInitPerfTest: public :: testing::Test
@@ -110,6 +111,7 @@ TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HBW_PREFERRED)
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HUGETLB)
 {
+        ASSERT_HUGEPAGES_AVAILABILITY();
         AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HUGETLB);
         post_test(stat);
 }
@@ -122,12 +124,14 @@ TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_GBTLB)
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HBW_HUGETLB)
 {
+        ASSERT_HUGEPAGES_AVAILABILITY();
         AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_HUGETLB);
         post_test(stat);
 }
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HBW_PREFERRED_HUGETLB)
 {
+        ASSERT_HUGEPAGES_AVAILABILITY();
         AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_PREFERRED_HUGETLB);
         post_test(stat);
 }
