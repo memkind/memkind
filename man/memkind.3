@@ -849,6 +849,12 @@ the cost of memory overhead. See section "IMPLEMENTATION NOTES" of
 .BR jemalloc (3)
 for more details about arenas.
 .TP
+.B MEMKIND_HOG_MEMORY
+Controls behavior of memkind with regards to returning memory to underlaying OS. Setting
+.B MEMKIND_HOG_MEMORY
+to "1" causes memkind to not release memory to OS in anticipation of memory reuse soon. This will
+improve latency of 'free' operations but increase memory usage.
+.TP
 .B MEMKIND_DEBUG
 Controls logging mechanism in memkind. Setting
 .B MEMKIND_DEBUG
