@@ -145,6 +145,10 @@ pages_trim(void *addr, size_t alloc_size, size_t leadsize, size_t size
 #endif
 }
 
+
+static bool memk_env_read;
+static bool memk_hog_memory;
+
 bool
 pages_purge(void *addr, size_t length
 #ifdef JEMALLOC_ENABLE_MEMKIND
@@ -153,6 +157,15 @@ pages_purge(void *addr, size_t length
 )
 {
 	bool unzeroed;
+
+	if (memk_env_read == false) {
+		const char* str = getenv("MEMKIND_HOG_MEMORY");
+		memk_hog_memory = str && str[0] == '1';
+		memk_env_read = true;
+	}
+
+	if (memk_hog_memory)
+		return true;
 
 #ifdef _WIN32
 	VirtualAlloc(addr, length, MEM_RESET, PAGE_READWRITE);
