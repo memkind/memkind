@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Sep 22 13:06:06 2016 -->
+<!-- Creator     : groff version 1.20 -->
+<!-- CreationDate: Wed Dec  7 10:34:42 2016 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -28,6 +28,8 @@
 <a href="#NOTES">NOTES</a><br>
 <a href="#FILES">FILES</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
+<a href="#SYSTEM CONFIGURATION">SYSTEM CONFIGURATION</a><br>
+<a href="#KNOWN ISSUES">KNOWN ISSUES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -70,7 +72,9 @@ int hbw_posix_memalign_psize(void</b> <i>**memptr</i><b>,
 size_t</b> <i>alignment</i><b>, size_t</b> <i>size</i><b>,
 hbw_pagesize_t</b> <i>pagesize</i><b>); <br>
 hbw_policy_t hbw_get_policy(void); <br>
-int hbw_set_policy(hbw_policy_t</b> <i>mode</i><b>);</b></p>
+int hbw_set_policy(hbw_policy_t</b> <i>mode</i><b>); <br>
+int hbw_verify_memory_region(void</b> <i>*addr</i><b>,
+size_t</b> <i>size</i><b>, int</b> <i>flags</i><b>);</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -169,7 +173,8 @@ megabyte pages.</p>
 <p style="margin-left:11%;"><b>HBW_PAGESIZE_2MB</b></p>
 
 <p style="margin-left:22%;">The two megabyte page size
-option.</p>
+option. Note: This page size requires huge pages
+configuration described in SYSTEM CONFIGURATION section.</p>
 
 <p style="margin-left:11%;"><b>HBW_PAGESIZE_1GB</b></p>
 
@@ -177,15 +182,18 @@ option.</p>
 specify arbitrary sizes backed by one gigabytes pages.
 Gigabyte pages are allocated even if the size is not a
 modulo of 1GB. A good example of using this feature with
-realloc is shown in gb_realloc_example.c</p>
+realloc is shown in gb_realloc_example.c. Note: This page
+size requires gigabyte pages configuration described in
+SYSTEM CONFIGURATION section.</p>
 
 
 <p style="margin-left:11%;"><b>HBW_PAGESIZE_1GB_STRICT</b></p>
 
 <p style="margin-left:22%;">The one gigabyte page size
 option. The total size of the allocation must be a multiple
-of 1GB with this option, otherwise the allocation will
-fail.</p>
+of 1GB with this option, otherwise the allocation will fail.
+Note: This page size requires gigabyte pages configuration
+described in SYSTEM CONFIGURATION section.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_get_policy</b>()
@@ -224,6 +232,32 @@ the smallest NUMA distance.</p>
 <p style="margin-left:22%;">Interleave faulted pages from
 across all high bandwidth NUMA nodes using standard size
 pages (the Transparent Huge Page feature is disabled).</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>hbw_verify_memory_region</b>()
+verifies if memory region fully fall into high bandwidth
+memory. Returns: 0 if memory in address range from
+<i>addr</i> to <i>addr</i> + <i>size</i> is allocated in
+high bandwidth memory, -1 if any fragment of memory was not
+backed by high bandwidth memory [e.g. when memory is not
+initalized] or one of error codes described in ERRORS
+section.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Using this
+function in production code may result in serious
+performance penalty.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><i>Flags</i>
+argument may include optional flags that modifies function
+behaviour: <b><br>
+HBW_TOUCH_PAGES</b></p>
+
+<p style="margin-left:22%;">Before checking pages, function
+will touch first byte of all pages in address range starting
+from <i>addr</i> to <i>addr</i> + <i>size</i> by read and
+write (so the content will be overwitten by the same data as
+it was read). Using this option may trigger Out Of Memory
+killer.</p>
 
 <h2>RETURN VALUE
 <a name="RETURN VALUE"></a>
@@ -274,6 +308,15 @@ if</b> <i>mode</i> argument was neither
 <b>HBW_POLICY_PREFERRED, HBW_POLICY_BIND</b> nor
 <b>HBW_POLICY_INTERLEAVE.</b></p>
 
+
+<p style="margin-left:11%;"><b>hbw_verify_memory_region</b>()</p>
+
+<p style="margin-left:22%;">returns <b>EINVAL</b> if
+<i>addr</i> is NULL, <i>size</i> equals 0 or <i>flags</i>
+contained unsupported bit set. If memory pointed by
+<i>addr</i> could not be verified then <b>EFAULT</b> is
+returned.</p>
+
 <h2>NOTES
 <a name="NOTES"></a>
 </h2>
@@ -304,7 +347,7 @@ of high bandwidth nodes.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_HBW_NODES</b></p>
 
-<p style="margin-left:22%;">This environment varaible is a
+<p style="margin-left:22%;">This environment variable is a
 comma separated list of NUMA nodes that are treated as high
 bandwidth. Uses the <i>libnuma</i> routine
 <b>numa_parse_nodestring</b>() for parsing, so the syntax
@@ -324,6 +367,47 @@ Higher value can provide better performance in extremely
 multithreaded applications at the cost of memory overhead.
 See section &quot;IMPLEMENTATION NOTES&quot; of
 <b>jemalloc</b>(3) for more details about arenas.</p>
+
+<h2>SYSTEM CONFIGURATION
+<a name="SYSTEM CONFIGURATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Interfaces for
+obtaining 2MB and 1GB pages (HUGETLB and GBTLB) need
+allocated huge pages in the kernel&rsquo;s huge page pool.
+<b><br>
+HUGETLB (huge pages)</b></p>
+
+<p style="margin-left:22%;">Current number of
+&quot;persistent&quot; huge pages can be read from
+/proc/sys/vm/nr_hugepages file. Proposed way of setting
+hugepages is: &quot;sudo sysctl
+vm.nr_hugepages=&lt;number_of_hugepages&gt;&quot;. More
+informations can be found here:
+https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</p>
+
+<p style="margin-left:11%;"><b>GBTLB (gigabyte
+pages)</b></p>
+
+<p style="margin-left:22%;">Number of preallocated gigabyte
+pages can be read from /proc/cmdline (hugepagesz=1G
+nr_hugepages=N). Setting gigabyte hugepages is available by
+kernel commandline. From 3.16 and later kernels, users can
+allocate gigabyte pages like its done for 2MB pages.</p>
+
+<h2>KNOWN ISSUES
+<a name="KNOWN ISSUES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>HUGETLB
+(huge pages)</b></p>
+
+<p style="margin-left:22%;">There might be some overhead in
+huge pages consumption caused by heap management. If your
+allocation fails because of OOM, please try to allocate
+extra huge pages (e.g. 8 huge pages).</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

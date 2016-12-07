@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Sep 22 13:05:39 2016 -->
+<!-- Creator     : groff version 1.20 -->
+<!-- CreationDate: Wed Dec  7 10:35:03 2016 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -29,6 +29,7 @@
 <a href="#FILES">FILES</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
 <a href="#SYSTEM CONFIGURATION">SYSTEM CONFIGURATION</a><br>
+<a href="#KNOWN ISSUES">KNOWN ISSUES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -150,8 +151,8 @@ int memkind_get_version();</b></p>
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_error_message</b>()
 converts an error number <i>err</i> returned by a member of
 the memkind interface to an error message <i>msg</i> where
-the maximium size of the message is passed by the
-<i>size</i> parameter.</p>
+the maximum size of the message is passed by the <i>size</i>
+parameter.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>HEAP
 MANAGMENT:</b> <br>
@@ -229,7 +230,7 @@ undefined behavior occurs. If <i>ptr</i> is NULL, no
 operation is performed. The value of <b>MEMKIND_DEFAULT</b>
 can be given as the <i>kind</i> for all buffers allocated by
 a kind that leverages the jemalloc allocator. This includes
-all interally defined kinds other than those that use
+all internally defined kinds other than those that use
 gigabyte pages. In cases where the kind is unknown in the
 context of the call to <b>memkind_free</b>() <b>0</b> can be
 given as the <i>kind</i> specified to <b>memkind_free</b>()
@@ -310,7 +311,7 @@ some of that space for its own metadata.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_finalize</b>()
 releases all resources associated with the memkind library
-including the resouces used by all of the kinds that were
+including the resources used by all of the kinds that were
 created, but it does not free memory allocated with the
 <b>HEAP MANAGEMENT</b> interface. This must be the last call
 to the memkind library before application termination, but
@@ -438,7 +439,7 @@ the operations which determine the kind of memory. This
 design pattern is modeled after the &quot;mix-in&quot;
 pattern used in the Linux kernel to enable some of the
 features of an object oriented language in C. This section
-defines the inputs, outputs and responsiblities of each
+defines the inputs, outputs and responsibilities of each
 function pointer enumerated in the <i>memkind_ops</i>
 structure. Each of these methods takes a <b>memkind_t</b>
 argument as its first parameter which shall be self
@@ -455,7 +456,7 @@ shall instantiate all of the dynamic resources associated
 with the <i>kind</i>. It takes a pointer to the vtable
 structure <i>ops</i> which has a function pointer for each
 of methods defined in this section of the man page. If any
-methods are unnessary to the implementation of the
+methods are unnecessary to the implementation of the
 <i>kind</i> these function pointers shall be set to
 <b>NULL</b>. The <i>name</i> string is an input parameter
 that identifies the kind of memory so that it can be fetched
@@ -522,7 +523,7 @@ ops.mbind(memkind_t</b> <i>kind</i><b>, void</b>
 shall wrap the <b>mbind</b>(2) system call and pass through
 the start address <i>ptr</i> to be bound, and the number of
 bytes <i>size</i> from that address to be bound. The other
-parmeters to <b>mbind</b>(2) shall be determined by calling
+parameters to <b>mbind</b>(2) shall be determined by calling
 other functions resolved by the <b>kind.ops</b> vtable.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>int
@@ -562,7 +563,7 @@ shall set <i>arena</i> to an index appropriate for the
 <i>kind,</i> allocation <i>size,</i> and CPU when using the
 jemalloc arena allocation through the <b>jemk_mallocx</b>()
 API. Size parameter is not used at the moment, but will be
-necesary for integration with jemalloc 4.0.x (planned for
+necessary for integration with jemalloc 4.0.x (planned for
 one of the future releases).</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>int
@@ -645,7 +646,7 @@ disabled.</p>
 <p style="margin-left:22%;">Allocate from the closest high
 bandwidth memory NUMA node at time of allocation. If there
 is not enough high bandwidth memory to satisfy the request
-<i>errno</i> is set to ENOMEM and the allocated poitner is
+<i>errno</i> is set to ENOMEM and the allocated pointer is
 set to NULL.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_HUGETLB</b></p>
@@ -702,14 +703,6 @@ CONFIGURATION section.</p>
 except that the pages that support the allocation are
 interleaved across all high bandwidth nodes and transparent
 huge pages are disabled.</p>
-
-<p style="margin-left:11%;"><b>MEMKIND_PMEM</b></p>
-
-<p style="margin-left:22%;">Allocate from file-backed heap.
-If the amount of allocated memory exceeds the total size of
-memory-mapped file associated with given kind, or if the
-actual file system space cannot be allocated <i>errno</i> is
-set to ENOMEM and the allocated poitner is set to NULL.</p>
 
 <h2>ERRORS
 <a name="ERRORS"></a>
@@ -844,7 +837,7 @@ See section &quot;IMPLEMENTATION NOTES&quot; of
 
 <p style="margin-left:11%;"><b>MEMKIND_DEBUG</b></p>
 
-<p style="margin-left:22%;">Controls tracing mechanism in
+<p style="margin-left:22%;">Controls logging mechanism in
 memkind. Setting <b>MEMKIND_DEBUG</b> to &quot;1&quot;
 enables printing messages like errors and general
 informations about environment to <i>stderr.</i></p>
@@ -876,6 +869,19 @@ pages can be read from /proc/cmdline (hugepagesz=1G
 nr_hugepages=N). Setting gigabyte hugepages is available by
 kernel commandline. From 3.16 and later kernels, users can
 allocate gigabyte pages like its done for 2MB pages.</p>
+
+<h2>KNOWN ISSUES
+<a name="KNOWN ISSUES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>HUGETLB
+(huge pages)</b></p>
+
+<p style="margin-left:22%;">There might be some overhead in
+huge pages consumption caused by heap management. If your
+allocation fails because of OOM, please try to allocate
+extra huge pages (e.g. 8 huge pages).</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
