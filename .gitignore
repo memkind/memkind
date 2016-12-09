@@ -73,8 +73,6 @@ autom4te.cache/
 /test/perf_tool
 /test/pmem
 /test/schedcpu_test
-/test/stream
-/test/stream_memkind
 /test/tieddisterr_test
 /examples/autohbw_candidates
 /examples/eratosthenes
@@ -88,7 +86,5 @@ autom4te.cache/
 /examples/numakind_test
 /examples/numakind_macro.h
 /examples/pmem_memkind
-/examples/stream
-/examples/stream_memkind
 /test-driver
 /vs
