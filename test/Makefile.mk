@@ -196,8 +196,6 @@ check_PROGRAMS += test/hello_memkind \
                   test/hello_memkind_debug \
                   test/hello_hbw \
                   test/filter_memkind \
-                  test/stream \
-                  test/stream_memkind \
                   test/gb_realloc \
                   test/pmem \
                   # end
@@ -210,8 +208,6 @@ test_hello_memkind_LDADD = libmemkind.la
 test_hello_memkind_debug_LDADD = libmemkind.la
 test_hello_hbw_LDADD = libmemkind.la
 test_filter_memkind_LDADD = libmemkind.la
-test_stream_LDADD = libmemkind.la
-test_stream_memkind_LDADD = libmemkind.la
 test_gb_realloc_LDADD = libmemkind.la
 test_pmem_LDADD = libmemkind.la
 test_autohbw_candidates_LDADD = libmemkind.la \
@@ -220,15 +216,10 @@ if ENABLE_CXX11
 test_memkind_allocated_LDADD = libmemkind.la
 endif
 
-test_stream_memkind_CFLAGS = $(AM_CFLAGS) $(CFLAGS) $(OPENMP_CFLAGS)
-test_stream_CFLAGS = $(AM_CFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS)
-
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 test_hello_hbw_SOURCES = examples/hello_hbw_example.c
 test_filter_memkind_SOURCES = examples/filter_example.c
-test_stream_SOURCES = examples/stream_example.c
-test_stream_memkind_SOURCES = examples/stream_example.c
 test_gb_realloc_SOURCES = examples/gb_realloc_example.c
 test_pmem_SOURCES = examples/pmem_example.c
 test_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
@@ -237,7 +228,6 @@ noinst_LTLIBRARIES += test/libautohbw.la
 if ENABLE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 endif
-test_stream_memkind_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) -DENABLE_DYNAMIC_ALLOC
 
 CLEANFILES += test/numakind_macro.h
 test/numakind_test.cpp: test/numakind_macro.h

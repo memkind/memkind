@@ -20,7 +20,6 @@ autohbw/autohbw_test.sh
 examples/autohbw_candidates.c
 examples/filter_example.c
 examples/hello_memkind_example.c
-examples/stream_example.c
 examples/README
 examples/Makefile.mk
 examples/hello_hbw_example.c

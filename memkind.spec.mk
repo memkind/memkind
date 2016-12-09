@@ -214,8 +214,6 @@ $(memkind_test_dir)/gb_realloc
 $(memkind_test_dir)/hello_hbw
 $(memkind_test_dir)/hello_memkind
 $(memkind_test_dir)/hello_memkind_debug
-$(memkind_test_dir)/stream
-$(memkind_test_dir)/stream_memkind
 $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/autohbw_candidates
 ${memkind_test_dir}/pmem
