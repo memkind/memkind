@@ -32,9 +32,22 @@ extern "C" {
 #endif
 
 #include "memkind.h"
+#include "memkind/internal/memkind_default.h"
 
 #include <stdbool.h>
 #include <pthread.h>
+
+#ifdef __GNUC__
+#   define MEMKIND_LIKELY(x)       __builtin_expect(!!(x), 1)
+#   define MEMKIND_UNLIKELY(x)     __builtin_expect(!!(x), 0)
+#else
+#   define MEMKIND_LIKELY(x)       (x)
+#   define MEMKIND_UNLIKELY(x)     (x)
+#endif
+
+#ifndef MEMKIND_EXPORT
+#   define MEMKIND_EXPORT __attribute__((visibility("default")))
+#endif
 
 enum memkind_const_private {
     MEMKIND_NAME_LENGTH_PRIV = 64
@@ -56,21 +69,20 @@ struct memkind {
 
 void memkind_init(memkind_t kind, bool check_numa);
 
-// common function for registring kinds on creation or first use (in case of static kinds)
+// common function for registering kinds on creation or first use (in case of static kinds)
 void memkind_register_kind(struct memkind *kind);
 
-#ifdef __GNUC__
-#   define MEMKIND_LIKELY(x)       __builtin_expect(!!(x), 1)
-#   define MEMKIND_UNLIKELY(x)     __builtin_expect(!!(x), 0)
-#else
-#   define MEMKIND_LIKELY(x)       (x)
-#   define MEMKIND_UNLIKELY(x)     (x)
-#endif
-
-#ifndef MEMKIND_EXPORT
-#   define MEMKIND_EXPORT __attribute__((visibility("default")))
-#endif
+static inline void *kind_mmap(struct memkind *kind, void* addr, size_t size)
+{
+    if (MEMKIND_LIKELY(kind->ops->mmap == NULL)) {
+        return memkind_default_mmap(kind, addr, size);
+    }
+    else {
+        return kind->ops->mmap(kind, addr, size);
+    }
+}
 
 #ifdef __cplusplus
 }
 #endif
+
