@@ -569,22 +569,17 @@ MEMKIND_EXPORT int memkind_get_kind_by_name(const char *name, struct memkind **k
 MEMKIND_EXPORT void *memkind_partition_mmap(int partition, void *addr, size_t size)
 {
     int err;
-    void *result = MAP_FAILED;
     struct memkind *kind;
 
     err = memkind_get_kind_by_partition_internal(partition, &kind);
-    if (MEMKIND_LIKELY(!err)) {
-        err = memkind_check_available(kind);
+    if (MEMKIND_UNLIKELY(err)) {
+        return MAP_FAILED;
     }
-    if (MEMKIND_LIKELY(!err)) {
-        if (kind->ops->mmap) {
-            result = kind->ops->mmap(kind, addr, size);
-        }
-        else {
-            result = memkind_default_mmap(kind, addr, size);
-        }
+    err = memkind_check_available(kind);
+    if (MEMKIND_UNLIKELY(err)) {
+        return MAP_FAILED;
     }
-    return result;
+    return kind_mmap(kind, addr, size);
 }
 
 MEMKIND_EXPORT int memkind_check_available(struct memkind *kind)
