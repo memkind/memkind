@@ -235,6 +235,11 @@ $(memkind_test_dir)/trace_mechanism_test.py
 $(memkind_test_dir)/python_framework
 $(memkind_test_dir)/python_framework/cmd_helper.py
 $(memkind_test_dir)/python_framework/__init__.py
+$(memkind_test_dir)/draw_plots.py
+$(memkind_test_dir)/run_alloc_benchmark.sh
+$(memkind_test_dir)/alloc_benchmark_hbw
+$(memkind_test_dir)/alloc_benchmark_glibc
+$(memkind_test_dir)/alloc_benchmark_tbb
 
 %exclude $(memkind_test_dir)/*.pyo
 %exclude $(memkind_test_dir)/*.pyc

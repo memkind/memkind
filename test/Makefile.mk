@@ -49,6 +49,8 @@ EXTRA_DIST += test/memkind-afts.ts \
               test/trace_mechanism_test.py \
               test/python_framework/cmd_helper.py \
               test/python_framework/__init__.py \
+              test/draw_plots.py \
+              test/run_alloc_benchmark.sh \
               test/gtest_fused/gtest/gtest-all.cc \
               test/gtest_fused/gtest/gtest.h \
               # end
@@ -189,6 +191,27 @@ if ENABLE_CXX11
 test_perf_tool_CPPFLAGS += -std=c++11
 test_perf_tool_CXXFLAGS += -std=c++11
 endif
+
+#Alloc benchmark
+check_PROGRAMS += test/alloc_benchmark_hbw \
+                  test/alloc_benchmark_glibc \
+                  test/alloc_benchmark_tbb \
+                  # end
+
+test_alloc_benchmark_hbw_LDADD = libmemkind.la
+test_alloc_benchmark_hbw_SOURCES = test/alloc_benchmark.c
+test_alloc_benchmark_hbw_CFLAGS = -O0 -g -fopenmp -Wall -DHBWMALLOC -lmemkind
+
+test_alloc_benchmark_glibc_LDADD = libmemkind.la
+test_alloc_benchmark_glibc_SOURCES = test/alloc_benchmark.c
+test_alloc_benchmark_glibc_CFLAGS = -O0 -g -fopenmp -Wall
+
+test_alloc_benchmark_tbb_LDADD = libmemkind.la
+test_alloc_benchmark_tbb_SOURCES = test/alloc_benchmark.c \
+                                   test/load_tbbmalloc_symbols.c \
+                                   test/tbbmalloc.h \
+                                   # end
+test_alloc_benchmark_tbb_CFLAGS = -O0 -g -fopenmp -Wall -DTBBMALLOC -ldl
 
 # Examples as tests
 check_PROGRAMS += test/hello_memkind \
