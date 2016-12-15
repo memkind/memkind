@@ -48,8 +48,10 @@ test/memkind-perf-ext.ts \
 test/memkind-pytests.ts \
 test/python_framework/cmd_helper.py \
 test/python_framework/__init__.py \
-test/hbw_detection_test.py test/autohbw_test.py \
-test/trace_mechanism_test.py
+test/hbw_detection_test.py \
+test/autohbw_test.py \
+test/trace_mechanism_test.py \
+test/draw_plots.py
 
 all: $(rpm)
 
