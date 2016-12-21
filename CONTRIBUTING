@@ -70,8 +70,9 @@ Alternatively you can follow this step-by-step instruction:
     autoconf
     mkdir obj
     cd obj
-    ../configure --enable-autogen --with-jemalloc-prefix=jemk_ \
-                 --enable-memkind --enable-cc-silence
+    ../configure --enable-autogen --with-jemalloc-prefix=jemk_ --without-export \
+                 --disable-stats --disable-fill --disable-valgrind \
+                 --with-malloc-conf="lg_chunk:22"
     make
     cd ../..
 

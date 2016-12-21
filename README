@@ -57,7 +57,7 @@ command:
 
     sudo zypper install libnuma-devel gcc-c++ unzip
 
-The jemalloc source was forked from jemalloc version 3.5.1 and
+The jemalloc source was forked from jemalloc version 4.3.1 and
 modified for the memkind extension.  This source tree is located
 within the jemalloc subdirectory of the memkind source. The jemalloc
 source code has been kept close to the original form, and in particular,

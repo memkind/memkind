@@ -32,6 +32,7 @@ extern "C" {
 #endif
 
 #include <memkind.h>
+#include <jemalloc/jemalloc.h>
 
 /*
  * Header file for the jemalloc arena allocation memkind operations.
@@ -41,8 +42,10 @@ extern "C" {
  * API standards are described in memkind(3) man page.
  */
 
+struct memkind *get_kind_by_arena(unsigned arena_ind);
+
 int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
-int memkind_arena_create_map(struct memkind *kind);
+int memkind_arena_create_map(struct memkind *kind, chunk_hooks_t *hooks);
 int memkind_arena_destroy(struct memkind *kind);
 void *memkind_arena_malloc(struct memkind *kind, size_t size);
 void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size);
@@ -50,7 +53,6 @@ int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t ali
 void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size);
 int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena, size_t size);
 int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size);
-
 #ifdef __cplusplus
 }
 #endif

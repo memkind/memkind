@@ -170,7 +170,7 @@ int MEMKIND_DEPRECATED(memkind_get_num_kind(int *num_kind));
  *   The current design of allocator back-end API is incomplete, e.g. needed
  *   also unmap() function and maybe more functions for allocator management.
  *   There is work in progress to implement new functionality that allows
- *   connecting other allocator than jemalloc 3.5 that is tightly coupled
+ *   connecting other allocator than jemalloc 4.3 that is tightly coupled
  *   today with memkind.
  */
 void* MEMKIND_DEPRECATED(memkind_partition_mmap(int partition, void *addr, size_t size));

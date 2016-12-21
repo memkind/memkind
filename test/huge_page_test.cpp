@@ -48,7 +48,7 @@ protected:
         initial_nr_hugepages = HugePageOrganizer::get_nr_hugepages();
         // Set number of Huge Pages to allocate
         // System command returned -1 on error
-        ASSERT_NE(HugePageOrganizer::set_nr_hugepages(1008), -1);
+        ASSERT_NE(HugePageOrganizer::set_nr_hugepages(1024), -1);
     }
 
     void TearDown()
