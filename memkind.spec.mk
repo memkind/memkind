@@ -119,25 +119,11 @@ memkind functional tests
 %setup -q -a 0 -n $(name)-%{version}
 
 %build
-
 # It is required that we configure and build the jemalloc subdirectory
 # before we configure and start building the top level memkind directory.
-# To ensure the memkind build step is able to discover the output
-# of the jemalloc build we must create an 'obj' directory, and build
-# from within that directory.
 cd %{_builddir}/%{buildsubdir}/jemalloc/
 echo %{version} > %{_builddir}/%{buildsubdir}/jemalloc/VERSION
-test -f configure || %{__autoconf}
-mkdir %{_builddir}/%{buildsubdir}/jemalloc/obj
-ln -s %{_builddir}/%{buildsubdir}/jemalloc/configure %{_builddir}/%{buildsubdir}/jemalloc/obj/
-cd %{_builddir}/%{buildsubdir}/jemalloc/obj
-../configure --enable-autogen --with-jemalloc-prefix=jemk_ --enable-memkind \
-             --enable-cc-silence --without-export --disable-stats --disable-fill \
-             --disable-valgrind --disable-experimental \
-             --prefix=%{_prefix} --includedir=%{_includedir} --libdir=%{_libdir} \
-             --bindir=%{_bindir} --docdir=%{_docdir} --mandir=%{_mandir}
-
-$(make_prefix)%{__make} %{?_smp_mflags} $(make_postfix)
+test -f configure || ../build_jemalloc.sh
 
 # Build memkind lib and tools
 cd %{_builddir}/%{buildsubdir}

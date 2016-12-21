@@ -381,7 +381,7 @@ MEMKIND_EXPORT void memkind_error_message(int err, char *msg, size_t size)
 void memkind_init(memkind_t kind, bool check_numa)
 {
     log_info("Initializing kind %s.", kind->name);
-    int err = memkind_arena_create_map(kind);
+    int err = memkind_arena_create_map(kind, NULL);
     if (err) {
         log_fatal("[%s] Failed to create arena map (error code:%d).", kind->name, err);
         abort();

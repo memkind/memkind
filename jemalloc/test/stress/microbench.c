@@ -1,10 +1,8 @@
 #include "test/jemalloc_test.h"
 
-unsigned arena1_ind;
-unsigned arena2_ind;
-
 JEMALLOC_INLINE_C void
-time_func(timedelta_t *timer, uint64_t nwarmup, uint64_t niter, void (*func)(void))
+time_func(timedelta_t *timer, uint64_t nwarmup, uint64_t niter,
+    void (*func)(void))
 {
 	uint64_t i;
 
@@ -34,8 +32,8 @@ compare_funcs(uint64_t nwarmup, uint64_t niter, const char *name_a,
 	time_func(&timer_b, nwarmup, niter, func_b);
 
 	timer_ratio(&timer_a, &timer_b, ratio_buf, sizeof(ratio_buf));
-	malloc_printf("%"PRIu64" iterations, %s=%"PRIu64"us, "
-	    "%s=%"PRIu64"us, ratio=1:%s\n",
+	malloc_printf("%"FMTu64" iterations, %s=%"FMTu64"us, "
+	    "%s=%"FMTu64"us, ratio=1:%s\n",
 	    niter, name_a, timer_usec(&timer_a), name_b, timer_usec(&timer_b),
 	    ratio_buf);
 
@@ -65,111 +63,13 @@ mallocx_free(void)
 	free(p);
 }
 
-static void
-mallocxa1_free(void)
-{
-	void *p = mallocx(1, MALLOCX_ARENA(arena1_ind));
-	if (p == NULL) {
-		test_fail("Unexpected mallocx() failure");
-		return;
-	}
-	free(p);
-}
-
-static void
-mallocxa2_free(void)
-{
-	void *p = mallocx(1, MALLOCX_ARENA(arena2_ind));
-	if (p == NULL) {
-		test_fail("Unexpected mallocx() failure");
-		return;
-	}
-	free(p);
-}
-
 TEST_BEGIN(test_malloc_vs_mallocx)
 {
 
 	compare_funcs(10*1000*1000, 100*1000*1000, "malloc",
-	    malloc_free, "mallocx(0)", mallocx_free);
+	    malloc_free, "mallocx", mallocx_free);
 }
 TEST_END
-
-TEST_BEGIN(test_malloc_vs_mallocxa1)
-{
-	size_t sz;
-
-	sz = sizeof(arena1_ind);
-	assert_d_eq(mallctl("arenas.extend", &arena1_ind, &sz, NULL, 0), 0,
-	    "Error in arenas.extend");
-
-	compare_funcs(10*1000*1000, 100*1000*1000, "malloc",
-	    malloc_free, "mallocx(a)", mallocxa1_free);
-}
-TEST_END
-
-TEST_BEGIN(test_mallocx_vs_mallocxa1)
-{
-	size_t sz;
-
-	sz = sizeof(arena1_ind);
-	assert_d_eq(mallctl("arenas.extend", &arena1_ind, &sz, NULL, 0), 0,
-	    "Error in arenas.extend");
-
-	compare_funcs(10*1000*1000, 100*1000*1000, "mallocx(0)",
-	    mallocx_free, "mallocx(a)", mallocxa1_free);
-}
-TEST_END
-
-#ifdef JEMALLOC_ENABLE_MEMKIND
-TEST_BEGIN(test_malloc_vs_mallocxa2)
-{
-	unsigned partition;
-	size_t sz;
-
-	sz = sizeof(arena2_ind);
-	partition = 1;
-	assert_d_eq(mallctl("arenas.extendk", &arena2_ind, &sz, &partition, sz), 0,
-	    "Error in arenas.extendk");
-
-	compare_funcs(10*1000*1000, 100*1000*1000, "malloc",
-	    malloc_free, "mallocx(a+tc)", mallocxa2_free);
-}
-TEST_END
-
-TEST_BEGIN(test_mallocx_vs_mallocxa2)
-{
-	unsigned partition;
-	size_t sz;
-
-	sz = sizeof(arena2_ind);
-	partition = 1;
-	assert_d_eq(mallctl("arenas.extendk", &arena2_ind, &sz, &partition, sz), 0,
-	    "Error in arenas.extendk");
-
-	compare_funcs(10*1000*1000, 100*1000*1000, "mallocx(0)",
-	    mallocx_free, "mallocx(a+tc)", mallocxa2_free);
-}
-TEST_END
-
-TEST_BEGIN(test_mallocxa1_vs_mallocxa2)
-{
-	unsigned partition;
-	size_t sz;
-
-	sz = sizeof(arena1_ind);
-	assert_d_eq(mallctl("arenas.extend", &arena1_ind, &sz, NULL, 0), 0,
-	    "Error in arenas.extend");
-	sz = sizeof(arena2_ind);
-	partition = 1;
-	assert_d_eq(mallctl("arenas.extendk", &arena2_ind, &sz, &partition, sz), 0,
-	    "Error in arenas.extendk");
-
-	compare_funcs(10*1000*1000, 100*1000*1000, "mallocx(a)",
-	    mallocxa1_free, "mallocx(a+tc)", mallocxa2_free);
-}
-TEST_END
-#endif
 
 static void
 malloc_dallocx(void)
@@ -182,11 +82,30 @@ malloc_dallocx(void)
 	dallocx(p, 0);
 }
 
+static void
+malloc_sdallocx(void)
+{
+	void *p = malloc(1);
+	if (p == NULL) {
+		test_fail("Unexpected malloc() failure");
+		return;
+	}
+	sdallocx(p, 1, 0);
+}
+
 TEST_BEGIN(test_free_vs_dallocx)
 {
 
 	compare_funcs(10*1000*1000, 100*1000*1000, "free", malloc_free,
 	    "dallocx", malloc_dallocx);
+}
+TEST_END
+
+TEST_BEGIN(test_dallocx_vs_sdallocx)
+{
+
+	compare_funcs(10*1000*1000, 100*1000*1000, "dallocx", malloc_dallocx,
+	    "sdallocx", malloc_sdallocx);
 }
 TEST_END
 
@@ -256,14 +175,8 @@ main(void)
 
 	return (test(
 	    test_malloc_vs_mallocx,
-	    test_malloc_vs_mallocxa1,
-	    test_mallocx_vs_mallocxa1,
-#ifdef JEMALLOC_ENABLE_MEMKIND
-	    test_malloc_vs_mallocxa2,
-	    test_mallocx_vs_mallocxa2,
-	    test_mallocxa1_vs_mallocxa2,
-#endif
 	    test_free_vs_dallocx,
+	    test_dallocx_vs_sdallocx,
 	    test_mus_vs_sallocx,
 	    test_sallocx_vs_nallocx));
 }

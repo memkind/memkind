@@ -33,6 +33,7 @@ autom4te.cache/
 /stamp-h1
 /stamp-h2
 /jemalloc/obj/
+/jemalloc/configure
 /src/memkind_defines.h.in
 /test/all_tests
 /test/.deps/
