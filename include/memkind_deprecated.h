@@ -117,6 +117,16 @@ struct memkind_ops {
 };
 
 /*
+ * Symbols related to GBTLB that are no longer supported
+ */
+extern memkind_t MEMKIND_HBW_GBTLB;
+extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
+extern memkind_t MEMKIND_GBTLB;
+extern const struct memkind_ops MEMKIND_HBW_GBTLB_OPS;
+extern const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS;
+extern const struct memkind_ops MEMKIND_GBTLB_OPS;
+
+/*
  * Create a new kind
  *
  * DEPRECATION REASON:
@@ -183,6 +193,114 @@ void* MEMKIND_DEPRECATED(memkind_partition_mmap(int partition, void *addr, size_
  *   This function is no longer supported.
  */
 int MEMKIND_DEPRECATED(memkind_get_size(memkind_t kind, size_t *total, size_t *free));
+
+
+/*
+ * Check for 1GB huge pages in high bandwidth memory
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+int MEMKIND_DEPRECATED(memkind_hbw_gbtlb_check_available(struct memkind *kind));
+
+
+/*
+ * Allocate memory using gigabyte pages
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+void* MEMKIND_DEPRECATED(memkind_gbtlb_malloc(struct memkind *kind, size_t size));
+
+
+/*
+ * Allocates zeroed memory using gigabyte pages
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+void* MEMKIND_DEPRECATED(memkind_gbtlb_calloc(struct memkind *kind, size_t num, size_t size));
+
+
+/*
+ * Allocate gigabyte pages with requested alignment
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+int MEMKIND_DEPRECATED(memkind_gbtlb_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size));
+
+
+/*
+ * Extend or shrink an allocation previously created by one of the other interfaces
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+void* MEMKIND_DEPRECATED(memkind_gbtlb_realloc(struct memkind *kind, void *ptr, size_t size));
+
+
+/*
+ * Unmap memory associated with the address passed by user
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+void MEMKIND_DEPRECATED(memkind_gbtlb_free(struct memkind *kind, void *ptr));
+
+
+/*
+ * Set the flags appropriately for requesting anonymous gigabyte pages
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+int MEMKIND_DEPRECATED(memkind_gbtlb_get_mmap_flags(struct memkind *kind, int *flags));
+
+
+/*
+ * Check if address was created using GBTLB interface
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+int MEMKIND_DEPRECATED(memkind_gbtlb_check_addr(struct memkind *kind, void *addr));
+
+
+/*
+ * Check if 1GB pages are available
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+int MEMKIND_DEPRECATED(memkind_hugetlb_check_available_1gb(struct memkind *kind));
+
+
+/*
+ * Initialize MEMKIND_HBW_GBTLB kind
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+void MEMKIND_DEPRECATED(memkind_hbw_gbtlb_init_once(void));
+
+
+/*
+ * Initialize MEMKIND_HBW_PREFERRED_GBTLB kind
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+void MEMKIND_DEPRECATED(memkind_hbw_preferred_gbtlb_init_once(void));
+
+
+/*
+ * Initialize MEMKIND_GBTLB kind
+ *
+ * DEPRECATED REASON:
+ *   1GB pages are no longer supported.
+ */
+void MEMKIND_DEPRECATED(memkind_gbtlb_init_once(void));
 
 #ifdef __cplusplus
 }

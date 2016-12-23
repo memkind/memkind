@@ -43,7 +43,6 @@ extern "C" {
 
 int memkind_hbw_check_available(struct memkind *kind);
 int memkind_hbw_hugetlb_check_available(struct memkind *kind);
-int memkind_hbw_gbtlb_check_available(struct memkind *kind);
 int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
                                    unsigned long *nodemask,
                                    unsigned long maxnode);

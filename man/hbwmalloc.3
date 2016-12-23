@@ -191,14 +191,14 @@ system to two megabyte pages.
 The two megabyte page size option. Note: This page size requires
 huge pages configuration described in SYSTEM CONFIGURATION section.
 .TP
-.B HBW_PAGESIZE_1GB
+.B HBW_PAGESIZE_1GB (DEPRECATED)
 This option allows the user to specify arbitrary sizes backed by
 one gigabytes pages. Gigabyte pages are allocated even if the
 size is not a modulo of 1GB. A good example of using this feature
 with realloc is shown in gb_realloc_example.c. Note: This page size requires
 gigabyte pages configuration described in SYSTEM CONFIGURATION section.
 .TP
-.B HBW_PAGESIZE_1GB_STRICT
+.B HBW_PAGESIZE_1GB_STRICT (DEPRECATED)
 The one gigabyte page size option. The total size of the allocation
 must be a multiple of 1GB with this option, otherwise the allocation
 will fail. Note: This page size requires gigabyte pages configuration
