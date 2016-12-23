@@ -687,7 +687,7 @@ Default allocation using standard memory and default page size.
 Allocate from standard memory using huge pages. Note: This kind requires
 huge pages configuration described in SYSTEM CONFIGURATION section.
 .TP
-.B MEMKIND_GBTLB
+.B MEMKIND_GBTLB (DEPRECATED)
 Allocate from standard memory using giga byte huge pages. Note: This kind
 requires gigabyte pages configuration described in SYSTEM CONFIGURATION section.
 .TP
@@ -719,7 +719,7 @@ Same as
 except the allocation is backed by huge pages. Note: This kind requires huge pages
 configuration described in SYSTEM CONFIGURATION section.
 .TP
-.B MEMKIND_HBW_GBTLB
+.B MEMKIND_HBW_GBTLB (DEPRECATED)
 Same as
 .B MEMKIND_HBW
 except the allocation is backed by one gigabyte huge pages.  Note that
@@ -733,7 +733,7 @@ examples directory with gb_realloc_example.c
 This kind requires gigabyte pages configuration described in SYSTEM CONFIGURATION
 section.
 .TP
-.B MEMKIND_HBW_PREFERRED_GBTLB
+.B MEMKIND_HBW_PREFERRED_GBTLB (DEPRECATED)
 Same as
 .B MEMKIND_HBW_GBTLB
 except that if there is not enough high bandwidth memory to satisfy

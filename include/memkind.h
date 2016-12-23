@@ -248,15 +248,6 @@ extern memkind_t MEMKIND_HBW_HUGETLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_HUGETLB;
 
 /* EXPERIMENTAL API */
-extern memkind_t MEMKIND_HBW_GBTLB;
-
-/* EXPERIMENTAL API */
-extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
-
-/* EXPERIMENTAL API */
-extern memkind_t MEMKIND_GBTLB;
-
-/* EXPERIMENTAL API */
 extern memkind_t MEMKIND_HBW_INTERLEAVE;
 
 /* EXPERIMENTAL API */

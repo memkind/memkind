@@ -36,7 +36,7 @@ Note: This is EXEPRIMENTAL API. The functionality and the header file itself can
 .br
 .BI "int memkind_hbw_hugetlb_check_available(struct memkind " "*kind" );
 .br
-.BI "int memkind_hbw_gbtlb_check_available(struct memkind " "*kind" );
+.BI "int memkind_hbw_gbtlb_check_available(struct memkind " "*kind" ); (DEPRECATED)
 .br
 .BI "int memkind_hbw_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
 .br
@@ -73,7 +73,7 @@ In addition to checking for high bandwidth memory as is done by
 memkind_hbw_check_available (), this also checks for 2MB huge pages as
 is done by memkind_hugetlb_check_available_2mb().
 .PP
-.BR memkind_hbw_gbtlb_check_available ()
+.BR memkind_hbw_gbtlb_check_available () (DEPRECATED)
 In addition to checking for high bandwidth memory as is done by
 memkind_hbw_check_available (), this also checks for 1GB huge pages as
 is done by memkind_hugetlb_check_available_1gb().

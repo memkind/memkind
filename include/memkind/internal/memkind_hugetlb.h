@@ -44,11 +44,6 @@ extern "C" {
 int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags);
 void memkind_hugetlb_init_once(void);
 int memkind_hugetlb_check_available_2mb(struct memkind *kind);
-int memkind_hugetlb_check_available_1gb(struct memkind *kind);
-
-void memkind_hbw_gbtlb_init_once(void);
-void memkind_hbw_preferred_gbtlb_init_once(void);
-void memkind_gbtlb_init_once(void);
 
 extern const struct memkind_ops MEMKIND_HUGETLB_OPS;
 

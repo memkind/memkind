@@ -32,13 +32,13 @@ Note: This is EXEPRIMENTAL API. The functionality and the header file itself can
 .sp
 .B Link with -lmemkind
 .sp
-.BI "void *memkind_gbtlb_malloc(struct memkind " "*kind" ", size_t " "size" );
-.BI "void *memkind_gbtlb_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" );
-.BI "int memkind_gbtlb_posix_memalign(struct memkind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
-.BI "void *memkind_gbtlb_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
-.BI "void memkind_gbtlb_free(struct memkind " "*kind" ", void " "*ptr" );
-.BI "int memkind_gbtlb_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
-.BI "int memkind_gbtlb_check_addr(struct memkind " "*kind" ", void " "*addr" );
+.BI "void *memkind_gbtlb_malloc(struct memkind " "*kind" ", size_t " "size" ); (DEPRECATED)
+.BI "void *memkind_gbtlb_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" ); (DEPRECATED)
+.BI "int memkind_gbtlb_posix_memalign(struct memkind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" ); (DEPRECATED)
+.BI "void *memkind_gbtlb_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" ); (DEPRECATED)
+.BI "void memkind_gbtlb_free(struct memkind " "*kind" ", void " "*ptr" ); (DEPRECATED)
+.BI "int memkind_gbtlb_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" ); (DEPRECATED)
+.BI "int memkind_gbtlb_check_addr(struct memkind " "*kind" ", void " "*addr" ); (DEPRECATED)
 .SH DESCRIPTION
 Gigabyte TLB implementations for memkind operations.  These are
 implemented without using the jemalloc library. The implementation is
@@ -60,7 +60,7 @@ low.  For this reason the traditional requirements of a heap manager
 to be faster than directly mapping memory from the operating system is
 relaxed.
 .PP
-.BR memkind_gbtlb_malloc ()
+.BR memkind_gbtlb_malloc () (DEPRECATED)
 calls
 .BR mmap (2)
 with
@@ -78,7 +78,7 @@ in the internal hash table which can be queried to support the
 .BR memkind_gbtlb_free ()
 operation. If kind does not support GBTLB undefined behaviour occurs.
 .PP
-.BR memkind_gbtlb_calloc ()
+.BR memkind_gbtlb_calloc () (DEPRECATED)
 is exactly the same implementation and supports the same
 .I kind
 as
@@ -89,7 +89,7 @@ system call is guaranteed to return memory of
 .IR size
 bytes which has been zeroed.
 .PP
-.BR memkind_gbtlb_posix_memalign ()
+.BR memkind_gbtlb_posix_memalign () (DEPRECATED)
 is a similar implementation to
 .BR memkind_gbtlb_malloc ()
 except that the returned address will be aligned as requested, and the
@@ -98,25 +98,25 @@ error code returned will reflect the POSIX standard defined in
 .BR memkind_gbtlb_posix_memalign
 the return pointer for the allocated memory
 .PP
-.BR memkind_gbtlb_realloc ()
+.BR memkind_gbtlb_realloc () (DEPRECATED)
 can be used to extend or shrink an allocation previously created by
 one of the other interfaces defined here. Implementation reuses
 .BR memkind_gbtlb_malloc ()
 for allocating the new size of memory if needed.
 There is an optimization in place so that if a partial page was previously allocated then it can be extended to the end of the page transparently. (Details in NOTE)
 .PP
-.BR memkind_gbtlb_free ()
+.BR memkind_gbtlb_free () (DEPRECATED)
 queries the hash table to find the extent of the memory associated
 with the address passed by the user. It then calls
 .BR munmap (2)
 on that extent.
 .PP
-.BR memkind_gbtlb_get_mmap_flags ()
+.BR memkind_gbtlb_get_mmap_flags () (DEPRECATED)
 Sets the
 .I flags
 appropriately for requesting anonymous gigabyte pages.
 .PP
-.BR memkind_gbtlb_check_addr ()
+.BR memkind_gbtlb_check_addr () (DEPRECATED)
 queries the hash table to determine if the address reflects an
 extent previously allocated with one of the interfaces defined
 here, and returned 03 exact kind associated with the address.
