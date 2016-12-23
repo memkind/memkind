@@ -58,7 +58,7 @@ int main(int argc, char * argv[])
     size_t alloc_size;
     unsigned long i;
     double dt, t_start, t_end, t_malloc, t_free, t_first_malloc, t_first_free,
-           malloc_time, free_time, first_malloc_time, first_free_time;
+           malloc_time = 0.0, free_time = 0.0, first_malloc_time, first_free_time;
     void* ptr;
 #ifdef TBBMALLOC
     int ret;
