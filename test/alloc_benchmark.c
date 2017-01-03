@@ -104,7 +104,7 @@ int main(int argc, char * argv[])
     {
         malloc_time = 0.0;
         free_time = 0.0;
-        for (i=0; i<N-1; i++) {
+        for (i=0; i<N; i++) {
             t_malloc = ctimer();
             ptr = (void*) MALLOC_FN(alloc_size);
             malloc_time += ctimer() - t_malloc;
@@ -136,7 +136,7 @@ int main(int argc, char * argv[])
     dt = t_end - t_start;
 
     printf("%d %lu %8.6f %8.6f  %8.6f  %8.6f  %8.6f\n",
-           nthr, SIZE, dt, malloc_time, free_time, first_malloc_time, first_free_time);
+           nthr, SIZE, dt/N, malloc_time/N, free_time/N, first_malloc_time, first_free_time);
     return EXIT_SUCCESS;
 }
 
@@ -151,5 +151,6 @@ inline double ctimer()
 {
     struct timeval tmr;
     gettimeofday(&tmr, NULL);
-    return tmr.tv_sec + tmr.tv_usec/1000000.0;
+    /* Return time in ms */
+    return (tmr.tv_sec + tmr.tv_usec/1000000.0)*1000;
 }
