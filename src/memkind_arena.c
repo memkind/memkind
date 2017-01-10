@@ -43,6 +43,7 @@
 #include <smmintrin.h>
 #include <limits.h>
 #include <sys/mman.h>
+#include <assert.h>
 
 #include "config.h"
 #include "config_tls.h"
@@ -118,9 +119,10 @@ static pthread_mutex_t arena_registry_write_lock;
 
 struct memkind *get_kind_by_arena(unsigned arena_ind)
 {
-    if(arena_ind >= MALLOCX_ARENA_MAX) {
-        return NULL;
-    }
+    // there is no way to obtain MALLOCX_ARENA_MAX from jemalloc
+    // so this checks if arena_ind does not exceed assumed range
+    assert(arena_ind < MALLOCX_ARENA_MAX);
+
     return arena_registry_g[arena_ind];
 }
 
