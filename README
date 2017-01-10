@@ -109,6 +109,17 @@ and pay particular attention to the use of the procfs files:
 for enabling the kernel's huge page pool.
 
 
+SETTING HEAP MANAGER
+--------------------
+In memkind library heap management can be adjusted with MEMKIND_HEAP_MANAGER
+environment variable, which allows for switching to one of the available
+heap managers.
+Values:
+    JEMALLOC – sets the jamalloc heap manager
+    TBB – sets Intel Threading Building Blocks heap manager. This option requires installed
+    Intel Threading Building Blocks library.
+If the MEMKIND_HEAP_MANAGER is not set than the jemalloc heap manager will be used by default.
+
 TESTING
 -------
 All existing tests pass. For more information on how to execute tests
