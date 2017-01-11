@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,9 @@
 #include <stdint.h>
 #include <assert.h>
 
-MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_OPS = {
+MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
-    .destroy = memkind_arena_destroy,
+    .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
     .calloc = memkind_arena_calloc,
     .posix_memalign = memkind_arena_posix_memalign,
@@ -61,11 +61,12 @@ MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_OPS = {
     .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_init_once,
+    .finalize = memkind_arena_finalize
 };
 
-MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
+MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .create = memkind_arena_create,
-    .destroy = memkind_arena_destroy,
+    .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
     .calloc = memkind_arena_calloc,
     .posix_memalign = memkind_arena_posix_memalign,
@@ -79,11 +80,12 @@ MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_hugetlb_init_once,
+    .finalize = memkind_arena_finalize
 };
 
-MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
+MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .create = memkind_arena_create,
-    .destroy = memkind_arena_destroy,
+    .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
     .calloc = memkind_arena_calloc,
     .posix_memalign = memkind_arena_posix_memalign,
@@ -97,11 +99,12 @@ MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_preferred_init_once,
+    .finalize = memkind_arena_finalize
 };
 
-MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
+MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .create = memkind_arena_create,
-    .destroy = memkind_arena_destroy,
+    .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
     .calloc = memkind_arena_calloc,
     .posix_memalign = memkind_arena_posix_memalign,
@@ -115,11 +118,12 @@ MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_preferred_hugetlb_init_once,
+    .finalize = memkind_arena_finalize
 };
 
-MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
+MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .create = memkind_arena_create,
-    .destroy = memkind_arena_destroy,
+    .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
     .calloc = memkind_arena_calloc,
     .posix_memalign = memkind_arena_posix_memalign,
@@ -134,6 +138,7 @@ MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_interleave_init_once,
+    .finalize = memkind_arena_finalize
 };
 
 struct numanode_bandwidth_t {

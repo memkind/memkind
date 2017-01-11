@@ -223,3 +223,4 @@ jemalloc/doc/manpages.xsl.in
 jemalloc/INSTALL
 jemalloc/config.stamp.in
 jemalloc/.travis.yml
+include/memkind/internal/tbb_mem_pool_policy.h

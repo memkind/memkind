@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@ enum memkind_base_partition {
 
 
 struct memkind_ops {
-    int (* create)(struct memkind *kind, const struct memkind_ops *ops, const char *name);
+    int (* create)(struct memkind *kind, struct memkind_ops *ops, const char *name);
     int (* destroy)(struct memkind *kind);
     void *(* malloc)(struct memkind *kind, size_t size);
     void *(* calloc)(struct memkind *kind, size_t num, size_t size);
@@ -114,6 +114,7 @@ struct memkind_ops {
     int (* check_available)(struct memkind *kind);
     int (* check_addr)(struct memkind *kind, void *addr);
     void (*init_once)(void);
+    int (* finalize)(struct memkind *kind);
 };
 
 /*
@@ -122,9 +123,9 @@ struct memkind_ops {
 extern memkind_t MEMKIND_HBW_GBTLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
 extern memkind_t MEMKIND_GBTLB;
-extern const struct memkind_ops MEMKIND_HBW_GBTLB_OPS;
-extern const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS;
-extern const struct memkind_ops MEMKIND_GBTLB_OPS;
+extern struct memkind_ops MEMKIND_HBW_GBTLB_OPS;
+extern struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS;
+extern struct memkind_ops MEMKIND_GBTLB_OPS;
 
 /*
  * Create a new kind
@@ -134,7 +135,7 @@ extern const struct memkind_ops MEMKIND_GBTLB_OPS;
  *   for dynamic kind creation.
  *
  */
-int MEMKIND_DEPRECATED(memkind_create(const struct memkind_ops *ops, const char *name, memkind_t *kind));
+int MEMKIND_DEPRECATED(memkind_create(struct memkind_ops *ops, const char *name, memkind_t *kind));
 
 
 /*

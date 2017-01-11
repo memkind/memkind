@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 - 2016 Intel Corporation.
+.\" Copyright (C) 2014 - 2017 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@ Note: This is EXEPRIMENTAL API. The functionality and the header file itself can
 .sp
 .B Link with -lmemkind
 .sp
-.BI "int memkind_arena_create(struct memkind " "*kind" ", const struct memkind_ops " "*ops" ", const char " "*name" );
+.BI "int memkind_arena_create(struct memkind " "*kind" ", struct memkind_ops " "*ops" ", const char " "*name" );
 .BI "int memkind_arena_create_map(struct memkind " "*kind" );
 .BI "int memkind_arena_destroy(struct memkind " "*kind" );
 .BI "void *memkind_arena_malloc(struct memkind " "*kind" ", size_t " "size" );

@@ -50,6 +50,7 @@ src/memkind_interleave.c
 src/memkind_pmem.c
 src/memkind_log.c
 src/memkind-hbw-nodes.c
+src/tbb_wrapper.c
 include/hbwmalloc.h
 include/memkind.h
 include/memkind_deprecated.h
@@ -63,6 +64,8 @@ include/memkind/internal/memkind_interleave.h
 include/memkind/internal/memkind_pmem.h
 include/memkind/internal/memkind_private.h
 include/memkind/internal/memkind_log.h
+include/memkind/internal/tbb_wrapper.h
+include/memkind/internal/tbb_mem_pool_policy.h
 test/Makefile.mk
 test/check.sh
 test/test.sh
@@ -168,6 +171,7 @@ test/run_alloc_benchmark.sh
 test/alloc_benchmark.c
 test/load_tbbmalloc_symbols.c
 test/tbbmalloc.h
+test/freeing_memory_segfault_test.cpp
 jemalloc/configure.ac
 jemalloc/build-aux/config.guess
 jemalloc/build-aux/install-sh

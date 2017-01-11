@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -298,7 +298,7 @@ exit:
     return err;
 }
 
-MEMKIND_EXPORT int memkind_arena_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
+MEMKIND_EXPORT int memkind_arena_create(struct memkind *kind, struct memkind_ops *ops, const char *name)
 {
     int err = 0;
 
@@ -328,6 +328,11 @@ MEMKIND_EXPORT int memkind_arena_destroy(struct memkind *kind)
 
     memkind_default_destroy(kind);
     return 0;
+}
+
+int memkind_arena_finalize(struct memkind *kind)
+{
+    return memkind_arena_destroy(kind);
 }
 
 MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)

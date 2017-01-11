@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,10 @@
 #include <gtest/gtest.h>
 
 
-extern const struct memkind_ops MEMKIND_BAD_OPS[];
-extern const struct memkind_ops MEMKIND_GOOD_OPS;
+extern struct memkind_ops MEMKIND_BAD_OPS[];
+extern struct memkind_ops MEMKIND_GOOD_OPS;
 extern const size_t MEMKIND_BAD_OPS_LEN;
-extern const struct memkind_ops deadbeef_ops;
+extern struct memkind_ops deadbeef_ops;
 
 /*These set of test cases are using defined ops (operations) structures to
  * validate the memkind_create API.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ extern "C" {
  * API standards are described in memkind(3) man page.
  */
 
-int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, const char *name);
+int memkind_default_create(struct memkind *kind, struct memkind_ops *ops, const char *name);
 int memkind_default_destroy(struct memkind *kind);
 void *memkind_default_malloc(struct memkind *kind, size_t size);
 void *memkind_default_calloc(struct memkind *kind, size_t num, size_t size);
@@ -60,7 +60,7 @@ int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free);
 int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
 void memkind_default_init_once(void);
 
-extern const struct memkind_ops MEMKIND_DEFAULT_OPS;
+extern struct memkind_ops MEMKIND_DEFAULT_OPS;
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 
 void *mmap_deadbeef(struct memkind *kind, void *addr, size_t size);
 
-const struct memkind_ops MEMKIND_BAD_OPS[] = {{
+struct memkind_ops MEMKIND_BAD_OPS[] = {{
         .create = NULL,
         .destroy = memkind_default_destroy,
         .malloc = memkind_default_malloc,
@@ -117,7 +117,7 @@ const struct memkind_ops MEMKIND_BAD_OPS[] = {{
     }
 };
 
-const struct memkind_ops MEMKIND_GOOD_OPS = {
+struct memkind_ops MEMKIND_GOOD_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_default_malloc,
@@ -130,7 +130,7 @@ const struct memkind_ops MEMKIND_GOOD_OPS = {
 
 const size_t MEMKIND_BAD_OPS_LEN = sizeof(MEMKIND_BAD_OPS)/sizeof(struct memkind_ops);
 
-const struct memkind_ops deadbeef_ops = {
+struct memkind_ops deadbeef_ops = {
     .create = memkind_arena_create,
     .destroy = memkind_arena_destroy,
     .malloc = memkind_arena_malloc,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ int node1_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsi
 int node2_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
 int node3_get_mbind_nodemask(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
 
-static const struct memkind_ops NODE0_OPS = {
+static struct memkind_ops NODE0_OPS = {
     create : memkind_arena_create,
     destroy : memkind_arena_destroy,
     malloc : memkind_arena_malloc,
@@ -60,7 +60,7 @@ static const struct memkind_ops NODE0_OPS = {
     init_once : 0
 };
 
-static const struct memkind_ops NODE1_OPS = {
+static struct memkind_ops NODE1_OPS = {
     create : memkind_arena_create,
     destroy : memkind_arena_destroy,
     malloc : memkind_arena_malloc,
@@ -81,7 +81,7 @@ static const struct memkind_ops NODE1_OPS = {
     init_once : 0
 };
 
-static const struct memkind_ops NODE2_OPS = {
+static struct memkind_ops NODE2_OPS = {
     create : memkind_arena_create,
     destroy : memkind_arena_destroy,
     malloc : memkind_arena_malloc,
@@ -102,7 +102,7 @@ static const struct memkind_ops NODE2_OPS = {
     init_once : 0
 };
 
-static const struct memkind_ops NODE3_OPS = {
+static struct memkind_ops NODE3_OPS = {
     create : memkind_arena_create,
     destroy : memkind_arena_destroy,
     malloc : memkind_arena_malloc,

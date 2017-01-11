@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2016 Intel Corporation.
+* Copyright (C) 2016 - 2017 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ protected:
         initial_nr_hugepages = HugePageOrganizer::get_nr_hugepages();
         // Set number of Huge Pages to allocate
         // System command returned -1 on error
-        ASSERT_NE(HugePageOrganizer::set_nr_hugepages(1024), -1);
+        ASSERT_NE(HugePageOrganizer::set_nr_hugepages(2048), -1);
     }
 
     void TearDown()
