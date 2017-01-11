@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,7 +117,6 @@ typedef enum memkind_bits_t {
 
     /** Allocations backed by 2 MB page size. */
     MEMKIND_MASK_PAGE_SIZE_2MB = 21ull, //2^21 = 2MB
-
 } memkind_bits_t;
 
 /* EXPERIMENTAL API */
@@ -187,20 +186,14 @@ enum {
  *      - argument configuration is not supported or not implemented,
  *      - invalid argument value.
  *
- * Note: currently implemented attributes configurations (memtype_flags,
- * policy, flags):
- * {MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, 0},
- * {MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL,
- *  MEMKIND_MASK_PAGE_SIZE_2MB},
- * {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, 0},
- * {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL,
- *  MEMKIND_MASK_PAGE_SIZE_2MB},
- * {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, 0}
- * {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL,
- *  MEMKIND_MASK_PAGE_SIZE_2MB}
- * {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, 0}
- * {MEMKIND_MEMTYPE_DEFAULT and MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
- *  MEMKIND_POLICY_INTERLEAVE_ALL, 0}.
+ * Note: currently implemented memory type and policy configurations (memtype_flags,
+ * policy):
+ * 1. {MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL},
+ * 2. {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL},
+ * 3. {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL},
+ * 4. {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL},
+ * 5. {MEMKIND_MEMTYPE_DEFAULT and MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
+ *  MEMKIND_POLICY_INTERLEAVE_ALL}.
  */
 int memkind_create_kind(memkind_memtype_t memtype_flags,
                         memkind_policy_t policy,

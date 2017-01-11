@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2016 Intel Corporation.
+#  Copyright (C) 2014 - 2017 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,14 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_pmem.c \
                         src/memkind_interleave.c \
                         src/memkind_log.c \
+                        src/tbb_wrapper.c \
                         # end
 
 
 libmemkind_la_LIBADD = jemalloc/obj/lib/libjemalloc_pic.a
 
 
-libmemkind_la_LDFLAGS = -version-info $(memkind_abi_version)
+libmemkind_la_LDFLAGS = -version-info $(memkind_abi_version) -ldl
 
 include_HEADERS = include/hbwmalloc.h \
                   include/hbw_allocator.h \
@@ -61,6 +62,8 @@ nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
                   include/memkind/internal/memkind_log.h \
+                  include/memkind/internal/tbb_wrapper.h \
+                  include/memkind/internal/tbb_mem_pool_policy.h \
                   # end
 
 sbin_PROGRAMS =

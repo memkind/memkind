@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,9 @@
 #include <dirent.h>
 #include <jemalloc/jemalloc.h>
 
-MEMKIND_EXPORT const struct memkind_ops MEMKIND_HUGETLB_OPS = {
+MEMKIND_EXPORT struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .create = memkind_arena_create,
-    .destroy = memkind_arena_destroy,
+    .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
     .calloc = memkind_arena_calloc,
     .posix_memalign = memkind_arena_posix_memalign,
@@ -55,7 +55,8 @@ MEMKIND_EXPORT const struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_arena = memkind_thread_get_arena,
     .get_size = memkind_default_get_size,
-    .init_once = memkind_hugetlb_init_once
+    .init_once = memkind_hugetlb_init_once,
+    .finalize = memkind_arena_finalize
 };
 
 static int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out);

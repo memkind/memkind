@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 #include <memkind/internal/memkind_interleave.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/tbb_wrapper.h>
 
 #include "config.h"
 
@@ -195,7 +196,23 @@ static struct memkind_subregistry memkind_check_addr_subregistry_g = {
 
 static size_t Chunksize = 0;
 
-static int memkind_get_kind_for_free(void *ptr, struct memkind **kind);
+static heap_manager_t heap_manager_g;
+
+static void set_heap_manager()
+{
+    heap_manager_g = MEMKIND_HEAP_MANAGER_JEMALLOC;
+    const char* env = getenv("MEMKIND_HEAP_MANAGER");
+    if(env && strcmp(env, "TBB") == 0) {
+        heap_manager_g = MEMKIND_HEAP_MANAGER_TBB;
+    }
+}
+
+heap_manager_t get_heap_manager()
+{
+    static pthread_once_t init_once_guard = PTHREAD_ONCE_INIT;
+    pthread_once(&init_once_guard, set_heap_manager);
+    return heap_manager_g;
+}
 
 static int validate_memtype_bits(memkind_memtype_t memtype) {
     if(memtype == 0) return -1;
@@ -247,8 +264,6 @@ MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
 
     memkind_t tmp_kind = NULL;
 
-    /* This implementation reuse old static kinds, which means that kind object
-     * is not created here. */
     if(memtype_flags == MEMKIND_MEMTYPE_DEFAULT) {
         if(policy == MEMKIND_POLICY_PREFERRED_LOCAL) {
             if(flags & MEMKIND_MASK_PAGE_SIZE_2MB)
@@ -307,13 +322,12 @@ MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
 }
 
 /* Kind destruction. */
-MEMKIND_EXPORT int memkind_destroy_kind(memkind_t kind) {
-    /* For now the implementation is based on old static kinds, so we don't destroy
-     * kind object here. This might be changed in furue. */
-    return MEMKIND_SUCCESS;
+MEMKIND_EXPORT int memkind_destroy_kind(memkind_t kind)
+{
+    return kind->ops->destroy(kind);
 }
 
-/* Declare weak symbols for alloctor decorators */
+/* Declare weak symbols for allocator decorators */
 extern void memkind_malloc_pre(struct memkind **, size_t *) __attribute__((weak));
 extern void memkind_malloc_post(struct memkind *, size_t, void **) __attribute__((weak));
 extern void memkind_calloc_pre(struct memkind **, size_t *, size_t *) __attribute__((weak));
@@ -381,13 +395,22 @@ MEMKIND_EXPORT void memkind_error_message(int err, char *msg, size_t size)
 void memkind_init(memkind_t kind, bool check_numa)
 {
     log_info("Initializing kind %s.", kind->name);
-    int err = memkind_arena_create_map(kind, NULL);
-    if (err) {
-        log_fatal("[%s] Failed to create arena map (error code:%d).", kind->name, err);
-        abort();
+
+    if(get_heap_manager() == MEMKIND_HEAP_MANAGER_TBB) {
+        if(tbb_initialize(kind) != MEMKIND_SUCCESS) {
+            log_fatal("Failed to initialize TBB.");
+            abort();
+        }
+    }
+    else {
+        int err = memkind_arena_create_map(kind, NULL);
+        if (err) {
+            log_fatal("[%s] Failed to create arena map (error code:%d).", kind->name, err);
+            abort();
+        }
     }
     if (check_numa) {
-        err = numa_available();
+        int err = numa_available();
         if (err) {
             log_fatal("[%s] NUMA not available (error code:%d).", kind->name, err);
             abort();
@@ -431,7 +454,7 @@ static inline int subregistry_size(struct memkind_subregistry* subregistry)
 
 static void nop(void) {}
 
-MEMKIND_EXPORT int memkind_create(const struct memkind_ops *ops, const char *name, struct memkind **kind)
+MEMKIND_EXPORT int memkind_create(struct memkind_ops *ops, const char *name, struct memkind **kind)
 {
     int err;
     int i;
@@ -502,8 +525,8 @@ MEMKIND_EXPORT int memkind_finalize(void)
 
     for (i = 0; i < memkind_registry_g.num_kind; ++i) {
         kind = memkind_registry_g.partition_map[i];
-        if (kind) {
-            err = kind->ops->destroy(kind);
+        if (kind && kind->ops->finalize) {
+            err = kind->ops->finalize(kind);
             if (err) {
                 goto exit;
             }
@@ -685,20 +708,44 @@ MEMKIND_EXPORT void *memkind_realloc(struct memkind *kind, void *ptr, size_t siz
     return result;
 }
 
+static inline struct memkind* memkind_get_kind_by_check_addr(void *ptr)
+{
+    int i, num_kind;
+    struct memkind *test_kind;
+
+    num_kind = subregistry_size(&memkind_check_addr_subregistry_g);
+    for (i = 0; i < num_kind; ++i) {
+        test_kind = subregistry_get(&memkind_check_addr_subregistry_g, i);
+        if (test_kind && test_kind->ops->check_addr(test_kind, ptr) == 0) {
+            return test_kind;
+        }
+    }
+    return 0;
+}
+
 MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
 {
-    if (!kind) {
-        memkind_get_kind_for_free(ptr, &kind);
-    }
-    pthread_once(&kind->init_once, kind->ops->init_once);
-
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memkind_free_pre) {
         memkind_free_pre(&kind, &ptr);
     }
 #endif
-
-    kind->ops->free(kind, ptr);
+    if (!kind && !(kind = memkind_get_kind_by_check_addr(ptr))) {
+        switch(get_heap_manager()) {
+            case MEMKIND_HEAP_MANAGER_TBB:
+                tbb_pool_free(kind, ptr);
+                break;
+            case MEMKIND_HEAP_MANAGER_JEMALLOC:
+                jemk_free(ptr);
+                break;
+            default:
+                assert(!"Unreachable code. Bad heap manager value.");
+        }
+    }
+    else {
+        pthread_once(&kind->init_once, kind->ops->init_once);
+        kind->ops->free(kind, ptr);
+    }
 
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memkind_free_post) {
@@ -710,23 +757,6 @@ MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
 MEMKIND_EXPORT int memkind_get_size(memkind_t kind, size_t *total, size_t *free)
 {
     return kind->ops->get_size(kind, total, free);
-}
-
-static inline int memkind_get_kind_for_free(void *ptr, struct memkind **kind)
-{
-    int i, num_kind;
-    struct memkind *test_kind;
-
-    *kind = MEMKIND_DEFAULT;
-    num_kind = subregistry_size(&memkind_check_addr_subregistry_g);
-    for (i = 0; i < num_kind; ++i) {
-        test_kind = subregistry_get(&memkind_check_addr_subregistry_g, i);
-        if (test_kind && test_kind->ops->check_addr(test_kind, ptr) == 0) {
-            *kind = test_kind;
-            break;
-        }
-    }
-    return 0;
 }
 
 static int memkind_tmpfile(const char *dir, size_t size, int *fd, void **addr)

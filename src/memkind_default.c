@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,7 @@
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/tbb_wrapper.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -37,7 +38,7 @@
 #define MADV_NOHUGEPAGE 15
 #endif
 
-MEMKIND_EXPORT const struct memkind_ops MEMKIND_DEFAULT_OPS = {
+MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_default_malloc,
@@ -49,7 +50,7 @@ MEMKIND_EXPORT const struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .init_once = memkind_default_init_once
 };
 
-MEMKIND_EXPORT int memkind_default_create(struct memkind *kind, const struct memkind_ops *ops, const char *name)
+MEMKIND_EXPORT int memkind_default_create(struct memkind *kind, struct memkind_ops *ops, const char *name)
 {
     int err = 0;
 
@@ -66,7 +67,6 @@ MEMKIND_EXPORT int memkind_default_create(struct memkind *kind, const struct mem
 
 MEMKIND_EXPORT int memkind_default_destroy(struct memkind *kind)
 {
-    kind->name[0] = '\0';
     return 0;
 }
 
@@ -237,5 +237,11 @@ MEMKIND_EXPORT int memkind_posix_check_alignment(struct memkind *kind, size_t al
 
 MEMKIND_EXPORT void memkind_default_init_once(void)
 {
+    if(get_heap_manager() == MEMKIND_HEAP_MANAGER_TBB) {
+        if(tbb_initialize(MEMKIND_DEFAULT) != MEMKIND_SUCCESS) {
+            log_fatal("Failed to initialize TBB.");
+            abort();
+        }
+    }
     memkind_register_kind(MEMKIND_DEFAULT);
 }

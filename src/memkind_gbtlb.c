@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@
 #define MAP_HUGE_1GB (30 << 26)
 #endif
 
-MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
+MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_gbtlb_malloc,
@@ -62,7 +62,7 @@ MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .init_once = memkind_hbw_gbtlb_init_once
 };
 
-MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
+MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_gbtlb_malloc,
@@ -81,7 +81,7 @@ MEMKIND_EXPORT const struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
 
 };
 
-MEMKIND_EXPORT const struct memkind_ops MEMKIND_GBTLB_OPS = {
+MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_gbtlb_malloc,

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2016 Intel Corporation.
+#  Copyright (C) 2014 - 2017 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@ check_PROGRAMS += test/all_tests \
                   test/gb_page_tests_preferred_policy \
                   test/bat_bind_tests \
                   test/bat_interleave_tests \
+                  test/freeing_memory_segfault_test \
                   # end
 
 TESTS += test/check.sh
@@ -67,6 +68,7 @@ test_gb_page_tests_preferred_policy_LDADD = libmemkind.la
 test_bat_bind_tests_LDADD = libmemkind.la
 test_bat_interleave_tests_LDADD = libmemkind.la
 test_trace_mechanism_test_helper_LDADD = libmemkind.la
+test_freeing_memory_segfault_test_LDADD = libmemkind.la
 
 fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
               test/main.cpp \
@@ -113,6 +115,7 @@ test_gb_page_tests_preferred_policy_SOURCES = $(fused_gtest) test/gb_page_tests_
 test_bat_bind_tests_SOURCES = $(fused_gtest) test/bat_bind_tests.cpp test/trial_generator.cpp test/check.cpp
 test_bat_interleave_tests_SOURCES = $(fused_gtest) test/bat_interleave_tests.cpp test/trial_generator.cpp test/check.cpp
 test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c
+test_freeing_memory_segfault_test_SOURCES = $(fused_gtest) test/freeing_memory_segfault_test.cpp
 
 #Tests based on Allocator Perf Tool
 allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.hpp \
@@ -258,7 +261,7 @@ test/numakind_macro.h:
 	for ((i=0;i<$(NUMAKIND_MAX);i++)); do \
 		echo "NUMAKIND_GET_MBIND_NODEMASK_MACRO($$i)" >> $@; \
 		done
-	echo 'const struct memkind_ops NUMAKIND_OPS[NUMAKIND_MAX] = {' >> $@
+	echo 'struct memkind_ops NUMAKIND_OPS[NUMAKIND_MAX] = {' >> $@
 	for ((i=0;i<$(NUMAKIND_MAX);i++)); do \
 		echo "NUMAKIND_OPS_MACRO($$i)," >> $@; \
 		done

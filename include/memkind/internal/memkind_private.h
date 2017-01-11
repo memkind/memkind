@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ enum memkind_const_private {
 
 
 struct memkind {
-    const struct memkind_ops *ops;
+    struct memkind_ops *ops;
     unsigned int partition;
     char name[MEMKIND_NAME_LENGTH_PRIV];
     pthread_once_t init_once;
@@ -81,6 +81,13 @@ static inline void *kind_mmap(struct memkind *kind, void* addr, size_t size)
         return kind->ops->mmap(kind, addr, size);
     }
 }
+
+typedef enum {
+    MEMKIND_HEAP_MANAGER_JEMALLOC=0u,
+    MEMKIND_HEAP_MANAGER_TBB,
+} heap_manager_t;
+
+heap_manager_t get_heap_manager();
 
 #ifdef __cplusplus
 }

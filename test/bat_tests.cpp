@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,146 +39,405 @@ class BATest: public TGTest
 {
 };
 
-void test_allocation(memkind_t kind, size_t size)
+class BasicAllocTest
 {
-    ASSERT_TRUE(kind != NULL);
-    void* ptr = memkind_malloc(kind, size);
-    ASSERT_TRUE(ptr != NULL);
-    void* memset_ret = memset(ptr, 3, size);
-    ASSERT_TRUE(memset_ret != NULL);
-    memkind_free(kind, ptr);
+public:
+    void init(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags)
+    {
+        if(!kind) {
+            int ret = memkind_create_kind(memtype, policy, flags, &kind);
+            ASSERT_EQ(MEMKIND_SUCCESS, ret);
+            ASSERT_TRUE(kind != NULL);
+        }
+    }
+
+    void malloc(size_t size)
+    {
+        void* ptr = memkind_malloc(kind, size);
+        ASSERT_TRUE(ptr != NULL) << "memkind_malloc() returns NULL";
+        void* memset_ret = memset(ptr, 3, size);
+        EXPECT_TRUE(memset_ret != NULL);
+        memkind_free(kind, ptr);
+    }
+
+    void calloc(size_t num, size_t size)
+    {
+        void* ptr = memkind_calloc(kind, num, size);
+        ASSERT_TRUE(ptr != NULL) << "memkind_calloc() returns NULL";
+        void* memset_ret = memset(ptr, 3, size);
+        ASSERT_TRUE(memset_ret != NULL);
+        memkind_free(kind, ptr);
+    }
+
+    void realloc(size_t size)
+    {
+        void* ptr = memkind_malloc(kind, size);
+        ASSERT_TRUE(ptr != NULL) << "memkind_malloc() returns NULL";
+        size_t realloc_size = size+128;
+        ptr = memkind_realloc(kind, ptr, realloc_size);
+        ASSERT_TRUE(ptr != NULL) << "memkind_realloc() returns NULL";
+        void* memset_ret = memset(ptr, 3, realloc_size);
+        ASSERT_TRUE(memset_ret != NULL);
+        memkind_free(kind, ptr);
+    }
+
+    void memalign(size_t alignment, size_t size)
+    {
+        void* ptr = NULL;
+        int ret = memkind_posix_memalign(kind, &ptr, alignment, size);
+        ASSERT_EQ(0, ret) << "memkind_posix_memalign() != 0";
+        ASSERT_TRUE(ptr != NULL) << "memkind_posix_memalign() returns NULL pointer";
+        void* memset_ret = memset(ptr, 3, size);
+        ASSERT_TRUE(memset_ret != NULL);
+        memkind_free(kind, ptr);
+    }
+
+    void free(size_t size)
+    {
+        void* ptr = memkind_malloc(kind, size);
+        ASSERT_TRUE(ptr != NULL) << "memkind_malloc() returns NULL";
+        memkind_free(kind, ptr);
+        ptr = memkind_malloc(kind, size);
+        ASSERT_TRUE(ptr != NULL) << "memkind_malloc() returns NULL";
+        memkind_free(0, ptr);
+    }
+
+    void destroy_kind()
+    {
+        int ret = memkind_destroy_kind(kind);
+        ASSERT_EQ(MEMKIND_SUCCESS, ret);
+        kind = NULL;
+    }
+
+    virtual ~BasicAllocTest() {destroy_kind();}
+private:
+    memkind_t kind = NULL;
+};
+
+static void test_malloc(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
+{
+    BasicAllocTest test;
+    test.init(memtype, policy, flags);
+    test.malloc(size);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL)
+static void test_calloc(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
 {
-    memkind_t kind = NULL;
-    int ret = memkind_create_kind(
-        MEMKIND_MEMTYPE_DEFAULT,
-        MEMKIND_POLICY_PREFERRED_LOCAL,
-        memkind_bits_t(),
-        &kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
-
-    test_allocation(kind, 4096);
-
-    ret = memkind_destroy_kind(kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+    BasicAllocTest test;
+    test.init(memtype, policy, flags);
+    test.calloc(1, size);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB)
+static void test_realloc(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
 {
-    memkind_t kind = NULL;
-    int ret = memkind_create_kind(
-        MEMKIND_MEMTYPE_DEFAULT,
-        MEMKIND_POLICY_PREFERRED_LOCAL,
-        MEMKIND_MASK_PAGE_SIZE_2MB,
-        &kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
-
-    test_allocation(kind, 4096);
-
-    ret = memkind_destroy_kind(kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+    BasicAllocTest test;
+    test.init(memtype, policy, flags);
+    test.realloc(size);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL)
+
+static void test_memalign(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
 {
-    memkind_t kind = NULL;
-    int ret = memkind_create_kind(
-        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
-        MEMKIND_POLICY_BIND_LOCAL,
-        memkind_bits_t(),
-        &kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
-
-    test_allocation(kind, 4096);
-
-    ret = memkind_destroy_kind(kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+    BasicAllocTest test;
+    test.init(memtype, policy, flags);
+    test.memalign(4096, size);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_2MBPages_malloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB)
+static void test_free(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
 {
-    memkind_t kind = NULL;
-    int ret = memkind_create_kind(
-        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
-        MEMKIND_POLICY_BIND_LOCAL,
-        MEMKIND_MASK_PAGE_SIZE_2MB,
-        &kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
-
-    test_allocation(kind, 4096);
-
-    ret = memkind_destroy_kind(kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+    BasicAllocTest test;
+    test.init(memtype, policy, flags);
+    test.free(size);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL)
+TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_4096_bytes)
 {
-    memkind_t kind = NULL;
-    int ret = memkind_create_kind(
-        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
-        MEMKIND_POLICY_PREFERRED_LOCAL,
-        memkind_bits_t(),
-        &kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
-
-    test_allocation(kind, 4096);
-
-    ret = memkind_destroy_kind(kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+    test_malloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB)
+TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_4194305_bytes)
 {
-    memkind_t kind = NULL;
-    int ret = memkind_create_kind(
-        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
-        MEMKIND_POLICY_PREFERRED_LOCAL,
-        MEMKIND_MASK_PAGE_SIZE_2MB,
-        &kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
-
-    test_allocation(kind, 4096);
-
-    ret = memkind_destroy_kind(kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+    test_malloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_INTERLEAVE_ALL)
+TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
 {
-    memkind_t kind = NULL;
-    int ret = memkind_create_kind(
-        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
-        MEMKIND_POLICY_INTERLEAVE_ALL,
-        memkind_bits_t(),
-        &kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
-
-    test_allocation(kind, 4096);
-
-    ret = memkind_destroy_kind(kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+    test_malloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_HIGH_BANDWIDTH_INTERLEAVE_ALL)
+TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
 {
-    memkind_t kind = NULL;
-    int flags_tmp = MEMKIND_MEMTYPE_DEFAULT | MEMKIND_MEMTYPE_HIGH_BANDWIDTH;
-    memkind_memtype_t memtype_flags;
-    memcpy(&memtype_flags, &flags_tmp, sizeof(memtype_flags));
+    test_malloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
 
-    int ret = memkind_create_kind(
-        memtype_flags,
-        MEMKIND_POLICY_INTERLEAVE_ALL,
-        memkind_bits_t(),
-        &kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL_4096_bytes)
+{
+    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4096);
+}
 
-    test_allocation(kind, 4096);
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL_4194305_bytes)
+{
+    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4194305);
+}
 
-    ret = memkind_destroy_kind(kind);
-    ASSERT_EQ(ret, MEMKIND_SUCCESS);
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4096_bytes)
+{
+    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4194305_bytes)
+{
+    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4096_bytes)
+{
+    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
+{
+    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_DEFAULT_PREFERRED_LOCAL_4096_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_DEFAULT_PREFERRED_LOCAL_4194305_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_LOCAL_4096_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_LOCAL_4194305_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4096_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4194305_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4096_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
+{
+    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_DEFAULT_PREFERRED_LOCAL_4096_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_DEFAULT_PREFERRED_LOCAL_4194305_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_LOCAL_4096_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_LOCAL_4194305_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4096_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4194305_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4096_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
+{
+    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_DEFAULT_PREFERRED_LOCAL_4096_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_DEFAULT_PREFERRED_LOCAL_4194305_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_LOCAL_4096_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_LOCAL_4194305_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_PREFERRED_LOCAL_4096_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_PREFERRED_LOCAL_4194305_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_INTERLEAVE_ALL_4096_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
+{
+    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_DEFULT_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
+{
+    test_malloc((memkind_memtype_t)(MEMKIND_MEMTYPE_DEFAULT | MEMKIND_MEMTYPE_HIGH_BANDWIDTH), MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_free_DEFAULT_PREFERRED_LOCAL_4096_bytes)
+{
+    test_free(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
 }
 
 TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_CheckAvailable)

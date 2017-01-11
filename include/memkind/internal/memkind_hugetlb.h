@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags);
 void memkind_hugetlb_init_once(void);
 int memkind_hugetlb_check_available_2mb(struct memkind *kind);
 
-extern const struct memkind_ops MEMKIND_HUGETLB_OPS;
+extern struct memkind_ops MEMKIND_HUGETLB_OPS;
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,11 +55,11 @@ void memkind_hbw_preferred_init_once(void);
 void memkind_hbw_preferred_hugetlb_init_once(void);
 void memkind_hbw_interleave_init_once(void);
 
-extern const struct memkind_ops MEMKIND_HBW_OPS;
-extern const struct memkind_ops MEMKIND_HBW_HUGETLB_OPS;
-extern const struct memkind_ops MEMKIND_HBW_PREFERRED_OPS;
-extern const struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS;
-extern const struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS;
+extern struct memkind_ops MEMKIND_HBW_OPS;
+extern struct memkind_ops MEMKIND_HBW_HUGETLB_OPS;
+extern struct memkind_ops MEMKIND_HBW_PREFERRED_OPS;
+extern struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS;
+extern struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS;
 
 #ifdef __cplusplus
 }
