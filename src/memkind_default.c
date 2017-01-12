@@ -136,21 +136,23 @@ MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr, size
     }
     if (MEMKIND_LIKELY(!err)) {
         result = mmap(addr, size, PROT_READ | PROT_WRITE, flags, -1, 0);
-    }
-    if (MEMKIND_LIKELY(result != MAP_FAILED)) {
-        if (kind->ops->mbind) {
-            err = kind->ops->mbind(kind, result, size);
-            if (err) {
-                munmap(result, size);
-                result = MAP_FAILED;
-            }
+        if (result == MAP_FAILED) {
+            log_err("syscall mmap() returned: %p", result);
+            return result;
         }
-        if (kind->ops->madvise) {
-            err = kind->ops->madvise(kind, result, size);
-            if (err) {
-                munmap(result, size);
-                result = MAP_FAILED;
-            }
+    }
+    if (kind->ops->mbind) {
+        err = kind->ops->mbind(kind, result, size);
+        if (err) {
+            munmap(result, size);
+            result = MAP_FAILED;
+        }
+    }
+    if (kind->ops->madvise) {
+        err = kind->ops->madvise(kind, result, size);
+        if (err) {
+            munmap(result, size);
+            result = MAP_FAILED;
         }
     }
     return result;
@@ -165,6 +167,9 @@ MEMKIND_EXPORT int memkind_nohugepage_madvise(struct memkind *kind, void *addr, 
     {
         return 0;
     }
+    if (MEMKIND_UNLIKELY(err)) {
+        log_err("syscall madvise() returned: %d", err);
+    }
     return err;
 }
 
@@ -177,17 +182,20 @@ MEMKIND_EXPORT int memkind_default_mbind(struct memkind *kind, void *ptr, size_t
     if (MEMKIND_UNLIKELY(kind->ops->get_mbind_nodemask == NULL ||
         kind->ops->get_mbind_mode == NULL)) {
         log_err("memkind_ops->mbind_mode or memkind_ops->bind_nodemask is NULL.");
-        err = MEMKIND_ERROR_BADOPS;
+        return MEMKIND_ERROR_BADOPS;
     }
-    if (MEMKIND_LIKELY(!err)) {
-        err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
+    err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
+    if (MEMKIND_UNLIKELY(err)) {
+        return err;
     }
-    if (MEMKIND_LIKELY(!err)) {
-        err = kind->ops->get_mbind_mode(kind, &mode);
+    err = kind->ops->get_mbind_mode(kind, &mode);
+    if (MEMKIND_UNLIKELY(err)) {
+        return err;
     }
-    if (MEMKIND_LIKELY(!err)) {
-        err = mbind(ptr, size, mode, nodemask.n, NUMA_NUM_NODES, 0);
-        err = err ? MEMKIND_ERROR_MBIND : 0;
+    err = mbind(ptr, size, mode, nodemask.n, NUMA_NUM_NODES, 0);
+    if (MEMKIND_UNLIKELY(err)) {
+        log_err("syscall mbind() returned: %d", err);
+        return MEMKIND_ERROR_MBIND;
     }
     return err;
 }
