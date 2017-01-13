@@ -674,24 +674,35 @@ ctl_arena_refresh(tsdn_t *tsdn, arena_t *arena, unsigned i)
 static bool
 ctl_grow(tsdn_t *tsdn)
 {
+	static unsigned arena_stats_cap;
 	ctl_arena_stats_t *astats;
 
 	/* Initialize new arena. */
 	if (arena_init(tsdn, ctl_stats.narenas) == NULL)
 		return (true);
 
-	/* Allocate extended arena stats. */
-	astats = (ctl_arena_stats_t *)a0malloc((ctl_stats.narenas + 2) *
-	    sizeof(ctl_arena_stats_t));
-	if (astats == NULL)
-		return (true);
+	if(arena_stats_cap < ctl_stats.narenas + 1) {
+		arena_stats_cap = (ctl_stats.narenas * 2) < MALLOCX_ARENA_MAX ?
+			(ctl_stats.narenas * 2) : MALLOCX_ARENA_MAX;
+		/* Allocate extended arena stats. */
+		astats = (ctl_arena_stats_t *)a0malloc((arena_stats_cap + 1) *
+				sizeof(ctl_arena_stats_t));
+		if (astats == NULL)
+			return (true);
+
+		memcpy(astats, ctl_stats.arenas, (ctl_stats.narenas + 1) *
+				sizeof(ctl_arena_stats_t));
+	}
+	else {
+		astats = ctl_stats.arenas;
+	}
 
 	/* Initialize the new astats element. */
-	memcpy(astats, ctl_stats.arenas, (ctl_stats.narenas + 1) *
-	    sizeof(ctl_arena_stats_t));
 	memset(&astats[ctl_stats.narenas + 1], 0, sizeof(ctl_arena_stats_t));
 	if (ctl_arena_init(&astats[ctl_stats.narenas + 1])) {
-		a0dalloc(astats);
+		if(astats != ctl_stats.arenas) {
+			a0dalloc(astats);
+		}
 		return (true);
 	}
 	/* Swap merged stats to their new location. */
@@ -704,8 +715,10 @@ ctl_grow(tsdn_t *tsdn)
 		memcpy(&astats[ctl_stats.narenas + 1], &tstats,
 		    sizeof(ctl_arena_stats_t));
 	}
-	a0dalloc(ctl_stats.arenas);
-	ctl_stats.arenas = astats;
+	if(astats != ctl_stats.arenas) {
+		a0dalloc(ctl_stats.arenas);
+		ctl_stats.arenas = astats;
+	}
 	ctl_stats.narenas++;
 
 	return (false);
