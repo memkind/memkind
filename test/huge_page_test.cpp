@@ -33,7 +33,7 @@
 * There are two root causes of the error:
 * - kernel bug (munmap() fails when the size is not aligned)
 * - heap Manager doesn’t provide size aligned to 2MB pages for munmap()
-* Test allocates 2000MB = 1000 Huge Pages (50threads*10operations*4MBalloc_size),
+* Test allocates 2000MB using Huge Pages (50threads*10operations*4MBalloc_size),
 * but it needs extra Huge Pages due to overhead caused by heap management.
 */
 class  HugePageTest: public :: testing::Test
@@ -104,8 +104,5 @@ protected:
 TEST_F(HugePageTest, test_TC_MEMKIND_UNMAP_HUGE_PAGE)
 {
     ASSERT_HUGEPAGES_AVAILABILITY();
-    int iterations = 10;
-    for (int i=0; i<iterations; i++) {
-        run();
-    }
+    run();
 }
