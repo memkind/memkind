@@ -22,20 +22,54 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-#include <memkind.h>
-#include <memkind_deprecated.h>
+#include <memkind/internal/heap_manager.h>
+#include <memkind/internal/tbb_wrapper.h>
+#include <memkind/internal/memkind_arena.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdio.h>
+#include <pthread.h>
+#include <string.h>
 
-/* ops callbacks are replaced by TBB callbacks. */
-void tbb_initialize(struct memkind *kind);
+static struct heap_manager_ops* heap_manager_g;
 
-/* ptr pointer must come from the valid TBB pool allocation */
-void tbb_pool_free(struct memkind *kind, void *ptr);
+pthread_once_t heap_manager_init_once_g = PTHREAD_ONCE_INIT;
 
-#ifdef __cplusplus
+struct heap_manager_ops {
+    void (*init)(struct memkind* kind);
+    void (*heap_manager_free)(struct memkind* kind, void* ptr);
+};
+
+struct heap_manager_ops arena_heap_manager_g = {
+    .init = memkind_arena_init,
+    .heap_manager_free = memkind_arena_free
+};
+
+struct heap_manager_ops tbb_heap_manager_g = {
+    .init = tbb_initialize,
+    .heap_manager_free = tbb_pool_free
+};
+
+static void set_heap_manager()
+{
+    heap_manager_g = &arena_heap_manager_g;
+    const char* env = getenv("MEMKIND_HEAP_MANAGER");
+    if(env && strcmp(env, "TBB") == 0) {
+        heap_manager_g = &tbb_heap_manager_g;
+    }
 }
-#endif
+
+static inline struct heap_manager_ops* get_heap_manager()
+{
+    pthread_once(&heap_manager_init_once_g, set_heap_manager);
+    return heap_manager_g;
+}
+
+void heap_manager_init(struct memkind *kind)
+{
+    get_heap_manager()->init(kind);
+}
+
+void heap_manager_free(struct memkind *kind, void* ptr)
+{
+    get_heap_manager()->heap_manager_free(kind, ptr);
+}

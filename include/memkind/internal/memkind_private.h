@@ -82,13 +82,6 @@ static inline void *kind_mmap(struct memkind *kind, void* addr, size_t size)
     }
 }
 
-typedef enum {
-    MEMKIND_HEAP_MANAGER_JEMALLOC=0u,
-    MEMKIND_HEAP_MANAGER_TBB,
-} heap_manager_t;
-
-heap_manager_t get_heap_manager();
-
 #ifdef __cplusplus
 }
 #endif

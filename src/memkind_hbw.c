@@ -28,6 +28,7 @@
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/heap_manager.h>
 
 #include <stdlib.h>
 #include <stdio.h>

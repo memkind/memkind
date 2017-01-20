@@ -177,10 +177,11 @@ static int tbb_destroy(struct memkind* kind)
     return MEMKIND_SUCCESS;
 }
 
-int tbb_initialize(memkind_t kind)
+void tbb_initialize(struct memkind *kind)
 {
     if(!kind || load_tbb_symbols()) {
-        return MEMKIND_ERROR_RUNTIME;
+        log_fatal("Failed to initialize TBB.");
+        abort();
     }
 
     struct MemPoolPolicy policy = {
@@ -195,7 +196,8 @@ int tbb_initialize(memkind_t kind)
 
     pool_create_v1((intptr_t)kind, &policy, &kind->priv);
     if (!kind->priv) {
-        return MEMKIND_ERROR_RUNTIME;
+        log_fatal("Unable to create TBB memory pool.");
+        abort();
     }
 
     kind->ops->malloc = tbb_pool_malloc;
@@ -204,6 +206,4 @@ int tbb_initialize(memkind_t kind)
     kind->ops->realloc = tbb_pool_realloc;
     kind->ops->free = tbb_pool_free;
     kind->ops->finalize = tbb_destroy;
-
-    return MEMKIND_SUCCESS;
 }

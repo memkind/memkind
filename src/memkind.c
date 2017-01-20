@@ -36,6 +36,7 @@
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/tbb_wrapper.h>
+#include <memkind/internal/heap_manager.h>
 
 #include "config.h"
 
@@ -49,7 +50,6 @@
 #include <assert.h>
 #include <pthread.h>
 #include <errno.h>
-#include <sys/mman.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -195,24 +195,6 @@ static struct memkind_subregistry memkind_check_addr_subregistry_g = {
 };
 
 static size_t Chunksize = 0;
-
-static heap_manager_t heap_manager_g;
-
-static void set_heap_manager()
-{
-    heap_manager_g = MEMKIND_HEAP_MANAGER_JEMALLOC;
-    const char* env = getenv("MEMKIND_HEAP_MANAGER");
-    if(env && strcmp(env, "TBB") == 0) {
-        heap_manager_g = MEMKIND_HEAP_MANAGER_TBB;
-    }
-}
-
-heap_manager_t get_heap_manager()
-{
-    static pthread_once_t init_once_guard = PTHREAD_ONCE_INIT;
-    pthread_once(&init_once_guard, set_heap_manager);
-    return heap_manager_g;
-}
 
 static int validate_memtype_bits(memkind_memtype_t memtype) {
     if(memtype == 0) return -1;
@@ -395,20 +377,7 @@ MEMKIND_EXPORT void memkind_error_message(int err, char *msg, size_t size)
 void memkind_init(memkind_t kind, bool check_numa)
 {
     log_info("Initializing kind %s.", kind->name);
-
-    if(get_heap_manager() == MEMKIND_HEAP_MANAGER_TBB) {
-        if(tbb_initialize(kind) != MEMKIND_SUCCESS) {
-            log_fatal("Failed to initialize TBB.");
-            abort();
-        }
-    }
-    else {
-        int err = memkind_arena_create_map(kind, NULL);
-        if (err) {
-            log_fatal("[%s] Failed to create arena map (error code:%d).", kind->name, err);
-            abort();
-        }
-    }
+    heap_manager_init(kind);
     if (check_numa) {
         int err = numa_available();
         if (err) {
@@ -731,16 +700,7 @@ MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
     }
 #endif
     if (!kind && !(kind = memkind_get_kind_by_check_addr(ptr))) {
-        switch(get_heap_manager()) {
-            case MEMKIND_HEAP_MANAGER_TBB:
-                tbb_pool_free(kind, ptr);
-                break;
-            case MEMKIND_HEAP_MANAGER_JEMALLOC:
-                jemk_free(ptr);
-                break;
-            default:
-                assert(!"Unreachable code. Bad heap manager value.");
-        }
+        heap_manager_free(kind, ptr);
     }
     else {
         pthread_once(&kind->init_once, kind->ops->init_once);

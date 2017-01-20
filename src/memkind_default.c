@@ -26,6 +26,7 @@
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/tbb_wrapper.h>
+#include <memkind/internal/heap_manager.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -245,11 +246,6 @@ MEMKIND_EXPORT int memkind_posix_check_alignment(struct memkind *kind, size_t al
 
 MEMKIND_EXPORT void memkind_default_init_once(void)
 {
-    if(get_heap_manager() == MEMKIND_HEAP_MANAGER_TBB) {
-        if(tbb_initialize(MEMKIND_DEFAULT) != MEMKIND_SUCCESS) {
-            log_fatal("Failed to initialize TBB.");
-            abort();
-        }
-    }
+    heap_manager_init(MEMKIND_DEFAULT);
     memkind_register_kind(MEMKIND_DEFAULT);
 }

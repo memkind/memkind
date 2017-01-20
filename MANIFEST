@@ -41,6 +41,7 @@ man/memkind_pmem.3
 man/hbwallocator.3
 man/autohbw.7
 memkind.spec.mk
+src/heap_manager.c
 src/hbwmalloc.c
 src/memkind.c
 src/memkind_arena.c
@@ -57,6 +58,7 @@ include/hbwmalloc.h
 include/memkind.h
 include/memkind_deprecated.h
 include/hbw_allocator.h
+include/memkind/internal/heap_manager.h
 include/memkind/internal/memkind_arena.h
 include/memkind/internal/memkind_default.h
 include/memkind/internal/memkind_gbtlb.h

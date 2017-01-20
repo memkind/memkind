@@ -500,3 +500,20 @@ static void *jemk_rallocx_check(void *ptr, size_t size, int flags)
     return result;
 
 }
+
+void memkind_arena_init(struct memkind *kind)
+{
+    int err = 0;
+    if (kind != MEMKIND_DEFAULT) {
+        err = memkind_arena_create_map(kind, NULL);
+        if (err) {
+            log_fatal("[%s] Failed to create arena map (error code:%d).", kind->name, err);
+            abort();
+        }
+    }
+}
+
+void memkind_arena_free(struct memkind *kind, void* ptr)
+{
+    jemk_free(ptr);
+}

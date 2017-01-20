@@ -28,6 +28,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/obj/include
 lib_LTLIBRARIES = libmemkind.la
 
 libmemkind_la_SOURCES = src/hbwmalloc.c \
+                        src/heap_manager.c \
                         src/memkind_arena.c \
                         src/memkind.c \
                         src/memkind_default.c \
@@ -51,6 +52,7 @@ include_HEADERS = include/hbwmalloc.h \
 
 nonstandardincludedir = $(includedir)/memkind/internal
 nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
+                  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_default.h \
                   include/memkind/internal/memkind_gbtlb.h \
                   include/memkind/internal/memkind_hbw.h \
