@@ -39,6 +39,7 @@
 #include <string>
 #include <cstring>
 #include <numa.h>
+#include <errno.h>
 
 #include "check.h"
 
@@ -316,4 +317,33 @@ int Check::check_page_size(size_t page_size, void *vaddr)
     }
     /*Never found a match!*/
     return 1;
+}
+
+void Check::record_page_association()
+{
+    int max_node_id = numa_max_node();
+    std::unique_ptr<int[]> nodes(new int[num_address]);
+    std::vector<int> pages_on_node(max_node_id+1);
+
+    if (move_pages(0, num_address, address, NULL, nodes.get(), MPOL_MF_MOVE)) {
+        fprintf(stderr, "Error: move_pages() returned %s\n", strerror(errno));
+        return;
+    }
+
+    for (size_t i = 0; i < num_address; i++) {
+        if (nodes[i] < 0) {
+            fprintf(stderr,"Error: status of page %p is %d\n", address[i], nodes[i]);
+            return;
+        } else {
+            pages_on_node[nodes[i]]++;
+        }
+    }
+
+    for (size_t i = 0; i < (size_t)max_node_id + 1; i++) {
+        if (pages_on_node[i] > 0) {
+            char buffer[1024];
+            snprintf(buffer, sizeof(buffer), "Node%zd", i);
+            GTestAdapter::RecordProperty(buffer, pages_on_node[i]);
+        }
+    }
 }

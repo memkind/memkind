@@ -42,6 +42,8 @@ class BATest: public TGTest
 class BasicAllocTest
 {
 public:
+    memkind_bits_t object_flags;
+
     void init(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags)
     {
         if(!kind) {
@@ -49,6 +51,15 @@ public:
             ASSERT_EQ(MEMKIND_SUCCESS, ret);
             ASSERT_TRUE(kind != NULL);
         }
+        object_flags = flags;
+    }
+
+    void record_page_association(void* ptr, size_t size)
+    {
+        size_t page_size = object_flags == MEMKIND_MASK_PAGE_SIZE_2MB ? 2*MB : 4*KB;
+
+        Check check(ptr, size, page_size);
+        check.record_page_association();
     }
 
     void malloc(size_t size)
@@ -57,6 +68,7 @@ public:
         ASSERT_TRUE(ptr != NULL) << "memkind_malloc() returns NULL";
         void* memset_ret = memset(ptr, 3, size);
         EXPECT_TRUE(memset_ret != NULL);
+        record_page_association(ptr, size);
         memkind_free(kind, ptr);
     }
 
@@ -66,6 +78,7 @@ public:
         ASSERT_TRUE(ptr != NULL) << "memkind_calloc() returns NULL";
         void* memset_ret = memset(ptr, 3, size);
         ASSERT_TRUE(memset_ret != NULL);
+        record_page_association(ptr, size);
         memkind_free(kind, ptr);
     }
 
@@ -78,6 +91,7 @@ public:
         ASSERT_TRUE(ptr != NULL) << "memkind_realloc() returns NULL";
         void* memset_ret = memset(ptr, 3, realloc_size);
         ASSERT_TRUE(memset_ret != NULL);
+        record_page_association(ptr, size);
         memkind_free(kind, ptr);
     }
 
@@ -89,6 +103,7 @@ public:
         ASSERT_TRUE(ptr != NULL) << "memkind_posix_memalign() returns NULL pointer";
         void* memset_ret = memset(ptr, 3, size);
         ASSERT_TRUE(memset_ret != NULL);
+        record_page_association(ptr, size);
         memkind_free(kind, ptr);
     }
 

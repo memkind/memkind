@@ -27,6 +27,7 @@
 
 #include <list>
 #include "trial_generator.h"
+#include "allocator_perf_tool/GTestAdapter.hpp"
 
 
 typedef struct {
@@ -48,6 +49,7 @@ public:
     ~Check();
     void check_node_hbw();
     void check_node_hbw_interleave();
+    void record_page_association();
     int check_page_size(size_t page_size);
     int check_zero(void);
     int check_data(int data);
