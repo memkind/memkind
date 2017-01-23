@@ -49,7 +49,7 @@ CFLAGS="$CFLAGS -Werror"
 AC_MSG_CHECKING([for tls_model attribute support])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
 [[
-    static __thread int __attribute__((tls_model("initial-exec"))) x;
+    static __thread int __attribute__((tls_model("local-dynamic"))) x;
 ]],
 [[
     x = 1234;

@@ -30,5 +30,6 @@ test -e obj || mkdir obj
 cd obj
 ../configure --enable-autogen --with-jemalloc-prefix=jemk_ --without-export \
              --disable-stats --disable-fill --disable-valgrind \
-             $EXTRA_CONF --with-malloc-conf="lg_chunk:22,narenas:256" #4MB chunksize
+             $EXTRA_CONF --with-malloc-conf="lg_chunk:22,narenas:256,lg_tcache_max:12"
+
 make -j`nproc`
