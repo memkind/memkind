@@ -4,6 +4,9 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+# ignore tests during build
+override_dh_auto_test:
+
 override_dh_auto_configure:
 	./build_jemalloc.sh
 	./autogen.sh
