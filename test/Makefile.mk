@@ -86,7 +86,6 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/extended_tests.cpp \
                          test/negative_tests.cpp \
                          test/error_message_tests.cpp \
-                         test/partition_tests.cpp \
                          test/get_size_tests.cpp \
                          test/create_tests.cpp \
                          test/create_tests_helper.c \
