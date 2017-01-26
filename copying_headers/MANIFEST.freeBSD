@@ -71,7 +71,6 @@ test/negative_tests.cpp
 test/test.sh
 test/trial_generator.cpp
 test/trial_generator.h
-test/partition_tests.cpp
 test/get_size_tests.cpp
 test/error_message_tests.cpp
 test/create_tests.cpp
