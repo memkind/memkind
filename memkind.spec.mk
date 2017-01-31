@@ -121,19 +121,14 @@ memkind functional tests
 %build
 # It is required that we configure and build the jemalloc subdirectory
 # before we configure and start building the top level memkind directory.
-cd %{_builddir}/%{buildsubdir}/jemalloc/
-echo %{version} > %{_builddir}/%{buildsubdir}/jemalloc/VERSION
-test -f configure || ../build_jemalloc.sh
+# To ensure the memkind build step is able to discover the output
+# of the jemalloc build we must create an 'obj' directory, and build
+# from within that directory.
 
-# Build memkind lib and tools
 cd %{_builddir}/%{buildsubdir}
 echo %{version} > %{_builddir}/%{buildsubdir}/VERSION
-test -f configure || ./autogen.sh
-./configure --prefix=%{_prefix} --libdir=%{_libdir} \
-           --includedir=%{_includedir} --sbindir=%{_sbindir} --enable-cxx11 \
-           --mandir=%{_mandir} --docdir=%{_docdir}/%{namespace}
-$(make_prefix)%{__make} %{?_smp_mflags} checkprogs $(make_postfix)
-
+./build.sh --prefix=%{_prefix} --includedir=%{_includedir} --libdir=%{_libdir} \
+           --bindir=%{_bindir} --docdir=%{_docdir}/%{namespace} --mandir=%{_mandir} --sbindir=%{_sbindir}
 
 %install
 cd %{_builddir}/%{buildsubdir}
@@ -146,7 +141,6 @@ cd %{_builddir}/%{buildsubdir}
 rm -f %{buildroot}$(memkind_test_dir)/libautohbw.*
 rm -f %{buildroot}/%{_libdir}/lib%{namespace}.{l,}a
 rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
-rm -f %{buildroot}/%{_libdir}/lib{numakind}.*
 
 %pre
 

@@ -886,6 +886,9 @@ Number of preallocated gigabyte pages can be read from /proc/cmdline
 (hugepagesz=1G nr_hugepages=N). Setting gigabyte hugepages is available
 by kernel commandline. From 3.16 and later kernels, users can allocate
 gigabyte pages like its done for 2MB pages.
+.SH "STATIC LINKING"
+.TP
+When linking statically against memkind, libmemkind.a should be used together with its dependencies libnuma and pthread. Pthread can be linked by adding /usr/lib64/libpthread.a as a dependency (exact path may vary). Typically libnuma will need to be compiled from sources to use it as a static dependency. libnuma can be reached on github: https://github.com/numactl/numactl
 .SH "KNOWN ISSUES"
 .TP
 .B HUGETLB (huge pages)

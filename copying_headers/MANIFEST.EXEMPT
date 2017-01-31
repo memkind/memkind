@@ -6,6 +6,7 @@ INSTALL
 NEWS
 README
 VERSION
+m4
 ChangeLog
 .travis.yml
 autohbw/autohbw_README

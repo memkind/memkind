@@ -46,7 +46,6 @@
 #include <assert.h>
 
 #include "config.h"
-#include "config_tls.h"
 
 static void *jemk_mallocx_check(size_t size, int flags);
 static void *jemk_rallocx_check(void *ptr, size_t size, int flags);
