@@ -9,8 +9,9 @@ README
 VERSION
 .travis.yml
 autogen.sh
+build.sh
+build_jemalloc.sh
 configure.ac
-config_tls.h.in
 autohbw/Makefile.mk
 autohbw/autohbw.c
 autohbw/autohbw_get_src_lines.pl
@@ -28,6 +29,7 @@ examples/gb_realloc_example.c
 examples/memkind_decorator_debug.c
 examples/pmem_example.c
 make_rpm.mk
+m4
 man/hbwmalloc.3
 man/memkind.3
 man/memkind_arena.3
@@ -94,7 +96,6 @@ test/policy_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmem_tests.cpp
 test/new_kind_test.cpp
-test/numakind_test.cpp
 test/static_kinds_tests.cpp
 test/huge_page_test.cpp
 test/hbw_verify_function_test.cpp

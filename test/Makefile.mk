@@ -101,7 +101,6 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/hbw_allocator_tests.cpp \
                          test/memkind_versioning_tests.cpp \
                          test/new_kind_test.cpp \
-                         test/numakind_test.cpp \
                          test/static_kinds_tests.cpp \
                          test/hbw_verify_function_test.cpp \
                          #end
@@ -171,10 +170,6 @@ test_allocator_perf_tool_tests_SOURCES = $(allocator_perf_tool_library_sources) 
 
 test_allocator_perf_tool_tests_CPPFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
 test_allocator_perf_tool_tests_CXXFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
-if ENABLE_CXX11
-test_allocator_perf_tool_tests_CPPFLAGS += -std=c++11
-test_allocator_perf_tool_tests_CXXFLAGS += -std=c++11
-endif
 
 NUMAKIND_MAX = 2048
 test_all_tests_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS) -DNUMAKIND_MAX=$(NUMAKIND_MAX)
@@ -189,7 +184,7 @@ test_perf_tool_SOURCES = $(allocator_perf_tool_library_sources) \
 
 test_perf_tool_CPPFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
 test_perf_tool_CXXFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
-if ENABLE_CXX11
+if HAVE_CXX11
 test_perf_tool_CPPFLAGS += -std=c++11
 test_perf_tool_CXXFLAGS += -std=c++11
 endif
@@ -224,7 +219,7 @@ check_PROGRAMS += test/hello_memkind \
                   test/gb_realloc \
                   test/pmem \
                   # end
-if ENABLE_CXX11
+if HAVE_CXX11
 check_PROGRAMS += test/memkind_allocated
 endif
 
@@ -237,7 +232,7 @@ test_gb_realloc_LDADD = libmemkind.la
 test_pmem_LDADD = libmemkind.la
 test_autohbw_candidates_LDADD = libmemkind.la \
                                 # end
-if ENABLE_CXX11
+if HAVE_CXX11
 test_memkind_allocated_LDADD = libmemkind.la
 endif
 
@@ -250,20 +245,7 @@ test_pmem_SOURCES = examples/pmem_example.c
 test_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
 test_libautohbw_la_SOURCES = autohbw/autohbw.c
 noinst_LTLIBRARIES += test/libautohbw.la
-if ENABLE_CXX11
+if HAVE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 endif
-
-CLEANFILES += test/numakind_macro.h
-test/numakind_test.cpp: test/numakind_macro.h
-test/numakind_macro.h:
-	for ((i=0;i<$(NUMAKIND_MAX);i++)); do \
-		echo "NUMAKIND_GET_MBIND_NODEMASK_MACRO($$i)" >> $@; \
-		done
-	echo 'struct memkind_ops NUMAKIND_OPS[NUMAKIND_MAX] = {' >> $@
-	for ((i=0;i<$(NUMAKIND_MAX);i++)); do \
-		echo "NUMAKIND_OPS_MACRO($$i)," >> $@; \
-		done
-	echo '};' >> $@
-	echo >> $@
 

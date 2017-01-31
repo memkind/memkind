@@ -42,10 +42,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
 
 
 libmemkind_la_LIBADD = jemalloc/obj/lib/libjemalloc_pic.a
-
-
-libmemkind_la_LDFLAGS = -version-info $(memkind_abi_version) -ldl
-
+libmemkind_la_LDFLAGS = -version-info 0:1:0 -ldl
 include_HEADERS = include/hbwmalloc.h \
                   include/hbw_allocator.h \
                   include/memkind.h \
@@ -66,9 +63,9 @@ nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/tbb_mem_pool_policy.h \
                   # end
 
-sbin_PROGRAMS =
-
 EXTRA_DIST = autogen.sh \
+             build.sh \
+             build_jemalloc.sh \
              examples/README \
              test/check.sh \
              test/test.sh \
@@ -309,18 +306,12 @@ check_PROGRAMS =
 noinst_PROGRAMS =
 noinst_LTLIBRARIES =
 noinst_HEADERS =
-
 TESTS =
-XFAIL_TESTS =
-TESTS_ENVIRONMENT =
 
-AM_CFLAGS =  -fvisibility=hidden -Wall -Werror -msse4.2 -D_GNU_SOURCE -DMEMKIND_INTERNAL_API
-AM_CXXFLAGS = -fvisibility=hidden -Wall -Werror -msse4.2 -D_GNU_SOURCE -DMEMKIND_INTERNAL_API
-if ENABLE_CXX11
-AM_CXXFLAGS += -std=c++11
-else
-AM_CXXFLAGS += -std=c++0x
-endif
+req_flags = -fvisibility=hidden -Wall -Werror -msse4.2 -D_GNU_SOURCE -DMEMKIND_INTERNAL_API -pthread -lnuma
+
+AM_CFLAGS = $(req_flags)
+AM_CXXFLAGS = $(req_flags)
 
 .PHONY: checkprogs
 
@@ -333,7 +324,7 @@ $(jemalloc_objects): jemalloc/obj/src/%.lo: jemalloc/obj/src/%.pic.o jemalloc/ob
 	@echo "non_pic_object='$*.o'" >> $@
 
 # build check programs without running tests
-checkprogs: $(check_PROGRAMS)
+checkprogs: libmemkind.la $(check_PROGRAMS)
 
 memkind-$(VERSION).spec:
 	$(MAKE) version="$(VERSION)" -f memkind.spec.mk $@
