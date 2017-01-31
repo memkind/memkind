@@ -30,7 +30,7 @@ PROGNAME=`basename $0`
 TEST_PATH="$basedir/"
 
 # Gtest binaries executed by Berta
-GTEST_BINARIES=(all_tests decorator_test allocator_perf_tool_tests gb_pages_test_bind_policy gb_pages_test_preferred_policy bat_bind_tests bat_interleave_tests)
+GTEST_BINARIES=(all_tests decorator_test allocator_perf_tool_tests gb_page_tests_bind_policy gb_page_tests_preferred_policy bat_bind_tests bat_interleave_tests)
 
 # Pytest files executed by Berta
 PYTEST_FILES=(hbw_detection_test.py autohbw_test.py trace_mechanism_test.py)
