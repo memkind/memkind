@@ -1,13 +1,9 @@
 sudo: false
 language: cpp python
 before_install:
-        - ./autogen.sh
-        - ./build_jemalloc.sh
 install:
-        - CXX="g++-4.8" CC="gcc-4.8" ./configure --enable-cxx11
 script:
-        - make
-        - make test
+  - CXX="g++-4.8" CC="gcc-4.8" LDFLAGS="-lrt -Wl,--no-as-needed" ./build.sh
 after_failure:
   - echo "Sad memking"
   - find . -name config.log -exec cat {} ";"

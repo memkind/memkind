@@ -299,7 +299,7 @@ DISTCLEANFILES = VERSION
 bin_PROGRAMS = memkind-hbw-nodes
 
 memkind_hbw_nodes_SOURCES = src/memkind-hbw-nodes.c
-memkind_hbw_nodes_LDADD= libmemkind.la
+memkind_hbw_nodes_LDADD = libmemkind.la
 
 bin_SCRIPTS =
 check_PROGRAMS =
