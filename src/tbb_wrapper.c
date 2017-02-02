@@ -94,11 +94,6 @@ static int raw_free(intptr_t pool_id, void* raw_ptr, size_t raw_bytes)
   return munmap(raw_ptr, raw_bytes);
 }
 
-struct tbb_wrapper {
-    struct memkind kind;
-    void *mem_pool;
-};
-
 static inline bool size_out_of_bounds(size_t size)
 {
     return (!size || size == (size_t)-1);
