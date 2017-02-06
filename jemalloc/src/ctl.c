@@ -671,7 +671,6 @@ static bool
 ctl_grow(tsdn_t *tsdn)
 {
 	static unsigned arena_stats_cap;
-	unsigned arena_stats_extended_cap;
 	ctl_arena_stats_t *astats;
 
 	/* Initialize new arena. */
@@ -679,10 +678,10 @@ ctl_grow(tsdn_t *tsdn)
 		return (true);
 
 	if(arena_stats_cap < ctl_stats.narenas + 1) {
-		arena_stats_extended_cap = (ctl_stats.narenas * 2) < MALLOCX_ARENA_MAX ?
+		arena_stats_cap = (ctl_stats.narenas * 2) < MALLOCX_ARENA_MAX ?
 			(ctl_stats.narenas * 2) : MALLOCX_ARENA_MAX;
 		/* Allocate extended arena stats. */
-		astats = (ctl_arena_stats_t *)a0malloc((arena_stats_extended_cap + 1) *
+		astats = (ctl_arena_stats_t *)a0malloc((arena_stats_cap + 1) *
 				sizeof(ctl_arena_stats_t));
 		if (astats == NULL)
 			return (true);
@@ -713,7 +712,6 @@ ctl_grow(tsdn_t *tsdn)
 		    sizeof(ctl_arena_stats_t));
 	}
 	if(astats != ctl_stats.arenas) {
-		arena_stats_cap = arena_stats_extended_cap;
 		a0dalloc(ctl_stats.arenas);
 		ctl_stats.arenas = astats;
 	}
