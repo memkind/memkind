@@ -288,7 +288,6 @@ dist_man_MANS = man/hbwmalloc.3 \
                 man/memkind.3 \
                 man/memkind_arena.3 \
                 man/memkind_default.3 \
-                man/memkind_gbtlb.3 \
                 man/memkind_hbw.3 \
                 man/memkind_hugetlb.3 \
                 man/memkind_pmem.3 \

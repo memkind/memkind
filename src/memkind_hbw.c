@@ -198,15 +198,6 @@ MEMKIND_EXPORT int memkind_hbw_hugetlb_check_available(struct memkind *kind)
     return err;
 }
 
-MEMKIND_EXPORT int memkind_hbw_gbtlb_check_available(struct memkind *kind)
-{
-    int err = memkind_hbw_check_available(kind);
-    if (!err) {
-        err = memkind_hugetlb_check_available_1gb(kind);
-    }
-    return err;
-}
-
 MEMKIND_EXPORT int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
                                    unsigned long *nodemask,
                                    unsigned long maxnode)

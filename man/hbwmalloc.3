@@ -193,16 +193,15 @@ huge pages configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B HBW_PAGESIZE_1GB (DEPRECATED)
 This option allows the user to specify arbitrary sizes backed by
-one gigabytes pages. Gigabyte pages are allocated even if the
-size is not a modulo of 1GB. A good example of using this feature
-with realloc is shown in gb_realloc_example.c. Note: This page size requires
-gigabyte pages configuration described in SYSTEM CONFIGURATION section.
+1GB chunks of huge pages. Huge pages are allocated even if the
+size is not a modulo of 1GB. Note: This page size requires
+huge pages configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B HBW_PAGESIZE_1GB_STRICT (DEPRECATED)
-The one gigabyte page size option. The total size of the allocation
-must be a multiple of 1GB with this option, otherwise the allocation
-will fail. Note: This page size requires gigabyte pages configuration
-described in SYSTEM CONFIGURATION section.
+The total size of the allocation must be a multiple of 1GB with
+this option, otherwise the allocation will fail. Note: This page
+size requires huge pages configuration described in SYSTEM
+CONFIGURATION section.
 .PP
 .BR hbw_get_policy ()
 returns the current fallback policy when insufficient high bandwith
@@ -372,7 +371,7 @@ Values:
     Intel Threading Building Blocks library.
 If the MEMKIND_HEAP_MANAGER is not set than the jemalloc heap manager will be used by default.
 .SH "SYSTEM CONFIGURATION"
-Interfaces for obtaining 2MB and 1GB pages (HUGETLB and GBTLB) need allocated
+Interfaces for obtaining 2MB (HUGETLB) need allocated
 huge pages in the kernel's huge page pool.
 .TP
 .B HUGETLB (huge pages)
@@ -380,12 +379,6 @@ Current number of "persistent" huge pages can be read from /proc/sys/vm/nr_hugep
 Proposed way of setting hugepages is: "sudo sysctl vm.nr_hugepages=<number_of_hugepages>".
 More informations can be found here:
 https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
-.TP
-.B GBTLB (gigabyte pages)
-Number of preallocated gigabyte pages can be read from /proc/cmdline
-(hugepagesz=1G nr_hugepages=N). Setting gigabyte hugepages is available
-by kernel commandline. From 3.16 and later kernels, users can allocate
-gigabyte pages like its done for 2MB pages.
 .SH "KNOWN ISSUES"
 .TP
 .B HUGETLB (huge pages)

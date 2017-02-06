@@ -25,14 +25,14 @@
 #include "memkind.h"
 
 #include "trial_generator.h"
+#include "allocator_perf_tool/HugePageOrganizer.hpp"
 
-/* This set of tests are intended to use GB pages allocation, it is needed to have
- * GB pages enabled or ignore its execution in case GB can't be enabled on an
- * specifc machine. It uses the trial generator to run the tests and validate
- * its output.
- */
+/* This set of tests for GBTLB kinds. */
 class GBPagesTestPreferredPolicy : public TGTest
-{};
+{
+private:
+    HugePageOrganizer huge_page_organizer = HugePageOrganizer(4500);
+};
 
 TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_HBW_Misalign_Preferred_Strict)
 {

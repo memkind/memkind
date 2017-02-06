@@ -33,19 +33,6 @@ if [[ "$nr_hugepages" == "0" ]] && [[ "$nr_overcommit_hugepages" == "0" ]]; then
         params=" -m"
 fi
 
-# Check if GB pages are enabled on system
-cmdline=$(cat /proc/cmdline)
-if [[ $cmdline == *"hugepagesz=1048576k hugepages="* ]]; then
-        nr_gbpages=$(sed "s/^.*hugepagesz=1048576k hugepages=\([0-9]*\).*$/\1/" <<< $cmdline)
-        if [ $nr_gbpages == "" ] || [ $nr_gbpages == "0" ]; then
-                # Add parameter that disables tests that require GB pages
-                params=$params" -g"
-        fi
-else
-        # Add parameter that disables tests that require GB pages
-        params=$params" -g"
-fi
-
 # Check if MCDRAM nodes exists on system
 if [ ! -x /usr/bin/memkind-hbw-nodes ]; then
         if [ -x ./memkind-hbw-nodes ]; then

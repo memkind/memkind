@@ -65,7 +65,6 @@ autom4te.cache/
 /test/filter_memkind
 /test/gb_page_tests_bind_policy
 /test/gb_page_tests_preferred_policy
-/test/gb_realloc
 /test/hello_hbw
 /test/hello_memkind
 /test/hello_memkind_debug
@@ -79,7 +78,6 @@ autom4te.cache/
 /examples/autohbw_candidates
 /examples/eratosthenes
 /examples/filter_memkind
-/examples/gb_realloc
 /examples/hello_hbw
 /examples/hello_memkind
 /examples/hello_memkind_debug

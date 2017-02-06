@@ -31,18 +31,28 @@
 #include "check.h"
 #include "omp.h"
 #include "trial_generator.h"
+#include "allocator_perf_tool/HugePageOrganizer.hpp"
 
 /*
  * Set of basic acceptance tests.
  */
 class BATest: public TGTest
 {
+private:
+    HugePageOrganizer huge_page_organizer = HugePageOrganizer(4500);
 };
 
 class BasicAllocTest
 {
 public:
-    memkind_bits_t object_flags;
+    BasicAllocTest() {}
+
+    BasicAllocTest(memkind_t kind_obj)
+    {
+        if(!kind) {
+            kind = kind_obj;
+        }
+    }
 
     void init(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags)
     {
@@ -127,6 +137,7 @@ public:
     virtual ~BasicAllocTest() {destroy_kind();}
 private:
     memkind_t kind = NULL;
+    memkind_bits_t object_flags;
 };
 
 static void test_malloc(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
@@ -453,6 +464,12 @@ TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_by
 TEST_F(BATest, test_TC_MEMKIND_free_DEFAULT_PREFERRED_LOCAL_4096_bytes)
 {
     test_free(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_free_MEMKIND_GBTLB_4096_bytes)
+{
+    BasicAllocTest test = BasicAllocTest(MEMKIND_GBTLB);
+    test.free(4096);
 }
 
 TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_CheckAvailable)

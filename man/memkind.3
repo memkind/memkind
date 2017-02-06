@@ -236,8 +236,7 @@ The value of
 can be given as the
 .I kind
 for all buffers allocated by a kind that leverages the jemalloc
-allocator.  This includes all internally defined kinds other than those
-that use gigabyte pages.  In cases where the kind is unknown in the
+allocator. In cases where the kind is unknown in the
 context of the call to
 .BR memkind_free ()
 .B 0
@@ -645,7 +644,7 @@ shall return 0 if the
 .I kind
 is available on the system, and an error code if not.
 .PP
-.BI "int ops.check_addr(memkind_t " "kind" ", void " "*addr" );
+.BI "int ops.check_addr(memkind_t " "kind" ", void " "*addr" ); (DEPRECATED)
 .br
 shall return 0 if the
 .I addr
@@ -688,8 +687,8 @@ Allocate from standard memory using huge pages. Note: This kind requires
 huge pages configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B MEMKIND_GBTLB (DEPRECATED)
-Allocate from standard memory using giga byte huge pages. Note: This kind
-requires gigabyte pages configuration described in SYSTEM CONFIGURATION section.
+Allocate from standard memory using 1GB chunks backed by huge pages.
+Note: This kind requires huge pages configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B MEMKIND_INTERLEAVE
 Allocate pages interleaved across all NUMA nodes with transparent huge
@@ -722,15 +721,11 @@ configuration described in SYSTEM CONFIGURATION section.
 .B MEMKIND_HBW_GBTLB (DEPRECATED)
 Same as
 .B MEMKIND_HBW
-except the allocation is backed by one gigabyte huge pages.  Note that
+except the allocation is backed by 1GB chunks of huge pages. Note that
 .I size
 can take on any value, but full gigabyte pages will allocated for each
-request, so remainder of the last page will be wasted. A good use case
-scenario is to grow a buffer in the course of an application with reallocs.
-In this case, if there is enough memory available within in already allocated
-gigabyte page, newer pages are not fetched. This is demonstrated in the
-examples directory with gb_realloc_example.c
-This kind requires gigabyte pages configuration described in SYSTEM CONFIGURATION
+request, so remainder of the last page will be wasted.
+This kind requires huge pages configuration described in SYSTEM CONFIGURATION
 section.
 .TP
 .B MEMKIND_HBW_PREFERRED_GBTLB (DEPRECATED)
@@ -738,7 +733,7 @@ Same as
 .B MEMKIND_HBW_GBTLB
 except that if there is not enough high bandwidth memory to satisfy
 the request, the allocation will fall back on standard memory. Note: This kind
-requires gigabyte pages configuration described in SYSTEM CONFIGURATION section.
+requires huge pages configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B MEMKIND_HBW_INTERLEAVE
 Same as
@@ -872,7 +867,7 @@ Values:
     Intel Threading Building Blocks library.
 If the MEMKIND_HEAP_MANAGER is not set than the jemalloc heap manager will be used by default.
 .SH "SYSTEM CONFIGURATION"
-Interfaces for obtaining 2MB and 1GB pages (HUGETLB and GBTLB) need allocated
+Interfaces for obtaining 2MB (HUGETLB) need allocated
 huge pages in the kernel's huge page pool.
 .TP
 .B HUGETLB (huge pages)
@@ -880,12 +875,6 @@ Current number of "persistent" huge pages can be read from /proc/sys/vm/nr_hugep
 Proposed way of setting hugepages is: "sudo sysctl vm.nr_hugepages=<number_of_hugepages>".
 More informations can be found here:
 https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
-.TP
-.B GBTLB (gigabyte pages)
-Number of preallocated gigabyte pages can be read from /proc/cmdline
-(hugepagesz=1G nr_hugepages=N). Setting gigabyte hugepages is available
-by kernel commandline. From 3.16 and later kernels, users can allocate
-gigabyte pages like its done for 2MB pages.
 .SH "STATIC LINKING"
 .TP
 When linking statically against memkind, libmemkind.a should be used together with its dependencies libnuma and pthread. Pthread can be linked by adding /usr/lib64/libpthread.a as a dependency (exact path may vary). Typically libnuma will need to be compiled from sources to use it as a static dependency. libnuma can be reached on github: https://github.com/numactl/numactl
@@ -908,5 +897,4 @@ Copyright (C) 2014 - 2016 Intel Corporation. All rights reserved.
 .BR memkind_arena (3),
 .BR memkind_hbw (3),
 .BR memkind_hugetlb (3),
-.BR memkind_gbtlb (3),
 .BR memkind_pmem (3)

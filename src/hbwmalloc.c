@@ -253,34 +253,17 @@ MEMKIND_EXPORT int hbw_posix_memalign(void **memptr, size_t alignment, size_t si
 MEMKIND_EXPORT int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
                              hbw_pagesize_t pagesize)
 {
-    memkind_t kind;
-
     if (pagesize == HBW_PAGESIZE_1GB_STRICT &&
         size % (1 << 30)) {
         return EINVAL;
     }
 
-    kind = hbw_get_kind(pagesize);
-    return memkind_posix_memalign(kind, memptr, alignment, size);
+    return memkind_posix_memalign(hbw_get_kind(pagesize), memptr, alignment, size);
 }
 
 MEMKIND_EXPORT void *hbw_realloc(void *ptr, size_t size)
 {
-    int i;
-    memkind_t kind;
-    memkind_t gbtlb_kinds[] = {MEMKIND_HBW_GBTLB, MEMKIND_HBW_PREFERRED_GBTLB, MEMKIND_GBTLB};
-    #define GBTLB_KINDS_LEN  sizeof(gbtlb_kinds)/sizeof(memkind_t)
-
-    for (i = 0; i < GBTLB_KINDS_LEN; i++) {
-        kind = gbtlb_kinds[i];
-        if (kind->ops->check_addr(kind, ptr) == 0) {
-            break;
-        }
-    }
-    if (i == GBTLB_KINDS_LEN) {
-        kind = hbw_get_kind(HBW_PAGESIZE_4KB);
-    }
-    return memkind_realloc(kind, ptr, size);
+    return memkind_realloc(hbw_get_kind(HBW_PAGESIZE_4KB), ptr, size);
 }
 
 MEMKIND_EXPORT void hbw_free(void *ptr)

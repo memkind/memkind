@@ -171,29 +171,6 @@ static struct memkind_registry memkind_registry_g = {
     PTHREAD_MUTEX_INITIALIZER
 };
 
-// subset of kind universe
-struct memkind_subregistry {
-    int kind_partition[MEMKIND_MAX_KIND]; // array containing indexes from memkind_registry->partition_map
-    int num_kind;
-    pthread_mutex_t lock;
-};
-
-// adding kind to subregistry; does not check for duplicates
-static void subregistry_add(struct memkind_subregistry* subregistry, memkind_t kind);
-
-// returns kind element at specified position in subregistry; index should be >=0 and < MEMKIND_MAX_KIND
-static struct memkind* subregistry_get(struct memkind_subregistry* subregistry, int index);
-
-// returns current number of elements in subregistry
-static int subregistry_size(struct memkind_subregistry* subregistry);
-
-// subset of kinds universe containing only kinds that implements check_addr operation
-static struct memkind_subregistry memkind_check_addr_subregistry_g = {
-    {},
-    0,
-    PTHREAD_MUTEX_INITIALIZER
-};
-
 static size_t Chunksize = 0;
 
 static int validate_memtype_bits(memkind_memtype_t memtype) {
@@ -385,40 +362,6 @@ void memkind_init(memkind_t kind, bool check_numa)
             abort();
         }
     }
-    memkind_register_kind(kind);
-}
-
-void memkind_register_kind(memkind_t kind)
-{
-    if(kind && kind->ops->check_addr)
-    {
-        subregistry_add(&memkind_check_addr_subregistry_g, kind);
-    }
-}
-
-static void subregistry_add(struct memkind_subregistry* subregistry, memkind_t kind)
-{
-    assert(subregistry && kind && subregistry->num_kind < MEMKIND_MAX_KIND);
-    if (pthread_mutex_lock(&subregistry->lock) != 0)
-        assert(0 && "failed to acquire mutex");
-
-    subregistry->kind_partition[subregistry->num_kind++]= kind->partition;
-    pthread_mutex_unlock(&subregistry->lock);
-}
-
-static struct memkind* subregistry_get(struct memkind_subregistry* subregistry, int index)
-{
-    assert(subregistry && index >= 0);
-    if(index > subregistry->num_kind) {
-        return NULL;
-    }
-    return memkind_registry_g.partition_map[subregistry->kind_partition[index]];
-}
-
-static inline int subregistry_size(struct memkind_subregistry* subregistry)
-{
-    assert(subregistry);
-    return subregistry->num_kind;
 }
 
 static void nop(void) {}
@@ -469,7 +412,6 @@ MEMKIND_EXPORT int memkind_create(struct memkind_ops *ops, const char *name, str
     }
     memkind_registry_g.partition_map[memkind_registry_g.num_kind] = *kind;
     ++memkind_registry_g.num_kind;
-    memkind_register_kind(*kind);
 
     (*kind)->init_once = PTHREAD_ONCE_INIT;
     pthread_once(&(*kind)->init_once, nop); //this is done to avoid init_once for dynamic kinds
@@ -677,21 +619,6 @@ MEMKIND_EXPORT void *memkind_realloc(struct memkind *kind, void *ptr, size_t siz
     return result;
 }
 
-static inline struct memkind* memkind_get_kind_by_check_addr(void *ptr)
-{
-    int i, num_kind;
-    struct memkind *test_kind;
-
-    num_kind = subregistry_size(&memkind_check_addr_subregistry_g);
-    for (i = 0; i < num_kind; ++i) {
-        test_kind = subregistry_get(&memkind_check_addr_subregistry_g, i);
-        if (test_kind && test_kind->ops->check_addr(test_kind, ptr) == 0) {
-            return test_kind;
-        }
-    }
-    return 0;
-}
-
 MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
 {
 #ifdef MEMKIND_DECORATION_ENABLED
@@ -699,7 +626,7 @@ MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
         memkind_free_pre(&kind, &ptr);
     }
 #endif
-    if (!kind && !(kind = memkind_get_kind_by_check_addr(ptr))) {
+    if (!kind) {
         heap_manager_free(kind, ptr);
     }
     else {

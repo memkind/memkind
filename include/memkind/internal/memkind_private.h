@@ -69,9 +69,6 @@ struct memkind {
 
 void memkind_init(memkind_t kind, bool check_numa);
 
-// common function for registering kinds on creation or first use (in case of static kinds)
-void memkind_register_kind(struct memkind *kind);
-
 static inline void *kind_mmap(struct memkind *kind, void* addr, size_t size)
 {
     if (MEMKIND_LIKELY(kind->ops->mmap == NULL)) {

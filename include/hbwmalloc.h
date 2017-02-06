@@ -85,17 +85,14 @@ typedef enum {
      */
     HBW_PAGESIZE_2MB           = 2,
     /*
-     * The one gigabyte page size option. The total size of the allocation must
-     * be a multiple of 1GB with this option, otherwise the allocation will
-     * fail.
+     * This option is deprecated.
+     * Allocate high bandwidth memory using 1GB chunks backed by huge pages.
      */
     HBW_PAGESIZE_1GB_STRICT    = 3,
 
     /*
-     * This option allows the user to specify arbitrary sizes backed by one
-     * gigabytes pages. Gigabyte pages are allocated even if the size is not a
-     * modulo of 1GB. A good example of using this feature with realloc is
-     * shown in gb_realloc_example.c
+     * This option is deprecated.
+     * Allocate high bandwidth memory using 1GB chunks backed by huge pages.
      */
     HBW_PAGESIZE_1GB           = 4,
 

@@ -23,7 +23,6 @@
  */
 
 #include <memkind.h>
-#include <memkind/internal/memkind_gbtlb.h>
 
 #include <fstream>
 #include <algorithm>
@@ -542,7 +541,7 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBMemalignPsizeAllign)
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBNullRealloc)
 {
     void *ptr = NULL;
-    ptr = memkind_gbtlb_realloc(MEMKIND_HBW_GBTLB, NULL, -1);
+    ptr = memkind_realloc(MEMKIND_HBW_GBTLB, NULL, -1);
     EXPECT_TRUE(ptr == NULL);
 }
 

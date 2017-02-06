@@ -60,8 +60,6 @@ OPTIONS
         skip high bandwidth memory nodes detection tests
     -m,
         skip tests that require 2MB pages configured on the machine
-    -g,
-        skip tests that require GB pages configured on the machine
     -x,
         skip tests that are passed as value
     -h,
@@ -274,21 +272,6 @@ while true; do
                 SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not test_TC_MEMKIND_2MBPages_"
             fi
             show_skipped_tests "test_TC_MEMKIND_2MBPages_"
-            shift
-            ;;
-        -g)
-            echo "Skipping tests that require GB pages due to unsatisfactory system conditions"
-            if [[ "$SKIPPED_GTESTS" == "" ]]; then
-                SKIPPED_GTESTS=":-*test_TC_MEMKIND_GBPages_*"
-            else
-                SKIPPED_GTESTS=$SKIPPED_GTESTS":*test_TC_MEMKIND_GBPages_*"
-            fi
-            if [[ "$SKIPPED_PYTESTS" == "" ]]; then
-                SKIPPED_PYTESTS=" and not test_TC_MEMKIND_GBPages_"
-            else
-                SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not test_TC_MEMKIND_GBPages_"
-            fi
-            show_skipped_tests "test_TC_MEMKIND_GBPages_"
             shift
             ;;
         -d)

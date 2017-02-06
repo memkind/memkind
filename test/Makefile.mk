@@ -216,7 +216,6 @@ check_PROGRAMS += test/hello_memkind \
                   test/hello_memkind_debug \
                   test/hello_hbw \
                   test/filter_memkind \
-                  test/gb_realloc \
                   test/pmem \
                   # end
 if HAVE_CXX11
@@ -228,7 +227,6 @@ test_hello_memkind_LDADD = libmemkind.la
 test_hello_memkind_debug_LDADD = libmemkind.la
 test_hello_hbw_LDADD = libmemkind.la
 test_filter_memkind_LDADD = libmemkind.la
-test_gb_realloc_LDADD = libmemkind.la
 test_pmem_LDADD = libmemkind.la
 test_autohbw_candidates_LDADD = libmemkind.la \
                                 # end
@@ -240,7 +238,6 @@ test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 test_hello_hbw_SOURCES = examples/hello_hbw_example.c
 test_filter_memkind_SOURCES = examples/filter_example.c
-test_gb_realloc_SOURCES = examples/gb_realloc_example.c
 test_pmem_SOURCES = examples/pmem_example.c
 test_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
 test_libautohbw_la_SOURCES = autohbw/autohbw.c

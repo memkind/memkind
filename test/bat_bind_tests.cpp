@@ -31,6 +31,7 @@
 #include "check.h"
 #include "omp.h"
 #include "trial_generator.h"
+#include "allocator_perf_tool/HugePageOrganizer.hpp"
 
 /* Set of basic acceptance tests for BIND policy, the goal of this set of tests
  * is to prove that you can do incremental allocations of memory with different
@@ -38,7 +39,8 @@
  */
 class BABindTest : public TGTest
 {
-
+private:
+    HugePageOrganizer huge_page_organizer = HugePageOrganizer(32);
 };
 
 

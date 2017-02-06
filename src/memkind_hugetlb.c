@@ -80,11 +80,6 @@ MEMKIND_EXPORT int memkind_hugetlb_check_available_2mb(struct memkind *kind)
     return memkind_hugetlb_check_available(kind, 2097152);
 }
 
-MEMKIND_EXPORT int memkind_hugetlb_check_available_1gb(struct memkind *kind)
-{
-    return memkind_hugetlb_check_available(kind, 1073741824);
-}
-
 /* huge_size: the huge page size in bytes */
 static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_size)
 {

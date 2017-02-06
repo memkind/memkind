@@ -25,7 +25,6 @@ examples/Makefile.mk
 examples/hello_hbw_example.c
 examples/memkind_allocated_example.cpp
 examples/memkind_allocated.hpp
-examples/gb_realloc_example.c
 examples/memkind_decorator_debug.c
 examples/pmem_example.c
 make_rpm.mk
@@ -34,7 +33,6 @@ man/hbwmalloc.3
 man/memkind.3
 man/memkind_arena.3
 man/memkind_default.3
-man/memkind_gbtlb.3
 man/memkind_hbw.3
 man/memkind_hugetlb.3
 man/memkind_pmem.3

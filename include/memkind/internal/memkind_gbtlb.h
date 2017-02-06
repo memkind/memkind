@@ -35,7 +35,6 @@ extern "C" {
 
 /*
  * Header file for the gigabyte TLB memkind operations.
- * More details in memkind_gbtlb(3) man page.
  *
  * All function declarations has been moved to memkind_deprecated.h
  * because of end of GBTLB support.

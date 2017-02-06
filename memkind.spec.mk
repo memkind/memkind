@@ -191,7 +191,6 @@ $(memkind_test_dir)/freeing_memory_segfault_test
 $(memkind_test_dir)/gb_page_tests_bind_policy
 $(memkind_test_dir)/gb_page_tests_preferred_policy
 $(memkind_test_dir)/filter_memkind
-$(memkind_test_dir)/gb_realloc
 $(memkind_test_dir)/hello_hbw
 $(memkind_test_dir)/hello_memkind
 $(memkind_test_dir)/hello_memkind_debug

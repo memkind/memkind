@@ -24,24 +24,26 @@
 */
 #include <fstream>
 #include <string.h>
+#include <assert.h>
 
 #define ASSERT_HUGEPAGES_AVAILABILITY() ASSERT_TRUE(HugePageOrganizer::get_nr_hugepages() > 0) << "No hugepages (2MB pages) found.";
-#define ASSERT_GBPAGES_AVAILABILITY() ASSERT_TRUE(HugePageOrganizer::get_nr_1GB_pages() > 0) << "No gigabyte pages found.";
 
 class HugePageOrganizer
 {
-
 public:
-
-    static bool get_nr_1GB_pages()
+    HugePageOrganizer(int nr_hugepages)
     {
-        std::string line;
-        std::ifstream file("/sys/kernel/mm/hugepages/hugepages-1048576kB/nr_hugepages");
-        if (!file.is_open()) {
-            return -1;
-        }
-        std::getline(file, line);
-        return strtol(line.c_str(), 0, 10);
+        initial_nr_hugepages = get_nr_hugepages();
+        int ret = set_nr_hugepages(0);
+        assert(ret != -1);
+        ret = set_nr_hugepages(nr_hugepages);
+        assert(ret != -1);
+    }
+
+    ~HugePageOrganizer()
+    {
+        int ret = set_nr_hugepages(initial_nr_hugepages);
+        assert(ret != -1);
     }
 
     static int get_nr_hugepages()
@@ -61,5 +63,8 @@ public:
         sprintf(cmd, "sudo sysctl vm.nr_hugepages=%d", nr_hugepages);
         return system(cmd);
     }
+
+private:
+    int initial_nr_hugepages;
 };
 
