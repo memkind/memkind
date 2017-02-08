@@ -45,7 +45,6 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
     .mmap = memkind_pmem_mmap,
     .get_mmap_flags = memkind_pmem_get_mmap_flags,
     .get_arena = memkind_thread_get_arena,
-    .get_size = memkind_pmem_get_size,
 };
 
 void *pmem_chunk_alloc(void *chunk, size_t size, size_t alignment,
@@ -216,15 +215,5 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t 
 MEMKIND_EXPORT int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_SHARED;
-    return 0;
-}
-
-MEMKIND_EXPORT int memkind_pmem_get_size(struct memkind *kind, size_t *total, size_t *free)
-{
-    struct memkind_pmem *priv = kind->priv;
-
-    *total = priv->max_size;
-    *free = priv->max_size - priv->offset; /* rough estimation */
-
     return 0;
 }

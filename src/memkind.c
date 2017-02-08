@@ -58,6 +58,10 @@
 /* Clear bits in x, but only this specified in mask. */
 #define CLEAR_BIT(x, mask) ((x) &= (~(mask)))
 
+extern struct memkind_ops MEMKIND_HBW_GBTLB_OPS;
+extern struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS;
+extern struct memkind_ops MEMKIND_GBTLB_OPS;
+
 static struct memkind MEMKIND_DEFAULT_STATIC = {
     .ops =  &MEMKIND_DEFAULT_OPS,
     .partition = MEMKIND_PARTITION_DEFAULT,
@@ -170,6 +174,16 @@ static struct memkind_registry memkind_registry_g = {
     MEMKIND_NUM_BASE_KIND,
     PTHREAD_MUTEX_INITIALIZER
 };
+
+inline void *kind_mmap(struct memkind *kind, void* addr, size_t size)
+{
+    if (MEMKIND_LIKELY(kind->ops->mmap == NULL)) {
+        return memkind_default_mmap(kind, addr, size);
+    }
+    else {
+        return kind->ops->mmap(kind, addr, size);
+    }
+}
 
 static size_t Chunksize = 0;
 
@@ -366,7 +380,7 @@ void memkind_init(memkind_t kind, bool check_numa)
 
 static void nop(void) {}
 
-MEMKIND_EXPORT int memkind_create(struct memkind_ops *ops, const char *name, struct memkind **kind)
+static int memkind_create(struct memkind_ops *ops, const char *name, struct memkind **kind)
 {
     int err;
     int i;
@@ -387,7 +401,6 @@ MEMKIND_EXPORT int memkind_create(struct memkind_ops *ops, const char *name, str
         ops->realloc == NULL ||
         ops->posix_memalign == NULL ||
         ops->free == NULL ||
-        ops->get_size == NULL ||
         ops->init_once != NULL) {
         err = MEMKIND_ERROR_BADOPS;
         goto exit;
@@ -425,7 +438,7 @@ exit:
 #ifdef __GNUC__
 __attribute__((destructor))
 #endif
-MEMKIND_EXPORT int memkind_finalize(void)
+static int memkind_finalize(void)
 {
     struct memkind *kind;
     int i;
@@ -453,67 +466,6 @@ exit:
         assert(0 && "failed to release mutex");
 
     return err;
-}
-
-MEMKIND_EXPORT int memkind_get_num_kind(int *num_kind)
-{
-    *num_kind = memkind_registry_g.num_kind;
-    return 0;
-}
-
-static int memkind_get_kind_by_partition_internal(int partition, struct memkind **kind)
-{
-    int err = 0;
-
-    if (MEMKIND_LIKELY(partition >= 0 &&
-        partition < MEMKIND_MAX_KIND &&
-        memkind_registry_g.partition_map[partition] != NULL)) {
-        *kind = memkind_registry_g.partition_map[partition];
-    }
-    else {
-        *kind = NULL;
-        err = MEMKIND_ERROR_UNAVAILABLE;
-    }
-    return err;
-}
-
-MEMKIND_EXPORT int memkind_get_kind_by_partition(int partition, struct memkind **kind)
-{
-    return memkind_get_kind_by_partition_internal(partition, kind);
-}
-
-MEMKIND_EXPORT int memkind_get_kind_by_name(const char *name, struct memkind **kind)
-{
-    int err = 0;
-    int i;
-
-    *kind = NULL;
-    for (i = 0; i < memkind_registry_g.num_kind; ++i) {
-        if (strcmp(name, memkind_registry_g.partition_map[i]->name) == 0) {
-            *kind = memkind_registry_g.partition_map[i];
-            break;
-        }
-    }
-    if (*kind == NULL) {
-        err = MEMKIND_ERROR_UNAVAILABLE;
-    }
-    return err;
-}
-
-MEMKIND_EXPORT void *memkind_partition_mmap(int partition, void *addr, size_t size)
-{
-    int err;
-    struct memkind *kind;
-
-    err = memkind_get_kind_by_partition_internal(partition, &kind);
-    if (MEMKIND_UNLIKELY(err)) {
-        return MAP_FAILED;
-    }
-    err = memkind_check_available(kind);
-    if (MEMKIND_UNLIKELY(err)) {
-        return MAP_FAILED;
-    }
-    return kind_mmap(kind, addr, size);
 }
 
 MEMKIND_EXPORT int memkind_check_available(struct memkind *kind)
@@ -639,11 +591,6 @@ MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
         memkind_free_post(kind, ptr);
     }
 #endif
-}
-
-MEMKIND_EXPORT int memkind_get_size(memkind_t kind, size_t *total, size_t *free)
-{
-    return kind->ops->get_size(kind, total, free);
 }
 
 static int memkind_tmpfile(const char *dir, size_t size, int *fd, void **addr)

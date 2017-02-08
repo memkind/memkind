@@ -33,6 +33,7 @@ extern "C" {
 
 #include <memkind.h>
 #include <jemalloc/jemalloc.h>
+#include <memkind/internal/memkind_private.h>
 
 /*
  * Header file for the jemalloc arena allocation memkind operations.

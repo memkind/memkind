@@ -42,7 +42,6 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .get_mbind_mode = memkind_interleave_get_mbind_mode,
     .get_mbind_nodemask = memkind_default_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
-    .get_size = memkind_default_get_size,
     .init_once = memkind_interleave_init_once,
     .finalize = memkind_arena_finalize
 };

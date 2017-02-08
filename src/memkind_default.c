@@ -47,7 +47,6 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .posix_memalign = memkind_default_posix_memalign,
     .realloc = memkind_default_realloc,
     .free = memkind_default_free,
-    .get_size = memkind_default_get_size,
     .init_once = memkind_default_init_once
 };
 
@@ -94,33 +93,6 @@ MEMKIND_EXPORT void *memkind_default_realloc(struct memkind *kind, void *ptr, si
 MEMKIND_EXPORT void memkind_default_free(struct memkind *kind, void *ptr)
 {
     jemk_free(ptr);
-}
-
-MEMKIND_EXPORT int memkind_default_get_size(struct memkind *kind, size_t *total, size_t *free)
-{
-    nodemask_t nodemask;
-    struct bitmask nodemask_bm = {NUMA_NUM_NODES, nodemask.n};
-    long long f;
-    int err = 0;
-    int i;
-
-    *total = 0;
-    *free = 0;
-    if (kind->ops->get_mbind_nodemask) {
-        err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
-    }
-    else {
-        copy_bitmask_to_bitmask(numa_all_nodes_ptr, &nodemask_bm);
-    }
-    if (!err) {
-        for (i = 0; i < NUMA_NUM_NODES; ++i) {
-            if (numa_bitmask_isbitset(&nodemask_bm, i)) {
-                *total += numa_node_size64(i, &f);
-                *free += f;
-            }
-        }
-    }
-    return err;
 }
 
 MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)

@@ -32,7 +32,6 @@ extern "C" {
 #endif
 
 #include "memkind.h"
-#include "memkind/internal/memkind_default.h"
 
 #include <stdbool.h>
 #include <pthread.h>
@@ -53,6 +52,26 @@ enum memkind_const_private {
     MEMKIND_NAME_LENGTH_PRIV = 64
 };
 
+struct memkind_ops {
+    int (* create)(struct memkind *kind, struct memkind_ops *ops, const char *name);
+    int (* destroy)(struct memkind *kind);
+    void *(* malloc)(struct memkind *kind, size_t size);
+    void *(* calloc)(struct memkind *kind, size_t num, size_t size);
+    int (* posix_memalign)(struct memkind *kind, void **memptr, size_t alignment, size_t size);
+    void *(* realloc)(struct memkind *kind, void *ptr, size_t size);
+    void (* free)(struct memkind *kind, void *ptr);
+    void *(* mmap)(struct memkind *kind, void *addr, size_t size);
+    int (* mbind)(struct memkind *kind, void *ptr, size_t size);
+    int (* madvise)(struct memkind *kind, void *addr, size_t size);
+    int (* get_mmap_flags)(struct memkind *kind, int *flags);
+    int (* get_mbind_mode)(struct memkind *kind, int *mode);
+    int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
+    int (* get_arena)(struct memkind *kind, unsigned int *arena, size_t size);
+    int (* check_available)(struct memkind *kind);
+    int (* check_addr)(struct memkind *kind, void *addr);
+    void (*init_once)(void);
+    int (* finalize)(struct memkind *kind);
+};
 
 struct memkind {
     struct memkind_ops *ops;
@@ -69,15 +88,22 @@ struct memkind {
 
 void memkind_init(memkind_t kind, bool check_numa);
 
-static inline void *kind_mmap(struct memkind *kind, void* addr, size_t size)
-{
-    if (MEMKIND_LIKELY(kind->ops->mmap == NULL)) {
-        return memkind_default_mmap(kind, addr, size);
-    }
-    else {
-        return kind->ops->mmap(kind, addr, size);
-    }
-}
+inline void *kind_mmap(struct memkind *kind, void* addr, size_t size);
+
+enum memkind_base_partition {
+    MEMKIND_PARTITION_DEFAULT = 0,
+    MEMKIND_PARTITION_HBW = 1,
+    MEMKIND_PARTITION_HBW_HUGETLB = 2,
+    MEMKIND_PARTITION_HBW_PREFERRED = 3,
+    MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB = 4,
+    MEMKIND_PARTITION_HUGETLB = 5,
+    MEMKIND_PARTITION_HBW_GBTLB = 6,
+    MEMKIND_PARTITION_HBW_PREFERRED_GBTLB = 7,
+    MEMKIND_PARTITION_GBTLB = 8,
+    MEMKIND_PARTITION_HBW_INTERLEAVE = 9,
+    MEMKIND_PARTITION_INTERLEAVE = 10,
+    MEMKIND_NUM_BASE_KIND
+};
 
 #ifdef __cplusplus
 }

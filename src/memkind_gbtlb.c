@@ -51,7 +51,6 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .get_mbind_mode = memkind_default_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
-    .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_gbtlb_init_once,
     .finalize = memkind_arena_finalize
 };
@@ -71,7 +70,6 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
-    .get_size = memkind_default_get_size,
     .init_once = memkind_hbw_preferred_gbtlb_init_once,
     .finalize = memkind_arena_finalize
 };
@@ -88,7 +86,6 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
     .check_available = memkind_hugetlb_check_available_2mb,
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_arena = memkind_thread_get_arena,
-    .get_size = memkind_default_get_size,
     .init_once = memkind_gbtlb_init_once,
     .finalize = memkind_arena_finalize
 };

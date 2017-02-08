@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,7 @@
 
 #include "common.h"
 
-/* Calling the basic APIs (calloc, realloc and get_size) with
- * MEMKIND_DEFAULT kind.
- */
+/* Calling the basic APIs with MEMKIND_DEFAULT kind. */
 class MemkindDefaultTests: public :: testing::Test
 {
 
@@ -55,25 +53,6 @@ TEST_F(MemkindDefaultTests, test_TC_MEMKIND_DefaultCalloc)
 
     sprintf(default_str, "memkind_calloc MEMKIND_DEFAULT\n");
     printf("%s", default_str);
-
-    memkind_free(MEMKIND_DEFAULT, default_str);
-}
-
-TEST_F(MemkindDefaultTests, test_TC_MEMKIND_DefaultGetSize)
-{
-    const size_t size = 512;
-    char *default_str = NULL;
-    int err = 0;
-    size_t *total, *free;
-    total = (size_t*) malloc(sizeof(size_t));
-    free = (size_t*) malloc(sizeof(size_t));
-
-    default_str = (char *)memkind_malloc(MEMKIND_DEFAULT, size);
-    EXPECT_TRUE(NULL != default_str);
-
-    err = memkind_get_size(MEMKIND_DEFAULT, total, free);
-
-    EXPECT_EQ(0,err);
 
     memkind_free(MEMKIND_DEFAULT, default_str);
 }

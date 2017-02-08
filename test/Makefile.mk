@@ -86,9 +86,6 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/extended_tests.cpp \
                          test/negative_tests.cpp \
                          test/error_message_tests.cpp \
-                         test/get_size_tests.cpp \
-                         test/create_tests.cpp \
-                         test/create_tests_helper.c \
                          test/memkind_default_tests.cpp \
                          test/policy_tests.cpp \
                          test/get_arena_test.cpp \
@@ -100,7 +97,6 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/performance/framework.cpp \
                          test/hbw_allocator_tests.cpp \
                          test/memkind_versioning_tests.cpp \
-                         test/new_kind_test.cpp \
                          test/static_kinds_tests.cpp \
                          test/hbw_verify_function_test.cpp \
                          #end

@@ -60,8 +60,6 @@ Note: This is EXEPRIMENTAL API. The functionality and the header file itself can
 .br
 .BI "int memkind_nohugepage_madvise(struct memkind " "*kind" ", void " "*addr" ", size_t " "size" );
 .br
-.BI "int memkind_default_get_size(struct memkind " "*kind" ", size_t " "*total" ", size_t " "*free" );
-.br
 .BI "int memkind_posix_check_alignment(struct memkind " "*kind" ", size_t " "alignment" );
 .br
 .SH DESCRIPTION
@@ -187,17 +185,6 @@ See
 .BR madvise (2)
 for more information about this option.
 .PP
-.BR memkind_default_get_size ()
-sums the values returned by
-.BR numa_node_size64 ()
-function for every NUMA node set by the
-.BR .get_node_mask ()
-operation.  If the
-.I .get_node_mask
-pointer is
-.B NULL
-then the values are summed for all NUMA nodes.
-.PP
 .BR memkind_posix_check_alignment ()
 can be used to check the alignment value for
 .BR memkind_posix_memalign ()
@@ -205,7 +192,7 @@ to ensure that is abides by the POSIX requirements:
 alignment must be a power of 2 at least as large as
 .RB sizeof( "void *" ).
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2016 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2017 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3),
 .BR memkind_arena (3),

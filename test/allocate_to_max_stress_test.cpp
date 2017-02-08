@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016 Intel Corporation.
+ * Copyright (C) 2015 - 2017 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@ protected:
     void TearDown()
     {}
 
-    void run(unsigned kind, unsigned operations, unsigned size_from, unsigned size_to, unsigned reserved_unallocated)
+    //Allocates memory up to 'memory_request_limit'.
+    void run(unsigned kind, unsigned operations, unsigned size_from, unsigned size_to, size_t memory_request_limit)
     {
         RecordProperty("kind", AllocatorTypes::allocator_name(kind));
         RecordProperty("memory_operations", operations);
@@ -47,25 +48,22 @@ protected:
         RecordProperty("size_to", size_to);
 
         TaskConf task_conf = {
-            operations, //number of memory operations
-            {
+            .n = operations, //number of memory operations
+            .allocation_sizes_conf = {
                 operations, //number of memory operations
-                reserved_unallocated, //reserved unallocated
                 size_from, //no random sizes.
                 size_to
             },
-            TypesConf(FunctionCalls::MALLOC), //enable allocator function call
-            TypesConf(kind), //enable allocator
-            11, //random seed
-            false, //disable csv logging
-            true //check memory availability
+            .func_calls = TypesConf(FunctionCalls::MALLOC), //enable allocator function call
+            .allocators_types = TypesConf(kind), //enable allocator
+            .seed = 11 //random seed
         };
 
         std::chrono::time_point<std::chrono::system_clock> start, end;
         start = std::chrono::system_clock::now();
 
         //Execute test iterations.
-        std::vector<iteration_result> results = StressIncreaseToMax::execute_test_iterations(task_conf, 1);
+        std::vector<iteration_result> results = StressIncreaseToMax::execute_test_iterations(task_conf, 120, memory_request_limit);
 
         end = std::chrono::system_clock::now();
 
@@ -83,9 +81,8 @@ protected:
     {
         for (size_t i=0; i<results.size(); i++)
         {
-            //Check if test ends with allocation error when reserved unallocated limit is enabled.
-           if(results[i].is_allocation_error
-                && task_conf.allocation_sizes_conf.reserved_unallocated)
+            //Check if test ends with allocation error.
+           if(results[i].is_allocation_error)
            {
                 return i+1;
            }
@@ -94,40 +91,31 @@ protected:
         return 0;
     }
 
+private:
+    HugePageOrganizer huge_page_organizer = HugePageOrganizer(4500);
 };
 
-//Allocate memory to max using MEMKIND_HBW kind.
-//NOTE: Allocated memory is limited (allocated_memory = total_free - reserved_unallocated).
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW)
 {
-    run(AllocatorTypes::MEMKIND_HBW, 10000, 2048, 2048, 15);
+    run(AllocatorTypes::MEMKIND_HBW, 1024, MB, MB, GB);
 }
 
-//Allocate memory to max using MEMKIND_INTERLEAVE kind.
-//NOTE: Allocated memory is limited (allocated_memory = total_free - reserved_unallocated).
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_INTERLEAVE)
 {
-    run(AllocatorTypes::MEMKIND_INTERLEAVE, 1000, 1048576, 1048576, 15000);
+    run(AllocatorTypes::MEMKIND_INTERLEAVE, 4096, MB, MB, 4*GB);
 }
 
-//Allocate memory to max using MEMKIND_HBW_PREFERRED kind.
-//NOTE: Allocated memory is limited (allocated_memory = total_free - reserved_unallocated).
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_PREFERRED)
 {
-    run(AllocatorTypes::MEMKIND_HBW_PREFERRED, 10000, 1048576, 1048576, 0);
+    run(AllocatorTypes::MEMKIND_HBW_PREFERRED, 17408, MB, MB, 17*GB);
 }
 
-//Allocate memory to max using MEMKIND_HBW_HUGETLB kind.
-//NOTE: Allocated memory is limited (allocated_memory = total_free - reserved_unallocated).
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_2MBPages_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_HUGETLB)
 {
-    ASSERT_HUGEPAGES_AVAILABILITY();
-    run(AllocatorTypes::MEMKIND_HBW_HUGETLB, 10000, 2048, 2048, 8);
+    run(AllocatorTypes::MEMKIND_HBW_HUGETLB, 1024, 4*MB, 4*MB, GB);
 }
 
-//Allocate memory to max using MEMKIND_HBW kind with different sizes.
-//NOTE: Allocated memory is limited (allocated_memory = total_free - reserved_unallocated).
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_DIFFERENT_SIZES)
 {
-    run(AllocatorTypes::MEMKIND_HBW, 2500, 1, 8*1024*1024, 150);
+    run(AllocatorTypes::MEMKIND_HBW, 2500, 1, 8*MB, GB);
 }

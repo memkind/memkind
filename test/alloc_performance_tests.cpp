@@ -58,7 +58,6 @@ protected:
             mem_operations_num, //number of memory operations
             {
                 mem_operations_num, //number of memory operations
-                0, //reserved unallocated memory to limit allocations
                 alloc_size, //min. size of single allocation
                 alloc_size //max. size of single allocatioion
             },
@@ -66,7 +65,6 @@ protected:
             allocator_types, //enable allocators
             11, //random seed
             false, //does not log memory operations and statistics to csv file
-            false //does not check memory avaiability before memory operation
         };
 
         for (int i=0; i<threads_number; i++)

@@ -71,12 +71,8 @@ test/negative_tests.cpp
 test/test.sh
 test/trial_generator.cpp
 test/trial_generator.h
-test/get_size_tests.cpp
 test/error_message_tests.cpp
-test/create_tests.cpp
-test/create_tests_helper.c
 test/memkind_default_tests.cpp
-test/new_kind_test.cpp
 test/policy_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmem_tests.cpp

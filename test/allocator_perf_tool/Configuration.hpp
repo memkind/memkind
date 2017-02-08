@@ -111,7 +111,7 @@ public:
 			types[type] = false;
 	}
 
-	bool is_enabled(unsigned type) {return (types.count(type) ? types[type] : false);}
+	bool is_enabled(unsigned type) const {return (types.count(type) ? types.find(type)->second : false);}
 
 private:
 	std::map<unsigned, bool> types;
@@ -123,7 +123,6 @@ class AllocationSizesConf
 {
 public:
 	unsigned n;
-	unsigned reserved_unallocated; // limit allocations
 	size_t size_from;
 	size_t size_to;
 };
@@ -144,5 +143,4 @@ public:
 	TypesConf allocators_types;
 	unsigned seed;
 	bool is_csv_log_enabled;
-	bool check_memory_availability;
 };

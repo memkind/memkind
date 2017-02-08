@@ -51,7 +51,6 @@ int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops, const cha
 int memkind_pmem_destroy(struct memkind *kind);
 void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size);
 int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags);
-int memkind_pmem_get_size(struct memkind *kind, size_t *total, size_t *free);
 
 struct memkind_pmem {
     int fd;
