@@ -100,11 +100,33 @@ void Check::check_node_hbw()
     memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
 
     for (size_t i = 0; i < num_address; i++) {
-        ASSERT_EQ(get_mempolicy(&status, returned_nodemask->maskp, returned_nodemask->size, address[i], MPOL_F_ADDR), 0);
-        for(int i=0; i < numa_num_possible_nodes(); i++) {
-            if(numa_bitmask_isbitset(returned_nodemask, i)) {
-                EXPECT_TRUE(numa_bitmask_isbitset(expected_nodemask, i));
-            }
+        ASSERT_EQ(0, get_mempolicy(&status, returned_nodemask->maskp, returned_nodemask->size, address[i], MPOL_F_ADDR));
+        check_node_bind_or_preferred(expected_nodemask, returned_nodemask);
+    }
+
+    numa_free_nodemask(expected_nodemask);
+    numa_free_nodemask(returned_nodemask);
+}
+
+void Check::check_hbw_numa_nodes(int policy)
+{
+    int status = -1;
+    struct bitmask *expected_nodemask = numa_allocate_nodemask(), *returned_nodemask = numa_allocate_nodemask();
+
+    memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
+    for (size_t i = 0; i < num_address; i++) {
+        ASSERT_EQ(0, get_mempolicy(&status, returned_nodemask->maskp, returned_nodemask->size, address[i], MPOL_F_ADDR));
+        EXPECT_EQ(policy, status);
+        switch(policy) {
+            case MPOL_INTERLEAVE:
+                EXPECT_TRUE(numa_bitmask_equal(expected_nodemask, returned_nodemask));
+                break;
+            case MPOL_BIND:
+            case MPOL_PREFERRED:
+                check_node_bind_or_preferred(expected_nodemask, returned_nodemask);
+                break;
+            default:
+                printf("Unknown policy\n");
         }
     }
 
@@ -112,21 +134,13 @@ void Check::check_node_hbw()
     numa_free_nodemask(returned_nodemask);
 }
 
-void Check::check_node_hbw_interleave()
+void Check::check_node_bind_or_preferred(struct bitmask* expected_nodemask, struct bitmask* returned_nodemask)
 {
-    int status = -1;
-    struct bitmask *expected_nodemask = numa_allocate_nodemask(), *returned_nodemask = numa_allocate_nodemask();
-
-    memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
-    //check if policy is MPOL_INTERLEAVE
-    for (size_t i = 0; i < num_address; i++) {
-        ASSERT_EQ(get_mempolicy(&status, returned_nodemask->maskp, returned_nodemask->size, address[i], MPOL_F_ADDR), 0);
-        EXPECT_EQ(status, MPOL_INTERLEAVE);
-        EXPECT_TRUE(numa_bitmask_equal(expected_nodemask, returned_nodemask));
+    for(int i=0; i < numa_num_possible_nodes(); i++) {
+        if(numa_bitmask_isbitset(returned_nodemask, i)) {
+            EXPECT_TRUE(numa_bitmask_isbitset(expected_nodemask, i));
+        }
     }
-
-    numa_free_nodemask(expected_nodemask);
-    numa_free_nodemask(returned_nodemask);
 }
 
 int Check::check_zero(void)

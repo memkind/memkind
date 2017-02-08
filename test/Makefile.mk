@@ -75,6 +75,7 @@ fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
               # end
 
 test_all_tests_SOURCES = $(fused_gtest) \
+                         test/Allocator.hpp \
                          test/common.h \
                          test/bat_tests.cpp \
                          test/trial_generator.cpp \
@@ -87,7 +88,6 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/negative_tests.cpp \
                          test/error_message_tests.cpp \
                          test/memkind_default_tests.cpp \
-                         test/policy_tests.cpp \
                          test/get_arena_test.cpp \
                          test/memkind_pmem_tests.cpp \
                          test/performance/operations.hpp \

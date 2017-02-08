@@ -29,6 +29,7 @@
 #include "check.h"
 #include <vector>
 #include <numa.h>
+#include <numaif.h>
 
 void TrialGenerator :: generate_incremental(alloc_api_t api)
 {
@@ -399,7 +400,7 @@ void TrialGenerator :: run(int num_bandwidth, std::vector<int> &bandwidth)
                 trial_vec[i].memkind != MEMKIND_HUGETLB &&
                 trial_vec[i].memkind != MEMKIND_GBTLB) {
                 if (trial_vec[i].memkind == MEMKIND_HBW_INTERLEAVE) {
-                    check.check_node_hbw_interleave();
+                    check.check_hbw_numa_nodes(MPOL_INTERLEAVE);
                     EXPECT_EQ(0, check.check_page_size(trial_vec[i].page_size));
                 }
                 else {

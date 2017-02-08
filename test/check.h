@@ -48,7 +48,8 @@ public:
     Check(const Check &);
     ~Check();
     void check_node_hbw();
-    void check_node_hbw_interleave();
+    void check_hbw_numa_nodes(int policy);
+    void check_node_bind_or_preferred(struct bitmask* expected_nodemask, struct bitmask* returned_nodemask);
     void record_page_association();
     int check_page_size(size_t page_size);
     int check_zero(void);

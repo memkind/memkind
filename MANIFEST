@@ -69,6 +69,7 @@ include/memkind/internal/memkind_log.h
 include/memkind/internal/tbb_wrapper.h
 include/memkind/internal/tbb_mem_pool_policy.h
 test/Makefile.mk
+test/Allocator.hpp
 test/check.sh
 test/test.sh
 test/multithreaded_tests.cpp
@@ -89,7 +90,6 @@ test/check.cpp
 test/extended_tests.cpp
 test/error_message_tests.cpp
 test/memkind_default_tests.cpp
-test/policy_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmem_tests.cpp
 test/static_kinds_tests.cpp

@@ -26,12 +26,14 @@
 
 #include <fstream>
 #include <algorithm>
+#include <numaif.h>
 
 #include "common.h"
 #include "check.h"
 #include "omp.h"
 #include "trial_generator.h"
 #include "allocator_perf_tool/HugePageOrganizer.hpp"
+#include "Allocator.hpp"
 
 /*
  * Set of basic acceptance tests.
@@ -45,135 +47,117 @@ private:
 class BasicAllocTest
 {
 public:
-    BasicAllocTest() {}
 
-    BasicAllocTest(memkind_t kind_obj)
-    {
-        if(!kind) {
-            kind = kind_obj;
-        }
-    }
+    BasicAllocTest(Allocator* allocator) : allocator(allocator) {}
 
-    void init(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags)
+    void check_policy_and_numa_node(void* ptr, size_t size)
     {
-        if(!kind) {
-            int ret = memkind_create_kind(memtype, policy, flags, &kind);
-            ASSERT_EQ(MEMKIND_SUCCESS, ret);
-            ASSERT_TRUE(kind != NULL);
+        Check check(ptr, size, allocator->get_page_size());
+
+        if (allocator->is_high_bandwidth() && allocator->is_interleave()) {
+            check.check_hbw_numa_nodes(MPOL_INTERLEAVE);
+        } else if (allocator->is_high_bandwidth() && allocator->is_preferred()) {
+            check.check_hbw_numa_nodes(MPOL_PREFERRED);
+        } else if (allocator->is_high_bandwidth() && allocator->is_bind()) {
+            check.check_hbw_numa_nodes(MPOL_BIND);
         }
-        object_flags = flags;
     }
 
     void record_page_association(void* ptr, size_t size)
     {
-        size_t page_size = object_flags == MEMKIND_MASK_PAGE_SIZE_2MB ? 2*MB : 4*KB;
-
-        Check check(ptr, size, page_size);
-        check.record_page_association();
+        Check(ptr, size, allocator->get_page_size()).record_page_association();
     }
 
     void malloc(size_t size)
     {
-        void* ptr = memkind_malloc(kind, size);
-        ASSERT_TRUE(ptr != NULL) << "memkind_malloc() returns NULL";
+        void* ptr = allocator->malloc(size);
+        ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";
         void* memset_ret = memset(ptr, 3, size);
         EXPECT_TRUE(memset_ret != NULL);
         record_page_association(ptr, size);
-        memkind_free(kind, ptr);
+        check_policy_and_numa_node(ptr, size);
+        allocator->free(ptr);
     }
 
     void calloc(size_t num, size_t size)
     {
-        void* ptr = memkind_calloc(kind, num, size);
-        ASSERT_TRUE(ptr != NULL) << "memkind_calloc() returns NULL";
+        void* ptr = allocator->calloc(num, size);
+        ASSERT_TRUE(ptr != NULL) << "calloc() returns NULL";
         void* memset_ret = memset(ptr, 3, size);
         ASSERT_TRUE(memset_ret != NULL);
         record_page_association(ptr, size);
-        memkind_free(kind, ptr);
+        check_policy_and_numa_node(ptr, size);
+        allocator->free(ptr);
     }
 
     void realloc(size_t size)
     {
-        void* ptr = memkind_malloc(kind, size);
-        ASSERT_TRUE(ptr != NULL) << "memkind_malloc() returns NULL";
+        void* ptr = allocator->malloc(size);
+        ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";
         size_t realloc_size = size+128;
-        ptr = memkind_realloc(kind, ptr, realloc_size);
-        ASSERT_TRUE(ptr != NULL) << "memkind_realloc() returns NULL";
+        ptr = allocator->realloc(ptr, realloc_size);
+        ASSERT_TRUE(ptr != NULL) << "realloc() returns NULL";
         void* memset_ret = memset(ptr, 3, realloc_size);
         ASSERT_TRUE(memset_ret != NULL);
         record_page_association(ptr, size);
-        memkind_free(kind, ptr);
+        check_policy_and_numa_node(ptr, size);
+        allocator->free(ptr);
     }
 
     void memalign(size_t alignment, size_t size)
     {
         void* ptr = NULL;
-        int ret = memkind_posix_memalign(kind, &ptr, alignment, size);
-        ASSERT_EQ(0, ret) << "memkind_posix_memalign() != 0";
-        ASSERT_TRUE(ptr != NULL) << "memkind_posix_memalign() returns NULL pointer";
+        int ret = allocator->memalign(&ptr, alignment, size);
+        ASSERT_EQ(0, ret) << "posix_memalign() != 0";
+        ASSERT_TRUE(ptr != NULL) << "posix_memalign() returns NULL pointer";
         void* memset_ret = memset(ptr, 3, size);
         ASSERT_TRUE(memset_ret != NULL);
         record_page_association(ptr, size);
-        memkind_free(kind, ptr);
+        check_policy_and_numa_node(ptr, size);
+        allocator->free(ptr);
     }
 
     void free(size_t size)
     {
-        void* ptr = memkind_malloc(kind, size);
-        ASSERT_TRUE(ptr != NULL) << "memkind_malloc() returns NULL";
-        memkind_free(kind, ptr);
-        ptr = memkind_malloc(kind, size);
-        ASSERT_TRUE(ptr != NULL) << "memkind_malloc() returns NULL";
-        memkind_free(0, ptr);
+        void* ptr = allocator->malloc(size);
+        ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";
+        allocator->free(ptr);
     }
 
-    void destroy_kind()
-    {
-        int ret = memkind_destroy_kind(kind);
-        ASSERT_EQ(MEMKIND_SUCCESS, ret);
-        kind = NULL;
-    }
-
-    virtual ~BasicAllocTest() {destroy_kind();}
+    virtual ~BasicAllocTest() {}
 private:
-    memkind_t kind = NULL;
-    memkind_bits_t object_flags;
+    Allocator *allocator;
 };
 
 static void test_malloc(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
 {
-    BasicAllocTest test;
-    test.init(memtype, policy, flags);
-    test.malloc(size);
+    MemkindAllocator memkind_allocator(memtype, policy, flags);
+    BasicAllocTest(&memkind_allocator).malloc(size);
 }
 
 static void test_calloc(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
 {
-    BasicAllocTest test;
-    test.init(memtype, policy, flags);
-    test.calloc(1, size);
+    MemkindAllocator memkind_allocator(memtype, policy, flags);
+    BasicAllocTest(&memkind_allocator).calloc(1, size);
 }
 
 static void test_realloc(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
 {
-    BasicAllocTest test;
-    test.init(memtype, policy, flags);
-    test.realloc(size);
+    MemkindAllocator memkind_allocator(memtype, policy, flags);
+    BasicAllocTest(&memkind_allocator).realloc(size);
 }
 
 
 static void test_memalign(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
 {
-    BasicAllocTest test;
-    test.init(memtype, policy, flags);
-    test.memalign(4096, size);
+    MemkindAllocator memkind_allocator(memtype, policy, flags);
+    BasicAllocTest(&memkind_allocator).memalign(4096, size);
 }
 
 static void test_free(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
 {
-    BasicAllocTest test;
-    test.init(memtype, policy, flags);
-    test.free(size);
+    MemkindAllocator memkind_allocator(memtype, policy, flags);
+    BasicAllocTest(&memkind_allocator).free(size);
 }
 
 TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_4096_bytes)
@@ -466,49 +450,200 @@ TEST_F(BATest, test_TC_MEMKIND_free_DEFAULT_PREFERRED_LOCAL_4096_bytes)
     test_free(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_free_MEMKIND_GBTLB_4096_bytes)
+TEST_F(BATest, test_TC_MEMKIND_free_MEMKIND_DEFAULT_free_with_NULL_kind_4096_bytes)
 {
-    BasicAllocTest test = BasicAllocTest(MEMKIND_GBTLB);
-    test.free(4096);
+    void* ptr = memkind_malloc(MEMKIND_DEFAULT, 4096);
+    ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";
+    memkind_free(0, ptr);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_CheckAvailable)
+TEST_F(BATest, test_TC_MEMKIND_free_MEMKIND_GBTLB_4096_bytes)
+{
+    MemkindAllocator memkind_allocator(MEMKIND_GBTLB);
+    BasicAllocTest(&memkind_allocator).free(4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Bind_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    BasicAllocTest(&hbwmalloc_allocator).malloc(4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Bind_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    BasicAllocTest(&hbwmalloc_allocator).malloc(4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Preferred_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
+    BasicAllocTest(&hbwmalloc_allocator).malloc(4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Preferred_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
+    BasicAllocTest(&hbwmalloc_allocator).malloc(4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Interleave_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
+    BasicAllocTest(&hbwmalloc_allocator).malloc(4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Interleave_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
+    BasicAllocTest(&hbwmalloc_allocator).malloc(4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Bind_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Bind_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Preferred_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
+    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Preferred_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
+    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Interleave_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
+    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Interleave_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
+    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Bind_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    BasicAllocTest(&hbwmalloc_allocator).realloc(4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Bind_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    BasicAllocTest(&hbwmalloc_allocator).realloc(4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Preferred_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
+    BasicAllocTest(&hbwmalloc_allocator).realloc(4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Preferred_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
+    BasicAllocTest(&hbwmalloc_allocator).realloc(4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Interleave_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
+    BasicAllocTest(&hbwmalloc_allocator).realloc(4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Interleave_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
+    BasicAllocTest(&hbwmalloc_allocator).realloc(4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Bind_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Bind_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Preferred_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Preferred_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Interleave_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Interleave_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_CheckAvailable)
 {
     ASSERT_EQ(0, hbw_check_available());
 }
 
-TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_Policy)
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_Policy)
 {
     hbw_set_policy(HBW_POLICY_PREFERRED);
     EXPECT_EQ(HBW_POLICY_PREFERRED, hbw_get_policy());
 }
 
-TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_MallocIncremental)
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_MallocIncremental)
 {
     tgen->generate_incremental(HBW_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_CallocIncremental)
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_CallocIncremental)
 {
     tgen->generate_incremental(HBW_CALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
 
-TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_ReallocIncremental)
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_ReallocIncremental)
 {
     tgen->generate_incremental(HBW_REALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_MemalignIncremental)
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_MemalignIncremental)
 {
     tgen->generate_incremental(HBW_MEMALIGN);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_2MBPages_HBW_Pref_MemalignPsizeIncremental)
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_2MBPages_Pref_MemalignPsizeIncremental)
 {
     tgen->generate_incremental(HBW_MEMALIGN_PSIZE);
     tgen->run(num_bandwidth, bandwidth);
