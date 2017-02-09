@@ -40,5 +40,5 @@ if [ ! -f ./Makefile ]; then
 fi
 
 #use V=1 for full cmdlines of build
-make all -j
-make checkprogs -j
+make all -j $MAKEOPTS
+make checkprogs -j $MAKEOPTS

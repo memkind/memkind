@@ -3,7 +3,7 @@ language: cpp python
 before_install:
 install:
 script:
-  - CXX="g++-4.8" CC="gcc-4.8" LDFLAGS="-lrt -Wl,--no-as-needed" ./build.sh
+  - CXX="g++-4.8" CC="gcc-4.8" LDFLAGS="-lrt -Wl,--no-as-needed" MAKEOPTS="-l 1.5" ./build.sh
 after_failure:
   - echo "Sad memking"
   - find . -name config.log -exec cat {} ";"
