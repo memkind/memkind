@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2017 Intel Corporation.
+* Copyright (C) 2017 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <memkind.h>
+#include <hbwmalloc.h>
 
 #include "Allocator.hpp"
 #include "Allocation_info.hpp"
@@ -36,53 +36,33 @@
 #include <stdlib.h>
 
 
-class MemkindAllocatorWithTimer
+class HBWmallocAllocatorWithTimer
 	: public Allocator
 {
 public:
-	MemkindAllocatorWithTimer() : kind(MEMKIND_DEFAULT) {}
-
-	MemkindAllocatorWithTimer(memkind_t memory_kind, unsigned kind_type_id)
-	{
-		kind = memory_kind;
-		type_id = kind_type_id;
-	}
-	~MemkindAllocatorWithTimer(void) {}
-
 	memory_operation wrapped_malloc(size_t size)
 	{
-		START_TEST(type_id, FunctionCalls::MALLOC)
-		data.ptr = memkind_malloc(kind, size);
+		START_TEST(AllocatorTypes::HBWMALLOC_ALLOCATOR, FunctionCalls::MALLOC)
+		data.ptr = hbw_malloc(size);
 		END_TEST
 	}
 
 	memory_operation wrapped_calloc(size_t num, size_t size)
 	{
-		START_TEST(type_id, FunctionCalls::CALLOC)
-		data.ptr = memkind_calloc(kind, num, size);
+		START_TEST(AllocatorTypes::HBWMALLOC_ALLOCATOR, FunctionCalls::CALLOC)
+		data.ptr = hbw_calloc(num, size);
 		END_TEST
 	}
 
 	memory_operation wrapped_realloc(void* ptr, size_t size)
 	{
-		START_TEST(type_id, FunctionCalls::REALLOC)
-		data.ptr = memkind_realloc(kind, ptr, size);
+		START_TEST(AllocatorTypes::HBWMALLOC_ALLOCATOR, FunctionCalls::REALLOC)
+		data.ptr = hbw_realloc(ptr, size);
 		END_TEST
 	}
 
-	void wrapped_free(void* ptr) {memkind_free(kind, ptr);}
+	void wrapped_free(void* ptr) {hbw_free(ptr);}
 
-	void change_kind(memkind_t memory_kind, unsigned kind_type_id)
-	{
-		kind = memory_kind;
-		type_id = kind_type_id;
-	}
-
-	unsigned type() {return type_id;}
-	memkind_t get_kind() {return kind;}
-
-private:
-	memkind_t kind;
-	unsigned type_id;
+	unsigned type() {return AllocatorTypes::HBWMALLOC_ALLOCATOR;}
 
 };

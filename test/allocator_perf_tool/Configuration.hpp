@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2016 Intel Corporation.
+* Copyright (C) 2015 - 2017 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@ public:
 		MEMKIND_HBW_PREFERRED_HUGETLB,
 		MEMKIND_HBW_GBTLB,
 		MEMKIND_HBW_PREFERRED_GBTLB,
+		HBWMALLOC_ALLOCATOR,
 		NUM_OF_ALLOCATOR_TYPES
 	};
 
@@ -65,7 +66,8 @@ public:
 			"MEMKIND_HBW_HUGETLB",
 			"MEMKIND_HBW_PREFERRED_HUGETLB",
 			"MEMKIND_HBW_GBTLB",
-			"MEMKIND_HBW_PREFERRED_GBTLB"
+			"MEMKIND_HBW_PREFERRED_GBTLB",
+			"HBWMALLOC_ALLOCATOR"
 		};
 
 		if(type >= NUM_OF_ALLOCATOR_TYPES) assert(!"Invalid input argument!");

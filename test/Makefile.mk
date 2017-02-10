@@ -156,6 +156,7 @@ allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.h
                                       test/allocator_perf_tool/WrappersMacros.hpp \
                                       test/allocator_perf_tool/HugePageUnmap.hpp \
                                       test/allocator_perf_tool/HugePageOrganizer.hpp \
+                                      test/allocator_perf_tool/HBWmallocAllocatorWithTimer.hpp \
                                       # end
 
 

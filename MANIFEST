@@ -158,6 +158,7 @@ test/allocator_perf_tool/Workload.hpp
 test/allocator_perf_tool/WrappersMacros.hpp
 test/allocator_perf_tool/HugePageUnmap.hpp
 test/allocator_perf_tool/HugePageOrganizer.hpp
+test/allocator_perf_tool/HBWmallocAllocatorWithTimer.hpp
 test/allocator_perf_tool/main.cpp
 test/allocate_to_max_stress_test.cpp
 test/memkind_versioning_tests.cpp
