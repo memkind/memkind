@@ -88,7 +88,7 @@ struct memkind {
 
 void memkind_init(memkind_t kind, bool check_numa);
 
-inline void *kind_mmap(struct memkind *kind, void* addr, size_t size);
+void *kind_mmap(struct memkind *kind, void* addr, size_t size);
 
 enum memkind_base_partition {
     MEMKIND_PARTITION_DEFAULT = 0,
