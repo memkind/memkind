@@ -56,7 +56,7 @@ BuildRequires: numactl-devel
 Prefix: %{_prefix}
 Prefix: %{_unitdir}
 Obsoletes: memkind
-Provides: memkind
+Provides: memkind libmemkind0
 
 %define namespace memkind
 
