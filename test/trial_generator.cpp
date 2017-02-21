@@ -396,17 +396,6 @@ void TrialGenerator :: run(int num_bandwidth, std::vector<int> &bandwidth)
             ASSERT_TRUE(ptr_vec[i] != NULL);
             memset(ptr_vec[i], 0, trial_vec[i].size);
             Check check(ptr_vec[i], trial_vec[i]);
-            if (trial_vec[i].memkind != MEMKIND_DEFAULT &&
-                trial_vec[i].memkind != MEMKIND_HUGETLB &&
-                trial_vec[i].memkind != MEMKIND_GBTLB) {
-                if (trial_vec[i].memkind == MEMKIND_HBW_INTERLEAVE) {
-                    check.check_hbw_numa_nodes(MPOL_INTERLEAVE);
-                    EXPECT_EQ(0, check.check_page_size(trial_vec[i].page_size));
-                }
-                else {
-                    check.check_node_hbw();
-                }
-            }
             if (trial_vec[i].api == HBW_CALLOC) {
                 EXPECT_EQ(0, check.check_zero());
             }

@@ -92,57 +92,6 @@ Check::Check(const Check &other)
     }
 }
 
-void Check::check_node_hbw()
-{
-    int status = -1;
-    struct bitmask *expected_nodemask = numa_allocate_nodemask(), *returned_nodemask = numa_allocate_nodemask();
-
-    memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
-
-    for (size_t i = 0; i < num_address; i++) {
-        ASSERT_EQ(0, get_mempolicy(&status, returned_nodemask->maskp, returned_nodemask->size, address[i], MPOL_F_ADDR));
-        check_node_bind_or_preferred(expected_nodemask, returned_nodemask);
-    }
-
-    numa_free_nodemask(expected_nodemask);
-    numa_free_nodemask(returned_nodemask);
-}
-
-void Check::check_hbw_numa_nodes(int policy)
-{
-    int status = -1;
-    struct bitmask *expected_nodemask = numa_allocate_nodemask(), *returned_nodemask = numa_allocate_nodemask();
-
-    memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
-    for (size_t i = 0; i < num_address; i++) {
-        ASSERT_EQ(0, get_mempolicy(&status, returned_nodemask->maskp, returned_nodemask->size, address[i], MPOL_F_ADDR));
-        EXPECT_EQ(policy, status);
-        switch(policy) {
-            case MPOL_INTERLEAVE:
-                EXPECT_TRUE(numa_bitmask_equal(expected_nodemask, returned_nodemask));
-                break;
-            case MPOL_BIND:
-            case MPOL_PREFERRED:
-                check_node_bind_or_preferred(expected_nodemask, returned_nodemask);
-                break;
-            default:
-                printf("Unknown policy\n");
-        }
-    }
-
-    numa_free_nodemask(expected_nodemask);
-    numa_free_nodemask(returned_nodemask);
-}
-
-void Check::check_node_bind_or_preferred(struct bitmask* expected_nodemask, struct bitmask* returned_nodemask)
-{
-    for(int i=0; i < numa_num_possible_nodes(); i++) {
-        if(numa_bitmask_isbitset(returned_nodemask, i)) {
-            EXPECT_TRUE(numa_bitmask_isbitset(expected_nodemask, i));
-        }
-    }
-}
-
 int Check::check_zero(void)
 {
     size_t i;
@@ -331,33 +280,4 @@ int Check::check_page_size(size_t page_size, void *vaddr)
     }
     /*Never found a match!*/
     return 1;
-}
-
-void Check::record_page_association()
-{
-    int max_node_id = numa_max_node();
-    std::unique_ptr<int[]> nodes(new int[num_address]);
-    std::vector<int> pages_on_node(max_node_id+1);
-
-    if (move_pages(0, num_address, address, NULL, nodes.get(), MPOL_MF_MOVE)) {
-        fprintf(stderr, "Error: move_pages() returned %s\n", strerror(errno));
-        return;
-    }
-
-    for (size_t i = 0; i < num_address; i++) {
-        if (nodes[i] < 0) {
-            fprintf(stderr,"Error: status of page %p is %d\n", address[i], nodes[i]);
-            return;
-        } else {
-            pages_on_node[nodes[i]]++;
-        }
-    }
-
-    for (size_t i = 0; i < (size_t)max_node_id + 1; i++) {
-        if (pages_on_node[i] > 0) {
-            char buffer[1024];
-            snprintf(buffer, sizeof(buffer), "Node%zd", i);
-            GTestAdapter::RecordProperty(buffer, pages_on_node[i]);
-        }
-    }
 }

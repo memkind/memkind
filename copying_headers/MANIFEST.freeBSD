@@ -54,6 +54,7 @@ include/memkind/internal/memkind_log.h
 include/memkind/internal/tbb_wrapper.h
 test/Makefile.mk
 test/Allocator.hpp
+test/TestPolicy.hpp
 test/bat_tests.cpp
 test/bat_bind_tests.cpp
 test/bat_interleave_tests.cpp

@@ -48,11 +48,11 @@ class MemkindAllocator : public Allocator
 {
 public:
 
-    MemkindAllocator(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags)
+    MemkindAllocator(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags) :
+        memtype(memtype),
+        policy(policy),
+        flags(flags)
     {
-        memtype = memtype;
-        policy = policy;
-        flags = flags;
         int ret = memkind_create_kind(memtype, policy, flags, &kind);
         assert(ret == MEMKIND_SUCCESS);
         assert(kind != NULL);
@@ -92,7 +92,7 @@ public:
 
     virtual bool is_preferred()
     {
-        return policy == MEMKIND_POLICY_PREFERRED_LOCAL || kind == MEMKIND_HBW_PREFERRED || kind == MEMKIND_HBW_PREFERRED_HUGETLB;
+        return (policy == MEMKIND_POLICY_PREFERRED_LOCAL && memtype != MEMKIND_MEMTYPE_DEFAULT) || kind == MEMKIND_HBW_PREFERRED || kind == MEMKIND_HBW_PREFERRED_HUGETLB;
     }
 
     virtual bool is_bind()
@@ -129,9 +129,9 @@ public:
 
 private:
     memkind_t kind = NULL;
-    memkind_bits_t flags = memkind_bits_t();
-    memkind_policy_t policy = MEMKIND_POLICY_MAX_VALUE;
     memkind_memtype_t memtype = memkind_memtype_t();
+    memkind_policy_t policy = MEMKIND_POLICY_MAX_VALUE;
+    memkind_bits_t flags = memkind_bits_t();
 };
 
 class HbwmallocAllocator : public Allocator

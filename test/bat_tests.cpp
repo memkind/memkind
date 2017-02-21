@@ -34,6 +34,7 @@
 #include "trial_generator.h"
 #include "allocator_perf_tool/HugePageOrganizer.hpp"
 #include "Allocator.hpp"
+#include "TestPolicy.hpp"
 
 /*
  * Set of basic acceptance tests.
@@ -52,20 +53,27 @@ public:
 
     void check_policy_and_numa_node(void* ptr, size_t size)
     {
-        Check check(ptr, size, allocator->get_page_size());
+        int policy = -1;
+        if (allocator->is_interleave()) {
+            policy = MPOL_INTERLEAVE;
+        } else if (allocator->is_bind()) {
+            policy = MPOL_BIND;
+        } else if (allocator->is_preferred()) {
+            policy = MPOL_PREFERRED;
+        }
 
-        if (allocator->is_high_bandwidth() && allocator->is_interleave()) {
-            check.check_hbw_numa_nodes(MPOL_INTERLEAVE);
-        } else if (allocator->is_high_bandwidth() && allocator->is_preferred()) {
-            check.check_hbw_numa_nodes(MPOL_PREFERRED);
-        } else if (allocator->is_high_bandwidth() && allocator->is_bind()) {
-            check.check_hbw_numa_nodes(MPOL_BIND);
+        if(policy != -1) {
+            if (allocator->is_high_bandwidth()) {
+                TestPolicy::check_hbw_numa_nodes(policy, ptr, size);
+            } else {
+                TestPolicy::check_all_numa_nodes(policy, ptr, size);
+            }
         }
     }
 
     void record_page_association(void* ptr, size_t size)
     {
-        Check(ptr, size, allocator->get_page_size()).record_page_association();
+        TestPolicy::record_page_association(ptr, size, allocator->get_page_size());
     }
 
     void malloc(size_t size)

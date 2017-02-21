@@ -76,6 +76,7 @@ fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
 
 test_all_tests_SOURCES = $(fused_gtest) \
                          test/Allocator.hpp \
+                         test/TestPolicy.hpp \
                          test/common.h \
                          test/bat_tests.cpp \
                          test/trial_generator.cpp \
