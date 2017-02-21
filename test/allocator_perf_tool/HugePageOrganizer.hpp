@@ -35,15 +35,20 @@ public:
     {
         initial_nr_hugepages = get_nr_hugepages();
         int ret = set_nr_hugepages(0);
-        assert(ret != -1);
+        assert(ret == 0);
         ret = set_nr_hugepages(nr_hugepages);
-        assert(ret != -1);
+        int current_nr_hugepages = get_nr_hugepages();
+        if(ret != 0 || current_nr_hugepages != nr_hugepages) {
+             set_nr_hugepages(initial_nr_hugepages);
+             assert(!"Cannot set requested amount of huge pages!");
+        }
+        assert(ret == 0);
     }
 
     ~HugePageOrganizer()
     {
         int ret = set_nr_hugepages(initial_nr_hugepages);
-        assert(ret != -1);
+        assert(ret == 0);
     }
 
     static int get_nr_hugepages()
