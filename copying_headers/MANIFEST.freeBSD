@@ -147,6 +147,7 @@ test/alloc_benchmark.c
 test/load_tbbmalloc_symbols.c
 test/tbbmalloc.h
 test/freeing_memory_segfault_test.cpp
+test/dlopen_test.cpp
 man/memkind_pmem.3
 src/memkind_pmem.c
 

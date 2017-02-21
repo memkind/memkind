@@ -99,6 +99,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/memkind_versioning_tests.cpp \
                          test/static_kinds_tests.cpp \
                          test/hbw_verify_function_test.cpp \
+                         test/dlopen_test.cpp \
                          #end
 
 test_environ_err_hbw_malloc_test_SOURCES = test/environ_err_hbw_malloc_test.cpp
