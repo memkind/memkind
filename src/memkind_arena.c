@@ -365,6 +365,9 @@ static void tcache_finalize(void* args)
 
 static inline int get_tcache_flag(unsigned partition, size_t size)
 {
+
+    return MALLOCX_TCACHE_NONE; // disabling tcache until fix for tls regression
+
     // do not cache allocation larger than tcache_max nor those comming from non-static kinds
     if(size > TCACHE_MAX || partition >= MEMKIND_NUM_BASE_KIND){
         return MALLOCX_TCACHE_NONE;
