@@ -347,15 +347,10 @@ int memkind_arena_finalize(struct memkind *kind)
 // should be aligned with jemalloc opt.lg_tcache_max
 #define TCACHE_MAX (1<<12)
 
-// thread-local map of tcaches for static kinds
-static __thread unsigned tcache_map[MEMKIND_NUM_BASE_KIND];
-
-// thread-local initialization status
-static __thread bool tcache_thread_initialized;
-
 static void tcache_finalize(void* args)
 {
     int i;
+    unsigned *tcache_map = args;
     for(i = 0; i < MEMKIND_NUM_BASE_KIND; i++) {
         if(tcache_map[i] != 0) {
             jemk_mallctl("tcache.destroy", NULL, NULL, (void*)&tcache_map[i], sizeof(unsigned));
@@ -366,18 +361,18 @@ static void tcache_finalize(void* args)
 static inline int get_tcache_flag(unsigned partition, size_t size)
 {
 
-    return MALLOCX_TCACHE_NONE; // disabling tcache until fix for tls regression
-
     // do not cache allocation larger than tcache_max nor those comming from non-static kinds
     if(size > TCACHE_MAX || partition >= MEMKIND_NUM_BASE_KIND){
         return MALLOCX_TCACHE_NONE;
     }
 
+    unsigned *tcache_map = pthread_getspecific(tcache_key);
+    if(tcache_map == NULL) {
+        tcache_map = jemk_calloc(MEMKIND_NUM_BASE_KIND, sizeof(unsigned));
+        pthread_setspecific(tcache_key, (void*)tcache_map);
+    }
+
     if(MEMKIND_UNLIKELY(tcache_map[partition] == 0)) {
-        if(MEMKIND_UNLIKELY(!tcache_thread_initialized)) {
-            pthread_setspecific(tcache_key, (void*)tcache_map);
-            tcache_thread_initialized = true;
-        }
         size_t unsigned_size = sizeof(unsigned);
         int err = jemk_mallctl("tcache.create", (void*)&tcache_map[partition], &unsigned_size, NULL, 0);
         if(err) {
