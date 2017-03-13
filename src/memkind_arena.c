@@ -369,6 +369,9 @@ static inline int get_tcache_flag(unsigned partition, size_t size)
     unsigned *tcache_map = pthread_getspecific(tcache_key);
     if(tcache_map == NULL) {
         tcache_map = jemk_calloc(MEMKIND_NUM_BASE_KIND, sizeof(unsigned));
+        if(tcache_map == NULL) {
+            return MALLOCX_TCACHE_NONE;
+        }
         pthread_setspecific(tcache_key, (void*)tcache_map);
     }
 
