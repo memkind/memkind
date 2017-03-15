@@ -334,6 +334,23 @@ rpm: dist
 	$(MAKE) version="$(VERSION)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
 		-f memkind.spec.mk $@
 
+all: static_lib
+
+# the script merge memkind and jemalloc libraries into one static library.
+define ar_prog
+create libmemkind.a\n\
+addlib .libs/libmemkind.a\n\
+addlib jemalloc/obj/lib/libjemalloc_pic.a\n\
+save\n\
+end
+endef
+
+static_lib: jemalloc/obj/lib/libjemalloc_pic.a libmemkind.la
+	bash -c "ar -M < <(echo -e '$(ar_prog)')"
+	cp libmemkind.a .libs/
+	rm libmemkind.a
+
+
 include autohbw/Makefile.mk
 include test/Makefile.mk
 include examples/Makefile.mk
