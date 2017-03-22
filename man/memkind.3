@@ -649,6 +649,10 @@ Same as
 except that the pages that support the allocation are interleaved
 across all high bandwidth nodes and transparent huge pages are
 disabled.
+.TP
+.B MEMKIND_REGULAR
+Allocate from regular memory using the default page size. Regular means general purpose memory
+from the NUMA nodes containing CPUs.
 .SH "ERRORS"
 .TP
 .BR memkind_posix_memalign ()

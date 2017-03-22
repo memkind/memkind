@@ -34,6 +34,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_default.c \
                         src/memkind_gbtlb.c \
                         src/memkind_hbw.c \
+                        src/memkind_regular.c \
                         src/memkind_hugetlb.c \
                         src/memkind_pmem.c \
                         src/memkind_interleave.c \
@@ -56,6 +57,7 @@ nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_default.h \
                   include/memkind/internal/memkind_gbtlb.h \
                   include/memkind/internal/memkind_hbw.h \
+                  include/memkind/internal/memkind_regular.h \
                   include/memkind/internal/memkind_hugetlb.h \
                   include/memkind/internal/memkind_interleave.h \
                   include/memkind/internal/memkind_pmem.h \

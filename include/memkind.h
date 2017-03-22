@@ -223,6 +223,9 @@ int memkind_destroy_kind(memkind_t kind);
 #include "memkind_deprecated.h"
 
 /* EXPERIMENTAL API */
+extern memkind_t MEMKIND_REGULAR;
+
+/* EXPERIMENTAL API */
 extern memkind_t MEMKIND_DEFAULT;
 
 /* EXPERIMENTAL API */
