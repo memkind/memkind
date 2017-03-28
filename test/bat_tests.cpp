@@ -168,6 +168,38 @@ static void test_free(memkind_memtype_t memtype, memkind_policy_t policy, memkin
     BasicAllocTest(&memkind_allocator).free(size);
 }
 
+static void test_malloc(memkind_t kind, size_t size)
+{
+    MemkindAllocator memkind_allocator(kind);
+    BasicAllocTest(&memkind_allocator).malloc(size);
+}
+
+static void test_calloc(memkind_t kind, size_t size)
+{
+    MemkindAllocator memkind_allocator(kind);
+    BasicAllocTest(&memkind_allocator).calloc(1, size);
+}
+
+static void test_realloc(memkind_t kind, size_t size)
+{
+    MemkindAllocator memkind_allocator(kind);
+    BasicAllocTest(&memkind_allocator).realloc(size);
+}
+
+static void test_memalign(memkind_t kind, size_t size)
+{
+    MemkindAllocator memkind_allocator(kind);
+    BasicAllocTest(&memkind_allocator).memalign(4096, size);
+}
+
+static void test_free(memkind_t kind, size_t size)
+{
+    MemkindAllocator memkind_allocator(kind);
+    BasicAllocTest(&memkind_allocator).free(size);
+}
+
+/*** Kind tests */
+
 TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_4096_bytes)
 {
     test_malloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
@@ -668,3 +700,70 @@ TEST_F(BATest, test_TC_MEMKIND_2MBPages_HBW_Pref_MallocRecyclePsize)
     tgen->generate_recycle_psize_incremental(MEMKIND_MALLOC);
     tgen->run(num_bandwidth, bandwidth);
 }
+
+/* MEMKIND REGULAR */
+#include <memkind/internal/memkind_regular.h>
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_REGULAR_4096_bytes)
+{
+    test_malloc(MEMKIND_REGULAR, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_malloc_REGULAR_4194305_bytes)
+{
+    test_malloc(MEMKIND_REGULAR, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_REGULAR_4096_bytes)
+{
+    test_realloc(MEMKIND_REGULAR, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_realloc_REGULAR_4194305_bytes)
+{
+    test_realloc(MEMKIND_REGULAR, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_REGULAR_4096_bytes)
+{
+    test_calloc(MEMKIND_REGULAR, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_calloc_REGULAR_4194305_bytes)
+{
+    test_calloc(MEMKIND_REGULAR, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_REGULAR_4096_bytes)
+{
+    test_memalign(MEMKIND_REGULAR, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memalign_REGULAR_4194305_bytes)
+{
+    test_memalign(MEMKIND_REGULAR, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_free_REGULAR_4096_bytes)
+{
+    test_free(MEMKIND_REGULAR, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_free_REGULAR_4194305_bytes)
+{
+    test_free(MEMKIND_REGULAR, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_REGULAR_nodemask)
+{
+    using namespace TestPolicy;
+    void *mem = memkind_malloc(MEMKIND_REGULAR, 1234567);
+    unique_bitmask_ptr kind_nodemask = make_nodemask_ptr();
+    ASSERT_EQ(0, memkind_regular_all_get_mbind_nodemask(MEMKIND_REGULAR,
+                                                        kind_nodemask->maskp,
+                                                        kind_nodemask->size));
+
+    check_numa_nodes(kind_nodemask, MPOL_BIND, mem, 1234567);
+    memkind_free(MEMKIND_REGULAR, mem);
+}
+
