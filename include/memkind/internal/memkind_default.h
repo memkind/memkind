@@ -60,6 +60,11 @@ int memkind_nohugepage_madvise(struct memkind *kind, void *addr, size_t size);
 int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
 void memkind_default_init_once(void);
 
+static inline bool size_out_of_bounds(size_t size)
+{
+    return !size;
+}
+
 extern struct memkind_ops MEMKIND_DEFAULT_OPS;
 
 #ifdef __cplusplus

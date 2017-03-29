@@ -94,11 +94,6 @@ static int raw_free(intptr_t pool_id, void* raw_ptr, size_t raw_bytes)
   return munmap(raw_ptr, raw_bytes);
 }
 
-static inline bool size_out_of_bounds(size_t size)
-{
-    return (!size || size == (size_t)-1);
-}
-
 static void *tbb_pool_malloc(struct memkind* kind, size_t size)
 {
     if(size_out_of_bounds(size)) return NULL;
