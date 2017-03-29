@@ -27,37 +27,41 @@
 #include "allocator_perf_tool/GTestAdapter.hpp"
 #include "numa.h"
 
-class TestPolicy
+#include <memory>
+
+namespace TestPolicy
 {
-public:
-    static void check_hbw_numa_nodes(int policy, void* ptr, size_t size)
+    typedef std::unique_ptr<struct bitmask, decltype(&numa_free_nodemask)> unique_bitmask_ptr;
+
+    unique_bitmask_ptr make_nodemask_ptr()
     {
-        struct bitmask *expected_nodemask = numa_allocate_nodemask(), *returned_nodemask = numa_allocate_nodemask();
-
-        memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
-        check_numa_nodes(expected_nodemask, returned_nodemask, policy, ptr, size);
-
-        numa_free_nodemask(expected_nodemask);
-        numa_free_nodemask(returned_nodemask);
+        return std::move(unique_bitmask_ptr(numa_allocate_nodemask(), numa_free_nodemask));
     }
 
-    static void check_all_numa_nodes(int policy, void* ptr, size_t size)
+    unique_bitmask_ptr make_cpumask_ptr()
     {
-        if (policy != MPOL_INTERLEAVE) return;
+        return std::move(unique_bitmask_ptr(numa_allocate_cpumask(), numa_free_nodemask));
+    }
 
-        struct bitmask *expected_nodemask = numa_allocate_nodemask(), *returned_nodemask = numa_allocate_nodemask();
+    int get_num_of_pages(const size_t size, const size_t page_size)
+    {
+        size_t pages_number = size / page_size;
+        pages_number += size % page_size ? 1 : 0;
+        return pages_number;
+    }
 
-        for(int i=0; i < numa_num_configured_nodes(); i++) {
-            numa_bitmask_setbit(expected_nodemask, i);
+    std::vector<void*> get_address_of_pages(const void* ptr, const size_t pages_number, const size_t page_size)
+    {
+        std::vector<void*> address(pages_number);
+        const size_t page_mask = ~(page_size-1);
+        address[0] = (void*)((uintptr_t)ptr & page_mask); //aligned address of first page
+        for (size_t page_num = 1; page_num < pages_number; page_num++) {
+            address[page_num] = (char*)address[page_num-1] + page_size;
         }
-
-        check_numa_nodes(expected_nodemask, returned_nodemask, policy, ptr, size);
-
-        numa_free_nodemask(expected_nodemask);
-        numa_free_nodemask(returned_nodemask);
+        return address;
     }
 
-    static void record_page_association(const void *ptr, const size_t size, const size_t page_size)
+    void record_page_association(const void *ptr, const size_t size, const size_t page_size)
     {
         size_t pages_number = get_num_of_pages(size, page_size);
         std::vector<void*> address = get_address_of_pages(ptr, pages_number, page_size);
@@ -89,46 +93,27 @@ public:
         }
     }
 
-private:
-    static int get_num_of_pages(const size_t size, const size_t page_size)
-    {
-        size_t pages_number = size / page_size;
-        pages_number += size % page_size ? 1 : 0;
-        return pages_number;
-    }
-
-    static std::vector<void*> get_address_of_pages(const void* ptr, const size_t pages_number, const size_t page_size)
-    {
-        std::vector<void*> address(pages_number);
-        const size_t page_mask = ~(page_size-1);
-        address[0] = (void*)((uintptr_t)ptr & page_mask); //aligned address of first page
-        for (size_t page_num = 1; page_num < pages_number; page_num++) {
-            address[page_num] = (char*)address[page_num-1] + page_size;
-        }
-        return address;
-    }
-
-    static void check_numa_nodes(struct bitmask* expected_nodemask, struct bitmask* returned_nodemask, int policy, void* ptr, size_t size)
+    void check_numa_nodes(unique_bitmask_ptr& expected_bitmask, int policy, void* ptr, size_t size)
     {
 
         const size_t page_size = sysconf(_SC_PAGESIZE);
         size_t pages_number = get_num_of_pages(size, page_size);
         std::vector<void*> address = get_address_of_pages(ptr, pages_number, page_size);
-
+        unique_bitmask_ptr returned_bitmask = make_nodemask_ptr();
         int status = -1;
 
         for (size_t page_num = 0; page_num < address.size(); page_num++) {
-            ASSERT_EQ(0, get_mempolicy(&status, returned_nodemask->maskp, returned_nodemask->size, address[page_num], MPOL_F_ADDR));
+            ASSERT_EQ(0, get_mempolicy(&status, returned_bitmask->maskp, returned_bitmask->size, address[page_num], MPOL_F_ADDR));
             EXPECT_EQ(policy, status);
             switch(policy) {
                 case MPOL_INTERLEAVE:
-                    EXPECT_TRUE(numa_bitmask_equal(expected_nodemask, returned_nodemask));
+                    EXPECT_TRUE(numa_bitmask_equal(expected_bitmask.get(), returned_bitmask.get()));
                     break;
                 case MPOL_BIND:
                 case MPOL_PREFERRED:
                     for(int i=0; i < numa_num_possible_nodes(); i++) {
-                        if(numa_bitmask_isbitset(returned_nodemask, i)) {
-                            EXPECT_TRUE(numa_bitmask_isbitset(expected_nodemask, i));
+                        if(numa_bitmask_isbitset(returned_bitmask.get(), i)) {
+                            EXPECT_TRUE(numa_bitmask_isbitset(expected_bitmask.get(), i));
                         }
                     }
                     break;
@@ -137,4 +122,25 @@ private:
             }
         }
     }
-};
+
+    void check_hbw_numa_nodes(int policy, void* ptr, size_t size)
+    {
+        unique_bitmask_ptr expected_bitmask = make_nodemask_ptr();
+
+        memkind_hbw_all_get_mbind_nodemask(NULL, expected_bitmask->maskp, expected_bitmask->size);
+        check_numa_nodes(expected_bitmask, policy, ptr, size);
+    }
+
+    void check_all_numa_nodes(int policy, void* ptr, size_t size)
+    {
+        if (policy != MPOL_INTERLEAVE) return;
+
+        unique_bitmask_ptr expected_bitmask = make_nodemask_ptr();
+
+        for(int i=0; i < numa_num_configured_nodes(); i++) {
+            numa_bitmask_setbit(expected_bitmask.get(), i);
+        }
+
+        check_numa_nodes(expected_bitmask, policy, ptr, size);
+    }
+}

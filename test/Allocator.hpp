@@ -58,7 +58,10 @@ public:
         assert(kind != NULL);
     }
 
-    MemkindAllocator(memkind_t kind) : kind(kind) {}
+    MemkindAllocator(memkind_t kind) : kind(kind)
+    {
+        assert(kind != NULL);
+    }
 
     virtual void* malloc(size_t size)
     {
@@ -92,12 +95,17 @@ public:
 
     virtual bool is_preferred()
     {
-        return (policy == MEMKIND_POLICY_PREFERRED_LOCAL && memtype != MEMKIND_MEMTYPE_DEFAULT) || kind == MEMKIND_HBW_PREFERRED || kind == MEMKIND_HBW_PREFERRED_HUGETLB;
+        return (policy == MEMKIND_POLICY_PREFERRED_LOCAL && memtype != MEMKIND_MEMTYPE_DEFAULT) ||
+                kind == MEMKIND_HBW_PREFERRED ||
+                kind == MEMKIND_HBW_PREFERRED_HUGETLB;
     }
 
     virtual bool is_bind()
     {
-        return policy == MEMKIND_POLICY_BIND_LOCAL || kind == MEMKIND_HBW || kind == MEMKIND_HBW_HUGETLB;
+        return policy == MEMKIND_POLICY_BIND_LOCAL ||
+               kind == MEMKIND_HBW ||
+               kind == MEMKIND_HBW_HUGETLB ||
+               kind == MEMKIND_REGULAR;
     }
 
     virtual bool is_high_bandwidth()
@@ -117,7 +125,7 @@ public:
             (flags & MEMKIND_MASK_PAGE_SIZE_2MB)) {
             return 2*MB;
         }
-        return 4*MB;
+        return 4*KB;
     }
 
     virtual ~MemkindAllocator()
