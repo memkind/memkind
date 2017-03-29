@@ -46,33 +46,6 @@ TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_HBW_Memalign_Psize_Pr
     tgen->run(num_bandwidth, bandwidth);
 }
 
-
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_HBW_Malloc)
-{
-    tgen->generate_gb (MEMKIND_MALLOC, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_HBW_Calloc)
-{
-    tgen->generate_gb (MEMKIND_CALLOC, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_HBW_Realloc)
-{
-    tgen->generate_gb (MEMKIND_REALLOC, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_HBW_Posix_Memalign)
-{
-    tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 1, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
 TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_Malloc_Regular)
 {
     tgen->generate_gb (MEMKIND_MALLOC, 1, MEMKIND_GBTLB, MEMKIND_FREE);
@@ -104,30 +77,6 @@ TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_Posix_Memalign_Regula
 TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize)
 {
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 2, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Malloc)
-{
-    tgen->generate_gb (MEMKIND_MALLOC, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Calloc)
-{
-    tgen->generate_gb (MEMKIND_CALLOC, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Realloc)
-{
-    tgen->generate_gb (MEMKIND_REALLOC, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Posix_Memalign)
-{
-    tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 2, MEMKIND_HBW_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
