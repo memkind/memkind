@@ -48,7 +48,6 @@ public:
     ~Check();
     int check_page_size(size_t page_size);
     int check_zero(void);
-    int check_data(int data);
     int check_align(size_t align);
 private:
     const void *ptr;

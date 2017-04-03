@@ -104,18 +104,6 @@ int Check::check_zero(void)
     return 0;
 }
 
-int Check::check_data(int data)
-{
-    int ret;
-    void *p;
-    p = malloc(size);
-    memset(p, data, size);
-    memset((void*)ptr, data, size);
-    ret = memcmp(p, ptr, size);
-    free(p);
-    return ret;
-}
-
 int Check::check_align(size_t align)
 {
     return (size_t)ptr % align;
