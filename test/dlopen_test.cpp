@@ -30,8 +30,13 @@ class DlopenTest: public :: testing::Test
 protected:
     DlopenTest()
     {
+        const char *path = "/usr/lib64/libmemkind.so";
+        if (!pathExists(path))
+        {
+            path = "/usr/lib/libmemkind.so";
+        }
         dlerror();
-        handle = dlopen("/usr/lib64/libmemkind.so", RTLD_LAZY);
+        handle = dlopen(path, RTLD_LAZY);
         assert((handle != NULL || dlerror() == NULL) && "Couldn't open libmemkind.so");
         memkind_malloc = (memkind_malloc_t)dlsym(handle, "memkind_malloc");
         assert(dlerror() == NULL && "Couldn't get memkind_malloc from memkind library");
@@ -57,6 +62,17 @@ protected:
 
         memkind_free((*kind_ptr), allocation_ptr);
     }
+
+    bool pathExists(const char *p)
+    {
+        struct stat info;
+        if (0 != stat(p, &info))
+        {
+            return false;
+        }
+        return true;
+    }
+
 private:
     void* handle;
     typedef void* (*memkind_malloc_t)(void*, size_t);
