@@ -56,7 +56,6 @@ autom4te.cache/
 /test/allocator_perf_tool_tests
 /test/autohbw_candidates
 /test/bat_bind_tests
-/test/bat_interleave_tests
 /test/decorator_test
 /test/eratosthenes
 /test/environerr_hbw_malloc_test

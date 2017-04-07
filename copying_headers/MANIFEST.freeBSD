@@ -59,7 +59,6 @@ test/Allocator.hpp
 test/TestPolicy.hpp
 test/bat_tests.cpp
 test/bat_bind_tests.cpp
-test/bat_interleave_tests.cpp
 test/check.cpp
 test/check.h
 test/check.sh
@@ -76,7 +75,6 @@ test/test.sh
 test/trial_generator.cpp
 test/trial_generator.h
 test/error_message_tests.cpp
-test/memkind_default_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmem_tests.cpp
 test/static_kinds_tests.cpp

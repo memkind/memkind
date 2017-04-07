@@ -85,14 +85,12 @@ test/check.h
 test/trial_generator.h
 test/bat_tests.cpp
 test/bat_bind_tests.cpp
-test/bat_interleave_tests.cpp
 test/main.cpp
 test/common.h
 test/static_kinds_list.h
 test/check.cpp
 test/extended_tests.cpp
 test/error_message_tests.cpp
-test/memkind_default_tests.cpp
 test/get_arena_test.cpp
 test/memkind_pmem_tests.cpp
 test/static_kinds_tests.cpp

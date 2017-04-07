@@ -33,7 +33,6 @@ check_PROGRAMS += test/all_tests \
                   test/gb_page_tests_bind_policy \
                   test/gb_page_tests_preferred_policy \
                   test/bat_bind_tests \
-                  test/bat_interleave_tests \
                   test/freeing_memory_segfault_test \
                   # end
 
@@ -66,7 +65,6 @@ test_autohbw_test_helper_LDADD = libmemkind.la
 test_gb_page_tests_bind_policy_LDADD = libmemkind.la
 test_gb_page_tests_preferred_policy_LDADD = libmemkind.la
 test_bat_bind_tests_LDADD = libmemkind.la
-test_bat_interleave_tests_LDADD = libmemkind.la
 test_trace_mechanism_test_helper_LDADD = libmemkind.la
 test_freeing_memory_segfault_test_LDADD = libmemkind.la
 
@@ -88,7 +86,6 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/extended_tests.cpp \
                          test/negative_tests.cpp \
                          test/error_message_tests.cpp \
-                         test/memkind_default_tests.cpp \
                          test/get_arena_test.cpp \
                          test/memkind_pmem_tests.cpp \
                          test/performance/operations.hpp \
@@ -109,7 +106,6 @@ test_autohbw_test_helper_SOURCES = test/autohbw_test_helper.c
 test_gb_page_tests_bind_policy_SOURCES = $(fused_gtest) test/gb_page_tests_bind_policy.cpp test/trial_generator.cpp test/check.cpp
 test_gb_page_tests_preferred_policy_SOURCES = $(fused_gtest) test/gb_page_tests_preferred_policy.cpp test/trial_generator.cpp test/check.cpp
 test_bat_bind_tests_SOURCES = $(fused_gtest) test/bat_bind_tests.cpp test/trial_generator.cpp test/check.cpp
-test_bat_interleave_tests_SOURCES = $(fused_gtest) test/bat_interleave_tests.cpp test/trial_generator.cpp test/check.cpp
 test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c
 test_freeing_memory_segfault_test_SOURCES = $(fused_gtest) test/freeing_memory_segfault_test.cpp
 
