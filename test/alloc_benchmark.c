@@ -28,6 +28,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <limits.h>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -75,7 +76,7 @@ int main(int argc, char * argv[])
         N = atol(argv[1]);
         SIZE = atol(argv[2]);
     }
-    if (argc != 3 || N < 0 || SIZE < 0) {
+    if (argc != 3 || N < 0 || SIZE < 0 || SIZE > (LONG_MAX >> 10)) {
         usage(argv[0]);
         return EXIT_FAILURE;
     }

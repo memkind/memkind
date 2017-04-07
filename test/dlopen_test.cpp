@@ -37,7 +37,7 @@ protected:
         }
         dlerror();
         handle = dlopen(path, RTLD_LAZY);
-        assert((handle != NULL || dlerror() == NULL) && "Couldn't open libmemkind.so");
+        assert((handle != NULL && dlerror() == NULL) && "Couldn't open libmemkind.so");
         memkind_malloc = (memkind_malloc_t)dlsym(handle, "memkind_malloc");
         assert(dlerror() == NULL && "Couldn't get memkind_malloc from memkind library");
         memkind_free = (memkind_free_t)dlsym(handle, "memkind_free");
