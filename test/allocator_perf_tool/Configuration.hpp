@@ -36,6 +36,7 @@ public:
 		STANDARD_ALLOCATOR,
 		JEMALLOC,
 		MEMKIND_DEFAULT,
+		MEMKIND_REGULAR,
 		MEMKIND_HBW,
 		MEMKIND_INTERLEAVE,
 		MEMKIND_HBW_INTERLEAVE,
@@ -57,6 +58,7 @@ public:
 			"STANDARD_ALLOCATOR",
 			"JEMALLOC",
 			"MEMKIND_DEFAULT",
+			"MEMKIND_REGULAR",
 			"MEMKIND_HBW",
 			"MEMKIND_INTERLEAVE",
 			"MEMKIND_HBW_INTERLEAVE",
@@ -134,6 +136,7 @@ public:
 // - "func_calls" - enabled or disabled function calls,
 // - "allocators_types" - enable allocators,
 // - "seed" - random seed.
+// - "touch_memory" - enable or disable touching memory
 class TaskConf
 {
 public:
@@ -142,5 +145,6 @@ public:
 	TypesConf func_calls;
 	TypesConf allocators_types;
 	unsigned seed;
+	bool touch_memory;
 	bool is_csv_log_enabled;
 };

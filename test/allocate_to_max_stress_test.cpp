@@ -40,7 +40,7 @@ protected:
     {}
 
     //Allocates memory up to 'memory_request_limit'.
-    void run(unsigned kind, unsigned operations, unsigned size_from, unsigned size_to, size_t memory_request_limit)
+    void run(unsigned kind, TypesConf func_calls, unsigned operations, size_t size_from, size_t size_to, size_t memory_request_limit, bool touch_memory)
     {
         RecordProperty("kind", AllocatorTypes::allocator_name(kind));
         RecordProperty("memory_operations", operations);
@@ -54,9 +54,10 @@ protected:
                 size_from, //no random sizes.
                 size_to
             },
-            .func_calls = TypesConf(FunctionCalls::MALLOC), //enable allocator function call
+            .func_calls = func_calls, //enable allocator function call
             .allocators_types = TypesConf(kind), //enable allocator
-            .seed = 11 //random seed
+            .seed = 11, //random seed
+            .touch_memory = touch_memory //enable or disable touching memory
         };
 
         std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -97,25 +98,41 @@ private:
 
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW)
 {
-    run(AllocatorTypes::MEMKIND_HBW, 1024, MB, MB, GB);
+    run(AllocatorTypes::MEMKIND_HBW, TypesConf(FunctionCalls::MALLOC), 1024, MB, MB, GB, true);
 }
 
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_INTERLEAVE)
 {
-    run(AllocatorTypes::MEMKIND_INTERLEAVE, 4096, MB, MB, 4*GB);
+    run(AllocatorTypes::MEMKIND_INTERLEAVE, TypesConf(FunctionCalls::MALLOC), 4096, MB, MB, 4*GB, true);
 }
 
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_PREFERRED)
 {
-    run(AllocatorTypes::MEMKIND_HBW_PREFERRED, 17408, MB, MB, 17*GB);
+    run(AllocatorTypes::MEMKIND_HBW_PREFERRED, TypesConf(FunctionCalls::MALLOC), 17408, MB, MB, 17*GB, true);
 }
 
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_2MBPages_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_HUGETLB)
 {
-    run(AllocatorTypes::MEMKIND_HBW_HUGETLB, 1024, 4*MB, 4*MB, GB);
+    run(AllocatorTypes::MEMKIND_HBW_HUGETLB, TypesConf(FunctionCalls::MALLOC), 1024, 4*MB, 4*MB, GB, true);
 }
 
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_DIFFERENT_SIZES)
 {
-    run(AllocatorTypes::MEMKIND_HBW, 2500, 1, 8*MB, GB);
+    run(AllocatorTypes::MEMKIND_HBW, TypesConf(FunctionCalls::MALLOC), 2500, 1, 8*MB, GB, true);
+}
+
+TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_AND_FREE_MEMKIND_DEFAULT)
+{
+    TypesConf func_calls;
+    func_calls.enable_type(FunctionCalls::MALLOC);
+    func_calls.enable_type(FunctionCalls::FREE);
+    run(AllocatorTypes::MEMKIND_DEFAULT, func_calls, 2500, 500*MB, 8*GB, 16*GB, false);
+}
+
+TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_AND_FREE_MEMKIND_REGULAR)
+{
+    TypesConf func_calls;
+    func_calls.enable_type(FunctionCalls::MALLOC);
+    func_calls.enable_type(FunctionCalls::FREE);
+    run(AllocatorTypes::MEMKIND_REGULAR, func_calls, 2500, 500*MB, 8*GB, 10*GB, false);
 }

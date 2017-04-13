@@ -55,6 +55,7 @@ public:
 	AllocatorFactory()
 	{
 		memkind_allocators[AllocatorTypes::MEMKIND_DEFAULT] = MemkindAllocatorWithTimer(MEMKIND_DEFAULT, AllocatorTypes::MEMKIND_DEFAULT);
+		memkind_allocators[AllocatorTypes::MEMKIND_REGULAR] = MemkindAllocatorWithTimer(MEMKIND_REGULAR, AllocatorTypes::MEMKIND_REGULAR);
 		memkind_allocators[AllocatorTypes::MEMKIND_HBW] = MemkindAllocatorWithTimer(MEMKIND_HBW, AllocatorTypes::MEMKIND_HBW);
 		memkind_allocators[AllocatorTypes::MEMKIND_INTERLEAVE] = MemkindAllocatorWithTimer(MEMKIND_INTERLEAVE, AllocatorTypes::MEMKIND_INTERLEAVE);
 		memkind_allocators[AllocatorTypes::MEMKIND_HBW_INTERLEAVE] = MemkindAllocatorWithTimer(MEMKIND_HBW_INTERLEAVE, AllocatorTypes::MEMKIND_HBW_INTERLEAVE);

@@ -49,7 +49,7 @@ void StressIncreaseToMax::run()
 		&func_calls
 	);
 
-	scenario_workload.enable_touch_memory_on_allocation(true);
+	scenario_workload.enable_touch_memory_on_allocation(task_conf.touch_memory);
 
 	test_status.is_allocation_error = false;
 
