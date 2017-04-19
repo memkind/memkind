@@ -1,6 +1,8 @@
 MEMKIND
 =======
 
+[![Build Status](https://travis-ci.org/memkind/memkind.svg)](https://travis-ci.org/memkind/memkind)
+[![MEMKIND version](https://img.shields.io/github/tag/memkind/memkind.svg)](https://github.com/memkind/memkind/releases/latest)
 
 DISCLAIMER
 ----------
