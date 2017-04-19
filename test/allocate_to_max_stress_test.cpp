@@ -91,9 +91,6 @@ protected:
 
         return 0;
     }
-
-private:
-    HugePageOrganizer huge_page_organizer = HugePageOrganizer(4500);
 };
 
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW)
@@ -113,6 +110,7 @@ TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HB
 
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_2MBPages_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_HUGETLB)
 {
+    HugePageOrganizer huge_page_organizer = HugePageOrganizer(4500);
     run(AllocatorTypes::MEMKIND_HBW_HUGETLB, TypesConf(FunctionCalls::MALLOC), 1024, 4*MB, 4*MB, GB, true);
 }
 
@@ -134,5 +132,5 @@ TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_AND_FREE_M
     TypesConf func_calls;
     func_calls.enable_type(FunctionCalls::MALLOC);
     func_calls.enable_type(FunctionCalls::FREE);
-    run(AllocatorTypes::MEMKIND_REGULAR, func_calls, 2500, 500*MB, 8*GB, 10*GB, false);
+    run(AllocatorTypes::MEMKIND_REGULAR, func_calls, 2500, 500*MB, 8*GB, 16*GB, false);
 }
