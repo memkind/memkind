@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2014-2016 Intel Corporation.
+#  Copyright (C) 2014-2017 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,13 @@ set -e
 # describe or if not in a git repo just set VERSION to 0.0.0.
 if [ ! -f VERSION ]; then
     if [ -f .git/config ]; then
-        sha=$(git describe --long | awk -F- '{print $(NF)}')
+        sha=$(git describe --long --always | awk -F- '{print $(NF)}')
         release=$(git describe --long | awk -F- '{print $(NF-1)}')
         version=$(git describe --long | sed -e "s|\(.*\)-$release-$sha|\1|" -e "s|-|+|g" -e "s|^v||")
-        if [ ${release} != "0" ]; then
-            version=${version}+dev${release}${sha}
+        if [ "$release" == "" ]; then
+            version=${sha}
+        else
+            version=${version}+dev${release}-${sha}
         fi
     else
         echo "WARNING:  VERSION file does not exist and working directory is not a git repository, setting verison to 0.0.0" 2>&1
