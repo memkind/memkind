@@ -167,8 +167,8 @@ int main(int argc, char* argv[])
 	printf("\nTest configuration: \n");
 	printf("\t memory operations per thread = %u \n", mem_operations_num);
 	printf("\t seed = %d\n", seed);
-	printf("\t number of threads = %u\n", threads_number);
-	printf("\t size from-to = %u-%u\n\n", size_from, size_to);
+	printf("\t number of threads = %zu\n", threads_number);
+	printf("\t size from-to = %zu-%zu\n\n", size_from, size_to);
 
 	assert(size_from <= size_to);
 #ifdef PRINT_LOG
