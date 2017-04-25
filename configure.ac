@@ -34,11 +34,14 @@ AC_CONFIG_SRCDIR([memkind.spec.mk])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign 1.11 silent-rules subdir-objects parallel-tests tar-pax])
 AM_SILENT_RULES([yes])
 
-# Checks for programs.
+# Checks for programs and libraries.
 AM_PROG_AR
 AC_PROG_CXX
 AC_PROG_CC
 AC_OPENMP
+AC_CHECK_LIB(numa, numa_available, [], [AC_MSG_ERROR([libnuma is required dependency])])
+AX_PTHREAD([LIBS="$PTHREAD_LIBS $LIBS" CFLAGS="$CFLAGS $PTHREAD_CFLAGS" CC="$PTHREAD_CC"],
+           [AC_MSG_ERROR([pthreads are required dependency])])
 
 AM_PROG_CC_C_O
 
@@ -170,18 +173,6 @@ AM_CONDITIONAL([HAVE_CXX11], [test "x$HAVE_CXX11" = x1])
 
 LT_PREREQ([2.2])
 LT_INIT
-
-if test "x$OPENMP_CFLAGS" = "x" ; then
-  echo "WARNING: Could not locate OpenMP support. This warning can also occur if compiler already supports OpenMP"
-fi
-
-AC_CHECK_HEADER([omp.h], [], [
-    echo "omp.h is required for this library"
-    exit -1])
-
-AC_CHECK_HEADER([numa.h], [], [
-    echo "numa.h is required for this library"
-    exit -1])
 
 AC_CONFIG_FILES([Makefile])
 
