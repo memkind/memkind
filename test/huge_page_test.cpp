@@ -38,26 +38,7 @@
 */
 class  HugePageTest: public :: testing::Test
 {
-private:
-    int initial_nr_hugepages;
-
 protected:
-    void SetUp()
-    {
-        // Get initial value of nr_hugepages
-        initial_nr_hugepages = HugePageOrganizer::get_nr_hugepages();
-        // Set number of Huge Pages to allocate
-        // System command returned -1 on error
-        ASSERT_NE(HugePageOrganizer::set_nr_hugepages(2048), -1);
-    }
-
-    void TearDown()
-    {
-        // Set number of Huge Pages to previous value
-        // System command returned -1 on error
-        ASSERT_NE(HugePageOrganizer::set_nr_hugepages(initial_nr_hugepages), -1);
-    }
-
     void run()
     {
         unsigned mem_operations_num = 10;
@@ -101,8 +82,8 @@ protected:
 
 
 // Test passes when there is no crash.
-TEST_F(HugePageTest, test_TC_MEMKIND_UNMAP_HUGE_PAGE)
+TEST_F(HugePageTest, test_TC_MEMKIND_ext_UNMAP_HUGE_PAGE)
 {
-    ASSERT_HUGEPAGES_AVAILABILITY();
+    HugePageOrganizer huge_page_organizer(1024);
     run();
 }

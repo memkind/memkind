@@ -45,7 +45,7 @@ class BATest: public TGTest
 class BATestHuge: public BATest
 {
 private:
-    HugePageOrganizer huge_page_organizer = HugePageOrganizer(4500);
+    HugePageOrganizer huge_page_organizer = HugePageOrganizer(8);
 };
 
 class BasicAllocTest
@@ -500,8 +500,9 @@ TEST_F(BATest, test_TC_MEMKIND_free_MEMKIND_DEFAULT_free_with_NULL_kind_4096_byt
     memkind_free(0, ptr);
 }
 
-TEST_F(BATestHuge, test_TC_MEMKIND_free_MEMKIND_GBTLB_4096_bytes)
+TEST_F(BATestHuge, test_TC_MEMKIND_free_ext_MEMKIND_GBTLB_4096_bytes)
 {
+    HugePageOrganizer huge_page_organizer(260);
     MemkindAllocator memkind_allocator(MEMKIND_GBTLB);
     BasicAllocTest(&memkind_allocator).free(4096);
 }

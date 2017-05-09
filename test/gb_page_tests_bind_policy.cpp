@@ -61,15 +61,15 @@ protected:
     }
 
 private:
-    HugePageOrganizer huge_page_organizer = HugePageOrganizer(4500);
+    HugePageOrganizer huge_page_organizer = HugePageOrganizer(2250);
 };
 
-TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_HBW_Misalign_Preferred_Bind_Strict)
+TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Misalign_Preferred_Bind_Strict_1GB)
 {
     run(1, 2*GB, true);
 }
 
-TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_HBW_Memalign_Psize_Bind)
+TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bind_1GB)
 {
     run(1, GB, true);
 }
@@ -78,12 +78,12 @@ TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_HBW_Memalign_Psize_Bind)
  * Below tests allocate GB pages incrementally.
 */
 
-TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bind)
+TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bind_2GB)
 {
     run(2, GB, false);
 }
 
-TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Strict_Bind)
+TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Strict_Bind_3GB)
 {
     run(3, GB, true);
 }

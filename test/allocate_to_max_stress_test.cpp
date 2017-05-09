@@ -107,9 +107,9 @@ TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HB
     run(TypesConf(AllocatorTypes::MEMKIND_HBW_PREFERRED), TypesConf(FunctionCalls::MALLOC), 17408, MB, MB, 17*GB, true);
 }
 
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_2MBPages_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_HUGETLB)
+TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_2MBPages_slts_ext_ALLOCATE_TO_MAX_MEMKIND_HBW_HUGETLB)
 {
-    HugePageOrganizer huge_page_organizer = HugePageOrganizer(4500);
+    HugePageOrganizer huge_page_organizer(2250);
     run(TypesConf(AllocatorTypes::MEMKIND_HBW_HUGETLB), TypesConf(FunctionCalls::MALLOC), 1024, 4*MB, 4*MB, GB, true);
 }
 
@@ -148,7 +148,7 @@ TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_DIFFERENT_
 
 TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ext_ALLOCATE_TO_MAX_DIFFERENT_KINDS_WITH_HUGETLB)
 {
-    HugePageOrganizer huge_page_organizer = HugePageOrganizer(4500);
+    HugePageOrganizer huge_page_organizer(2250);
     TypesConf kinds;
     kinds.enable_type(AllocatorTypes::MEMKIND_HBW);
     kinds.enable_type(AllocatorTypes::MEMKIND_HBW_HUGETLB);

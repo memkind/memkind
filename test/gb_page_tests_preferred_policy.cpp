@@ -31,40 +31,40 @@
 class GBPagesTestPreferredPolicy : public TGTest
 {
 private:
-    HugePageOrganizer huge_page_organizer = HugePageOrganizer(4500);
+    HugePageOrganizer huge_page_organizer = HugePageOrganizer(2250);
 };
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_HBW_Misalign_Preferred_Strict)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Misalign_Preferred_Strict_1GB)
 {
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true, 2147483648);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_HBW_Memalign_Psize_Preferred_Strict)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Preferred_Strict_1GB)
 {
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 1, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_Malloc_Regular)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Malloc_Regular_1GB)
 {
     tgen->generate_gb (MEMKIND_MALLOC, 1, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_Calloc_Regular)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Calloc_Regular_1GB)
 {
     tgen->generate_gb (MEMKIND_CALLOC, 1, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_Realloc_Regular)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Realloc_Regular_1GB)
 {
     tgen->generate_gb (MEMKIND_REALLOC, 1, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_Posix_Memalign_Regular)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Posix_Memalign_Regular_1GB)
 {
     tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 1, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
@@ -74,37 +74,37 @@ TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_Posix_Memalign_Regula
  * Below tests allocate GB pages incrementally.
 */
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_2GB)
 {
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 2, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Strict)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Strict_3GB)
 {
     tgen->generate_gb (HBW_MEMALIGN_PSIZE, 3, MEMKIND_HBW_PREFERRED_GBTLB, HBW_FREE, true);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Malloc_Regular)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Malloc_Regular_2GB)
 {
     tgen->generate_gb (MEMKIND_MALLOC, 2, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Calloc_Regular)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Calloc_Regular_2GB)
 {
     tgen->generate_gb (MEMKIND_CALLOC, 2, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Realloc_Regular)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Realloc_Regular_2GB)
 {
     tgen->generate_gb (MEMKIND_REALLOC, 2, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Posix_Memalign_Regular)
+TEST_F(GBPagesTestPreferredPolicy, test_TC_MEMKIND_GBPages_ext_Posix_Memalign_Regular_2GB)
 {
     tgen->generate_gb (MEMKIND_POSIX_MEMALIGN, 2, MEMKIND_GBTLB, MEMKIND_FREE);
     tgen->run(num_bandwidth, bandwidth);

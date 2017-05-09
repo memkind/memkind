@@ -40,7 +40,7 @@
 class BABindTest : public TGTest
 {
 private:
-    HugePageOrganizer huge_page_organizer = HugePageOrganizer(32);
+    HugePageOrganizer huge_page_organizer = HugePageOrganizer(16);
 };
 
 

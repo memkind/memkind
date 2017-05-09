@@ -22,54 +22,70 @@
 * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#pragma once
+
 #include <fstream>
 #include <string.h>
-#include <assert.h>
+#include <numa.h>
+#include <vector>
+#include <iostream>
+#include <stdexcept>
 
-#define ASSERT_HUGEPAGES_AVAILABILITY() ASSERT_TRUE(HugePageOrganizer::get_nr_hugepages() > 0) << "No hugepages (2MB pages) found.";
+/*
+ * HugePageOrganizer sets hugepages per NUMA node and restore initial setup of hugepages.
+ * It writes and reads from the same file, so using HugePageOrganizer with parallel execution may cause undefined behaviour.
+ */
 
 class HugePageOrganizer
 {
 public:
-    HugePageOrganizer(int nr_hugepages)
+    HugePageOrganizer(int nr_hugepages_per_node)
     {
-        initial_nr_hugepages = get_nr_hugepages();
-        int ret = set_nr_hugepages(0);
-        assert(ret == 0);
-        ret = set_nr_hugepages(nr_hugepages);
-        int current_nr_hugepages = get_nr_hugepages();
-        if(ret != 0 || current_nr_hugepages != nr_hugepages) {
-             set_nr_hugepages(initial_nr_hugepages);
-             assert(!"Cannot set requested amount of huge pages!");
+        for (int node_id = 0; node_id < numa_num_configured_nodes(); node_id++) {
+            initial_nr_hugepages_per_nodes.push_back(get_nr_hugepages(node_id));
+            if (set_nr_hugepages(nr_hugepages_per_node, node_id)) {
+                restore();
+                throw std::runtime_error("Error: Could not set the requested amount of huge pages.");
+            }
         }
-        assert(ret == 0);
     }
 
     ~HugePageOrganizer()
     {
-        int ret = set_nr_hugepages(initial_nr_hugepages);
-        assert(ret == 0);
+        restore();
     }
+private:
+    std::vector<int> initial_nr_hugepages_per_nodes;
 
-    static int get_nr_hugepages()
+    int get_nr_hugepages(int node_number)
     {
         std::string line;
-        std::ifstream file("/sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages");
-        if (!file.is_open()) {
+        char path[128];
+        sprintf(path, "/sys/devices/system/node/node%d/hugepages/hugepages-2048kB/nr_hugepages", node_number);
+        std::ifstream file(path);
+        if (!file) {
             return -1;
         }
         std::getline(file, line);
         return strtol(line.c_str(), 0, 10);
     }
 
-    static int set_nr_hugepages(int nr_hugepages)
+    int set_nr_hugepages(int nr_hugepages, int node_number)
     {
         char cmd[128];
-        sprintf(cmd, "sudo sysctl vm.nr_hugepages=%d", nr_hugepages);
-        return system(cmd);
+        sprintf(cmd, "sudo sh -c \"echo %d > \
+            /sys/devices/system/node/node%d/hugepages/hugepages-2048kB/nr_hugepages\"",
+            nr_hugepages, node_number);
+        if (system(cmd) || (get_nr_hugepages(node_number) != nr_hugepages)) {
+            return -1;
+        }
+        return 0;
     }
 
-private:
-    int initial_nr_hugepages;
+    void restore()
+    {
+        for(size_t node_id = 0; node_id < initial_nr_hugepages_per_nodes.size(); node_id++) {
+            set_nr_hugepages(initial_nr_hugepages_per_nodes[node_id], node_id);
+        }
+    }
 };
-
