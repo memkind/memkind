@@ -692,18 +692,6 @@ TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_2MBPages_Pref_MemalignPsizeIncremen
     tgen->run(num_bandwidth, bandwidth);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_HBW_Pref_MallocRecycle)
-{
-    tgen->generate_recycle_incremental(MEMKIND_MALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_2MBPages_HBW_Pref_MallocRecyclePsize)
-{
-    tgen->generate_recycle_psize_incremental(MEMKIND_MALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
 /* MEMKIND REGULAR */
 #include <memkind/internal/memkind_regular.h>
 

@@ -58,38 +58,6 @@ void TrialGenerator :: generate_incremental(alloc_api_t api)
     }
 }
 
-
-void TrialGenerator :: generate_recycle_incremental(alloc_api_t api)
-{
-
-    size_t size[] = {2*MB, 1*GB};
-    int k = 0;
-    trial_vec.clear();
-    for (int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
-                                               MEMKIND_DEFAULT,-1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
-                                               MEMKIND_DEFAULT, k++));
-
-        trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
-                                               MEMKIND_HBW,-1));
-        k++;
-        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
-                                               MEMKIND_HBW, k++));
-
-        trial_vec.push_back(create_trial_tuple(api, size[i], 0, 0,
-                                               MEMKIND_HBW_PREFERRED,-1));
-        k++;
-        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE,0,0,0,
-                                               MEMKIND_HBW_PREFERRED, k++));
-
-    }
-
-}
-
 trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
         size_t size,
         size_t alignment,
@@ -138,87 +106,6 @@ void TrialGenerator :: generate_gb (alloc_api_t api, int number_of_gb_pages, mem
 int n_random(int i)
 {
     return random() % i;
-}
-
-void TrialGenerator :: generate_recycle_psize_2GB(alloc_api_t api)
-{
-    ASSERT_HUGEPAGES_AVAILABILITY();
-    trial_vec.clear();
-    trial_vec.push_back(create_trial_tuple(api, 2*GB, 32, 4096,
-                                           MEMKIND_HBW,-1));
-    trial_vec.push_back(create_trial_tuple(MEMKIND_FREE, 0, 0, 0,
-                                           MEMKIND_HBW, 0));
-    trial_vec.push_back(create_trial_tuple(api, 2*GB, 32, 2097152,
-                                           MEMKIND_HBW_HUGETLB,-1));
-    trial_vec.push_back(create_trial_tuple(MEMKIND_FREE, 0, 0, 2097152,
-                                           MEMKIND_HBW_HUGETLB, 2));
-
-}
-
-void TrialGenerator :: generate_recycle_psize_incremental(alloc_api_t api)
-{
-    ASSERT_HUGEPAGES_AVAILABILITY();
-    size_t size[] = {2*KB, 2*MB};
-
-    int k = 0;
-    trial_vec.clear();
-    for (int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i], 32, 4096,
-                                               MEMKIND_HBW,-1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE, 0, 0, 0,
-                                               MEMKIND_HBW, k++));
-
-        trial_vec.push_back(create_trial_tuple(api, size[i], 32, 2097152,
-                                               MEMKIND_HBW_PREFERRED_HUGETLB,-1));
-        k++;
-        trial_vec.push_back(create_trial_tuple(MEMKIND_FREE, 0, 0, 0,
-                                               MEMKIND_HBW_PREFERRED_HUGETLB, k++));
-    }
-}
-
-
-
-void TrialGenerator :: generate_size_1KB_2GB(alloc_api_t api)
-{
-
-    size_t size[] = {KB, 2*KB, 4*KB, 16*KB, 256*KB,
-                     512*KB, MB, 2*MB, 4*MB, 16*MB,
-                     256*MB, 512*MB, GB, 2*GB
-                    };
-
-    int k = 0;
-    trial_vec.clear();
-    for (unsigned int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api,size[i],32,
-                                               4096, MEMKIND_HBW,
-                                               -1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(HBW_FREE, 0, 0, 0,
-                                               MEMKIND_HBW, k));
-        k++;
-    }
-}
-
-void TrialGenerator :: generate_interleave(alloc_api_t api)
-{
-    size_t size[] = {4*KB, 2*MB, 2*GB};
-    size_t psize = 4096;
-    int k = 0;
-    trial_vec.clear();
-    for (size_t i = 0; i < (sizeof(size)/sizeof(size[0])); i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i],0, psize,
-                                               MEMKIND_HBW_INTERLEAVE,-1));
-
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
-                                               MEMKIND_HBW_INTERLEAVE, k++));
-    }
 }
 
 void TrialGenerator :: generate_size_2bytes_2KB_2MB(alloc_api_t api)
