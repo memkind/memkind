@@ -104,10 +104,12 @@ namespace TestPolicy
 
         for (size_t page_num = 0; page_num < address.size(); page_num++) {
             ASSERT_EQ(0, get_mempolicy(&status, returned_bitmask->maskp, returned_bitmask->size, address[page_num], MPOL_F_ADDR));
-            EXPECT_EQ(policy, status);
+            ASSERT_EQ(policy, status);
             switch(policy) {
                 case MPOL_INTERLEAVE:
                     EXPECT_TRUE(numa_bitmask_equal(expected_bitmask.get(), returned_bitmask.get()));
+                    break;
+                case MPOL_DEFAULT:
                     break;
                 case MPOL_BIND:
                 case MPOL_PREFERRED:
@@ -133,7 +135,7 @@ namespace TestPolicy
 
     void check_all_numa_nodes(int policy, void* ptr, size_t size)
     {
-        if (policy != MPOL_INTERLEAVE) return;
+        if (policy != MPOL_INTERLEAVE && policy != MPOL_DEFAULT) return;
 
         unique_bitmask_ptr expected_bitmask = make_nodemask_ptr();
 

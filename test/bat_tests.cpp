@@ -58,12 +58,12 @@ public:
     {
         int policy = allocator->get_numa_policy();
 
-        if(policy != -1) {
-            if (allocator->is_high_bandwidth()) {
-                TestPolicy::check_hbw_numa_nodes(policy, ptr, size);
-            } else {
-                TestPolicy::check_all_numa_nodes(policy, ptr, size);
-            }
+        EXPECT_NE(-1, policy);
+
+        if (allocator->is_high_bandwidth()) {
+            TestPolicy::check_hbw_numa_nodes(policy, ptr, size);
+        } else {
+            TestPolicy::check_all_numa_nodes(policy, ptr, size);
         }
     }
 
