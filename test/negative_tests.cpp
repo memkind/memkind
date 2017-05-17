@@ -196,28 +196,6 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_INTERLEAVE_ALL
     ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
 }
 
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_HIGH_BANDWIDTH_BIND_ALL)
-{
-    memkind_t kind;
-    int ret = memkind_create_kind(
-        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
-        MEMKIND_POLICY_BIND_ALL,
-        memkind_bits_t(),
-        &kind);
-    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
-}
-
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_HIGH_BANDWIDTH_BIND_ALL_PAGE_SIZE_2MB)
-{
-    memkind_t kind;
-    int ret = memkind_create_kind(
-        MEMKIND_MEMTYPE_HIGH_BANDWIDTH,
-        MEMKIND_POLICY_BIND_ALL,
-        MEMKIND_MASK_PAGE_SIZE_2MB,
-        &kind);
-    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
-}
-
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_HIGH_BANDWIDTH_INTERLEAVE_LOCAL)
 {
     memkind_t kind;

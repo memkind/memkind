@@ -50,13 +50,17 @@ int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
                                        unsigned long *nodemask,
                                        unsigned long maxnode);
 void memkind_hbw_init_once(void);
+void memkind_hbw_all_init_once(void);
 void memkind_hbw_hugetlb_init_once(void);
+void memkind_hbw_all_hugetlb_init_once(void);
 void memkind_hbw_preferred_init_once(void);
 void memkind_hbw_preferred_hugetlb_init_once(void);
 void memkind_hbw_interleave_init_once(void);
 
 extern struct memkind_ops MEMKIND_HBW_OPS;
+extern struct memkind_ops MEMKIND_HBW_ALL_OPS;
 extern struct memkind_ops MEMKIND_HBW_HUGETLB_OPS;
+extern struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS;
 extern struct memkind_ops MEMKIND_HBW_PREFERRED_OPS;
 extern struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS;
 extern struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS;

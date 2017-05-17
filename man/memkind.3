@@ -608,10 +608,23 @@ of allocation. If there is not enough high bandwidth memory to satisfy the reque
 .I errno
 is set to ENOMEM and the allocated pointer is set to NULL.
 .TP
+.B MEMKIND_HBW_ALL
+Same as
+.B MEMKIND_HBW
+except decision regarding closest NUMA node is postponed until the time of first write.
+.TP
 .B MEMKIND_HBW_HUGETLB
 Same as
 .B MEMKIND_HBW
 except the allocation is backed by huge pages. Note: This kind requires
+huge pages configuration described in SYSTEM CONFIGURATION section.
+.TP
+.B MEMKIND_HBW_ALL_HUGETLB
+Combination of
+.B MEMKIND_HBW_ALL
+and
+.B MEMKIND_HBW_HUGETLB
+properties. Note: This kind requires
 huge pages configuration described in SYSTEM CONFIGURATION section.
 .TP
 .B MEMKIND_HBW_PREFERRED

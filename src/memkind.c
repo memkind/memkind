@@ -91,6 +91,13 @@ static struct memkind MEMKIND_HBW_STATIC = {
     .init_once = PTHREAD_ONCE_INIT,
 };
 
+static struct memkind MEMKIND_HBW_ALL_STATIC = {
+    .ops = &MEMKIND_HBW_ALL_OPS,
+    .partition = MEMKIND_PARTITION_HBW_ALL,
+    .name = "memkind_hbw_all",
+    .init_once = PTHREAD_ONCE_INIT,
+};
+
 static struct memkind MEMKIND_HBW_PREFERRED_STATIC = {
     .ops = &MEMKIND_HBW_PREFERRED_OPS,
     .partition = MEMKIND_PARTITION_HBW_PREFERRED,
@@ -102,6 +109,13 @@ static struct memkind MEMKIND_HBW_HUGETLB_STATIC = {
     .ops = &MEMKIND_HBW_HUGETLB_OPS,
     .partition = MEMKIND_PARTITION_HBW_HUGETLB,
     .name = "memkind_hbw_hugetlb",
+    .init_once = PTHREAD_ONCE_INIT,
+};
+
+static struct memkind MEMKIND_HBW_ALL_HUGETLB_STATIC = {
+    .ops = &MEMKIND_HBW_ALL_HUGETLB_OPS,
+    .partition = MEMKIND_PARTITION_HBW_ALL_HUGETLB,
+    .name = "memkind_hbw_all_hugetlb",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
@@ -151,8 +165,10 @@ MEMKIND_EXPORT struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HUGETLB = &MEMKIND_HUGETLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_INTERLEAVE = &MEMKIND_INTERLEAVE_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW = &MEMKIND_HBW_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_ALL = &MEMKIND_HBW_ALL_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED = &MEMKIND_HBW_PREFERRED_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_HUGETLB = &MEMKIND_HBW_HUGETLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_ALL_HUGETLB = &MEMKIND_HBW_ALL_HUGETLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED_HUGETLB = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_GBTLB = &MEMKIND_HBW_GBTLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED_GBTLB = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC;
@@ -180,6 +196,8 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_HBW_INTERLEAVE] = &MEMKIND_HBW_INTERLEAVE_STATIC,
         [MEMKIND_PARTITION_INTERLEAVE] = &MEMKIND_INTERLEAVE_STATIC,
         [MEMKIND_PARTITION_REGULAR] = &MEMKIND_REGULAR_STATIC,
+        [MEMKIND_PARTITION_HBW_ALL] = &MEMKIND_HBW_ALL_STATIC,
+        [MEMKIND_PARTITION_HBW_ALL_HUGETLB] = &MEMKIND_HBW_ALL_HUGETLB_STATIC,
     },
     MEMKIND_NUM_BASE_KIND,
     PTHREAD_MUTEX_INITIALIZER
@@ -262,6 +280,13 @@ MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
                 tmp_kind = MEMKIND_HBW_HUGETLB;
             else
                 tmp_kind = MEMKIND_HBW;
+        }
+
+        if(policy == MEMKIND_POLICY_BIND_ALL) {
+            if(flags & MEMKIND_MASK_PAGE_SIZE_2MB)
+                tmp_kind = MEMKIND_HBW_ALL_HUGETLB;
+            else
+                tmp_kind = MEMKIND_HBW_ALL;
         }
 
         if(policy == MEMKIND_POLICY_PREFERRED_LOCAL) {
