@@ -56,14 +56,7 @@ public:
 
     void check_policy_and_numa_node(void* ptr, size_t size)
     {
-        int policy = -1;
-        if (allocator->is_interleave()) {
-            policy = MPOL_INTERLEAVE;
-        } else if (allocator->is_bind()) {
-            policy = MPOL_BIND;
-        } else if (allocator->is_preferred()) {
-            policy = MPOL_PREFERRED;
-        }
+        int policy = allocator->get_numa_policy();
 
         if(policy != -1) {
             if (allocator->is_high_bandwidth()) {
@@ -779,6 +772,48 @@ TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Interleave_Policy_4194305_byte
     BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
 }
 
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Preferred_Policy_Pagesize_2MB_4096_bytes_)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
+    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Preferred_Policy_Pagesize_2MB_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
+    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_Policy_Pagesize_2MB_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_Policy_Pagesize_2MB_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_All_Policy_Pagesize_2MB_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
+    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_All_Policy_Pagesize_2MB_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
+    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
+}
+
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_CheckAvailable)
 {
     ASSERT_EQ(0, hbw_check_available());
@@ -788,37 +823,6 @@ TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_Policy)
 {
     hbw_set_policy(HBW_POLICY_PREFERRED);
     EXPECT_EQ(HBW_POLICY_PREFERRED, hbw_get_policy());
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_MallocIncremental)
-{
-    tgen->generate_incremental(HBW_MALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_CallocIncremental)
-{
-    tgen->generate_incremental(HBW_CALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_ReallocIncremental)
-{
-    tgen->generate_incremental(HBW_REALLOC);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_MemalignIncremental)
-{
-    tgen->generate_incremental(HBW_MEMALIGN);
-    tgen->run(num_bandwidth, bandwidth);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_2MBPages_Pref_MemalignPsizeIncremental)
-{
-    tgen->generate_incremental(HBW_MEMALIGN_PSIZE);
-    tgen->run(num_bandwidth, bandwidth);
 }
 
 /* MEMKIND REGULAR */

@@ -58,14 +58,12 @@ test/Makefile.mk
 test/Allocator.hpp
 test/TestPolicy.hpp
 test/bat_tests.cpp
-test/bat_bind_tests.cpp
 test/check.cpp
 test/check.h
 test/check.sh
 test/common.h
 test/static_kinds_list.h
 test/environ_err_hbw_malloc_test.cpp
-test/extended_tests.cpp
 test/gb_page_tests_bind_policy.cpp
 test/main.cpp
 test/multithreaded_tests.cpp

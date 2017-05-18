@@ -35,9 +35,10 @@ public:
     virtual void* realloc(void* ptr, size_t size) = 0;
     virtual int memalign(void** ptr, size_t alignment, size_t size) = 0;
     virtual void free(void* ptr) = 0;
-    virtual bool is_interleave() = 0;
-    virtual bool is_preferred() = 0;
-    virtual bool is_bind() = 0;
+
+    /* get_numa_policy() returns MPOL_INTERLEAVE, MPOL_BIND, MPOL_PREFERRED
+     or -1 when the allocator is not providing NUMA policy */
+    virtual int get_numa_policy() = 0;
     virtual bool is_high_bandwidth() = 0;
     virtual size_t get_page_size() = 0;
 
@@ -88,24 +89,23 @@ public:
         memkind_free(kind, ptr);
     }
 
-    virtual bool is_interleave()
+    virtual int get_numa_policy()
     {
-        return policy == MEMKIND_POLICY_INTERLEAVE_ALL || kind == MEMKIND_HBW_INTERLEAVE || kind == MEMKIND_INTERLEAVE;
-    }
-
-    virtual bool is_preferred()
-    {
-        return (policy == MEMKIND_POLICY_PREFERRED_LOCAL && memtype != MEMKIND_MEMTYPE_DEFAULT) ||
+        if (policy == MEMKIND_POLICY_INTERLEAVE_ALL || kind == MEMKIND_HBW_INTERLEAVE || kind == MEMKIND_INTERLEAVE) {
+            return MPOL_INTERLEAVE;
+        }
+        else if ((policy == MEMKIND_POLICY_PREFERRED_LOCAL && memtype != MEMKIND_MEMTYPE_DEFAULT) ||
                 kind == MEMKIND_HBW_PREFERRED ||
-                kind == MEMKIND_HBW_PREFERRED_HUGETLB;
-    }
-
-    virtual bool is_bind()
-    {
-        return policy == MEMKIND_POLICY_BIND_LOCAL ||
+                kind == MEMKIND_HBW_PREFERRED_HUGETLB) {
+            return MPOL_PREFERRED;
+        }
+        else if (policy == MEMKIND_POLICY_BIND_LOCAL ||
                kind == MEMKIND_HBW ||
                kind == MEMKIND_HBW_HUGETLB ||
-               kind == MEMKIND_REGULAR;
+               kind == MEMKIND_REGULAR) {
+            return MPOL_BIND;
+        }
+        return -1;
     }
 
     virtual bool is_high_bandwidth()
@@ -166,9 +166,19 @@ public:
         return hbw_realloc(ptr, size);
     }
 
+    virtual void set_memalign_page_size(hbw_pagesize_t psize)
+    {
+        page_size = psize;
+    }
+
     virtual int memalign(void** ptr, size_t alignment, size_t size)
     {
-        return hbw_posix_memalign(ptr, alignment, size);
+        if (page_size == HBW_PAGESIZE_4KB) {
+            return hbw_posix_memalign(ptr, alignment, size);
+        }
+        else {
+            return hbw_posix_memalign_psize(ptr, alignment, size, page_size);
+        }
     }
 
     virtual void free(void* ptr)
@@ -176,19 +186,19 @@ public:
         hbw_free(ptr);
     }
 
-    virtual bool is_interleave()
+    virtual int get_numa_policy()
     {
-        return hbw_get_policy() == HBW_POLICY_INTERLEAVE;
-    }
-
-    virtual bool is_preferred()
-    {
-        return hbw_get_policy() == HBW_POLICY_PREFERRED;
-    }
-
-    virtual bool is_bind()
-    {
-        return hbw_get_policy() == HBW_POLICY_BIND;
+        if (hbw_get_policy() == HBW_POLICY_INTERLEAVE) {
+            return MPOL_INTERLEAVE;
+        }
+        else if (hbw_get_policy() == HBW_POLICY_PREFERRED) {
+            return MPOL_PREFERRED;
+        }
+        else if (hbw_get_policy() == HBW_POLICY_BIND ||
+                hbw_get_policy() == HBW_POLICY_BIND_ALL) {
+            return MPOL_BIND;
+        }
+        return -1;
     }
 
     virtual bool is_high_bandwidth()
@@ -198,8 +208,13 @@ public:
 
     virtual size_t get_page_size()
     {
-        return sysconf(_SC_PAGESIZE);
+        if (page_size == HBW_PAGESIZE_2MB) {
+            return 2*MB;
+        }
+        return 4*KB;
     }
 
+private:
+    hbw_pagesize_t page_size = HBW_PAGESIZE_4KB;
 };
 

@@ -31,33 +31,6 @@
 #include <numa.h>
 #include <numaif.h>
 
-void TrialGenerator :: generate_incremental(alloc_api_t api)
-{
-
-    size_t size[] = {2, 2*KB, 2*MB};
-    size_t psize[] = {4096, 4096, 2097152};
-    size_t align[] = {8, 128, 4*KB};
-    int k = 0;
-    trial_vec.clear();
-    for (int i = 0; i< (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(create_trial_tuple(api, size[i],
-                                               align[i], psize[i],
-                                               MEMKIND_HBW,-1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
-                                               MEMKIND_HBW, k++));
-
-        trial_vec.push_back(create_trial_tuple(api, size[i],
-                                               align[i], psize[i],
-                                               MEMKIND_HBW_PREFERRED,-1));
-        k++;
-        trial_vec.push_back(create_trial_tuple(HBW_FREE,0,0,0,
-                                               MEMKIND_HBW_PREFERRED, k++));
-    }
-}
-
 trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
         size_t size,
         size_t alignment,
