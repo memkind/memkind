@@ -44,6 +44,11 @@ static void hbw_policy_bind_init(void)
     hbw_policy_g = HBW_POLICY_BIND;
 }
 
+static void hbw_policy_bind_all_init(void)
+{
+    hbw_policy_g = HBW_POLICY_BIND_ALL;
+}
+
 static void hbw_policy_preferred_init(void)
 {
     hbw_policy_g = HBW_POLICY_PREFERRED;
@@ -64,10 +69,17 @@ static memkind_t hbw_choose_kind(hbw_pagesize_t pagesize)
 
     int policy = hbw_get_policy();
 
-    if (policy == HBW_POLICY_BIND || policy == HBW_POLICY_INTERLEAVE) {
+    // PREFERRED policy have separate handling cause it can fallback
+    // to non-HBW kinds in case of HBW absence
+    if (policy != HBW_POLICY_PREFERRED ) {
         switch (pagesize) {
             case HBW_PAGESIZE_2MB:
-                result = MEMKIND_HBW_HUGETLB;
+                if(policy == HBW_POLICY_BIND_ALL) {
+                    result = MEMKIND_HBW_ALL_HUGETLB;
+                }
+                else {
+                    result = MEMKIND_HBW_HUGETLB;
+                }
                 break;
             case HBW_PAGESIZE_1GB:
             case HBW_PAGESIZE_1GB_STRICT:
@@ -76,6 +88,9 @@ static memkind_t hbw_choose_kind(hbw_pagesize_t pagesize)
             default:
                 if (policy == HBW_POLICY_BIND) {
                     result = MEMKIND_HBW;
+                }
+                else if (policy == HBW_POLICY_BIND_ALL) {
+                    result = MEMKIND_HBW_ALL;
                 }
                 else {
                     result = MEMKIND_HBW_INTERLEAVE;
@@ -138,6 +153,9 @@ MEMKIND_EXPORT int hbw_set_policy(hbw_policy_t mode)
             break;
         case HBW_POLICY_BIND:
             pthread_once(&hbw_policy_once_g, hbw_policy_bind_init);
+            break;
+        case HBW_POLICY_BIND_ALL:
+            pthread_once(&hbw_policy_once_g, hbw_policy_bind_all_init);
             break;
         case HBW_POLICY_INTERLEAVE:
             pthread_once(&hbw_policy_once_g, hbw_policy_interleave_init);

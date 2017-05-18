@@ -49,8 +49,8 @@ extern "C" {
  */
 typedef enum {
     /*
-     *  If insufficient high bandwidth memory pages are available then
-     *  OOM killer will be triggered.
+     *  If insufficient high bandwidth memory pages on nearest NUMA node are
+     *  available then OOM killer will be triggered.
      */
     HBW_POLICY_BIND = 1,
     /*
@@ -62,7 +62,12 @@ typedef enum {
      *  Interleave pages across high bandwidth nodes. If insufficient memory
      *  pages are available then OOM killer will be triggered.
      */
-    HBW_POLICY_INTERLEAVE = 3
+    HBW_POLICY_INTERLEAVE = 3,
+    /*
+     *  If insufficient high bandwidth memory pages are available then
+     *  OOM killer will be triggered.
+     */
+    HBW_POLICY_BIND_ALL = 4,
 } hbw_policy_t;
 
 /*
@@ -132,7 +137,7 @@ hbw_policy_t hbw_get_policy(void);
  * Returns:
  *   0: on success
  *   EPERM: if hbw_set_policy () was called more than once
- *   EINVAL: if mode argument was neither HBW_POLICY_PREFERRED, HBW_POLICY_BIND nor HBW_POLICY_INTERLEAVE
+ *   EINVAL: if mode argument was neither HBW_POLICY_PREFERRED, HBW_POLICY_BIND, HBW_POLICY_BIND_ALL nor HBW_POLICY_INTERLEAVE
  */
 int hbw_set_policy(hbw_policy_t mode);
 

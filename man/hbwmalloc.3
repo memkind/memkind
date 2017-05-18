@@ -222,6 +222,15 @@ available at fault time the Out Of Memory (OOM) killer is triggered.
 Note that pages are faulted exclusively from the high bandwidth NUMA
 node nearest at time of allocation, not at time of fault.
 .TP
+.B HBW_POLICY_BIND_ALL
+If insufficient high bandwidth memory is available to satisfy a request,
+the allocated pointer is set to NULL and
+.I errno
+is set to ENOMEM.  If insufficient high bandwidth memory pages are
+available at fault time the Out Of Memory (OOM) killer is triggered.
+Note that pages are faulted exclusively from the high bandwidth NUMA
+node nearest at time of allocation, not at time of fault.
+.TP
 .B HBW_POLICY_PREFERRED
 If insufficient memory is available from the high bandwidth NUMA node
 closest at allocation time, fall back to standard memory (default)
@@ -261,9 +270,11 @@ Using this option may trigger Out Of Memory killer.
 .SH "RETURN VALUE"
 .BR hbw_get_policy ()
 returns
-.B HBW_POLICY_BIND
-or
+.B HBW_POLICY_BIND,
+.B HBW_POLICY_BIND_ALL,
 .B HBW_POLICY_PREFERRED
+or
+.B HBW_POLICY_INTERLEAVE
 which represents the current high bandwidth policy.
 .BR hbw_free ()
 do not have return value.
@@ -309,7 +320,8 @@ if hbw_set_policy () was called more than once, or
 .I mode
 argument was neither
 .B HBW_POLICY_PREFERRED,
-.B HBW_POLICY_BIND
+.B HBW_POLICY_BIND,
+.B HBW_POLICY_BIND_ALL
 nor
 .B HBW_POLICY_INTERLEAVE.
 .TP

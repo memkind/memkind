@@ -599,6 +599,18 @@ TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Bind_Policy_4194305_bytes)
     BasicAllocTest(&hbwmalloc_allocator).malloc(4194305);
 }
 
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Bind_All_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
+    BasicAllocTest(&hbwmalloc_allocator).malloc(4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Bind_All_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
+    BasicAllocTest(&hbwmalloc_allocator).malloc(4194305);
+}
+
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Preferred_Policy_4096_bytes)
 {
     HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
@@ -632,6 +644,18 @@ TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Bind_Policy_4096_bytes)
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Bind_Policy_4194305_bytes)
 {
     HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Bind_All_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
+    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Bind_All_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
     BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4194305);
 }
 
@@ -671,6 +695,18 @@ TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Bind_Policy_4194305_bytes)
     BasicAllocTest(&hbwmalloc_allocator).realloc(4194305);
 }
 
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Bind_All_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
+    BasicAllocTest(&hbwmalloc_allocator).realloc(4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Bind_All_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
+    BasicAllocTest(&hbwmalloc_allocator).realloc(4194305);
+}
+
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Preferred_Policy_4096_bytes)
 {
     HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
@@ -704,6 +740,18 @@ TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Bind_Policy_4096_bytes)
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Bind_Policy_4194305_bytes)
 {
     HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Bind_All_Policy_4096_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Bind_All_Policy_4194305_bytes)
+{
+    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
     BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
 }
 
