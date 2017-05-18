@@ -237,6 +237,27 @@ static int validate_policy(memkind_policy_t policy) {
     return -1;
 }
 
+struct create_args {
+    memkind_t kind;
+    memkind_policy_t policy;
+    memkind_bits_t flags;
+    memkind_memtype_t memtype_flags;
+};
+
+static struct create_args supported_args[] = {
+
+    {&MEMKIND_HBW_STATIC,                    MEMKIND_POLICY_BIND_LOCAL,      0,                          MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_HUGETLB_STATIC,            MEMKIND_POLICY_BIND_LOCAL,      MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_ALL_STATIC,                MEMKIND_POLICY_BIND_ALL,        0,                          MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_ALL_HUGETLB_STATIC,        MEMKIND_POLICY_BIND_ALL,        MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_PREFERRED_STATIC,          MEMKIND_POLICY_PREFERRED_LOCAL, 0,                          MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,  MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_INTERLEAVE_STATIC,         MEMKIND_POLICY_INTERLEAVE_ALL,  0,                          MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_DEFAULT_STATIC,                MEMKIND_POLICY_PREFERRED_LOCAL, 0,                          MEMKIND_MEMTYPE_DEFAULT},
+    {&MEMKIND_HUGETLB_STATIC,                MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_DEFAULT},
+    {&MEMKIND_INTERLEAVE_STATIC,             MEMKIND_POLICY_INTERLEAVE_ALL,  0,                          MEMKIND_MEMTYPE_HIGH_BANDWIDTH | MEMKIND_MEMTYPE_DEFAULT},
+};
+
 /* Kind creation */
 MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
                                        memkind_policy_t policy,
@@ -263,70 +284,26 @@ MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
         return MEMKIND_ERROR_INVALID;
     }
 
-    memkind_t tmp_kind = NULL;
+    int i, num_supported_args = sizeof(supported_args) / sizeof(struct create_args);
+    for(i = 0; i < num_supported_args; i++) {
+        if((supported_args[i].memtype_flags == memtype_flags) &&
+           (supported_args[i].policy == policy) &&
+           (supported_args[i].flags == flags)) {
 
-    if(memtype_flags == MEMKIND_MEMTYPE_DEFAULT) {
-        if(policy == MEMKIND_POLICY_PREFERRED_LOCAL) {
-            if(flags & MEMKIND_MASK_PAGE_SIZE_2MB)
-                tmp_kind = MEMKIND_HUGETLB;
-            else
-                tmp_kind = MEMKIND_DEFAULT;
-        }
-    }
-
-    if(memtype_flags == MEMKIND_MEMTYPE_HIGH_BANDWIDTH) {
-        if(policy == MEMKIND_POLICY_BIND_LOCAL) {
-            if(flags & MEMKIND_MASK_PAGE_SIZE_2MB)
-                tmp_kind = MEMKIND_HBW_HUGETLB;
-            else
-                tmp_kind = MEMKIND_HBW;
-        }
-
-        if(policy == MEMKIND_POLICY_BIND_ALL) {
-            if(flags & MEMKIND_MASK_PAGE_SIZE_2MB)
-                tmp_kind = MEMKIND_HBW_ALL_HUGETLB;
-            else
-                tmp_kind = MEMKIND_HBW_ALL;
-        }
-
-        if(policy == MEMKIND_POLICY_PREFERRED_LOCAL) {
-            if(flags & MEMKIND_MASK_PAGE_SIZE_2MB)
-                tmp_kind = MEMKIND_HBW_PREFERRED_HUGETLB;
-            else
-                tmp_kind = MEMKIND_HBW_PREFERRED;
-        }
-
-        if((policy == MEMKIND_POLICY_INTERLEAVE_ALL)
-            && !(flags & MEMKIND_MASK_PAGE_SIZE_2MB))
-        {
-            tmp_kind = MEMKIND_HBW_INTERLEAVE;
-        }
-    }
-
-    if((memtype_flags & MEMKIND_MEMTYPE_HIGH_BANDWIDTH)
-        && (memtype_flags & MEMKIND_MEMTYPE_DEFAULT)
-        && (policy == MEMKIND_POLICY_INTERLEAVE_ALL)
-        && !(flags & MEMKIND_MASK_PAGE_SIZE_2MB))
-    {
-        tmp_kind = MEMKIND_INTERLEAVE;
-    }
-
-    if(tmp_kind == NULL) {
-        log_err("Cannot create kind: invalid argument.");
-        return MEMKIND_ERROR_INVALID;
-    }
-
-    if(memkind_check_available(tmp_kind) != 0) {
-        if(policy == MEMKIND_POLICY_PREFERRED_LOCAL) {
-            tmp_kind = MEMKIND_DEFAULT;
-        } else {
+            if(memkind_check_available(supported_args[i].kind) == 0) {
+                *kind = supported_args[i].kind;
+                return MEMKIND_SUCCESS;
+            } else if(policy == MEMKIND_POLICY_PREFERRED_LOCAL) {
+                *kind = MEMKIND_DEFAULT;
+                return MEMKIND_SUCCESS;
+            }
             log_err("Cannot create kind: requested memory type is not available.");
             return MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
         }
     }
 
-    *kind = tmp_kind;
-    return MEMKIND_SUCCESS;
+    log_err("Cannot create kind: unsupported set of capabilities.");
+    return MEMKIND_ERROR_INVALID;
 }
 
 /* Kind destruction. */
