@@ -63,7 +63,6 @@ autom4te.cache/
 /test/freeing_memory_segfault_test
 /test/filter_memkind
 /test/gb_page_tests_bind_policy
-/test/gb_page_tests_preferred_policy
 /test/hello_hbw
 /test/hello_memkind
 /test/hello_memkind_debug

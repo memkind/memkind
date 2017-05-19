@@ -31,7 +31,6 @@ check_PROGRAMS += test/all_tests \
                   test/autohbw_test_helper \
                   test/trace_mechanism_test_helper \
                   test/gb_page_tests_bind_policy \
-                  test/gb_page_tests_preferred_policy \
                   test/bat_bind_tests \
                   test/freeing_memory_segfault_test \
                   # end
@@ -63,7 +62,6 @@ test_decorator_test_LDADD = libmemkind.la
 test_allocator_perf_tool_tests_LDADD = libmemkind.la
 test_autohbw_test_helper_LDADD = libmemkind.la
 test_gb_page_tests_bind_policy_LDADD = libmemkind.la
-test_gb_page_tests_preferred_policy_LDADD = libmemkind.la
 test_bat_bind_tests_LDADD = libmemkind.la
 test_trace_mechanism_test_helper_LDADD = libmemkind.la
 test_freeing_memory_segfault_test_LDADD = libmemkind.la
@@ -104,7 +102,6 @@ test_environ_err_hbw_malloc_test_SOURCES = test/environ_err_hbw_malloc_test.cpp
 test_decorator_test_SOURCES = $(fused_gtest) test/decorator_test.cpp test/decorator_test.h
 test_autohbw_test_helper_SOURCES = test/autohbw_test_helper.c
 test_gb_page_tests_bind_policy_SOURCES = $(fused_gtest) test/gb_page_tests_bind_policy.cpp test/trial_generator.cpp test/check.cpp
-test_gb_page_tests_preferred_policy_SOURCES = $(fused_gtest) test/gb_page_tests_preferred_policy.cpp test/trial_generator.cpp test/check.cpp
 test_bat_bind_tests_SOURCES = $(fused_gtest) test/bat_bind_tests.cpp test/trial_generator.cpp test/check.cpp
 test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c
 test_freeing_memory_segfault_test_SOURCES = $(fused_gtest) test/freeing_memory_segfault_test.cpp

@@ -67,7 +67,6 @@ test/static_kinds_list.h
 test/environ_err_hbw_malloc_test.cpp
 test/extended_tests.cpp
 test/gb_page_tests_bind_policy.cpp
-test/gb_page_tests_preferred_policy.cpp
 test/main.cpp
 test/multithreaded_tests.cpp
 test/negative_tests.cpp
