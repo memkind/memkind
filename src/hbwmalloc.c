@@ -26,6 +26,7 @@
 #include <memkind.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_hbw.h>
+#include <memkind/internal/memkind_log.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -271,8 +272,16 @@ MEMKIND_EXPORT int hbw_posix_memalign(void **memptr, size_t alignment, size_t si
 MEMKIND_EXPORT int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
                              hbw_pagesize_t pagesize)
 {
-    if (pagesize == HBW_PAGESIZE_1GB_STRICT &&
-        size % (1 << 30)) {
+    if (pagesize == HBW_PAGESIZE_1GB_STRICT && size % (1 << 30)) {
+        return EINVAL;
+    }
+
+    if((pagesize == HBW_PAGESIZE_2MB ||
+        pagesize == HBW_PAGESIZE_1GB_STRICT ||
+        pagesize == HBW_PAGESIZE_1GB) &&
+        hbw_get_policy() == HBW_POLICY_INTERLEAVE) {
+
+        log_err("HBW_POLICY_INTERLEAVE is unsupported with used page size!");
         return EINVAL;
     }
 

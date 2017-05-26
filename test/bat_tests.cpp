@@ -772,42 +772,42 @@ TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Interleave_Policy_4194305_byte
     BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Preferred_Policy_Pagesize_2MB_4096_bytes_)
+TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Preferred_Policy_PAGE_SIZE_2MB_4096_bytes_)
 {
     HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
     hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
     BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Preferred_Policy_Pagesize_2MB_4194305_bytes)
+TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Preferred_Policy_PAGE_SIZE_2MB_4194305_bytes)
 {
     HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
     hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
     BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_Policy_Pagesize_2MB_4096_bytes)
+TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_Policy_PAGE_SIZE_2MB_4096_bytes)
 {
     HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
     hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
     BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_Policy_Pagesize_2MB_4194305_bytes)
+TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_Policy_PAGE_SIZE_2MB_4194305_bytes)
 {
     HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
     hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
     BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_All_Policy_Pagesize_2MB_4096_bytes)
+TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_All_Policy_PAGE_SIZE_2MB_4096_bytes)
 {
     HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
     hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
     BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_All_Policy_Pagesize_2MB_4194305_bytes)
+TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_All_Policy_PAGE_SIZE_2MB_4194305_bytes)
 {
     HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
     hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
