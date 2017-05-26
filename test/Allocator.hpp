@@ -25,6 +25,8 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <map>
+#include <iterator>
 
 class Allocator
 {
@@ -91,21 +93,37 @@ public:
 
     virtual int get_numa_policy()
     {
-        if (policy == MEMKIND_POLICY_INTERLEAVE_ALL || kind == MEMKIND_HBW_INTERLEAVE || kind == MEMKIND_INTERLEAVE) {
-            return MPOL_INTERLEAVE;
+        std::map<memkind_t, int> kind_policy =
+        {
+            std::make_pair(MEMKIND_HBW_INTERLEAVE, MPOL_INTERLEAVE),
+            std::make_pair(MEMKIND_INTERLEAVE, MPOL_INTERLEAVE),
+            std::make_pair(MEMKIND_HBW_PREFERRED, MPOL_PREFERRED),
+            std::make_pair(MEMKIND_HBW_PREFERRED_HUGETLB, MPOL_PREFERRED),
+            std::make_pair(MEMKIND_HBW, MPOL_BIND),
+            std::make_pair(MEMKIND_HBW_HUGETLB, MPOL_BIND),
+            std::make_pair(MEMKIND_REGULAR, MPOL_BIND)
+        };
+
+        auto it = kind_policy.find(kind);
+
+        if(it != std::end(kind_policy)) {
+            return it->second;
         }
-        else if ((policy == MEMKIND_POLICY_PREFERRED_LOCAL && memtype != MEMKIND_MEMTYPE_DEFAULT) ||
-                kind == MEMKIND_HBW_PREFERRED ||
-                kind == MEMKIND_HBW_PREFERRED_HUGETLB) {
-            return MPOL_PREFERRED;
+        else {
+            switch (policy) {
+                case MEMKIND_POLICY_INTERLEAVE_ALL:
+                case MEMKIND_POLICY_INTERLEAVE_LOCAL:
+                      return MPOL_INTERLEAVE;
+                case MEMKIND_POLICY_PREFERRED_LOCAL:
+                      return memtype == MEMKIND_MEMTYPE_DEFAULT ? -1 :
+                             MPOL_PREFERRED;
+                case MEMKIND_POLICY_BIND_LOCAL:
+                case MEMKIND_POLICY_BIND_ALL:
+                      return MPOL_BIND;
+                default:
+                    return -1;
+            }
         }
-        else if (policy == MEMKIND_POLICY_BIND_LOCAL ||
-               kind == MEMKIND_HBW ||
-               kind == MEMKIND_HBW_HUGETLB ||
-               kind == MEMKIND_REGULAR) {
-            return MPOL_BIND;
-        }
-        return -1;
     }
 
     virtual bool is_high_bandwidth()
