@@ -83,6 +83,10 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/error_message_tests.cpp \
                          test/get_arena_test.cpp \
                          test/memkind_pmem_tests.cpp \
+                         test/memory_footprint_test.cpp \
+                         test/memory_manager.h \
+                         test/random_sizes_allocator.h \
+                         test/proc_stat.h \
                          test/performance/operations.hpp \
                          test/performance/perf_tests.hpp \
                          test/performance/perf_tests.cpp \
