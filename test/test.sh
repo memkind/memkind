@@ -230,36 +230,23 @@ if [[ $ret == "" ]]; then
     TEST_PREFIX="numactl --membind=0 %s"
 fi
 
-# Execute getopt
-ARGS=$(getopt -o T:c:f:l:hdmgx: -- "$@");
+OPTIND=1
 
-#Bad arguments
-if [ $? -ne 0 ];
-then
-    usage
-fi
-
-eval set -- "$ARGS";
-
-while true; do
-    case "$1" in
-        -T)
-            TEST_PATH=$2;
-            shift 2;
+while getopts "T:c:f:l:hdmgx:p:" opt; do
+    case "$opt" in
+        T)
+            TEST_PATH=$OPTARG;
             ;;
-        -c)
-            CSV=$2;
-            shift 2;
+        c)
+            CSV=$OPTARG;
             ;;
-        -f)
-            TEST_FILTER=$2;
-            shift 2;
+        f)
+            TEST_FILTER=$OPTARG;
             ;;
-        -l)
-            LOG_FILE=$2;
-            shift 2;
+        l)
+            LOG_FILE=$OPTARG;
             ;;
-        -m)
+        m)
             echo "Skipping tests that require 2MB pages due to unsatisfactory system conditions"
             if [[ "$SKIPPED_GTESTS" == "" ]]; then
                 SKIPPED_GTESTS=":-*test_TC_MEMKIND_2MBPages_*"
@@ -272,9 +259,8 @@ while true; do
                 SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not test_TC_MEMKIND_2MBPages_"
             fi
             show_skipped_tests "test_TC_MEMKIND_2MBPages_"
-            shift
             ;;
-        -d)
+        d)
             echo "Skipping tests that detect high bandwidth memory nodes due to unsatisfactory system conditions"
             if [[ $SKIPPED_PYTESTS == "" ]]; then
                 SKIPPED_PYTESTS=" and not hbw_detection"
@@ -282,25 +268,18 @@ while true; do
                 SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not hbw_detection"
             fi
             show_skipped_tests "test_TC_MEMKIND_hbw_detection"
-            shift
             ;;
-        -x)
-            echo "Skipping some tests on demand '$2'"
+        x)
+            echo "Skipping some tests on demand '$OPTARG'"
             if [[ $SKIPPED_GTESTS == "" ]]; then
-                SKIPPED_GTESTS=":-"$2
+                SKIPPED_GTESTS=":-"$OPTARG
             else
-                SKIPPED_GTESTS=$SKIPPED_GTESTS":"$2
+                SKIPPED_GTESTS=$SKIPPED_GTESTS":"$OPTARG
             fi
-            show_skipped_tests "$2"
-            shift 2;
+            show_skipped_tests "$OPTARG"
             ;;
-        -h)
+        h)
             usage;
-            shift;
-            ;;
-        --)
-            shift;
-            break;
             ;;
     esac
 done
