@@ -2,6 +2,7 @@ dist: trusty
 sudo: false
 language: cpp python
 before_install:
+  - pip install -U pytest
 install:
 script:
   - CXX="g++-4.8" CC="gcc-4.8" LDFLAGS="-lrt -Wl,--no-as-needed" MAKEOPTS="-l 1.5" ./build.sh

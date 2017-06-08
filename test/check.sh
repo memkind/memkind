@@ -54,6 +54,11 @@ if [[ -n $DISABLE_GTEST_TESTS ]]; then
         test_cmd=$test_cmd" -x $DISABLE_GTEST_TESTS"
 fi
 
+if [[ -n "$DISABLE_PYTEST_TESTS" ]]; then
+        test_cmd=$test_cmd" -p \"$DISABLE_PYTEST_TESTS\""
+        echo "Python test disabling env var detected $DISABLE_PYTEST_TESTS"
+fi
+
 eval $test_cmd
 
 err=${PIPESTATUS[0]}

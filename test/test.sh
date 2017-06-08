@@ -45,7 +45,7 @@ err=0
 function usage () {
    cat <<EOF
 
-Usage: $PROGNAME [-c csv_file] [-l log_file] [-f test_filter] [-T tests_dir] [-d] [-m] [-g] [-h]
+Usage: $PROGNAME [-c csv_file] [-l log_file] [-f test_filter] [-T tests_dir] [-d] [-m] [-g] [-h] [-p]
 
 OPTIONS
     -c,
@@ -60,11 +60,12 @@ OPTIONS
         skip high bandwidth memory nodes detection tests
     -m,
         skip tests that require 2MB pages configured on the machine
+    -p,
+        skip python tests
     -x,
         skip tests that are passed as value
     -h,
         parameter added to display script usage
-
 EOF
 }
 
@@ -268,6 +269,11 @@ while getopts "T:c:f:l:hdmgx:p:" opt; do
                 SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not hbw_detection"
             fi
             show_skipped_tests "test_TC_MEMKIND_hbw_detection"
+            ;;
+        p)
+            SKIPPED_PYTESTS=$SKIPPED_PYTESTS$OPTARG
+            show_skipped_tests "$OPTARG"
+            break;
             ;;
         x)
             echo "Skipping some tests on demand '$OPTARG'"
