@@ -49,9 +49,9 @@ if [[ $ret == "" ]]; then
         test_cmd=$test_cmd" -d"
 fi
 
-if [[ -n $DISABLE_TESTS ]]; then
+if [[ -n $DISABLE_GTEST_TESTS ]]; then
         echo "On demand test disabling detected!"
-        test_cmd=$test_cmd" -x $DISABLE_TESTS"
+        test_cmd=$test_cmd" -x $DISABLE_GTEST_TESTS"
 fi
 
 eval $test_cmd
