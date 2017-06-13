@@ -1,3 +1,19 @@
+* Tue Jun 13 2017 Artur Koziej <artur.koziej@intel.com> v1.6.0
+- Introduced new policy HBW_POLICY_BIND_ALL.
+- Introduced MEMKIND_HBW_ALL, MEMKIND_HBW_ALL_HUGETLB and MEMKIND_REGULAR kinds.
+- Fixed hbw_posix_memalign_psize() return value in case of unsupported policy and
+  page size combination.
+- Documented supported policy and page size combination for
+  hbw_posix_memalign_psize().
+- Merged libmemkind.a and libjemalloc_pic.a into a single static library.
+- Fixed OOM during tcache acquisition.
+- Tuned huge pages configuration in memkind tests.
+- Added stress tests for allocations with large random sizes.
+- Added stress tests for allocations with random kinds.
+- Extended policy and NUMA node binding tests.
+- Fixed several Travis build problems.
+- Removed gb_page_tests_preferred_policy tests.
+
 * Tue Feb 21 2017 Krzysztof Kulakowski <krzysztof.kulakowski@intel.com> v1.5.0
 - Intel(R) TBB scalable_allocator can be used as heap management alternative
   to jemalloc (requires installed Intel (R) TBB package and environment variable
