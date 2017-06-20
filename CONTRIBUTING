@@ -58,7 +58,7 @@ a) Building jemalloc
 
 The memkind library has a dependency on a related fork of jemalloc.
 
-The jemalloc source was forked from jemalloc version 4.3.1. This source tree
+The jemalloc source was forked from jemalloc version 4.5. This source tree
 is located within the jemalloc subdirectory of the memkind source. The jemalloc
 source code has been kept close to the original form, and in particular,
 the build system has been lightly modified.

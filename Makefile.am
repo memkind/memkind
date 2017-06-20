@@ -255,6 +255,30 @@ EXTRA_DIST = autogen.sh \
              jemalloc/test/unit/prof_active.c \
              jemalloc/test/unit/decay.c \
              jemalloc/test/stress/microbench.c \
+             jemalloc/test/integration/chunk.sh \
+             jemalloc/test/integration/mallocx.sh \
+             jemalloc/test/integration/xallocx.sh \
+             jemalloc/test/unit/arena_reset.sh \
+             jemalloc/test/unit/decay.sh \
+             jemalloc/test/unit/extent_quantize.c \
+             jemalloc/test/unit/junk.sh \
+             jemalloc/test/unit/junk_alloc.sh \
+             jemalloc/test/unit/junk_free.sh \
+             jemalloc/test/unit/lg_chunk.sh \
+             jemalloc/test/unit/pack.c \
+             jemalloc/test/unit/pack.sh \
+             jemalloc/test/unit/pages.c \
+             jemalloc/test/unit/prof_accum.sh \
+             jemalloc/test/unit/prof_active.sh \
+             jemalloc/test/unit/prof_gdump.sh \
+             jemalloc/test/unit/prof_idump.sh \
+             jemalloc/test/unit/prof_reset.sh \
+             jemalloc/test/unit/prof_tctx.sh \
+             jemalloc/test/unit/prof_thread_name.sh \
+             jemalloc/test/unit/quarantine.sh \
+             jemalloc/test/unit/stats_print.c \
+             jemalloc/test/unit/zero.sh \
+             jemalloc/scripts/gen_travis.py \
              jemalloc/Makefile.in \
              jemalloc/autogen.sh \
              jemalloc/ChangeLog \

@@ -84,6 +84,7 @@ CTL_PROTO(config_prof_libgcc)
 CTL_PROTO(config_prof_libunwind)
 CTL_PROTO(config_stats)
 CTL_PROTO(config_tcache)
+CTL_PROTO(config_thp)
 CTL_PROTO(config_tls)
 CTL_PROTO(config_utrace)
 CTL_PROTO(config_valgrind)
@@ -104,6 +105,7 @@ CTL_PROTO(opt_utrace)
 CTL_PROTO(opt_xmalloc)
 CTL_PROTO(opt_tcache)
 CTL_PROTO(opt_lg_tcache_max)
+CTL_PROTO(opt_thp)
 CTL_PROTO(opt_prof)
 CTL_PROTO(opt_prof_prefix)
 CTL_PROTO(opt_prof_active)
@@ -258,6 +260,7 @@ static const ctl_named_node_t	config_node[] = {
 	{NAME("prof_libunwind"), CTL(config_prof_libunwind)},
 	{NAME("stats"),		CTL(config_stats)},
 	{NAME("tcache"),	CTL(config_tcache)},
+	{NAME("thp"),		CTL(config_thp)},
 	{NAME("tls"),		CTL(config_tls)},
 	{NAME("utrace"),	CTL(config_utrace)},
 	{NAME("valgrind"),	CTL(config_valgrind)},
@@ -281,6 +284,7 @@ static const ctl_named_node_t opt_node[] = {
 	{NAME("xmalloc"),	CTL(opt_xmalloc)},
 	{NAME("tcache"),	CTL(opt_tcache)},
 	{NAME("lg_tcache_max"),	CTL(opt_lg_tcache_max)},
+	{NAME("thp"),		CTL(opt_thp)},
 	{NAME("prof"),		CTL(opt_prof)},
 	{NAME("prof_prefix"),	CTL(opt_prof_prefix)},
 	{NAME("prof_active"),	CTL(opt_prof_active)},
@@ -670,35 +674,24 @@ ctl_arena_refresh(tsdn_t *tsdn, arena_t *arena, unsigned i)
 static bool
 ctl_grow(tsdn_t *tsdn)
 {
-	static unsigned arena_stats_cap;
 	ctl_arena_stats_t *astats;
 
 	/* Initialize new arena. */
 	if (arena_init(tsdn, ctl_stats.narenas) == NULL)
 		return (true);
 
-	if(arena_stats_cap < ctl_stats.narenas + 1) {
-		arena_stats_cap = (ctl_stats.narenas * 2) < MALLOCX_ARENA_MAX ?
-			(ctl_stats.narenas * 2) : MALLOCX_ARENA_MAX;
-		/* Allocate extended arena stats. */
-		astats = (ctl_arena_stats_t *)a0malloc((arena_stats_cap + 1) *
-				sizeof(ctl_arena_stats_t));
-		if (astats == NULL)
-			return (true);
-
-		memcpy(astats, ctl_stats.arenas, (ctl_stats.narenas + 1) *
-				sizeof(ctl_arena_stats_t));
-	}
-	else {
-		astats = ctl_stats.arenas;
-	}
+	/* Allocate extended arena stats. */
+	astats = (ctl_arena_stats_t *)a0malloc((ctl_stats.narenas + 2) *
+	    sizeof(ctl_arena_stats_t));
+	if (astats == NULL)
+		return (true);
 
 	/* Initialize the new astats element. */
+	memcpy(astats, ctl_stats.arenas, (ctl_stats.narenas + 1) *
+	    sizeof(ctl_arena_stats_t));
 	memset(&astats[ctl_stats.narenas + 1], 0, sizeof(ctl_arena_stats_t));
 	if (ctl_arena_init(&astats[ctl_stats.narenas + 1])) {
-		if(astats != ctl_stats.arenas) {
-			a0dalloc(astats);
-		}
+		a0dalloc(astats);
 		return (true);
 	}
 	/* Swap merged stats to their new location. */
@@ -711,10 +704,8 @@ ctl_grow(tsdn_t *tsdn)
 		memcpy(&astats[ctl_stats.narenas + 1], &tstats,
 		    sizeof(ctl_arena_stats_t));
 	}
-	if(astats != ctl_stats.arenas) {
-		a0dalloc(ctl_stats.arenas);
-		ctl_stats.arenas = astats;
-	}
+	a0dalloc(ctl_stats.arenas);
+	ctl_stats.arenas = astats;
 	ctl_stats.narenas++;
 
 	return (false);
@@ -1281,6 +1272,7 @@ CTL_RO_CONFIG_GEN(config_prof_libgcc, bool)
 CTL_RO_CONFIG_GEN(config_prof_libunwind, bool)
 CTL_RO_CONFIG_GEN(config_stats, bool)
 CTL_RO_CONFIG_GEN(config_tcache, bool)
+CTL_RO_CONFIG_GEN(config_thp, bool)
 CTL_RO_CONFIG_GEN(config_tls, bool)
 CTL_RO_CONFIG_GEN(config_utrace, bool)
 CTL_RO_CONFIG_GEN(config_valgrind, bool)
@@ -1304,6 +1296,7 @@ CTL_RO_NL_CGEN(config_utrace, opt_utrace, opt_utrace, bool)
 CTL_RO_NL_CGEN(config_xmalloc, opt_xmalloc, opt_xmalloc, bool)
 CTL_RO_NL_CGEN(config_tcache, opt_tcache, opt_tcache, bool)
 CTL_RO_NL_CGEN(config_tcache, opt_lg_tcache_max, opt_lg_tcache_max, ssize_t)
+CTL_RO_NL_CGEN(config_thp, opt_thp, opt_thp, bool)
 CTL_RO_NL_CGEN(config_prof, opt_prof, opt_prof, bool)
 CTL_RO_NL_CGEN(config_prof, opt_prof_prefix, opt_prof_prefix, const char *)
 CTL_RO_NL_CGEN(config_prof, opt_prof_active, opt_prof_active, bool)
@@ -1489,7 +1482,6 @@ tcache_create_ctl(tsd_t *tsd, const size_t *mib, size_t miblen, void *oldp,
 	if (!config_tcache)
 		return (ENOENT);
 
-	malloc_mutex_lock(tsd_tsdn(tsd), &ctl_mtx);
 	READONLY();
 	if (tcaches_create(tsd, &tcache_ind)) {
 		ret = EFAULT;
@@ -1499,8 +1491,7 @@ tcache_create_ctl(tsd_t *tsd, const size_t *mib, size_t miblen, void *oldp,
 
 	ret = 0;
 label_return:
-	malloc_mutex_unlock(tsd_tsdn(tsd), &ctl_mtx);
-	return (ret);
+	return ret;
 }
 
 static int
