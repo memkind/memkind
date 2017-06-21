@@ -28,7 +28,7 @@ cd jemalloc
 test -e configure || autoconf
 test -e obj || mkdir obj
 cd obj
-../configure --enable-autogen --with-jemalloc-prefix=jemk_ --without-export \
+../configure --enable-autogen --with-jemalloc-prefix=$JE_PREFIX --without-export \
              --disable-stats --disable-fill --disable-valgrind \
              $EXTRA_CONF --with-malloc-conf="lg_chunk:22,narenas:256,lg_tcache_max:12"
 

@@ -311,7 +311,7 @@ noinst_LTLIBRARIES =
 noinst_HEADERS =
 TESTS =
 
-req_flags = -fvisibility=hidden -Wall -Werror -msse4.2 -D_GNU_SOURCE -DMEMKIND_INTERNAL_API
+req_flags = -fvisibility=hidden -Wall -Werror -msse4.2 -D_GNU_SOURCE -DMEMKIND_INTERNAL_API -DJE_PREFIX=$(JE_PREFIX)
 
 AM_CFLAGS = $(req_flags)
 AM_CXXFLAGS = $(req_flags)
