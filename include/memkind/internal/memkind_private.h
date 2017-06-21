@@ -48,6 +48,28 @@ extern "C" {
 #   define MEMKIND_EXPORT __attribute__((visibility("default")))
 #endif
 
+#ifndef JE_PREFIX
+#error "Can't find JE_PREFIX define. Define one or use build.sh script."
+#endif
+
+// This ladder call is required due to meanders of C's preprocessor logic.
+// Without it, JE_PREFIX would be used directly (i.e. 'JE_PREFIX') and not
+// substituted with defined value.
+#define JE_SYMBOL2(a, b) a ## b
+#define JE_SYMBOL1(a, b) JE_SYMBOL2(a, b)
+#define JE_SYMBOL(b)     JE_SYMBOL1(JE_PREFIX, b)
+
+// Redefine symbols
+#define jemk_malloc         JE_SYMBOL(malloc)
+#define jemk_mallocx        JE_SYMBOL(mallocx)
+#define jemk_calloc         JE_SYMBOL(calloc)
+#define jemk_rallocx        JE_SYMBOL(rallocx)
+#define jemk_realloc        JE_SYMBOL(realloc)
+#define jemk_mallctl        JE_SYMBOL(mallctl)
+#define jemk_memalign       JE_SYMBOL(memalign)
+#define jemk_posix_memalign JE_SYMBOL(posix_memalign)
+#define jemk_free           JE_SYMBOL(free)
+
 enum memkind_const_private {
     MEMKIND_NAME_LENGTH_PRIV = 64
 };

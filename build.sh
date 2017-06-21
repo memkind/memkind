@@ -24,6 +24,10 @@
 
 set -e
 
+if [ -z "$JE_PREFIX" ]; then
+        export JE_PREFIX=jemk_
+fi
+
 cd $(dirname $0)
 EXTRA_CONF=$@
 
