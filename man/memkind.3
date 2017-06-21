@@ -536,8 +536,8 @@ to an index appropriate for the
 .I kind,
 allocation
 .I size,
-and CPU when using the jemalloc arena allocation through the jemalloc's
-.BR mallocx ()
+and CPU when using the jemalloc arena allocation through the
+.BR jemk_mallocx ()
 API. Size parameter is not used at the moment, but will be necessary for integration with jemalloc 4.0.x (planned for one of the future releases).
 .PP
 .BI "int ops.get_size(memkind_t " "kind" ", size_t " "*total" ", size_t " "*free" );
@@ -558,8 +558,8 @@ shall return 0 if the
 .I addr
 can be freed with the specified
 .I kind
-and an error code otherwise.  If the memory cannot be freed with jemalloc's
-.BR free (),
+and an error code otherwise.  If the memory cannot be freed with
+.BR jemk_free (),
 then at least one of the instantiated kinds must return 0 to enable
 freeing.
 .PP
@@ -707,18 +707,18 @@ Call to
 failed
 .TP
 .B MEMKIND_ERROR_MEMALIGN (DEPRECATED)
-Call to jemalloc's
-.BR posix_memalign ()
+Call to
+.BR jemk_posix_memalign ()
 failed
 .TP
 .B MEMKIND_ERROR_MALLCTL (DEPRECATED)
-Call to jemalloc's
-.BR mallctl ()
+Call to
+.BR jemk_mallctl ()
 failed
 .TP
 .B MEMKIND_ERROR_MALLOC
-Call to jemalloc's
-.BR malloc ()
+Call to
+.BR jemk_malloc ()
 failed
 .TP
 .B MEMKIND_ERROR_GETCPU (DEPRECATED)
@@ -733,8 +733,8 @@ Two NUMA memory nodes are equidistant from target cpu node
 Alignment must be a power of two and larger than sizeof(void *)
 .TP
 .B MEMKIND_ERROR_ALLOCM
-Call to jemalloc's
-.BR allocm ()
+Call to
+.BR jemk_allocm ()
 failed
 .TP
 .B MEMKIND_ERROR_ENVIRON
