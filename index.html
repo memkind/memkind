@@ -64,7 +64,7 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
             Binaries
           </h2>
           <p>
-            <a href="http://download.opensuse.org/repositories/home:/akoziej/" class="btn btn-link">RPMs for misc OSes</a>
+            <a href="http://download.opensuse.org/repositories/home:/kakulako/" class="btn btn-link">RPMs for misc OSes</a>
           </p>
         </div>
         <div id="faq" class='bs-docs-section'>
@@ -82,33 +82,9 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
           <h1 class="page-header">
             Blog
           </h1>
-          <p class="lead">Release 1.6.0 is available</p><span class="post-date">Fri Jun 16 2017</span><p>I would like to announce memkind release <strong>1.6.0</strong>. Changes since 1.5.0:</p>
+          <p class="lead">Release 1.5.0 is available</p><span class="post-date">Tue Feb 21 2017</span><p>I would like to announce memkind release <strong>1.5.0</strong>. Changes since 1.4.0:</p>
 <ul>
-<li>Tue Jun 13 2017 Artur Koziej <a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#x3a;&#x61;&#x72;&#x74;&#117;&#x72;&#46;&#x6b;&#111;&#122;&#x69;&#101;&#x6a;&#x40;&#x69;&#110;&#116;&#x65;&#108;&#x2e;&#99;&#111;&#x6d;">&#x61;&#x72;&#x74;&#117;&#x72;&#46;&#x6b;&#111;&#122;&#x69;&#101;&#x6a;&#x40;&#x69;&#110;&#116;&#x65;&#108;&#x2e;&#99;&#111;&#x6d;</a> v1.6.0</li>
-</ul>
-<ul>
-<li>Introduced new policy HBW_POLICY_BIND_ALL.</li>
-<li>Introduced MEMKIND_HBW_ALL, MEMKIND_HBW_ALL_HUGETLB and MEMKIND_REGULAR kinds.</li>
-<li>Fixed hbw_posix_memalign_psize() return value in case of unsupported policy and
-page size combination.</li>
-<li>Documented supported policy and page size combination for
-hbw_posix_memalign_psize().</li>
-<li>Merged libmemkind.a and libjemalloc_pic.a into a single static library.</li>
-<li>Fixed OOM during tcache acquisition.</li>
-<li>Tuned huge pages configuration in memkind tests.</li>
-<li>Added stress tests for allocations with large random sizes.</li>
-<li>Added stress tests for allocations with random kinds.</li>
-<li>Extended policy and NUMA node binding tests.</li>
-<li>Fixed several Travis build problems.</li>
-<li>Removed gb_page_tests_preferred_policy tests.</li>
-</ul>
-<p>Sources are available on:
-<a href="https://github.com/memkind/memkind/releases/tag/v1.6.0">https://github.com/memkind/memkind/releases/tag/v1.6.0</a></p>
-<p>Best Regards,</p>
-<p><em>Artur Koziej</em></p>
-<p class="lead">Release 1.5.0 is available</p><span class="post-date">Tue Feb 21 2017</span><p>I would like to announce memkind release <strong>1.5.0</strong>. Changes since 1.4.0:</p>
-<ul>
-<li>Tue Feb 21 2017 Krzysztof Kulakowski <a href="&#109;&#x61;&#x69;&#x6c;&#116;&#111;&#x3a;&#x6b;&#114;&#122;&#121;&#115;&#122;&#x74;&#111;&#102;&#x2e;&#x6b;&#117;&#x6c;&#x61;&#x6b;&#x6f;&#119;&#x73;&#x6b;&#x69;&#64;&#x69;&#110;&#116;&#x65;&#108;&#x2e;&#99;&#x6f;&#x6d;">&#x6b;&#114;&#122;&#121;&#115;&#122;&#x74;&#111;&#102;&#x2e;&#x6b;&#117;&#x6c;&#x61;&#x6b;&#x6f;&#119;&#x73;&#x6b;&#x69;&#64;&#x69;&#110;&#116;&#x65;&#108;&#x2e;&#99;&#x6f;&#x6d;</a> v1.5.0</li>
+<li>Tue Feb 21 2017 Krzysztof Kulakowski <a href="&#109;&#x61;&#105;&#x6c;&#116;&#x6f;&#x3a;&#x6b;&#114;&#x7a;&#x79;&#115;&#122;&#x74;&#x6f;&#102;&#x2e;&#107;&#117;&#108;&#97;&#x6b;&#x6f;&#119;&#x73;&#x6b;&#x69;&#x40;&#105;&#110;&#x74;&#101;&#108;&#46;&#99;&#x6f;&#x6d;">&#x6b;&#114;&#x7a;&#x79;&#115;&#122;&#x74;&#x6f;&#102;&#x2e;&#107;&#117;&#108;&#97;&#x6b;&#x6f;&#119;&#x73;&#x6b;&#x69;&#x40;&#105;&#110;&#x74;&#101;&#108;&#46;&#99;&#x6f;&#x6d;</a> v1.5.0</li>
 </ul>
 <ul>
 <li>Intel(R) TBB scalable_allocator can be used as heap management alternative
@@ -129,7 +105,7 @@ introduced simple build.sh script)</li>
 <p><em>Krzysztof Kulakowski</em></p>
 <p class="lead">Release 1.4.0 is available</p><span class="post-date">Fri Nov 18 2016</span><p>I would like to announce memkind release <strong>1.4.0</strong>. Changes since 1.3.0:</p>
 <ul>
-<li>Thu Nov 17 2016 Krzysztof Kulakowski <a href="&#109;&#97;&#105;&#108;&#116;&#x6f;&#58;&#x6b;&#x72;&#122;&#121;&#115;&#x7a;&#116;&#x6f;&#x66;&#x2e;&#x6b;&#117;&#x6c;&#97;&#x6b;&#x6f;&#119;&#115;&#x6b;&#x69;&#64;&#105;&#110;&#x74;&#101;&#x6c;&#46;&#x63;&#111;&#x6d;">&#x6b;&#x72;&#122;&#121;&#115;&#x7a;&#116;&#x6f;&#x66;&#x2e;&#x6b;&#117;&#x6c;&#97;&#x6b;&#x6f;&#119;&#115;&#x6b;&#x69;&#64;&#105;&#110;&#x74;&#101;&#x6c;&#46;&#x63;&#111;&#x6d;</a> v1.4.0</li>
+<li>Thu Nov 17 2016 Krzysztof Kulakowski <a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#x6b;&#114;&#x7a;&#121;&#115;&#x7a;&#116;&#x6f;&#102;&#46;&#x6b;&#x75;&#108;&#97;&#x6b;&#111;&#x77;&#115;&#107;&#105;&#x40;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;">&#x6b;&#114;&#x7a;&#121;&#115;&#x7a;&#116;&#x6f;&#102;&#46;&#x6b;&#x75;&#108;&#97;&#x6b;&#111;&#x77;&#115;&#107;&#105;&#x40;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;</a> v1.4.0</li>
 </ul>
 <ul>
 <li>Introduced hbw_verify_memory_region() for verifying if provided memory
