@@ -26,6 +26,7 @@
 #include "random_sizes_allocator.h"
 #include "proc_stat.h"
 #include "allocator_perf_tool/GTestAdapter.hpp"
+#include "allocator_perf_tool/Allocation_info.hpp"
 #include <memkind.h>
 #include <random>
 
@@ -65,13 +66,12 @@ public:
             if (current_physical_memory_diff > max_physical_memory_diff)
                 max_physical_memory_diff = current_physical_memory_diff;
         }
-
-        GTestAdapter::RecordProperty("avg_vm_overhead_per_operation", (float)overhead_sum / calls_number);
+        GTestAdapter::RecordProperty("avg_vm_overhead_per_operation_mb", convert_bytes_to_mb(overhead_sum) / calls_number);
         GTestAdapter::RecordProperty("overhead_to_requested_memory_ratio_percent", 100.f * current_overhead / requested_memory_sum);
-        GTestAdapter::RecordProperty("avg_vm_overhead_growth_per_operation", (float)current_overhead / calls_number);
-        GTestAdapter::RecordProperty("max_vm_overhead", max_overhead);
-        GTestAdapter::RecordProperty("avg_phys_memory", (float)physical_memory_diff_sum / calls_number);
-        GTestAdapter::RecordProperty("max_phys_memory", max_physical_memory_diff);
+        GTestAdapter::RecordProperty("avg_vm_overhead_growth_per_operation_mb", convert_bytes_to_mb(current_overhead) / calls_number);
+        GTestAdapter::RecordProperty("max_vm_overhead_mb", convert_bytes_to_mb(max_overhead));
+        GTestAdapter::RecordProperty("avg_phys_memory_mb", convert_bytes_to_mb(physical_memory_diff_sum) / calls_number);
+        GTestAdapter::RecordProperty("max_phys_memory_mb", convert_bytes_to_mb(max_physical_memory_diff));
     }
 };
 

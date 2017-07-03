@@ -83,10 +83,6 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/error_message_tests.cpp \
                          test/get_arena_test.cpp \
                          test/memkind_pmem_tests.cpp \
-                         test/memory_footprint_test.cpp \
-                         test/memory_manager.h \
-                         test/random_sizes_allocator.h \
-                         test/proc_stat.h \
                          test/performance/operations.hpp \
                          test/performance/perf_tests.hpp \
                          test/performance/perf_tests.cpp \
@@ -148,6 +144,9 @@ allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.h
                                       test/allocator_perf_tool/HugePageUnmap.hpp \
                                       test/allocator_perf_tool/HugePageOrganizer.hpp \
                                       test/allocator_perf_tool/HBWmallocAllocatorWithTimer.hpp \
+                                      test/memory_manager.h \
+                                      test/random_sizes_allocator.h \
+                                      test/proc_stat.h \
                                       # end
 
 
@@ -157,6 +156,7 @@ test_allocator_perf_tool_tests_SOURCES = $(allocator_perf_tool_library_sources) 
                                          test/heap_manager_init_perf_test.cpp \
                                          test/huge_page_test.cpp \
                                          test/alloc_performance_tests.cpp \
+                                         test/memory_footprint_test.cpp \
                                          # end
 
 
