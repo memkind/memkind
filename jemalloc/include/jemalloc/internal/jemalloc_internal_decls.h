@@ -1,5 +1,5 @@
 #ifndef JEMALLOC_INTERNAL_DECLS_H
-#define	JEMALLOC_INTERNAL_DECLS_H
+#define JEMALLOC_INTERNAL_DECLS_H
 
 #include <math.h>
 #ifdef _WIN32
@@ -14,9 +14,15 @@
 #    if !defined(SYS_write) && defined(__NR_write)
 #      define SYS_write __NR_write
 #    endif
+#    if defined(SYS_open) && defined(__aarch64__)
+       /* Android headers may define SYS_open to __NR_open even though
+        * __NR_open may not exist on AArch64 (superseded by __NR_openat). */
+#      undef SYS_open
+#    endif
 #    include <sys/uio.h>
 #  endif
 #  include <pthread.h>
+#  include <signal.h>
 #  ifdef JEMALLOC_OS_UNFAIR_LOCK
 #    include <os/lock.h>
 #  endif
@@ -35,6 +41,9 @@
 #include <limits.h>
 #ifndef SIZE_T_MAX
 #  define SIZE_T_MAX	SIZE_MAX
+#endif
+#ifndef SSIZE_MAX
+#  define SSIZE_MAX	((ssize_t)(SIZE_T_MAX >> 1))
 #endif
 #include <stdarg.h>
 #include <stdbool.h>
@@ -61,9 +70,7 @@ typedef intptr_t ssize_t;
 #  pragma warning(disable: 4996)
 #if _MSC_VER < 1800
 static int
-isblank(int c)
-{
-
+isblank(int c) {
 	return (c == '\t' || c == ' ');
 }
 #endif

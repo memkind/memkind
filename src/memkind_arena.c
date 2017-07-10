@@ -47,6 +47,8 @@
 
 #include "config.h"
 
+#define HUGE_PAGE_SIZE (1ull << MEMKIND_MASK_PAGE_SIZE_2MB)
+
 static void *jemk_mallocx_check(size_t size, int flags);
 static void *jemk_rallocx_check(void *ptr, size_t size, int flags);
 static void tcache_finalize(void* args);
@@ -134,9 +136,6 @@ struct memkind *get_kind_by_arena(unsigned arena_ind)
 // Allocates size bytes aligned to alignment. Returns NULL if allocation fails.
 static void *alloc_aligned_slow(size_t size, size_t alignment, struct memkind* kind)
 {
-    // According to jemalloc man page:
-    // The size parameter is always a multiple of the chunk size (where chunk size equals 2MB)
-    // The alignment parameter is always a power of two at least as large as the chunk size.
     size_t extended_size = size + alignment;
     void* ptr;
 
@@ -163,8 +162,14 @@ static void *alloc_aligned_slow(size_t size, size_t alignment, struct memkind* k
     return (void*)aligned_addr;
 }
 
-void *arena_chunk_alloc(void *chunk, size_t size, size_t alignment,
-                        bool *zero, bool *commit, unsigned arena_ind)
+
+void *arena_extent_alloc(extent_hooks_t *extent_hooks,
+    void *new_addr,
+    size_t size,
+    size_t alignment,
+    bool *zero,
+    bool *commit,
+    unsigned arena_ind)
 {
     int err;
     void *addr = NULL;
@@ -176,12 +181,12 @@ void *arena_chunk_alloc(void *chunk, size_t size, size_t alignment,
         return NULL;
     }
 
-    addr = kind_mmap(kind, chunk, size);
+    addr = kind_mmap(kind, new_addr, size);
     if (addr == MAP_FAILED) {
         return NULL;
     }
 
-    if (chunk != NULL && addr != chunk) {
+    if (new_addr != NULL && addr != new_addr) {
         /* wrong place */
         munmap(addr, size);
         return NULL;
@@ -201,25 +206,54 @@ void *arena_chunk_alloc(void *chunk, size_t size, size_t alignment,
     return addr;
 }
 
-bool arena_chunk_dalloc(void *chunk, size_t size, bool commited, unsigned arena_ind)
+void *arena_extent_alloc_hugetlb(extent_hooks_t *extent_hooks,
+    void *new_addr,
+    size_t size,
+    size_t alignment,
+    bool *zero,
+    bool *commit,
+    unsigned arena_ind)
+{
+    //round up to huge page size
+    size = (size + (HUGE_PAGE_SIZE - 1)) & ~(HUGE_PAGE_SIZE - 1);
+    return arena_extent_alloc(extent_hooks, new_addr, size, alignment, zero, commit, arena_ind);
+}
+
+bool arena_extent_dalloc(extent_hooks_t *extent_hooks,
+    void *addr,
+    size_t size,
+    bool committed,
+    unsigned arena_ind)
 {
     return true;
 }
 
-bool arena_chunk_commit(void *chunk, size_t size, size_t offset, size_t length,
-                        unsigned arena_ind)
+bool arena_extent_commit(extent_hooks_t *extent_hooks,
+    void *addr,
+    size_t size,
+    size_t offset,
+    size_t length,
+    unsigned arena_ind)
 {
     return false;
 }
 
-bool arena_chunk_decommit(void *chunk, size_t size, size_t offset, size_t length,
-                          unsigned arena_ind)
+bool arena_extent_decommit(extent_hooks_t *extent_hooks,
+    void *addr,
+    size_t size,
+    size_t offset,
+    size_t length,
+    unsigned arena_ind)
 {
     return true;
 }
 
-bool arena_chunk_purge(void *chunk, size_t size, size_t offset, size_t length,
-                       unsigned arena_ind)
+bool arena_extent_purge(extent_hooks_t *extent_hooks,
+    void *addr,
+    size_t size,
+    size_t offset,
+    size_t length,
+    unsigned arena_ind)
 {
     int err;
 
@@ -227,45 +261,73 @@ bool arena_chunk_purge(void *chunk, size_t size, size_t offset, size_t length,
         return true;
     }
 
-    err = madvise(chunk + offset, length, MADV_DONTNEED);
+    err = madvise(addr + offset, length, MADV_DONTNEED);
     return (err != 0);
 }
 
-bool arena_chunk_split(void *chunk, size_t size, size_t size_a, size_t size_b,
-        bool commited, unsigned arena_ind)
+bool arena_extent_split(extent_hooks_t *extent_hooks,
+    void *addr,
+    size_t size,
+    size_t size_a,
+    size_t size_b,
+    bool committed,
+    unsigned arena_ind)
 {
     return false;
 }
 
-bool arena_chunk_merge(void *chunk_a, size_t size_a, void *chunk_b,
-        size_t size_b, bool commited, unsigned arena_ind)
+bool arena_extent_merge(extent_hooks_t *extent_hooks,
+    void *addr_a,
+    size_t size_a,
+    void *addr_b,
+    size_t size_b,
+    bool committed,
+    unsigned arena_ind)
 {
     return false;
 }
 
-chunk_hooks_t arena_chunk_hooks = {
-    arena_chunk_alloc,
-    arena_chunk_dalloc,
-    arena_chunk_commit,
-    arena_chunk_decommit,
-    arena_chunk_purge,
-    arena_chunk_split,
-    arena_chunk_merge
+extent_hooks_t arena_extent_hooks = {
+    .alloc = arena_extent_alloc,
+    .dalloc = arena_extent_dalloc,
+    .commit = arena_extent_commit,
+    .decommit = arena_extent_decommit,
+    .purge_lazy = arena_extent_purge,
+    .split = arena_extent_split,
+    .merge = arena_extent_merge
 };
 
-MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind, chunk_hooks_t *hooks)
+extent_hooks_t arena_extent_hooks_hugetlb = {
+    .alloc = arena_extent_alloc_hugetlb,
+    .dalloc = arena_extent_dalloc,
+    .commit = arena_extent_commit,
+    .decommit = arena_extent_decommit,
+    .purge_lazy = arena_extent_purge,
+    .split = arena_extent_split,
+    .merge = arena_extent_merge
+};
+
+extent_hooks_t* get_extent_hooks_by_kind(struct memkind *kind)
+{
+    if (kind == MEMKIND_HUGETLB
+        || kind == MEMKIND_HBW_HUGETLB
+        || kind == MEMKIND_HBW_ALL_HUGETLB
+        || kind == MEMKIND_HBW_PREFERRED_HUGETLB) {
+        return &arena_extent_hooks_hugetlb;
+    }
+    else {
+        return &arena_extent_hooks;
+    }
+}
+
+MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind, extent_hooks_t *hooks)
 {
     int err = 0;
     size_t unsigned_size = sizeof(unsigned int);
-    size_t chunk_hooks_t_size = sizeof(chunk_hooks_t);
 
     pthread_once(&arena_config_once, arena_config_init);
     if(arena_init_status) {
         return arena_init_status;
-    }
-
-    if(hooks == NULL) {
-        hooks = &arena_chunk_hooks;
     }
 
     err = memkind_set_arena_map_len(kind);
@@ -283,7 +345,7 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind, chunk_hooks_t 
     for(i=0; i < kind->arena_map_len; i++) {
         //create new arena with consecutive index
         unsigned arena_index;
-        err = jemk_mallctl("arenas.extend", (void*)&arena_index, &unsigned_size, NULL, 0);
+        err = jemk_mallctl("arenas.create", (void*)&arena_index, &unsigned_size, NULL, 0);
         if(err) {
             goto exit;
         }
@@ -291,10 +353,10 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind, chunk_hooks_t 
         if(i == 0) {
             kind->arena_zero = arena_index;
         }
-        //setup chunk_hooks for newly created arena
+        //setup extent_hooks for newly created arena
         char cmd[64];
-        snprintf(cmd, sizeof(cmd), "arena.%u.chunk_hooks", arena_index);
-        err = jemk_mallctl(cmd, NULL, NULL, (void*)hooks, chunk_hooks_t_size);
+        snprintf(cmd, sizeof(cmd), "arena.%u.extent_hooks", arena_index);
+        err = jemk_mallctl(cmd, NULL, NULL, (void*)&hooks, sizeof(extent_hooks_t*));
         if(err) {
             goto exit;
         }
@@ -312,7 +374,7 @@ MEMKIND_EXPORT int memkind_arena_create(struct memkind *kind, struct memkind_ops
 
     err = memkind_default_create(kind, ops, name);
     if (!err) {
-        err = memkind_arena_create_map(kind, &arena_chunk_hooks);
+        err = memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind));
     }
     return err;
 }
@@ -557,7 +619,7 @@ void memkind_arena_init(struct memkind *kind)
 {
     int err = 0;
     if (kind != MEMKIND_DEFAULT) {
-        err = memkind_arena_create_map(kind, NULL);
+        err = memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind));
         if (err) {
             log_fatal("[%s] Failed to create arena map (error code:%d).", kind->name, err);
             abort();

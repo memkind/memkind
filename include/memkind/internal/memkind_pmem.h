@@ -46,6 +46,7 @@ extern "C" {
  */
 
 #define	MEMKIND_PMEM_MIN_SIZE (1024 * 1024 * 16)
+#define MEMKIND_PMEM_CHUNK_SIZE (1ull << 21ull) // 2MB
 
 int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops, const char *name);
 int memkind_pmem_destroy(struct memkind *kind);

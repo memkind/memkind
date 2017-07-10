@@ -46,7 +46,7 @@ extern "C" {
 struct memkind *get_kind_by_arena(unsigned arena_ind);
 
 int memkind_arena_create(struct memkind *kind, struct memkind_ops *ops, const char *name);
-int memkind_arena_create_map(struct memkind *kind, chunk_hooks_t *hooks);
+int memkind_arena_create_map(struct memkind *kind, extent_hooks_t *hooks);
 int memkind_arena_destroy(struct memkind *kind);
 void *memkind_arena_malloc(struct memkind *kind, size_t size);
 void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size);

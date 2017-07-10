@@ -213,7 +213,6 @@ void *kind_mmap(struct memkind *kind, void* addr, size_t size)
     }
 }
 
-static size_t Chunksize = 0;
 
 static int validate_memtype_bits(memkind_memtype_t memtype) {
     if(memtype == 0) return -1;
@@ -664,22 +663,12 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
     int err = 0;
     int oerrno;
 
-    size_t s = sizeof (Chunksize);
-
-    if (Chunksize == 0) {
-        err = jemk_mallctl("opt.lg_chunk", &Chunksize, &s, NULL, 0);
-        if (err) {
-            return MEMKIND_ERROR_RUNTIME;
-        }
-        Chunksize = 1 << Chunksize; /* 2^N */
-    }
-
     if (max_size < MEMKIND_PMEM_MIN_SIZE) {
         return MEMKIND_ERROR_INVALID;
     }
 
     /* round up to a multiple of jemalloc chunk size */
-    max_size = roundup(max_size, Chunksize);
+    max_size = roundup(max_size, MEMKIND_PMEM_CHUNK_SIZE);
 
     int fd = -1;
     void *addr;
@@ -697,7 +686,7 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
         goto exit;
     }
 
-    void *aligned_addr = (void *)roundup((uintptr_t)addr, Chunksize);
+    void *aligned_addr = (void *)roundup((uintptr_t)addr, MEMKIND_PMEM_CHUNK_SIZE);
     struct memkind_pmem *priv = (*kind)->priv;
 
     priv->fd = fd;

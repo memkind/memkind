@@ -32,7 +32,6 @@
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4096;
 static const char*  PMEM_DIR = "/tmp/";
-static const size_t CHUNK_SIZE = (1 << 22); // 4MB
 
 class MemkindPmemTests: public :: testing::Test
 {
@@ -69,10 +68,10 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPriv)
     ASSERT_TRUE(total_mem != 0);
     ASSERT_TRUE(free_mem != 0);
 
-    EXPECT_EQ(total_mem, roundup(PMEM_PART_SIZE, CHUNK_SIZE));
+    EXPECT_EQ(total_mem, roundup(PMEM_PART_SIZE, MEMKIND_PMEM_CHUNK_SIZE));
 
     size_t offset = total_mem - free_mem;
-    EXPECT_LT(offset, CHUNK_SIZE);
+    EXPECT_LT(offset, MEMKIND_PMEM_CHUNK_SIZE);
     EXPECT_LT(offset, total_mem);
 }
 
@@ -122,7 +121,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCalloc)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHuge)
 {
-    const size_t size = CHUNK_SIZE;
+    const size_t size = MEMKIND_PMEM_CHUNK_SIZE;
     const size_t num = 1;
     char *default_str = NULL;
 
