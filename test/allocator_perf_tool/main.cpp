@@ -21,40 +21,31 @@
 * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-//#define PRINT_LOG
 
 #include <stdio.h>
 #include <assert.h>
-#include <map>
 #include <iostream>
 #include <vector>
 
 #include "Configuration.hpp"
-#include "AllocationSizes.hpp"
 #include "AllocatorFactory.hpp"
 #include "TaskFactory.hpp"
 #include "Task.hpp"
 #include "ConsoleLog.hpp"
 #include "Stats.hpp"
 #include "Thread.hpp"
-#include "FootprintTask.h"
 #include "Tests.hpp"
-#include "MemoryFootprintStats.hpp"
-#include "Numastat.hpp"
 #include "CommandLine.hpp"
-#include "FootprintSampling.h"
 #include "FunctionCallsPerformanceTask.h"
 #include "StressIncreaseToMax.h"
-#include "CSVLogger.hpp"
 
 /*
 Command line description.
 Syntax:
 	key=value
 Options:
-	- 'test' - specify the test case. This option can be used with the following values: 'footprint', 'calls', 'all' or 'self',
+	- 'test' - specify the test case. This option can be used with the following values: 'calls', 'all' or 'self',
 	where:
-		'footprint' - memory footprint test,
 		'calls' - function calls performance test,
 		'all' - execute both above ('footprint' and 'calls') tests,
 		'self' - execute self tests
@@ -171,12 +162,6 @@ int main(int argc, char* argv[])
 	printf("\t size from-to = %zu-%zu\n\n", size_from, size_to);
 
 	assert(size_from <= size_to);
-#ifdef PRINT_LOG
-	float min = convert_bytes_to_mb(size_from * N *  threads_number);
-	float mid = convert_bytes_to_mb(((size_from + size_to) / 2.0) * N *  threads_number);
-	float max = convert_bytes_to_mb(size_to* N *  threads_number);
-	printf("Allocation bound: min: %f, mid: %f, max: %f\n",  min, mid, max);
-#endif
 
 
 	TypesConf func_calls;
@@ -218,51 +203,6 @@ int main(int argc, char* argv[])
 		is_csv_log_enabled,
 	};
 
-	//Footprint test
-	if(cmd_line.is_option_set("test", "footprint") || cmd_line.is_option_set("test", "all"))
-	{
-
-		TypesConf allocator_type;
-		allocator_type.enable_type(AllocatorTypes::MEMKIND_HBW);
-		conf.allocators_types = allocator_type;
-
-		std::vector<Thread*> threads;
-		std::vector<FootprintTask*> tasks;
-
-		FootprintSampling sampling;
-		Thread sampling_thread(&sampling);
-
-		TaskFactory task_factory;
-
-		for (int i=0; i<threads_number; i++)
-		{
-			FootprintTask* task = static_cast<FootprintTask*>(task_factory.create(TaskFactory::FOOTPRINT_TASK, conf));
-
-			sampling.register_task(task);
-			tasks.push_back(task);
-			threads.push_back(new Thread(task));
-		}
-
-		ThreadsManager threads_manager(threads);
-		threads_manager.start(); //Threads begins to execute tasks with footprint workload.
-		sampling_thread.start(); //Start sampling in separated thread.
-		threads_manager.barrier(); //Waiting until each thread has completed.
-		sampling.stop(); //Stop sampling.
-		sampling_thread.wait(); //Wait for the sampling thread.
-
-		MemoryFootprintStats mem_footprint_stats = sampling.get_memory_footprint_stats();
-		TimeStats stats;
-		for (int i=0; i<tasks.size(); i++)
-		{
-			stats += tasks[i]->get_results();
-		}
-
-		ConsoleLog::print_stats(mem_footprint_stats);
-		ConsoleLog::print_requested_memory(stats, "footprint test");
-
-		threads_manager.release();
-	}
-
 	//Function calls test
 	if(cmd_line.is_option_set("test", "calls") || cmd_line.is_option_set("test", "all"))
 	{
@@ -273,7 +213,7 @@ int main(int argc, char* argv[])
 		for (int i=0; i<threads_number; i++)
 		{
 			FunctionCallsPerformanceTask* task = static_cast<FunctionCallsPerformanceTask*>(
-				task_factory.create(TaskFactory::FUNCTION_CALLS_PERFORMANCE_TASK, conf)
+				task_factory.create(conf)
 				);
 			tasks.push_back(task);
 			threads.push_back(new Thread(task));

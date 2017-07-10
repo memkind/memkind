@@ -25,7 +25,6 @@
 #include "Configuration.hpp"
 #include "Stats.hpp"
 #include "FunctionCalls.hpp"
-#include "MemoryFootprintStats.hpp"
 
 #include <stdio.h>
 
@@ -64,19 +63,6 @@ public:
 			}
 		}
 		printf("==============================================================================================\n");
-	}
-
-	static void print_stats(const MemoryFootprintStats& stats)
-	{
-		printf("\n====== Memory footprint stats =======================================\n");
-		printf("Overhead sum over every sample: %f MB \n", stats.get_total_mem_overhed());
-		printf("Avg overhead: %f MB\n", stats.get_average_mem_overhead());
-		printf("Standard deviation: %f MB\n", stats.get_standard_deviation());
-		printf("Max overhead: %f MB\n", stats.get_max_mem_overhead());
-		printf("Max memory usage: %f MB\n", stats.get_max_memory_usage());
-		printf("Min memory usage: %f MB\n", stats.get_min_memory_usage());
-		printf("Number of samples: %zu\n", stats.get_number_of_samples());
-		printf("=====================================================================\n");
 	}
 
 	static void print_requested_memory(TimeStats& stats, std::string test_name)

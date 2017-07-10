@@ -112,10 +112,6 @@ allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.h
                                       test/allocator_perf_tool/CommandLine.hpp \
                                       test/allocator_perf_tool/Configuration.hpp \
                                       test/allocator_perf_tool/ConsoleLog.hpp \
-                                      test/allocator_perf_tool/FootprintSampling.cpp \
-                                      test/allocator_perf_tool/FootprintSampling.h \
-                                      test/allocator_perf_tool/FootprintTask.cpp \
-                                      test/allocator_perf_tool/FootprintTask.h \
                                       test/allocator_perf_tool/FunctionCalls.hpp \
                                       test/allocator_perf_tool/FunctionCallsPerformanceTask.cpp \
                                       test/allocator_perf_tool/FunctionCallsPerformanceTask.h \
@@ -123,10 +119,8 @@ allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.h
                                       test/allocator_perf_tool/Iterator.hpp \
                                       test/allocator_perf_tool/JemallocAllocatorWithTimer.hpp \
                                       test/allocator_perf_tool/MemkindAllocatorWithTimer.hpp \
-                                      test/allocator_perf_tool/MemoryFootprintStats.hpp \
                                       test/allocator_perf_tool/Numastat.hpp \
                                       test/allocator_perf_tool/Runnable.hpp \
-                                      test/allocator_perf_tool/Sample.hpp \
                                       test/allocator_perf_tool/ScenarioWorkload.cpp \
                                       test/allocator_perf_tool/ScenarioWorkload.h \
                                       test/allocator_perf_tool/StandardAllocatorWithTimer.hpp \

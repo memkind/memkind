@@ -37,8 +37,6 @@ This file contain self-tests for Allocator Perf Tool.
 #include "ScenarioWorkload.h"
 #include "TaskFactory.hpp"
 #include "Task.hpp"
-#include "FootprintTask.h"
-#include "MemoryFootprintStats.hpp"
 
 //Basic test for allocators. Allocate 32 bytes by malloc, then deallocate it by free.
 void test_allocator(Allocator& allocator, const char* allocator_name)
@@ -158,71 +156,6 @@ void test_types_conf()
 	}
 }
 
-//This test validate calculations of FootprintTask::calc_allocated_memory(...) method.
-void test_calc_allocated_memory()
-{
-	std::vector<memory_operation> op;
-
-	memory_operation data;
-	data.size_of_allocation = 1024*1024;
-	data.allocation_method = FunctionCalls::MALLOC;
-	data.is_allocated = true;
-	op.push_back(data);
-	op.push_back(data);
-	op.push_back(data);
-	data.allocation_method = FunctionCalls::FREE;
-	data.is_allocated = false;
-	op.push_back(data);
-
-	float allocated_mem = FootprintTask::calc_allocated_memory(op);
-
-	printf("calc_allocated_memory(op) = %f \n", allocated_mem);
-	assert(allocated_mem > 1.99);
-	assert(allocated_mem < 2.01);
-}
-
-//Test MemoryFootprintStats class for calculating statistics.
-void test_memory_footprint_stats()
-{
-	std::vector<Sample> samples;
-
-	double first_sample = 10.0;
-	double overhead = 4.0;
-
-	samples.push_back(Sample(first_sample + overhead, 1.0));
-	samples.push_back(Sample(first_sample + overhead, 1.0));
-	samples.push_back(Sample(first_sample + overhead, 2.0));
-	samples.push_back(Sample(first_sample + overhead, 1.0));
-
-	MemoryFootprintStats stats = MemoryFootprintStats::generate_stats(
-		first_sample,
-		samples
-		);
-
-#ifdef PRINT_LOG
-	printf("stats.get_max_mem_overhead() = %f \n", stats.get_max_mem_overhead());
-	printf("stats.get_min_memory_usage() = %f \n", stats.get_min_memory_usage());
-	printf("stats.get_max_memory_usage() = %f \n", stats.get_max_memory_usage());
-	printf("stats.get_total_mem_overhed() = %f \n", stats.get_total_mem_overhed());
-	printf("stats.get_average_mem_overhead() = %f \n", stats.get_average_mem_overhead());
-#endif
-
-	assert(stats.get_max_mem_overhead() >= 2.99);
-	assert(stats.get_max_mem_overhead() <= 3.01);
-
-	assert(stats.get_min_memory_usage() >= first_sample - 0.01);
-	assert(stats.get_min_memory_usage() <= first_sample + 0.01);
-
-	assert(stats.get_max_memory_usage() >= (first_sample + overhead) - 0.01);
-	assert(stats.get_max_memory_usage() <= (first_sample + overhead) + 0.01);
-
-	assert(stats.get_total_mem_overhed() >= 10.99);
-	assert(stats.get_total_mem_overhed() <= 11.01);
-
-	assert(stats.get_average_mem_overhead() >= 2.75 - 0.01);
-	assert(stats.get_average_mem_overhead() <= 2.75 + 0.01);
-}
-
 void execute_self_tests()
 {
 	const int N = 10000;
@@ -230,10 +163,6 @@ void execute_self_tests()
 	const unsigned seed = 11;
 
 	test_types_conf();
-
-	test_calc_allocated_memory();
-
-	test_memory_footprint_stats();
 
 	{
 		VectorIterator<size_t> it = AllocationSizes::generate_random_sizes(N, size_from, size_to,seed);

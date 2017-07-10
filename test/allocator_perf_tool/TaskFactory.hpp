@@ -28,7 +28,6 @@
 #include <assert.h>
 
 #include "Task.hpp"
-#include "FootprintTask.h"
 #include "FunctionCallsPerformanceTask.h"
 #include "Configuration.hpp"
 
@@ -37,28 +36,10 @@ class TaskFactory
 {
 public:
 
-	enum {FOOTPRINT_TASK, FUNCTION_CALLS_PERFORMANCE_TASK};
-
-	Task* create(unsigned type, TaskConf conf)
+	Task* create(TaskConf conf)
 	{
 		Task* task = NULL;
-
-		switch(type)
-		{
-			case FOOTPRINT_TASK:
-					{
-						task = new FootprintTask(conf);
-						break;
-					}
-			case FUNCTION_CALLS_PERFORMANCE_TASK:
-					{
-						task = new FunctionCallsPerformanceTask(conf);
-						break;
-					}
-
-			default:
-				assert(!"'type' out of range!");
-		}
+		task = new FunctionCallsPerformanceTask(conf);
 
 		tasks.push_back(task);
 

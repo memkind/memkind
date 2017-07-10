@@ -69,7 +69,7 @@ protected:
 
         for (int i=0; i<threads_number; i++)
         {
-            Task* task = task_factory.create(TaskFactory::FUNCTION_CALLS_PERFORMANCE_TASK, conf);
+            Task* task = task_factory.create(conf);
             tasks.push_back(task);
             threads.push_back(new Thread(task));
             conf.seed += 1;
