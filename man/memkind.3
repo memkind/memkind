@@ -472,31 +472,10 @@ Call to
 .BR mmap (2)
 failed
 .TP
-.B MEMKIND_ERROR_MEMALIGN (DEPRECATED)
-Call to jemalloc's
-.BR posix_memalign ()
-failed
-.TP
-.B MEMKIND_ERROR_MALLCTL (DEPRECATED)
-Call to jemalloc's
-.BR mallctl ()
-failed
-.TP
 .B MEMKIND_ERROR_MALLOC
 Call to jemalloc's
 .BR malloc ()
 failed
-.TP
-.B MEMKIND_ERROR_GETCPU (DEPRECATED)
-Call to
-.BR sched_getcpu ()
-returned out of range
-.TP
-.B MEMKIND_ERROR_TIEDISTANCE (DEPRECATED)
-Two NUMA memory nodes are equidistant from target cpu node
-.TP
-.B MEMKIND_ERROR_ALIGNMENT (DEPRECATED)
-Alignment must be a power of two and larger than sizeof(void *)
 .TP
 .B MEMKIND_ERROR_ALLOCM
 Call to jemalloc's
