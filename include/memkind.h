@@ -269,10 +269,6 @@ void memkind_error_message(int err, char *msg, size_t size);
 /* KIND MANAGEMENT INTERFACE */
 
 /* EXPERIMENTAL API */
-/* Create a new PMEM (file-backed) kind of given size on top of a temporary file */
-int memkind_create_pmem(const char *dir, size_t max_size, memkind_t *kind);
-
-/* EXPERIMENTAL API */
 /* returns 0 if memory kind is available else returns error code */
 int memkind_check_available(memkind_t kind);
 

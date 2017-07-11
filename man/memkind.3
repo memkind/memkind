@@ -50,7 +50,7 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .sp
 .B "KIND MANAGMENT:"
 .br
-.BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
+.BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" ); (DEPRECATED)
 .br
 .BI "int memkind_check_available(memkind_t " "kind" );
 .sp
@@ -239,7 +239,7 @@ section.  The user can also create their own kinds of memory.  This
 section describes the API's that enable the tracking of the different
 kinds of memory and determining their properties.
 .PP
-.BR memkind_create_pmem ()
+.BR memkind_create_pmem () (DEPRECATED)
 is a convenience function used to create a file-backed kind of memory.
 It allocates a temporary file in the given directory
 .IR dir .
