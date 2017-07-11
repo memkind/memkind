@@ -48,10 +48,6 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .BI "void memkind_free(memkind_t " "kind" ", void " "*ptr" );
 .br
 .sp
-.B "ALLOCATOR CALLBACK FUNCTION:"
-.br
-.BI "void *memkind_partition_mmap(int " "partition" ", void " "*addr" ", size_t " "size" ); (DEPRECATED)
-.sp
 .B "KIND MANAGMENT:"
 .br
 .BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
@@ -234,30 +230,6 @@ specified to
 .BR memkind_free ()
 but this will require a look up that can be bypassed by specifying
 a non-zero value.
-.sp
-.B "ALLOCATOR CALLBACK FUNCTION:"
-.br
-This section describes the memkind interface which is used internally
-by the heap manager.  For this API the kind is determined by the
-partition index.  This enables the underlying heap manager to call
-routines with standard type arguments, and allows the heap manager
-implementation to be independent of the specifics of the
-.I memkind_t
-implementation.  Currently there is only one callback function.
-.PP
-.BR memkind_partition_mmap ()
-which is a wrapper around the
-.BR mmap (2)
-system call.  The hint address
-.I addr
-and the length in bytes of the buffer to be
-allocated
-.I size
-are passed through to
-.BR mmap (2).
-The other
-.BR mmap (2)
-parameters are determined by the kind operations.
 .sp
 .B "KIND MANAGEMENT:"
 .br
