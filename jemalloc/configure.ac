@@ -700,6 +700,14 @@ if test "x${je_cv_attribute}" = "xyes" ; then
     JE_CXXFLAGS_ADD([-fvisibility=hidden])
   fi
 fi
+dnl Check for tls-dialect support.
+JE_CFLAGS_ADD([-mtls-dialect=gnu2])
+if test "x$je_cv_cflags_added" = "x-mtls-dialect=gnu2" ; then
+  je_cv_tls_dialect_gnu2=yes
+else
+  je_cv_tls_dialect_gnu2=no
+fi
+JE_CXXFLAGS_ADD([-mtls-dialect=gnu2])
 dnl Check for tls_model attribute support (clang 3.0 still lacks support).
 JE_CFLAGS_SAVE()
 JE_CFLAGS_ADD([-Werror])
@@ -710,7 +718,8 @@ JE_COMPILABLE([tls_model attribute], [],
                foo = 0;],
               [je_cv_tls_model])
 JE_CFLAGS_RESTORE()
-if test "x${je_cv_tls_model}" = "xyes" ; then
+if test "x${je_cv_tls_dialect_gnu2}" = "xno" \
+ -a "x${je_cv_tls_model}" = "xyes" ; then
   AC_DEFINE([JEMALLOC_TLS_MODEL],
             [__attribute__((tls_model("initial-exec")))])
 else
