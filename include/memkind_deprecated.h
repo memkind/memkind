@@ -59,15 +59,6 @@ extern memkind_t MEMKIND_HBW_GBTLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
 extern memkind_t MEMKIND_GBTLB;
 
-/*
- * Create a new PMEM (file-backed) kind
- *
- * DEPRECATION REASON:
- * There are libraries that already provides similar functionality,
- * such as NVM Library.
- */
-int MEMKIND_DEPRECATED(memkind_create_pmem(const char *dir, size_t max_size, memkind_t *kind));
-
 #ifdef __cplusplus
 }
 #endif
