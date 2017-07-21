@@ -23,8 +23,8 @@
  */
 
 #pragma once
-#include "common.h"
 #include <memkind.h>
+#include <new>
 
 class MemoryManager
 {
@@ -48,7 +48,11 @@ public:
         kind(kind),
         memory_size(size),
         memory_pointer(memkind_malloc(kind, size))
-    {}
+    {
+        if(!memory_pointer) {
+            throw std::bad_alloc();
+        }
+    }
 
     size_t size()
     {

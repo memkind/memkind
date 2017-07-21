@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2016 Intel Corporation.
+* Copyright (C) 2016 - 2017 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,9 @@
 */
 #pragma once
 
-#include <stdio.h>
+#include <iostream>
+#include <sstream>
+#include <gtest/gtest.h>
 
 /*
  * The GTestAdapter class is an adapter for GTest framework.
@@ -39,6 +41,8 @@ public:
         std::ostringstream tmp_value;
         tmp_value << value;
         testing::Test::RecordProperty(key, tmp_value.str());
-        std::cout << key << ": " << value << std::endl;
+        std::ios::fmtflags flags(std::cout.flags());
+        std::cout << key << ": " << std::fixed  <<  std::setprecision(5) << value << std::endl;
+        std::cout.flags(flags);
     }
 };

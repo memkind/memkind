@@ -23,43 +23,47 @@
  */
 
 #pragma once
-#include <iostream>
-#include <fstream>
-#include "common.h"
+#include <stdio.h>
+#include <fcntl.h>
 
-namespace ProcStat
+class ProcStat
 {
-    std::string get_stat(const std::string& field_name)
+public:
+    //Note: this function is not thread-safe.
+    bool get_stat(const char* field_name, char* value)
     {
-        std::string file_name = "/proc/self/status";
-        std::ifstream file(file_name);
-        std::string line;
-        while (std::getline(file, line))
-        {
-            if (!line.compare(0, field_name.size(), field_name))
-            {
-                line.erase(0, field_name.size() + 1);
-                size_t start = line.find_first_not_of(" \t");
-                return line.substr(start);
-            }
+        int file = open("/proc/self/status", O_RDONLY);
+        if(file == -1) {
+            return false;
         }
-        return "";
+
+        read(file, buff, sizeof(buff));
+        char* pos = strstr(buff, field_name);
+        if(pos) {
+            sscanf(pos, "%64[a-zA-Z_0-9()]: %s", current_entry_name, value);
+        }
+
+        close(file);
+        return pos;
     }
 
-    unsigned extract_leading_number(const std::string& value)
+    size_t get_virtual_memory_size_bytes()
     {
-        size_t number_end = value.find_first_not_of("0123456789");
-        return std::stoi(value.substr(0, number_end));
+        get_stat("VmSize", str_value);
+        return strtol(str_value, NULL, 10) * 1024;
     }
 
-    size_t get_virtual_memory_size()
+    size_t get_physical_memory_size_bytes()
     {
-        return extract_leading_number(get_stat("VmSize")) * KB;
+        get_stat("VmRSS", str_value);
+        return strtol(str_value, NULL, 10) * 1024;
     }
-
-    size_t get_physical_memory_size()
-    {
-        return extract_leading_number(get_stat("VmRSS")) * KB;
-    }
-}
+private:
+    /* We are avoiding to allocate local buffers,
+     * since it can produce noise in memory footprint tests.
+     */
+    char buff[1024];
+    char current_entry_name[1024];
+    char str_value[1024];
+};
 

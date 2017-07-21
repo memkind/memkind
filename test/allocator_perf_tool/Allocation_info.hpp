@@ -23,8 +23,9 @@
 */
 #pragma once
 
-#include <stdlib.h>
-#include <numaif.h>
+#include <stdint.h>
+#include <stddef.h>
+
 
 
 //This structure is responsible to store information about single memory operation.
@@ -39,6 +40,6 @@ struct memory_operation
 	int error_code;
 };
 
-float convert_bytes_to_mb(size_t bytes);
+double convert_bytes_to_mb(uint64_t bytes);
 
 int get_numa_node_id(void* ptr);

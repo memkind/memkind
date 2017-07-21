@@ -23,10 +23,11 @@
 */
 
 #include "Allocation_info.hpp"
+#include <numaif.h>
 
-float convert_bytes_to_mb(size_t bytes)
+double convert_bytes_to_mb(uint64_t bytes)
 {
-	return ((float)bytes) / (1024.0*1024.0);
+    return bytes / (1024.0 * 1024.0);
 }
 
 int get_numa_node_id(void* ptr)
