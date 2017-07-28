@@ -51,7 +51,8 @@ test/python_framework/__init__.py \
 test/hbw_detection_test.py \
 test/autohbw_test.py \
 test/trace_mechanism_test.py \
-test/draw_plots.py
+test/draw_plots.py \
+VERSION
 
 all: $(rpm)
 

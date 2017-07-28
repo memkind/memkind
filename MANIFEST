@@ -6,7 +6,6 @@ INSTALL
 Makefile.am
 NEWS
 README
-VERSION
 .travis.yml
 autogen.sh
 build.sh
@@ -27,8 +26,9 @@ examples/memkind_allocated_example.cpp
 examples/memkind_allocated.hpp
 examples/memkind_decorator_debug.c
 examples/pmem_example.c
-make_rpm.mk
-m4
+m4/ax_cxx_compile_stdcxx.m4
+m4/ax_cxx_compile_stdcxx_11.m4
+m4/ax_pthread.m4
 man/hbwmalloc.3
 man/memkind.3
 man/memkind_arena.3

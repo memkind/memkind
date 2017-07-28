@@ -15,7 +15,6 @@ examples/memkind_allocated_example.cpp
 examples/memkind_allocated.hpp
 examples/hello_memkind_example.c
 examples/memkind_decorator_debug.c
-make_rpm.mk
 man/autohbw.7
 man/hbwmalloc.3
 man/memkind.3
