@@ -459,11 +459,6 @@ static void memkind_hbw_closest_numanode_init(void)
     if (g->init_err)
         goto exit;
 
-    if (num_unique == 1) {
-       g->init_err = MEMKIND_ERROR_UNAVAILABLE;
-       goto exit;
-    }
-
     high_bandwidth = bandwidth_nodes[num_unique-1].bandwidth;
     g->init_err = set_closest_numanode(num_unique, bandwidth_nodes,
                                        high_bandwidth, g->num_cpu,
