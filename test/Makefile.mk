@@ -34,7 +34,7 @@ check_PROGRAMS += test/all_tests \
                   test/freeing_memory_segfault_test \
                   # end
 
-TESTS += test/check.sh
+TESTS += test/test.sh
 
 EXTRA_DIST += test/memkind-afts.ts \
               test/memkind-afts-ext.ts \

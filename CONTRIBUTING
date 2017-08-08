@@ -111,8 +111,8 @@ pages may require a modification to the kernel command line unless the
 kernel is quite recent.
 
 To test memkind simply execute the "make check" target after building.
-This target calls memkind/test/check.sh which in turn calls
-memkind/test/test.sh with parameters depending on the environment.
+This target calls memkind/test/test.sh with parameters
+depending on the environment.
 
 Most of the tests are written within the gtest framework, however, as
 part of testing the example programs are also executed and the return

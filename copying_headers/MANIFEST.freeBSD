@@ -59,7 +59,6 @@ test/TestPolicy.hpp
 test/bat_tests.cpp
 test/check.cpp
 test/check.h
-test/check.sh
 test/common.h
 test/static_kinds_list.h
 test/environ_err_hbw_malloc_test.cpp

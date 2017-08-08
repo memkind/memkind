@@ -60,9 +60,6 @@ This is scenario for all stress and longevity tests.
 
 MANUAL TESTING
 ==============
-In order to run tests on local machine, check.sh or test.sh should be executed.
-While running tests with check.sh, script is determining if 2MB pages are enabled
-on the machine as well as whether it contains MCDRAM nodes. Based on this information test.sh
-is executed with parameters that skip tests that would fail because of machine configuration.
+In order to run tests on local machine, test.sh should be executed.
 When test.sh is run, all tests are executed as long as -d (skip MCDRAM nodes detection), -m (skip
 tests that require 2MB pages) parameters are not used.

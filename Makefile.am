@@ -71,7 +71,6 @@ EXTRA_DIST = autogen.sh \
              build.sh \
              build_jemalloc.sh \
              examples/README \
-             test/check.sh \
              test/test.sh \
              VERSION \
              CONTRIBUTING \
