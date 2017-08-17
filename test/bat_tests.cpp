@@ -27,6 +27,7 @@
 #include <fstream>
 #include <algorithm>
 #include <numaif.h>
+#include <memkind/internal/memkind_regular.h>
 
 #include "common.h"
 #include "check.h"
@@ -36,18 +37,72 @@
 #include "Allocator.hpp"
 #include "TestPolicy.hpp"
 
+#define TEST_PREFIX "test_TC_MEMKIND_BAT_"
+
+typedef void(*test_function)(Allocator*, size_t);
+
+typedef std::tuple<test_function, memkind_memtype_t, memkind_policy_t, memkind_bits_t, size_t> memtype_policy_test_params;
+
+test_function get_function(memtype_policy_test_params params)
+{
+    return std::get<0>(params);
+}
+
+memkind_memtype_t get_memtype(memtype_policy_test_params params)
+{
+    return std::get<1>(params);
+}
+
+memkind_policy_t get_policy(memtype_policy_test_params params)
+{
+    return std::get<2>(params);
+}
+
+memkind_bits_t get_flags(memtype_policy_test_params params)
+{
+    return std::get<3>(params);
+}
+
+size_t get_size(memtype_policy_test_params params)
+{
+    return std::get<4>(params);
+}
+
+typedef std::tuple<test_function, hbw_policy_t, size_t> hbw_policy_test_params;
+
+test_function get_function(hbw_policy_test_params params)
+{
+    return std::get<0>(params);
+}
+
+hbw_policy_t get_hbw_policy(hbw_policy_test_params params)
+{
+    return std::get<1>(params);
+}
+
+size_t get_size(hbw_policy_test_params params)
+{
+    return std::get<2>(params);
+}
+
+typedef std::tuple<hbw_policy_t, size_t> hbw_policy_huge_page_test_params;
+
+hbw_policy_t get_hbw_policy(hbw_policy_huge_page_test_params params)
+{
+    return std::get<0>(params);
+}
+
+size_t get_size(hbw_policy_huge_page_test_params params)
+{
+    return std::get<1>(params);
+}
+
+
+
 /*
  * Set of basic acceptance tests.
  */
-class BATest: public TGTest
-{};
-
-class BATestHuge: public BATest
-{
-private:
-    HugePageOrganizer huge_page_organizer = HugePageOrganizer(8);
-};
-
+class BATest: public TGTest {};
 class BasicAllocTest
 {
 public:
@@ -133,437 +188,213 @@ private:
     Allocator *allocator;
 };
 
-static void test_malloc(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
+
+static void test_malloc(Allocator* allocator, size_t size)
 {
-    MemkindAllocator memkind_allocator(memtype, policy, flags);
-    BasicAllocTest(&memkind_allocator).malloc(size);
+    BasicAllocTest(allocator).malloc(size);
 }
 
-static void test_calloc(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
+static void test_calloc(Allocator* allocator, size_t size)
 {
-    MemkindAllocator memkind_allocator(memtype, policy, flags);
-    BasicAllocTest(&memkind_allocator).calloc(1, size);
+    BasicAllocTest(allocator).calloc(1, size);
 }
 
-static void test_realloc(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
+static void test_realloc(Allocator* allocator, size_t size)
 {
-    MemkindAllocator memkind_allocator(memtype, policy, flags);
-    BasicAllocTest(&memkind_allocator).realloc(size);
+    BasicAllocTest(allocator).realloc(size);
+}
+
+static void test_memalign(Allocator* allocator, size_t size)
+{
+    BasicAllocTest(allocator).memalign(4096, size);
+}
+
+static void test_free(Allocator* allocator, size_t size)
+{
+    BasicAllocTest(allocator).free(size);
 }
 
 
-static void test_memalign(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
+template <typename T>
+std::vector<T> GetKeys(std::map<T, std::string> dict)
 {
-    MemkindAllocator memkind_allocator(memtype, policy, flags);
-    BasicAllocTest(&memkind_allocator).memalign(4096, size);
+    std::vector<T> keys;
+    for (auto const& item: dict) {
+        keys.push_back(item.first);
+    }
+    return keys;
 }
 
-static void test_free(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags, size_t size)
+struct TestParameters
 {
-    MemkindAllocator memkind_allocator(memtype, policy, flags);
-    BasicAllocTest(&memkind_allocator).free(size);
+    static const std::map<test_function, std::string> functions;
+    static const std::map<memkind_memtype_t, std::string> memtypes;
+    static const std::map<memkind_policy_t, std::string> policies;
+    static const std::map<hbw_policy_t, std::string> hbw_policies;
+    static const std::vector<size_t> sizes;
+};
+
+const map<test_function, std::string> TestParameters::functions =
+    {{&test_malloc, "malloc"},
+     {&test_calloc, "calloc"},
+     {&test_realloc, "realloc"},
+     {&test_memalign, "memalign"},
+     {&test_free, "free"}};
+const std::map<memkind_memtype_t, std::string> TestParameters::memtypes = {{MEMKIND_MEMTYPE_DEFAULT, "DEFAULT"},
+                                                                           {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, "HIGH_BANDWIDTH"}};
+const std::map<memkind_policy_t, std::string> TestParameters::policies = {{MEMKIND_POLICY_PREFERRED_LOCAL, "PREFERRED_LOCAL"},
+                                                                          {MEMKIND_POLICY_BIND_LOCAL, "BIND_LOCAL"},
+                                                                          {MEMKIND_POLICY_BIND_ALL, "BIND_ALL"},
+                                                                          {MEMKIND_POLICY_INTERLEAVE_ALL, "MEMKIND_POLICY_INTERLEAVE_ALL"}};
+const std::map<hbw_policy_t, std::string> TestParameters::hbw_policies = {{HBW_POLICY_PREFERRED, "HBW_POLICY_PREFERRED"},
+                                                                          {HBW_POLICY_BIND, "HBW_POLICY_BIND"},
+                                                                          {HBW_POLICY_BIND_ALL, "HBW_POLICY_BIND_ALL"},
+                                                                          {HBW_POLICY_INTERLEAVE, "HBW_POLICY_INTERLEAVE"}};
+const std::vector<size_t> TestParameters::sizes = {4096, 4194305};
+
+
+class MemtypePolicyTest: public TGTest,
+              public ::testing::WithParamInterface<memtype_policy_test_params>
+{
+public:
+    static std::string get_test_name_suffix(testing::TestParamInfo<memtype_policy_test_params> info)
+    {
+        return TEST_PREFIX +
+               TestParameters::functions.at(get_function(info.param)) + "_" +
+               TestParameters::memtypes.at(get_memtype(info.param)) + "_" +
+               TestParameters::policies.at(get_policy(info.param)) + "_" +
+               (get_flags(info.param) == MEMKIND_MASK_PAGE_SIZE_2MB ? "PAGE_SIZE_2MB_" : "") +
+               std::to_string(get_size(info.param)) + "_bytes";
+    }
+};
+
+TEST_P(MemtypePolicyTest, memkind_heap_mgmt)
+{
+    HugePageOrganizer huge_page_organizer(8);
+    auto params = GetParam();
+    auto flags = get_flags(params);
+    MemkindAllocator allocator(get_memtype(GetParam()), get_policy(GetParam()), flags);
+    get_function(GetParam())(&allocator, get_size(GetParam()));
 }
 
-static void test_malloc(memkind_t kind, size_t size)
+INSTANTIATE_TEST_CASE_P(DEFAULT,
+                        MemtypePolicyTest,
+                        ::testing::Combine(::testing::ValuesIn(GetKeys(TestParameters::functions)),
+                                           ::testing::Values(MEMKIND_MEMTYPE_DEFAULT),
+                                           ::testing::Values(MEMKIND_POLICY_PREFERRED_LOCAL),
+                                           ::testing::Values(MEMKIND_MASK_PAGE_SIZE_2MB, memkind_bits_t()),
+                                           ::testing::ValuesIn(TestParameters::sizes)),
+                        MemtypePolicyTest::get_test_name_suffix
+                        );
+
+INSTANTIATE_TEST_CASE_P(HBW,
+                        MemtypePolicyTest,
+                        ::testing::Combine(::testing::ValuesIn(GetKeys(TestParameters::functions)),
+                                           ::testing::Values(MEMKIND_MEMTYPE_HIGH_BANDWIDTH),
+                                           ::testing::ValuesIn(GetKeys(TestParameters::policies)),
+                                           ::testing::Values(memkind_bits_t()),
+                                           ::testing::ValuesIn(TestParameters::sizes)),
+                        MemtypePolicyTest::get_test_name_suffix
+                        );
+
+INSTANTIATE_TEST_CASE_P(HBW_HUGE,
+                        MemtypePolicyTest,
+                        ::testing::Combine(::testing::ValuesIn(GetKeys(TestParameters::functions)),
+                                           ::testing::Values(MEMKIND_MEMTYPE_HIGH_BANDWIDTH),
+                                           ::testing::Values(MEMKIND_POLICY_PREFERRED_LOCAL,
+                                                             MEMKIND_POLICY_BIND_LOCAL,
+                                                             MEMKIND_POLICY_BIND_ALL),
+                                           ::testing::Values(MEMKIND_MASK_PAGE_SIZE_2MB),
+                                           ::testing::ValuesIn(TestParameters::sizes)),
+                        MemtypePolicyTest::get_test_name_suffix
+                        );
+
+
+class HBWPolicyHugePageTest: public TGTest,
+                             public ::testing::WithParamInterface<hbw_policy_huge_page_test_params>
 {
-    MemkindAllocator memkind_allocator(kind);
-    BasicAllocTest(&memkind_allocator).malloc(size);
+public:
+    static std::string get_test_name_suffix(testing::TestParamInfo<hbw_policy_huge_page_test_params> info)
+    {
+        return TEST_PREFIX +
+               TestParameters::hbw_policies.at(get_hbw_policy(info.param)) + "_" +
+               std::to_string(get_size(info.param)) + "_bytes";
+    }
+};
+
+TEST_P(HBWPolicyHugePageTest, memalign)
+{
+    HugePageOrganizer huge_page_organizer(8);
+    HbwmallocAllocator hbwmalloc_allocator(get_hbw_policy(GetParam()));
+    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
+    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, get_size(GetParam()));
 }
 
-static void test_calloc(memkind_t kind, size_t size)
+INSTANTIATE_TEST_CASE_P(HBW_memalign,
+                        HBWPolicyHugePageTest,
+                        ::testing::Combine(::testing::Values(HBW_POLICY_PREFERRED, HBW_POLICY_BIND, HBW_POLICY_BIND_ALL),
+                                           ::testing::ValuesIn(TestParameters::sizes)),
+                        HBWPolicyHugePageTest::get_test_name_suffix
+                        );
+
+
+class HBWPolicyTest: public TGTest, public ::testing::WithParamInterface<hbw_policy_test_params>
 {
-    MemkindAllocator memkind_allocator(kind);
-    BasicAllocTest(&memkind_allocator).calloc(1, size);
+public:
+    static std::string get_test_name_suffix(testing::TestParamInfo<hbw_policy_test_params> info)
+    {
+        return TEST_PREFIX +
+               TestParameters::functions.at(get_function(info.param)) + "_" +
+               TestParameters::hbw_policies.at(get_hbw_policy(info.param)) + "_" +
+               std::to_string(get_size(info.param)) + "_bytes";
+    }
+};
+
+TEST_P(HBWPolicyTest, memkind_heap_mgmt)
+{
+    HbwmallocAllocator allocator(get_hbw_policy(GetParam()));
+    get_function(GetParam())(&allocator, get_size(GetParam()));
 }
 
-static void test_realloc(memkind_t kind, size_t size)
+INSTANTIATE_TEST_CASE_P(HBWPolicy,
+                        HBWPolicyTest,
+                        ::testing::Combine(::testing::ValuesIn(GetKeys(TestParameters::functions)),
+                                           ::testing::ValuesIn(GetKeys(TestParameters::hbw_policies)),
+                                           ::testing::ValuesIn(TestParameters::sizes)),
+                        HBWPolicyTest::get_test_name_suffix
+                        );
+
+
+class MemkindRegularTest: public TGTest, public ::testing::WithParamInterface<tuple<test_function, size_t>>
 {
-    MemkindAllocator memkind_allocator(kind);
-    BasicAllocTest(&memkind_allocator).realloc(size);
+public:
+    static std::string get_test_name_suffix(testing::TestParamInfo<std::tuple<test_function, size_t>> info)
+    {
+        return TEST_PREFIX +
+               TestParameters::functions.at(std::get<0>(info.param)) + "_" +
+               std::to_string(std::get<1>(info.param)) + "_bytes";
+    }
+};
+
+
+TEST_P(MemkindRegularTest, memkind_heap_mgmt)
+{
+    MemkindAllocator allocator(MEMKIND_REGULAR);
+    std::get<0>(GetParam())(&allocator, std::get<1>(GetParam()));
 }
 
-static void test_memalign(memkind_t kind, size_t size)
-{
-    MemkindAllocator memkind_allocator(kind);
-    BasicAllocTest(&memkind_allocator).memalign(4096, size);
-}
+INSTANTIATE_TEST_CASE_P(Regular,
+                        MemkindRegularTest,
+                        ::testing::Combine(::testing::ValuesIn(GetKeys(TestParameters::functions)),
+                                           ::testing::ValuesIn(TestParameters::sizes)),
+                        MemkindRegularTest::get_test_name_suffix
+                        );
 
-static void test_free(memkind_t kind, size_t size)
-{
-    MemkindAllocator memkind_allocator(kind);
-    BasicAllocTest(&memkind_allocator).free(size);
-}
-
-/*** Kind tests */
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_4096_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_4194305_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_malloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL_4096_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL_4194305_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_ALL_4096_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_ALL_4194305_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_ALL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_BIND_ALL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4096_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4194305_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4096_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
-{
-    test_malloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4194305);
-}
 
 TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
 {
-    test_malloc((memkind_memtype_t)(MEMKIND_MEMTYPE_DEFAULT | MEMKIND_MEMTYPE_HIGH_BANDWIDTH), MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_DEFAULT_PREFERRED_LOCAL_4096_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_DEFAULT_PREFERRED_LOCAL_4194305_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_calloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_calloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_LOCAL_4096_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_LOCAL_4194305_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_ALL_4096_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_ALL_4194305_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_ALL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_BIND_ALL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4096_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4194305_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4096_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
-{
-    test_calloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_DEFAULT_PREFERRED_LOCAL_4096_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_DEFAULT_PREFERRED_LOCAL_4194305_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_realloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_realloc_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_LOCAL_4096_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_LOCAL_4194305_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_ALL_4096_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_ALL_4194305_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_ALL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_BIND_ALL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4096_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_4194305_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4096_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
-{
-    test_realloc(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_DEFAULT_PREFERRED_LOCAL_4096_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_DEFAULT_PREFERRED_LOCAL_4194305_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_memalign_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_memalign_DEFAULT_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_LOCAL_4096_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_LOCAL_4194305_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_ALL_4096_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_ALL_4194305_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_ALL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_BIND_ALL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_BIND_ALL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_PREFERRED_LOCAL_4096_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_PREFERRED_LOCAL_4194305_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4096_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_PREFERRED_LOCAL_PAGE_SIZE_2MB_4194305_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_INTERLEAVE_ALL_4096_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
-{
-    test_memalign(MEMKIND_MEMTYPE_HIGH_BANDWIDTH, MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t(), 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_free_DEFAULT_PREFERRED_LOCAL_4096_bytes)
-{
-    test_free(MEMKIND_MEMTYPE_DEFAULT, MEMKIND_POLICY_PREFERRED_LOCAL, memkind_bits_t(), 4096);
+    MemkindAllocator allocator((memkind_memtype_t)(MEMKIND_MEMTYPE_DEFAULT | MEMKIND_MEMTYPE_HIGH_BANDWIDTH), MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t());
+    test_malloc(&allocator, 4194305);
 }
 
 TEST_F(BATest, test_TC_MEMKIND_free_MEMKIND_DEFAULT_free_with_NULL_kind_4096_bytes)
@@ -573,245 +404,11 @@ TEST_F(BATest, test_TC_MEMKIND_free_MEMKIND_DEFAULT_free_with_NULL_kind_4096_byt
     memkind_free(0, ptr);
 }
 
-TEST_F(BATestHuge, test_TC_MEMKIND_free_ext_MEMKIND_GBTLB_4096_bytes)
+TEST_F(BATest, test_TC_MEMKIND_free_ext_MEMKIND_GBTLB_4096_bytes)
 {
-    HugePageOrganizer huge_page_organizer(260);
+    HugePageOrganizer huge_page_organizer(1000);
     MemkindAllocator memkind_allocator(MEMKIND_GBTLB);
     BasicAllocTest(&memkind_allocator).free(4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Bind_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
-    BasicAllocTest(&hbwmalloc_allocator).malloc(4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Bind_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
-    BasicAllocTest(&hbwmalloc_allocator).malloc(4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Bind_All_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
-    BasicAllocTest(&hbwmalloc_allocator).malloc(4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Bind_All_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
-    BasicAllocTest(&hbwmalloc_allocator).malloc(4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Preferred_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
-    BasicAllocTest(&hbwmalloc_allocator).malloc(4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Preferred_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
-    BasicAllocTest(&hbwmalloc_allocator).malloc(4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Interleave_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
-    BasicAllocTest(&hbwmalloc_allocator).malloc(4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_malloc_Interleave_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
-    BasicAllocTest(&hbwmalloc_allocator).malloc(4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Bind_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
-    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Bind_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
-    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Bind_All_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
-    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Bind_All_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
-    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Preferred_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
-    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Preferred_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
-    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Interleave_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
-    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_calloc_Interleave_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
-    BasicAllocTest(&hbwmalloc_allocator).calloc(1, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Bind_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
-    BasicAllocTest(&hbwmalloc_allocator).realloc(4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Bind_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
-    BasicAllocTest(&hbwmalloc_allocator).realloc(4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Bind_All_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
-    BasicAllocTest(&hbwmalloc_allocator).realloc(4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Bind_All_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
-    BasicAllocTest(&hbwmalloc_allocator).realloc(4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Preferred_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
-    BasicAllocTest(&hbwmalloc_allocator).realloc(4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Preferred_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
-    BasicAllocTest(&hbwmalloc_allocator).realloc(4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Interleave_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
-    BasicAllocTest(&hbwmalloc_allocator).realloc(4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_realloc_Interleave_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
-    BasicAllocTest(&hbwmalloc_allocator).realloc(4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Bind_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Bind_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Bind_All_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Bind_All_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Preferred_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Preferred_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Interleave_Policy_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_memalign_Interleave_Policy_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_INTERLEAVE);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Preferred_Policy_PAGE_SIZE_2MB_4096_bytes_)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
-    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Preferred_Policy_PAGE_SIZE_2MB_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_PREFERRED);
-    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_Policy_PAGE_SIZE_2MB_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
-    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_Policy_PAGE_SIZE_2MB_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND);
-    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_All_Policy_PAGE_SIZE_2MB_4096_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
-    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4096);
-}
-
-TEST_F(BATestHuge, test_TC_MEMKIND_hbwmalloc_memalign_psize_Bind_All_Policy_PAGE_SIZE_2MB_4194305_bytes)
-{
-    HbwmallocAllocator hbwmalloc_allocator(HBW_POLICY_BIND_ALL);
-    hbwmalloc_allocator.set_memalign_page_size(HBW_PAGESIZE_2MB);
-    BasicAllocTest(&hbwmalloc_allocator).memalign(4096, 4194305);
 }
 
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_CheckAvailable)
@@ -823,59 +420,6 @@ TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_Policy)
 {
     hbw_set_policy(HBW_POLICY_PREFERRED);
     EXPECT_EQ(HBW_POLICY_PREFERRED, hbw_get_policy());
-}
-
-/* MEMKIND REGULAR */
-#include <memkind/internal/memkind_regular.h>
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_REGULAR_4096_bytes)
-{
-    test_malloc(MEMKIND_REGULAR, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_malloc_REGULAR_4194305_bytes)
-{
-    test_malloc(MEMKIND_REGULAR, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_REGULAR_4096_bytes)
-{
-    test_realloc(MEMKIND_REGULAR, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_realloc_REGULAR_4194305_bytes)
-{
-    test_realloc(MEMKIND_REGULAR, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_REGULAR_4096_bytes)
-{
-    test_calloc(MEMKIND_REGULAR, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_calloc_REGULAR_4194305_bytes)
-{
-    test_calloc(MEMKIND_REGULAR, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_REGULAR_4096_bytes)
-{
-    test_memalign(MEMKIND_REGULAR, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_memalign_REGULAR_4194305_bytes)
-{
-    test_memalign(MEMKIND_REGULAR, 4194305);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_free_REGULAR_4096_bytes)
-{
-    test_free(MEMKIND_REGULAR, 4096);
-}
-
-TEST_F(BATest, test_TC_MEMKIND_free_REGULAR_4194305_bytes)
-{
-    test_free(MEMKIND_REGULAR, 4194305);
 }
 
 TEST_F(BATest, test_TC_MEMKIND_REGULAR_nodemask)
