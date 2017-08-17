@@ -27,11 +27,14 @@
 #include "proc_stat.h"
 #include "allocator_perf_tool/GTestAdapter.hpp"
 #include "allocator_perf_tool/Allocation_info.hpp"
+
 #include <memkind.h>
+
+#include <condition_variable>
+#include <functional>
+#include <mutex>
 #include <random>
 #include <thread>
-#include <mutex>
-#include <condition_variable>
 
 class Worker
 {
