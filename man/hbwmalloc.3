@@ -230,8 +230,8 @@ the allocated pointer is set to NULL and
 .I errno
 is set to ENOMEM.  If insufficient high bandwidth memory pages are
 available at fault time the Out Of Memory (OOM) killer is triggered.
-Note that pages are faulted exclusively from the high bandwidth NUMA
-node nearest at time of allocation, not at time of fault.
+Note that pages are faulted from the high bandwidth NUMA nodes.
+Nearest NUMA node is selected at time of page fault.
 .TP
 .B HBW_POLICY_PREFERRED
 If insufficient memory is available from the high bandwidth NUMA node
