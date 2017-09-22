@@ -88,6 +88,7 @@ test/static_kinds_list.h
 test/check.cpp
 test/error_message_tests.cpp
 test/get_arena_test.cpp
+test/locality_test.cpp
 test/memkind_pmem_tests.cpp
 test/memory_footprint_test.cpp
 test/memory_manager.h

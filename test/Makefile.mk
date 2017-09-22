@@ -32,6 +32,7 @@ check_PROGRAMS += test/all_tests \
                   test/trace_mechanism_test_helper \
                   test/gb_page_tests_bind_policy \
                   test/freeing_memory_segfault_test \
+                  test/locality_test \
                   # end
 
 TESTS += test/test.sh
@@ -95,6 +96,12 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/hbw_verify_function_test.cpp \
                          test/dlopen_test.cpp \
                          #end
+
+test_locality_test_SOURCES = $(fused_gtest) test/allocator_perf_tool/Allocation_info.cpp test/locality_test.cpp
+test_locality_test_LDADD = libmemkind.la
+
+test_locality_test_CPPFLAGS = -fopenmp -O0 -Wno-error $(AM_CPPFLAGS)
+test_locality_test_CXXFLAGS = -fopenmp -O0 -Wno-error $(AM_CPPFLAGS)
 
 test_environ_err_hbw_malloc_test_SOURCES = test/environ_err_hbw_malloc_test.cpp
 test_decorator_test_SOURCES = $(fused_gtest) test/decorator_test.cpp test/decorator_test.h

@@ -55,6 +55,7 @@ autom4te.cache/
 /memkind-hbw-nodes
 /test/allocator_perf_tool_tests
 /test/autohbw_candidates
+/test/locality_test
 /test/decorator_test
 /test/eratosthenes
 /test/environerr_hbw_malloc_test
