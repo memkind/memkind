@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.20 -->
-<!-- CreationDate: Wed Dec  7 10:34:42 2016 -->
+<!-- CreationDate: Wed Sep 27 18:04:50 2017 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -176,24 +176,27 @@ megabyte pages.</p>
 option. Note: This page size requires huge pages
 configuration described in SYSTEM CONFIGURATION section.</p>
 
-<p style="margin-left:11%;"><b>HBW_PAGESIZE_1GB</b></p>
+<p style="margin-left:11%;"><b>HBW_PAGESIZE_1GB
+(DEPRECATED)</b></p>
 
 <p style="margin-left:22%;">This option allows the user to
-specify arbitrary sizes backed by one gigabytes pages.
-Gigabyte pages are allocated even if the size is not a
-modulo of 1GB. A good example of using this feature with
-realloc is shown in gb_realloc_example.c. Note: This page
-size requires gigabyte pages configuration described in
-SYSTEM CONFIGURATION section.</p>
-
-
-<p style="margin-left:11%;"><b>HBW_PAGESIZE_1GB_STRICT</b></p>
-
-<p style="margin-left:22%;">The one gigabyte page size
-option. The total size of the allocation must be a multiple
-of 1GB with this option, otherwise the allocation will fail.
-Note: This page size requires gigabyte pages configuration
+specify arbitrary sizes backed by 1GB chunks of huge pages.
+Huge pages are allocated even if the size is not a modulo of
+1GB. Note: This page size requires huge pages configuration
 described in SYSTEM CONFIGURATION section.</p>
+
+<p style="margin-left:11%;"><b>HBW_PAGESIZE_1GB_STRICT
+(DEPRECATED)</b></p>
+
+<p style="margin-left:22%;">The total size of the
+allocation must be a multiple of 1GB with this option,
+otherwise the allocation will fail. Note: This page size
+requires huge pages configuration described in SYSTEM
+CONFIGURATION section.</p>
+
+<p style="margin-left:11%;">HBW_PAGESIZE_2MB,
+HBW_PAGESIZE_1GB and HBW_PAGESIZE_1GB_STRICT options <br>
+are not supported with HBW_POLICY_INTERLEAVE policy.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_get_policy</b>()
@@ -217,6 +220,16 @@ bandwidth memory pages are available at fault time the Out
 Of Memory (OOM) killer is triggered. Note that pages are
 faulted exclusively from the high bandwidth NUMA node
 nearest at time of allocation, not at time of fault.</p>
+
+<p style="margin-left:11%;"><b>HBW_POLICY_BIND_ALL</b></p>
+
+<p style="margin-left:22%;">If insufficient high bandwidth
+memory is available to satisfy a request, the allocated
+pointer is set to NULL and <i>errno</i> is set to ENOMEM. If
+insufficient high bandwidth memory pages are available at
+fault time the Out Of Memory (OOM) killer is triggered. Note
+that pages are faulted from the high bandwidth NUMA nodes.
+Nearest NUMA node is selected at time of page fault.</p>
 
 
 <p style="margin-left:11%;"><b>HBW_POLICY_PREFERRED</b></p>
@@ -266,10 +279,11 @@ killer.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_get_policy</b>()
-returns <b>HBW_POLICY_BIND</b> or
-<b>HBW_POLICY_PREFERRED</b> which represents the current
-high bandwidth policy. <b>hbw_free</b>() do not have return
-value. <b>hbw_malloc</b>() <b>hbw_calloc</b>(), and
+returns <b>HBW_POLICY_BIND, HBW_POLICY_BIND_ALL,
+HBW_POLICY_PREFERRED</b> or <b>HBW_POLICY_INTERLEAVE</b>
+which represents the current high bandwidth policy.
+<b>hbw_free</b>() do not have return value.
+<b>hbw_malloc</b>() <b>hbw_calloc</b>(), and
 <b>hbw_realloc</b>() return the pointer to the allocated
 memory, or NULL if the request fails.
 <b>hbw_posix_memalign</b>(),
@@ -297,15 +311,18 @@ high-bandwidth memory is unavailable.</p>
 <p style="margin-left:22%;">If the <i>alignment</i>
 parameter is not a power of two, or was not a multiple of
 <i>sizoeof(void *)</i>, then <b>EINVAL</b> is returned. If
-there was insufficient memory to satisfy the request then
-<b>ENOMEM</b> is returned.</p>
+the policy and <i>pagesize</i> combination is unsupported
+then <b>EINVAL</b> is returned. If there was insufficient
+memory to satisfy the request then <b>ENOMEM</b> is
+returned.</p>
 
 <p style="margin-left:11%;"><b>hbw_set_policy</b>()</p>
 
 <p style="margin-left:22%;">returns <b>EPERM</b> if
 hbw_set_policy () was called more than once, or <b>EINVAL
 if</b> <i>mode</i> argument was neither
-<b>HBW_POLICY_PREFERRED, HBW_POLICY_BIND</b> nor
+<b>HBW_POLICY_PREFERRED, HBW_POLICY_BIND,
+HBW_POLICY_BIND_ALL</b> nor
 <b>HBW_POLICY_INTERLEAVE.</b></p>
 
 
@@ -368,15 +385,28 @@ multithreaded applications at the cost of memory overhead.
 See section &quot;IMPLEMENTATION NOTES&quot; of
 <b>jemalloc</b>(3) for more details about arenas.</p>
 
+
+<p style="margin-left:11%;"><b>MEMKIND_HEAP_MANAGER</b></p>
+
+<p style="margin-left:22%;">Controls heap management
+behavior in memkind library by switching to one of the
+available heap managers. <br>
+Values: <br>
+JEMALLOC &acirc; sets the jamalloc heap manager <br>
+TBB &acirc; sets the Intel Threading Building Blocks heap
+manager. This option requires installed <br>
+Intel Threading Building Blocks library. If the
+MEMKIND_HEAP_MANAGER is not set than the jemalloc heap
+manager will be used by default.</p>
+
 <h2>SYSTEM CONFIGURATION
 <a name="SYSTEM CONFIGURATION"></a>
 </h2>
 
 
 <p style="margin-left:11%; margin-top: 1em">Interfaces for
-obtaining 2MB and 1GB pages (HUGETLB and GBTLB) need
-allocated huge pages in the kernel&rsquo;s huge page pool.
-<b><br>
+obtaining 2MB (HUGETLB) need allocated huge pages in the
+kernel&rsquo;s huge page pool. <b><br>
 HUGETLB (huge pages)</b></p>
 
 <p style="margin-left:22%;">Current number of
@@ -386,15 +416,6 @@ hugepages is: &quot;sudo sysctl
 vm.nr_hugepages=&lt;number_of_hugepages&gt;&quot;. More
 informations can be found here:
 https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</p>
-
-<p style="margin-left:11%;"><b>GBTLB (gigabyte
-pages)</b></p>
-
-<p style="margin-left:22%;">Number of preallocated gigabyte
-pages can be read from /proc/cmdline (hugepagesz=1G
-nr_hugepages=N). Setting gigabyte hugepages is available by
-kernel commandline. From 3.16 and later kernels, users can
-allocate gigabyte pages like its done for 2MB pages.</p>
 
 <h2>KNOWN ISSUES
 <a name="KNOWN ISSUES"></a>

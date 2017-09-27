@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.20 -->
-<!-- CreationDate: Wed Dec  7 10:35:03 2016 -->
+<!-- CreationDate: Wed Sep 27 17:45:22 2017 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -29,6 +29,7 @@
 <a href="#FILES">FILES</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
 <a href="#SYSTEM CONFIGURATION">SYSTEM CONFIGURATION</a><br>
+<a href="#STATIC LINKING">STATIC LINKING</a><br>
 <a href="#KNOWN ISSUES">KNOWN ISSUES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -78,33 +79,11 @@ size_t</b> <i>size</i><b>); <br>
 void memkind_free(memkind_t</b> <i>kind</i><b>, void</b>
 <i>*ptr</i><b>);</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>ALLOCATOR
-CALLBACK FUNCTION: <br>
-void *memkind_partition_mmap(int</b> <i>partition</i><b>,
-void</b> <i>*addr</i><b>, size_t</b>
-<i>size</i><b>);</b><i>(DEPRECATED)</i></p>
-
 <p style="margin-left:11%; margin-top: 1em"><b>KIND
 MANAGMENT: <br>
-int memkind_create(const struct memkind_ops</b>
-<i>*ops</i><b>, const char</b> <i>*name</i><b>,
-memkind_t</b> <i>*kind</i><b>);</b><i>(DEPRECATED)</i>
-<b><br>
 int memkind_create_pmem(const char</b> <i>*dir</i><b>,
 size_t</b> <i>max_size</i><b>, memkind_t</b>
 <i>*kind</i><b>); <br>
-int memkind_finalize(void);</b><i>(DEPRECATED)</i> <b><br>
-int memkind_get_num_kind(int</b>
-<i>*num_kind</i><b>);</b><i>(DEPRECATED)</i> <b><br>
-int memkind_get_kind_by_partition(int</b>
-<i>partition</i><b>, memkind_t</b>
-<i>*kind</i><b>);</b><i>(DEPRECATED)</i> <b><br>
-int memkind_get_kind_by_name(const char</b> <i>*name</i><b>,
-memkind_t</b> <i>*kind</i><b>);</b><i>(DEPRECATED)</i>
-<b><br>
-int memkind_get_size(memkind_t</b> <i>kind</i><b>,
-size_t</b> <i>*total</i><b>, size_t</b>
-<i>*free</i><b>);</b><i>(DEPRECATED)</i> <b><br>
 int memkind_check_available(memkind_t</b>
 <i>kind</i><b>);</b></p>
 
@@ -229,32 +208,12 @@ have been returned by a previous call to
 undefined behavior occurs. If <i>ptr</i> is NULL, no
 operation is performed. The value of <b>MEMKIND_DEFAULT</b>
 can be given as the <i>kind</i> for all buffers allocated by
-a kind that leverages the jemalloc allocator. This includes
-all internally defined kinds other than those that use
-gigabyte pages. In cases where the kind is unknown in the
-context of the call to <b>memkind_free</b>() <b>0</b> can be
-given as the <i>kind</i> specified to <b>memkind_free</b>()
-but this will require a look up that can be bypassed by
-specifying a non-zero value.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>ALLOCATOR
-CALLBACK FUNCTION:</b> <br>
-This section describes the memkind interface which is used
-internally by the heap manager. For this API the kind is
-determined by the partition index. This enables the
-underlying heap manager to call routines with standard type
-arguments, and allows the heap manager implementation to be
-independent of the specifics of the <i>memkind_t</i>
-implementation. Currently there is only one callback
-function.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>memkind_partition_mmap</b>()
-which is a wrapper around the <b>mmap</b>(2) system call.
-The hint address <i>addr</i> and the length in bytes of the
-buffer to be allocated <i>size</i> are passed through to
-<b>mmap</b>(2). The other <b>mmap</b>(2) parameters are
-determined by the kind operations.</p>
+a kind that leverages the jemalloc allocator. In cases where
+the kind is unknown in the context of the call to
+<b>memkind_free</b>() <b>0</b> can be given as the
+<i>kind</i> specified to <b>memkind_free</b>() but this will
+require a look up that can be bypassed by specifying a
+non-zero value.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>KIND
 MANAGEMENT:</b> <br>
@@ -266,19 +225,6 @@ different kinds of memory and determining their
 properties.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>memkind_create</b>()<b>(DEPRECATED)</b>
-is used to create a new kind of memory. It takes as input a
-pointer to a vtable called <i>ops</i> that determines the
-operations that define the kind of memory. These operations
-can be taken from one of the memkind built-in
-implementations defined in the memkind headers, or it can be
-user implemented. The requirements for each operation is
-defined in the <b>MEMKIND OPERATIONS</b> section. See the
-<b>SEE ALSO</b> section for the list of memkind header files
-that implement the built-in operations: each header has a
-man page.</p>
-
-
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_create_pmem</b>()
 is a convenience function used to create a file-backed kind
 of memory. It allocates a temporary file in the given
@@ -287,11 +233,7 @@ similar to <b>tmpfile</b>(3), so that the file name does not
 appear when the directory is listed and the space is
 automatically freed when the program terminates. The file is
 truncated to a size of <i>max_size</i> bytes and the
-resulting space is memory-mapped. Then, the actual pmem
-<i>kind</i> is created by calling <b>memkind_create</b>()
-with a unique <i>name</i> string (&quot;pmemXXXXXXXX&quot;),
-and the pointer to <b>MEMKIND_PMEM_OPS</b> as <i>ops</i>
-argument. <br>
+resulting space is memory-mapped. <br>
 Note that the actual file system space is not allocated
 immediately, but only on a call to
 <b>memkind_pmem_mmap</b>() (see <b>memkind_pmem</b>(3)).
@@ -307,50 +249,6 @@ limited by <b>memkind</b>, but by the file system specified
 by the <i>dir</i> argument. The <i>max_size</i> passed in is
 the raw size of the memory pool and <b>jemalloc</b> will use
 some of that space for its own metadata.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>memkind_finalize</b>()
-releases all resources associated with the memkind library
-including the resources used by all of the kinds that were
-created, but it does not free memory allocated with the
-<b>HEAP MANAGEMENT</b> interface. This must be the last call
-to the memkind library before application termination, but
-it can be called more than once.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>memkind_get_num_kind</b>()
-sets <i>num_kind</i> to the number of available kinds of
-memory. This accounts for the built-in static kinds and any
-dynamically created kinds. Since there is a one-to-one
-mapping between partitions and kinds, this is also the
-number of partitions.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>memkind_get_kind_by_partition</b>()
-sets <i>kind</i> to the memory kind associated with the
-<i>partition</i> index which must be in the range [0,
-<i>num_kind</i> - 1] where num_kind can be retrieved with
-the <b>memkind_get_num_kind</b>() function.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>memkind_get_kind_by_name</b>()
-sets <i>kind</i> to the memory kind associated with the
-<i>name</i> string specified. All of the built-in kinds have
-name strings that are the lower-case version of name given
-in the <b>KINDS</b> section (for example: MEMKIND_DEFAULT
-has <i>name</i> &quot;memkind_default&quot;)</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>memkind_get_size</b>()<b>(DEPRECATED)</b>
-sets <i>total</i> to the number of bytes on the system which
-can be allocated with the specified <i>kind</i>, and sets
-<i>free</i> to the number of unallocated bytes available of
-memory with the specified <i>kind.</i></p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>Note:</b>
-These numbers may be specific to the CPU of the calling
-thread if the <i>kind</i> binds memory to NUMA nodes
-associated with the CPU.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_check_available</b>()
@@ -432,167 +330,6 @@ is not a standard way to use memkind <br>
 -EXPERIMENTAL API, API is considered as unstable and the
 subject to change</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>MEMKIND
-OPERATIONS:</b> <br>
-The <i>memkind_ops</i> structure is a vtable that defines
-the operations which determine the kind of memory. This
-design pattern is modeled after the &quot;mix-in&quot;
-pattern used in the Linux kernel to enable some of the
-features of an object oriented language in C. This section
-defines the inputs, outputs and responsibilities of each
-function pointer enumerated in the <i>memkind_ops</i>
-structure. Each of these methods takes a <b>memkind_t</b>
-argument as its first parameter which shall be self
-referencing. In this documentation the function pointers in
-the <i>memkind_ops</i> structure will be prepended with
-&quot;<b>ops.</b>&quot; and should be considered the
-operation associated with the <i>kind</i>.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.create(memkind_t</b> <i>kind</i><b>, const struct
-memkind_ops</b> <i>*ops</i><b>, const char</b>
-<i>*name</i><b>);</b> <br>
-shall instantiate all of the dynamic resources associated
-with the <i>kind</i>. It takes a pointer to the vtable
-structure <i>ops</i> which has a function pointer for each
-of methods defined in this section of the man page. If any
-methods are unnecessary to the implementation of the
-<i>kind</i> these function pointers shall be set to
-<b>NULL</b>. The <i>name</i> string is an input parameter
-that identifies the kind of memory so that it can be fetched
-with the <b>memkind_get_kind_by_name</b>() function.
-Typically this method is either a pointer to the function
-<b>memkind_default_create</b>() defined in
-<i>&lt;memkind_default.h&gt;</i>, or a function that calls
-<b>memkind_default_create</b>() before performing other
-setup.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.destroy(memkind_t</b> <i>kind</i><b>);</b> <br>
-shall free all of the dynamic resources reserved by the
-<b>ops.create</b>() method. If no dynamic resources were
-explicitly allocated in the <i>ops.create</i>() method, this
-pointer can be set to <b>NULL</b>.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>void
-*ops.malloc(memkind_t</b> <i>kind</i><b>, size_t</b>
-<i>size</i><b>);</b> <br>
-shall implement <b>memkind_malloc</b>(), as described
-above.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>void
-*ops.calloc(memkind_t</b> <i>kind</i><b>, size_t</b>
-<i>num</i><b>, size_t</b> <i>size</i><b>);</b> <br>
-shall implement <b>memkind_calloc</b>(), as described
-above.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.posix_memalign(memkind_t</b> <i>kind</i><b>, void</b>
-<i>**memptr</i><b>, size_t</b> <i>alignment</i><b>,
-size_t</b> <i>size</i><b>);</b> <br>
-shall implement <b>memkind_posix_memalign</b>(), as
-described above.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>void
-*ops.realloc(memkind_t</b> <i>kind</i><b>, void</b>
-<i>*ptr</i><b>, size_t</b> <i>size</i><b>);</b> <br>
-shall implement <b>memkind_realloc</b>(), as described
-above.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>void
-ops.free(memkind_t</b> <i>kind</i><b>, void</b>
-<i>*ptr</i><b>);</b> <br>
-shall implement <b>memkind_free</b>(), as described
-above.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>void
-*ops.mmap(memkind_t</b> <i>kind</i><b>, void</b>
-<i>*addr</i><b>, size_t</b> <i>size</i><b>);</b> shall wrap
-the <b>mmap</b>(2) <b>mbind</b>(2) and <b>madvise</b>(2)
-system calls while passing <i>addr</i> and <i>size</i>
-through and determining all other parameters for
-<b>mmap</b>(2) <b>mbind</b>(2) and <b>madvise</b>(2) by
-calling other functions resolved by the <b>kind.ops</b>
-vtable. This function shall return a virtual address to the
-memory mapped, or <b>MAP_FAILED</b> as defined in
-<i>&lt;sys/mman.h&gt;</i> which is <i>(void *) -1</i>.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.mbind(memkind_t</b> <i>kind</i><b>, void</b>
-<i>*ptr</i><b>, size_t</b> <i>size</i><b>);</b> <br>
-shall wrap the <b>mbind</b>(2) system call and pass through
-the start address <i>ptr</i> to be bound, and the number of
-bytes <i>size</i> from that address to be bound. The other
-parameters to <b>mbind</b>(2) shall be determined by calling
-other functions resolved by the <b>kind.ops</b> vtable.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.madvise(memkind_t</b> <i>kind</i><b>, void</b>
-<i>*addr</i><b>, size_t</b> <i>size</i><b>);</b> <br>
-shall wrap the <b>madvise</b>(2) system call and pass
-through the start address <i>addr</i> to be advised, and the
-number of bytes <i>size</i> from that address to be advised.
-This may call <b>madvise</b>(2) multiple times with
-different advice.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.get_mmap_flags(memkind_t</b> <i>kind</i><b>, int</b>
-<i>*flags</i><b>);</b> <br>
-shall set <i>flags</i> to a value appropriate for passing to
-the <i>mmap</i>(2) system call for the <i>kind</i>.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.get_mbind_mode(memkind_t</b> <i>kind</i><b>, int</b>
-<i>*mode</i><b>);</b> <br>
-shall set <i>mode</i> to a value appropriate for passing to
-the <i>mmap</i>(2) system call for the <i>kind</i>.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.get_mbind_nodemask(memkind_t</b> <i>kind</i><b>,
-unsigned long</b> <i>*nodemask</i><b>, unsigned long</b>
-<i>maxnode</i><b>);</b> <br>
-shall set the <i>nodemask</i> of length <i>maxnode</i> bits
-to a value appropriate for passing to the <i>mbind</i>(2)
-system call for the <i>kind</i>.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.get_arena(memkind_t</b> <i>kind</i><b>, unsigned int</b>
-<i>*arena</i><b>,&quot;</b> <i>size_t</i>
-<b>size</b><i>);</i> <br>
-shall set <i>arena</i> to an index appropriate for the
-<i>kind,</i> allocation <i>size,</i> and CPU when using the
-jemalloc arena allocation through the <b>jemk_mallocx</b>()
-API. Size parameter is not used at the moment, but will be
-necessary for integration with jemalloc 4.0.x (planned for
-one of the future releases).</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.get_size(memkind_t</b> <i>kind</i><b>, size_t</b>
-<i>*total</i><b>, size_t</b> <i>*free</i><b>);</b> <br>
-shall implement <b>memkind_get_size</b>(), as described
-above.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.check_available(memkind_t</b> <i>kind</i><b>);</b> <br>
-shall return 0 if the <i>kind</i> is available on the
-system, and an error code if not.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>int
-ops.check_addr(memkind_t</b> <i>kind</i><b>, void</b>
-<i>*addr</i><b>);</b> <br>
-shall return 0 if the <i>addr</i> can be freed with the
-specified <i>kind</i> and an error code otherwise. If the
-memory cannot be freed with <b>jemk_free</b>(), then at
-least one of the instantiated kinds must return 0 to enable
-freeing.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>void
-ops.init_once(void);</b> <br>
-this function pointer shall be set to NULL for any kind that
-is not built-in. The method is used to allocate dynamic
-resources for built-in kinds without requiring and
-initialization routine.</p>
-
 <h2>RETURN VALUE
 <a name="RETURN VALUE"></a>
 </h2>
@@ -628,11 +365,12 @@ standard memory and default page size.</p>
 using huge pages. Note: This kind requires huge pages
 configuration described in SYSTEM CONFIGURATION section.</p>
 
-<p style="margin-left:11%;"><b>MEMKIND_GBTLB</b></p>
+<p style="margin-left:11%;"><b>MEMKIND_GBTLB
+(DEPRECATED)</b></p>
 
 <p style="margin-left:22%;">Allocate from standard memory
-using giga byte huge pages. Note: This kind requires
-gigabyte pages configuration described in SYSTEM
+using 1GB chunks backed by huge pages. Note: This kind
+requires huge pages configuration described in SYSTEM
 CONFIGURATION section.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_INTERLEAVE</b></p>
@@ -649,12 +387,26 @@ is not enough high bandwidth memory to satisfy the request
 <i>errno</i> is set to ENOMEM and the allocated pointer is
 set to NULL.</p>
 
+<p style="margin-left:11%;"><b>MEMKIND_HBW_ALL</b></p>
+
+<p style="margin-left:22%;">Same as <b>MEMKIND_HBW</b>
+except decision regarding closest NUMA node is postponed
+until the time of first write.</p>
+
 <p style="margin-left:11%;"><b>MEMKIND_HBW_HUGETLB</b></p>
 
 <p style="margin-left:22%;">Same as <b>MEMKIND_HBW</b>
 except the allocation is backed by huge pages. Note: This
 kind requires huge pages configuration described in SYSTEM
 CONFIGURATION section.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_HBW_ALL_HUGETLB</b></p>
+
+<p style="margin-left:22%;">Combination of
+<b>MEMKIND_HBW_ALL</b> and <b>MEMKIND_HBW_HUGETLB</b>
+properties. Note: This kind requires huge pages
+configuration described in SYSTEM CONFIGURATION section.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_PREFERRED</b></p>
@@ -672,29 +424,26 @@ standard memory.</p>
 by huge pages. Note: This kind requires huge pages
 configuration described in SYSTEM CONFIGURATION section.</p>
 
-<p style="margin-left:11%;"><b>MEMKIND_HBW_GBTLB</b></p>
+<p style="margin-left:11%;"><b>MEMKIND_HBW_GBTLB
+(DEPRECATED)</b></p>
 
 <p style="margin-left:22%;">Same as <b>MEMKIND_HBW</b>
-except the allocation is backed by one gigabyte huge pages.
+except the allocation is backed by 1GB chunks of huge pages.
 Note that <i>size</i> can take on any value, but full
 gigabyte pages will allocated for each request, so remainder
-of the last page will be wasted. A good use case scenario is
-to grow a buffer in the course of an application with
-reallocs. In this case, if there is enough memory available
-within in already allocated gigabyte page, newer pages are
-not fetched. This is demonstrated in the examples directory
-with gb_realloc_example.c This kind requires gigabyte pages
-configuration described in SYSTEM CONFIGURATION section.</p>
+of the last page will be wasted. This kind requires huge
+pages configuration described in SYSTEM CONFIGURATION
+section.</p>
 
-
-<p style="margin-left:11%;"><b>MEMKIND_HBW_PREFERRED_GBTLB</b></p>
+<p style="margin-left:11%;"><b>MEMKIND_HBW_PREFERRED_GBTLB
+(DEPRECATED)</b></p>
 
 <p style="margin-left:22%;">Same as
 <b>MEMKIND_HBW_GBTLB</b> except that if there is not enough
 high bandwidth memory to satisfy the request, the allocation
 will fall back on standard memory. Note: This kind requires
-gigabyte pages configuration described in SYSTEM
-CONFIGURATION section.</p>
+huge pages configuration described in SYSTEM CONFIGURATION
+section.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_INTERLEAVE</b></p>
@@ -703,6 +452,12 @@ CONFIGURATION section.</p>
 except that the pages that support the allocation are
 interleaved across all high bandwidth nodes and transparent
 huge pages are disabled.</p>
+
+<p style="margin-left:11%;"><b>MEMKIND_REGULAR</b></p>
+
+<p style="margin-left:22%;">Allocate from regular memory
+using the default page size. Regular means general purpose
+memory from the NUMA nodes containing CPUs.</p>
 
 <h2>ERRORS
 <a name="ERRORS"></a>
@@ -741,47 +496,17 @@ failed</p>
 <p style="margin-left:22%;">Call to <b>mmap</b>(2)
 failed</p>
 
-<p style="margin-left:11%;"><b>MEMKIND_ERROR_MEMALIGN
-(DEPRECATED)</b></p>
-
-<p style="margin-left:22%;">Call to
-<b>jemk_posix_memalign</b>() failed</p>
-
-<p style="margin-left:11%;"><b>MEMKIND_ERROR_MALLCTL
-(DEPRECATED)</b></p>
-
-<p style="margin-left:22%;">Call to <b>jemk_mallctl</b>()
-failed</p>
-
 
 <p style="margin-left:11%;"><b>MEMKIND_ERROR_MALLOC</b></p>
 
-<p style="margin-left:22%;">Call to <b>jemk_malloc</b>()
-failed</p>
-
-<p style="margin-left:11%;"><b>MEMKIND_ERROR_GETCPU
-(DEPRECATED)</b></p>
-
-<p style="margin-left:22%;">Call to <b>sched_getcpu</b>()
-returned out of range</p>
-
-<p style="margin-left:11%;"><b>MEMKIND_ERROR_TIEDISTANCE
-(DEPRECATED)</b></p>
-
-<p style="margin-left:22%;">Two NUMA memory nodes are
-equidistant from target cpu node</p>
-
-<p style="margin-left:11%;"><b>MEMKIND_ERROR_ALIGNMENT
-(DEPRECATED)</b></p>
-
-<p style="margin-left:22%;">Alignment must be a power of
-two and larger than sizeof(void *)</p>
+<p style="margin-left:22%;">Call to jemalloc&rsquo;s
+<b>malloc</b>() failed</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_ERROR_ALLOCM</b></p>
 
-<p style="margin-left:22%;">Call to <b>jemk_allocm</b>()
-failed</p>
+<p style="margin-left:22%;">Call to jemalloc&rsquo;s
+<b>allocm</b>() failed</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_ERROR_ENVIRON</b></p>
@@ -835,6 +560,15 @@ multithreaded applications at the cost of memory overhead.
 See section &quot;IMPLEMENTATION NOTES&quot; of
 <b>jemalloc</b>(3) for more details about arenas.</p>
 
+<p style="margin-left:11%;"><b>MEMKIND_HOG_MEMORY</b></p>
+
+<p style="margin-left:22%;">Controls behavior of memkind
+with regards to returning memory to underlaying OS. Setting
+<b>MEMKIND_HOG_MEMORY</b> to &quot;1&quot; causes memkind to
+not release memory to OS in anticipation of memory reuse
+soon. This will improve latency of &rsquo;free&rsquo;
+operations but increase memory usage.</p>
+
 <p style="margin-left:11%;"><b>MEMKIND_DEBUG</b></p>
 
 <p style="margin-left:22%;">Controls logging mechanism in
@@ -842,15 +576,28 @@ memkind. Setting <b>MEMKIND_DEBUG</b> to &quot;1&quot;
 enables printing messages like errors and general
 informations about environment to <i>stderr.</i></p>
 
+
+<p style="margin-left:11%;"><b>MEMKIND_HEAP_MANAGER</b></p>
+
+<p style="margin-left:22%;">Controls heap management
+behavior in memkind library by switching to one of the
+available heap managers. <br>
+Values: <br>
+JEMALLOC &acirc; sets the jamalloc heap manager <br>
+TBB &acirc; sets the Intel Threading Building Blocks heap
+manager. This option requires installed <br>
+Intel Threading Building Blocks library. If the
+MEMKIND_HEAP_MANAGER is not set than the jemalloc heap
+manager will be used by default.</p>
+
 <h2>SYSTEM CONFIGURATION
 <a name="SYSTEM CONFIGURATION"></a>
 </h2>
 
 
 <p style="margin-left:11%; margin-top: 1em">Interfaces for
-obtaining 2MB and 1GB pages (HUGETLB and GBTLB) need
-allocated huge pages in the kernel&rsquo;s huge page pool.
-<b><br>
+obtaining 2MB (HUGETLB) need allocated huge pages in the
+kernel&rsquo;s huge page pool. <b><br>
 HUGETLB (huge pages)</b></p>
 
 <p style="margin-left:22%;">Current number of
@@ -861,14 +608,22 @@ vm.nr_hugepages=&lt;number_of_hugepages&gt;&quot;. More
 informations can be found here:
 https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</p>
 
-<p style="margin-left:11%;"><b>GBTLB (gigabyte
-pages)</b></p>
+<h2>STATIC LINKING
+<a name="STATIC LINKING"></a>
+</h2>
 
-<p style="margin-left:22%;">Number of preallocated gigabyte
-pages can be read from /proc/cmdline (hugepagesz=1G
-nr_hugepages=N). Setting gigabyte hugepages is available by
-kernel commandline. From 3.16 and later kernels, users can
-allocate gigabyte pages like its done for 2MB pages.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When linking
+statically against memkind, libmemkind.a should be used <br>
+together with its dependencies libnuma and pthread. Pthread
+can be <br>
+linked by adding /usr/lib64/libpthread.a as a dependency
+(exact path <br>
+may vary). Typically libnuma will need to be compiled from
+sources to <br>
+use it as a static dependency. libnuma can be reached on
+github: <br>
+https://github.com/numactl/numactl</p>
 
 <h2>KNOWN ISSUES
 <a name="KNOWN ISSUES"></a>
@@ -889,7 +644,7 @@ extra huge pages (e.g. 8 huge pages).</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright (C)
-2014 - 2016 Intel Corporation. All rights reserved.</p>
+2014 - 2017 Intel Corporation. All rights reserved.</p>
 
 <h2>SEE ALSO
 <a name="SEE ALSO"></a>
@@ -902,7 +657,7 @@ extra huge pages (e.g. 8 huge pages).</p>
 <b>mmap</b>(2), <b>move_pages</b>(2), <b>jemalloc</b>(3),
 <b>memkind_default</b>(3), <b>memkind_arena</b>(3),
 <b>memkind_hbw</b>(3), <b>memkind_hugetlb</b>(3),
-<b>memkind_gbtlb</b>(3), <b>memkind_pmem</b>(3)</p>
+<b>memkind_pmem</b>(3)</p>
 <hr>
 </body>
 </html>
