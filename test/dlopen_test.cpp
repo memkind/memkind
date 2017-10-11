@@ -21,6 +21,8 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "allocator_perf_tool/HugePageOrganizer.hpp"
+
 #include <dlfcn.h>
 
 #include "common.h"
@@ -93,6 +95,7 @@ TEST_F(DlopenTest, test_TC_MEMKIND_HBW_4194305_bytes)
 
 TEST_F(DlopenTest, test_TC_MEMKIND_HBW_HUGETLB_4194305_bytes)
 {
+    HugePageOrganizer huge_page_organizer(8);
     test("MEMKIND_HBW_HUGETLB", 4194305);
 }
 
