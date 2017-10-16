@@ -46,6 +46,7 @@ EXTRA_DIST += test/memkind-afts.ts \
               test/autohbw_test.py \
               test/trace_mechanism_test.py \
               test/python_framework/cmd_helper.py \
+              test/python_framework/huge_page_organizer.py \
               test/python_framework/__init__.py \
               test/draw_plots.py \
               test/run_alloc_benchmark.sh \

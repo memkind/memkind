@@ -23,3 +23,4 @@
 #
 
 from python_framework.cmd_helper import CMD_helper
+from python_framework.huge_page_organizer import Huge_page_organizer

@@ -210,6 +210,7 @@ $(memkind_test_dir)/autohbw_test.py
 $(memkind_test_dir)/trace_mechanism_test.py
 $(memkind_test_dir)/python_framework
 $(memkind_test_dir)/python_framework/cmd_helper.py
+$(memkind_test_dir)/python_framework/huge_page_organizer.py
 $(memkind_test_dir)/python_framework/__init__.py
 $(memkind_test_dir)/draw_plots.py
 $(memkind_test_dir)/run_alloc_benchmark.sh
