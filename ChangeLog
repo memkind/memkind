@@ -1,3 +1,19 @@
+* Wed Jan 24 2018 Pawel Kochanek <pawel.b.kochanek@intel.com> v1.7.0
+- Updated internally used jemalloc to upstream version 5.0.
+- Fixed error that has been occuring while memkind was dynamically loaded.
+- Fixed MEMKIND_HBW_NODES behavior for single NUMA node system.
+- Removed licenses other than BSD 3-clause from COPYING.
+- Changed build instructions.
+- Added configurable jemalloc prefix in build scripts.
+- Upgraded gtest to version 1.8.0.
+- Added memory footprint tests.
+- Added locality test for MEMKIND_PREFERRED.
+- Applied test parametrization in BATests.
+- Fixed problems with pytest testing in Travis.
+- Added huge page configuration in several tests.
+- Removed several symbols that are no longer exposed in public API from man pages.
+- Fixed HBW_POLICY_BIND_ALL documentation.
+
 * Tue Jun 13 2017 Artur Koziej <artur.koziej@intel.com> v1.6.0
 - Introduced new policy HBW_POLICY_BIND_ALL.
 - Introduced MEMKIND_HBW_ALL, MEMKIND_HBW_ALL_HUGETLB and MEMKIND_REGULAR kinds.
