@@ -74,7 +74,6 @@ EXTRA_DIST = CONTRIBUTING \
              autogen.sh \
              build.sh \
              build_jemalloc.sh \
-             build_jemalloc.sh \
              examples/README \
              jemalloc/.appveyor.yml \
              jemalloc/.autom4te.cfg \
@@ -356,6 +355,11 @@ EXTRA_DIST = CONTRIBUTING \
              memkind-$(VERSION).spec \
              memkind.spec.mk \
              test/test.sh \
+             utils/docker/Dockerfile.ubuntu-18.04 \
+             utils/docker/README.md \
+             utils/docker/docker_run_build_and_test.sh \
+             utils/docker/docker_run_coverage.sh \
+             utils/docker/run_local.sh \
              # end
 
 dist_doc_DATA = COPYING README VERSION
