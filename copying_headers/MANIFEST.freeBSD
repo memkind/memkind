@@ -157,3 +157,8 @@ test/trace_mechanism_test.py
 test/trace_mechanism_test_helper.c
 test/trial_generator.cpp
 test/trial_generator.h
+utils/docker/docker_run_build_and_test.sh
+utils/docker/docker_run_coverage.sh
+utils/docker/Dockerfile.ubuntu-18.04
+utils/docker/README.md
+utils/docker/run_local.sh
