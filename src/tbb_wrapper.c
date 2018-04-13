@@ -85,7 +85,8 @@ static int load_tbb_symbols()
 #define GRANULARITY 2*1024*1024
 static void *raw_alloc(intptr_t pool_id, size_t* bytes/*=n*GRANULARITY*/)
 {
-   void* ptr = kind_mmap((struct memkind*)pool_id, NULL, *bytes);
+   /* XXX: not sure how to handle alignment in TBB */
+   void* ptr = kind_mmap((struct memkind*)pool_id, NULL, *bytes, 0);
    return (ptr==MAP_FAILED) ? NULL : ptr;
 }
 

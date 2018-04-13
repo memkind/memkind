@@ -107,7 +107,7 @@ MEMKIND_EXPORT void memkind_default_free(struct memkind *kind, void *ptr)
     jemk_free(ptr);
 }
 
-MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
+MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size, size_t alignment)
 {
     void *result = MAP_FAILED;
     int err = 0;
