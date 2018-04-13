@@ -294,7 +294,10 @@ sz_sa2u(size_t size, size_t alignment) {
 
 	/* Make sure result is a large size class. */
 	if (size <= LARGE_MINCLASS) {
-		usize = LARGE_MINCLASS;
+		if (alignment <= LARGE_MINCLASS)
+			usize = LARGE_MINCLASS;
+		else
+			usize = alignment;
 	} else {
 		usize = sz_s2u(size);
 		if (usize < size) {
