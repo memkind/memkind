@@ -94,6 +94,7 @@ tsd_boot1(void) {
 	wrapper->val = initializer;
 	tsd_wrapper_set(wrapper);
 }
+
 JEMALLOC_ALWAYS_INLINE bool
 tsd_boot(void) {
 	if (tsd_boot0()) {
@@ -101,6 +102,10 @@ tsd_boot(void) {
 	}
 	tsd_boot1();
 	return false;
+}
+
+JEMALLOC_ALWAYS_INLINE void
+tsd_fini(void) {
 }
 
 JEMALLOC_ALWAYS_INLINE bool

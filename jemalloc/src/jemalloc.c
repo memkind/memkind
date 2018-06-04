@@ -192,6 +192,7 @@ static bool had_conf_error = false;
 
 static bool	malloc_init_hard_a0(void);
 static bool	malloc_init_hard(void);
+static void	malloc_fini_hard(void);
 
 /******************************************************************************/
 /*
@@ -219,6 +220,12 @@ malloc_init(void) {
 	return false;
 }
 
+JEMALLOC_ALWAYS_INLINE void
+malloc_fini(void) {
+	if (likely(malloc_initialized())) {
+		malloc_fini_hard();
+	}
+}
 /*
  * The a0*() functions are used instead of i{d,}alloc() in situations that
  * cannot tolerate TLS variable access.
@@ -1511,6 +1518,11 @@ malloc_init_hard(void) {
 	}
 #undef UNLOCK_RETURN
 	return false;
+}
+
+static void 
+malloc_fini_hard(void) {
+    malloc_tsd_fini();
 }
 
 /*
@@ -3012,6 +3024,13 @@ static void
 jemalloc_constructor(void) {
 	malloc_init();
 }
+
+JEMALLOC_ATTR(destructor)
+static void
+jemalloc_destructor(void) {
+	malloc_fini();
+}
+
 #endif
 
 #ifndef JEMALLOC_MUTEX_INIT_CB

@@ -267,6 +267,11 @@ malloc_tsd_boot1(void) {
 	*tsd_arenas_tdata_bypassp_get(tsd) = false;
 }
 
+void
+malloc_tsd_fini(void) {
+	tsd_fini();
+}
+
 #ifdef _WIN32
 static BOOL WINAPI
 _tls_callback(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
