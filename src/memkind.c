@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -604,7 +604,7 @@ MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
 #endif
 }
 
-static int memkind_tmpfile(const char *dir, size_t size, int *fd, void **addr)
+static int memkind_tmpfile(const char *dir, int *fd)
 {
     static char template[] = "/memkind.XXXXXX";
     int err = 0;
@@ -631,18 +631,6 @@ static int memkind_tmpfile(const char *dir, size_t size, int *fd, void **addr)
     (void) unlink(fullname);
     (void) sigprocmask(SIG_SETMASK, &oldset, NULL);
 
-    if (ftruncate(*fd, size) != 0) {
-        err = MEMKIND_ERROR_RUNTIME;
-        goto exit;
-    }
-
-    *addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, *fd, 0);
-    if (*addr == MAP_FAILED) {
-        err = MEMKIND_ERROR_RUNTIME;
-        log_err("mmap() returned MAP_FAILED.");
-        goto exit;
-    }
-
     return err;
 
 exit:
@@ -652,7 +640,6 @@ exit:
         (void) close(*fd);
     }
     *fd = -1;
-    *addr = NULL;
     errno = oerrno;
     return err;
 }
@@ -663,18 +650,19 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
     int err = 0;
     int oerrno;
 
-    if (max_size < MEMKIND_PMEM_MIN_SIZE) {
+    if (max_size && max_size < MEMKIND_PMEM_MIN_SIZE) {
         return MEMKIND_ERROR_INVALID;
     }
 
-    /* round up to a multiple of jemalloc chunk size */
-    max_size = roundup(max_size, MEMKIND_PMEM_CHUNK_SIZE);
+    if (max_size) {
+        /* round up to a multiple of jemalloc chunk size */
+        max_size = roundup(max_size, MEMKIND_PMEM_CHUNK_SIZE);
+    }
 
     int fd = -1;
-    void *addr;
     char name[16];
 
-    err = memkind_tmpfile(dir, max_size, &fd, &addr);
+    err = memkind_tmpfile(dir, &fd);
     if (err) {
         goto exit;
     }
@@ -686,13 +674,11 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
         goto exit;
     }
 
-    void *aligned_addr = (void *)roundup((uintptr_t)addr, MEMKIND_PMEM_CHUNK_SIZE);
     struct memkind_pmem *priv = (*kind)->priv;
 
     priv->fd = fd;
-    priv->addr = addr;
+    priv->offset = 0;
     priv->max_size = max_size;
-    priv->offset = (uintptr_t)aligned_addr - (uintptr_t)addr;
 
     return err;
 
