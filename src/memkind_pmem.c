@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2017 Intel Corporation.
+ * Copyright (C) 2015 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -155,6 +155,17 @@ bool pmem_extent_merge(extent_hooks_t *extent_hooks,
     return false;
 }
 
+void pmem_extent_destroy(extent_hooks_t *extent_hooks,
+    void *addr,
+    size_t size,
+    bool committed,
+    unsigned arena_ind)
+{
+    if (munmap(addr, size) == -1) {
+        log_err("munmap failed!");
+    }
+}
+
 static extent_hooks_t pmem_extent_hooks = {
     .alloc = pmem_extent_alloc,
     .dalloc = pmem_extent_dalloc,
@@ -162,7 +173,8 @@ static extent_hooks_t pmem_extent_hooks = {
     .decommit = pmem_extent_decommit,
     .purge_lazy = pmem_extent_purge,
     .split = pmem_extent_split,
-    .merge = pmem_extent_merge
+    .merge = pmem_extent_merge,
+    .destroy = pmem_extent_destroy
 };
 
 MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops, const char *name)
@@ -208,7 +220,7 @@ MEMKIND_EXPORT int memkind_pmem_destroy(struct memkind *kind)
     memkind_arena_destroy(kind);
 
     pthread_mutex_destroy(&priv->pmem_lock);
-    (void) munmap(priv->addr, priv->max_size);
+
     (void) close(priv->fd);
     jemk_free(priv);
 
@@ -223,17 +235,21 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t 
     if (pthread_mutex_lock(&priv->pmem_lock) != 0)
         assert(0 && "failed to acquire mutex");
 
-    if (priv->offset + size > priv->max_size) {
+    if (priv->max_size != 0 && (size_t)priv->offset + size > priv->max_size) {
         pthread_mutex_unlock(&priv->pmem_lock);
         return MAP_FAILED;
     }
 
-    if ((errno = posix_fallocate(priv->fd, priv->offset, size)) != 0) {
+    if ((errno = posix_fallocate(priv->fd, priv->offset, (off_t)size)) != 0) {
         pthread_mutex_unlock(&priv->pmem_lock);
         return MAP_FAILED;
     }
 
-    result = priv->addr + priv->offset;
+    if ((result = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, priv->fd, priv->offset)) == MAP_FAILED) {
+        pthread_mutex_unlock(&priv->pmem_lock);
+        return MAP_FAILED;
+    }
+
     priv->offset += size;
 
     pthread_mutex_unlock(&priv->pmem_lock);

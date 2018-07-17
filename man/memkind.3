@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 - 2017 Intel Corporation.
+.\" Copyright (C) 2014 - 2018 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -258,15 +258,20 @@ on a call to
 .BR memkind_pmem (3)).
 This allows to create a pmem memkind of a pretty large size without the
 need to reserve in advance the corresponding file system space for the entire
-heap.  The minimum
+heap. If the value of
 .I max_size
-value allowed by the library is defined in
+is equal 0, pmem memkind is not limited by the file system specified by the
+.I dir
+argument.
+ The minimum
+.I max_size
+value which allows to limit the size of kind by the library is defined in
 .B <memkind_pmem.h>
 as
 .BR MEMKIND_PMEM_MIN_SIZE .
 Calling
 .BR memkind_create_pmem ()
-with a size smaller than that will return an error.
+with a size smaller than that, and different than 0 will return an error.
 The maximum allowed size is not limited by
 .BR memkind ,
 but by the file system specified by the
@@ -554,7 +559,7 @@ When linking statically against memkind, libmemkind.a should be used together wi
 There might be some overhead in huge pages consumption caused by heap management.
 If your allocation fails because of OOM, please try to allocate extra huge pages (e.g. 8 huge pages).
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2017 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2018 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR malloc (3),
 .BR numa (3),
