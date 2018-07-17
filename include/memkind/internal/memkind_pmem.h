@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2017 Intel Corporation.
+ * Copyright (C) 2015 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,6 @@ int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags);
 
 struct memkind_pmem {
     int fd;
-    void *addr;
     off_t offset;
     size_t max_size;
     pthread_mutex_t pmem_lock;

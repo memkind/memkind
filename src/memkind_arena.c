@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -386,7 +386,7 @@ MEMKIND_EXPORT int memkind_arena_destroy(struct memkind *kind)
 
     if (kind->arena_map_len) {
         for (i = 0; i < kind->arena_map_len; ++i) {
-            snprintf(cmd, 128, "arena.%u.purge", kind->arena_zero + i);
+            snprintf(cmd, 128, "arena.%u.destroy", kind->arena_zero + i);
             jemk_mallctl(cmd, NULL, NULL, NULL, 0);
         }
 #ifdef MEMKIND_TLS
