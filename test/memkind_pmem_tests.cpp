@@ -31,6 +31,7 @@
 #include "common.h"
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4096;
+static const size_t PMEM_NO_LIMIT = 0;
 static const char*  PMEM_DIR = "/tmp/";
 
 class MemkindPmemTests: public :: testing::Test
@@ -201,4 +202,41 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocUsableSize)
         EXPECT_LE(diff, check_sizes[i].spacing);
         memkind_free(pmem_temp, alloc);
     }
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemResize)
+{
+    const size_t size = MEMKIND_PMEM_CHUNK_SIZE;
+    char *pmem_str10 = nullptr;
+    char *pmem_strX  = nullptr;
+    memkind_t pmem_kind_no_limit = nullptr;
+    memkind_t pmem_kind_not_possible = nullptr;
+    int err = 0;
+
+    pmem_str10 = (char *)memkind_malloc(pmem_kind, MEMKIND_PMEM_MIN_SIZE);
+    EXPECT_TRUE(nullptr != pmem_str10);
+
+    // Out of memory
+    pmem_strX = (char *)memkind_malloc(pmem_kind, size);
+    EXPECT_TRUE(nullptr == pmem_strX);
+
+    memkind_free(pmem_kind, pmem_str10);
+    memkind_free(pmem_kind, pmem_strX);
+
+    err = memkind_create_pmem(PMEM_DIR, PMEM_NO_LIMIT, &pmem_kind_no_limit);
+    EXPECT_EQ(0, err);
+    EXPECT_TRUE(nullptr != pmem_kind_no_limit);
+
+    pmem_str10 = (char *)memkind_malloc(pmem_kind_no_limit, MEMKIND_PMEM_MIN_SIZE);
+    EXPECT_TRUE(nullptr != pmem_str10);
+
+    pmem_strX = (char *)memkind_malloc(pmem_kind_no_limit, size);
+    EXPECT_TRUE(nullptr != pmem_strX);
+
+    memkind_free(pmem_kind_no_limit, pmem_str10);
+    memkind_free(pmem_kind_no_limit, pmem_strX);
+
+    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE-1, &pmem_kind_not_possible);
+    EXPECT_EQ(MEMKIND_ERROR_INVALID, err);
+    EXPECT_TRUE(nullptr == pmem_kind_not_possible);
 }
