@@ -32,7 +32,7 @@
 #include <memkind/internal/memkind_hbw.h>
 #include <memkind/internal/memkind_regular.h>
 #include <memkind/internal/memkind_gbtlb.h>
-#include <memkind/internal/memkind_pmem.h>
+#include <pmemmalloc.h>
 #include <memkind/internal/memkind_interleave.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>

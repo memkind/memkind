@@ -23,15 +23,16 @@
  */
 
 #include <memkind/internal/memkind_arena.h>
-#include <memkind/internal/memkind_pmem.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_default.h>
 
 #include <sys/mman.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
+#include <pmemmalloc.h>
 #include <assert.h>
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
