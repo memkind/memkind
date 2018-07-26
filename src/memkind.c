@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -487,6 +487,16 @@ MEMKIND_EXPORT int memkind_check_available(struct memkind *kind)
         err = kind->ops->check_available(kind);
     }
     return err;
+}
+
+MEMKIND_EXPORT size_t memkind_malloc_usable_size(struct memkind *kind, void *ptr)
+{
+    size_t size = 0;
+
+    if (MEMKIND_LIKELY(kind->ops->malloc_usable_size)) {
+        size = kind->ops->malloc_usable_size(kind, ptr);
+    }
+    return size;
 }
 
 MEMKIND_EXPORT void *memkind_malloc(struct memkind *kind, size_t size)
