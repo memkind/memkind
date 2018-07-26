@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -281,6 +281,10 @@ int memkind_check_available(memkind_t kind);
 /* EXPERIMENTAL API */
 /* malloc from the numa nodes of the specified kind */
 void *memkind_malloc(memkind_t kind, size_t size);
+
+/* EXPERIMENTAL API */
+/* malloc_usable_size from the numa nodes of the specified kind */
+size_t memkind_malloc_usable_size(memkind_t kind, void *ptr);
 
 /* EXPERIMENTAL API */
 /* calloc from the numa nodes of the specified kind */

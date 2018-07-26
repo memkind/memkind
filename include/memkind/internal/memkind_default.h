@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,7 @@ int memkind_interleave_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_nohugepage_madvise(struct memkind *kind, void *addr, size_t size);
 int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
 void memkind_default_init_once(void);
+size_t memkind_default_malloc_usable_size(struct memkind *kind, void *ptr);
 
 static inline bool size_out_of_bounds(size_t size)
 {

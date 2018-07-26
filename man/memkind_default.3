@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 - 2017 Intel Corporation.
+.\" Copyright (C) 2014 - 2018 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,8 @@ Note: This is EXEPRIMENTAL API. The functionality and the header file itself can
 .BI "int memkind_default_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
 .br
 .BI "int memkind_default_get_mbind_mode(struct memkind " "*kind" ", int " "*mode" );
+.br
+.BI "size_t memkind_default_malloc_usable_size(struct memkind " "*kind" ", void " "*ptr" );
 .br
 .BI "int memkind_preferred_get_mbind_mode(struct memkind " "*kind" ", int " "*mode" );
 .br
@@ -157,6 +159,10 @@ See
 .BR mbind (2)
 for more information about this flag.
 .PP
+.BR memkind_default_malloc_usable_size ()
+is a direct call through to jemalloc's
+.BR malloc_usable_size ().
+.PP
 .BR memkind_preferred_get_mbind_mode ()
 sets
 .I mode
@@ -192,7 +198,7 @@ to ensure that is abides by the POSIX requirements:
 alignment must be a power of 2 at least as large as
 .RB sizeof( "void *" ).
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2017 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2018 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3),
 .BR memkind_arena (3),

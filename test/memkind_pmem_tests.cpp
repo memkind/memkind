@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2017 Intel Corporation.
+ * Copyright (C) 2015 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,4 +164,41 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
     printf("%s", default_str);
 
     memkind_free(pmem_kind, default_str);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocUsableSize)
+{
+    const struct {
+        size_t size;
+        size_t spacing;
+    } Check_sizes[] = {
+        {.size = 10, .spacing = 8},
+        {.size = 100, .spacing = 16},
+        {.size = 200, .spacing = 32},
+        {.size = 500, .spacing = 64},
+        {.size = 1000, .spacing = 128},
+        {.size = 2000, .spacing = 256},
+        {.size = 3000, .spacing = 512},
+        {.size = 1 * 1024 * 1024, .spacing = 4 * 1024 * 1024},
+        {.size = 2 * 1024 * 1024, .spacing = 4 * 1024 * 1024},
+        {.size = 3 * 1024 * 1024, .spacing = 4 * 1024 * 1024},
+        {.size = 4 * 1024 * 1024, .spacing = 4 * 1024 * 1024}
+    };
+    struct memkind *pmem_temp= nullptr;
+
+    int err = memkind_create_pmem(".", MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+    EXPECT_EQ(0, err);
+    EXPECT_TRUE(nullptr != pmem_temp);
+    size_t usable_size = memkind_malloc_usable_size(pmem_temp, nullptr);
+    EXPECT_EQ(0u, usable_size);
+    for (unsigned int i =0 ; i < (sizeof(Check_sizes) / sizeof(Check_sizes[0])); i++) {
+        size_t size = Check_sizes[i].size;
+        void *alloc = memkind_malloc(pmem_temp, size);
+        EXPECT_TRUE(nullptr != alloc);
+        usable_size = memkind_malloc_usable_size(pmem_temp, alloc);
+        size_t diff = usable_size - size;
+        EXPECT_GE(usable_size, size);
+        EXPECT_LE(diff, Check_sizes[i].spacing);
+        memkind_free(pmem_temp, alloc);
+    }
 }
