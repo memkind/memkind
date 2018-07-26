@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .posix_memalign = memkind_default_posix_memalign,
     .realloc = memkind_default_realloc,
     .free = memkind_default_free,
-    .init_once = memkind_default_init_once
+    .init_once = memkind_default_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size
 };
 
 MEMKIND_EXPORT int memkind_default_create(struct memkind *kind, struct memkind_ops *ops, const char *name)
@@ -105,6 +106,11 @@ MEMKIND_EXPORT void *memkind_default_realloc(struct memkind *kind, void *ptr, si
 MEMKIND_EXPORT void memkind_default_free(struct memkind *kind, void *ptr)
 {
     jemk_free(ptr);
+}
+
+MEMKIND_EXPORT size_t memkind_default_malloc_usable_size(struct memkind *kind, void *ptr)
+{
+    return jemk_malloc_usable_size(ptr);
 }
 
 MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
