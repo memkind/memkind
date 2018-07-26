@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2017 Intel Corporation.
+ * Copyright (C) 2016 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,15 +60,16 @@ extern "C" {
 #define JE_SYMBOL(b)     JE_SYMBOL1(JE_PREFIX, b)
 
 // Redefine symbols
-#define jemk_malloc         JE_SYMBOL(malloc)
-#define jemk_mallocx        JE_SYMBOL(mallocx)
-#define jemk_calloc         JE_SYMBOL(calloc)
-#define jemk_rallocx        JE_SYMBOL(rallocx)
-#define jemk_realloc        JE_SYMBOL(realloc)
-#define jemk_mallctl        JE_SYMBOL(mallctl)
-#define jemk_memalign       JE_SYMBOL(memalign)
-#define jemk_posix_memalign JE_SYMBOL(posix_memalign)
-#define jemk_free           JE_SYMBOL(free)
+#define jemk_malloc                 JE_SYMBOL(malloc)
+#define jemk_mallocx                JE_SYMBOL(mallocx)
+#define jemk_calloc                 JE_SYMBOL(calloc)
+#define jemk_rallocx                JE_SYMBOL(rallocx)
+#define jemk_realloc                JE_SYMBOL(realloc)
+#define jemk_mallctl                JE_SYMBOL(mallctl)
+#define jemk_memalign               JE_SYMBOL(memalign)
+#define jemk_posix_memalign         JE_SYMBOL(posix_memalign)
+#define jemk_free                   JE_SYMBOL(free)
+#define jemk_malloc_usable_size     JE_SYMBOL(malloc_usable_size)
 
 enum memkind_const_private {
     MEMKIND_NAME_LENGTH_PRIV = 64
@@ -93,6 +94,7 @@ struct memkind_ops {
     int (* check_addr)(struct memkind *kind, void *addr);
     void (*init_once)(void);
     int (* finalize)(struct memkind *kind);
+    size_t (*malloc_usable_size)(struct memkind *kind, void *addr);
 };
 
 struct memkind {
