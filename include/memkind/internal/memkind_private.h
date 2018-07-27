@@ -69,6 +69,7 @@ extern "C" {
 #define jemk_memalign               JE_SYMBOL(memalign)
 #define jemk_posix_memalign         JE_SYMBOL(posix_memalign)
 #define jemk_free                   JE_SYMBOL(free)
+#define jemk_dallocx                JE_SYMBOL(dallocx)
 #define jemk_malloc_usable_size     JE_SYMBOL(malloc_usable_size)
 
 enum memkind_const_private {
