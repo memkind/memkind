@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 - 2017 Intel Corporation.
+.\" Copyright (C) 2014 - 2018 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ Note: This is EXEPRIMENTAL API. The functionality and the header file itself can
 .BI "void *memkind_arena_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
 .BI "int memkind_thread_get_arena(struct memkind " "*kind" ", unsigned int " "*arena", size_t " "size" );
 .BI "int memkind_bijective_get_arena(struct memkind " "*kind" ", unsigned int " "*arena", size_t " "size" );
+.BI "void memkind_arena_free(struct memkind " "*kind" ", void " "*ptr" );
 .br
 .SH DESCRIPTION
 This header file is a collection of functions can be used to populate
@@ -142,8 +143,20 @@ index to be used with the MALLOCX_ARENA macro to set flags for jemalloc's
 .BR mallocx ().
 Use of this operation implies that only one arena is used for the
 .IR kind .
+.PP
+.BR memkind_arena_free ()
+is an implementation of the memkind "free" operation for memory
+kinds that use jemalloc.  It causes the allocated memory referenced by
+.IR ptr ,
+which must have been returned by a previous call to
+.BR memkind_arena_malloc () ,
+.BR memkind_arena_calloc ()
+or
+.BR memkind_arena_realloc ()
+to be made available for future allocations.
+It uses the memkind "get_arena" operation to select the arena.
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2016 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2018 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3),
 .BR memkind_default (3),
