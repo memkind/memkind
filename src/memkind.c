@@ -313,10 +313,32 @@ MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
     return MEMKIND_ERROR_INVALID;
 }
 
+static void memkind_destroy_kind_from_register(unsigned int i, memkind_t kind)
+{
+    memkind_registry_g.partition_map[i] = NULL;
+    --memkind_registry_g.num_kind;
+    if (i >= MEMKIND_NUM_BASE_KIND) {
+        jemk_free(kind);
+    }
+}
+
 /* Kind destruction. */
 MEMKIND_EXPORT int memkind_destroy_kind(memkind_t kind)
 {
-    return kind->ops->destroy(kind);
+    if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
+        assert(0 && "failed to acquire mutex");
+    unsigned int i;
+    int err = kind->ops->destroy(kind);
+    for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        if ((memkind_registry_g.partition_map[i]) &&
+            (strcmp(kind->name, memkind_registry_g.partition_map[i]->name) == 0)) {
+            memkind_destroy_kind_from_register(i,kind);
+            break;
+        }
+    }
+    if (pthread_mutex_unlock(&memkind_registry_g.lock) != 0)
+        assert(0 && "failed to release mutex");
+    return err;
 }
 
 /* Declare weak symbols for allocator decorators */
@@ -418,7 +440,8 @@ static int memkind_create(struct memkind_ops *ops, const char *name,
                           struct memkind **kind)
 {
     int err;
-    int i;
+    unsigned int i;
+    unsigned int id_kind = 0;
 
     *kind = NULL;
     if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
@@ -441,8 +464,12 @@ static int memkind_create(struct memkind_ops *ops, const char *name,
         err = MEMKIND_ERROR_BADOPS;
         goto exit;
     }
-    for (i = 0; i < memkind_registry_g.num_kind; ++i) {
-        if (strcmp(name, memkind_registry_g.partition_map[i]->name) == 0) {
+    for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        if (memkind_registry_g.partition_map[i] == NULL) {
+            id_kind = i;
+            break;
+        } else if (strcmp(name, memkind_registry_g.partition_map[i]->name) == 0) {
+            log_err("Kind with the name %s already exists", name);
             err = MEMKIND_ERROR_INVALID;
             goto exit;
         }
@@ -459,7 +486,7 @@ static int memkind_create(struct memkind_ops *ops, const char *name,
     if (err) {
         goto exit;
     }
-    memkind_registry_g.partition_map[memkind_registry_g.num_kind] = *kind;
+    memkind_registry_g.partition_map[id_kind] = *kind;
     ++memkind_registry_g.num_kind;
 
     (*kind)->init_once = PTHREAD_ONCE_INIT;
@@ -478,25 +505,23 @@ __attribute__((destructor))
 static int memkind_finalize(void)
 {
     struct memkind *kind;
-    int i;
+    unsigned int i;
     int err = 0;
 
     if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
         assert(0 && "failed to acquire mutex");
 
-    for (i = 0; i < memkind_registry_g.num_kind; ++i) {
+    for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
         kind = memkind_registry_g.partition_map[i];
         if (kind && kind->ops->finalize) {
             err = kind->ops->finalize(kind);
             if (err) {
                 goto exit;
             }
-            memkind_registry_g.partition_map[i] = NULL;
-            if (i >= MEMKIND_NUM_BASE_KIND) {
-                jemk_free(kind);
-            }
+            memkind_destroy_kind_from_register(i, kind);
         }
     }
+    assert(memkind_registry_g.num_kind == 0);
 
 exit:
     if (pthread_mutex_unlock(&memkind_registry_g.lock) != 0)
