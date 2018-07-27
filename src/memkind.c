@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -308,7 +308,22 @@ MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
 /* Kind destruction. */
 MEMKIND_EXPORT int memkind_destroy_kind(memkind_t kind)
 {
-    return kind->ops->destroy(kind);
+    if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
+        assert(0 && "failed to acquire mutex");
+    for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        if ((memkind_registry_g.partition_map[i]) && (strcmp(kind->name, memkind_registry_g.partition_map[i]->name) == 0)) {
+            memkind_registry_g.partition_map[i] = NULL;
+            --memkind_registry_g.num_kind;
+            break;
+        }
+    }
+
+    int err = kind->ops->destroy(kind);
+
+    if (pthread_mutex_unlock(&memkind_registry_g.lock) != 0)
+        assert(0 && "failed to release mutex");
+
+    return err;
 }
 
 /* Declare weak symbols for allocator decorators */
@@ -394,7 +409,8 @@ static void nop(void) {}
 static int memkind_create(struct memkind_ops *ops, const char *name, struct memkind **kind)
 {
     int err;
-    int i;
+    unsigned int i;
+    unsigned int id_kind = 0;
 
     *kind = NULL;
     if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
@@ -416,12 +432,20 @@ static int memkind_create(struct memkind_ops *ops, const char *name, struct memk
         err = MEMKIND_ERROR_BADOPS;
         goto exit;
     }
-    for (i = 0; i < memkind_registry_g.num_kind; ++i) {
-        if (strcmp(name, memkind_registry_g.partition_map[i]->name) == 0) {
-            err = MEMKIND_ERROR_INVALID;
-            goto exit;
+    for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        if ( memkind_registry_g.partition_map[i] != NULL) {
+            if (strcmp(name, memkind_registry_g.partition_map[i]->name) == 0) {
+                log_err("Kind with the name %s already exist", name);
+                err = MEMKIND_ERROR_INVALID;
+                goto exit;
+            }
+        }
+        else {
+            id_kind = i;
+            break;
         }
     }
+
     *kind = (struct memkind *)jemk_calloc(1, sizeof(struct memkind));
     if (!*kind) {
         err = MEMKIND_ERROR_MALLOC;
@@ -429,12 +453,13 @@ static int memkind_create(struct memkind_ops *ops, const char *name, struct memk
         goto exit;
     }
 
-    (*kind)->partition = memkind_registry_g.num_kind;
+    (*kind)->partition = id_kind;
     err = ops->create(*kind, ops, name);
     if (err) {
+        log_err("ops->create failed.");
         goto exit;
     }
-    memkind_registry_g.partition_map[memkind_registry_g.num_kind] = *kind;
+    memkind_registry_g.partition_map[id_kind] = *kind;
     ++memkind_registry_g.num_kind;
 
     (*kind)->init_once = PTHREAD_ONCE_INIT;
@@ -458,7 +483,7 @@ static int memkind_finalize(void)
     if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
         assert(0 && "failed to acquire mutex");
 
-    for (i = 0; i < memkind_registry_g.num_kind; ++i) {
+    for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
         kind = memkind_registry_g.partition_map[i];
         if (kind && kind->ops->finalize) {
             err = kind->ops->finalize(kind);

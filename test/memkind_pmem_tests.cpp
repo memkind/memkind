@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2017 Intel Corporation.
+ * Copyright (C) 2015 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,4 +164,35 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
     printf("%s", default_str);
 
     memkind_free(pmem_kind, default_str);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemDestroyKind)
+{
+    const size_t pmem_array_size = 10;
+    struct memkind * pmem_kind_array[pmem_array_size]= {nullptr};
+
+    int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_kind_array[0]);
+    EXPECT_EQ(err, 0);
+
+    err = memkind_destroy_kind(pmem_kind_array[0]);
+    EXPECT_EQ(err, 0);
+
+    for (unsigned int i = 0; i < pmem_array_size; i++ ) {
+        err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_kind_array[i]);
+        EXPECT_EQ(err, 0);
+    }
+
+    char * pmem_middle_name = pmem_kind_array[5]->name;
+    err = memkind_destroy_kind(pmem_kind_array[5]);
+    EXPECT_EQ(err, 0);
+
+    err = memkind_destroy_kind(pmem_kind_array[6]);
+    EXPECT_EQ(err, 0);
+
+    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_kind_array[5]);
+    EXPECT_EQ(err, 0);
+
+    char * pmem_new_middle_name = pmem_kind_array[5]->name;
+
+    EXPECT_STREQ(pmem_middle_name,pmem_new_middle_name);
 }
