@@ -95,6 +95,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/static_kinds_tests.cpp \
                          test/hbw_verify_function_test.cpp \
                          test/dlopen_test.cpp \
+                         test/pmem_allocator_tests.cpp \
                          #end
 
 test_locality_test_SOURCES = $(fused_gtest) test/allocator_perf_tool/Allocation_info.cpp test/locality_test.cpp
