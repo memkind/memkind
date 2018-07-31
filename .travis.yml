@@ -1,30 +1,46 @@
 dist: trusty
 sudo: false
-language: cpp python
-before_install:
-  - pip install -U pytest
+language: cpp
+matrix:
+  include:
+    - name: "GCC 4.8"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.8
+            - libnuma-dev
+      env:
+         - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8 && JEMALLOC_CC=gcc-4.8 && JEMALLOC_CXX=g++-4.8 && BUILDTEST=true"
+    - name: "GCC 7.0"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+            - libnuma-dev
+      env:
+         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7 && JEMALLOC_CC=gcc-7 && JEMALLOC_CXX=g++-7 && BUILDTEST=true"
+    - name: "Clang 6.0"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - g++-4.8
+            - clang-6.0
+            - libnuma-dev
+      env:
+        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0 && JEMALLOC_CC=gcc-4.8 && JEMALLOC_CXX=g++-4.8 && BUILDTEST=false"
 install:
 script:
-  - CXX="g++-4.8" CC="gcc-4.8" LDFLAGS="-lrt -Wl,--no-as-needed" MAKEOPTS="-l 1.5" ./build.sh
-  - travis_wait 60 make check
-  - cat test-suite.log
-after_failure:
-  - echo "Sad memking"
-  - find . -name config.log -exec cat {} ";"
-  - find . -name test-suite.log -exec cat {} ";"
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-4.8
-    - g++-4.8
-    - libnuma-dev
-    - numactl
-notifications:
-  email:
-    recipients:
-      - krzysztof.kulakowski@intel.com
-      - lukasz.anaczkowski@intel.com
-    on_success: [change]
-    on_failure: [always]
+  - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh 
+  - ./autogen.sh
+  - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
+  - make all
+  - if [ $BUILDTEST == 'true' ]; then make checkprogs; fi;
+before_install:
+  - eval "${MATRIX_EVAL}"

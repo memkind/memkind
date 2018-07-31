@@ -6332,12 +6332,6 @@ void UnitTestImpl::ListTestsMatchingFilter() {
           printf("\n");
         }
         printf("  %s", test_info->name());
-        if (test_info->value_param() != NULL) {
-          printf("  # %s = ", kValueParamLabel);
-          // We print the value parameter on a single line to make the
-          // output easy to parse by a program.
-          PrintOnOneLine(test_info->value_param(), kMaxParamLength);
-        }
         printf("\n");
       }
     }

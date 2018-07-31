@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2017 Intel Corporation.
+ * Copyright (C) 2015 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .mbind = memkind_default_mbind,
     .madvise = memkind_nohugepage_madvise,
     .get_mmap_flags = memkind_default_get_mmap_flags,
-    .mbind = memkind_default_mbind,
     .get_mbind_mode = memkind_interleave_get_mbind_mode,
     .get_mbind_nodemask = memkind_default_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
