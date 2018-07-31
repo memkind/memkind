@@ -42,11 +42,10 @@
 #define STL_MAP_INT_STRING_TEST
 
 void cpp_allocator_test() {
+    std::cout << "TEST SCOPE: HELLO" << std::endl;
 
-	std::cout << "TEST SCOPE: HELLO" << std::endl;
-
-	const char* pmem_directory = "/dev/shm";
-	size_t pmem_max_size = 1024*1024*1024;
+    const char* pmem_directory = "/dev/shm";
+    size_t pmem_max_size = 1024*1024*1024;
 
     /*
      * Because of the issue #57 we cannot create multiple PMEM kinds.
@@ -57,119 +56,98 @@ void cpp_allocator_test() {
      * and create required allocators from scratch.
      */
 
-       pmem::allocator<int> alloc_source { pmem_directory, pmem_max_size } ;
+    pmem::allocator<int> alloc_source { pmem_directory, pmem_max_size } ;
 
-	#ifdef STL_VECTOR_TEST
+#ifdef STL_VECTOR_TEST
+    {
+        std::cout << "VECTOR OPEN" << std::endl;
+        pmem::allocator<int> alc{ alloc_source  };
+        std::vector<int, pmem::allocator<int>> vector{ alc };
 
+        for (int i = 0; i < 20; ++i) {
+            vector.push_back(0xDEAD + i);
+            assert(vector.back() == 0xDEAD + i);
 
-	{
-	    std::cout << "VECTOR OPEN" << std::endl;
-		pmem::allocator<int> alc{ alloc_source  };
+        }
 
-		std::vector<int, pmem::allocator<int>> vector{ alc };
+        std::cout << "VECTOR CLOSE" << std::endl;
+    }
+#endif
 
-		for (int i = 0; i < 20; ++i) {
-			vector.push_back(0xDEAD + i);
-			assert(vector.back() == 0xDEAD + i);
+#ifdef STL_LIST_TEST
+    {
+        std::cout << "LIST OPEN" << std::endl;
+        pmem::allocator<int> alc{ alloc_source };
+        std::list<int, pmem::allocator<int>> list{ alc };
 
-		}
+        const int nx2 = 4;
+        for (int i = 0; i < nx2; ++i) {
+            list.emplace_back(0xBEAC011 + i);
+            assert(list.back() == 0xBEAC011 + i);
+        }
 
-		std::cout << "VECTOR CLOSE" << std::endl;
-	}
+        for (int i = 0; i < nx2; ++i) {
+            list.pop_back();
+        }
 
-	#endif
-	
-	#ifdef STL_LIST_TEST
+        std::cout << "LIST CLOSE" << std::endl;
+    }
+#endif
 
-	
-	{
-	    std::cout << "LIST OPEN" << std::endl;
-		pmem::allocator<int> alc{ alloc_source };
+#ifdef STL_VEC_STRING_TEST
+    {
+        std::cout << "STRINGED VECTOR OPEN" << std::endl;
+        typedef pmem::allocator<pmem_string> vec_alloc_t;
+        typedef pmem::allocator<char> str_alloc_t;
+        typedef std::basic_string<char, std::char_traits<char>, str_alloc_t> pmem_string;
 
-		std::list<int, pmem::allocator<int>> list{ alc };
+        vec_alloc_t vec_alloc{ alloc_source };
+        str_alloc_t str_alloc{ alloc_source };
 
-		const int nx2 = 4;
+        std::vector<pmem_string, std::scoped_allocator_adaptor<vec_alloc_t> > vec{ vec_alloc };
 
-		for (int i = 0; i < nx2; ++i) {
-			list.emplace_back(0xBEAC011 + i);
-			assert(list.back() == 0xBEAC011 + i);
-		}
+        pmem_string arg{ "Very very loooong striiiing", str_alloc };
 
-		for (int i = 0; i < nx2; ++i) {
-			list.pop_back();
-		}
+        vec.push_back(arg);
+        assert(vec.back() == arg);
 
-		std::cout << "LIST CLOSE" << std::endl;
-	}
+        std::cout << "STRINGED VECTOR CLOSE" << std::endl;
+    }
 
-	#endif
+#endif
 
-
-	#ifdef STL_VEC_STRING_TEST
-
-
-	{
-
-	    std::cout << "STRINGED VECTOR OPEN" << std::endl;
-		typedef std::basic_string<char, std::char_traits<char>, pmem::allocator<char>> pmem_string;
-		typedef pmem::allocator<pmem_string> pmem_alloc;
-
-		pmem_alloc alc{ alloc_source };
-		pmem::allocator<char> st_alc{ alc };
-
-        std::vector<pmem_string, std::scoped_allocator_adaptor<pmem_alloc> > vec{ alc };
-		pmem_string arg{ "Very very loooong striiiing", st_alc };
-
-		vec.push_back(arg);
-		assert(vec.back() == arg);
-
-		std::cout << "STRINGED VECTOR CLOSE" << std::endl;
-	}
-
-	#endif
-
-	#ifdef STL_MAP_INT_STRING_TEST
-
-
-	{
-		
-    	std::cout << "INT_STRING MAP OPEN" << std::endl;
-		typedef std::basic_string<char, std::char_traits<char>, pmem::allocator<char> > pmem_string;
-		typedef int key_t;
-		typedef pmem_string value_t;
-		typedef std::pair<key_t, value_t> target_pair;
-		typedef pmem::allocator<target_pair> pmem_alloc;
+#ifdef STL_MAP_INT_STRING_TEST
+    {
+        std::cout << "INT_STRING MAP OPEN" << std::endl;
+        typedef std::basic_string<char, std::char_traits<char>, pmem::allocator<char> > pmem_string;
+        typedef int key_t;
+        typedef pmem_string value_t;
+        typedef std::pair<key_t, value_t> target_pair;
+        typedef pmem::allocator<target_pair> pmem_alloc;
         typedef pmem::allocator<char> str_allocator_t;
-		typedef std::map<key_t, value_t, std::less<key_t>, std::scoped_allocator_adaptor<pmem_alloc> > map_t;
+        typedef std::map<key_t, value_t, std::less<key_t>, std::scoped_allocator_adaptor<pmem_alloc> > map_t;
 
-		pmem_alloc map_allocator( alloc_source );
+        pmem_alloc map_allocator( alloc_source );
 
-		str_allocator_t str_allocator( map_allocator );
+        str_allocator_t str_allocator( map_allocator );
 
-		value_t source_str1( "Lorem ipsum dolor " , str_allocator);
-		value_t source_str2( "sit amet consectetuer adipiscing elit", str_allocator );
+        value_t source_str1( "Lorem ipsum dolor " , str_allocator);
+        value_t source_str2( "sit amet consectetuer adipiscing elit", str_allocator );
 
-		map_t target_map{ std::scoped_allocator_adaptor<pmem_alloc>(map_allocator) };
+        map_t target_map{ std::scoped_allocator_adaptor<pmem_alloc>(map_allocator) };
 
-		target_map[key_t(165)] = source_str1;
-		assert(target_map[key_t(165)] == source_str1);
-		target_map[key_t(165)] = source_str2;
-		assert(target_map[key_t(165)] == source_str2);
+        target_map[key_t(165)] = source_str1;
+        assert(target_map[key_t(165)] == source_str1);
+        target_map[key_t(165)] = source_str2;
+        assert(target_map[key_t(165)] == source_str2);
 
-		std::cout << "INT_STRING MAP CLOSE" << std::endl;
-	}
-
-	#endif
-
-	std::cout << "TEST SCOPE: GOODBYE" << std::endl;
+        std::cout << "INT_STRING MAP CLOSE" << std::endl;
+    }
+#endif
+    std::cout << "TEST SCOPE: GOODBYE" << std::endl;
 }
-
-
 
 int main() {
     cpp_allocator_test();
     return 0;
 }
-
-
-
