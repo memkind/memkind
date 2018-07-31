@@ -38,31 +38,32 @@
 
 #define STL_VECTOR_TEST
 #define STL_LIST_TEST
-#define STL_MAP_TEST
 #define STL_VEC_STRING_TEST
 #define STL_MAP_INT_STRING_TEST
 
 void cpp_allocator_test() {
 
-	std::cout << "MAIN SCOPE: HELLO" << std::endl;
+	std::cout << "TEST SCOPE: HELLO" << std::endl;
 
 	const char* pmem_directory = "/dev/shm";
 	size_t pmem_max_size = 1024*1024*1024;
 
     /*
-     * TODO: Because of the issue #57, all allocators must be using the same memkind,
-     * so they are built via copy constructor.
-     * When the issue is fixed, we should split the program to several functions,
-     * instead of all-in-one implementation.
+     * Because of the issue #57 we cannot create multiple PMEM kinds.
+     * Therefore, we create alloc_source object of pmem::allocator class
+     * and use this object to copy-construct all other required allocators.
+     * In this case all allocators use the same PMEM kind created inside alloc_source object.
+     * When the issue #57 is fixed, we can remove alloc_source allocator
+     * and create required allocators from scratch.
      */
 
-    pmem::allocator<int> alloc_source { pmem_directory, pmem_max_size } ;
+       pmem::allocator<int> alloc_source { pmem_directory, pmem_max_size } ;
 
 	#ifdef STL_VECTOR_TEST
 
-	std::cout << "VECTOR OPEN" << std::endl;
 
 	{
+	    std::cout << "VECTOR OPEN" << std::endl;
 		pmem::allocator<int> alc{ alloc_source  };
 
 		std::vector<int, pmem::allocator<int>> vector{ alc };
@@ -80,9 +81,9 @@ void cpp_allocator_test() {
 	
 	#ifdef STL_LIST_TEST
 
-	std::cout << "LIST OPEN" << std::endl;
 	
 	{
+	    std::cout << "LIST OPEN" << std::endl;
 		pmem::allocator<int> alc{ alloc_source };
 
 		std::list<int, pmem::allocator<int>> list{ alc };
@@ -103,38 +104,20 @@ void cpp_allocator_test() {
 
 	#endif
 
-	#ifdef STL_MAP_TEST
-
-	std::cout << "MAP OPEN" << std::endl;
-
-	{
-		pmem::allocator<std::pair<const std::string, std::string>> alc{ alloc_source };
-
-		std::map<std::string, std::string, std::less<std::string>, pmem::allocator<std::pair<const std::string, std::string> > > map{ alc };
-		
-		for (int i = 0; i < 10; ++i) {
-			map[std::to_string((i * 997 + 83) % 113)] = std::to_string(0x0CEA11 + i);
-			assert(map[std::to_string((i * 997 + 83) % 113)] == std::to_string(0x0CEA11 + i));
-		}
-
-		std::cout << "MAP CLOSE" << std::endl;
-	}
-
-	#endif
 
 	#ifdef STL_VEC_STRING_TEST
 
-	std::cout << "STRINGED VECTOR OPEN" << std::endl;
 
 	{
 
+	    std::cout << "STRINGED VECTOR OPEN" << std::endl;
 		typedef std::basic_string<char, std::char_traits<char>, pmem::allocator<char>> pmem_string;
 		typedef pmem::allocator<pmem_string> pmem_alloc;
 
 		pmem_alloc alc{ alloc_source };
-		pmem::allocator<char> st_alc{alc};
+		pmem::allocator<char> st_alc{ alc };
 
-		std::vector<pmem_string, pmem_alloc> vec{ alc };
+        std::vector<pmem_string, std::scoped_allocator_adaptor<pmem_alloc> > vec{ alc };
 		pmem_string arg{ "Very very loooong striiiing", st_alc };
 
 		vec.push_back(arg);
@@ -147,10 +130,10 @@ void cpp_allocator_test() {
 
 	#ifdef STL_MAP_INT_STRING_TEST
 
-	std::cout << "INT_STRING MAP OPEN" << std::endl;
 
 	{
 		
+    	std::cout << "INT_STRING MAP OPEN" << std::endl;
 		typedef std::basic_string<char, std::char_traits<char>, pmem::allocator<char> > pmem_string;
 		typedef int key_t;
 		typedef pmem_string value_t;
@@ -178,31 +161,10 @@ void cpp_allocator_test() {
 
 	#endif
 
-	std::cout << "MAIN SCOPE: GOODBYE" << std::endl;
+	std::cout << "TEST SCOPE: GOODBYE" << std::endl;
 }
 
-void create_destroy_test() {
-    memkind_t mkind = 0;
-    memkind_t mkind2 = 0;
-    
-    const int size = 1024 * 1024 * 1024;
-    const char* dir = "/dev/shm";
-    
-    int err = memkind_create_pmem(dir, size, &mkind);
-    std::cout << "Caught an error while creating 1: " << err << std::endl;
 
-    err = memkind_create_pmem(dir, size, &mkind2);
-    std::cout << "Caught an error while creating 2: " << err << std::endl;
-    
-    err = memkind_destroy_kind(mkind);
-    std::cout << "Caught an error while destroying 1: " << err << std::endl;
-    mkind = 0;
-
-    err = memkind_destroy_kind(mkind2);
-    std::cout << "Caught an error while destroying 2: " << err << std::endl;
-    mkind2 = 0;
-    
-}
 
 int main() {
     cpp_allocator_test();

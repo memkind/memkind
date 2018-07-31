@@ -144,6 +144,7 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_SharedAllocationDeallocatio
 	int* created_object = nullptr;
 	int* created_object_2 = nullptr;
 	created_object = alc1.allocate(1);
+    ASSERT_TRUE(alc1 == alc2);
 	alc2.deallocate(created_object, 1);
 	created_object = alc2.allocate(1);
 	alc1.deallocate(created_object, 1);
@@ -215,8 +216,11 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_Vector_Test)
 
 	for (int i = 0; i < 20; ++i) {
 		vector.push_back(0xDEAD + i);
-		ASSERT_TRUE(vector.back() == 0xDEAD + i);
 	}
+
+    for (int i = 0; i < 20; ++i) {
+        ASSERT_TRUE(vector[i] == 0xDEAD + i);
+    }
 
 }
 
@@ -248,8 +252,8 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_Map_Test)
 	std::map<std::string, std::string, std::less<std::string>, pmem::allocator<std::pair<const std::string, std::string> > > map{ alc };
 		
 	for (int i = 0; i < 10; ++i) {
-		map[std::to_string((i * 997 + 83) % 113)] = std::to_string(0x0CEA11 + i);
-		ASSERT_TRUE(map[std::to_string((i * 997 + 83) % 113)] == std::to_string(0x0CEA11 + i));
+		map[std::to_string(i)] = std::to_string(0x0CEA11 + i);
+		ASSERT_TRUE(map[std::to_string(i)] == std::to_string(0x0CEA11 + i));
 	}
 }
 
@@ -262,7 +266,7 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_VectorOfString_Test)
 	pmem_alloc alc{ alloc_source };
 	pmem::allocator<char> st_alc{alc};
 
-	std::vector<pmem_string, pmem_alloc> vec{ alc };
+	std::vector<pmem_string,std::scoped_allocator_adaptor<pmem_alloc> > vec{ alc };
 	pmem_string arg{ "Very very loooong striiiing", st_alc };
 
 	vec.push_back(arg);
