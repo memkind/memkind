@@ -139,7 +139,7 @@ static void *alloc_aligned_slow(size_t size, size_t alignment, struct memkind* k
     size_t extended_size = size + alignment;
     void* ptr;
 
-    ptr = kind_mmap(kind,  NULL, extended_size);
+    ptr = kind_mmap(kind,  NULL, extended_size, alignment);
 
     if(ptr == MAP_FAILED) {
         return NULL;
@@ -181,7 +181,7 @@ void *arena_extent_alloc(extent_hooks_t *extent_hooks,
         return NULL;
     }
 
-    addr = kind_mmap(kind, new_addr, size);
+    addr = kind_mmap(kind, new_addr, size, alignment);
     if (addr == MAP_FAILED) {
         return NULL;
     }

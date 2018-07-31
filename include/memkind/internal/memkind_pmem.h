@@ -50,7 +50,7 @@ extern "C" {
 
 int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops, const char *name);
 int memkind_pmem_destroy(struct memkind *kind);
-void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size);
+void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size, size_t alignment);
 int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags);
 
 struct memkind_pmem {

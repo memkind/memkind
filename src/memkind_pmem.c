@@ -41,7 +41,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
     .calloc = memkind_arena_calloc,
     .posix_memalign = memkind_arena_posix_memalign,
     .realloc = memkind_arena_realloc,
-    .free = memkind_default_free,
+    .free = memkind_arena_free,
     .mmap = memkind_pmem_mmap,
     .get_mmap_flags = memkind_pmem_get_mmap_flags,
     .get_arena = memkind_thread_get_arena,
@@ -74,13 +74,13 @@ void *pmem_extent_alloc(extent_hooks_t *extent_hooks,
         goto exit;
     }
 
-    addr = memkind_pmem_mmap(kind, new_addr, size);
+    addr = memkind_pmem_mmap(kind, new_addr, size, alignment);
 
     if (addr != MAP_FAILED) {
+        assert((uintptr_t)addr % alignment == 0);
+
         *zero = true;
         *commit = true;
-
-        /* XXX - check alignment */
     } else {
         addr = NULL;
     }
@@ -95,6 +95,7 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
     unsigned arena_ind)
 {
     /* do nothing - report failure (opt-out) */
+    /* XXX: punch hole? */
     return true;
 }
 
@@ -215,7 +216,7 @@ MEMKIND_EXPORT int memkind_pmem_destroy(struct memkind *kind)
     return 0;
 }
 
-MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size)
+MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size, size_t alignment)
 {
     struct memkind_pmem *priv = kind->priv;
     void *result;
@@ -223,18 +224,25 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t 
     if (pthread_mutex_lock(&priv->pmem_lock) != 0)
         assert(0 && "failed to acquire mutex");
 
-    if (priv->offset + size > priv->max_size) {
+    uintptr_t aligned_addr =
+        ((uintptr_t)priv->addr + priv->offset + alignment - 1) & ~(alignment - 1);
+
+    size_t adjust = aligned_addr & (alignment - 1);
+    if (adjust)
+        adjust = alignment - adjust;
+
+    if (priv->offset + size + adjust > priv->max_size) {
         pthread_mutex_unlock(&priv->pmem_lock);
         return MAP_FAILED;
     }
 
-    if ((errno = posix_fallocate(priv->fd, priv->offset, size)) != 0) {
+    if ((errno = posix_fallocate(priv->fd, priv->offset, size + adjust)) != 0) {
         pthread_mutex_unlock(&priv->pmem_lock);
         return MAP_FAILED;
     }
 
-    result = priv->addr + priv->offset;
-    priv->offset += size;
+    result = (void *)aligned_addr;
+    priv->offset += size + adjust;
 
     pthread_mutex_unlock(&priv->pmem_lock);
 

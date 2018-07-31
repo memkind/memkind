@@ -82,7 +82,7 @@ struct memkind_ops {
     int (* posix_memalign)(struct memkind *kind, void **memptr, size_t alignment, size_t size);
     void *(* realloc)(struct memkind *kind, void *ptr, size_t size);
     void (* free)(struct memkind *kind, void *ptr);
-    void *(* mmap)(struct memkind *kind, void *addr, size_t size);
+    void *(* mmap)(struct memkind *kind, void *addr, size_t size, size_t alignment);
     int (* mbind)(struct memkind *kind, void *ptr, size_t size);
     int (* madvise)(struct memkind *kind, void *addr, size_t size);
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
@@ -110,7 +110,7 @@ struct memkind {
 
 void memkind_init(memkind_t kind, bool check_numa);
 
-void *kind_mmap(struct memkind *kind, void* addr, size_t size);
+void *kind_mmap(struct memkind *kind, void* addr, size_t size, size_t alignment);
 
 #ifdef __cplusplus
 }

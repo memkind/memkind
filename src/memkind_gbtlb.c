@@ -34,7 +34,7 @@ static void memkind_hbw_gbtlb_init_once(void);
 static void memkind_hbw_preferred_gbtlb_init_once(void);
 static void memkind_gbtlb_init_once(void);
 
-static void *gbtlb_mmap(struct memkind *kind, void *addr, size_t size);
+static void *gbtlb_mmap(struct memkind *kind, void *addr, size_t size, size_t alignment);
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .create = memkind_arena_create,
@@ -97,10 +97,10 @@ static void memkind_gbtlb_ceil_size(size_t *size)
     *size = *size % ONE_GB ? ((*size / ONE_GB) + 1) * ONE_GB : *size;
 }
 
-static void *gbtlb_mmap(struct memkind *kind, void *addr, size_t size)
+static void *gbtlb_mmap(struct memkind *kind, void *addr, size_t size, size_t alignment)
 {
     memkind_gbtlb_ceil_size(&size);
-    return memkind_default_mmap(kind, addr, size);
+    return memkind_default_mmap(kind, addr, size, alignment);
 }
 
 static void memkind_hbw_gbtlb_init_once(void)
