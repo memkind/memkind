@@ -241,7 +241,7 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_Map_Test)
 {   
     pmem::allocator<std::pair<const std::string, std::string>> alc{ alloc_source };
 
-    std::map<std::string, std::string, std::less<std::string>, pmem::allocator<std::pair<const std::string, std::string> > > map{ alc };
+    std::map<std::string, std::string, std::less<std::string>, pmem::allocator<std::pair<const std::string, std::string> > > map( alc );
 
     for (int i = 0; i < 10; ++i) {
         map[std::to_string(i)] = std::to_string(0x0CEA11 + i);
