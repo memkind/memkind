@@ -38,8 +38,10 @@
 
 #define STL_VECTOR_TEST
 #define STL_LIST_TEST
+#if _GLIBCXX_USE_CXX11_ABI
 #define STL_VEC_STRING_TEST
 #define STL_MAP_INT_STRING_TEST
+#endif
 
 void cpp_allocator_test() {
     std::cout << "TEST SCOPE: HELLO" << std::endl;

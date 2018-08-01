@@ -251,6 +251,7 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_Map_Test)
     }
 }
 
+#if _GLIBCXX_USE_CXX11_ABI
 //Test vector of strings
 TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_VectorOfString_Test)
 {   
@@ -292,3 +293,4 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorScopedUsage_MapOfIntString_T
     target_map[key_t(165)] = source_str2;
     ASSERT_TRUE(target_map[key_t(165)] == source_str2);
 }
+#endif // _GLIBCXX_USE_CXX11_ABI
