@@ -104,7 +104,7 @@ void cpp_allocator_test() {
         vec_alloc_t vec_alloc{ alloc_source };
         str_alloc_t str_alloc{ alloc_source };
 
-        std::vector<pmem_string, std::scoped_allocator_adaptor<vec_alloc_t> > vec{ vec_alloc };
+        std::vector<pmem_string, std::scoped_allocator_adaptor<vec_alloc_t> > vec{ std::scoped_allocator_adaptor<vec_alloc_t>(vec_alloc) };
 
         pmem_string arg{ "Very very loooong striiiing", str_alloc };
 
