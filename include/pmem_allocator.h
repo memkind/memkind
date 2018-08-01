@@ -70,10 +70,16 @@ private:
         ++(*kind_cnt);
     }
 
-
 public:
 
-    /* Parameterized constructors */
+#ifndef _GLIBCXX_USE_CXX11_ABI
+    /* This is a workaround for compilers that uses C++11 standard,
+     * but use old - non C++11 ABI */
+    template<typename V = void>
+    explicit allocator() {
+        static_assert(std::is_same<V, void>::value, "pmem::allocator cannot be compiled without CXX11 ABI");
+    }
+#endif
 
     explicit allocator(const char *dir, size_t max_size) {
         int err_c  = memkind_create_pmem(dir, max_size, &kind_ptr);
@@ -87,8 +93,6 @@ public:
         allocator(dir.c_str(), max_size);
     };
 
-    /* Copy constructors */		
-
     allocator(const allocator& other) noexcept {
         assign(other);
     }
@@ -99,7 +103,6 @@ public:
     }
 
     /* Move constructors */		
-
     allocator(const allocator&& other) noexcept {
         assign(other);
     }
@@ -109,9 +112,7 @@ public:
         assign(other);
     }
 
-    /* Copy-assign operators */		
-
-    void operator = (const allocator<T>& other) noexcept {
+    void operator = (const allocator& other) noexcept {
         clean_up();		
         assign(other);
     }
@@ -122,9 +123,7 @@ public:
         assign(other);
     }
 
-    /* Move-assign operators */		
-
-    void operator = (const allocator<T>&& other) noexcept {
+    void operator = (const allocator&& other) noexcept {
         clean_up();		
         assign(other);
     }
@@ -134,9 +133,7 @@ public:
         clean_up();		
         assign(other);
     }
-
-    /* Compare operators */		
-
+	
     template <typename U>
     bool operator ==(const allocator<U>& other) const {
         return kind_ptr == other.kind_ptr;
@@ -146,8 +143,6 @@ public:
     bool operator !=(const allocator<U>& other) const {
         return !(*this ==other);
     }
-
-    /* Allocator methods */		
 
     T* allocate(std::size_t n) const {
         void* mptr = memkind_calloc(kind_ptr, n, sizeof(T));
@@ -166,9 +161,6 @@ public:
     void destroy(T* const p) const {
         p->~value_type();
     }
-
-
-    /* Destructor */		
 
     ~allocator() {
         clean_up();
