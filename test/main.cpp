@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,9 +24,27 @@
 
 #include "common.h"
 
+char* PMEM_DIR = const_cast<char *>("/tmp/");
 
 int main(int argc, char **argv)
 {
+    int opt = 0;
+    opterr = 0;
+    while((opt = getopt(argc, argv, "hd:")) != -1) {
+        switch (opt) {
+            case 'd': {
+                PMEM_DIR = optarg;
+                break;
+            }
+            case 'h': {
+                printf("Options:\n"
+                    "-d <directory_path>   change directory on which PMEM kinds\n"
+                    "                      are created (default /tmp/)\n");
+                break;
+            }
+         }
+     }
+
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
