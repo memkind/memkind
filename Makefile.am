@@ -1,5 +1,7 @@
 #
 #  Copyright (C) 2014 - 2017 Intel Corporation.
+#  Copyright (c) 2018        Research Organization for Information Science
+#                            and Technology (RIST).  All rights reserved.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -23,7 +25,7 @@
 #
 
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/obj/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/jemalloc/obj/include
 
 lib_LTLIBRARIES = libmemkind.la
 
