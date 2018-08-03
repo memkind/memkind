@@ -40,9 +40,13 @@
 #include <map>
 
 
+static const size_t PMEM_PART_SIZE = (1024 * 1024 * 16) + 4096;
+static const char*  PMEM_DIR = "/tmp/";
+
 class AllocatorFactory
 {
 public:
+    memkind_t MEMKIND_PMEM;
 	//Allocator initialization statistics
 	struct initialization_stat
 	{
@@ -54,6 +58,8 @@ public:
 
 	AllocatorFactory()
 	{
+		memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &MEMKIND_PMEM); //temporary here, just for test
+
 		memkind_allocators[AllocatorTypes::MEMKIND_DEFAULT] = MemkindAllocatorWithTimer(MEMKIND_DEFAULT, AllocatorTypes::MEMKIND_DEFAULT);
 		memkind_allocators[AllocatorTypes::MEMKIND_REGULAR] = MemkindAllocatorWithTimer(MEMKIND_REGULAR, AllocatorTypes::MEMKIND_REGULAR);
 		memkind_allocators[AllocatorTypes::MEMKIND_HBW] = MemkindAllocatorWithTimer(MEMKIND_HBW, AllocatorTypes::MEMKIND_HBW);
@@ -66,6 +72,7 @@ public:
 		memkind_allocators[AllocatorTypes::MEMKIND_HBW_PREFERRED_HUGETLB] = MemkindAllocatorWithTimer(MEMKIND_HBW_PREFERRED_HUGETLB, AllocatorTypes::MEMKIND_HBW_PREFERRED_HUGETLB);
 		memkind_allocators[AllocatorTypes::MEMKIND_HBW_GBTLB] = MemkindAllocatorWithTimer(MEMKIND_HBW_GBTLB, AllocatorTypes::MEMKIND_HBW_GBTLB);
 		memkind_allocators[AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB] = MemkindAllocatorWithTimer(MEMKIND_HBW_PREFERRED_GBTLB, AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB);
+		memkind_allocators[AllocatorTypes::MEMKIND_PMEM] = MemkindAllocatorWithTimer(MEMKIND_PMEM, AllocatorTypes::MEMKIND_PMEM);
 	}
 
 	//Get existing allocator without creating new.
