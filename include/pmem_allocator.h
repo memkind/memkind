@@ -89,8 +89,8 @@ public:
         kind_cnt = new std::atomic<size_t>(1);
     }
 
-    explicit allocator(const std::string& dir, size_t max_size) {
-        allocator(dir.c_str(), max_size);
+    explicit allocator(const std::string& dir, size_t max_size) : allocator(dir.c_str(), max_size){
+        
     };
 
     allocator(const allocator& other) noexcept {

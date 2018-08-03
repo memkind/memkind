@@ -43,10 +43,10 @@ public:
     const char* const pmem_directory = "/dev/shm";
     const size_t pmem_max_size = 1024*1024*1024;
 
-    pmem::allocator<int> alloc_source { pmem_directory, pmem_max_size } ;
+    pmem::allocator<int> alloc_source { std::string(pmem_directory), pmem_max_size } ;
 
-    pmem::allocator<int> alloc_source_f1 { pmem_directory, pmem_max_size } ;
-    pmem::allocator<int> alloc_source_f2 { pmem_directory, pmem_max_size } ;
+    pmem::allocator<int> alloc_source_f1 { std::string(pmem_directory), pmem_max_size } ;
+    pmem::allocator<int> alloc_source_f2 { std::string(pmem_directory), pmem_max_size } ;
 
 protected:
     void SetUp()
