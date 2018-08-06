@@ -1,6 +1,8 @@
+astyle.sh
 autogen.sh
 build.sh
 build_jemalloc.sh
+install_astyle.sh
 Makefile.am
 configure.ac
 autohbw/Makefile.mk
