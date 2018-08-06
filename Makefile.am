@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2017 Intel Corporation.
+#  Copyright (C) 2014 - 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,8 @@ nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/tbb_mem_pool_policy.h \
                   # end
 
-EXTRA_DIST = autogen.sh \
+EXTRA_DIST = astyle.sh \
+             autogen.sh \
              build.sh \
              build_jemalloc.sh \
              examples/README \
