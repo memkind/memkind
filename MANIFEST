@@ -7,6 +7,7 @@ Makefile.am
 NEWS
 README
 .travis.yml
+astyle.sh
 autogen.sh
 build.sh
 build_jemalloc.sh
@@ -26,6 +27,7 @@ examples/memkind_allocated_example.cpp
 examples/memkind_allocated.hpp
 examples/memkind_decorator_debug.c
 examples/pmem_example.c
+install_astyle.sh
 m4/ax_cxx_compile_stdcxx.m4
 m4/ax_cxx_compile_stdcxx_11.m4
 m4/ax_pthread.m4
