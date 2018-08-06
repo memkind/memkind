@@ -31,7 +31,6 @@
  */
 
 #include <memkind.h>
-//#include <memkind/internal/memkind_pmem.h>
 #include <pmemmalloc.h>
 
 #include <sys/param.h>
