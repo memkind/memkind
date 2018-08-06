@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,8 +63,8 @@ static int memkind_regular_check_available(struct memkind *kind)
 }
 
 MEMKIND_EXPORT int memkind_regular_all_get_mbind_nodemask(struct memkind *kind,
-                                                          unsigned long *nodemask,
-                                                          unsigned long maxnode)
+        unsigned long *nodemask,
+        unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};
 

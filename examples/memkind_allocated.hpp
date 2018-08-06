@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,9 +58,9 @@ public:
         if(alignof(deriving_class) <  sizeof(void *)) {
             result_ptr = memkind_malloc(memory_kind, size);
             allocation_result = result_ptr ? 1 : 0;
-        }
-        else {
-            allocation_result = memkind_posix_memalign(memory_kind, &result_ptr, alignof(deriving_class), size);
+        } else {
+            allocation_result = memkind_posix_memalign(memory_kind, &result_ptr,
+                                alignof(deriving_class), size);
         }
 
         if(allocation_result) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "Unable to allocate hbw_preferred string\n");
         return errno ? -errno : 1;
     }
-    hbw_preferred_hugetlb_str = (char *)memkind_malloc(MEMKIND_HBW_PREFERRED_HUGETLB, size);
+    hbw_preferred_hugetlb_str = (char *)memkind_malloc(
+                                    MEMKIND_HBW_PREFERRED_HUGETLB, size);
     if (hbw_preferred_hugetlb_str == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate hbw_preferred_hugetlb string\n");
@@ -86,10 +87,13 @@ int main(int argc, char **argv)
     sprintf(hugetlb_str, "Hello world from standard memory with 2 MB pages\n");
     sprintf(hbw_str, "Hello world from high bandwidth memory\n");
     sprintf(hbw_hugetlb_str, "Hello world from high bandwidth 2 MB paged memory\n");
-    sprintf(hbw_preferred_str, "Hello world from high bandwidth memory if sufficient resources exist\n");
-    sprintf(hbw_preferred_hugetlb_str, "Hello world from high bandwidth 2 MB paged memory if sufficient resources exist\n");
+    sprintf(hbw_preferred_str,
+            "Hello world from high bandwidth memory if sufficient resources exist\n");
+    sprintf(hbw_preferred_hugetlb_str,
+            "Hello world from high bandwidth 2 MB paged memory if sufficient resources exist\n");
 
-    sprintf(hbw_interleave_str, "Hello world from high bandwidth interleaved memory\n");
+    sprintf(hbw_interleave_str,
+            "Hello world from high bandwidth interleaved memory\n");
 
     fprintf(stdout, "%s", default_str);
     fprintf(stdout, "%s", hugetlb_str);

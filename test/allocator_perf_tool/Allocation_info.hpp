@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2016 Intel Corporation.
+* Copyright (C) 2015 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -29,15 +29,14 @@
 
 
 //This structure is responsible to store information about single memory operation.
-struct memory_operation
-{
-	void* ptr;
-	double total_time;
-	size_t size_of_allocation;
-	unsigned allocator_type;
-	unsigned allocation_method;
-	bool is_allocated;
-	int error_code;
+struct memory_operation {
+    void* ptr;
+    double total_time;
+    size_t size_of_allocation;
+    unsigned allocator_type;
+    unsigned allocation_method;
+    bool is_allocated;
+    int error_code;
 };
 
 double convert_bytes_to_mb(uint64_t bytes);

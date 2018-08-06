@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,8 @@ int main()
     }
 
     expected_nodemask = numa_allocate_nodemask();
-    status = memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp, expected_nodemask->size);
+    status = memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp,
+             expected_nodemask->size);
     if (status != MEMKIND_ERROR_ENVIRON) {
         printf("Error: wrong return value from memkind_hbw_all_get_mbind_nodemask()\n");
         printf("Expected: %d\n", MEMKIND_ERROR_ENVIRON);
@@ -59,7 +60,8 @@ int main()
     }
 
     returned_nodemask = numa_allocate_nodemask();
-    status = get_mempolicy(NULL, returned_nodemask->maskp, returned_nodemask->size, ptr, MPOL_F_ADDR);
+    status = get_mempolicy(NULL, returned_nodemask->maskp, returned_nodemask->size,
+                           ptr, MPOL_F_ADDR);
     if (status) {
         printf("Error: get_mempolicy() returned %d\n", status);
         goto exit;

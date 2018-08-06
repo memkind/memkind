@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017-2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@ protected:
     DlopenTest()
     {
         const char *path = "/usr/lib64/libmemkind.so";
-        if (!pathExists(path))
-        {
+        if (!pathExists(path)) {
             path = "/usr/lib/libmemkind.so";
         }
         dlerror();
@@ -68,8 +67,7 @@ protected:
     bool pathExists(const char *p)
     {
         struct stat info;
-        if (0 != stat(p, &info))
-        {
+        if (0 != stat(p, &info)) {
             return false;
         }
         return true;

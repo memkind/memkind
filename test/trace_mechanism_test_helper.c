@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016-2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,35 +34,27 @@ int main(int argc, char *argv[])
     void *buf = NULL;
 
     //It is expected that "MEMKIND_HBW" or "MEMKIND_HUGETLB" argument is passed
-    if (argc != 2)
-    {
+    if (argc != 2) {
         printf("Error: Wrong number of parameters\n");
         err = -1;
         return err;
     }
 
-    if (strcmp(argv[1], "MEMKIND_HBW") == 0)
-    {
+    if (strcmp(argv[1], "MEMKIND_HBW") == 0) {
         buf = memkind_malloc(MEMKIND_HBW, size);
-        if (buf == NULL)
-        {
+        if (buf == NULL) {
             printf("Allocation of MEMKIND_HBW failed\n");
             err = -1;
         }
         memkind_free(MEMKIND_HBW, buf);
-    }
-    else if (strcmp(argv[1], "MEMKIND_HUGETLB") == 0)
-    {
+    } else if (strcmp(argv[1], "MEMKIND_HUGETLB") == 0) {
         buf = memkind_malloc(MEMKIND_HUGETLB, size);
-        if (buf == NULL)
-        {
+        if (buf == NULL) {
             printf("Allocation of MEMKIND_HUGETLB failed\n");
             err = -1;
         }
         memkind_free(MEMKIND_HUGETLB, buf);
-    }
-    else
-    {
+    } else {
         printf("Error: unknown parameter\n");
         err = -1;
     }

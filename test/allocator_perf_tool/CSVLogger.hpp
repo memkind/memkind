@@ -32,30 +32,30 @@
 namespace csv
 {
 
-class Row
-{
-public:
-	Row()
-	{
-		row << std::fixed;
-		row.precision(6);
-	}
+    class Row
+    {
+    public:
+        Row()
+        {
+            row << std::fixed;
+            row.precision(6);
+        }
 
-	template<class T>
-	void append(const T& e)
-	{
-		row << "," << e;
-	}
+        template<class T>
+        void append(const T& e)
+        {
+            row << "," << e;
+        }
 
-	std::string export_row() const
-	{
-		std::stringstream ss(row.str());
-		ss << std::endl;
-		return ss.str();
-	}
+        std::string export_row() const
+        {
+            std::stringstream ss(row.str());
+            ss << std::endl;
+            return ss.str();
+        }
 
-private:
-	std::stringstream row;
-};
+    private:
+        std::stringstream row;
+    };
 
 }

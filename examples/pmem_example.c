@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016, Intel Corporation
+ * Copyright (c) 2015 - 2018, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -146,7 +146,8 @@ main(int argc, char *argv[])
     pmem_str = (char *)memkind_malloc(pmem_kind1, 16 * 1024 * 1024);
     if (pmem_str != NULL) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Failure, this allocation should not be possible (expected result was NULL)\n");
+        fprintf(stderr,
+                "Failure, this allocation should not be possible (expected result was NULL)\n");
         return errno ? -errno : 1;
     }
 

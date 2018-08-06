@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016-2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,8 @@ protected:
     void SetUp()
     {
         //Calculate reference statistics.
-        ref_time = allocator_factory.initialize_allocator(AllocatorTypes::STANDARD_ALLOCATOR).total_time;
+        ref_time = allocator_factory.initialize_allocator(
+                       AllocatorTypes::STANDARD_ALLOCATOR).total_time;
     }
 
     void TearDown()
@@ -45,7 +46,8 @@ protected:
 
     void run_test(unsigned allocator_type)
     {
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_DEFAULT);
+        AllocatorFactory::initialization_stat stat =
+            allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_DEFAULT);
 
         post_test(stat);
     }
@@ -53,7 +55,8 @@ protected:
     void post_test(AllocatorFactory::initialization_stat& stat)
     {
         //Calculate (%) distance to the reference time for function calls.
-        stat.ref_delta_time = allocator_factory.calc_ref_delta(ref_time, stat.total_time);
+        stat.ref_delta_time = allocator_factory.calc_ref_delta(ref_time,
+                              stat.total_time);
 
         std::stringstream elapsed_time;
         elapsed_time << stat.total_time;
@@ -64,8 +67,7 @@ protected:
         RecordProperty("elapsed_time", elapsed_time.str());
         RecordProperty("ref_delta_time_percent_rate", ref_delta_time.str());
 
-        for (int i=0; i<stat.memory_overhead.size(); i++)
-        {
+        for (int i=0; i<stat.memory_overhead.size(); i++) {
             std::stringstream node;
             node << "memory_overhad_node_" << i;
             std::stringstream memory_overhead;
@@ -81,70 +83,85 @@ protected:
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_DEFAULT)
 {
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_DEFAULT);
-        post_test(stat);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_DEFAULT);
+    post_test(stat);
 }
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HBW)
 {
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW);
-        post_test(stat);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW);
+    post_test(stat);
 }
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_INTERLEAVE)
 {
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_INTERLEAVE);
-        post_test(stat);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_INTERLEAVE);
+    post_test(stat);
 }
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HBW_INTERLEAVE)
 {
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_INTERLEAVE);
-        post_test(stat);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_INTERLEAVE);
+    post_test(stat);
 }
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HBW_PREFERRED)
 {
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_PREFERRED);
-        post_test(stat);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_PREFERRED);
+    post_test(stat);
 }
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HUGETLB)
 {
-        HugePageOrganizer huge_page_organizer(16);
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HUGETLB);
-        post_test(stat);
+    HugePageOrganizer huge_page_organizer(16);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HUGETLB);
+    post_test(stat);
 }
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_GBTLB)
 {
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_GBTLB);
-        post_test(stat);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_GBTLB);
+    post_test(stat);
 }
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HBW_HUGETLB)
 {
-        HugePageOrganizer huge_page_organizer(16);
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_HUGETLB);
-        post_test(stat);
+    HugePageOrganizer huge_page_organizer(16);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_HUGETLB);
+    post_test(stat);
 }
 
-TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HBW_PREFERRED_HUGETLB)
+TEST_F(HeapManagerInitPerfTest,
+       test_TC_MEMKIND_perf_libinit_HBW_PREFERRED_HUGETLB)
 {
-        HugePageOrganizer huge_page_organizer(16);
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_PREFERRED_HUGETLB);
-        post_test(stat);
+    HugePageOrganizer huge_page_organizer(16);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(
+            AllocatorTypes::MEMKIND_HBW_PREFERRED_HUGETLB);
+    post_test(stat);
 }
 
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_ext_libinit_HBW_GBTLB)
 {
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_GBTLB);
-        post_test(stat);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_GBTLB);
+    post_test(stat);
 }
 
-TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HBW_PREFERRED_GBTLB)
+TEST_F(HeapManagerInitPerfTest,
+       test_TC_MEMKIND_perf_libinit_HBW_PREFERRED_GBTLB)
 {
-        AllocatorFactory::initialization_stat stat = allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB);
-        post_test(stat);
+    AllocatorFactory::initialization_stat stat =
+        allocator_factory.initialize_allocator(
+            AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB);
+    post_test(stat);
 }
 

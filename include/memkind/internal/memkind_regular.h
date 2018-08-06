@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,8 @@ extern "C" {
 
 extern struct memkind_ops MEMKIND_REGULAR_OPS;
 int memkind_regular_all_get_mbind_nodemask(struct memkind *kind,
-                                           unsigned long *nodemask,
-                                           unsigned long maxnode);
+        unsigned long *nodemask,
+        unsigned long maxnode);
 
 #ifdef __cplusplus
 }

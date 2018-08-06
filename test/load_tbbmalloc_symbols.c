@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016-2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@ int load_tbbmalloc_symbols()
     const char so_name[]="libtbbmalloc.so.2";
     void* tbb_handle = dlopen(so_name, RTLD_LAZY);
     if(!tbb_handle) {
-       printf("Cannot load %s\n", so_name);
-       return -1;
+        printf("Cannot load %s\n", so_name);
+        return -1;
     }
 
     scalable_malloc = dlsym(tbb_handle, "scalable_malloc");

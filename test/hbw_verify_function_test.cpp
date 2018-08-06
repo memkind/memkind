@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016-2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,8 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_HBW_page_size_round)
 
 TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_HBW_iterate_1_byte_to_8194_bytes)
 {
-    for (size_t size = 1; size <= (page_size * 2 + 2); size++) { //iterate through 2 pages and 2 bytes
+    for (size_t size = 1; size <= (page_size * 2 + 2);
+         size++) { //iterate through 2 pages and 2 bytes
         char* ptr = (char*) hbw_malloc(size);
         ASSERT_FALSE(ptr == NULL);
         EXPECT_EQ(hbw_verify_memory_region(ptr, size, HBW_TOUCH_PAGES), 0);
@@ -107,14 +108,16 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_HBW_setting_memory_without_flag)
 /*
  * Test HBW_TOUCH_PAGES flag
  */
-TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_HBW_TOUCH_PAGES_check_overwritten_content)
+TEST_F(HbwVerifyFunctionTest,
+       test_TC_MEMKIND_HBW_TOUCH_PAGES_check_overwritten_content)
 {
     size_t size = 5 * page_size;
     char* ptr = (char*) hbw_malloc(size);
     ASSERT_FALSE(ptr == NULL);
     memset(ptr, '.', size);
     EXPECT_EQ(hbw_verify_memory_region(ptr, size, HBW_TOUCH_PAGES), 0);
-    for (size_t i = 0; i < size; i++) { //check that content of all pages doesn't change
+    for (size_t i = 0; i < size;
+         i++) { //check that content of all pages doesn't change
         EXPECT_TRUE(ptr[i] == '.');
     }
     hbw_free(ptr);
@@ -134,7 +137,8 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_HBW_many_blocks_round)
 
 TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_HBW_many_blocks_not_round)
 {
-    size_t size = (16 * BLOCK_SIZE * page_size) + (8 * page_size); //16 * 64-page blocks and 1 * 8-paged block
+    size_t size = (16 * BLOCK_SIZE * page_size) + (8 *
+                  page_size); //16 * 64-page blocks and 1 * 8-paged block
     char* ptr = (char*) hbw_malloc(size);
     ASSERT_FALSE(ptr == NULL);
     EXPECT_EQ(hbw_verify_memory_region(ptr, size, HBW_TOUCH_PAGES), 0);
@@ -148,7 +152,8 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_HBW_many_blocks_not_round)
 TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_HBW_iterate_not_round)
 {
     for (size_t i = 1; i < BLOCK_SIZE; i++) {
-        size_t size = (2 * BLOCK_SIZE * page_size) + (i * page_size); // 2 * 64-paged blocks and iterate through whole 3rd 64-paged block
+        size_t size = (2 * BLOCK_SIZE * page_size) + (i *
+                      page_size); // 2 * 64-paged blocks and iterate through whole 3rd 64-paged block
         char* ptr = (char*) hbw_malloc(size);
         ASSERT_FALSE(ptr == NULL);
         EXPECT_EQ(hbw_verify_memory_region(ptr, size, HBW_TOUCH_PAGES), 0);
@@ -190,7 +195,8 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_malloc)
 /*
  * Group of negative tests
  */
-TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Negative_size_0_and_SET_MEMORY_flag)
+TEST_F(HbwVerifyFunctionTest,
+       test_TC_MEMKIND_Negative_size_0_and_SET_MEMORY_flag)
 {
     void* ptr = hbw_malloc(page_size);
     ASSERT_FALSE(ptr == NULL);
@@ -206,16 +212,19 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Negative_size_0_without_flag)
     hbw_free(ptr);
 }
 
-TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Negative_Uninitialized_Memory_without_flag)
+TEST_F(HbwVerifyFunctionTest,
+       test_TC_MEMKIND_Negative_Uninitialized_Memory_without_flag)
 {
     void* ptr = NULL;
     EXPECT_EQ(hbw_verify_memory_region(ptr, page_size * 1024, 0), EINVAL);
 }
 
-TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Negative_Uninitialized_Memory_and_SET_MEMORY_flag)
+TEST_F(HbwVerifyFunctionTest,
+       test_TC_MEMKIND_Negative_Uninitialized_Memory_and_SET_MEMORY_flag)
 {
     void* ptr = NULL;
-    EXPECT_EQ(hbw_verify_memory_region(ptr, page_size * 1024, HBW_TOUCH_PAGES), EINVAL);
+    EXPECT_EQ(hbw_verify_memory_region(ptr, page_size * 1024, HBW_TOUCH_PAGES),
+              EINVAL);
 }
 
 TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Negative_Without_Memset)
@@ -235,9 +244,9 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Negative_Without_Memset)
  * = not HBM memory and verified
  */
 
- /* 3 pages:
-  * |++##|####|##++|
-  */
+/* 3 pages:
+ * |++##|####|##++|
+ */
 TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Half_Pages)
 {
     size_t size = 3 * page_size;
@@ -245,14 +254,15 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Half_Pages)
     struct bitmask hbw_nodemask = {NUMA_NUM_NODES, nodemask.n};
     //function memkind_hbw_all_get_mbind_nodemask() has to be rewritten, when we will have replacement in new API.
     memkind_hbw_all_get_mbind_nodemask(NULL, hbw_nodemask.maskp, hbw_nodemask.size);
-    char* ptr = (char*) mmap(NULL, size , PROT_READ | PROT_WRITE, flags, -1, 0);
+    char* ptr = (char*) mmap(NULL, size, PROT_READ | PROT_WRITE, flags, -1, 0);
     ASSERT_FALSE(ptr == NULL);
 
     //all pages should fall on HBM
     mbind(ptr, size, MPOL_BIND, hbw_nodemask.maskp, NUMA_NUM_NODES, 0);
 
     //verified are: half of the first page, second page and half of the third page
-    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size/2), size - page_size, HBW_TOUCH_PAGES), 0);
+    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size/2),
+                                       size - page_size, HBW_TOUCH_PAGES), 0);
     EXPECT_EQ(munmap(ptr, size), 0);
 }
 
@@ -267,7 +277,7 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Half_Pages_1_and_2_page)
     struct bitmask hbw_nodemask = {NUMA_NUM_NODES, nodemask.n};
     //function memkind_hbw_all_get_mbind_nodemask() has to be rewritten, when we will have replacement in new API.
     memkind_hbw_all_get_mbind_nodemask(NULL, hbw_nodemask.maskp, hbw_nodemask.size);
-    char* ptr = (char*) mmap(NULL, size , PROT_READ | PROT_WRITE, flags, -1, 0);
+    char* ptr = (char*) mmap(NULL, size, PROT_READ | PROT_WRITE, flags, -1, 0);
     ASSERT_FALSE(ptr == NULL);
 
     //first and second page should fall on HBM
@@ -277,7 +287,8 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Half_Pages_1_and_2_page)
     EXPECT_EQ(hbw_verify_memory_region(ptr, size - page_size, HBW_TOUCH_PAGES), 0);
 
     //verified are: half of the first page, second page and half of the third page |++##|####|==--|
-    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size/2), size - page_size, HBW_TOUCH_PAGES), -1);
+    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size/2),
+                                       size - page_size, HBW_TOUCH_PAGES), -1);
     EXPECT_EQ(munmap(ptr, size), 0);
 }
 
@@ -292,17 +303,20 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Half_Pages_2_and_3_page)
     struct bitmask hbw_nodemask = {NUMA_NUM_NODES, nodemask.n};
     //function memkind_hbw_all_get_mbind_nodemask() has to be rewritten, when we will have replacement in new API.
     memkind_hbw_all_get_mbind_nodemask(NULL, hbw_nodemask.maskp, hbw_nodemask.size);
-    char* ptr = (char*) mmap(NULL, size , PROT_READ | PROT_WRITE, flags, -1, 0);
+    char* ptr = (char*) mmap(NULL, size, PROT_READ | PROT_WRITE, flags, -1, 0);
     ASSERT_FALSE(ptr == NULL);
 
     //second and third page should fall on HBM
-    mbind(SHIFT_BYTES(ptr, page_size), size - page_size, MPOL_BIND, hbw_nodemask.maskp, NUMA_NUM_NODES, 0);
+    mbind(SHIFT_BYTES(ptr, page_size), size - page_size, MPOL_BIND,
+          hbw_nodemask.maskp, NUMA_NUM_NODES, 0);
 
     //check if mbind is successful |----|####|####|
-    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size), size - page_size, HBW_TOUCH_PAGES), 0);
+    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size),
+                                       size - page_size, HBW_TOUCH_PAGES), 0);
 
     //verified are: half of the first page, second page and half of the third page
-    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size/2), size - page_size, HBW_TOUCH_PAGES), -1);
+    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size/2),
+                                       size - page_size, HBW_TOUCH_PAGES), -1);
     EXPECT_EQ(munmap(ptr, size), 0);
 }
 
@@ -317,19 +331,23 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Half_Pages_1_and_3_page)
     struct bitmask hbw_nodemask = {NUMA_NUM_NODES, nodemask.n};
     //function memkind_hbw_all_get_mbind_nodemask() has to be rewritten, when we will have replacement in new API.
     memkind_hbw_all_get_mbind_nodemask(NULL, hbw_nodemask.maskp, hbw_nodemask.size);
-    char* ptr = (char*) mmap(NULL, size , PROT_READ | PROT_WRITE, flags, -1, 0);
+    char* ptr = (char*) mmap(NULL, size, PROT_READ | PROT_WRITE, flags, -1, 0);
     ASSERT_FALSE(ptr == NULL);
 
     //first and third page should fall on HBM
     mbind(ptr, page_size, MPOL_BIND, hbw_nodemask.maskp, NUMA_NUM_NODES, 0);
-    mbind(SHIFT_BYTES(ptr, 2 * page_size), page_size, MPOL_BIND, hbw_nodemask.maskp, NUMA_NUM_NODES, 0);
+    mbind(SHIFT_BYTES(ptr, 2 * page_size), page_size, MPOL_BIND, hbw_nodemask.maskp,
+          NUMA_NUM_NODES, 0);
 
     //check if mbind is successful |####|----|++++| and  |++++|----|####|
-    EXPECT_EQ(hbw_verify_memory_region(ptr, size - 2*page_size, HBW_TOUCH_PAGES), 0);
-    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, 2*page_size), size - 2*page_size, HBW_TOUCH_PAGES), 0);
+    EXPECT_EQ(hbw_verify_memory_region(ptr, size - 2*page_size, HBW_TOUCH_PAGES),
+              0);
+    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, 2*page_size),
+                                       size - 2*page_size, HBW_TOUCH_PAGES), 0);
 
     //verified are: half of the first page, second page and half of the third page
-    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size/2), size - page_size, HBW_TOUCH_PAGES), -1);
+    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size/2),
+                                       size - page_size, HBW_TOUCH_PAGES), -1);
     EXPECT_EQ(munmap(ptr, size), 0);
 }
 
@@ -343,16 +361,18 @@ TEST_F(HbwVerifyFunctionTest, test_TC_MEMKIND_Boundaries_CornerCase)
     struct bitmask hbw_nodemask = {NUMA_NUM_NODES, nodemask.n};
     //function memkind_hbw_all_get_mbind_nodemask() has to be rewritten, when we will have replacement in new API.
     memkind_hbw_all_get_mbind_nodemask(NULL, hbw_nodemask.maskp, hbw_nodemask.size);
-    char* ptr = (char*) mmap(NULL, size , PROT_READ | PROT_WRITE, flags, -1, 0);
+    char* ptr = (char*) mmap(NULL, size, PROT_READ | PROT_WRITE, flags, -1, 0);
     ASSERT_FALSE(ptr == NULL);
 
     size_t tested_pages_size = size - 2 * page_size;
 
     //second, third and fourth page should fall on HBM
-    mbind(SHIFT_BYTES(ptr, page_size), tested_pages_size, MPOL_BIND, hbw_nodemask.maskp, NUMA_NUM_NODES, 0);
+    mbind(SHIFT_BYTES(ptr, page_size), tested_pages_size, MPOL_BIND,
+          hbw_nodemask.maskp, NUMA_NUM_NODES, 0);
 
     //verified are: second byte of the second page to last byte -1 of fourth page
-    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size + 1), tested_pages_size - 2, HBW_TOUCH_PAGES), 0);
+    EXPECT_EQ(hbw_verify_memory_region(SHIFT_BYTES(ptr, page_size + 1),
+                                       tested_pages_size - 2, HBW_TOUCH_PAGES), 0);
     EXPECT_EQ(munmap(ptr, size), 0);
 }
 

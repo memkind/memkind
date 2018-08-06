@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2014 - 2016 Intel Corporation.
+* Copyright (C) 2014 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -59,10 +59,8 @@ public:
     ~PerfTestCase()
     {
         delete m_test;
-        for (vector<Operation *> ops : m_testOperations)
-        {
-            for (Operation * op : ops)
-            {
+        for (vector<Operation *> ops : m_testOperations) {
+            for (Operation * op : ops) {
                 delete op;
             }
         }
@@ -85,7 +83,8 @@ public:
 
         m_testOperations = { { new T(OperationName::Malloc) } };
 
-        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads, m_iterations * 10);
+        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads,
+                m_iterations * 10);
         m_test->setOperations(m_testOperations, m_freeOperation);
         m_test->setAllocationSizes({ 128 });
     }
@@ -99,9 +98,11 @@ public:
                 new T(OperationName::Calloc, 50),
                 new T(OperationName::Realloc, 75),
                 new T(OperationName::Align, 100)
-            } };
+            }
+        };
 
-        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads, m_iterations * 10);
+        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads,
+                m_iterations * 10);
         m_test->setOperations(m_testOperations, m_freeOperation);
         m_test->setAllocationSizes({ 120, 521, 1200, 4099 });
     }
@@ -115,9 +116,11 @@ public:
                 new T(OperationName::Calloc, 50),
                 new T(OperationName::Realloc, 75),
                 new T(OperationName::Align, 100)
-            }};
+            }
+        };
 
-        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads, m_iterations);
+        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads,
+                m_iterations);
         m_test->setOperations(m_testOperations, m_freeOperation);
         m_test->setAllocationSizes({ 500000, 1000000, 2000000, 4000000 });
     }
@@ -133,7 +136,8 @@ public:
             { new T(OperationName::Align, 100) }
         };
 
-        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads, m_iterations * 10);
+        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads,
+                m_iterations * 10);
         m_test->setOperations(m_testOperations, m_freeOperation);
         m_test->setAllocationSizes({ 120, 521, 1200, 4099 });
         m_test->setExecutionMode(ExecutionMode::ManyIterations);
@@ -177,7 +181,8 @@ public:
             }
         };
 
-        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads, m_iterations * 10);
+        m_test = new performance_tests::PerformanceTest(m_repeats, m_threads,
+                m_iterations * 10);
         m_test->setOperations(m_testOperations, m_freeOperation);
         m_test->setAllocationSizes({ 120, 521, 1200, 4099 });
         m_test->setExecutionMode(ExecutionMode::ManyIterations);

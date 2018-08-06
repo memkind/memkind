@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,8 @@ using namespace std;
 /*Check each page between the start
 and the end address additionally also
 check the end address for pagesize*/
-Check::Check(const void *p, const trial_t &trial): Check(p, trial.size, trial.page_size)
+Check::Check(const void *p, const trial_t &trial): Check(p, trial.size,
+            trial.page_size)
 {
 }
 
@@ -70,8 +71,7 @@ Check::Check(const void *p, const size_t size, const size_t page_size)
             address[i] = (char *)ptr + i * psize;
         }
         address[i] = (char *)p + size - 1;
-    }
-    else {
+    } else {
         address = NULL;
         num_address = 0;
     }
@@ -227,8 +227,7 @@ int Check::populate_smaps_table ()
     if (0 == smaps_table.size()) {
         fprintf(stderr,"Empty smaps table\n");
         return -1;
-    }
-    else {
+    } else {
         return 0;
     }
 
@@ -257,8 +256,7 @@ int Check::check_page_size(size_t page_size, void *vaddr)
             lpagesize = it->pagesize;
             if (lpagesize == page_size) {
                 return 0;
-            }
-            else {
+            } else {
                 /*The pagesize of allocation and req don't match*/
                 fprintf(stderr,"%zd does not match entry in SMAPS (%zd)\n",
                         page_size, lpagesize);

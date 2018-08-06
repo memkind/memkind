@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,11 @@
 
 /* This is an example that enables debug printing on every alloction call */
 
-static void memkind_debug(const char *func, memkind_t kind, size_t size, void *ptr)
+static void memkind_debug(const char *func, memkind_t kind, size_t size,
+                          void *ptr)
 {
-    fprintf(stderr, "[ DEBUG ] func=%s kind=%p size=%zu ptr=0x%lx\n", func, kind, size, (size_t)ptr);
+    fprintf(stderr, "[ DEBUG ] func=%s kind=%p size=%zu ptr=0x%lx\n", func, kind,
+            size, (size_t)ptr);
 }
 
 void memkind_malloc_post(memkind_t kind, size_t size, void **result)
@@ -39,12 +41,14 @@ void memkind_malloc_post(memkind_t kind, size_t size, void **result)
     memkind_debug("memkind_malloc", kind, size, *result);
 }
 
-void memkind_calloc_post(memkind_t kind, size_t nmemb, size_t size, void **result)
+void memkind_calloc_post(memkind_t kind, size_t nmemb, size_t size,
+                         void **result)
 {
     memkind_debug("memkind_calloc", kind, nmemb * size, *result);
 }
 
-void memkind_posix_memalign_post(memkind_t kind, void **memptr, size_t alignment, size_t size, int *err)
+void memkind_posix_memalign_post(memkind_t kind, void **memptr,
+                                 size_t alignment, size_t size, int *err)
 {
     memkind_debug("memkind_posix_memalign", kind, size, *memptr);
 }
