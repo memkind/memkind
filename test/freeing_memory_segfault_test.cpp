@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2017 Intel Corporation.
+* Copyright (C) 2017 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,8 @@ protected:
     void TearDown() {}
 };
 
-TEST_F(FreeingMemorySegfault, test_TC_MEMKIND_freeing_memory_after_thread_finish)
+TEST_F(FreeingMemorySegfault,
+       test_TC_MEMKIND_freeing_memory_after_thread_finish)
 {
     void* ptr = nullptr;
 

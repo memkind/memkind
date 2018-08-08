@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,12 +86,13 @@ int main(int argc, char *argv[])
 {
     if(argc == 1) {
         return print_hbw_nodes();
-    }
-    else if ((argc == 2) && (strncmp(argv[1], "-h", MAX_ARG_LEN) == 0 || strncmp(argv[1], "--help", MAX_ARG_LEN) == 0)) {
+    } else if ((argc == 2) && (strncmp(argv[1], "-h", MAX_ARG_LEN) == 0 ||
+                               strncmp(argv[1], "--help", MAX_ARG_LEN) == 0)) {
         printf("%s", help_message);
         return 2;
     }
 
-    printf("ERROR: Unknown option %s. More info with \"%s --help\".\n", argv[1], argv[0]);
+    printf("ERROR: Unknown option %s. More info with \"%s --help\".\n", argv[1],
+           argv[0]);
     return 2;
 }

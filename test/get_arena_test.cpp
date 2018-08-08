@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,8 +74,7 @@ TEST_F(GetArenaTest, test_TC_MEMKIND_ThreadHash)
     for (i = 1; i < num_threads; ++i) {
         if (arena_idx[i] == idx) {
             collisions++;
-        }
-        else {
+        } else {
             if (collisions > max_collisions) {
                 max_collisions = collisions;
             }

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2014 - 2016 Intel Corporation.
+* Copyright (C) 2014 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -55,14 +55,14 @@ namespace performance_tests
         // only after been called from the last thread expected at the barrier
         void wait();
 
-            // (Re)Initializes the barrier
+        // (Re)Initializes the barrier
         void reset(unsigned waiting)
         {
             m_releasedAt.tv_sec = m_releasedAt.tv_nsec = 0;
             m_waiting = waiting;
         }
 
-            // Get time when barrier was released
+        // Get time when barrier was released
         timespec& releasedAt()
         {
             return m_releasedAt;
@@ -139,9 +139,9 @@ namespace performance_tests
     class Worker
     {
     protected:
-        #ifdef __DEBUG
+#ifdef __DEBUG
         uint16_t m_threadId;
-        #endif
+#endif
         // Requested number of test actions
         const uint32_t m_actionsCount;
         // List of memory block sizes - for each memory allocation operation actual value is chosen randomly
@@ -170,15 +170,15 @@ namespace performance_tests
         // Create & start thread
         void run();
 
-        #ifdef __DEBUG
-            // Get thread id
+#ifdef __DEBUG
+        // Get thread id
         uint16_t getId();
 
-            // Set thread id
+        // Set thread id
         void setId(uint16_t threadId);
-        #endif
+#endif
 
-            // Finish thread and free all allocations made
+        // Finish thread and free all allocations made
         void finish();
 
         // Free allocated memory
@@ -189,14 +189,12 @@ namespace performance_tests
         virtual void work();
     };
 
-    enum ExecutionMode
-    {
+    enum ExecutionMode {
         SingleInteration, // Single iteration, operations listS will be distributed among threads sequentially
         ManyIterations    // Each operations list will be run in separate iteration by each thread
     };
 
-    struct Metrics
-    {
+    struct Metrics {
         uint64_t executedOperations;
         uint64_t totalDuration;
         double operationsPerSecond;
@@ -246,26 +244,28 @@ namespace performance_tests
 
         virtual ~PerformanceTest() {}
 
-            // Set list of block sizes
+        // Set list of block sizes
         void setAllocationSizes(const vector<size_t>& allocationSizes);
 
-            // Set list of operations per thread/per iteration (depending on execution mode)
-        void setOperations(const vector<vector<Operation*>>& testOperations, Operation* freeOperation);
+        // Set list of operations per thread/per iteration (depending on execution mode)
+        void setOperations(const vector<vector<Operation*>>& testOperations,
+                           Operation* freeOperation);
 
-            // Set per-thread list of memory kinds
+        // Set per-thread list of memory kinds
         void setKind(const vector<memkind_t>& kinds);
 
-            // Set execution mode (different operations per each thread/same operations for each thread, but many iterations)
+        // Set execution mode (different operations per each thread/same operations for each thread, but many iterations)
         void setExecutionMode(ExecutionMode operationMode);
 
-            // Execute test
+        // Execute test
         int run();
 
-            // Print test parameters
+        // Print test parameters
         virtual void showInfo();
 
-            // Write test metrics
-        void writeMetrics(const string& suiteName, const string& caseName, const string &fileName = "");
+        // Write test metrics
+        void writeMetrics(const string& suiteName, const string& caseName,
+                          const string &fileName = "");
 
         Metrics getMetrics();
     private:
@@ -273,7 +273,7 @@ namespace performance_tests
         // Run single iteration
         void runIteration();
 
-            // Setup thread workers
+        // Setup thread workers
         void prepareWorkers();
 
     };

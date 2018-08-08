@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,8 @@ class TrialGenerator
 {
 public:
     TrialGenerator() {}
-    void generate_gb(alloc_api_t api, int number_of_gb_pages, memkind_t memkind, alloc_api_t api_free, bool psize_strict=false, size_t align = GB);
+    void generate_gb(alloc_api_t api, int number_of_gb_pages, memkind_t memkind,
+                     alloc_api_t api_free, bool psize_strict=false, size_t align = GB);
     void run(int num_bandwidth, std::vector<int> &bandwidths);
     void generate_size_2bytes_2KB_2MB(alloc_api_t api);
     /*For debugging purposes*/

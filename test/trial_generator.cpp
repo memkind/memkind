@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,11 +32,11 @@
 #include <numaif.h>
 
 trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
-        size_t size,
-        size_t alignment,
-        int page_size,
-        memkind_t memkind,
-        int free_index)
+                                             size_t size,
+                                             size_t alignment,
+                                             int page_size,
+                                             memkind_t memkind,
+                                             int free_index)
 {
     trial_t ltrial;
     ltrial.api = api;
@@ -49,21 +49,21 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
 }
 
 
-void TrialGenerator :: generate_gb (alloc_api_t api, int number_of_gb_pages, memkind_t memkind, alloc_api_t api_free, bool psize_strict, size_t align)
+void TrialGenerator :: generate_gb (alloc_api_t api, int number_of_gb_pages,
+                                    memkind_t memkind, alloc_api_t api_free, bool psize_strict, size_t align)
 {
     std::vector<size_t> sizes_to_alloc;
     //When API = HBW_MEMALIGN_PSIZE: psize is set to HBW_PAGESIZE_1GB_STRICT when allocation is a multiple of 1GB. Otherwise it is set to HBW_PAGESIZE_1GB.
     for (int i=1; i <= number_of_gb_pages; i++) {
-            if (psize_strict || api!=HBW_MEMALIGN_PSIZE)
-                sizes_to_alloc.push_back(i*GB);
-            else
-                sizes_to_alloc.push_back(i*GB+1);
+        if (psize_strict || api!=HBW_MEMALIGN_PSIZE)
+            sizes_to_alloc.push_back(i*GB);
+        else
+            sizes_to_alloc.push_back(i*GB+1);
     }
     int k = 0;
     trial_vec.clear();
 
-    for (int i = 0; i< (int)sizes_to_alloc.size(); i++)
-    {
+    for (int i = 0; i< (int)sizes_to_alloc.size(); i++) {
         trial_vec.push_back(create_trial_tuple(api, sizes_to_alloc[i],
                                                align, 2*MB,
                                                memkind,
@@ -153,9 +153,9 @@ void TrialGenerator :: run(int num_bandwidth, std::vector<int> &bandwidth)
                     hbw_free(ptr_vec[trial_vec[i].free_index]);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                     ptr_vec[i] = NULL;
-                }
-                else {
-                    ptr_vec[i + 1] = hbw_realloc(ptr_vec[trial_vec[i].free_index], trial_vec[i + 1].size);
+                } else {
+                    ptr_vec[i + 1] = hbw_realloc(ptr_vec[trial_vec[i].free_index],
+                                                 trial_vec[i + 1].size);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                 }
                 break;
@@ -165,8 +165,7 @@ void TrialGenerator :: run(int num_bandwidth, std::vector<int> &bandwidth)
                                  ptr_vec[trial_vec[i].free_index]);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                     ptr_vec[i] = NULL;
-                }
-                else {
+                } else {
                     ptr_vec[i + 1] = memkind_realloc(trial_vec[i].memkind,
                                                      ptr_vec[trial_vec[i].free_index],
                                                      trial_vec[i + 1].size);
@@ -301,8 +300,7 @@ void TGTest :: SetUp()
                 bandwidth.push_back(2);
             }
         }
-    }
-    else {
+    } else {
         num_bandwidth = NUMA_NUM_NODES;
         nodemask_t nodemask;
         struct bitmask nodemask_bm = {NUMA_NUM_NODES, nodemask.n};
@@ -314,11 +312,9 @@ void TGTest :: SetUp()
         for (i=0; i<NUMA_NUM_NODES; i++) {
             if (i >= nodes_num) {
                 bandwidth.push_back(0);
-            }
-            else if (numa_bitmask_isbitset(&nodemask_bm, i)) {
+            } else if (numa_bitmask_isbitset(&nodemask_bm, i)) {
                 bandwidth.push_back(2);
-            }
-            else {
+            } else {
                 bandwidth.push_back(1);
             }
         }

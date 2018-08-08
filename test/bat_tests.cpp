@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,8 @@
 
 typedef void(*test_function)(Allocator*, size_t);
 
-typedef std::tuple<test_function, memkind_memtype_t, memkind_policy_t, memkind_bits_t, size_t> memtype_policy_test_params;
+typedef std::tuple<test_function, memkind_memtype_t, memkind_policy_t, memkind_bits_t, size_t>
+memtype_policy_test_params;
 
 test_function get_function(memtype_policy_test_params params)
 {
@@ -225,8 +226,7 @@ std::vector<T> GetKeys(std::map<T, std::string> dict)
     return keys;
 }
 
-struct TestParameters
-{
+struct TestParameters {
     static const std::map<test_function, std::string> functions;
     static const std::map<memkind_memtype_t, std::string> memtypes;
     static const std::map<memkind_policy_t, std::string> policies;
@@ -234,30 +234,35 @@ struct TestParameters
     static const std::vector<size_t> sizes;
 };
 
-const map<test_function, std::string> TestParameters::functions =
-    {{&test_malloc, "malloc"},
-     {&test_calloc, "calloc"},
-     {&test_realloc, "realloc"},
-     {&test_memalign, "memalign"},
-     {&test_free, "free"}};
+const map<test_function, std::string> TestParameters::functions = {
+    {&test_malloc, "malloc"},
+    {&test_calloc, "calloc"},
+    {&test_realloc, "realloc"},
+    {&test_memalign, "memalign"},
+    {&test_free, "free"}
+};
 const std::map<memkind_memtype_t, std::string> TestParameters::memtypes = {{MEMKIND_MEMTYPE_DEFAULT, "DEFAULT"},
-                                                                           {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, "HIGH_BANDWIDTH"}};
+    {MEMKIND_MEMTYPE_HIGH_BANDWIDTH, "HIGH_BANDWIDTH"}
+};
 const std::map<memkind_policy_t, std::string> TestParameters::policies = {{MEMKIND_POLICY_PREFERRED_LOCAL, "PREFERRED_LOCAL"},
-                                                                          {MEMKIND_POLICY_BIND_LOCAL, "BIND_LOCAL"},
-                                                                          {MEMKIND_POLICY_BIND_ALL, "BIND_ALL"},
-                                                                          {MEMKIND_POLICY_INTERLEAVE_ALL, "MEMKIND_POLICY_INTERLEAVE_ALL"}};
+    {MEMKIND_POLICY_BIND_LOCAL, "BIND_LOCAL"},
+    {MEMKIND_POLICY_BIND_ALL, "BIND_ALL"},
+    {MEMKIND_POLICY_INTERLEAVE_ALL, "MEMKIND_POLICY_INTERLEAVE_ALL"}
+};
 const std::map<hbw_policy_t, std::string> TestParameters::hbw_policies = {{HBW_POLICY_PREFERRED, "HBW_POLICY_PREFERRED"},
-                                                                          {HBW_POLICY_BIND, "HBW_POLICY_BIND"},
-                                                                          {HBW_POLICY_BIND_ALL, "HBW_POLICY_BIND_ALL"},
-                                                                          {HBW_POLICY_INTERLEAVE, "HBW_POLICY_INTERLEAVE"}};
+    {HBW_POLICY_BIND, "HBW_POLICY_BIND"},
+    {HBW_POLICY_BIND_ALL, "HBW_POLICY_BIND_ALL"},
+    {HBW_POLICY_INTERLEAVE, "HBW_POLICY_INTERLEAVE"}
+};
 const std::vector<size_t> TestParameters::sizes = {4096, 4194305};
 
 
 class MemtypePolicyTest: public TGTest,
-              public ::testing::WithParamInterface<memtype_policy_test_params>
+    public ::testing::WithParamInterface<memtype_policy_test_params>
 {
 public:
-    static std::string get_test_name_suffix(testing::TestParamInfo<memtype_policy_test_params> info)
+    static std::string get_test_name_suffix(
+        testing::TestParamInfo<memtype_policy_test_params> info)
     {
         return TEST_PREFIX +
                TestParameters::functions.at(get_function(info.param)) + "_" +
@@ -273,7 +278,8 @@ TEST_P(MemtypePolicyTest, memkind_heap_mgmt)
     HugePageOrganizer huge_page_organizer(8);
     auto params = GetParam();
     auto flags = get_flags(params);
-    MemkindAllocator allocator(get_memtype(GetParam()), get_policy(GetParam()), flags);
+    MemkindAllocator allocator(get_memtype(GetParam()), get_policy(GetParam()),
+                               flags);
     get_function(GetParam())(&allocator, get_size(GetParam()));
 }
 
@@ -285,7 +291,7 @@ INSTANTIATE_TEST_CASE_P(DEFAULT,
                                            ::testing::Values(MEMKIND_MASK_PAGE_SIZE_2MB, memkind_bits_t()),
                                            ::testing::ValuesIn(TestParameters::sizes)),
                         MemtypePolicyTest::get_test_name_suffix
-                        );
+                       );
 
 INSTANTIATE_TEST_CASE_P(HBW,
                         MemtypePolicyTest,
@@ -295,7 +301,7 @@ INSTANTIATE_TEST_CASE_P(HBW,
                                            ::testing::Values(memkind_bits_t()),
                                            ::testing::ValuesIn(TestParameters::sizes)),
                         MemtypePolicyTest::get_test_name_suffix
-                        );
+                       );
 
 INSTANTIATE_TEST_CASE_P(HBW_HUGE,
                         MemtypePolicyTest,
@@ -307,14 +313,15 @@ INSTANTIATE_TEST_CASE_P(HBW_HUGE,
                                            ::testing::Values(MEMKIND_MASK_PAGE_SIZE_2MB),
                                            ::testing::ValuesIn(TestParameters::sizes)),
                         MemtypePolicyTest::get_test_name_suffix
-                        );
+                       );
 
 
 class HBWPolicyHugePageTest: public TGTest,
-                             public ::testing::WithParamInterface<hbw_policy_huge_page_test_params>
+    public ::testing::WithParamInterface<hbw_policy_huge_page_test_params>
 {
 public:
-    static std::string get_test_name_suffix(testing::TestParamInfo<hbw_policy_huge_page_test_params> info)
+    static std::string get_test_name_suffix(
+        testing::TestParamInfo<hbw_policy_huge_page_test_params> info)
     {
         return TEST_PREFIX +
                TestParameters::hbw_policies.at(get_hbw_policy(info.param)) + "_" +
@@ -332,16 +339,19 @@ TEST_P(HBWPolicyHugePageTest, memalign)
 
 INSTANTIATE_TEST_CASE_P(HBW_memalign,
                         HBWPolicyHugePageTest,
-                        ::testing::Combine(::testing::Values(HBW_POLICY_PREFERRED, HBW_POLICY_BIND, HBW_POLICY_BIND_ALL),
+                        ::testing::Combine(::testing::Values(HBW_POLICY_PREFERRED, HBW_POLICY_BIND,
+                                                             HBW_POLICY_BIND_ALL),
                                            ::testing::ValuesIn(TestParameters::sizes)),
                         HBWPolicyHugePageTest::get_test_name_suffix
-                        );
+                       );
 
 
-class HBWPolicyTest: public TGTest, public ::testing::WithParamInterface<hbw_policy_test_params>
+class HBWPolicyTest: public TGTest,
+    public ::testing::WithParamInterface<hbw_policy_test_params>
 {
 public:
-    static std::string get_test_name_suffix(testing::TestParamInfo<hbw_policy_test_params> info)
+    static std::string get_test_name_suffix(
+        testing::TestParamInfo<hbw_policy_test_params> info)
     {
         return TEST_PREFIX +
                TestParameters::functions.at(get_function(info.param)) + "_" +
@@ -362,13 +372,15 @@ INSTANTIATE_TEST_CASE_P(HBWPolicy,
                                            ::testing::ValuesIn(GetKeys(TestParameters::hbw_policies)),
                                            ::testing::ValuesIn(TestParameters::sizes)),
                         HBWPolicyTest::get_test_name_suffix
-                        );
+                       );
 
 
-class MemkindRegularTest: public TGTest, public ::testing::WithParamInterface<tuple<test_function, size_t>>
+class MemkindRegularTest: public TGTest,
+    public ::testing::WithParamInterface<tuple<test_function, size_t>>
 {
 public:
-    static std::string get_test_name_suffix(testing::TestParamInfo<std::tuple<test_function, size_t>> info)
+    static std::string get_test_name_suffix(
+        testing::TestParamInfo<std::tuple<test_function, size_t>> info)
     {
         return TEST_PREFIX +
                TestParameters::functions.at(std::get<0>(info.param)) + "_" +
@@ -388,16 +400,20 @@ INSTANTIATE_TEST_CASE_P(Regular,
                         ::testing::Combine(::testing::ValuesIn(GetKeys(TestParameters::functions)),
                                            ::testing::ValuesIn(TestParameters::sizes)),
                         MemkindRegularTest::get_test_name_suffix
-                        );
+                       );
 
 
-TEST_F(BATest, test_TC_MEMKIND_malloc_DEFAULT_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
+TEST_F(BATest,
+       test_TC_MEMKIND_malloc_DEFAULT_HIGH_BANDWIDTH_INTERLEAVE_ALL_4194305_bytes)
 {
-    MemkindAllocator allocator((memkind_memtype_t)(MEMKIND_MEMTYPE_DEFAULT | MEMKIND_MEMTYPE_HIGH_BANDWIDTH), MEMKIND_POLICY_INTERLEAVE_ALL, memkind_bits_t());
+    MemkindAllocator allocator((memkind_memtype_t)(MEMKIND_MEMTYPE_DEFAULT |
+                                                   MEMKIND_MEMTYPE_HIGH_BANDWIDTH), MEMKIND_POLICY_INTERLEAVE_ALL,
+                               memkind_bits_t());
     test_malloc(&allocator, 4194305);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_free_MEMKIND_DEFAULT_free_with_NULL_kind_4096_bytes)
+TEST_F(BATest,
+       test_TC_MEMKIND_free_MEMKIND_DEFAULT_free_with_NULL_kind_4096_bytes)
 {
     void* ptr = memkind_malloc(MEMKIND_DEFAULT, 4096);
     ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2016 Intel Corporation.
+* Copyright (C) 2015 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -30,35 +30,39 @@
 #include <string.h>
 
 class ScenarioWorkload :
-	public Workload
+    public Workload
 {
 public:
-	ScenarioWorkload(VectorIterator<Allocator*>* a, VectorIterator<size_t>* as,  VectorIterator<int>* fc);
-	~ScenarioWorkload(void);
+    ScenarioWorkload(VectorIterator<Allocator*>* a, VectorIterator<size_t>* as,
+                     VectorIterator<int>* fc);
+    ~ScenarioWorkload(void);
 
-	double get_time_costs();
+    double get_time_costs();
 
-	const std::vector<memory_operation>& get_allocations_info() const {return allocations;}
+    const std::vector<memory_operation>& get_allocations_info() const
+    {
+        return allocations;
+    }
 
-	bool run();
+    bool run();
 
-	memory_operation* get_allocated_memory();
+    memory_operation* get_allocated_memory();
 
-	void enable_touch_memory_on_allocation(bool enable)
-	{
-		touch_memory_on_allocation = enable;
-	}
+    void enable_touch_memory_on_allocation(bool enable)
+    {
+        touch_memory_on_allocation = enable;
+    }
 
-	void post_allocation_check(const memory_operation& data);
+    void post_allocation_check(const memory_operation& data);
 
 private:
-	AllocatorFactory allocator_factory;
-	std::vector<memory_operation> allocations;
+    AllocatorFactory allocator_factory;
+    std::vector<memory_operation> allocations;
 
-	bool touch_memory_on_allocation;
+    bool touch_memory_on_allocation;
 
-	VectorIterator<int>* func_calls;
-	VectorIterator<size_t>* alloc_sizes;
-	VectorIterator<Allocator*>* allocators;
+    VectorIterator<int>* func_calls;
+    VectorIterator<size_t>* alloc_sizes;
+    VectorIterator<Allocator*>* allocators;
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,10 @@ protected:
  */
 TEST_F(StaticKindsTest, test_TC_MEMKIND_STATIC_KINDS_INIT_ONCE)
 {
-    for(size_t i=0; i<(sizeof(static_kinds_list)/sizeof(static_kinds_list[0])); i++) {
-       ASSERT_TRUE(static_kinds_list[i]->ops->init_once != NULL) << static_kinds_list[i]->name << " does not implement init_once operation!";
+    for(size_t i=0; i<(sizeof(static_kinds_list)/sizeof(static_kinds_list[0]));
+        i++) {
+        ASSERT_TRUE(static_kinds_list[i]->ops->init_once != NULL) <<
+                                                                  static_kinds_list[i]->name << " does not implement init_once operation!";
     }
 }
 

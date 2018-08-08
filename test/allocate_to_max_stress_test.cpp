@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2017 Intel Corporation.
+ * Copyright (C) 2015 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,9 @@ protected:
     {}
 
     //Allocates memory up to 'memory_request_limit'.
-    void run(TypesConf kinds, TypesConf func_calls, unsigned operations, size_t size_from, size_t size_to, size_t memory_request_limit, bool touch_memory)
+    void run(TypesConf kinds, TypesConf func_calls, unsigned operations,
+             size_t size_from, size_t size_to, size_t memory_request_limit,
+             bool touch_memory)
     {
         RecordProperty("memory_operations", operations);
         RecordProperty("size_from", size_from);
@@ -63,7 +65,9 @@ protected:
         start = std::chrono::system_clock::now();
 
         //Execute test iterations.
-        std::vector<iteration_result> results = StressIncreaseToMax::execute_test_iterations(task_conf, 120, memory_request_limit);
+        std::vector<iteration_result> results =
+            StressIncreaseToMax::execute_test_iterations(task_conf, 120,
+                                                         memory_request_limit);
 
         end = std::chrono::system_clock::now();
 
@@ -77,64 +81,78 @@ protected:
 
     //Check true allocation errors over all iterations.
     //Return iteration number (>0) when error occurs, or zero
-    int check_allocation_errors(std::vector<iteration_result>& results, const TaskConf& task_conf)
+    int check_allocation_errors(std::vector<iteration_result>& results,
+                                const TaskConf& task_conf)
     {
-        for (size_t i=0; i<results.size(); i++)
-        {
+        for (size_t i=0; i<results.size(); i++) {
             //Check if test ends with allocation error.
-           if(results[i].is_allocation_error)
-           {
+            if(results[i].is_allocation_error) {
                 return i+1;
-           }
+            }
         }
 
         return 0;
     }
 };
 
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW)
+TEST_F(AllocateToMaxStressTests,
+       test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW)
 {
-    run(TypesConf(AllocatorTypes::MEMKIND_HBW), TypesConf(FunctionCalls::MALLOC), 1024, MB, MB, GB, true);
+    run(TypesConf(AllocatorTypes::MEMKIND_HBW), TypesConf(FunctionCalls::MALLOC),
+        1024, MB, MB, GB, true);
 }
 
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_INTERLEAVE)
+TEST_F(AllocateToMaxStressTests,
+       test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_INTERLEAVE)
 {
-    run(TypesConf(AllocatorTypes::MEMKIND_INTERLEAVE), TypesConf(FunctionCalls::MALLOC), 4096, MB, MB, 4*GB, true);
+    run(TypesConf(AllocatorTypes::MEMKIND_INTERLEAVE),
+        TypesConf(FunctionCalls::MALLOC), 4096, MB, MB, 4*GB, true);
 }
 
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_PREFERRED)
+TEST_F(AllocateToMaxStressTests,
+       test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_PREFERRED)
 {
-    run(TypesConf(AllocatorTypes::MEMKIND_HBW_PREFERRED), TypesConf(FunctionCalls::MALLOC), 17408, MB, MB, 17*GB, true);
+    run(TypesConf(AllocatorTypes::MEMKIND_HBW_PREFERRED),
+        TypesConf(FunctionCalls::MALLOC), 17408, MB, MB, 17*GB, true);
 }
 
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_2MBPages_slts_ext_ALLOCATE_TO_MAX_MEMKIND_HBW_HUGETLB)
+TEST_F(AllocateToMaxStressTests,
+       test_TC_MEMKIND_2MBPages_slts_ext_ALLOCATE_TO_MAX_MEMKIND_HBW_HUGETLB)
 {
     HugePageOrganizer huge_page_organizer(2250);
-    run(TypesConf(AllocatorTypes::MEMKIND_HBW_HUGETLB), TypesConf(FunctionCalls::MALLOC), 1024, 4*MB, 4*MB, GB, true);
+    run(TypesConf(AllocatorTypes::MEMKIND_HBW_HUGETLB),
+        TypesConf(FunctionCalls::MALLOC), 1024, 4*MB, 4*MB, GB, true);
 }
 
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_DIFFERENT_SIZES)
+TEST_F(AllocateToMaxStressTests,
+       test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_DIFFERENT_SIZES)
 {
-    run(TypesConf(AllocatorTypes::MEMKIND_HBW), TypesConf(FunctionCalls::MALLOC), 2500, 1, 8*MB, GB, true);
+    run(TypesConf(AllocatorTypes::MEMKIND_HBW), TypesConf(FunctionCalls::MALLOC),
+        2500, 1, 8*MB, GB, true);
 }
 
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_AND_FREE_MEMKIND_DEFAULT)
-{
-    TypesConf func_calls;
-    func_calls.enable_type(FunctionCalls::MALLOC);
-    func_calls.enable_type(FunctionCalls::FREE);
-    run(TypesConf(AllocatorTypes::MEMKIND_DEFAULT), func_calls, 2500, 500*MB, 8*GB, 16*GB, false);
-}
-
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_AND_FREE_MEMKIND_REGULAR)
+TEST_F(AllocateToMaxStressTests,
+       test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_AND_FREE_MEMKIND_DEFAULT)
 {
     TypesConf func_calls;
     func_calls.enable_type(FunctionCalls::MALLOC);
     func_calls.enable_type(FunctionCalls::FREE);
-    run(TypesConf(AllocatorTypes::MEMKIND_REGULAR), func_calls, 2500, 500*MB, 8*GB, 16*GB, false);
+    run(TypesConf(AllocatorTypes::MEMKIND_DEFAULT), func_calls, 2500, 500*MB, 8*GB,
+        16*GB, false);
 }
 
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_DIFFERENT_KINDS)
+TEST_F(AllocateToMaxStressTests,
+       test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_AND_FREE_MEMKIND_REGULAR)
+{
+    TypesConf func_calls;
+    func_calls.enable_type(FunctionCalls::MALLOC);
+    func_calls.enable_type(FunctionCalls::FREE);
+    run(TypesConf(AllocatorTypes::MEMKIND_REGULAR), func_calls, 2500, 500*MB, 8*GB,
+        16*GB, false);
+}
+
+TEST_F(AllocateToMaxStressTests,
+       test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_DIFFERENT_KINDS)
 {
     TypesConf kinds;
     kinds.enable_type(AllocatorTypes::MEMKIND_HBW);
@@ -146,7 +164,8 @@ TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_DIFFERENT_
     run(kinds, TypesConf(FunctionCalls::MALLOC), 2048, MB, MB, 2*GB, true);
 }
 
-TEST_F(AllocateToMaxStressTests, test_TC_MEMKIND_slts_ext_ALLOCATE_TO_MAX_DIFFERENT_KINDS_WITH_HUGETLB)
+TEST_F(AllocateToMaxStressTests,
+       test_TC_MEMKIND_slts_ext_ALLOCATE_TO_MAX_DIFFERENT_KINDS_WITH_HUGETLB)
 {
     HugePageOrganizer huge_page_organizer(2250);
     TypesConf kinds;

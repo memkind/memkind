@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2016 Intel Corporation.
+* Copyright (C) 2015 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -32,8 +32,8 @@ double convert_bytes_to_mb(uint64_t bytes)
 
 int get_numa_node_id(void* ptr)
 {
-	int status = -1;
+    int status = -1;
 
-	get_mempolicy(&status, NULL, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
-	return status;
+    get_mempolicy(&status, NULL, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
+    return status;
 }
