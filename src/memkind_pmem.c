@@ -49,12 +49,12 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
 };
 
 void *pmem_extent_alloc(extent_hooks_t *extent_hooks,
-    void *new_addr,
-    size_t size,
-    size_t alignment,
-    bool *zero,
-    bool *commit,
-    unsigned arena_ind)
+                        void *new_addr,
+                        size_t size,
+                        size_t alignment,
+                        bool *zero,
+                        bool *commit,
+                        unsigned arena_ind)
 {
     int err;
     void *addr = NULL;
@@ -90,77 +90,77 @@ exit:
 }
 
 bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
-    void *addr,
-    size_t size,
-    bool committed,
-    unsigned arena_ind)
+                        void *addr,
+                        size_t size,
+                        bool committed,
+                        unsigned arena_ind)
 {
     /* do nothing - report failure (opt-out) */
     return true;
 }
 
 bool pmem_extent_commit(extent_hooks_t *extent_hooks,
-    void *addr,
-    size_t size,
-    size_t offset,
-    size_t length,
-    unsigned arena_ind)
+                        void *addr,
+                        size_t size,
+                        size_t offset,
+                        size_t length,
+                        unsigned arena_ind)
 {
     /* do nothing - report success */
     return false;
 }
 
 bool pmem_extent_decommit(extent_hooks_t *extent_hooks,
-    void *addr,
-    size_t size,
-    size_t offset,
-    size_t length,
-    unsigned arena_ind)
+                          void *addr,
+                          size_t size,
+                          size_t offset,
+                          size_t length,
+                          unsigned arena_ind)
 {
     /* do nothing - report failure (opt-out) */
     return true;
 }
 
 bool pmem_extent_purge(extent_hooks_t *extent_hooks,
-    void *addr,
-    size_t size,
-    size_t offset,
-    size_t length,
-    unsigned arena_ind)
+                       void *addr,
+                       size_t size,
+                       size_t offset,
+                       size_t length,
+                       unsigned arena_ind)
 {
     /* do nothing - report failure (opt-out) */
     return true;
 }
 
 bool pmem_extent_split(extent_hooks_t *extent_hooks,
-    void *addr,
-    size_t size,
-    size_t size_a,
-    size_t size_b,
-    bool committed,
-    unsigned arena_ind)
+                       void *addr,
+                       size_t size,
+                       size_t size_a,
+                       size_t size_b,
+                       bool committed,
+                       unsigned arena_ind)
 {
     /* do nothing - report success */
     return false;
 }
 
 bool pmem_extent_merge(extent_hooks_t *extent_hooks,
-    void *addr_a,
-    size_t size_a,
-    void *addr_b,
-    size_t size_b,
-    bool committed,
-    unsigned arena_ind)
+                       void *addr_a,
+                       size_t size_a,
+                       void *addr_b,
+                       size_t size_b,
+                       bool committed,
+                       unsigned arena_ind)
 {
     /* do nothing - report success */
     return false;
 }
 
 void pmem_extent_destroy(extent_hooks_t *extent_hooks,
-    void *addr,
-    size_t size,
-    bool committed,
-    unsigned arena_ind)
+                         void *addr,
+                         size_t size,
+                         bool committed,
+                         unsigned arena_ind)
 {
     if (munmap(addr, size) == -1) {
         log_err("munmap failed!");
@@ -178,7 +178,8 @@ static extent_hooks_t pmem_extent_hooks = {
     .destroy = pmem_extent_destroy
 };
 
-MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops, const char *name)
+MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
+                                       struct memkind_ops *ops, const char *name)
 {
     struct memkind_pmem *priv;
     int err;
@@ -228,7 +229,8 @@ MEMKIND_EXPORT int memkind_pmem_destroy(struct memkind *kind)
     return 0;
 }
 
-MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size)
+MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr,
+                                       size_t size)
 {
     struct memkind_pmem *priv = kind->priv;
     void *result;
@@ -246,7 +248,8 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t 
         return MAP_FAILED;
     }
 
-    if ((result = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, priv->fd, priv->offset)) != MAP_FAILED) {
+    if ((result = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, priv->fd,
+                       priv->offset)) != MAP_FAILED) {
         priv->offset += size;
     }
 

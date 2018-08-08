@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2014 - 2016 Intel Corporation.
+* Copyright (C) 2014 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -61,20 +61,22 @@ protected:
     {
     }
 
-    bool checkDelta(double value, double reference, const string &info, double delta, bool higherIsBetter = false)
+    bool checkDelta(double value, double reference, const string &info,
+                    double delta, bool higherIsBetter = false)
     {
         // If higherIsBetter is true, current value should be >= (reference - delta); otherwise, it should be <= (reference + delta)
-        double treshold = higherIsBetter ? reference * (1 - delta) : reference * (1 + delta);
+        double treshold = higherIsBetter ? reference * (1 - delta) : reference *
+                          (1 + delta);
         cout <<
-            "Metric: " << info << ". Reference value: " << reference << ". "
-            "Expected: " << (higherIsBetter ? ">= " : "<= ") << treshold << " (delta = " << delta << ")."
-            "Actual: " << value << " (delta = " <<
-                ((value > reference ? (value / reference) : (reference / value)) - 1.0) /
-                ((higherIsBetter != (value > reference)) ? 1.0 : -1.0)
-            << ")."
-            << endl ;
-        if (higherIsBetter ? (value <= treshold) : (value >= treshold))
-        {
+             "Metric: " << info << ". Reference value: " << reference << ". "
+             "Expected: " << (higherIsBetter ? ">= " : "<= ") << treshold << " (delta = " <<
+             delta << ")."
+             "Actual: " << value << " (delta = " <<
+             ((value > reference ? (value / reference) : (reference / value)) - 1.0) /
+             ((higherIsBetter != (value > reference)) ? 1.0 : -1.0)
+             << ")."
+             << endl ;
+        if (higherIsBetter ? (value <= treshold) : (value >= treshold)) {
             cout << "WARNING : Value of '" << info << "' outside expected bounds!" << endl;
             return false;
         }
@@ -84,8 +86,10 @@ protected:
     bool compareMetrics(Metrics metrics, Metrics reference, double delta)
     {
         bool result = true;
-        result &= checkDelta(metrics.operationsPerSecond, reference.operationsPerSecond, "operationsPerSecond", delta, true);
-        result &= checkDelta(metrics.avgOperationDuration, reference.avgOperationDuration, "avgOperationDuration", delta);
+        result &= checkDelta(metrics.operationsPerSecond, reference.operationsPerSecond,
+                             "operationsPerSecond", delta, true);
+        result &= checkDelta(metrics.avgOperationDuration,
+                             reference.avgOperationDuration, "avgOperationDuration", delta);
         return result;
     }
 
@@ -93,12 +97,12 @@ protected:
     {
         RecordProperty("ops_per_sec", metrics.operationsPerSecond);
         RecordProperty("ops_per_sec_vs_ref",
-            (reference.operationsPerSecond - metrics.operationsPerSecond) * 100.0f
-            / reference.operationsPerSecond);
+                       (reference.operationsPerSecond - metrics.operationsPerSecond) * 100.0f
+                       / reference.operationsPerSecond);
         RecordProperty("avg_op_time_nsec", metrics.avgOperationDuration);
         RecordProperty("avg_op_time_nsec_vs_ref",
-            (metrics.avgOperationDuration - reference.avgOperationDuration) * 100.0f
-            / reference.avgOperationDuration);
+                       (metrics.avgOperationDuration - reference.avgOperationDuration) * 100.0f
+                       / reference.avgOperationDuration);
     }
 
     void run()
@@ -110,7 +114,8 @@ protected:
         performanceMetrics = performanceTest.runTest();
 
         writeMetrics(performanceMetrics, referenceMetrics);
-        EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics, Tolerance + Confidence));
+        EXPECT_TRUE(compareMetrics(performanceMetrics, referenceMetrics,
+                                   Tolerance + Confidence));
     }
 };
 

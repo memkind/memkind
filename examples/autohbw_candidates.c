@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016 Intel Corporation.
+ * Copyright (C) 2015 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,74 +47,76 @@ volatile int memkind_called_g;
 
 void memkind_malloc_post(struct memkind *kind, size_t size, void **result)
 {
-  memkind_called_g = 1;
+    memkind_called_g = 1;
 }
-void memkind_calloc_post(struct memkind *kind, size_t nmemb, size_t size, void **result)
+void memkind_calloc_post(struct memkind *kind, size_t nmemb, size_t size,
+                         void **result)
 {
-  memkind_called_g = 1;
+    memkind_called_g = 1;
 }
-void memkind_posix_memalign_post(struct memkind *kind, void **memptr, size_t alignment, size_t size, int *err)
+void memkind_posix_memalign_post(struct memkind *kind, void **memptr,
+                                 size_t alignment, size_t size, int *err)
 {
-  memkind_called_g = 1;
+    memkind_called_g = 1;
 }
-void memkind_realloc_post(struct memkind *kind, void *ptr, size_t size, void **result)
+void memkind_realloc_post(struct memkind *kind, void *ptr, size_t size,
+                          void **result)
 {
-  memkind_called_g = 1;
+    memkind_called_g = 1;
 }
 void memkind_free_pre(struct memkind **kind, void **ptr)
 {
-  memkind_called_g = 1;
+    memkind_called_g = 1;
 }
 
 void finish_testcase(int fail_condition, const char* fail_message, int *err)
 {
 
-  if(memkind_called_g != 1 || fail_condition)
-  {
-    printf("%s\n", fail_message);
-    *err= -1;
-  }
-  memkind_called_g = 0;
+    if(memkind_called_g != 1 || fail_condition) {
+        printf("%s\n", fail_message);
+        *err= -1;
+    }
+    memkind_called_g = 0;
 }
 
-int main() 
+int main()
 {
-  int err = 0;
-  const size_t size = 1024 * 1024;   // 1M of data
+    int err = 0;
+    const size_t size = 1024 * 1024;   // 1M of data
 
-  void *buf = NULL;
-  memkind_called_g = 0;
+    void *buf = NULL;
+    memkind_called_g = 0;
 
-  // Test 1: Test malloc and free
-  buf = malloc(size);
-  finish_testcase(buf==NULL, "Malloc failed!", &err);
+    // Test 1: Test malloc and free
+    buf = malloc(size);
+    finish_testcase(buf==NULL, "Malloc failed!", &err);
 
-  free(buf);
-  finish_testcase(0, "Free after malloc failed!", &err);
+    free(buf);
+    finish_testcase(0, "Free after malloc failed!", &err);
 
-  // Test 2: Test calloc and free
-  buf = calloc(size, 1);
-  finish_testcase(buf==NULL, "Calloc failed!", &err);
+    // Test 2: Test calloc and free
+    buf = calloc(size, 1);
+    finish_testcase(buf==NULL, "Calloc failed!", &err);
 
-  free(buf);
-  finish_testcase(0, "Free after calloc failed!", &err);
+    free(buf);
+    finish_testcase(0, "Free after calloc failed!", &err);
 
-  // Test 3: Test realloc and free
-  buf = malloc(size);
-  finish_testcase(buf==NULL, "Malloc before realloc failed!", &err);
+    // Test 3: Test realloc and free
+    buf = malloc(size);
+    finish_testcase(buf==NULL, "Malloc before realloc failed!", &err);
 
-  buf = realloc(buf,  size * 2);
-  finish_testcase(buf==NULL, "Realloc failed!", &err);
+    buf = realloc(buf,  size * 2);
+    finish_testcase(buf==NULL, "Realloc failed!", &err);
 
-  free(buf);
-  finish_testcase(0, "Free after realloc failed!", &err);
+    free(buf);
+    finish_testcase(0, "Free after realloc failed!", &err);
 
-  // Test 4: Test posix_memalign and free
-  int ret = posix_memalign(&buf,  64, size);
-  finish_testcase(ret, "Posix_memalign failed!", &err);
+    // Test 4: Test posix_memalign and free
+    int ret = posix_memalign(&buf,  64, size);
+    finish_testcase(ret, "Posix_memalign failed!", &err);
 
-  free(buf);
-  finish_testcase(0, "Free after posix_memalign failed!", &err);
+    free(buf);
+    finish_testcase(0, "Free after posix_memalign failed!", &err);
 
-  return err;
+    return err;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,15 +45,19 @@ extern "C" {
 
 struct memkind *get_kind_by_arena(unsigned arena_ind);
 
-int memkind_arena_create(struct memkind *kind, struct memkind_ops *ops, const char *name);
+int memkind_arena_create(struct memkind *kind, struct memkind_ops *ops,
+                         const char *name);
 int memkind_arena_create_map(struct memkind *kind, extent_hooks_t *hooks);
 int memkind_arena_destroy(struct memkind *kind);
 void *memkind_arena_malloc(struct memkind *kind, size_t size);
 void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size);
-int memkind_arena_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size);
+int memkind_arena_posix_memalign(struct memkind *kind, void **memptr,
+                                 size_t alignment, size_t size);
 void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size);
-int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena, size_t size);
-int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena, size_t size);
+int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena,
+                                size_t size);
+int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena,
+                             size_t size);
 int memkind_arena_finalize(struct memkind *kind);
 void memkind_arena_init(struct memkind *kind);
 void memkind_arena_free(struct memkind *kind, void* ptr);

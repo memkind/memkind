@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,8 +77,7 @@ static memkind_t hbw_choose_kind(hbw_pagesize_t pagesize)
             case HBW_PAGESIZE_2MB:
                 if(policy == HBW_POLICY_BIND_ALL) {
                     result = MEMKIND_HBW_ALL_HUGETLB;
-                }
-                else {
+                } else {
                     result = MEMKIND_HBW_HUGETLB;
                 }
                 break;
@@ -89,17 +88,14 @@ static memkind_t hbw_choose_kind(hbw_pagesize_t pagesize)
             default:
                 if (policy == HBW_POLICY_BIND) {
                     result = MEMKIND_HBW;
-                }
-                else if (policy == HBW_POLICY_BIND_ALL) {
+                } else if (policy == HBW_POLICY_BIND_ALL) {
                     result = MEMKIND_HBW_ALL;
-                }
-                else {
+                } else {
                     result = MEMKIND_HBW_INTERLEAVE;
                 }
                 break;
         }
-    }
-    else if (memkind_check_available(MEMKIND_HBW) == 0) {
+    } else if (memkind_check_available(MEMKIND_HBW) == 0) {
         switch (pagesize) {
             case HBW_PAGESIZE_2MB:
                 result = MEMKIND_HBW_PREFERRED_HUGETLB;
@@ -112,8 +108,7 @@ static memkind_t hbw_choose_kind(hbw_pagesize_t pagesize)
                 result = MEMKIND_HBW_PREFERRED;
                 break;
         }
-    }
-    else {
+    } else {
         switch (pagesize) {
             case HBW_PAGESIZE_2MB:
                 result = MEMKIND_HUGETLB;
@@ -133,8 +128,7 @@ static memkind_t hbw_choose_kind(hbw_pagesize_t pagesize)
 static memkind_t pagesize_kind[HBW_PAGESIZE_MAX_VALUE];
 static inline memkind_t hbw_get_kind(hbw_pagesize_t pagesize)
 {
-    if(pagesize_kind[pagesize] == NULL)
-    {
+    if(pagesize_kind[pagesize] == NULL) {
         pagesize_kind[pagesize] = hbw_choose_kind(pagesize);
     }
     return pagesize_kind[pagesize];
@@ -162,7 +156,7 @@ MEMKIND_EXPORT int hbw_set_policy(hbw_policy_t mode)
             pthread_once(&hbw_policy_once_g, hbw_policy_interleave_init);
             break;
         default:
-             return EINVAL;
+            return EINVAL;
     }
 
     if (mode != hbw_policy_g) {
@@ -209,7 +203,8 @@ MEMKIND_EXPORT int hbw_verify_memory_region(void* addr, size_t size, int flags)
     nodemask_t nodemask;
     struct bitmask expected_nodemask = {NUMA_NUM_NODES, nodemask.n};
 
-    memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask.maskp, expected_nodemask.size);
+    memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask.maskp,
+                                       expected_nodemask.size);
 
     while(aligned_beg < end) {
         int nodes[block_size];
@@ -264,13 +259,16 @@ MEMKIND_EXPORT void *hbw_calloc(size_t num, size_t size)
     return memkind_calloc(hbw_get_kind(HBW_PAGESIZE_4KB), num, size);
 }
 
-MEMKIND_EXPORT int hbw_posix_memalign(void **memptr, size_t alignment, size_t size)
+MEMKIND_EXPORT int hbw_posix_memalign(void **memptr, size_t alignment,
+                                      size_t size)
 {
-    return memkind_posix_memalign(hbw_get_kind(HBW_PAGESIZE_4KB), memptr, alignment, size);
+    return memkind_posix_memalign(hbw_get_kind(HBW_PAGESIZE_4KB), memptr, alignment,
+                                  size);
 }
 
-MEMKIND_EXPORT int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
-                             hbw_pagesize_t pagesize)
+MEMKIND_EXPORT int hbw_posix_memalign_psize(void **memptr, size_t alignment,
+                                            size_t size,
+                                            hbw_pagesize_t pagesize)
 {
     if (pagesize == HBW_PAGESIZE_1GB_STRICT && size % (1 << 30)) {
         return EINVAL;
@@ -279,7 +277,7 @@ MEMKIND_EXPORT int hbw_posix_memalign_psize(void **memptr, size_t alignment, siz
     if((pagesize == HBW_PAGESIZE_2MB ||
         pagesize == HBW_PAGESIZE_1GB_STRICT ||
         pagesize == HBW_PAGESIZE_1GB) &&
-        hbw_get_policy() == HBW_POLICY_INTERLEAVE) {
+       hbw_get_policy() == HBW_POLICY_INTERLEAVE) {
 
         log_err("HBW_POLICY_INTERLEAVE is unsupported with used page size!");
         return EINVAL;

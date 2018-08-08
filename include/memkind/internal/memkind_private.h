@@ -80,7 +80,8 @@ struct memkind_ops {
     int (* destroy)(struct memkind *kind);
     void *(* malloc)(struct memkind *kind, size_t size);
     void *(* calloc)(struct memkind *kind, size_t num, size_t size);
-    int (* posix_memalign)(struct memkind *kind, void **memptr, size_t alignment, size_t size);
+    int (* posix_memalign)(struct memkind *kind, void **memptr, size_t alignment,
+                           size_t size);
     void *(* realloc)(struct memkind *kind, void *ptr, size_t size);
     void (* free)(struct memkind *kind, void *ptr);
     void *(* mmap)(struct memkind *kind, void *addr, size_t size);
@@ -88,7 +89,8 @@ struct memkind_ops {
     int (* madvise)(struct memkind *kind, void *addr, size_t size);
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
     int (* get_mbind_mode)(struct memkind *kind, int *mode);
-    int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
+    int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask,
+                               unsigned long maxnode);
     int (* get_arena)(struct memkind *kind, unsigned int *arena, size_t size);
     int (* check_available)(struct memkind *kind);
     int (* check_addr)(struct memkind *kind, void *addr);
@@ -106,7 +108,8 @@ struct memkind {
     unsigned int *arena_map; // To be deleted beyond 1.2.0+
     pthread_key_t arena_key;
     void *priv;
-    unsigned int arena_map_mask; // arena_map_len - 1 to optimize modulo operation on arena_map_len
+    unsigned int
+    arena_map_mask; // arena_map_len - 1 to optimize modulo operation on arena_map_len
     unsigned int arena_zero; // index first jemalloc arena of this kind
 };
 

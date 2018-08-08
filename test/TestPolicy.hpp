@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,16 +31,19 @@
 
 namespace TestPolicy
 {
-    typedef std::unique_ptr<struct bitmask, decltype(&numa_free_nodemask)> unique_bitmask_ptr;
+    typedef std::unique_ptr<struct bitmask, decltype(&numa_free_nodemask)>
+    unique_bitmask_ptr;
 
     unique_bitmask_ptr make_nodemask_ptr()
     {
-        return std::move(unique_bitmask_ptr(numa_allocate_nodemask(), numa_free_nodemask));
+        return std::move(unique_bitmask_ptr(numa_allocate_nodemask(),
+                                            numa_free_nodemask));
     }
 
     unique_bitmask_ptr make_cpumask_ptr()
     {
-        return std::move(unique_bitmask_ptr(numa_allocate_cpumask(), numa_free_nodemask));
+        return std::move(unique_bitmask_ptr(numa_allocate_cpumask(),
+                                            numa_free_nodemask));
     }
 
     int get_num_of_pages(const size_t size, const size_t page_size)
@@ -50,18 +53,21 @@ namespace TestPolicy
         return pages_number;
     }
 
-    std::vector<void*> get_address_of_pages(const void* ptr, const size_t pages_number, const size_t page_size)
+    std::vector<void*> get_address_of_pages(const void* ptr,
+                                            const size_t pages_number, const size_t page_size)
     {
         std::vector<void*> address(pages_number);
         const size_t page_mask = ~(page_size-1);
-        address[0] = (void*)((uintptr_t)ptr & page_mask); //aligned address of first page
+        address[0] = (void*)((uintptr_t)ptr &
+                             page_mask); //aligned address of first page
         for (size_t page_num = 1; page_num < pages_number; page_num++) {
             address[page_num] = (char*)address[page_num-1] + page_size;
         }
         return address;
     }
 
-    void record_page_association(const void *ptr, const size_t size, const size_t page_size)
+    void record_page_association(const void *ptr, const size_t size,
+                                 const size_t page_size)
     {
         size_t pages_number = get_num_of_pages(size, page_size);
         std::vector<void*> address = get_address_of_pages(ptr, pages_number, page_size);
@@ -70,7 +76,8 @@ namespace TestPolicy
         std::vector<int> nodes(pages_number);
         std::vector<int> pages_on_node(max_node_id+1);
 
-        if (move_pages(0, pages_number, address.data(), NULL, nodes.data(), MPOL_MF_MOVE)) {
+        if (move_pages(0, pages_number, address.data(), NULL, nodes.data(),
+                       MPOL_MF_MOVE)) {
             fprintf(stderr, "Error: move_pages() returned %s\n", strerror(errno));
             return;
         }
@@ -93,7 +100,8 @@ namespace TestPolicy
         }
     }
 
-    void check_numa_nodes(unique_bitmask_ptr& expected_bitmask, int policy, void* ptr, size_t size)
+    void check_numa_nodes(unique_bitmask_ptr& expected_bitmask, int policy,
+                          void* ptr, size_t size)
     {
 
         const size_t page_size = sysconf(_SC_PAGESIZE);
@@ -103,7 +111,8 @@ namespace TestPolicy
         int status = -1;
 
         for (size_t page_num = 0; page_num < address.size(); page_num++) {
-            ASSERT_EQ(0, get_mempolicy(&status, returned_bitmask->maskp, returned_bitmask->size, address[page_num], MPOL_F_ADDR));
+            ASSERT_EQ(0, get_mempolicy(&status, returned_bitmask->maskp,
+                                       returned_bitmask->size, address[page_num], MPOL_F_ADDR));
             ASSERT_EQ(policy, status);
             switch(policy) {
                 case MPOL_INTERLEAVE:
@@ -129,7 +138,8 @@ namespace TestPolicy
     {
         unique_bitmask_ptr expected_bitmask = make_nodemask_ptr();
 
-        memkind_hbw_all_get_mbind_nodemask(NULL, expected_bitmask->maskp, expected_bitmask->size);
+        memkind_hbw_all_get_mbind_nodemask(NULL, expected_bitmask->maskp,
+                                           expected_bitmask->size);
         check_numa_nodes(expected_bitmask, policy, ptr, size);
     }
 
