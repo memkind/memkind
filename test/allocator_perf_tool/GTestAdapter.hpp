@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2016 - 2017 Intel Corporation.
+* Copyright (C) 2016 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,8 @@ public:
         tmp_value << value;
         testing::Test::RecordProperty(key, tmp_value.str());
         std::ios::fmtflags flags(std::cout.flags());
-        std::cout << key << ": " << std::fixed  <<  std::setprecision(5) << value << std::endl;
+        std::cout << key << ": " << std::fixed  <<  std::setprecision(
+                      5) << value << std::endl;
         std::cout.flags(flags);
     }
 };

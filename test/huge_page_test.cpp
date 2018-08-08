@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2016 - 2017 Intel Corporation.
+* Copyright (C) 2016 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,8 @@ protected:
 
         // This bug occurs more frequently under stress of multithreaded allocations.
         for (int i=0; i<threads_number; i++) {
-            Task* task = new HugePageUnmap(mem_operations_num, touch_memory, alignment, alloc_size, HBW_PAGESIZE_2MB);
+            Task* task = new HugePageUnmap(mem_operations_num, touch_memory, alignment,
+                                           alloc_size, HBW_PAGESIZE_2MB);
             tasks.push_back(task);
             threads.push_back(new Thread(task));
         }

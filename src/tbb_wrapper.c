@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,19 +58,21 @@ static int load_tbb_symbols()
 
     pool_malloc = dlsym(tbb_handle, "_ZN3rml11pool_mallocEPNS_10MemoryPoolEm");
     pool_realloc = dlsym(tbb_handle, "_ZN3rml12pool_reallocEPNS_10MemoryPoolEPvm");
-    pool_aligned_malloc = dlsym(tbb_handle, "_ZN3rml19pool_aligned_mallocEPNS_10MemoryPoolEmm");
+    pool_aligned_malloc = dlsym(tbb_handle,
+                                "_ZN3rml19pool_aligned_mallocEPNS_10MemoryPoolEmm");
     pool_free = dlsym(tbb_handle, "_ZN3rml9pool_freeEPNS_10MemoryPoolEPv");
-    pool_create_v1 = dlsym(tbb_handle, "_ZN3rml14pool_create_v1ElPKNS_13MemPoolPolicyEPPNS_10MemoryPoolE");
+    pool_create_v1 = dlsym(tbb_handle,
+                           "_ZN3rml14pool_create_v1ElPKNS_13MemPoolPolicyEPPNS_10MemoryPoolE");
     pool_destroy = dlsym(tbb_handle, "_ZN3rml12pool_destroyEPNS_10MemoryPoolE");
     pool_identify = dlsym(tbb_handle, "_ZN3rml13pool_identifyEPv");
 
     if(!pool_malloc ||
-        !pool_realloc ||
-        !pool_aligned_malloc ||
-        !pool_free ||
-        !pool_create_v1 ||
-        !pool_destroy ||
-        !pool_identify)
+       !pool_realloc ||
+       !pool_aligned_malloc ||
+       !pool_free ||
+       !pool_create_v1 ||
+       !pool_destroy ||
+       !pool_identify)
 
     {
         log_err("Could not find symbols in %s.", so_name);
@@ -85,13 +87,13 @@ static int load_tbb_symbols()
 #define GRANULARITY 2*1024*1024
 static void *raw_alloc(intptr_t pool_id, size_t* bytes/*=n*GRANULARITY*/)
 {
-   void* ptr = kind_mmap((struct memkind*)pool_id, NULL, *bytes);
-   return (ptr==MAP_FAILED) ? NULL : ptr;
+    void* ptr = kind_mmap((struct memkind*)pool_id, NULL, *bytes);
+    return (ptr==MAP_FAILED) ? NULL : ptr;
 }
 
 static int raw_free(intptr_t pool_id, void* raw_ptr, size_t raw_bytes)
 {
-  return munmap(raw_ptr, raw_bytes);
+    return munmap(raw_ptr, raw_bytes);
 }
 
 static void *tbb_pool_malloc(struct memkind* kind, size_t size)
@@ -115,8 +117,7 @@ static void *tbb_pool_calloc(struct memkind *kind, size_t num, size_t size)
     void *result = pool_malloc(kind->priv, array_size);
     if (result) {
         memset(result, 0, array_size);
-    }
-    else {
+    } else {
         errno = ENOMEM;
     }
     return result;
@@ -131,7 +132,8 @@ static void *tbb_pool_realloc(struct memkind *kind, void *ptr, size_t size)
     return result;
 }
 
-static int tbb_pool_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size)
+static int tbb_pool_posix_memalign(struct memkind *kind, void **memptr,
+                                   size_t alignment, size_t size)
 {
     //Check if alignment is "at least as large as sizeof(void *)".
     if(!alignment && (0 != (alignment & (alignment-sizeof(void*))))) return EINVAL;

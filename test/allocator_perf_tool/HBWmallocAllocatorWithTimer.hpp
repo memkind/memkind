@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2017 Intel Corporation.
+* Copyright (C) 2017 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -37,32 +37,38 @@
 
 
 class HBWmallocAllocatorWithTimer
-	: public Allocator
+    : public Allocator
 {
 public:
-	memory_operation wrapped_malloc(size_t size)
-	{
-		START_TEST(AllocatorTypes::HBWMALLOC_ALLOCATOR, FunctionCalls::MALLOC)
-		data.ptr = hbw_malloc(size);
-		END_TEST
-	}
+    memory_operation wrapped_malloc(size_t size)
+    {
+        START_TEST(AllocatorTypes::HBWMALLOC_ALLOCATOR, FunctionCalls::MALLOC)
+        data.ptr = hbw_malloc(size);
+        END_TEST
+    }
 
-	memory_operation wrapped_calloc(size_t num, size_t size)
-	{
-		START_TEST(AllocatorTypes::HBWMALLOC_ALLOCATOR, FunctionCalls::CALLOC)
-		data.ptr = hbw_calloc(num, size);
-		END_TEST
-	}
+    memory_operation wrapped_calloc(size_t num, size_t size)
+    {
+        START_TEST(AllocatorTypes::HBWMALLOC_ALLOCATOR, FunctionCalls::CALLOC)
+        data.ptr = hbw_calloc(num, size);
+        END_TEST
+    }
 
-	memory_operation wrapped_realloc(void* ptr, size_t size)
-	{
-		START_TEST(AllocatorTypes::HBWMALLOC_ALLOCATOR, FunctionCalls::REALLOC)
-		data.ptr = hbw_realloc(ptr, size);
-		END_TEST
-	}
+    memory_operation wrapped_realloc(void* ptr, size_t size)
+    {
+        START_TEST(AllocatorTypes::HBWMALLOC_ALLOCATOR, FunctionCalls::REALLOC)
+        data.ptr = hbw_realloc(ptr, size);
+        END_TEST
+    }
 
-	void wrapped_free(void* ptr) {hbw_free(ptr);}
+    void wrapped_free(void* ptr)
+    {
+        hbw_free(ptr);
+    }
 
-	unsigned type() {return AllocatorTypes::HBWMALLOC_ALLOCATOR;}
+    unsigned type()
+    {
+        return AllocatorTypes::HBWMALLOC_ALLOCATOR;
+    }
 
 };

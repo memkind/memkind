@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016 Intel Corporation.
+ * Copyright (C) 2015 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,12 +113,12 @@ static size_t getLimit(size_t limit, char lchar)
         long mult = 1;
 
         switch (toupper(lchar)) {
-        case 'G':
-            mult *= 1024;
-        case 'M':
-            mult *= 1024;
-        case 'K':
-            mult *= 1024;
+            case 'G':
+                mult *= 1024;
+            case 'M':
+                mult *= 1024;
+            case 'K':
+                mult *= 1024;
         }
 
         // check for overflow, saturate at max
@@ -140,17 +140,17 @@ static void printLimits()
     if ((HBWLowLimit > 0) && (HBWHighLimit < -1ull)) {
         // if both high and low limits are specified, we use a range
         LOG(INFO, "INFO: Allocations between %ldK - %ldK will be allocated in "
-                  "HBW. Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
+            "HBW. Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
             HBWLowLimit / 1024, HBWHighLimit / 1024);
     } else if (HBWLowLimit > 0) {
         // if only a low limit is provided, use that
         LOG(INFO, "INFO: Allocations greater than %ldK will be allocated in HBW."
-                  " Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
+            " Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
             HBWLowLimit / 1024);
     } else if (HBWHighLimit < -1ull) {
         // if only a high limit is provided, use that
         LOG(INFO, "INFO: Allocations smaller than %ldK will be allocated in HBW. "
-                  "Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
+            "Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
             HBWHighLimit / 1024);
     } else {
         // none of limits is set to non-edge value, everything goes to HBW
@@ -204,13 +204,13 @@ static void setEnvValues()
 
     if (LogLevel == INFO) {
         LOG(INFO, "INFO: HBW allocation stats will not be printed. "
-                  "Set AUTO_HBW_LOG to enable.\n");
+            "Set AUTO_HBW_LOG to enable.\n");
     } else if (LogLevel == ALLOC) {
         LOG(INFO, "INFO: Only HBW allocations will be printed. "
-                  "Set AUTO_HBW_LOG to disable/enable.\n");
+            "Set AUTO_HBW_LOG to disable/enable.\n");
     } else if (LogLevel == VERBOSE) {
         LOG(INFO, "INFO: HBW allocation with backtrace info will be printed. "
-                  "Set AUTO_HBW_LOG to disable.\n");
+            "Set AUTO_HBW_LOG to disable.\n");
     }
 
     // Set the memory type allocated by this library. By default, it is
@@ -224,7 +224,8 @@ static void setEnvValues()
             hbw_kind = mty;
             LOG(INFO, "INFO: Setting HBW memory type to %s\n", memtype_str);
         } else {
-            LOG(ALWAYS, "WARN: Memory type %s not recognized. Using default type\n", memtype_str);
+            LOG(ALWAYS, "WARN: Memory type %s not recognized. Using default type\n",
+                memtype_str);
         }
     }
 
@@ -253,7 +254,8 @@ static void setEnvValues()
                     highC = ' ';
             }
 
-            LOG(INFO, "INFO: lowlim=%zu(%c), highlim=%zu(%c)\n", lowlim, lowC, highlim, highC);
+            LOG(INFO, "INFO: lowlim=%zu(%c), highlim=%zu(%c)\n", lowlim, lowC, highlim,
+                highC);
         }
 
         HBWLowLimit = getLimit(lowlim, lowC);
@@ -261,13 +263,13 @@ static void setEnvValues()
 
         if (HBWLowLimit >= HBWHighLimit) {
             LOG(ALWAYS, "WARN: In AUTO_HBW_SIZE=X:Y, X cannot be greater or equal to Y. "
-                        "None of allocations will use HBW memory.\n");
+                "None of allocations will use HBW memory.\n");
         }
     } else {
         // if the user did not specify any limits, inform that we are using
         // default limits
         LOG(INFO, "INFO: Using default values for array size thresholds. "
-                  "Set AUTO_HBW_SIZE=X:Y to change.\n");
+            "Set AUTO_HBW_SIZE=X:Y to change.\n");
     }
 
     // inform the user about limits
@@ -288,7 +290,7 @@ static void AUTOHBW_INIT autohbw_load(void)
     //       would fail. Therefore, we need to check for availability first.
     if (memkind_check_available(MEMKIND_HBW) != 0) {
         LOG(ALWAYS, "WARN: *** No HBM found in system. Will use default (DDR) "
-                    "OR user specified type ***\n");
+            "OR user specified type ***\n");
         hbw_kind = MEMKIND_DEFAULT;
     } else {
         hbw_kind = MEMKIND_HBW_PREFERRED;
@@ -304,7 +306,7 @@ static void AUTOHBW_INIT autohbw_load(void)
     void* pp = memkind_malloc(hbw_kind, 16);
     if (pp == 0) {
         LOG(ALWAYS, "\t-HBW init call FAILED. "
-                    "Is required memory type present on your system?\n");
+            "Is required memory type present on your system?\n");
         abort();
     }
 

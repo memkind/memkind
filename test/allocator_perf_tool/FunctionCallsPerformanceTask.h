@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2016 Intel Corporation.
+* Copyright (C) 2015 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,22 @@
 
 
 class FunctionCallsPerformanceTask :
-	public Task
+    public Task
 {
 public:
-	FunctionCallsPerformanceTask(TaskConf conf) {task_conf = conf;}
+    FunctionCallsPerformanceTask(TaskConf conf)
+    {
+        task_conf = conf;
+    }
 
-	void run();
+    void run();
 
-	std::vector<memory_operation> get_results() {return results;}
+    std::vector<memory_operation> get_results()
+    {
+        return results;
+    }
 
 private:
-	TaskConf task_conf;
-	std::vector<memory_operation> results;
+    TaskConf task_conf;
+    std::vector<memory_operation> results;
 };

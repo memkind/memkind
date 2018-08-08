@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2017 Intel Corporation.
+ * Copyright (C) 2016 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,8 @@ extern memkind_t MEMKIND_HBW_GBTLB;
 extern memkind_t MEMKIND_HBW_PREFERRED_GBTLB;
 extern memkind_t MEMKIND_GBTLB;
 
-int MEMKIND_DEPRECATED(memkind_get_kind_by_partition(int partition, memkind_t *kind));
+int MEMKIND_DEPRECATED(memkind_get_kind_by_partition(int partition,
+                                                     memkind_t *kind));
 
 enum memkind_base_partition {
     MEMKIND_PARTITION_DEFAULT = 0,

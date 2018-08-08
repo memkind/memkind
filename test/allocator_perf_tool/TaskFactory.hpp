@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2016 Intel Corporation.
+* Copyright (C) 2015 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -36,24 +36,23 @@ class TaskFactory
 {
 public:
 
-	Task* create(TaskConf conf)
-	{
-		Task* task = NULL;
-		task = new FunctionCallsPerformanceTask(conf);
+    Task* create(TaskConf conf)
+    {
+        Task* task = NULL;
+        task = new FunctionCallsPerformanceTask(conf);
 
-		tasks.push_back(task);
+        tasks.push_back(task);
 
-		return task;
-	}
+        return task;
+    }
 
-	~TaskFactory()
-	{
-		for (int i=0; i<tasks.size(); i++)
-		{
-			delete tasks[i];
-		}
-	}
+    ~TaskFactory()
+    {
+        for (int i=0; i<tasks.size(); i++) {
+            delete tasks[i];
+        }
+    }
 
 private:
-	std::vector<Task*> tasks;
+    std::vector<Task*> tasks;
 };

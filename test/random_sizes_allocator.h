@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,8 @@ private:
     }
 
 public:
-    RandomSizesAllocator(memkind_t kind, size_t min_size, size_t max_size, int max_allocations_number) :
+    RandomSizesAllocator(memkind_t kind, size_t min_size, size_t max_size,
+                         int max_allocations_number) :
         kind(kind),
         memory_distribution(min_size, max_size)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,7 +137,8 @@ int main(int argc, char * argv[])
     dt = t_end - t_start;
 
     printf("%d %lu %8.6f %8.6f  %8.6f  %8.6f  %8.6f\n",
-           nthr, SIZE, dt/N, malloc_time/N, free_time/N, first_malloc_time, first_free_time);
+           nthr, SIZE, dt/N, malloc_time/N, free_time/N, first_malloc_time,
+           first_free_time);
     return EXIT_SUCCESS;
 }
 
