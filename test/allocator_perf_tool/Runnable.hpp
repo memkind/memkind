@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2016 Intel Corporation.
+* Copyright (C) 2015 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,6 @@
 class Runnable
 {
 public:
-	virtual void run() = 0;
-	virtual ~Runnable() {};
+    virtual void run() = 0;
+    virtual ~Runnable() {};
 };

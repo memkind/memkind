@@ -1,6 +1,6 @@
 
 /*
-* Copyright (C) 2016 Intel Corporation.
+* Copyright (C) 2016 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,9 @@ private:
     {
         std::string line;
         char path[128];
-        sprintf(path, "/sys/devices/system/node/node%d/hugepages/hugepages-2048kB/nr_hugepages", node_number);
+        sprintf(path,
+                "/sys/devices/system/node/node%d/hugepages/hugepages-2048kB/nr_hugepages",
+                node_number);
         std::ifstream file(path);
         if (!file) {
             return -1;
@@ -75,7 +77,7 @@ private:
         char cmd[128];
         sprintf(cmd, "sudo sh -c \"echo %d > \
             /sys/devices/system/node/node%d/hugepages/hugepages-2048kB/nr_hugepages\"",
-            nr_hugepages, node_number);
+                nr_hugepages, node_number);
         if (system(cmd) || (get_nr_hugepages(node_number) != nr_hugepages)) {
             return -1;
         }
@@ -84,7 +86,8 @@ private:
 
     void restore()
     {
-        for(size_t node_id = 0; node_id < initial_nr_hugepages_per_nodes.size(); node_id++) {
+        for(size_t node_id = 0; node_id < initial_nr_hugepages_per_nodes.size();
+            node_id++) {
             set_nr_hugepages(initial_nr_hugepages_per_nodes[node_id], node_id);
         }
     }

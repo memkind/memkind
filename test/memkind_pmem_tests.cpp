@@ -192,7 +192,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocUsableSize)
     EXPECT_TRUE(nullptr != pmem_temp);
     size_t usable_size = memkind_malloc_usable_size(pmem_temp, nullptr);
     EXPECT_EQ(0u, usable_size);
-    for (unsigned int i = 0 ; i < (sizeof(check_sizes) / sizeof(check_sizes[0])); ++i) {
+    for (unsigned int i = 0 ; i < (sizeof(check_sizes) / sizeof(check_sizes[0]));
+         ++i) {
         size_t size = check_sizes[i].size;
         void *alloc = memkind_malloc(pmem_temp, size);
         EXPECT_TRUE(nullptr != alloc);
@@ -236,7 +237,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemResize)
     memkind_free(pmem_kind_no_limit, pmem_str10);
     memkind_free(pmem_kind_no_limit, pmem_strX);
 
-    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE-1, &pmem_kind_not_possible);
+    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE-1,
+                              &pmem_kind_not_possible);
     EXPECT_EQ(MEMKIND_ERROR_INVALID, err);
     EXPECT_TRUE(nullptr == pmem_kind_not_possible);
 }

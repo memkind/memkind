@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2016 Intel Corporation.
+* Copyright (C) 2015 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,8 @@ template<class T>
 class Iterator
 {
 public:
-	virtual bool has_next() const = 0;
-	virtual T next() = 0;
-	virtual size_t size() const = 0;
+    virtual bool has_next() const = 0;
+    virtual T next() = 0;
+    virtual size_t size() const = 0;
 };
 

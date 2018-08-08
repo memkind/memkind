@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2014 - 2016 Intel Corporation.
+* Copyright (C) 2014 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -38,11 +38,11 @@ namespace performance_tests
     using std::thread;
 
 #ifdef __DEBUG
-    #include <mutex>
+#include <mutex>
     // Write entire text at once, avoiding switching to another thread
     extern int g_msgLevel;
     extern std::mutex g_coutMutex;
-    #define EMIT(LEVEL, TEXT) \
+#define EMIT(LEVEL, TEXT) \
     if (g_msgLevel >= LEVEL) \
     { \
         g_coutMutex.lock(); std::cout << TEXT << std::endl; g_coutMutex.unlock(); \
@@ -52,14 +52,14 @@ namespace performance_tests
 #endif
 
     // Use jemalloc, compiled with unique prefix (--with-jemalloc-prefix= configure option)
-    #ifdef SYSTEM_JEMALLOC_PREFIX
-    #define TOKENPASTE(x, y) x ## y
-    #define JE(x, y) TOKENPASTE(x, y)
-    #define jexx_malloc JE(SYSTEM_JEMALLOC_PREFIX, malloc)
-    #define jexx_calloc JE(SYSTEM_JEMALLOC_PREFIX, calloc)
-    #define jexx_memalign JE(SYSTEM_JEMALLOC_PREFIX, memalign)
-    #define jexx_realloc JE(SYSTEM_JEMALLOC_PREFIX, realloc)
-    #define jexx_free JE(SYSTEM_JEMALLOC_PREFIX, free)
+#ifdef SYSTEM_JEMALLOC_PREFIX
+#define TOKENPASTE(x, y) x ## y
+#define JE(x, y) TOKENPASTE(x, y)
+#define jexx_malloc JE(SYSTEM_JEMALLOC_PREFIX, malloc)
+#define jexx_calloc JE(SYSTEM_JEMALLOC_PREFIX, calloc)
+#define jexx_memalign JE(SYSTEM_JEMALLOC_PREFIX, memalign)
+#define jexx_realloc JE(SYSTEM_JEMALLOC_PREFIX, realloc)
+#define jexx_free JE(SYSTEM_JEMALLOC_PREFIX, free)
     extern "C" {
         // jemalloc function prototypes
         // full header cannot be include due to conflict with memkind jemalloc
@@ -69,11 +69,10 @@ namespace performance_tests
         extern void * jexx_realloc(void *ptr, size_t size);
         extern void  jexx_free(void *ptr);
     }
-    #endif
+#endif
 
     // Available memory operations
-    enum OperationName
-    {
+    enum OperationName {
         Malloc,
         Calloc,
         Realloc,
@@ -102,8 +101,8 @@ namespace performance_tests
         {
         }
 
-            // Creates an operation with given name and bucket size
-            // If no bucket size is given, operation will be always performed
+        // Creates an operation with given name and bucket size
+        // If no bucket size is given, operation will be always performed
         Operation(
             OperationName name,
             unsigned bucketSize = MaxBucketSize)
@@ -116,7 +115,7 @@ namespace performance_tests
         virtual ~Operation() {}
         ;
 
-            // Check if operation should be performed (currently drawn random number lower than bucket size)
+        // Check if operation should be performed (currently drawn random number lower than bucket size)
         bool checkCondition(unsigned ballSize) const
         {
             return (ballSize < m_bucketSize);
@@ -129,41 +128,40 @@ namespace performance_tests
 
         string getNameStr() const
         {
-            switch (m_name)
-            {
-            case OperationName::Malloc:
-                return "malloc";
+            switch (m_name) {
+                case OperationName::Malloc:
+                    return "malloc";
 
-            case OperationName::Calloc:
-                return "calloc";
+                case OperationName::Calloc:
+                    return "calloc";
 
-            case OperationName::Realloc:
-                return "realloc";
+                case OperationName::Realloc:
+                    return "realloc";
 
-            case OperationName::Align:
-                return "align";
+                case OperationName::Align:
+                    return "align";
 
-            case OperationName::Free:
-                return "free";
+                case OperationName::Free:
+                    return "free";
 
-            default:
-                return "<unknown>";
+                default:
+                    return "<unknown>";
             }
         }
 
-            // Get operation bucket size
+        // Get operation bucket size
         unsigned getBucketSize() const
         {
             return m_bucketSize;
         }
 
-            // perform memory operation
+        // perform memory operation
         virtual void perform(const memkind_t& kind,
-            void * &mem,
-            size_t size = 0,
-            size_t offset=0,
-            size_t alignment=0)
-            const = 0;
+                             void * &mem,
+                             size_t size = 0,
+                             size_t offset=0,
+                             size_t alignment=0)
+        const = 0;
 
     };
 
@@ -185,31 +183,26 @@ namespace performance_tests
         }
 
         virtual void perform(const memkind_t& kind,
-            void * &mem,
-            size_t size,
-            size_t offset,
-            size_t alignment) const override
+                             void * &mem,
+                             size_t size,
+                             size_t offset,
+                             size_t alignment) const override
         {
             EMIT(2, "Entering Operation::" << getNameStr()
-                <<  ", size=" << size
-                << ", offset=" << offset
-                << ", alignment=" << alignment
-                << ", mem=" << mem)
-            switch(m_name)
-            {
-            case Malloc:
-                {
-                    if (mem != nullptr)
-                    {
+                 <<  ", size=" << size
+                 << ", offset=" << offset
+                 << ", alignment=" << alignment
+                 << ", mem=" << mem)
+            switch(m_name) {
+                case Malloc: {
+                    if (mem != nullptr) {
                         free(mem);
                     }
                     mem = malloc(size);
                     break;
                 }
-            case Calloc:
-                {
-                    if (mem != nullptr)
-                    {
+                case Calloc: {
+                    if (mem != nullptr) {
                         free(mem);
                     }
                     // split allocation size randomly
@@ -217,41 +210,37 @@ namespace performance_tests
                     mem = calloc((1 << offset), (size >> offset));
                     break;
                 }
-            case Realloc:
-                {
+                case Realloc: {
                     mem = realloc(mem, size);
                     break;
                 }
-            case Align:
-                {
-                    if (mem != nullptr)
-                    {
+                case Align: {
+                    if (mem != nullptr) {
                         free(mem);
                     }
                     // randomly choose alignment from (8, 8 * MemalignMaxMultiplie)
                     mem = memalign(alignment, size);
                     break;
                 }
-            case Free:
-                {
+                case Free: {
                     free(mem);
                     mem = nullptr;
                     break;
                 }
 
-            default:
-                throw "Not implemented";
-                break;
+                default:
+                    throw "Not implemented";
+                    break;
             }
             EMIT(2, "Exiting Operation::" << getNameStr()
-                <<  ", size=" << size
-                << ", offset=" << offset
-                << ", alignment=" << alignment
-                << ", mem=" << mem)
+                 <<  ", size=" << size
+                 << ", offset=" << offset
+                 << ", alignment=" << alignment
+                 << ", mem=" << mem)
         }
     };
 
-    #ifdef SYSTEM_JEMALLOC_PREFIX
+#ifdef SYSTEM_JEMALLOC_PREFIX
     // Jemalloc memory operations
     class JemallocOperation : public Operation
     {
@@ -270,72 +259,63 @@ namespace performance_tests
         }
 
         virtual void perform(const memkind_t& kind,
-            void * &mem,
-            size_t size,
-            size_t offset,
-            size_t alignment) const override
+                             void * &mem,
+                             size_t size,
+                             size_t offset,
+                             size_t alignment) const override
         {
             EMIT(2, "Entering Operation::" << getNameStr()
-                <<  ", size=" << size
-                << ", offset=" << offset
-                << ", alignment=" << alignment
-                << ", mem=" << mem)
-            switch(m_name)
-            {
-            case Malloc:
-                {
-                    if (mem != nullptr)
-                    {
+                 <<  ", size=" << size
+                 << ", offset=" << offset
+                 << ", alignment=" << alignment
+                 << ", mem=" << mem)
+            switch(m_name) {
+                case Malloc: {
+                    if (mem != nullptr) {
                         jexx_free(mem);
                     }
                     mem = jexx_malloc(size);
                     break;
                 }
-            case Calloc:
-                {
-                    if (mem != nullptr)
-                    {
+                case Calloc: {
+                    if (mem != nullptr) {
                         jexx_free(mem);
                     }
                     // split allocation size randomly
                     // between number of elements and element size
-                    mem = jexx_calloc((1 << , offset), (size >> , offset));
+                    mem = jexx_calloc((1 <<, offset), (size >>, offset));
                     break;
                 }
-            case Realloc:
-                {
+                case Realloc: {
                     mem = jexx_realloc(mem, size);
                     break;
                 }
-            case Align:
-                {
-                    if (mem != nullptr)
-                    {
+                case Align: {
+                    if (mem != nullptr) {
                         jexx_free(mem);
                     }
                     // randomly choose alignment from (8, 8 * MemalignMaxMultiplie)
                     mem = jexx_memalign(alignment, size);
                     break;
                 }
-            case Free:
-                {
+                case Free: {
                     jexx_free(mem);
                     mem = nullptr;
                     break;
                 }
 
-            default:
-                throw "Not implemented";
-                break;
+                default:
+                    throw "Not implemented";
+                    break;
             }
             EMIT(2, "Exiting Operation::" << getNameStr()
-                <<  ", size=" << size
-                << ", offset=" << offset
-                << ", alignment=" << alignment
-                << ", mem=" << mem)
+                 <<  ", size=" << size
+                 << ", offset=" << offset
+                 << ", alignment=" << alignment
+                 << ", mem=" << mem)
         }
     };
-    #endif
+#endif
     // Jemkmalloc memory operations
     class JemkmallocOperation : public Operation
     {
@@ -354,32 +334,27 @@ namespace performance_tests
         }
 
         virtual void perform(const memkind_t& kind,
-            void * &mem,
-            size_t size,
-            size_t offset,
-            size_t alignment) const override
+                             void * &mem,
+                             size_t size,
+                             size_t offset,
+                             size_t alignment) const override
         {
-        #ifdef JEMK
+#ifdef JEMK
             EMIT(2, "Entering Operation::" << getNameStr()
-                <<  ", size=" << size
-                << ", offset=" << offset
-                << ", alignment=" << alignment
-                << ", mem=" << mem)
-            switch(m_name)
-            {
-            case Malloc:
-                {
-                    if (mem != nullptr)
-                    {
+                 <<  ", size=" << size
+                 << ", offset=" << offset
+                 << ", alignment=" << alignment
+                 << ", mem=" << mem)
+            switch(m_name) {
+                case Malloc: {
+                    if (mem != nullptr) {
                         jemk_free(mem);
                     }
                     mem = jemk_malloc(size);
                     break;
                 }
-            case Calloc:
-                {
-                    if (mem != nullptr)
-                    {
+                case Calloc: {
+                    if (mem != nullptr) {
                         jemk_free(mem);
                     }
                     // split allocation size randomly
@@ -387,38 +362,34 @@ namespace performance_tests
                     mem = jemk_calloc((1 << offset), (size >> offset));
                     break;
                 }
-            case Realloc:
-                {
+                case Realloc: {
                     mem = jemk_realloc(mem, size);
                     break;
                 }
-            case Align:
-                {
-                    if (mem != nullptr)
-                    {
+                case Align: {
+                    if (mem != nullptr) {
                         jemk_free(mem);
                     }
                     // randomly choose alignment from (8, 8 * MemalignMaxMultiplie)
                     mem = jemk_memalign(alignment, size);
                     break;
                 }
-            case Free:
-                {
+                case Free: {
                     jemk_free(mem);
                     mem = nullptr;
                     break;
                 }
 
-            default:
-                throw "Not implemented";
-                break;
+                default:
+                    throw "Not implemented";
+                    break;
             }
             EMIT(2, "Exiting Operation::" << getNameStr()
-                <<  ", size=" << size
-                << ", offset=" << offset
-                << ", alignment=" << alignment
-                << ", mem=" << mem)
-            #endif // JE_MK
+                 <<  ", size=" << size
+                 << ", offset=" << offset
+                 << ", alignment=" << alignment
+                 << ", mem=" << mem)
+#endif // JE_MK
         }
     };
 
@@ -443,31 +414,26 @@ namespace performance_tests
         }
 
         virtual void perform(const memkind_t& kind,
-            void * &mem,
-            size_t size,
-            size_t offset,
-            size_t alignment) const override
+                             void * &mem,
+                             size_t size,
+                             size_t offset,
+                             size_t alignment) const override
         {
             EMIT(2, "Entering Operation::" << getNameStr()
-                <<  ", size=" << size
-                << ", offset=" << offset
-                << ", alignment=" << alignment
-                << ", mem=" << mem)
-            switch (m_name)
-            {
-            case Malloc:
-                {
-                    if (mem != nullptr)
-                    {
+                 <<  ", size=" << size
+                 << ", offset=" << offset
+                 << ", alignment=" << alignment
+                 << ", mem=" << mem)
+            switch (m_name) {
+                case Malloc: {
+                    if (mem != nullptr) {
                         memkind_free(kind, mem);
                     }
                     mem = memkind_malloc(kind, size);
                     break;
                 }
-            case Calloc:
-                {
-                    if (mem != nullptr)
-                    {
+                case Calloc: {
+                    if (mem != nullptr) {
                         memkind_free(kind, mem);
                     }
                     // split allocation size randomly
@@ -475,42 +441,37 @@ namespace performance_tests
                     mem = memkind_calloc(kind, 1 << offset, size >> offset);
                     break;
                 }
-            case Realloc:
-                {
+                case Realloc: {
                     mem = memkind_realloc(kind, mem, size);
                     break;
                 }
 
-            case Align:
-                {
-                    if (mem != nullptr)
-                    {
+                case Align: {
+                    if (mem != nullptr) {
                         memkind_free(kind, mem);
                         mem = nullptr;
                     }
                     // randomly choose alignment from (sizeof(void*), sizeof(void*) * MemalignMaxMultiplie)
-                    if (memkind_posix_memalign(kind, &mem, alignment, size) != 0)
-                    {
+                    if (memkind_posix_memalign(kind, &mem, alignment, size) != 0) {
                         // failure
                         mem = nullptr;
                     }
                     break;
                 }
-            case Free:
-                {
+                case Free: {
                     memkind_free(kind, mem);
                     mem = nullptr;
                     break;
                 }
 
-            default:
-                break;
+                default:
+                    break;
             }
             EMIT(2, "Exiting Operation::" << getNameStr()
-                <<  ", size=" << size
-                << ", offset=" << offset
-                << ", alignment=" << alignment
-                << ", mem=" << mem)
+                 <<  ", size=" << size
+                 << ", offset=" << offset
+                 << ", alignment=" << alignment
+                 << ", mem=" << mem)
         }
     };
 }

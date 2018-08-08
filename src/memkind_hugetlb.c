@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,11 +59,14 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HUGETLB_OPS = {
 };
 
 static int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out);
-static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask, size_t* out);
+static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask,
+                                   size_t* out);
 
-static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_size);
+static int memkind_hugetlb_check_available(struct memkind *kind,
+                                           size_t huge_size);
 
-MEMKIND_EXPORT int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags)
+MEMKIND_EXPORT int memkind_hugetlb_get_mmap_flags(struct memkind *kind,
+                                                  int *flags)
 {
     *flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_2MB;
     return 0;
@@ -80,7 +83,8 @@ MEMKIND_EXPORT int memkind_hugetlb_check_available_2mb(struct memkind *kind)
 }
 
 /* huge_size: the huge page size in bytes */
-static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_size)
+static int memkind_hugetlb_check_available(struct memkind *kind,
+                                           size_t huge_size)
 {
     int err = 0;
     nodemask_t nodemask;
@@ -93,14 +97,14 @@ static int memkind_hugetlb_check_available(struct memkind *kind, size_t huge_siz
 
     if (kind->ops->get_mbind_nodemask) {
         err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
-    }
-    else {
+    } else {
         numa_bitmask_setall(&nodemask_bm);
     }
 
     size_t nr_persistent_hugepages, nr_overcommit_hugepages;
 
-    err = get_nr_hugepages_cached(huge_size, &nodemask_bm, &nr_persistent_hugepages);
+    err = get_nr_hugepages_cached(huge_size, &nodemask_bm,
+                                  &nr_persistent_hugepages);
     if(err) {
         return err;
     }
@@ -134,13 +138,15 @@ static pthread_once_t memkind_hugepages_config_once_g = PTHREAD_ONCE_INIT;
 
 static struct hugepage_size_info *allocate_hugepage_size_info()
 {
-    struct hugepage_size_info *newInfo = jemk_malloc(sizeof(struct hugepage_size_info));
+    struct hugepage_size_info *newInfo = jemk_malloc(sizeof(
+                                                         struct hugepage_size_info));
     if(newInfo == NULL) {
         log_err("jemk_malloc() failed.");
         return NULL;
     }
 
-    newInfo->nr_hugepages_per_node_array = jemk_calloc(NUMA_NUM_NODES, sizeof(size_t));
+    newInfo->nr_hugepages_per_node_array = jemk_calloc(NUMA_NUM_NODES,
+                                                       sizeof(size_t));
     if(newInfo->nr_hugepages_per_node_array == NULL) {
         jemk_free(newInfo);
         log_err("jemk_calloc() failed.");
@@ -165,19 +171,21 @@ static size_t get_sysfs_entry_value(const char* entry_path)
             ret  = value_read;
         }
         fclose(fid);
-    }
-    else {
+    } else {
         errno = errno_before;
     }
     return ret;
 }
 
 // construct hugepage_size_info object and fill it with data for provided pagesize
-static void init_hugepage_size_info(size_t pagesize, struct hugepage_size_info *newInfo)
+static void init_hugepage_size_info(size_t pagesize,
+                                    struct hugepage_size_info *newInfo)
 {
     char formatted_path[128];
-    const char *nr_path_fmt = "/sys/devices/system/node/node%u/hugepages/hugepages-%zukB/nr_hugepages";
-    const char *nr_overcommit_path_fmt = "/sys/kernel/mm/hugepages/hugepages-%zukB/nr_overcommit_hugepages";
+    const char *nr_path_fmt =
+        "/sys/devices/system/node/node%u/hugepages/hugepages-%zukB/nr_hugepages";
+    const char *nr_overcommit_path_fmt =
+        "/sys/kernel/mm/hugepages/hugepages-%zukB/nr_overcommit_hugepages";
     int snprintf_ret = 0;
     size_t node;
 
@@ -186,19 +194,24 @@ static void init_hugepage_size_info(size_t pagesize, struct hugepage_size_info *
     newInfo->size = pagesize;
 
     //read overcommit hugepages limit for this pagesize
-    snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_overcommit_path_fmt, pagesize_kb);
+    snprintf_ret = snprintf(formatted_path, sizeof(formatted_path),
+                            nr_overcommit_path_fmt, pagesize_kb);
     if (snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
         newInfo->nr_overcommit = get_sysfs_entry_value(formatted_path);
-        log_info("Overcommit limit for %zu kB hugepages is %zu.", pagesize, newInfo->nr_overcommit);
+        log_info("Overcommit limit for %zu kB hugepages is %zu.", pagesize,
+                 newInfo->nr_overcommit);
     }
 
     //read every node nr_hugepages for this pagesize
     for (node = 0; node < NUMA_NUM_NODES; ++node) {
-        snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_path_fmt, node, pagesize_kb);
+        snprintf_ret = snprintf(formatted_path, sizeof(formatted_path), nr_path_fmt,
+                                node, pagesize_kb);
         if(snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
-            newInfo->nr_hugepages_per_node_array[node] = get_sysfs_entry_value(formatted_path);
+            newInfo->nr_hugepages_per_node_array[node] = get_sysfs_entry_value(
+                                                             formatted_path);
             if(node < numa_num_configured_nodes()) {
-                log_info("Number of %zu kB hugepages on node %zu equals %zu.", pagesize, node, newInfo->nr_hugepages_per_node_array[node]);
+                log_info("Number of %zu kB hugepages on node %zu equals %zu.", pagesize, node,
+                         newInfo->nr_hugepages_per_node_array[node]);
             }
         }
     }
@@ -233,7 +246,8 @@ static void hugepages_config_init_once()
     }
 
     unsigned hugepages_info_array_len = 2; //initial size of array
-    hugepages_info_array = jemk_malloc(hugepages_info_array_len * sizeof(struct hugepage_size_info *));
+    hugepages_info_array = jemk_malloc(hugepages_info_array_len * sizeof(
+                                           struct hugepage_size_info *));
     if (hugepages_info_array == NULL) {
         memkind_hugepages_config.err = MEMKIND_ERROR_MALLOC;
         closedir(hugepages_sysfs);
@@ -242,7 +256,8 @@ static void hugepages_config_init_once()
     }
 
     while ((dir = readdir(hugepages_sysfs)) != NULL) {
-        if(dir->d_type == DT_DIR && parse_pagesize_from_sysfs_entry(dir->d_name, &pagesize) == 0) {
+        if(dir->d_type == DT_DIR &&
+           parse_pagesize_from_sysfs_entry(dir->d_name, &pagesize) == 0) {
             struct hugepage_size_info *new_hugepage_info = allocate_hugepage_size_info();
             if(new_hugepage_info == NULL) {
                 memkind_hugepages_config.err = MEMKIND_ERROR_MALLOC;
@@ -254,7 +269,8 @@ static void hugepages_config_init_once()
             //there is more hugepage sizes than expected, reallocation of array needed
             if(i == hugepages_info_array_len) {
                 hugepages_info_array_len *= 2;
-                struct hugepage_size_info **swap_tmp = jemk_realloc(hugepages_info_array, hugepages_info_array_len * sizeof(struct hugepage_size_info *));
+                struct hugepage_size_info **swap_tmp = jemk_realloc(hugepages_info_array,
+                                                                    hugepages_info_array_len * sizeof(struct hugepage_size_info *));
                 if(swap_tmp == NULL) {
                     jemk_free(new_hugepage_info);
                     memkind_hugepages_config.err = MEMKIND_ERROR_MALLOC;
@@ -274,8 +290,7 @@ static void hugepages_config_init_once()
     if(memkind_hugepages_config.err == 0) {
         memkind_hugepages_config.hugepages_info_array = hugepages_info_array;
         memkind_hugepages_config.hugepages_info_array_len = i;
-    }
-    else {
+    } else {
         for(j=0; j<i; j++) {
             jemk_free(hugepages_info_array[i]);
         }
@@ -298,7 +313,8 @@ static void destroy_hugepages_per_node()
 }
 
 // helper function that find and return hugepage_size_info object for specified pagesize
-static struct hugepage_size_info* get_hugepage_info_for_pagesize(size_t pagesize)
+static struct hugepage_size_info* get_hugepage_info_for_pagesize(
+    size_t pagesize)
 {
     int i;
 
@@ -311,7 +327,8 @@ static struct hugepage_size_info* get_hugepage_info_for_pagesize(size_t pagesize
 }
 
 // returns sum of pre-allocated hugepage for specified pagesize and set of nodes
-static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask, size_t *out)
+static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask,
+                                   size_t *out)
 {
     int i;
     size_t nr_hugepages = 0;

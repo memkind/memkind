@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,10 +53,11 @@ static void log_init_once(void)
 
     if (memkind_debug_env) {
         if(strcmp(memkind_debug_env, "1") == 0) {
-               log_enabled = true;
-        }
-        else {
-            fprintf(stderr, "MEMKIND_WARNING: debug option \"%s\" unknown; Try man memkind for available options.\n", memkind_debug_env);
+            log_enabled = true;
+        } else {
+            fprintf(stderr,
+                    "MEMKIND_WARNING: debug option \"%s\" unknown; Try man memkind for available options.\n",
+                    memkind_debug_env);
         }
     }
 }
@@ -65,8 +66,7 @@ static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
 static void log_generic(message_type_t type, const char * format, va_list args)
 {
     pthread_once(&init_once, log_init_once);
-    if(log_enabled || (type == MESSAGE_TYPE_FATAL))
-    {
+    if(log_enabled || (type == MESSAGE_TYPE_FATAL)) {
         pthread_mutex_lock(&log_lock);
         fprintf(stderr, "%s: ", message_prefixes[type]);
         vfprintf(stderr, format, args);

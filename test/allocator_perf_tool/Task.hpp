@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2016 Intel Corporation.
+* Copyright (C) 2015 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,11 @@
 #include "Allocation_info.hpp"
 
 class Task
-	: public Runnable
+    : public Runnable
 {
 public:
-	virtual ~Task() {}
+    virtual ~Task() {}
 
-	virtual std::vector<memory_operation> get_results() = 0;
+    virtual std::vector<memory_operation> get_results() = 0;
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,8 @@ TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AddressConvertion)
     hbw::allocator<int>::const_reference const_reference = *ptr;
 
     hbw::allocator<int>::pointer test_ptr = allocator.address(reference);
-    hbw::allocator<int>::const_pointer test_const_ptr = allocator.address(const_reference);
+    hbw::allocator<int>::const_pointer test_const_ptr = allocator.address(
+                                                            const_reference);
 
     ASSERT_TRUE(NULL != test_ptr);
     ASSERT_TRUE(NULL != test_const_ptr);

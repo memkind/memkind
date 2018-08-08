@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2017 Intel Corporation.
+* Copyright (C) 2017 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,8 @@ class MemkindAllocator : public Allocator
 {
 public:
 
-    MemkindAllocator(memkind_memtype_t memtype, memkind_policy_t policy, memkind_bits_t flags) :
+    MemkindAllocator(memkind_memtype_t memtype, memkind_policy_t policy,
+                     memkind_bits_t flags) :
         memtype(memtype),
         policy(policy),
         flags(flags)
@@ -93,8 +94,7 @@ public:
 
     virtual int get_numa_policy()
     {
-        static std::map<memkind_t, int> kind_policy =
-        {
+        static std::map<memkind_t, int> kind_policy = {
             std::make_pair(MEMKIND_HBW_INTERLEAVE, MPOL_INTERLEAVE),
             std::make_pair(MEMKIND_INTERLEAVE, MPOL_INTERLEAVE),
             std::make_pair(MEMKIND_HBW_PREFERRED, MPOL_PREFERRED),
@@ -182,8 +182,7 @@ public:
     {
         if (page_size == HBW_PAGESIZE_4KB) {
             return hbw_posix_memalign(ptr, alignment, size);
-        }
-        else {
+        } else {
             return hbw_posix_memalign_psize(ptr, alignment, size, page_size);
         }
     }
@@ -197,12 +196,10 @@ public:
     {
         if (hbw_get_policy() == HBW_POLICY_INTERLEAVE) {
             return MPOL_INTERLEAVE;
-        }
-        else if (hbw_get_policy() == HBW_POLICY_PREFERRED) {
+        } else if (hbw_get_policy() == HBW_POLICY_PREFERRED) {
             return MPOL_PREFERRED;
-        }
-        else if (hbw_get_policy() == HBW_POLICY_BIND ||
-                hbw_get_policy() == HBW_POLICY_BIND_ALL) {
+        } else if (hbw_get_policy() == HBW_POLICY_BIND ||
+                   hbw_get_policy() == HBW_POLICY_BIND_ALL) {
             return MPOL_BIND;
         }
         return -1;

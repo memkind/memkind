@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2016 Intel Corporation.
+* Copyright (C) 2015 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -29,26 +29,41 @@
 
 template<class T>
 class VectorIterator
-	: public Iterator<T>
+    : public Iterator<T>
 {
 public:
 
-	static VectorIterator create(int init_size) {return VectorIterator(init_size);}
-	static VectorIterator create(std::vector<T> v) {return VectorIterator(v);}
+    static VectorIterator create(int init_size)
+    {
+        return VectorIterator(init_size);
+    }
+    static VectorIterator create(std::vector<T> v)
+    {
+        return VectorIterator(v);
+    }
 
-	bool has_next() const  {return !vec.empty();}
+    bool has_next() const
+    {
+        return !vec.empty();
+    }
 
-	T next()
-	{
-		T val = vec.back();
-		vec.pop_back();
-		return val;
-	}
+    T next()
+    {
+        T val = vec.back();
+        vec.pop_back();
+        return val;
+    }
 
-	size_t size() const  {return vec.size();}
+    size_t size() const
+    {
+        return vec.size();
+    }
 
 private:
-	VectorIterator(std::vector<T> v) {vec = v;}
+    VectorIterator(std::vector<T> v)
+    {
+        vec = v;
+    }
 
-	std::vector<T> vec;
+    std::vector<T> vec;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,17 +58,20 @@ extern "C" {
         decorators_state->calloc_pre++;
     }
 
-    void memkind_calloc_post(struct memkind *kind, size_t nmemb, size_t size, void **result)
+    void memkind_calloc_post(struct memkind *kind, size_t nmemb, size_t size,
+                             void **result)
     {
         decorators_state->calloc_post++;
     }
 
-    void memkind_posix_memalign_pre(struct memkind *kind, void **memptr, size_t alignment, size_t size)
+    void memkind_posix_memalign_pre(struct memkind *kind, void **memptr,
+                                    size_t alignment, size_t size)
     {
         decorators_state->posix_memalign_pre++;
     }
 
-    void memkind_posix_memalign_post(struct memkind *kind, void **memptr, size_t alignment, size_t size, int *err)
+    void memkind_posix_memalign_post(struct memkind *kind, void **memptr,
+                                     size_t alignment, size_t size, int *err)
     {
         decorators_state->posix_memalign_post++;
     }
@@ -78,7 +81,8 @@ extern "C" {
         decorators_state->realloc_pre++;
     }
 
-    void memkind_realloc_post(struct memkind *kind, void *ptr, size_t size, void **result)
+    void memkind_realloc_post(struct memkind *kind, void *ptr, size_t size,
+                              void **result)
     {
         decorators_state->realloc_post++;
     }
