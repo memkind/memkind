@@ -36,16 +36,16 @@ matrix:
       before_install:
         - eval "${MATRIX_EVAL}"
 
-    - name: "GCC 7.0"
+    - name: "GCC 8.0"
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-7
+            - g++-8
             - libnuma-dev
       env:
-         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7 && JEMALLOC_CC=gcc-7 && JEMALLOC_CXX=g++-7"
+         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8 && JEMALLOC_CC=gcc-8 && JEMALLOC_CXX=g++-8"
       install:
       script:
         - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh 
