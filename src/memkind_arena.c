@@ -495,7 +495,8 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
                 ptr = jemk_mallocx_check(size,
                                          MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
             } else {
-                ptr = jemk_rallocx_check(ptr, size, MALLOCX_ARENA(arena));
+                ptr = jemk_rallocx_check(ptr, size,
+                                         MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
             }
         }
     }
