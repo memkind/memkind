@@ -75,7 +75,7 @@ Alternatively you can follow this step-by-step instruction:
     mkdir obj
     cd obj
     ../configure --enable-autogen --with-jemalloc-prefix=jemk_ --without-export \
-                 --disable-stats --disable-fill --disable-valgrind \
+                 --disable-stats --disable-fill \
                  --with-malloc-conf="lg_chunk:22"
     make
     cd ../..
