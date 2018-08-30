@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017-2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,8 +23,8 @@
  */
 
 #pragma once
-#include <stdio.h>
-#include <fcntl.h>
+#include <cstring>
+#include <fstream>
 
 class ProcStat
 {
@@ -32,18 +32,17 @@ public:
     //Note: this function is not thread-safe.
     bool get_stat(const char* field_name, char* value)
     {
-        int file = open("/proc/self/status", O_RDONLY);
-        if(file == -1) {
-            return false;
-        }
+        std::ifstream file("/proc/self/status", std::ifstream::in);
+        char* pos = nullptr;
 
-        read(file, buff, sizeof(buff));
-        char* pos = strstr(buff, field_name);
-        if(pos) {
-            sscanf(pos, "%64[a-zA-Z_0-9()]: %s", current_entry_name, value);
+        while(file.getline(line, sizeof(line))) {
+            pos = strstr(line, field_name);
+            if(pos) {
+                sscanf(pos, "%64[a-zA-Z_0-9()]: %s", current_entry_name, value);
+                break;
+            }
         }
-
-        close(file);
+        file.close();
         return pos;
     }
 
@@ -62,7 +61,7 @@ private:
     /* We are avoiding to allocate local buffers,
      * since it can produce noise in memory footprint tests.
      */
-    char buff[1024];
+    char line[1024];
     char current_entry_name[1024];
     char str_value[1024];
 };
