@@ -27,31 +27,58 @@
 extern "C" {
 #endif
 
-#ifndef MEMKIND_INTERNAL_API
-#warning "DO NOT INCLUDE THIS FILE! IT IS INTERNAL MEMKIND API AND SOON WILL BE REMOVED FROM BIN & DEVEL PACKAGES"
-#endif
-
 #include <memkind.h>
-#include "memkind_default.h"
-#include "memkind_arena.h"
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_arena.h>
 
 #include <pthread.h>
 
 /*
- * Header file for the file-backed memory memkind operations.
- * More details in memkind_pmem(3) man page.
+ *  The pmem memory memkind operations enable memory kinds built on memory-mapped
+ *  files. These support traditional volatile memory allocation in a fashion
+ *  similar to libvmem(3) library. It uses the mmap(2) system call to create
+ *  a pool of volatile memory. Such memory may have different attributes,
+ *  depending on the file system containing the memory-mapped files. (See also
+ *  http://pmem.io/pmdk/libvmem).
  *
- * Functionality defined in this header is considered as EXPERIMENTAL API.
- * API standards are described in memkind(3) man page.
+ *  The pmem memkinds are most useful when used with Direct Access storage (DAX),
+ *  which is memory-addressable persistent storage that supports load/store access
+ *  without being paged via the system page cache. A Persistent Memory-aware file
+ *  system is typically used to provide this type of access.
+ *
+ *  The most convenient way to create pmem memkinds is to use memkind_create_pmem()
+ *  (see memkind(3)).
  */
 
 #define	MEMKIND_PMEM_MIN_SIZE (1024 * 1024 * 16)
 #define MEMKIND_PMEM_CHUNK_SIZE (1ull << 21ull) // 2MB
 
-int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops,
-                        const char *name);
+/*
+ * memkind_pmem_create() is an implementation of the memkind "create" operation
+ * for file-backed memory kinds. This allocates a space for some pmem-specific
+ * metadata, then calls memkind_arena_create() (see memkind_arena(3))
+ */
+int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops, const char *name);
+
+/*
+ * memkind_pmem_destroy() is an implementation of the memkind "destroy" operation
+ * for file-backed memory kinds.  This releases all of the resources allocated
+ * by memkind_pmem_create() and allows the file system space to be reclaimed.
+ */
 int memkind_pmem_destroy(struct memkind *kind);
+
+/*
+ * memkind_pmem_mmap() allocates the file system space for a block of size bytes
+ * in the memory-mapped file associated with given kind. The addr hint is ignored.
+ * The return value is the address of mapped memory region or MAP_FAILED in the
+ * case of an error.
+ */
 void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size);
+
+/*
+ * memkind_pmem_get_mmap_flags() sets flags to MAP_SHARED. See mmap(2) for more
+ * information about these flags.
+ */
 int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags);
 
 struct memkind_pmem {

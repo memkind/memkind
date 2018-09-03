@@ -49,6 +49,7 @@ include_HEADERS = include/hbwmalloc.h \
                   include/hbw_allocator.h \
                   include/memkind.h \
                   include/memkind_deprecated.h \
+                  include/pmemmalloc.h \
                   # end
 
 nonstandardincludedir = $(includedir)/memkind/internal
@@ -60,7 +61,6 @@ nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_regular.h \
                   include/memkind/internal/memkind_hugetlb.h \
                   include/memkind/internal/memkind_interleave.h \
-                  include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
                   include/memkind/internal/memkind_log.h \
                   include/memkind/internal/tbb_wrapper.h \

@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <memkind/internal/memkind_pmem.h>
+#include <pmemmalloc.h>
 #include <memkind/internal/memkind_private.h>
 
 #include <sys/param.h>
