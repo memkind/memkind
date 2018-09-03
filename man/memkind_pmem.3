@@ -25,7 +25,7 @@
 .SH "NAME"
 memkind_pmem.h \- file-backed memory memkind operations.
 .br
-Note: This is EXEPRIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes), or remove.
+Note: This is EXEPRIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes) or remove.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind/internal/memkind_pmem.h>
@@ -98,6 +98,12 @@ to
 See
 .BR mmap (2)
 for more information about these flags.
+.TP
+.B MEMKIND_PMEM_MIN_SIZE
+The minimum size of the file-backed memory partition.
+.TP
+.B MEMKIND_PMEM_CHUNK_SIZE
+The size of the PMEM chunk size.
 .SH "COPYRIGHT"
 Copyright (C) 2015 - 2018 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
