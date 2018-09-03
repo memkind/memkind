@@ -351,6 +351,8 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
         err = jemk_mallctl("arenas.create", (void*)&arena_index, &unsigned_size, NULL,
                            0);
         if(err) {
+            log_err("Could not create arena.");
+            err = MEMKIND_ERROR_ARENAS_CREATE;
             goto exit;
         }
         //store arena with lowest index (arenas could be created in descending/ascending order)
