@@ -44,6 +44,8 @@ Note: This is EXEPRIMENTAL API. The functionality and the header file itself can
 .br
 .BI "void memkind_hbw_hugetlb_init_once(void);"
 .br
+.BI "void memkind_hbw_all_hugetlb_init_once(void);"
+.br
 .BI "void memkind_hbw_preferred_init_once(void);"
 .br
 .BI "void memkind_hbw_preferred_hugetlb_init_once(void);"
@@ -122,13 +124,16 @@ Note:
 .BR memkind_hbw_preferred_hugetlb_init_once ()
 may reserve some extra memory.
 .PP
+.BR void memkind_hbw_all_hugetlb_init_once ()
+This function initializes MEMKIND_HBW_ALL_HUGETLB kind and it shouldn;t be called more than once.
+.PP
 .BR memkind_hbw_interleave_init_once ()
 This function initializes MEMKIND_HBW_INTERLEAVE kind and it should not be called more than once.
 Note:
 .BR memkind_hbw_interleave_init_once ()
 may reserve some extra memory.
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2016 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2018 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3),
 .BR memkind_arena (3),
