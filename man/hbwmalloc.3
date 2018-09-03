@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 - 2016 Intel Corporation.
+.\" Copyright (C) 2014 - 2018 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@ Note: hbwmalloc.h functionality is considered as stable API (STANDARD API).
 .fi
 .SH "DESCRIPTION"
 .BR hbw_check_available ()
-returns 0 if high bandwidth memory is available and an error code
+returns 0 if high bandwidth memory is available or an error code
 described in the
 .B ERRORS
 section if not.
@@ -245,7 +245,7 @@ disabled).
 .PP
 .BR hbw_verify_memory_region ()
 verifies if memory region fully fall into high bandwidth memory. Returns:
-0 if memory in address range from
+0 if memory address range from
 .IR "addr"
 to
 .IR "addr"
@@ -405,7 +405,7 @@ https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
 There might be some overhead in huge pages consumption caused by heap management.
 If your allocation fails because of OOM, please try to allocate extra huge pages (e.g. 8 huge pages).
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2016 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2018 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR malloc (3),
 .BR numa (3),

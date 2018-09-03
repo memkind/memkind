@@ -50,9 +50,13 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .BI "size_t memkind_malloc_usable_size(memkind_t " "kind" ", void " "*ptr" );
 .br
 .sp
-.B "KIND MANAGMENT:"
+.B "KIND MANAGEMENT:
 .br
 .BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
+.br
+.BI "int memkind_create_kind(memkind_memtype_t " "memtype_flags" ", memkind_policy_t " "policy" ", memkind_bits_t " "flags" ", memkind_t " "*kind" ");
+.br
+.BI "int memkind_destroy_kind(memkind_t " "kind" ");
 .br
 .BI "int memkind_check_available(memkind_t " "kind" );
 .sp
@@ -94,13 +98,13 @@ where the maximum size of the message is passed by the
 .I size
 parameter.
 
-.B "HEAP MANAGMENT:"
+.B "HEAP MANAGEMENT:"
 .br
 The functions described in this section define a heap manager with an
 interface modeled on the ISO C standard API's, except that the user
 must specify the
 .I kind
-of memory with the first argument to each function.  See the
+of memory with the first argument to each function. See the
 .B KINDS
 section below for a full description of the implemented kinds.
 .PP
@@ -110,11 +114,11 @@ allocates
 bytes of uninitialized memory of the specified
 .IR "kind" .
 The allocated space is suitably aligned (after possible pointer
-coercion) for storage of any type of object.  If
+coercion) for storage of any type of object. If
 .I size
 is 0, then
 .BR memkind_malloc ()
-returns  NULL.
+returns NULL.
 .PP
 .BR memkind_calloc ()
 allocates space for
@@ -222,7 +226,7 @@ Otherwise, if
 was already called before, undefined behavior occurs.
 If
 .I ptr
-is  NULL, no operation is performed.
+is NULL, no operation is performed.
 The value of
 .B MEMKIND_DEFAULT
 can be given as the
@@ -241,14 +245,14 @@ a non-zero value.
 .sp
 .B "KIND MANAGEMENT:"
 .br
-There are built-in kinds that are always available, and these are enumerated in the
+There are built-in kinds that are always available and these are enumerated in the
 .B KINDS
-section.  The user can also create their own kinds of memory.  This
+section. The user can also create their own kinds of memory. This
 section describes the API's that enable the tracking of the different
 kinds of memory and determining their properties.
 .PP
 .BR memkind_create_pmem ()
-is a convenience function used to create a file-backed kind of memory.
+is a convenient function used to create a file-backed kind of memory.
 It allocates a temporary file in the given directory
 .IR dir .
 The file is created in a fashion similar to
@@ -277,7 +281,7 @@ value which allows to limit the size of kind by the library is defined as
 .BR MEMKIND_PMEM_MIN_SIZE .
 Calling
 .BR memkind_create_pmem ()
-with a size smaller than that, and different than 0 will return an error.
+with a size smaller than that and different than 0 will return an error.
 The maximum allowed size is not limited by
 .BR memkind ,
 but by the file system specified by the
@@ -289,8 +293,27 @@ passed in is the raw size of the memory pool and
 .B jemalloc
 will use some of that space for its own metadata.
 .PP
+.BR memkind_create_kind ()
+creates kind that allocates memory with specific memory type, memory binding policy and flags.
+The
+.IR memtype_flags
+determine memory types to allocate,
+.IR policy
+argument is policy for specify page binding to memory types selected by
+.IR memtype_flags .
+Possible status returned from function as follows:
+.IR MEMKIND_SUCCESS ,
+.IR MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE ,
+.IR MEMKIND_ERROR_INVALID .
+.PP
+Function
+.BR memkind_destroy_kind ()
+destroys previously initialized kind object.
+Note that all allocated memory must be freed before kind is destroyed,
+otherwise this may cause memory leak.
+.PP
 .BR memkind_check_available ()
-Returns a zero if the specified
+returns a zero if the specified
 .I kind
 is available or an error code from the
 .B ERRORS
@@ -302,24 +325,24 @@ The minimum size which allows to limit the file-backed memory partition.
 .B "DECORATORS:"
 .br
 The memkind library enables the user to define decorator functions that
-can be called before and after each memkind heap management API.  The
+can be called before and after each memkind heap management API. The
 decorators that are called at the beginning of the function end are named
 after that function with
 .I _pre
-appended to the name, and those that are called at the end of the
+appended to the name and those that are called at the end of the
 function are named after that function with
 .I _post
-appended to the name.  These are weak symbols, and if they are not
-present at link time they are not called.  The memkind library does
+appended to the name. These are weak symbols and if they are not
+present at link time they are not called. The memkind library does
 not define these symbols which are reserved for user definition.
 These decorators can be used to track calls to the heap management
-interface or to modify parameters.  The decorators that are called at
-the beginning of the allocator pass all inputs by reference, and the
+interface or to modify parameters. The decorators that are called at
+the beginning of the allocator pass all inputs by reference and the
 decorators that are called at the end of the allocator pass the output
-by reference.  This enables the modification of the input and output
+by reference. This enables the modification of the input and output
 of each heap management function by the decorators.
 .sp
-.B "LIBRARY VERSION"
+.B "LIBRARY VERSION:"
 .br
 The memkind library version scheme consist major, minor and patch numbers separated by dot. Combining those numbers, we got the following representation:
 .br
@@ -327,7 +350,7 @@ major.minor.patch, where:
 .br
 	-major number is incremented whenever API is changed (loss of backward compatibility),
 .br
-	-minor number is incremented whenever additional extensions are introduced, or behavior has been changed,
+	-minor number is incremented whenever additional extensions are introduced or behavior has been changed,
 .br
 	-patch number is incremented whenever small bug fixes are added.
 .sp
@@ -353,7 +376,7 @@ API standards:
 .BR memkind_malloc (),
 and
 .BR memkind_realloc (),
-returns the pointer to the allocated memory, or NULL if the request fails.
+returns the pointer to the allocated memory or NULL if the request fails.
 .BR memkind_malloc_usable_size ()
 returns the number of usable bytes in the block of allocated memory pointed to by
 .I ptr,
@@ -367,13 +390,13 @@ and
 .BR memkind_error_message ()
 do not have return values.
 All other memkind API's return 0 upon
-success, and an error code defined in the ERRORS section upon failure.
+success and an error code defined in the ERRORS section upon failure.
 The memkind library avoids setting
 .I errno
 directly, but calls to underlying libraries and system calls may set
 .IR errno .
 .SH "KINDS"
-The available kinds of memory
+The available kinds of memory:
 .TP
 .B MEMKIND_DEFAULT
 Default allocation using standard memory and default page size.
@@ -466,11 +489,11 @@ as defined in
 if an error occurs (these have positive values).
 If the
 .I alignment
-parameter is not a power of two, or is not a multiple of
-.IR "sizoeof(void *)" ,
+parameter is not a power of two or is not a multiple of
+.IR "sizeof(void *)" ,
 then
 .B EINVAL
-is returned.  If there is insufficient memory to satisfy the request then
+is returned. If there is insufficient memory to satisfy the request then
 .B ENOMEM
 is returned.
 .PP
