@@ -31,9 +31,28 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .B #include <memkind.h>
 .sp
 .B Link with -lmemkind
+.br
+.SS "EXPERIMENTAL API:"
+.sp
+.B "HEAP MANAGEMENT:"
+.br
+.BI "int memkind_posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.sp
+.B "KIND MANAGEMENT:"
+.br
+.BI "int memkind_create_kind(memkind_memtype_t " "memtype_flags" ", memkind_policy_t " "policy" ", memkind_bits_t " "flags" ", memkind_t " "*kind" );
+.br
+.BI "int memkind_check_available(memkind_t " "kind" );
+.sp
+.SS "STANDARD API:"
 .sp
 .B "ERROR HANDLING:"
+.br
 .BI "void memkind_error_message(int " "err" ", char " "*msg" ", size_t " "size" );
+.sp
+.B "LIBRARY VERSION:"
+.br
+.BI "int memkind_get_version();"
 .sp
 .B "HEAP MANAGEMENT:"
 .br
@@ -43,22 +62,15 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .br
 .BI "void *memkind_realloc(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" );
 .br
-.BI "int memkind_posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
-.br
 .BI "void memkind_free(memkind_t " "kind" ", void " "*ptr" );
 .br
 .BI "size_t memkind_malloc_usable_size(memkind_t " "kind" ", void " "*ptr" );
-.br
 .sp
 .B "KIND MANAGEMENT:"
 .br
 .BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
 .br
-.BI "int memkind_create_kind(memkind_memtype_t " "memtype_flags" ", memkind_policy_t " "policy" ", memkind_bits_t " "flags" ", memkind_t " "*kind" );
-.br
 .BI "int memkind_destroy_kind(memkind_t " "kind" );
-.br
-.BI "int memkind_check_available(memkind_t " "kind" );
 .sp
 .B "DECORATORS:"
 .br
@@ -82,8 +94,6 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .br
 .BI "void memkind_free_post(memkind_t " "kind" ", void " "*ptr" );
 .sp
-.B "LIBRARY VERSION:"
-.BI "int memkind_get_version();"
 .sp
 .br
 .SH "DESCRIPTION"
@@ -363,8 +373,9 @@ major.minor.patch, where:
 	-patch number is incremented whenever small bug fixes are added.
 .sp
 memkind library provide numeric representation of the version by exposing the following API:
-.br
-int memkind_get_version () return version number represented by a single integer number, obtained from the formula:
+.PP
+.BR memkind_get_version ()
+return version number represented by a single integer number, obtained from the formula:
 .br
 major * 1000000 + minor * 1000 + patch
 .sp
