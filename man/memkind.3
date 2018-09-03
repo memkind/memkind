@@ -507,6 +507,11 @@ failed
 .B MEMKIND_ERROR_ENVIRON
 Error parsing environment variable (MEMKIND_*)
 .TP
+.B MEMKIND_ERROR_ARENAS_CREATE
+Call to jemalloc's
+.BR arenas.create ()
+failed
+.TP
 .B MEMKIND_ERROR_INVALID
 Invalid input arguments to memkind routine
 .SH "FILES"
