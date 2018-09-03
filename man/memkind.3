@@ -25,34 +25,19 @@
 .SH "NAME"
 memkind \- Heap manager that enables allocations to memory with different properties.
 .br
-This header expose EXPERIMENTAL API in except of STANDARD API placed in section LIBRARY VERSION. API Standards are described below in this man page.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind.h>
 .sp
 .B Link with -lmemkind
+.br
+.SS "EXPERIMENTAL API:"
 .sp
 .B "ERROR HANDLING:"
+.br
 .BI "void memkind_error_message(int " "err" ", char " "*msg" ", size_t " "size" );
 .sp
-.B "HEAP MANAGEMENT:"
-.br
-.BI "void *memkind_malloc(memkind_t " "kind" ", size_t " "size" );
-.br
-.BI "void *memkind_calloc(memkind_t " "kind" ", size_t " "num" ", size_t " "size" );
-.br
-.BI "void *memkind_realloc(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" );
-.br
-.BI "int memkind_posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
-.br
-.BI "void memkind_free(memkind_t " "kind" ", void " "*ptr" );
-.br
-.BI "size_t memkind_malloc_usable_size(memkind_t " "kind" ", void " "*ptr" );
-.br
-.sp
 .B "KIND MANAGMENT:"
-.br
-.BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
 .br
 .BI "int memkind_check_available(memkind_t " "kind" );
 .sp
@@ -78,8 +63,29 @@ This header expose EXPERIMENTAL API in except of STANDARD API placed in section 
 .br
 .BI "void memkind_free_post(memkind_t " "kind" ", void " "*ptr" );
 .sp
+.SS "STANDARD API:"
+.sp
 .B "LIBRARY VERSION:"
+.br
 .BI "int memkind_get_version();"
+.sp
+.B "HEAP MANAGEMENT:"
+.br
+.BI "void *memkind_malloc(memkind_t " "kind" ", size_t " "size" );
+.br
+.BI "void *memkind_calloc(memkind_t " "kind" ", size_t " "num" ", size_t " "size" );
+.br
+.BI "void *memkind_realloc(memkind_t " "kind" ", void " "*ptr" ", size_t " "size" );
+.br
+.BI "int memkind_posix_memalign(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.br
+.BI "void memkind_free(memkind_t " "kind" ", void " "*ptr" );
+.br
+.BI "size_t memkind_malloc_usable_size(memkind_t " "kind" ", void " "*ptr" );
+.sp
+.B "KIND MANAGMENT:"
+.br
+.BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
 .sp
 .br
 .SH "DESCRIPTION"
@@ -319,7 +325,7 @@ decorators that are called at the end of the allocator pass the output
 by reference.  This enables the modification of the input and output
 of each heap management function by the decorators.
 .sp
-.B "LIBRARY VERSION"
+.B "LIBRARY VERSION:"
 .br
 The memkind library version scheme consist major, minor and patch numbers separated by dot. Combining those numbers, we got the following representation:
 .br
@@ -332,8 +338,9 @@ major.minor.patch, where:
 	-patch number is incremented whenever small bug fixes are added.
 .sp
 memkind library provide numeric representation of the version by exposing the following API:
-.br
-int memkind_get_version () return version number represented by a single integer number, obtained from the formula:
+.PP
+.BR memkind_get_version ()
+return version number represented by a single integer number, obtained from the formula:
 .br
 major * 1000000 + minor * 1000 + patch
 .sp
