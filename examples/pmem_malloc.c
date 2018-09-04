@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016, Intel Corporation
+ * Copyright (c) 2015 - 2018 Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,85 +31,42 @@
  */
 
 #include <memkind.h>
-#include <memkind/internal/memkind_pmem.h>
 
-#include <sys/param.h>
-#include <sys/mman.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <errno.h>
-#include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include <sys/stat.h>
 
-#define PMEM1_MAX_SIZE	(MEMKIND_PMEM_MIN_SIZE * 2)
-#define PMEM2_MAX_SIZE	((size_t)1024 * 1024 * 1024 * 1024)
+#define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
-#define CHUNK_SIZE	(4 * 1024 * 1024) /* assume 4MB chunks */
+static char* PMEM_DIR = "/tmp/";
 
-static int pmem_tmpfile(const char *dir, size_t size, int *fd, void **addr)
+int main(int argc, char *argv[])
 {
-    static char template[] = "/pmem.XXXXXX";
+    struct memkind *pmem_kind = NULL;
     int err = 0;
-    int oerrno;
+    struct stat st;
 
-    char fullname[strlen(dir) + sizeof (template)];
-    (void) strcpy(fullname, dir);
-    (void) strcat(fullname, template);
-
-    if ((*fd = mkstemp(fullname)) < 0) {
-        perror("mkstemp()");
-        err = MEMKIND_ERROR_RUNTIME;
-        goto exit;
+    if (argc > 2) {
+        fprintf(stderr,"Usage: %s [pmem_kind_dir_path]", argv[0]);
+        return 1;
+    }
+    if (argc == 2) {
+        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
+            fprintf(stderr,"%s : Invalid path to pmem kind directory ", argv[1]);
+            return 1;
+        } else
+            PMEM_DIR = argv[1];
     }
 
-    (void) unlink(fullname);
+    fprintf(stdout,
+            "This example shows how to allocate memory and possibility to exceed pmem kind size.\nPMEM kind directory: %s\n",
+            PMEM_DIR);
 
-    if (ftruncate(*fd, size) != 0) {
-        err = MEMKIND_ERROR_RUNTIME;
-        goto exit;
-    }
-
-    *addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, *fd, 0);
-    if (*addr == MAP_FAILED) {
-        err = MEMKIND_ERROR_RUNTIME;
-        goto exit;
-    }
-
-    return err;
-
-exit:
-    oerrno = errno;
-    if (*fd != -1) {
-        (void) close(*fd);
-    }
-    *fd = -1;
-    *addr = NULL;
-    errno = oerrno;
-    return err;
-}
-
-int
-main(int argc, char *argv[])
-{
-    struct memkind *pmem_kind1;
-    int err = 0;
-    int fd;
-    void *addr;
-
-    /* create PMEM partition */
-    err = memkind_create_pmem(".", PMEM1_MAX_SIZE, &pmem_kind1);
+    /* Create PMEM partition with specific size */
+    err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
         perror("memkind_create_pmem()");
         fprintf(stderr, "Unable to create pmem partition\n");
-        return errno ? -errno : 1;
-    }
-
-    /* alternate way to create PMEM partition */
-    err = pmem_tmpfile(".", PMEM2_MAX_SIZE, &fd, &addr);
-    if (err) {
-        fprintf(stderr, "Unable to create temporary file\n");
         return errno ? -errno : 1;
     }
 
@@ -119,7 +76,7 @@ main(int argc, char *argv[])
     char *pmem_str12 = NULL;
     char *pmem_str = NULL;
 
-    pmem_str10 = (char *)memkind_malloc(pmem_kind1, size);
+    pmem_str10 = (char *)memkind_malloc(pmem_kind, size);
     if (pmem_str10 == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate pmem string (pmem_str10)\n");
@@ -127,7 +84,7 @@ main(int argc, char *argv[])
     }
 
     /* next chunk mapping */
-    pmem_str11 = (char *)memkind_malloc(pmem_kind1, 8 * 1024 * 1024);
+    pmem_str11 = (char *)memkind_malloc(pmem_kind, 8 * 1024 * 1024);
     if (pmem_str11 == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate pmem string (pmem_str11)\n");
@@ -135,7 +92,7 @@ main(int argc, char *argv[])
     }
 
     /* extend the heap #1 */
-    pmem_str12 = (char *)memkind_malloc(pmem_kind1, 16 * 1024 * 1024);
+    pmem_str12 = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
     if (pmem_str12 == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate pmem string (pmem_str12)\n");
@@ -143,20 +100,30 @@ main(int argc, char *argv[])
     }
 
     /* OOM #1 */
-    pmem_str = (char *)memkind_malloc(pmem_kind1, 16 * 1024 * 1024);
+    pmem_str = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
     if (pmem_str != NULL) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Failure, this allocation should not be possible (expected result was NULL)\n");
+        fprintf(stderr,
+                "Failure, this allocation should not be possible (expected result was NULL)\n");
         return errno ? -errno : 1;
     }
 
-    sprintf(pmem_str10, "Hello world from persistent memory1\n");
+    sprintf(pmem_str10, "Hello world from persistent memory\n");
 
     fprintf(stdout, "%s", pmem_str10);
 
-    memkind_free(pmem_kind1, pmem_str10);
-    memkind_free(pmem_kind1, pmem_str11);
-    memkind_free(pmem_kind1, pmem_str12);
+    memkind_free(pmem_kind, pmem_str10);
+    memkind_free(pmem_kind, pmem_str11);
+    memkind_free(pmem_kind, pmem_str12);
+
+    err = memkind_destroy_kind(pmem_kind);
+    if (err) {
+        perror("memkind_destroy_kind()");
+        fprintf(stderr, "Unable to destroy pmem partition\n");
+        return errno ? -errno : 1;
+    }
+
+    fprintf(stdout, "Memory was successfully allocated and released.\n");
 
     return 0;
 }

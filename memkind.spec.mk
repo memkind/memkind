@@ -193,7 +193,13 @@ $(memkind_test_dir)/hello_memkind
 $(memkind_test_dir)/hello_memkind_debug
 $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/autohbw_candidates
-${memkind_test_dir}/pmem
+${memkind_test_dir}/pmem_kinds
+${memkind_test_dir}/pmem_malloc
+${memkind_test_dir}/pmem_malloc_unlimited
+${memkind_test_dir}/pmem_usable_size
+${memkind_test_dir}/pmem_alignment
+${memkind_test_dir}/pmem_multithreads
+${memkind_test_dir}/pmem_multithreads_onekind
 ${memkind_test_dir}/allocator_perf_tool_tests
 ${memkind_test_dir}/perf_tool
 ${memkind_test_dir}/autohbw_test_helper
