@@ -344,6 +344,7 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
 
     pthread_mutex_lock(&arena_registry_write_lock);
     unsigned i = 0;
+    kind->arena_zero = UINT_MAX;
     for(i = 0; i<kind->arena_map_len; i++) {
         //create new arena with consecutive index
         unsigned arena_index;
@@ -354,8 +355,8 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
             err = MEMKIND_ERROR_ARENAS_CREATE;
             goto exit;
         }
-        //store index of first arena
-        if(i == 0) {
+        //store arena with lowest index (arenas could be created in descending/ascending order)
+        if(kind->arena_zero > arena_index) {
             kind->arena_zero = arena_index;
         }
         //setup extent_hooks for newly created arena
@@ -388,7 +389,7 @@ MEMKIND_EXPORT int memkind_arena_create(struct memkind *kind,
 MEMKIND_EXPORT int memkind_arena_destroy(struct memkind *kind)
 {
     char cmd[128];
-    int i;
+    unsigned int i;
 
     if (kind->arena_map_len) {
         for (i = 0; i < kind->arena_map_len; ++i) {
@@ -470,6 +471,16 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
     return result;
 }
 
+MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
+{
+    if (ptr) {
+        unsigned int arena;
+        kind->ops->get_arena(kind, &arena, 0);
+        assert(arena != 0);
+        jemk_dallocx(ptr, MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, 0));
+    }
+}
+
 MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
                                            size_t size)
 {
@@ -486,7 +497,8 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
                 ptr = jemk_mallocx_check(size,
                                          MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
             } else {
-                ptr = jemk_rallocx_check(ptr, size, MALLOCX_ARENA(arena));
+                ptr = jemk_rallocx_check(ptr, size,
+                                         MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
             }
         }
     }
@@ -641,9 +653,4 @@ void memkind_arena_init(struct memkind *kind)
             abort();
         }
     }
-}
-
-void memkind_arena_free(struct memkind *kind, void* ptr)
-{
-    jemk_free(ptr);
 }
