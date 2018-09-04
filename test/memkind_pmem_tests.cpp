@@ -379,3 +379,25 @@ TEST_F(MemkindPmemTests,
         EXPECT_EQ(err, 0);
     }
 }
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCreateCheckErrorCodeArenaCreate)
+{
+    const size_t pmem_number = 25000;
+    struct memkind *pmem_temp[pmem_number] = {nullptr};
+    unsigned int i = 0;
+    unsigned int j = 0;
+    int err = 0;
+
+    for (i = 0; i < pmem_number; ++i) {
+        err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp[i]);
+        if ( err ) {
+            EXPECT_EQ(err, MEMKIND_ERROR_ARENAS_CREATE);
+            break;
+        }
+    }
+    for (j = 0; j < i; ++j) {
+        err = memkind_destroy_kind(pmem_temp[j]);
+        EXPECT_EQ(err, 0);
+    }
+}
