@@ -26,7 +26,12 @@ noinst_PROGRAMS += examples/hello_memkind \
                    examples/hello_memkind_debug \
                    examples/hello_hbw \
                    examples/filter_memkind \
-                   examples/pmem_memkind \
+                   examples/pmem_kinds \
+                   examples/pmem_malloc \
+                   examples/pmem_malloc_unlimited \
+                   examples/pmem_usable_size \
+                   examples/pmem_alignment \
+                   examples/pmem_multithreads \
                    examples/autohbw_candidates \
                    # end
 if HAVE_CXX11
@@ -37,7 +42,12 @@ examples_hello_memkind_LDADD = libmemkind.la
 examples_hello_memkind_debug_LDADD = libmemkind.la
 examples_hello_hbw_LDADD = libmemkind.la
 examples_filter_memkind_LDADD = libmemkind.la
-examples_pmem_memkind_LDADD = libmemkind.la
+examples_pmem_kinds_LDADD = libmemkind.la
+examples_pmem_malloc_LDADD = libmemkind.la
+examples_pmem_malloc_unlimited_LDADD = libmemkind.la
+examples_pmem_usable_size_LDADD = libmemkind.la
+examples_pmem_alignment_LDADD = libmemkind.la
+examples_pmem_multithreads_LDADD = libmemkind.la
 examples_autohbw_candidates_LDADD = libmemkind.la
 
 if HAVE_CXX11
@@ -48,7 +58,12 @@ examples_hello_memkind_SOURCES = examples/hello_memkind_example.c
 examples_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 examples_hello_hbw_SOURCES = examples/hello_hbw_example.c
 examples_filter_memkind_SOURCES = examples/filter_example.c
-examples_pmem_memkind_SOURCES = examples/pmem_example.c
+examples_pmem_kinds_SOURCES = examples/pmem_kinds.c
+examples_pmem_malloc_SOURCES = examples/pmem_malloc.c
+examples_pmem_malloc_unlimited_SOURCES = examples/pmem_malloc_unlimited.c
+examples_pmem_usable_size_SOURCES = examples/pmem_usable_size.c
+examples_pmem_alignment_SOURCES = examples/pmem_alignment.c
+examples_pmem_multithreads_SOURCES = examples/pmem_multithreads.c
 examples_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
 if HAVE_CXX11
 examples_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
