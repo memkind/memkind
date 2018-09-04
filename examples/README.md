@@ -1,15 +1,44 @@
-Christopher Cantalupo <christopher.m.cantalupo@intel.com>
-2014 July 29
+# Memkind examples
 
 The example directory contains some example codes that use the memkind
-interface.  The simplest is the hello_example.c which is a hello world
+interface.
+
+## PMEM
+
+The pmem_*.c demonstrates how to create and use a file-backed memkind.
+
+### pmem_kinds.c
+
+A simple example showing how to create and destroy pmem kind with defined or unlimited size.
+
+### pmem_malloc.c
+
+Memory allocation example with possibility to exceed pmem kind size.
+
+### pmem_malloc_unlimited.c
+
+A similar example this time with the use of unlimited kind size.
+
+### pmem_usable_size.c
+
+An example showing the difference between the expected and the actual allocation size.
+
+### pmem_alignment.c
+
+This example shows how to use memkind alignment and how it affects allocations.
+
+### pmem_multithreads.c
+
+Simple example how to use multithreading with pmem kinds.
+
+## Other memkind examples
+
+The simplest example is the hello_example.c which is a hello world
 variant.  The filter_example.c shows how you would use high bandwidth
 memory to store a reduction of a larger data set stored in DDR. There is
 also an example of how to create user defined kinds.  This example
 creates kinds which isolate allocations to a single NUMA node each
 backed by a single arena.
-
-The pmem_example.c demonstrates how to create a file-backed memkind.
 
 The memkind_allocated example is simple usage of memkind in C++11 which
 shows how memkind can be used to allocate objects, and consists of two files:
