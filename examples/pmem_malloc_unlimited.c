@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2018 Intel Corporation
+ * Copyright (c) 2018 Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,70 +34,72 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <sys/stat.h>
 
-#define PMEM_MAX_SIZE (MEMKIND_PMEM_MIN_SIZE * 2)
+#define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
-#define CHUNK_SIZE (4 * 1024 * 1024) /* assume 4MB chunks */
+static char* PMEM_DIR = "/tmp/";
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-    struct memkind *pmem_kind;
+    struct memkind *pmem_kind_unlimited = NULL;
     int err = 0;
+    struct stat st;
 
-    /* create PMEM partition */
-    err = memkind_create_pmem(".", PMEM_MAX_SIZE, &pmem_kind);
+    if (argc > 2) {
+        fprintf(stderr,"Usage: %s [pmem_kind_dir_path]", argv[0]);
+        return 1;
+    }
+    if (argc == 2) {
+        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
+            fprintf(stderr,"%s : Invalid path to pmem kind directory ", argv[1]);
+            return 1;
+        } else
+            PMEM_DIR = argv[1];
+    }
+
+    fprintf(stdout,
+            "This example shows how to allocate memory with unlimited kind size.\nPMEM kind directory: %s\n",
+            PMEM_DIR);
+
+    /* Create PMEM partition with unlimited size */
+    err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind_unlimited);
     if (err) {
         perror("memkind_create_pmem()");
         fprintf(stderr, "Unable to create pmem partition\n");
         return errno ? -errno : 1;
     }
 
-    const size_t size = 512;
     char *pmem_str10 = NULL;
     char *pmem_str11 = NULL;
-    char *pmem_str12 = NULL;
-    char *pmem_str = NULL;
 
-    pmem_str10 = (char *)memkind_malloc(pmem_kind, size);
+    /* Huge allocation */
+    pmem_str10 = (char *)memkind_malloc(pmem_kind_unlimited, 32 * 1024 * 1024);
     if (pmem_str10 == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate pmem string (pmem_str10)\n");
         return errno ? -errno : 1;
     }
 
-    /* next chunk mapping */
-    pmem_str11 = (char *)memkind_malloc(pmem_kind, 8 * 1024 * 1024);
+    /* Another huge allocation, kind size is only limited by OS resources */
+    pmem_str11 = (char *)memkind_malloc(pmem_kind_unlimited, 32 * 1024 * 1024);
     if (pmem_str11 == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate pmem string (pmem_str11)\n");
         return errno ? -errno : 1;
     }
 
-    /* extend the heap #1 */
-    pmem_str12 = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
-    if (pmem_str12 == NULL) {
-        perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string (pmem_str12)\n");
+    memkind_free(pmem_kind_unlimited, pmem_str10);
+    memkind_free(pmem_kind_unlimited, pmem_str11);
+
+    err = memkind_destroy_kind(pmem_kind_unlimited);
+    if (err) {
+        perror("memkind_destroy_kind()");
+        fprintf(stderr, "Unable to destroy pmem partition\n");
         return errno ? -errno : 1;
     }
 
-    /* OOM #1 */
-    pmem_str = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
-    if (pmem_str != NULL) {
-        perror("memkind_malloc()");
-        fprintf(stderr,
-                "Failure, this allocation should not be possible (expected result was NULL)\n");
-        return errno ? -errno : 1;
-    }
-
-    sprintf(pmem_str10, "Hello world from persistent memory\n");
-
-    fprintf(stdout, "%s", pmem_str10);
-
-    memkind_free(pmem_kind, pmem_str10);
-    memkind_free(pmem_kind, pmem_str11);
-    memkind_free(pmem_kind, pmem_str12);
+    fprintf(stdout, "Memory was successfully allocated and released.\n");
 
     return 0;
 }
