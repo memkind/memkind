@@ -1,7 +1,9 @@
 dist: trusty
 sudo: required
 language: cpp
+cache: ccache
 matrix:
+  fast_finish: true
   include:
 
     - name: "Astyle"
@@ -28,7 +30,7 @@ matrix:
          - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8 && JEMALLOC_CC=gcc-4.8 && JEMALLOC_CXX=g++-4.8"
       install:
       script:
-        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh 
+        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh
         - ./autogen.sh
         - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
         - make all
