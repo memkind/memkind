@@ -273,9 +273,7 @@ equals 0, pmem memkind is only limited by the capacity of the file system mounte
 argument.
  The minimum
 .I max_size
-value which allows to limit the size of kind by the library is defined in
-.B <memkind_pmem.h>
-as
+value which allows to limit the size of kind by the library is defined as
 .BR MEMKIND_PMEM_MIN_SIZE .
 Calling
 .BR memkind_create_pmem ()
@@ -297,6 +295,9 @@ Returns a zero if the specified
 is available or an error code from the
 .B ERRORS
 section if it is not.
+.PP
+.BR MEMKIND_PMEM_MIN_SIZE
+The minimum size which allows to limit the file-backed memory partition.
 .sp
 .B "DECORATORS:"
 .br
@@ -505,6 +506,11 @@ failed
 .TP
 .B MEMKIND_ERROR_ENVIRON
 Error parsing environment variable (MEMKIND_*)
+.TP
+.B MEMKIND_ERROR_ARENAS_CREATE
+Call to jemalloc's
+.BR arenas.create ()
+failed
 .TP
 .B MEMKIND_ERROR_INVALID
 Invalid input arguments to memkind routine

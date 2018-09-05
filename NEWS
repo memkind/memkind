@@ -34,7 +34,8 @@ We are moving to a more open development model with memkind.
 - Pull requests are welcome.
 
 - White space formatting generally conforms to
-  $ astyle --style=linux --indent=spaces=4 -y -S
+  $ astyle --style=linux --indent=spaces=4 -S --max-continuation-indent=80 \
+           --max-code-length=80 --break-after-logical --indent-namespaces -z2
 
 - For more information about astyle:
   http://astyle.sourceforge.net/

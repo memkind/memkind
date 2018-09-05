@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2017 Intel Corporation.
+* Copyright (C) 2015 - 2018 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -31,94 +31,97 @@
 class AllocatorTypes
 {
 public:
-	enum
-	{
-		STANDARD_ALLOCATOR,
-		JEMALLOC,
-		MEMKIND_DEFAULT,
-		MEMKIND_REGULAR,
-		MEMKIND_HBW,
-		MEMKIND_INTERLEAVE,
-		MEMKIND_HBW_INTERLEAVE,
-		MEMKIND_HBW_PREFERRED,
-		MEMKIND_HUGETLB,
-		MEMKIND_GBTLB,
-		MEMKIND_HBW_HUGETLB,
-		MEMKIND_HBW_PREFERRED_HUGETLB,
-		MEMKIND_HBW_GBTLB,
-		MEMKIND_HBW_PREFERRED_GBTLB,
-		HBWMALLOC_ALLOCATOR,
-		MEMKIND_PMEM,
-		NUM_OF_ALLOCATOR_TYPES
-	};
+    enum {
+        STANDARD_ALLOCATOR,
+        JEMALLOC,
+        MEMKIND_DEFAULT,
+        MEMKIND_REGULAR,
+        MEMKIND_HBW,
+        MEMKIND_INTERLEAVE,
+        MEMKIND_HBW_INTERLEAVE,
+        MEMKIND_HBW_PREFERRED,
+        MEMKIND_HUGETLB,
+        MEMKIND_GBTLB,
+        MEMKIND_HBW_HUGETLB,
+        MEMKIND_HBW_PREFERRED_HUGETLB,
+        MEMKIND_HBW_GBTLB,
+        MEMKIND_HBW_PREFERRED_GBTLB,
+        HBWMALLOC_ALLOCATOR,
+        MEMKIND_PMEM,
+        NUM_OF_ALLOCATOR_TYPES
+    };
 
-	static const std::string& allocator_name(unsigned type)
-	{
-		static const std::string names[] =
-		{
-			"STANDARD_ALLOCATOR",
-			"JEMALLOC",
-			"MEMKIND_DEFAULT",
-			"MEMKIND_REGULAR",
-			"MEMKIND_HBW",
-			"MEMKIND_INTERLEAVE",
-			"MEMKIND_HBW_INTERLEAVE",
-			"MEMKIND_HBW_PREFERRED",
-			"MEMKIND_HUGETLB",
-			"MEMKIND_GBTLB",
-			"MEMKIND_HBW_HUGETLB",
-			"MEMKIND_HBW_PREFERRED_HUGETLB",
-			"MEMKIND_HBW_GBTLB",
-			"MEMKIND_HBW_PREFERRED_GBTLB",
-			"MEMKIND_PMEM",
-			"HBWMALLOC_ALLOCATOR"
-		};
+    static const std::string& allocator_name(unsigned type)
+    {
+        static const std::string names[] = {
+            "STANDARD_ALLOCATOR",
+            "JEMALLOC",
+            "MEMKIND_DEFAULT",
+            "MEMKIND_REGULAR",
+            "MEMKIND_HBW",
+            "MEMKIND_INTERLEAVE",
+            "MEMKIND_HBW_INTERLEAVE",
+            "MEMKIND_HBW_PREFERRED",
+            "MEMKIND_HUGETLB",
+            "MEMKIND_GBTLB",
+            "MEMKIND_HBW_HUGETLB",
+            "MEMKIND_HBW_PREFERRED_HUGETLB",
+            "MEMKIND_HBW_GBTLB",
+            "MEMKIND_HBW_PREFERRED_GBTLB",
+            "HBWMALLOC_ALLOCATOR",
+            "MEMKIND_PMEM"
+        };
 
-		if(type >= NUM_OF_ALLOCATOR_TYPES) assert(!"Invalid input argument!");
+        if(type >= NUM_OF_ALLOCATOR_TYPES) assert(!"Invalid input argument!");
 
-		return names[type];
-	}
+        return names[type];
+    }
 
-	static unsigned allocator_type(const std::string& name)
-	{
-		for (unsigned i=0; i<NUM_OF_ALLOCATOR_TYPES; i++)
-		{
-			if(allocator_name(i) == name)
-				return i;
-		}
+    static unsigned allocator_type(const std::string& name)
+    {
+        for (unsigned i=0; i<NUM_OF_ALLOCATOR_TYPES; i++) {
+            if(allocator_name(i) == name)
+                return i;
+        }
 
-		assert(!"Invalid input argument!");
-	}
+        assert(!"Invalid input argument!");
+    }
 
-	static bool is_valid_memkind(unsigned type)
-	{
-		return (type >= MEMKIND_DEFAULT) && (type < NUM_OF_ALLOCATOR_TYPES);
-	}
+    static bool is_valid_memkind(unsigned type)
+    {
+        return (type >= MEMKIND_DEFAULT) && (type < NUM_OF_ALLOCATOR_TYPES);
+    }
 };
 
 //Enable or disable enum values (types).
 class TypesConf
 {
 public:
-	TypesConf() {}
+    TypesConf() {}
 
-	TypesConf(unsigned type)
-	{
-		enable_type(type);
-	}
+    TypesConf(unsigned type)
+    {
+        enable_type(type);
+    }
 
-	void enable_type(unsigned type) {types[type] = true;}
+    void enable_type(unsigned type)
+    {
+        types[type] = true;
+    }
 
-	void disable_type(unsigned type)
-	{
-		if(types.count(type))
-			types[type] = false;
-	}
+    void disable_type(unsigned type)
+    {
+        if(types.count(type))
+            types[type] = false;
+    }
 
-	bool is_enabled(unsigned type) const {return (types.count(type) ? types.find(type)->second : false);}
+    bool is_enabled(unsigned type) const
+    {
+        return (types.count(type) ? types.find(type)->second : false);
+    }
 
 private:
-	std::map<unsigned, bool> types;
+    std::map<unsigned, bool> types;
 };
 
 //AllocationSizesConf class represents allocation sizes configuration.
@@ -126,9 +129,9 @@ private:
 class AllocationSizesConf
 {
 public:
-	unsigned n;
-	size_t size_from;
-	size_t size_to;
+    unsigned n;
+    size_t size_from;
+    size_t size_to;
 };
 
 //TaskConf class contain configuration data for task,
@@ -142,11 +145,11 @@ public:
 class TaskConf
 {
 public:
-	unsigned n;
-	AllocationSizesConf allocation_sizes_conf;
-	TypesConf func_calls;
-	TypesConf allocators_types;
-	unsigned seed;
-	bool touch_memory;
-	bool is_csv_log_enabled;
+    unsigned n;
+    AllocationSizesConf allocation_sizes_conf;
+    TypesConf func_calls;
+    TypesConf allocators_types;
+    unsigned seed;
+    bool touch_memory;
+    bool is_csv_log_enabled;
 };

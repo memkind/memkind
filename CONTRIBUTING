@@ -58,7 +58,7 @@ a) Building jemalloc
 
 The memkind library has a dependency on a related fork of jemalloc.
 
-The jemalloc source was forked from jemalloc version 4.5. This source tree
+The jemalloc source was forked from jemalloc version 5.0. This source tree
 is located within the jemalloc subdirectory of the memkind source. The jemalloc
 source code has been kept close to the original form, and in particular,
 the build system has been lightly modified.
@@ -75,7 +75,7 @@ Alternatively you can follow this step-by-step instruction:
     mkdir obj
     cd obj
     ../configure --enable-autogen --with-jemalloc-prefix=jemk_ --without-export \
-                 --disable-stats --disable-fill --disable-valgrind \
+                 --disable-stats --disable-fill \
                  --with-malloc-conf="lg_chunk:22"
     make
     cd ../..
@@ -138,7 +138,8 @@ CODING STYLE
 Before submitting a patch for inclusion, please run the modified
 source code files through astyle with the following options
 
-    $ astyle --style=linux --indent=spaces=4 -y -S
+    $ astyle --style=linux --indent=spaces=4 -S --max-continuation-indent=80 \
+             --max-code-length=80 --break-after-logical --indent-namespaces -z2
 
 More information about astyle can be found here:
 

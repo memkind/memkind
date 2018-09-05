@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,8 @@ int main(int argc, char **argv)
         err = errno ? -errno : 1;
         goto exit;
     }
-    err = hbw_posix_memalign_psize((void **)&hbw_hugetlb_str, 2097152, size, HBW_PAGESIZE_2MB);
+    err = hbw_posix_memalign_psize((void **)&hbw_hugetlb_str, 2097152, size,
+                                   HBW_PAGESIZE_2MB);
     if (err) {
         perror("hbw_posix_memalign()");
         fprintf(stderr, "Unable to allocate hbw hugetlb string\n");

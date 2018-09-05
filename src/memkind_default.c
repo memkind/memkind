@@ -48,10 +48,12 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .realloc = memkind_default_realloc,
     .free = memkind_default_free,
     .init_once = memkind_default_init_once,
-    .malloc_usable_size = memkind_default_malloc_usable_size
+    .malloc_usable_size = memkind_default_malloc_usable_size,
+    .finalize = memkind_default_destroy
 };
 
-MEMKIND_EXPORT int memkind_default_create(struct memkind *kind, struct memkind_ops *ops, const char *name)
+MEMKIND_EXPORT int memkind_default_create(struct memkind *kind,
+                                          struct memkind_ops *ops, const char *name)
 {
     int err = 0;
 
@@ -59,8 +61,7 @@ MEMKIND_EXPORT int memkind_default_create(struct memkind *kind, struct memkind_o
     if (strlen(name) >= MEMKIND_NAME_LENGTH_PRIV) {
         kind->name[0] = '\0';
         err = MEMKIND_ERROR_INVALID;
-    }
-    else {
+    } else {
         strcpy(kind->name, name);
     }
     return err;
@@ -79,7 +80,8 @@ MEMKIND_EXPORT void *memkind_default_malloc(struct memkind *kind, size_t size)
     return jemk_malloc(size);
 }
 
-MEMKIND_EXPORT void *memkind_default_calloc(struct memkind *kind, size_t num, size_t size)
+MEMKIND_EXPORT void *memkind_default_calloc(struct memkind *kind, size_t num,
+                                            size_t size)
 {
     if(MEMKIND_UNLIKELY(size_out_of_bounds(num) || size_out_of_bounds(size))) {
         return NULL;
@@ -87,7 +89,8 @@ MEMKIND_EXPORT void *memkind_default_calloc(struct memkind *kind, size_t num, si
     return jemk_calloc(num, size);
 }
 
-MEMKIND_EXPORT int memkind_default_posix_memalign(struct memkind *kind, void **memptr, size_t alignment, size_t size)
+MEMKIND_EXPORT int memkind_default_posix_memalign(struct memkind *kind,
+                                                  void **memptr, size_t alignment, size_t size)
 {
     if(MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         return EINVAL;
@@ -95,7 +98,8 @@ MEMKIND_EXPORT int memkind_default_posix_memalign(struct memkind *kind, void **m
     return jemk_posix_memalign(memptr, alignment, size);
 }
 
-MEMKIND_EXPORT void *memkind_default_realloc(struct memkind *kind, void *ptr, size_t size)
+MEMKIND_EXPORT void *memkind_default_realloc(struct memkind *kind, void *ptr,
+                                             size_t size)
 {
     if(MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         return NULL;
@@ -108,12 +112,14 @@ MEMKIND_EXPORT void memkind_default_free(struct memkind *kind, void *ptr)
     jemk_free(ptr);
 }
 
-MEMKIND_EXPORT size_t memkind_default_malloc_usable_size(struct memkind *kind, void *ptr)
+MEMKIND_EXPORT size_t memkind_default_malloc_usable_size(struct memkind *kind,
+                                                         void *ptr)
 {
     return jemk_malloc_usable_size(ptr);
 }
 
-MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr, size_t size)
+MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr,
+                                          size_t size)
 {
     void *result = MAP_FAILED;
     int err = 0;
@@ -121,8 +127,7 @@ MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr, size
 
     if (kind->ops->get_mmap_flags) {
         err = kind->ops->get_mmap_flags(kind, &flags);
-    }
-    else {
+    } else {
         err = memkind_default_get_mmap_flags(kind, &flags);
     }
     if (MEMKIND_LIKELY(!err)) {
@@ -149,13 +154,14 @@ MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr, size
     return result;
 }
 
-MEMKIND_EXPORT int memkind_nohugepage_madvise(struct memkind *kind, void *addr, size_t size)
+MEMKIND_EXPORT int memkind_nohugepage_madvise(struct memkind *kind, void *addr,
+                                              size_t size)
 {
     int err = madvise(addr, size, MADV_NOHUGEPAGE);
 
     //checking if EINVAL was returned due to lack of THP support in kernel
-    if ((err == EINVAL) && (((uintptr_t) addr & (uintptr_t) 0xfff) == 0) && (size > 0))
-    {
+    if ((err == EINVAL) && (((uintptr_t) addr & (uintptr_t) 0xfff) == 0) &&
+        (size > 0)) {
         return 0;
     }
     if (MEMKIND_UNLIKELY(err)) {
@@ -164,14 +170,15 @@ MEMKIND_EXPORT int memkind_nohugepage_madvise(struct memkind *kind, void *addr, 
     return err;
 }
 
-MEMKIND_EXPORT int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size)
+MEMKIND_EXPORT int memkind_default_mbind(struct memkind *kind, void *ptr,
+                                         size_t size)
 {
     nodemask_t nodemask;
     int err = 0;
     int mode;
 
     if (MEMKIND_UNLIKELY(kind->ops->get_mbind_nodemask == NULL ||
-        kind->ops->get_mbind_mode == NULL)) {
+                         kind->ops->get_mbind_mode == NULL)) {
         log_err("memkind_ops->mbind_mode or memkind_ops->bind_nodemask is NULL.");
         return MEMKIND_ERROR_BADOPS;
     }
@@ -191,40 +198,45 @@ MEMKIND_EXPORT int memkind_default_mbind(struct memkind *kind, void *ptr, size_t
     return err;
 }
 
-MEMKIND_EXPORT int memkind_default_get_mmap_flags(struct memkind *kind, int *flags)
+MEMKIND_EXPORT int memkind_default_get_mmap_flags(struct memkind *kind,
+                                                  int *flags)
 {
     *flags = MAP_PRIVATE | MAP_ANONYMOUS;
     return 0;
 }
 
 MEMKIND_EXPORT int memkind_default_get_mbind_nodemask(struct memkind *kind,
-                                       unsigned long *nodemask,
-                                       unsigned long maxnode)
+                                                      unsigned long *nodemask,
+                                                      unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};
     copy_bitmask_to_bitmask(numa_all_nodes_ptr, &nodemask_bm);
     return 0;
 }
 
-MEMKIND_EXPORT int memkind_default_get_mbind_mode(struct memkind *kind, int *mode)
+MEMKIND_EXPORT int memkind_default_get_mbind_mode(struct memkind *kind,
+                                                  int *mode)
 {
     *mode = MPOL_BIND;
     return 0;
 }
 
-MEMKIND_EXPORT int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode)
+MEMKIND_EXPORT int memkind_preferred_get_mbind_mode(struct memkind *kind,
+                                                    int *mode)
 {
     *mode = MPOL_PREFERRED;
     return 0;
 }
 
-MEMKIND_EXPORT int memkind_interleave_get_mbind_mode(struct memkind *kind, int *mode)
+MEMKIND_EXPORT int memkind_interleave_get_mbind_mode(struct memkind *kind,
+                                                     int *mode)
 {
     *mode = MPOL_INTERLEAVE;
     return 0;
 }
 
-MEMKIND_EXPORT int memkind_posix_check_alignment(struct memkind *kind, size_t alignment)
+MEMKIND_EXPORT int memkind_posix_check_alignment(struct memkind *kind,
+                                                 size_t alignment)
 {
     int err = 0;
     if ((alignment < sizeof(void*)) ||

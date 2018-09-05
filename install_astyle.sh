@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2016 - 2018 Intel Corporation.
+#  Copyright (C) 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -22,14 +22,10 @@
 #  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-EXTRA_CONF=$@
-
-cd jemalloc
-test -e configure || autoconf
-test -e obj || mkdir obj
-cd obj
-../configure --enable-autogen --with-jemalloc-prefix=$JE_PREFIX --without-export \
-             --disable-stats --disable-fill \
-             $EXTRA_CONF --with-malloc-conf="narenas:256,lg_tcache_max:12"
-
-make -j`nproc`
+set -ex
+curl -SL https://sourceforge.net/projects/astyle/files/astyle/astyle%203.1/astyle_3.1_linux.tar.gz -o /tmp/astyle.tar.gz
+tar -xzvf /tmp/astyle.tar.gz -C /tmp/
+echo "Install astyle"
+cd /tmp/astyle/build/gcc
+make
+sudo make install

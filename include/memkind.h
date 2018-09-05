@@ -40,6 +40,10 @@ extern "C" {
 #define _MEMKIND_BIT(N) (1ull << N)
 
 /* EXPERIMENTAL API */
+/** The minimum size which allows to limit the file-backed memory partition */
+#define MEMKIND_PMEM_MIN_SIZE (1024 * 1024 * 16)
+
+/* EXPERIMENTAL API */
 /** Memory types. */
 typedef enum memkind_memtype_t {
 
@@ -148,6 +152,7 @@ enum {
     MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE = -20,
     /** Operation failed. */
     MEMKIND_ERROR_OPERATION_FAILED = -21,
+    MEMKIND_ERROR_ARENAS_CREATE = -22,
     MEMKIND_ERROR_RUNTIME = -255
 };
 

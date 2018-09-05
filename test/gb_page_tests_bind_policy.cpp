@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016 -2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,7 @@ protected:
             int ret;
             if (psize_strict) {
                 ret = hbw_posix_memalign_psize(&ptr, alignment, GB, HBW_PAGESIZE_1GB_STRICT);
-            }
-            else {
+            } else {
                 ret = hbw_posix_memalign_psize(&ptr, alignment, GB, HBW_PAGESIZE_1GB);
             }
             ASSERT_EQ(0, ret);
@@ -64,12 +63,14 @@ private:
     HugePageOrganizer huge_page_organizer = HugePageOrganizer(2250);
 };
 
-TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Misalign_Preferred_Bind_Strict_1GB)
+TEST_F(GBPagesTestBindPolicy,
+       test_TC_MEMKIND_GBPages_ext_HBW_Misalign_Preferred_Bind_Strict_1GB)
 {
     run(1, 2*GB, true);
 }
 
-TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bind_1GB)
+TEST_F(GBPagesTestBindPolicy,
+       test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bind_1GB)
 {
     run(1, GB, true);
 }
@@ -78,12 +79,14 @@ TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bin
  * Below tests allocate GB pages incrementally.
 */
 
-TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bind_2GB)
+TEST_F(GBPagesTestBindPolicy,
+       test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bind_2GB)
 {
     run(2, GB, false);
 }
 
-TEST_F(GBPagesTestBindPolicy, test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Strict_Bind_3GB)
+TEST_F(GBPagesTestBindPolicy,
+       test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Strict_Bind_3GB)
 {
     run(3, GB, true);
 }

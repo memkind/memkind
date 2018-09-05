@@ -1,8 +1,21 @@
 dist: trusty
-sudo: false
+sudo: required
 language: cpp
 matrix:
   include:
+
+    - name: "Astyle"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.8
+      before_install:
+        - ./install_astyle.sh
+      script:
+        - ./astyle.sh
+
     - name: "GCC 4.8"
       addons:
         apt:
@@ -12,17 +25,37 @@ matrix:
             - g++-4.8
             - libnuma-dev
       env:
-         - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8 && JEMALLOC_CC=gcc-4.8 && JEMALLOC_CXX=g++-4.8 && BUILDTEST=true"
-    - name: "GCC 7.0"
+         - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8 && JEMALLOC_CC=gcc-4.8 && JEMALLOC_CXX=g++-4.8"
+      install:
+      script:
+        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh 
+        - ./autogen.sh
+        - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
+        - make all
+        - make checkprogs
+      before_install:
+        - eval "${MATRIX_EVAL}"
+
+    - name: "GCC 8.0"
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-7
+            - g++-8
             - libnuma-dev
       env:
-         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7 && JEMALLOC_CC=gcc-7 && JEMALLOC_CXX=g++-7 && BUILDTEST=true"
+         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8 && JEMALLOC_CC=gcc-8 && JEMALLOC_CXX=g++-8"
+      install:
+      script:
+        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh 
+        - ./autogen.sh
+        - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
+        - make all
+        - make checkprogs
+      before_install:
+        - eval "${MATRIX_EVAL}"
+
     - name: "Clang 6.0"
       addons:
         apt:
@@ -34,13 +67,12 @@ matrix:
             - clang-6.0
             - libnuma-dev
       env:
-        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0 && JEMALLOC_CC=gcc-4.8 && JEMALLOC_CXX=g++-4.8 && BUILDTEST=false"
-install:
-script:
-  - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh 
-  - ./autogen.sh
-  - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
-  - make all
-  - if [ $BUILDTEST == 'true' ]; then make checkprogs; fi;
-before_install:
-  - eval "${MATRIX_EVAL}"
+        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0 && JEMALLOC_CC=gcc-4.8 && JEMALLOC_CXX=g++-4.8"
+      install:
+      script:
+        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh 
+        - ./autogen.sh
+        - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
+        - make all
+      before_install:
+        - eval "${MATRIX_EVAL}"

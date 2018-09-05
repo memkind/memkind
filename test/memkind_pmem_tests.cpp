@@ -50,7 +50,10 @@ protected:
     }
 
     void TearDown()
-    {}
+    {
+        int err = memkind_destroy_kind(pmem_kind);
+        ASSERT_EQ(0, err);
+    }
 };
 
 class MemkindPmemCallocTests : public MemkindPmemTests,
@@ -238,7 +241,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocUsableSize)
     EXPECT_TRUE(nullptr != pmem_temp);
     size_t usable_size = memkind_malloc_usable_size(pmem_temp, nullptr);
     EXPECT_EQ(0u, usable_size);
-    for (unsigned int i = 0 ; i < (sizeof(check_sizes) / sizeof(check_sizes[0])); ++i) {
+    for (unsigned int i = 0 ; i < (sizeof(check_sizes) / sizeof(check_sizes[0]));
+         ++i) {
         size_t size = check_sizes[i].size;
         void *alloc = memkind_malloc(pmem_temp, size);
         EXPECT_TRUE(nullptr != alloc);
@@ -248,13 +252,15 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocUsableSize)
         EXPECT_LE(diff, check_sizes[i].spacing);
         memkind_free(pmem_temp, alloc);
     }
+    err = memkind_destroy_kind(pmem_temp);
+    EXPECT_EQ(0, err);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemResize)
 {
     const size_t size = MEMKIND_PMEM_CHUNK_SIZE;
     char *pmem_str10 = nullptr;
-    char *pmem_strX  = nullptr;
+    char *pmem_strX = nullptr;
     memkind_t pmem_kind_no_limit = nullptr;
     memkind_t pmem_kind_not_possible = nullptr;
     int err = 0;
@@ -282,7 +288,11 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemResize)
     memkind_free(pmem_kind_no_limit, pmem_str10);
     memkind_free(pmem_kind_no_limit, pmem_strX);
 
-    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE-1, &pmem_kind_not_possible);
+    err = memkind_destroy_kind(pmem_kind_no_limit);
+    EXPECT_EQ(0, err);
+
+    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE-1,
+                              &pmem_kind_not_possible);
     EXPECT_EQ(MEMKIND_ERROR_INVALID, err);
     EXPECT_TRUE(nullptr == pmem_kind_not_possible);
 }
@@ -615,4 +625,133 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreads)
     free(pools);
     free(threads);
     free(pool_idx);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemDestroyKind)
+{
+    const size_t pmem_array_size = 10;
+    struct memkind *pmem_kind_array[pmem_array_size] = {nullptr};
+
+    int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE,
+                                  &pmem_kind_array[0]);
+    EXPECT_EQ(err, 0);
+
+    err = memkind_destroy_kind(pmem_kind_array[0]);
+    EXPECT_EQ(err, 0);
+
+    for (unsigned int i = 0; i < pmem_array_size; ++i) {
+        err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_kind_array[i]);
+        EXPECT_EQ(err, 0);
+    }
+
+    char *pmem_middle_name = pmem_kind_array[5]->name;
+    err = memkind_destroy_kind(pmem_kind_array[5]);
+    EXPECT_EQ(err, 0);
+
+    err = memkind_destroy_kind(pmem_kind_array[6]);
+    EXPECT_EQ(err, 0);
+
+    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_kind_array[5]);
+    EXPECT_EQ(err, 0);
+
+    char *pmem_new_middle_name = pmem_kind_array[5]->name;
+
+    EXPECT_STREQ(pmem_middle_name, pmem_new_middle_name);
+
+    for (unsigned int i = 0; i < pmem_array_size; ++i) {
+        if (i != 6) {
+            err = memkind_destroy_kind(pmem_kind_array[i]);
+            EXPECT_EQ(err, 0);
+        }
+    }
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemDestroyKindArenaZero)
+{
+    struct memkind *pmem_temp_1 = nullptr;
+    struct memkind *pmem_temp_2 = nullptr;
+    unsigned int arena_zero = 0;
+    int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp_1);
+    EXPECT_EQ(err, 0);
+
+    arena_zero = pmem_temp_1->arena_zero;
+    err = memkind_destroy_kind(pmem_temp_1);
+    EXPECT_EQ(err, 0);
+    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp_2);
+    EXPECT_EQ(err, 0);
+
+    EXPECT_EQ(arena_zero,pmem_temp_2->arena_zero);
+
+    err = memkind_destroy_kind(pmem_temp_2);
+    EXPECT_EQ(err, 0);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreateDestroyKindLoop)
+{
+    struct memkind *pmem_temp = nullptr;
+    const size_t pmem_number = 25000;
+
+    for (unsigned int i = 0; i < pmem_number; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        EXPECT_EQ(err, 0);
+        err = memkind_destroy_kind(pmem_temp);
+        EXPECT_EQ(err, 0);
+    }
+}
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCreateDestroyKindLoopWithMallocSmallSize)
+{
+    struct memkind *pmem_temp = nullptr;
+    const size_t pmem_number = 25000;
+    const size_t size = 1024;
+
+    for (unsigned int i = 0; i < pmem_number; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        EXPECT_EQ(err, 0);
+        void *ptr = memkind_malloc(pmem_temp, size);
+        EXPECT_TRUE(nullptr != ptr);
+        memkind_free(pmem_temp, ptr);
+        err = memkind_destroy_kind(pmem_temp);
+        EXPECT_EQ(err, 0);
+    }
+}
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCreateDestroyKindLoopWithMallocChunkSize)
+{
+    struct memkind *pmem_temp = nullptr;
+    const size_t pmem_number = 25000;
+    const size_t size = MEMKIND_PMEM_CHUNK_SIZE;
+
+    for (unsigned int i = 0; i < pmem_number; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        EXPECT_EQ(err, 0);
+        void *ptr = memkind_malloc(pmem_temp, size);
+        EXPECT_TRUE(nullptr != ptr);
+        memkind_free(pmem_temp, ptr);
+        err = memkind_destroy_kind(pmem_temp);
+        EXPECT_EQ(err, 0);
+    }
+}
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCreateDestroyKindLoopWithRealloc)
+{
+    struct memkind *pmem_temp = nullptr;
+    const size_t pmem_number = 25000;
+    const size_t size_1 = 512;
+    const size_t size_2 = 1024;
+
+    for (unsigned int i = 0; i < pmem_number; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        EXPECT_EQ(err, 0);
+        void *ptr = memkind_malloc(pmem_temp, size_1);
+        EXPECT_TRUE(nullptr != ptr);
+        void *ptr_2 = memkind_realloc(pmem_temp, ptr, size_2);
+        EXPECT_TRUE(nullptr != ptr_2);
+        memkind_free(pmem_temp, ptr_2);
+        err = memkind_destroy_kind(pmem_temp);
+        EXPECT_EQ(err, 0);
+    }
 }
