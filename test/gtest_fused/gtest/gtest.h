@@ -21342,6 +21342,7 @@ namespace testing
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
     GTEST_API_ void InitGoogleTest(int* argc, wchar_t** argv);
+    GTEST_API_ bool GetGtestHelpFlag();
 
     namespace internal
     {
