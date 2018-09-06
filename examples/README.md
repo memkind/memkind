@@ -17,7 +17,7 @@ Memory allocation example with possibility to exceed pmem kind size.
 
 ### pmem_malloc_unlimited.c
 
-A similar example this time with the use of unlimited kind size.
+A similar example to pmem_malloc but with the use of unlimited kind size.
 
 ### pmem_usable_size.c
 
@@ -45,13 +45,13 @@ shows how memkind can be used to allocate objects, and consists of two files:
 memkind_allocated.hpp - which is definition of template class that should be
 inherited and parametrized by derived type (curiously recurring template
 pattern), to let deriving class allocate their objects using specified kind.
-memkind_allocated_example.cpp - which is example usage of this approach.
+memkind_allocated_example.cpp - which is usage example of this approach.
 Logic of memkind_allocated is based on overriding operator new() in template,
 and allocating memory on kind specified in new() parameter, or by overridable
-static method getClassKind(). This implementation also supports aligment
+static method getClassKind(). This implementation also supports alignment
 specifier's (alignas() - new feature in C++11).
 The downside of this approach is that it will work properly only if
 memkind_allocated template is inherited once in inheritance chain (which
-probably makes that not very usefull for most scenarios). Other thing is that it
+probably makes that not very useful for most scenarios). Other thing is that it
 overriding class new() operator which can cause various problems if used
 unwisely.

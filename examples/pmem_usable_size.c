@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2018 Intel Corporation
+ * Copyright (c) 2018 Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,28 +31,47 @@
  */
 
 #include <memkind.h>
-#include <memkind/internal/memkind_pmem.h>
 
-#include <sys/param.h>
-#include <sys/mman.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <errno.h>
-#include <string.h>
-#include <fcntl.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
-#define PMEM_MAX_SIZE	(MEMKIND_PMEM_MIN_SIZE * 2)
+#define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
-int
-main(int argc, char *argv[])
+char* PMEM_DIR = "/tmp/";
+
+int main(int argc, char *argv[])
 {
-    struct memkind *pmem_kind_unlimited;
-    int err;
+    struct memkind *pmem_kind_unlimited = NULL;
+    int err = 0, opt = 0;
+	struct stat st;
 
-    /* create PMEM partition with unlimited size */
-    err = memkind_create_pmem(".", 0, &pmem_kind_unlimited);
+	while((opt = getopt(argc, argv, "hd:")) != -1) {
+        switch (opt) {
+            case 'd':
+                PMEM_DIR = optarg;
+                err = stat(PMEM_DIR, &st);
+                 if (err != 0 || !S_ISDIR(st.st_mode)) {
+                    printf("%s : Error in getting path status or"
+                           "invalid or non-existent directory\n", PMEM_DIR);
+                    return -1;
+                }
+                 break;
+            case 'h':
+                printf("\nMemkind options:\n"
+                       "-d <directory_path>   change directory on which PMEM kinds\n"
+                       "                      are created (default /tmp/)\n");
+                break;
+        }
+    }
+
+    printf("An example showing the difference between the expected and the actual allocation size.\nPMEM kind directory: %s\n", PMEM_DIR);
+
+    /* Create PMEM partition with unlimited size */
+    err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind_unlimited);
     if (err) {
         perror("memkind_create_pmem()");
         fprintf(stderr, "Unable to create pmem partition\n");
@@ -72,8 +91,7 @@ main(int argc, char *argv[])
     }
 
     /* Check real usable size for this allocation */
-    if(memkind_default_malloc_usable_size(pmem_kind_unlimited, pmem_str10) != 32)
-    {
+    if (memkind_malloc_usable_size(pmem_kind_unlimited, pmem_str10) != 32) {
         perror("memkind_default_malloc_usable_size()");
         fprintf(stderr, "Wrong usable size\n");
         return 1;
@@ -88,8 +106,7 @@ main(int argc, char *argv[])
     }
 
     /* Check real usable size for this allocation, its 32 again */
-    if(memkind_default_malloc_usable_size(pmem_kind_unlimited, pmem_str11) != 32)
-    {
+    if (memkind_malloc_usable_size(pmem_kind_unlimited, pmem_str11) != 32) {
         perror("memkind_default_malloc_usable_size()");
         fprintf(stderr, "Wrong usable size\n");
         return 1;
@@ -104,8 +121,7 @@ main(int argc, char *argv[])
     }
 
     /* Check real usable size for this allocation, its 48 now */
-    if(memkind_default_malloc_usable_size(pmem_kind_unlimited, pmem_str12) != 48)
-    {
+    if (memkind_malloc_usable_size(pmem_kind_unlimited, pmem_str12) != 48) {
         perror("memkind_default_malloc_usable_size()");
         fprintf(stderr, "Wrong usable size\n");
         return 1;
@@ -124,8 +140,7 @@ main(int argc, char *argv[])
     }
 
     /* Check real usable size for this allocation */
-    if(memkind_default_malloc_usable_size(pmem_kind_unlimited, pmem_str10) != 5*1024*1024)
-    {
+    if (memkind_malloc_usable_size(pmem_kind_unlimited, pmem_str10) != 5*1024*1024) {
         perror("memkind_default_malloc_usable_size()");
         fprintf(stderr, "Wrong usable size\n");
         return 1;
@@ -140,8 +155,7 @@ main(int argc, char *argv[])
     }
 
     /* Check real usable size for this allocation, its 6MB now */
-    if(memkind_default_malloc_usable_size(pmem_kind_unlimited, pmem_str11) != 6*1024*1024)
-    {
+    if (memkind_malloc_usable_size(pmem_kind_unlimited, pmem_str11) != 6*1024*1024) {
         perror("memkind_default_malloc_usable_size()");
         fprintf(stderr, "Wrong usable size\n");
         return 1;
@@ -156,6 +170,8 @@ main(int argc, char *argv[])
         fprintf(stderr, "Unable to destroy pmem partition\n");
         return errno ? -errno : 1;
     }
+
+    printf("The real size of the allocation has been successfully read.\n");
 
     return 0;
 }

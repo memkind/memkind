@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2018 Intel Corporation
+ * Copyright (c) 2018 Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,28 +31,47 @@
  */
 
 #include <memkind.h>
-#include <memkind/internal/memkind_pmem.h>
 
-#include <sys/param.h>
-#include <sys/mman.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <errno.h>
-#include <string.h>
-#include <fcntl.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
-#define PMEM_MAX_SIZE	(MEMKIND_PMEM_MIN_SIZE * 2)
+#define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
-int
-main(int argc, char *argv[])
+char* PMEM_DIR = "/tmp/";
+
+int main(int argc, char *argv[])
 {
-    struct memkind *pmem_kind;
-    int err;
+    struct memkind *pmem_kind = NULL;
+    int err = 0, opt = 0;
+	struct stat st;
 
-    /* create PMEM partition with PMEM_MAX_SIZE size */
-    err = memkind_create_pmem(".", PMEM_MAX_SIZE, &pmem_kind);
+	while((opt = getopt(argc, argv, "hd:")) != -1) {
+        switch (opt) {
+            case 'd':
+                PMEM_DIR = optarg;
+                err = stat(PMEM_DIR, &st);
+                 if (err != 0 || !S_ISDIR(st.st_mode)) {
+                    printf("%s : Error in getting path status or"
+                           "invalid or non-existent directory\n", PMEM_DIR);
+                    return -1;
+                }
+                 break;
+            case 'h':
+                printf("\nMemkind options:\n"
+                       "-d <directory_path>   change directory on which PMEM kinds\n"
+                       "                      are created (default /tmp/)\n");
+                break;
+        }
+    }
+
+    printf("This example shows how to use memkind alignment and how it affects allocations.\nPMEM kind directory: %s\n", PMEM_DIR);
+
+    /* Create PMEM partition with PMEM_MAX_SIZE size */
+    err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
         perror("memkind_create_pmem()");
         fprintf(stderr, "Unable to create pmem partition\n");
@@ -78,8 +97,7 @@ main(int argc, char *argv[])
     }
 
     /* Probably they will be very close to each other in memory */
-    if(pmem_str11 - pmem_str10 != 32)
-    {
+    if (pmem_str11 - pmem_str10 != 32) {
         fprintf(stderr, "Something went wrong\n");
         return 1;
     }
@@ -103,8 +121,7 @@ main(int argc, char *argv[])
     }
 
     /* This time addresses are not close to each other, they are aligned to 64 */
-    if(pmem_str11 - pmem_str10 != 64)
-    {
+    if (pmem_str11 - pmem_str10 != 64) {
         fprintf(stderr, "Something went wrong with alignment allocation\n");
         return 1;
     }
@@ -118,6 +135,8 @@ main(int argc, char *argv[])
         fprintf(stderr, "Unable to destroy pmem partition\n");
         return errno ? -errno : 1;
     }
+
+    printf("The memory has been successfully allocated using memkind alignment.\n");
 
     return 0;
 }
