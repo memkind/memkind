@@ -561,23 +561,6 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalign)
     }
 }
 
-TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKinds)
-{
-    memkind_t pmem_kind[100];
-    size_t size = 32;
-    void *test = NULL;
-
-    for(int i=0; i<100; i++)
-    {
-        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind[i]);
-        ASSERT_EQ(0, err);
-        ASSERT_TRUE(NULL != pmem_kind[i]);
-        test = memkind_malloc(pmem_kind[i], size);
-        ASSERT_TRUE(test != NULL);
-        memkind_free(pmem_kind[i], test);
-    }
-}
-
 static memkind_t *pools;
 static int npools = 3;
 static void* thread_func(void* arg)
