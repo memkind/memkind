@@ -82,11 +82,11 @@ int main(int argc, char *argv[])
 
     /* Create a few threads which will access to our main pmem_kind */
     pthread_t pmem_threads[10];
-    int *pmem_tint[10];
+    int *pmem_tint[10], t;
 
     struct arg_struct *args[10];
 
-    for (int t = 0; t<10; t++) {
+    for (t = 0; t<10; t++) {
         args[t] = malloc(sizeof(struct arg_struct));
         args[t]->id = t;
         args[t]->ptr = &pmem_tint[t];
@@ -95,11 +95,11 @@ int main(int argc, char *argv[])
         pthread_create(&pmem_threads[t], NULL, thread_onekind, (void *)args[t]);
     }
 
-    for (int t = 0; t<10; t++)
+    for (t = 0; t<10; t++)
         pthread_join(pmem_threads[t], NULL);
 
     /* Check if we can read the values outside of threads and free resources */
-    for (int t=0; t<10; t++) {
+    for (t=0; t<10; t++) {
         if(*pmem_tint[t] != t) {
             perror("read thread memkind_malloc()");
             fprintf(stderr, "pmem_tint value has not been saved correctly in the thread\n");
@@ -110,10 +110,10 @@ int main(int argc, char *argv[])
     }
 
     /* Lets create many independent threads */
-    for (int t = 0; t<10; t++)
+    for (t = 0; t<10; t++)
         pthread_create(&pmem_threads[t], NULL, thread_ind, NULL);
 
-    for (int t = 0; t<10; t++)
+    for (t = 0; t<10; t++)
         pthread_join(pmem_threads[t], NULL);
 
     err = memkind_destroy_kind(pmem_kind_unlimited);

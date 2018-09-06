@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 {
     struct memkind *pmem_kinds[10] = {NULL}, *pmem_kind = NULL,
                                               *pmem_kind_unlimited = NULL;
-    int err = 0;
+    int err = 0, i = 0;
     struct stat st;
 
     if (argc > 2) {
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     }
 
     /* Create many PMEM kinds */
-    for (int i=0; i<10; i++) {
+    for (i=0; i<10; i++) {
         err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kinds[i]);
         if (err) {
             perror("memkind_create_pmem()");
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     }
 
     /* and delete them */
-    for (int i=0; i<10; i++) {
+    for (i=0; i<10; i++) {
         err = memkind_destroy_kind(pmem_kinds[i]);
         if (err) {
             perror("memkind_pmem_destroy()");
