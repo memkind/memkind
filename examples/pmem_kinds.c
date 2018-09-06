@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2018 Intel Corporation
+ * Copyright (c) 2018 Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,36 +31,55 @@
  */
 
 #include <memkind.h>
-#include <memkind/internal/memkind_pmem.h>
 
-#include <sys/param.h>
-#include <sys/mman.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <errno.h>
-#include <string.h>
-#include <fcntl.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
-#define PMEM_MAX_SIZE	(MEMKIND_PMEM_MIN_SIZE * 2)
+#define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
-int
-main(int argc, char *argv[])
+char* PMEM_DIR = "/tmp/";
+
+int main(int argc, char *argv[])
 {
-    struct memkind *pmem_kinds[10], *pmem_kind, *pmem_kind_unlimited;
-    int err;
+    struct memkind *pmem_kinds[10] = {NULL}, *pmem_kind = NULL, *pmem_kind_unlimited = NULL;
+    int err = 0, opt = 0;
+	struct stat st;
 
-    /* create PMEM partition with specific size */
-    err = memkind_create_pmem(".", PMEM_MAX_SIZE, &pmem_kind);
+	while((opt = getopt(argc, argv, "hd:")) != -1) {
+        switch (opt) {
+            case 'd':
+                PMEM_DIR = optarg;
+                err = stat(PMEM_DIR, &st);
+                 if (err != 0 || !S_ISDIR(st.st_mode)) {
+                    printf("%s : Error in getting path status or"
+                           "invalid or non-existent directory\n", PMEM_DIR);
+                    return -1;
+                }
+                 break;
+            case 'h':
+                printf("\nMemkind options:\n"
+                       "-d <directory_path>   change directory on which PMEM kinds\n"
+                       "                      are created (default /tmp/)\n");
+                break;
+        }
+    }
+
+    printf("A simple example showing how to create and destroy pmem kind with defined or unlimited size.\nPMEM kind directory: %s\n", PMEM_DIR);
+
+    /* Create PMEM partition with specific size */
+    err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
         perror("memkind_create_pmem()");
         fprintf(stderr, "Unable to create pmem partition\n");
         return errno ? -errno : 1;
     }
 
-    /* create PMEM partition with unlimited size */
-    err = memkind_create_pmem(".", 0, &pmem_kind_unlimited);
+    /* Create PMEM partition with unlimited size */
+    err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind_unlimited);
     if (err) {
         perror("memkind_create_pmem()");
         fprintf(stderr, "Unable to create pmem partition\n");
@@ -82,10 +101,9 @@ main(int argc, char *argv[])
         return errno ? -errno : 1;
     }	
 
-    /* create many PMEM kinds */
-    for(int i=0; i<10; i++)
-    {
-        err = memkind_create_pmem(".", MEMKIND_PMEM_MIN_SIZE, &pmem_kinds[i]);
+    /* Create many PMEM kinds */
+    for (int i=0; i<10; i++) {
+        err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kinds[i]);
         if (err) {
             perror("memkind_create_pmem()");
             fprintf(stderr, "Unable to create pmem partition\n");
@@ -94,8 +112,7 @@ main(int argc, char *argv[])
     }
 
     /* and delete them */
-    for(int i=0; i<10; i++)
-    {
+    for (int i=0; i<10; i++) {
         err = memkind_destroy_kind(pmem_kinds[i]);
         if (err) {
             perror("memkind_pmem_destroy()");
@@ -103,6 +120,8 @@ main(int argc, char *argv[])
             return errno ? -errno : 1;
         }
     }
+
+    printf("PMEM kinds has been successfully created and destroyed.\n");
 
     return 0;
 }
