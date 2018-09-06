@@ -6,6 +6,9 @@ interface.
 ## PMEM
 
 The pmem_*.c demonstrates how to create and use a file-backed memkind.
+ The default pmem path is "/tmp/", to provide custom directory please use:
+
+    ./pmem_malloc.c /custom/pmem/dir/
 
 ### pmem_kinds.c
 

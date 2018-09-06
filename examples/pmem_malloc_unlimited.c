@@ -34,41 +34,33 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <sys/stat.h>
 
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
-char* PMEM_DIR = "/tmp/";
+static char* PMEM_DIR = "/tmp/";
 
 int main(int argc, char *argv[])
 {
     struct memkind *pmem_kind_unlimited = NULL;
-    int err = 0, opt = 0;
-	struct stat st;
+    int err = 0;
+    struct stat st;
 
-	while((opt = getopt(argc, argv, "hd:")) != -1) {
-        switch (opt) {
-            case 'd':
-                PMEM_DIR = optarg;
-                err = stat(PMEM_DIR, &st);
-                 if (err != 0 || !S_ISDIR(st.st_mode)) {
-                    printf("%s : Error in getting path status or"
-                           "invalid or non-existent directory\n", PMEM_DIR);
-                    return -1;
-                }
-                 break;
-            case 'h':
-                printf("\nMemkind options:\n"
-                       "-d <directory_path>   change directory on which PMEM kinds\n"
-                       "                      are created (default /tmp/)\n");
-                break;
-        }
+    if (argc > 2) {
+        fprintf(stderr,"Usage: %s [pmem_kind_dir_path]", argv[0]);
+        return 1;
+    }
+    if (argc == 2) {
+        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
+            fprintf(stderr,"%s : Invalid path to pmem kind directory ", argv[1]);
+            return 1;
+        } else
+            PMEM_DIR = argv[1];
     }
 
-    printf("Memory allocation example with the use of unlimited kind size.\nPMEM kind directory: %s\n", PMEM_DIR);
+    fprintf(stdout,
+            "Memory allocation example with the use of unlimited kind size.\nPMEM kind directory: %s\n",
+            PMEM_DIR);
 
     /* Create PMEM partition with unlimited size */
     err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind_unlimited);
@@ -107,7 +99,7 @@ int main(int argc, char *argv[])
         return errno ? -errno : 1;
     }
 
-    printf("Memory was successfully allocated and released.\n");
+    fprintf(stdout, "Memory was successfully allocated and released.\n");
 
     return 0;
 }
