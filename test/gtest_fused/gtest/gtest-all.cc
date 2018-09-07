@@ -1584,6 +1584,11 @@ class GTEST_API_ StreamingListener : public EmptyTestEventListener {
 #endif  // GTEST_CAN_STREAM_RESULTS_
 
 }  // namespace internal
+
+// Returns the value of g_help_flag.
+bool GetGtestHelpFlag() {
+  return internal::g_help_flag;
+}
 }  // namespace testing
 
 #endif  // GTEST_SRC_GTEST_INTERNAL_INL_H_
