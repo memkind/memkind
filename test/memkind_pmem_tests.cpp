@@ -32,7 +32,7 @@
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4096;
 static const size_t PMEM_NO_LIMIT = 0;
-static const char*  PMEM_DIR = "/tmp/";
+extern const char*  PMEM_DIR;
 
 class MemkindPmemTests: public :: testing::Test
 {
