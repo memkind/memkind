@@ -42,16 +42,17 @@ static char* PMEM_DIR = "/tmp/";
 
 int main(int argc, char *argv[])
 {
-    struct memkind *pmem_kinds[10] = {NULL}, *pmem_kind = NULL,
-                                              *pmem_kind_unlimited = NULL;
+    struct memkind *pmem_kinds[10] = {NULL};
+    struct memkind *pmem_kind = NULL;
+    struct memkind *pmem_kind_unlimited = NULL;
+
     int err = 0, i = 0;
     struct stat st;
 
     if (argc > 2) {
         fprintf(stderr,"Usage: %s [pmem_kind_dir_path]", argv[0]);
         return 1;
-    }
-    if (argc == 2) {
+    } else if (argc == 2) {
         if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
             fprintf(stderr,"%s : Invalid path to pmem kind directory ", argv[1]);
             return 1;

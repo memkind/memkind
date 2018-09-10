@@ -1,30 +1,31 @@
 # Memkind examples
 
-The example directory contains some example codes that use the memkind
+The example directory contains example codes that use the memkind
 interface.
 
 ## PMEM
 
-The pmem_*.c demonstrates how to create and use a file-backed memkind.
- The default pmem path is "/tmp/", to provide custom directory please use:
+The pmem_*.c demonstrates how to create and use a file-backed memory kind.
+The default pmem path is "/tmp/".
+Custom directory is pass as first argument to all of PMEM example programs, e.g. to execute pmem_malloc example in /mnt/pmem location, call:
 
-    ./pmem_malloc.c /custom/pmem/dir/
+    ./pmem_malloc /mnt/pmem/
 
 ### pmem_kinds.c
 
-A simple example showing how to create and destroy pmem kind with defined or unlimited size.
+This example shows how to create and destroy pmem kind with defined or unlimited size.
 
 ### pmem_malloc.c
 
-Memory allocation example with possibility to exceed pmem kind size.
+This example shows how to allocate memory and possibility to exceed pmem kind size.
 
 ### pmem_malloc_unlimited.c
 
-A similar example to pmem_malloc but with the use of unlimited kind size.
+This example shows how to allocate memory with unlimited kind size.
 
 ### pmem_usable_size.c
 
-An example showing the difference between the expected and the actual allocation size.
+This example shows difference between the expected and the actual allocation size.
 
 ### pmem_alignment.c
 
@@ -32,7 +33,7 @@ This example shows how to use memkind alignment and how it affects allocations.
 
 ### pmem_multithreads.c
 
-Simple example how to use multithreading with pmem kinds.
+This example shows how to use multithreading with pmem kinds.
 
 ## Other memkind examples
 

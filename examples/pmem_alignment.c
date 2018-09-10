@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         return errno ? -errno : 1;
     }
 
-    /* Probably they will be very close to each other in memory */
+    /* They will be very close to each other in memory */
     if (pmem_str11 - pmem_str10 != 32) {
         fprintf(stderr, "Something went wrong\n");
         return 1;

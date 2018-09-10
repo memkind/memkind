@@ -1,1 +1,6 @@
-examples/pmem_example.c
+pmem_kinds.c
+pmem_malloc.c
+pmem_malloc_unlimited.c
+pmem_usable_size.c
+pmem_alignment.c
+pmem_multithreads.c
