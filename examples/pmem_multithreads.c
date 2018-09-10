@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
@@ -49,6 +50,9 @@ struct arg_struct {
 };
 void *thread_onekind(void *arg);
 void *thread_ind(void *arg);
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 int main(int argc, char *argv[])
 {
@@ -82,36 +86,44 @@ int main(int argc, char *argv[])
 
     /* Create a few threads which will access to our main pmem_kind */
     pthread_t pmem_threads[10];
-    int *pmem_tint[10], t;
+    int *pmem_tint[10][100], t, i;
 
     struct arg_struct *args[10];
 
     for (t = 0; t<10; t++) {
         args[t] = malloc(sizeof(struct arg_struct));
         args[t]->id = t;
-        args[t]->ptr = &pmem_tint[t];
+        args[t]->ptr = &pmem_tint[t][0];
         args[t]->kind = pmem_kind_unlimited;
 
         pthread_create(&pmem_threads[t], NULL, thread_onekind, (void *)args[t]);
     }
+
+    sleep(1);
+    pthread_cond_broadcast(&cond);
 
     for (t = 0; t<10; t++)
         pthread_join(pmem_threads[t], NULL);
 
     /* Check if we can read the values outside of threads and free resources */
     for (t=0; t<10; t++) {
-        if(*pmem_tint[t] != t) {
-            perror("read thread memkind_malloc()");
-            fprintf(stderr, "pmem_tint value has not been saved correctly in the thread\n");
-            return 1;
+        for(i=0; i<100; i++) {
+            if(*pmem_tint[t][i] != t) {
+                perror("read thread memkind_malloc()");
+                fprintf(stderr, "pmem_tint value has not been saved correctly in the thread\n");
+                return 1;
+            }
+            memkind_free(args[t]->kind, *(args[t]->ptr+i));
         }
-        memkind_free(args[t]->kind, *(args[t]->ptr));
         free(args[t]);
     }
 
     /* Lets create many independent threads */
     for (t = 0; t<10; t++)
         pthread_create(&pmem_threads[t], NULL, thread_ind, NULL);
+
+    sleep(1);
+    pthread_cond_broadcast(&cond);
 
     for (t = 0; t<10; t++)
         pthread_join(pmem_threads[t], NULL);
@@ -130,17 +142,23 @@ int main(int argc, char *argv[])
 
 void *thread_onekind(void *arg)
 {
-    struct arg_struct *args = arg;
+    struct arg_struct *args = (struct arg_struct*)arg;
+    int i;
+
+    pthread_mutex_lock(&mutex);
+    pthread_cond_wait(&cond, &mutex);
+    pthread_mutex_unlock(&mutex);
 
     /* Lets alloc int and put there thread ID */
-    *(args->ptr) = (int *)memkind_malloc(args->kind, sizeof(int));
-    if (*(args->ptr) == NULL) {
-        perror("thread memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem int\n");
-        return NULL;
+    for(i = 0; i<100; i++) {
+        *(args->ptr+i) = (int *)memkind_malloc(args->kind, sizeof(int));
+        if (*(args->ptr+i) == NULL) {
+            perror("thread memkind_malloc()");
+            fprintf(stderr, "Unable to allocate pmem int\n");
+            return NULL;
+        }
+        **(args->ptr+i) = args->id;
     }
-
-    **(args->ptr) = args->id;
 
     return NULL;
 }
@@ -148,6 +166,10 @@ void *thread_onekind(void *arg)
 void *thread_ind(void *arg)
 {
     struct memkind *pmem_kind;
+
+    pthread_mutex_lock(&mutex);
+    pthread_cond_wait(&cond, &mutex);
+    pthread_mutex_unlock(&mutex);
 
     /* Create a pmem kind in thread */
     int err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);

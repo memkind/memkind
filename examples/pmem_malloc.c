@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2015 - 2018 Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -107,10 +107,6 @@ int main(int argc, char *argv[])
                 "Failure, this allocation should not be possible (expected result was NULL)\n");
         return errno ? -errno : 1;
     }
-
-    sprintf(pmem_str10, "Hello world from persistent memory!\n");
-
-    fprintf(stdout, "%s", pmem_str10);
 
     memkind_free(pmem_kind, pmem_str10);
     memkind_free(pmem_kind, pmem_str11);
