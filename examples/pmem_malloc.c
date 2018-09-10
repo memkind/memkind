@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
     }
 
     sprintf(pmem_str10, "Hello world from persistent memory\n");
+
     fprintf(stdout, "%s", pmem_str10);
 
     memkind_free(pmem_kind, pmem_str10);
