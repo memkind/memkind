@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout,
-            "Memory allocation example with the use of unlimited kind size.\nPMEM kind directory: %s\n",
+            "This example shows how to allocate memory with unlimited kind size.\nPMEM kind directory: %s\n",
             PMEM_DIR);
 
     /* Create PMEM partition with unlimited size */
