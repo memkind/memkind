@@ -40,6 +40,7 @@
 #include <unistd.h>
 
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
+#define NUM_THREADS 10
 
 static char* PMEM_DIR = "/tmp/";
 
@@ -86,11 +87,12 @@ int main(int argc, char *argv[])
 
     /* Create a few threads which will access to our main pmem_kind */
     pthread_t pmem_threads[10];
-    int *pmem_tint[10][100], t, i;
+    int *pmem_tint[NUM_THREADS][100];
+    int t, i;
 
-    struct arg_struct *args[10];
+    struct arg_struct *args[NUM_THREADS];
 
-    for (t = 0; t<10; t++) {
+    for (t = 0; t<NUM_THREADS; t++) {
         args[t] = malloc(sizeof(struct arg_struct));
         args[t]->id = t;
         args[t]->ptr = &pmem_tint[t][0];
@@ -102,11 +104,11 @@ int main(int argc, char *argv[])
     sleep(1);
     pthread_cond_broadcast(&cond);
 
-    for (t = 0; t<10; t++)
+    for (t = 0; t<NUM_THREADS; t++)
         pthread_join(pmem_threads[t], NULL);
 
     /* Check if we can read the values outside of threads and free resources */
-    for (t=0; t<10; t++) {
+    for (t = 0; t<NUM_THREADS; t++) {
         for(i=0; i<100; i++) {
             if(*pmem_tint[t][i] != t) {
                 perror("read thread memkind_malloc()");
@@ -119,13 +121,13 @@ int main(int argc, char *argv[])
     }
 
     /* Lets create many independent threads */
-    for (t = 0; t<10; t++)
+    for (t = 0; t<NUM_THREADS; t++)
         pthread_create(&pmem_threads[t], NULL, thread_ind, NULL);
 
     sleep(1);
     pthread_cond_broadcast(&cond);
 
-    for (t = 0; t<10; t++)
+    for (t = 0; t<NUM_THREADS; t++)
         pthread_join(pmem_threads[t], NULL);
 
     err = memkind_destroy_kind(pmem_kind_unlimited);
