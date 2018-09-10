@@ -412,6 +412,12 @@ MEMKIND_EXPORT void memkind_error_message(int err, char *msg, size_t size)
                     "<memkind> memkind_ops structure is poorly formed (missing or incorrect functions)",
                     size);
             break;
+        case MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE:
+            strncpy(msg, "<memkind> Requested memory type is not available", size);
+            break;
+        case MEMKIND_ERROR_OPERATION_FAILED:
+            strncpy(msg, "<memkind> Operation failed", size);
+            break;
         case MEMKIND_ERROR_ARENAS_CREATE:
             strncpy(msg, "<memkind> Call to jemalloc's arenas.create () failed", size);
             break;
