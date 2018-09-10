@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout,
-            "A simple example showing how to create and destroy pmem kind with defined or unlimited size.\nPMEM kind directory: %s\n",
+            "This example shows how to create and destroy pmem kind with defined or unlimited size.\nPMEM kind directory: %s\n",
             PMEM_DIR);
 
     /* Create PMEM partition with specific size */

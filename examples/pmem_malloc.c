@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout,
-            "Memory allocation example with possibility to exceed pmem kind size.\nPMEM kind directory: %s\n",
+            "This example shows how to allocate memory and possibility to exceed pmem kind size.\nPMEM kind directory: %s\n",
             PMEM_DIR);
 
     /* Create PMEM partition with specific size */
@@ -107,6 +107,9 @@ int main(int argc, char *argv[])
                 "Failure, this allocation should not be possible (expected result was NULL)\n");
         return errno ? -errno : 1;
     }
+
+    sprintf(pmem_str10, "Hello world from persistent memory\n");
+    fprintf(stdout, "%s", pmem_str10);
 
     memkind_free(pmem_kind, pmem_str10);
     memkind_free(pmem_kind, pmem_str11);

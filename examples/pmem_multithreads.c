@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout,
-            "Simple example how to use multithreading with pmem kinds.\nPMEM kind directory: %s\n",
+            "This example shows how to use multithreading with pmem kinds.\nPMEM kind directory: %s\n",
             PMEM_DIR);
 
     /* Create PMEM partition with unlimited size */

@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout,
-            "An example showing the difference between the expected and the actual allocation size.\nPMEM kind directory: %s\n",
+            "This example shows difference between the expected and the actual allocation size.\nPMEM kind directory: %s\n",
             PMEM_DIR);
 
     /* Create PMEM partition with unlimited size */
