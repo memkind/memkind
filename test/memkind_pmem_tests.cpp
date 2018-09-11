@@ -130,6 +130,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocZero)
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSizeMax)
 {
     void *test1 = nullptr;
+    errno = 0;
 
     test1 = memkind_malloc(pmem_kind, SIZE_MAX);
     ASSERT_TRUE(test1 == nullptr);
@@ -167,12 +168,14 @@ TEST_P(MemkindPmemCallocTests, test_TC_MEMKIND_PmemCallocSize)
     void *test = nullptr;
     size_t size = std::get<0>(GetParam());
     size_t num = std::get<1>(GetParam());
+    errno = 0;
 
     test = memkind_calloc(pmem_kind, size, num);
     ASSERT_TRUE(test == nullptr);
 
-    if(size == SIZE_MAX || num == SIZE_MAX)
+    if(size == SIZE_MAX || num == SIZE_MAX) {
         ASSERT_TRUE(errno == ENOMEM);
+    }
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -330,6 +333,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocSizeMax)
     size_t size = 1024;
     void *test = nullptr;
     void *new_test = nullptr;
+    errno = 0;
 
     test = memkind_malloc(pmem_kind, size);
     ASSERT_TRUE(test != nullptr);
