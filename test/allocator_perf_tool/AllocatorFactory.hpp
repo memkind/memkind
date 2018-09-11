@@ -39,13 +39,10 @@
 #include <string.h>
 #include <map>
 
-static const size_t PMEM_PART_SIZE = 1024 * 1024 * 1024;
-static const char*  PMEM_DIR = "/tmp/";
 
 class AllocatorFactory
 {
 public:
-    memkind_t MEMKIND_PMEM;
     //Allocator initialization statistics
     struct initialization_stat {
         float total_time; //Total time of initialization.
@@ -56,7 +53,6 @@ public:
 
     AllocatorFactory()
     {
-        memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &MEMKIND_PMEM);
         memkind_allocators[AllocatorTypes::MEMKIND_DEFAULT] = MemkindAllocatorWithTimer(
                                                                   MEMKIND_DEFAULT, AllocatorTypes::MEMKIND_DEFAULT);
         memkind_allocators[AllocatorTypes::MEMKIND_REGULAR] = MemkindAllocatorWithTimer(
@@ -87,8 +83,6 @@ public:
         memkind_allocators[AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB] =
             MemkindAllocatorWithTimer(MEMKIND_HBW_PREFERRED_GBTLB,
                                       AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB);
-        memkind_allocators[AllocatorTypes::MEMKIND_PMEM] =
-		    MemkindAllocatorWithTimer(MEMKIND_PMEM, AllocatorTypes::MEMKIND_PMEM);
     }
 
     //Get existing allocator without creating new.
