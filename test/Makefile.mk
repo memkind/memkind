@@ -240,3 +240,10 @@ if HAVE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 endif
 
+clean-local: test-clean
+
+test-clean:
+	rm -f test/*.gcno test/*.gcda
+	rm -f test/allocator_perf_tool/*.gcno test/allocator_perf_tool/*.gcda
+	rm -f test/gtest_fused/gtest/*.gcno test/gtest_fused/gtest/*.gcda
+	rm -f test/performance/*.gcno test/performance/*.gcda

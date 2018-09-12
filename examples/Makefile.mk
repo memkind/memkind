@@ -53,3 +53,6 @@ examples_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
 if HAVE_CXX11
 examples_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 endif
+
+clean-local:
+	rm -f examples/*.gcno

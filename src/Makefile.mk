@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2016 Intel Corporation.
+#  Copyright (C) 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -22,16 +22,7 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-lib_LTLIBRARIES += autohbw/libautohbw.la \
-                   # end
+src-clean:
+	rm -f src/*.gcno
 
-EXTRA_DIST += autohbw/autohbw_get_src_lines.pl
-
-autohbw_libautohbw_la_LIBADD = libmemkind.la
-
-autohbw_libautohbw_la_SOURCES = autohbw/autohbw.c
-
-clean-local: autohbw-clean
-
-autohbw-clean:
-	rm -f autohbw/*.gcno
+clean-local: src-clean

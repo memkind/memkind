@@ -131,6 +131,23 @@ if test "x$enable_debug" = "x1" ; then
 fi
 AC_SUBST([enable_debug])
 
+#============================gcov==============================================
+AC_ARG_ENABLE([gcov],
+  [AS_HELP_STRING([--enable-gcov], [Build code with gcov instructions])],
+[if test "x$enable_gcov" = "xno" ; then
+  enable_gcov="0"
+else
+  enable_gcov="1"
+fi
+],
+[enable_gcov="0"]
+)
+if test "x$enable_gcov" = "x1" ; then
+  CFLAGS="$CFLAGS -O0 -g -fprofile-arcs -ftest-coverage"
+  CXXFLAGS="$CXXFLAGS -O0 -g -fprofile-arcs -ftest-coverage"
+fi
+AC_SUBST([enable_gcov])
+
 #============================secure_flags======================================
 AC_ARG_ENABLE([secure],
   [AS_HELP_STRING([--enable-secure], [Build library with security enchantments])],
