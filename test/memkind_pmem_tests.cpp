@@ -56,22 +56,17 @@ protected:
     }
 };
 
-class MemkindPmemCallocTests : public MemkindPmemTests,
+class MemkindPmemTestsCalloc : public MemkindPmemTests,
     public ::testing::WithParamInterface<std::tuple<int, int>>
 {
 };
 
-class MemkindPmemMallocTimeTests : public MemkindPmemTests,
+class MemkindPmemTestsMallocTime : public MemkindPmemTests,
     public ::testing::WithParamInterface<std::tuple<int, int>>
 {
 };
 
-class MemkindPmemMallocTests : public MemkindPmemTests,
-    public ::testing::WithParamInterface<size_t>
-{
-};
-
-class MemkindPmemAlignmentTests : public MemkindPmemTests,
+class MemkindPmemTestsMalloc : public MemkindPmemTests,
     public ::testing::WithParamInterface<size_t>
 {
 };
@@ -163,7 +158,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCalloc)
     memkind_free(pmem_kind, default_str);
 }
 
-TEST_P(MemkindPmemCallocTests, test_TC_MEMKIND_PmemCallocSize)
+TEST_P(MemkindPmemTestsCalloc, test_TC_MEMKIND_PmemCallocSize)
 {
     void *test = nullptr;
     size_t size = std::get<0>(GetParam());
@@ -179,7 +174,7 @@ TEST_P(MemkindPmemCallocTests, test_TC_MEMKIND_PmemCallocSize)
 }
 
 INSTANTIATE_TEST_CASE_P(
-    CallocParam, MemkindPmemCallocTests,
+    CallocParam, MemkindPmemTestsCalloc,
     ::testing::Values(std::make_tuple(10, 0),
                       std::make_tuple(0, 0),
                       std::make_tuple(SIZE_MAX, 1),
@@ -325,7 +320,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocZero)
     new_test = memkind_realloc(pmem_kind, test, 0);
     ASSERT_TRUE(new_test == nullptr);
 
-    memkind_free(pmem_kind, test);
+    memkind_free(pmem_kind, new_test);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocSizeMax)
@@ -333,11 +328,10 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocSizeMax)
     size_t size = 1024;
     void *test = nullptr;
     void *new_test = nullptr;
-    errno = 0;
 
     test = memkind_malloc(pmem_kind, size);
     ASSERT_TRUE(test != nullptr);
-
+    errno = 0;
     new_test = memkind_realloc(pmem_kind, test, SIZE_MAX);
     ASSERT_TRUE(new_test == nullptr);
     ASSERT_TRUE(errno == ENOMEM);
@@ -386,41 +380,64 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocIncreaseSize)
     memkind_free(pmem_kind, test2);
 }
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocDecreaseSize)
+{
+    size_t size = 1024;
+    char *test1 = nullptr;
+    char *test2 = nullptr;
+    const char val[] = "test_TC_MEMKIND_PmemReallocIncreaseSize";
+    int status;
+
+    test1 = (char*)memkind_malloc(pmem_kind, size);
+    ASSERT_TRUE(test1 != nullptr);
+
+    sprintf(test1, "%s", val);
+
+    size = 4;
+    test2 = (char*)memkind_realloc(pmem_kind, test1, size);
+    ASSERT_TRUE(test2 != nullptr);
+    status = memcmp(val, test2, size);
+    ASSERT_TRUE(status == 0);
+
+    memkind_free(pmem_kind, test2);
+}
+
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocInPlace)
 {
-    void *test1 = memkind_malloc(pmem_kind, 12 * 1024 * 1024);
+    void *test1 = memkind_malloc(pmem_kind, 10 * 1024 * 1024);
     ASSERT_TRUE(test1 != nullptr);
 
     void *test1r = memkind_realloc(pmem_kind, test1, 6 * 1024 * 1024);
     ASSERT_EQ(test1r, test1);
 
-    test1r = memkind_realloc(pmem_kind, test1, 12 * 1024 * 1024);
+    test1r = memkind_realloc(pmem_kind, test1, 10 * 1024 * 1024);
     ASSERT_EQ(test1r, test1);
 
     test1r = memkind_realloc(pmem_kind, test1, 8 * 1024 * 1024);
     ASSERT_EQ(test1r, test1);
 
-    void *test2 = memkind_malloc(pmem_kind, 2 * 1024 * 1024);
+    void *test2 = memkind_malloc(pmem_kind, 4 * 1024 * 1024);
     ASSERT_TRUE(test2 != nullptr);
 
-    /* 2MB => 16B */
+    /* 4MB => 16B */
     void *test2r = memkind_realloc(pmem_kind, test2, 16);
     ASSERT_TRUE(test2r != nullptr);
     /* ... but the usable size is still 4MB. */
 
     /* 8MB => 16B */
     test1r = memkind_realloc(pmem_kind, test1, 16);
+
     /*
      * If the old size of the allocation is larger than
-     * the chunk size (2MB), we can reallocate it to 2MB first (in place),
+     * the chunk size (4MB), we can reallocate it to 4MB first (in place),
      * releasing some space, which makes it possible to do the actual
      * shrinking...
      */
     ASSERT_TRUE(test1r != nullptr);
-    ASSERT_NE(test1r, test1);
+    //ASSERT_NE(test1r, test1);
 
     /* ... and leaves some memory for new allocations. */
-    void *test3 = memkind_malloc(pmem_kind, 3 * 1024 * 1024);
+    void *test3 = memkind_malloc(pmem_kind, 5 * 1024 * 1024);
     ASSERT_TRUE(test3 != nullptr);
 
     memkind_free(pmem_kind, test1r);
@@ -456,7 +473,18 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMaxFill)
     memkind_free(pmem_kind, test3);
 }
 
-TEST_P(MemkindPmemMallocTimeTests, test_TC_MEMKIND_PmemMallocTime)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeNullptr)
+{
+    const double test_time = 5;
+
+    TimerSysTime timer;
+    timer.start();
+    do {
+        memkind_free(pmem_kind, nullptr);
+    } while(timer.getElapsedTime() < test_time);
+}
+
+TEST_P(MemkindPmemTestsMallocTime, test_TC_MEMKIND_PmemMallocTime)
 {
     size_t size = std::get<0>(GetParam());
     size_t size_max = std::get<1>(GetParam());
@@ -477,7 +505,7 @@ TEST_P(MemkindPmemMallocTimeTests, test_TC_MEMKIND_PmemMallocTime)
 }
 
 INSTANTIATE_TEST_CASE_P(
-    MallocTimeParam, MemkindPmemMallocTimeTests,
+    MallocTimeParam, MemkindPmemTestsMallocTime,
     ::testing::Values(std::make_tuple(32, 32),
                       std::make_tuple(896, 896),
                       std::make_tuple(4096, 4096),
@@ -493,7 +521,7 @@ INSTANTIATE_TEST_CASE_P(
                       std::make_tuple(5*1024*1024, 8*1024*1024),
                       std::make_tuple(32, 9*1024*1024)));
 
-TEST_P(MemkindPmemMallocTests, test_TC_MEMKIND_PmemMallocSize)
+TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSize)
 {
     void *test[1000000];
     int i, max;
@@ -502,7 +530,7 @@ TEST_P(MemkindPmemMallocTests, test_TC_MEMKIND_PmemMallocSize)
         i =0;
         do {
             test[i] = memkind_malloc(pmem_kind, GetParam());
-        } while(test[i] != 0 && i++<1000000);
+        } while(test[i] != nullptr && i++<1000000);
 
         if(j == 0)
             max = i;
@@ -511,19 +539,20 @@ TEST_P(MemkindPmemMallocTests, test_TC_MEMKIND_PmemMallocSize)
 
         while(i > 0) {
             memkind_free(pmem_kind, test[--i]);
-            test[i] = 0;
+            test[i] = nullptr;
         }
     }
 }
 
 INSTANTIATE_TEST_CASE_P(
-    MallocParam, MemkindPmemMallocTests,
+    MallocParam, MemkindPmemTestsMalloc,
     ::testing::Values(32, 60, 80, 100, 128, 150, 160, 250, 256, 300, 320,
                       500, 512, 800, 896, 3000, 4096, 6000, 10000, 60000,
                       98304, 114688, 131072, 163840, 196608, 500000,
                       2*1024*1024, 5*1024*1024));
 
-TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignWrongAlignment1)
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemPosixMemalignWrongAlignmentLessThanVoidAndNotPowerOfTwo)
 {
     void *test = nullptr;
     size_t size = 32;
@@ -535,7 +564,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignWrongAlignment1)
     ASSERT_TRUE(test == nullptr);
 }
 
-TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignWrongAlignment2)
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemPosixMemalignWrongAlignmentLessThanVoidAndPowerOfTwo)
 {
     void *test = nullptr;
     size_t size = 32;
@@ -547,7 +577,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignWrongAlignment2)
     ASSERT_TRUE(test == nullptr);
 }
 
-TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignWrongAlignment3)
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemPosixMemalignWrongAlignmentNotPowerOfTwo)
 {
     void *test = nullptr;
     size_t size = 32;
@@ -559,7 +590,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignWrongAlignment3)
     ASSERT_TRUE(test == nullptr);
 }
 
-TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignLowestAlignment)
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemPosixMemalignLowestCorrectAlignment)
 {
     void *test = nullptr;
     size_t size = 32;
@@ -594,40 +626,6 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignSizeMax)
     ASSERT_TRUE(ret == ENOMEM);
     ASSERT_TRUE(test == nullptr);
 }
-
-TEST_P(MemkindPmemAlignmentTests, test_TC_MEMKIND_PmemAlignment)
-{
-    size_t alignment;
-    void *test[1000000];
-    int i, max, ret;
-
-    for(alignment = 1024; alignment < 140000; alignment *= 2) {
-        if(GetParam() > alignment)
-            continue;
-        for(int j=0; j<10; j++) {
-            i =0;
-            do {
-                ret = memkind_posix_memalign(pmem_kind, &test[i], alignment, GetParam());
-            } while(ret == 0 && i++<1000000);
-
-            if(j == 0)
-                max = i;
-            else
-                ASSERT_TRUE(i > 0.98*max);
-
-            while(i > 0) {
-                memkind_free(pmem_kind, test[--i]);
-                test[i] = 0;
-            }
-        }
-    }
-}
-
-INSTANTIATE_TEST_CASE_P(
-    AlignmentParam, MemkindPmemAlignmentTests,
-    ::testing::Values(32, 60, 80, 100, 128, 150, 160, 250, 256, 300, 320,
-                      500, 512, 800, 896, 3000, 4096, 6000, 10000, 60000,
-                      98304, 114688));
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalign)
 {
@@ -690,10 +688,12 @@ static void* thread_func(void* arg)
             EXPECT_EQ(0, err);
         }
 
-        void *test = memkind_malloc(pools[pool_id], sizeof(void *));
-        EXPECT_TRUE(test != nullptr);
-        memkind_free(pools[pool_id], test);
-        memkind_destroy_kind(pools[pool_id]);
+        if (err == 0) {
+            void *test = memkind_malloc(pools[pool_id], sizeof(void *));
+            EXPECT_TRUE(test != nullptr);
+            memkind_free(pools[pool_id], test);
+            memkind_destroy_kind(pools[pool_id]);
+        }
     }
 
     return nullptr;
