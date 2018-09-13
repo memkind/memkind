@@ -35,12 +35,13 @@
 #include <scoped_allocator>
 #include <thread>
 
+extern const char* PMEM_DIR;
+
 // Tests for pmem::allocator class.
 class PmemAllocatorTests: public :: testing::Test
 {
 
 public:
-    static constexpr const char* PMEM_DIR = "/tmp/";
     const size_t pmem_max_size = 1024*1024*1024;
 
     pmem::allocator<int> alloc_source { std::string(PMEM_DIR), pmem_max_size } ;
@@ -162,7 +163,7 @@ TEST_F(PmemAllocatorTests,
 }
 
 //Construct-destroy test
-TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_ConsructDestroy_Test)
+TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_ConstructDestroy_Test)
 {
     pmem::allocator<int> alc1 { alloc_source_f1  };
     int* created_object = alc1.allocate(1);
