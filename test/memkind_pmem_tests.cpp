@@ -32,7 +32,7 @@
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4096;
 static const size_t PMEM_NO_LIMIT = 0;
-static const char*  PMEM_DIR = "/tmp/";
+extern const char*  PMEM_DIR;
 
 class MemkindPmemTests: public :: testing::Test
 {
@@ -381,6 +381,27 @@ TEST_F(MemkindPmemTests,
         EXPECT_TRUE(nullptr != ptr_2);
         memkind_free(pmem_temp, ptr_2);
         err = memkind_destroy_kind(pmem_temp);
+        EXPECT_EQ(err, 0);
+    }
+}
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCreateCheckErrorCodeArenaCreate)
+{
+    const size_t pmem_number = 25000;
+    struct memkind *pmem_temp[pmem_number] = { nullptr };
+    unsigned i, j = 0;
+    int err = 0;
+
+    for (i = 0; i < pmem_number; ++i) {
+        err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp[i]);
+        if ( err ) {
+            EXPECT_EQ(err, MEMKIND_ERROR_ARENAS_CREATE);
+            break;
+        }
+    }
+    for (j = 0; j < i; ++j) {
+        err = memkind_destroy_kind(pmem_temp[j]);
         EXPECT_EQ(err, 0);
     }
 }
