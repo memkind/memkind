@@ -26,6 +26,7 @@ man/memkind_default.3
 man/memkind_hbw.3
 man/memkind_hugetlb.3
 man/hbwallocator.3
+man/pmemallocator.3
 memkind.spec.mk
 src/heap_manager.c
 src/hbwmalloc.c

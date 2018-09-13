@@ -71,6 +71,7 @@ autom4te.cache/
 /test/new_kind
 /test/perf_tool
 /test/pmem
+/test/pmem_cpp_allocator
 /test/schedcpu_test
 /test/tieddisterr_test
 /test/alloc_benchmark_glibc
@@ -90,5 +91,6 @@ autom4te.cache/
 /examples/numakind_test
 /examples/numakind_macro.h
 /examples/pmem_memkind
+/examples/pmem_cpp_allocator
 /test-driver
 /vs
