@@ -24,6 +24,7 @@
 
 #include <memkind/internal/memkind_pmem.h>
 #include <memkind/internal/memkind_private.h>
+#include "allocator_perf_tool/TimerSysTime.hpp"
 
 #include <sys/param.h>
 #include <sys/mman.h>
@@ -52,6 +53,11 @@ protected:
         int err = memkind_destroy_kind(pmem_kind);
         ASSERT_EQ(0, err);
     }
+};
+
+class MemkindPmemTestsMallocTime : public MemkindPmemTests,
+    public ::testing::WithParamInterface<std::tuple<int, int>>
+{
 };
 
 static void pmem_get_size(struct memkind *kind, size_t& total, size_t& free)
@@ -379,3 +385,40 @@ TEST_F(MemkindPmemTests,
         EXPECT_EQ(err, 0);
     }
 }
+
+TEST_P(MemkindPmemTestsMallocTime, test_TC_MEMKIND_PmemMallocTime)
+{
+    size_t size = std::get<0>(GetParam());
+    size_t size_max = std::get<1>(GetParam());
+    const double test_malloc_time = 5;
+    void *test = nullptr;
+
+    TimerSysTime timer;
+    timer.start();
+    do {
+        if(size < size_max)
+            ++size;
+        else
+            size = std::get<0>(GetParam());
+        test = memkind_malloc(pmem_kind, size);
+        ASSERT_TRUE(test != nullptr);
+        memkind_free(pmem_kind, test);
+    } while(timer.getElapsedTime() < test_malloc_time);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    MallocTimeParam, MemkindPmemTestsMallocTime,
+    ::testing::Values(std::make_tuple(32, 32),
+                      std::make_tuple(896, 896),
+                      std::make_tuple(4096, 4096),
+                      std::make_tuple(131072, 131072),
+                      std::make_tuple(2*1024*1024, 2*1024*1024),
+                      std::make_tuple(5*1024*1024, 5*1024*1024),
+                      std::make_tuple(32, 4096),
+                      std::make_tuple(4096, 98304),
+                      std::make_tuple(114688, 196608),
+                      std::make_tuple(500000, 2*1024*1024),
+                      std::make_tuple(2*1024*1024, 4*1024*1024),
+                      std::make_tuple(5*1024*1024, 6*1024*1024),
+                      std::make_tuple(5*1024*1024, 8*1024*1024),
+                      std::make_tuple(32, 9*1024*1024)));
