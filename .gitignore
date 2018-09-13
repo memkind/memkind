@@ -77,6 +77,8 @@ autom4te.cache/
 /test/pmem_alignment
 /test/pmem_multithreads
 /test/pmem_multithreads_onekind
+/test/pmem
+/test/pmem_cpp_allocator
 /test/schedcpu_test
 /test/tieddisterr_test
 /test/alloc_benchmark_glibc
@@ -102,5 +104,7 @@ autom4te.cache/
 /examples/pmem_alignment
 /examples/pmem_multithreads
 /examples/pmem_multithreads_onekind
+/examples/pmem_memkind
+/examples/pmem_cpp_allocator
 /test-driver
 /vs

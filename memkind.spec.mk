@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2017 Intel Corporation.
+#  Copyright (C) 2014 - 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -169,6 +169,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %{_includedir}
 %{_includedir}/hbwmalloc.h
 %{_includedir}/hbw_allocator.h
+%{_includedir}/pmem_allocator.h
 %{_libdir}/lib%{namespace}.so
 %{_libdir}/libautohbw.so
 %{_includedir}/%{namespace}.h
@@ -176,6 +177,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %{_includedir}/%{internal_include}/%{namespace}*.h
 %{_mandir}/man3/hbwmalloc.3.*
 %{_mandir}/man3/hbwallocator.3.*
+%{_mandir}/man3/pmemallocator.3.*
 %{_mandir}/man3/%{namespace}*.3.*
 
 %exclude %{_includedir}/%{internal_include}/%{namespace}_log.h
@@ -201,6 +203,8 @@ ${memkind_test_dir}/pmem_usable_size
 ${memkind_test_dir}/pmem_alignment
 ${memkind_test_dir}/pmem_multithreads
 ${memkind_test_dir}/pmem_multithreads_onekind
+${memkind_test_dir}/pmem
+${memkind_test_dir}/pmem_cpp_allocator
 ${memkind_test_dir}/allocator_perf_tool_tests
 ${memkind_test_dir}/perf_tool
 ${memkind_test_dir}/autohbw_test_helper
