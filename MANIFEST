@@ -33,7 +33,6 @@ examples/pmem_usable_size.c
 examples/pmem_alignment.c
 examples/pmem_multithreads.c
 examples/pmem_multithreads_onekind.c
-examples/pmem_example.c
 examples/pmem_cpp_allocator.cpp
 install_astyle.sh
 m4/ax_cxx_compile_stdcxx.m4

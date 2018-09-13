@@ -25,14 +25,10 @@
 
 #include "pmem_allocator.h"
 #include <iostream>
-#include <memory>
 #include <vector>
-#include <array>
 #include <list>
 #include <map>
-#include <utility>
 #include <string>
-#include <algorithm>
 #include <scoped_allocator>
 #include <cassert>
 
@@ -43,34 +39,21 @@
 #define STL_MAP_INT_STRING_TEST
 #endif
 
-void cpp_allocator_test()
+void cpp_allocator_test(const char* pmem_directory)
 {
     std::cout << "TEST SCOPE: HELLO" << std::endl;
 
-    const char* pmem_directory = "/dev/shm";
     size_t pmem_max_size = 1024*1024*1024;
-
-    /*
-     * Because of the issue #57 we cannot create multiple PMEM kinds.
-     * Therefore, we create alloc_source object of pmem::allocator class
-     * and use this object to copy-construct all other required allocators.
-     * In this case all allocators use the same PMEM kind created inside alloc_source object.
-     * When the issue #57 is fixed, we can remove alloc_source allocator
-     * and create required allocators from scratch.
-     */
-
-    pmem::allocator<int> alloc_source { pmem_directory, pmem_max_size } ;
 
 #ifdef STL_VECTOR_TEST
     {
         std::cout << "VECTOR OPEN" << std::endl;
-        pmem::allocator<int> alc{ alloc_source  };
+        pmem::allocator<int> alc{ pmem_directory, pmem_max_size };
         std::vector<int, pmem::allocator<int>> vector{ alc };
 
         for (int i = 0; i < 20; ++i) {
             vector.push_back(0xDEAD + i);
             assert(vector.back() == 0xDEAD + i);
-
         }
 
         std::cout << "VECTOR CLOSE" << std::endl;
@@ -80,7 +63,7 @@ void cpp_allocator_test()
 #ifdef STL_LIST_TEST
     {
         std::cout << "LIST OPEN" << std::endl;
-        pmem::allocator<int> alc{ alloc_source };
+        pmem::allocator<int> alc{ pmem_directory, pmem_max_size };
         std::list<int, pmem::allocator<int>> list{ alc };
 
         const int nx2 = 4;
@@ -105,8 +88,8 @@ void cpp_allocator_test()
         pmem_string;
         typedef pmem::allocator<pmem_string> vec_alloc_t;
 
-        vec_alloc_t vec_alloc{ alloc_source };
-        str_alloc_t str_alloc{ alloc_source };
+        vec_alloc_t vec_alloc{ pmem_directory, pmem_max_size };
+        str_alloc_t str_alloc{ pmem_directory, pmem_max_size };
 
         std::vector<pmem_string, std::scoped_allocator_adaptor<vec_alloc_t> > vec{ std::scoped_allocator_adaptor<vec_alloc_t>(vec_alloc) };
 
@@ -127,20 +110,16 @@ void cpp_allocator_test()
         pmem_string;
         typedef int key_t;
         typedef pmem_string value_t;
-        typedef std::pair<key_t, value_t> target_pair;
-        typedef pmem::allocator<target_pair> pmem_alloc;
-        typedef pmem::allocator<char> str_allocator_t;
-        typedef std::map<key_t, value_t, std::less<key_t>, std::scoped_allocator_adaptor<pmem_alloc> >
+        typedef pmem::allocator<char> allocator_t;
+        typedef std::map<key_t, value_t, std::less<key_t>, std::scoped_allocator_adaptor<allocator_t> >
         map_t;
 
-        pmem_alloc map_allocator( alloc_source );
+        allocator_t allocator( pmem_directory, pmem_max_size );
 
-        str_allocator_t str_allocator( map_allocator );
+        value_t source_str1( "Lorem ipsum dolor ", allocator);
+        value_t source_str2( "sit amet consectetuer adipiscing elit", allocator );
 
-        value_t source_str1( "Lorem ipsum dolor ", str_allocator);
-        value_t source_str2( "sit amet consectetuer adipiscing elit", str_allocator );
-
-        map_t target_map{ std::scoped_allocator_adaptor<pmem_alloc>(map_allocator) };
+        map_t target_map{ std::scoped_allocator_adaptor<allocator_t>(allocator) };
 
         target_map[key_t(165)] = source_str1;
         assert(target_map[key_t(165)] == source_str1);
@@ -153,8 +132,17 @@ void cpp_allocator_test()
     std::cout << "TEST SCOPE: GOODBYE" << std::endl;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    cpp_allocator_test();
+    if(argc != 2) {
+        std::cerr << "Usage: pmem_cpp_allocator <directory path>\n"
+                  << "\t<directory path> - directory where create temporary file"
+                  <<std::endl;
+        return 0;
+    }
+
+    const char* pmem_directory = argv[1];
+
+    cpp_allocator_test(pmem_directory);
     return 0;
 }
