@@ -28,56 +28,70 @@
 #include <string>
 #include <exception>
 #include <type_traits>
-#include <cstddef>
-#include <utility>
 #include <atomic>
+#include <cstddef>
 
 #include "memkind.h"
 
+/*
+ * Header file for the C++ allocator compatible with the C++ standard library allocator concepts.
+ * More details in pmemallocator(3) man page.
+ * Note: memory heap management is based on memkind_malloc, refer to the memkind(3) man page for more
+ * information.
+ *
+ * Functionality defined in this header is considered as EXPERIMENTAL API.
+ * API standards are described in memkind(3) man page.
+ */
 namespace pmem
 {
     template<typename T>
-    struct allocator {
-        typedef T value_type;
-        typedef value_type* pointer;
-        typedef const value_type* const_pointer;
-        typedef value_type& reference;
-        typedef const value_type& const_reference;
-        typedef size_t size_type;
-        typedef ptrdiff_t difference_type;
+    class allocator
+    {
+    public:
+        using value_type = T;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using size_type = size_t;
+        using difference_type = ptrdiff_t;
 
         template<class U>
         struct rebind {
-            typedef allocator<U> other;
+            using other = allocator<U>;
         };
 
         template<typename U>
-        friend struct allocator;
+        friend class allocator;
 
     private:
-        memkind_t kind_ptr;
-        std::atomic<size_t> * kind_cnt;
+
+        memkind_t kind;
+        /*
+         * Atomic reference counter. Only last allocator object, which uses the kind,
+         * calls 'memkind_destroy_kind' in destructor.
+         */
+        std::atomic<size_t> * ref_count;
 
         void clean_up()
         {
-            if (kind_cnt->fetch_sub(1) == 1) {
-
-                memkind_destroy_kind(kind_ptr);
-                delete kind_cnt;
+            if (ref_count->fetch_sub(1) == 1) {
+                memkind_destroy_kind(kind);
+                delete ref_count;
             }
         }
 
         template <typename U>
-        inline void assign(U&&  other)
+        inline void assign(U&& other)
         {
-            kind_ptr = other.kind_ptr;
-            kind_cnt = other.kind_cnt;
-            ++(*kind_cnt);
+            kind = other.kind;
+            ref_count = other.ref_count;
+            ++(*ref_count);
         }
 
     public:
 #ifndef _GLIBCXX_USE_CXX11_ABI
-        /* This is a workaround for compilers that uses C++11 standard,
+        /* This is a workaround for compilers (e.g GCC 4.8) that uses C++11 standard,
          * but use old - non C++11 ABI */
         template<typename V = void>
         explicit allocator()
@@ -89,19 +103,19 @@ namespace pmem
 
         explicit allocator(const char *dir, size_t max_size)
         {
-            int err_c  = memkind_create_pmem(dir, max_size, &kind_ptr);
+            int err_c  = memkind_create_pmem(dir, max_size, &kind);
             if (err_c) {
                 throw std::runtime_error(
                     std::string("An error occured while creating pmem kind; error code: ") +
                     std::to_string(err_c));
             }
-            kind_cnt = new std::atomic<size_t>(1);
+            ref_count = new std::atomic<size_t>(1);
         }
 
         explicit allocator(const std::string& dir,
                            size_t max_size) : allocator(dir.c_str(), max_size)
         {
-        };
+        }
 
         allocator(const allocator& other) noexcept
         {
@@ -125,36 +139,40 @@ namespace pmem
             assign(other);
         }
 
-        void operator = (const allocator& other) noexcept
+        allocator<T>& operator = (const allocator& other) noexcept
         {
             clean_up();
             assign(other);
+            return *this;
         }
 
         template <typename U>
-        void operator = (const allocator<U>& other) noexcept
+        allocator<T>& operator = (const allocator<U>& other) noexcept
         {
             clean_up();
             assign(other);
+            return *this;
         }
 
-        void operator = (const allocator&& other) noexcept
+        allocator<T>& operator = (const allocator&& other) noexcept
         {
             clean_up();
             assign(other);
+            return *this;
         }
 
         template <typename U>
-        void operator = (const allocator<U>&& other) noexcept
+        allocator<T>& operator = (const allocator<U>&& other) noexcept
         {
             clean_up();
             assign(other);
+            return *this;
         }
 
         template <typename U>
         bool operator ==(const allocator<U>& other) const
         {
-            return kind_ptr == other.kind_ptr;
+            return kind == other.kind;
         }
 
         template <typename U>
@@ -163,15 +181,18 @@ namespace pmem
             return !(*this ==other);
         }
 
-        T* allocate(std::size_t n) const
+        pointer allocate(size_type n) const
         {
-            void* mptr = memkind_calloc(kind_ptr, n, sizeof(T));
-            return static_cast<T*>(mptr);
+            pointer result = static_cast<pointer>(memkind_malloc(kind, n*sizeof(T)));
+            if (!result) {
+                throw std::bad_alloc();
+            }
+            return result;
         }
 
-        void deallocate(T* const p, std::size_t n) const
+        void deallocate(pointer p, size_type n) const
         {
-            memkind_free(kind_ptr, static_cast<void*>(p));
+            memkind_free(kind, static_cast<void*>(p));
         }
 
         template <class U, class... Args>
@@ -180,7 +201,7 @@ namespace pmem
             ::new((void *)p) U(std::forward<Args>(args)...);
         }
 
-        void destroy(T* const p) const
+        void destroy(pointer p) const
         {
             p->~value_type();
         }

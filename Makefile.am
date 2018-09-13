@@ -47,6 +47,7 @@ libmemkind_la_LIBADD = jemalloc/obj/lib/libjemalloc_pic.a
 libmemkind_la_LDFLAGS = -version-info 0:1:0 -ldl
 include_HEADERS = include/hbwmalloc.h \
                   include/hbw_allocator.h \
+				  include/pmem_allocator.h \
                   include/memkind.h \
                   include/memkind_deprecated.h \
                   # end
