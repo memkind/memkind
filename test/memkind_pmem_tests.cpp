@@ -54,6 +54,11 @@ protected:
     }
 };
 
+class MemkindPmemTestsAlignment : public MemkindPmemTests,
+    public ::testing::WithParamInterface<size_t>
+{
+};
+
 static void pmem_get_size(struct memkind *kind, size_t& total, size_t& free)
 {
     struct memkind_pmem *priv = reinterpret_cast<struct memkind_pmem *>(kind->priv);
@@ -379,3 +384,37 @@ TEST_F(MemkindPmemTests,
         EXPECT_EQ(err, 0);
     }
 }
+
+TEST_P(MemkindPmemTestsAlignment, test_TC_MEMKIND_PmemAlignment)
+{
+    size_t alignment;
+    void *test[1000000];
+    int i, max, ret;
+
+    for(alignment = 1024; alignment < 140000; alignment *= 2) {
+        if(GetParam() > alignment)
+            continue;
+        for(int j=0; j<10; j++) {
+            i =0;
+            do {
+                ret = memkind_posix_memalign(pmem_kind, &test[i], alignment, GetParam());
+            } while(ret == 0 && i++<1000000);
+
+            if(j == 0)
+                max = i;
+            else
+                ASSERT_TRUE(i > 0.98*max);
+
+            while(i > 0) {
+                memkind_free(pmem_kind, test[--i]);
+                test[i] = nullptr;
+            }
+        }
+    }
+}
+
+INSTANTIATE_TEST_CASE_P(
+    AlignmentParam, MemkindPmemTestsAlignment,
+    ::testing::Values(32, 60, 80, 100, 128, 150, 160, 250, 256, 300, 320,
+                      500, 512, 800, 896, 3000, 4096, 6000, 10000, 60000,
+                      98304, 114688));
