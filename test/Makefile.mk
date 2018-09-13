@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2017 Intel Corporation.
+#  Copyright (C) 2014 - 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
