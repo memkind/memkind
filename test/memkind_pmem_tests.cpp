@@ -61,11 +61,6 @@ class MemkindPmemTestsCalloc : public MemkindPmemTests,
 {
 };
 
-class MemkindPmemTestsMallocTime : public MemkindPmemTests,
-    public ::testing::WithParamInterface<std::tuple<int, int>>
-{
-};
-
 class MemkindPmemTestsMalloc : public MemkindPmemTests,
     public ::testing::WithParamInterface<size_t>
 {
@@ -125,8 +120,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocZero)
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSizeMax)
 {
     void *test1 = nullptr;
-    errno = 0;
 
+    errno = 0;
     test1 = memkind_malloc(pmem_kind, SIZE_MAX);
     ASSERT_TRUE(test1 == nullptr);
     ASSERT_TRUE(errno == ENOMEM);
@@ -177,6 +172,7 @@ INSTANTIATE_TEST_CASE_P(
     CallocParam, MemkindPmemTestsCalloc,
     ::testing::Values(std::make_tuple(10, 0),
                       std::make_tuple(0, 0),
+                      std::make_tuple(0, 10),
                       std::make_tuple(SIZE_MAX, 1),
                       std::make_tuple(10, SIZE_MAX)));
 
@@ -319,8 +315,6 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocZero)
 
     new_test = memkind_realloc(pmem_kind, test, 0);
     ASSERT_TRUE(new_test == nullptr);
-
-    memkind_free(pmem_kind, new_test);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocSizeMax)
@@ -385,7 +379,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocDecreaseSize)
     size_t size = 1024;
     char *test1 = nullptr;
     char *test2 = nullptr;
-    const char val[] = "test_TC_MEMKIND_PmemReallocIncreaseSize";
+    const char val[] = "test_TC_MEMKIND_PmemReallocDecreaseSize";
     int status;
 
     test1 = (char*)memkind_malloc(pmem_kind, size);
@@ -402,6 +396,12 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocDecreaseSize)
     memkind_free(pmem_kind, test2);
 }
 
+/*
+ * This test shows realloc "in-place" mechanism.
+ * In some cases like allocation shrinking within the same size class
+ * realloc will shrink allocation "in-place",
+ * but in others not (like changing size class).
+ */
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocInPlace)
 {
     void *test1 = memkind_malloc(pmem_kind, 10 * 1024 * 1024);
@@ -434,7 +434,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocInPlace)
      * shrinking...
      */
     ASSERT_TRUE(test1r != nullptr);
-    //ASSERT_NE(test1r, test1);
+    ASSERT_NE(test1r, test1);
 
     /* ... and leaves some memory for new allocations. */
     void *test3 = memkind_malloc(pmem_kind, 5 * 1024 * 1024);
@@ -484,46 +484,9 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeNullptr)
     } while(timer.getElapsedTime() < test_time);
 }
 
-TEST_P(MemkindPmemTestsMallocTime, test_TC_MEMKIND_PmemMallocTime)
-{
-    size_t size = std::get<0>(GetParam());
-    size_t size_max = std::get<1>(GetParam());
-    const double test_malloc_time = 5;
-    void *test = nullptr;
-
-    TimerSysTime timer;
-    timer.start();
-    do {
-        if(size < size_max)
-            ++size;
-        else
-            size = std::get<0>(GetParam());
-        test = memkind_malloc(pmem_kind, size);
-        ASSERT_TRUE(test != nullptr);
-        memkind_free(pmem_kind, test);
-    } while(timer.getElapsedTime() < test_malloc_time);
-}
-
-INSTANTIATE_TEST_CASE_P(
-    MallocTimeParam, MemkindPmemTestsMallocTime,
-    ::testing::Values(std::make_tuple(32, 32),
-                      std::make_tuple(896, 896),
-                      std::make_tuple(4096, 4096),
-                      std::make_tuple(131072, 131072),
-                      std::make_tuple(2*1024*1024, 2*1024*1024),
-                      std::make_tuple(5*1024*1024, 5*1024*1024),
-                      std::make_tuple(32, 4096),
-                      std::make_tuple(4096, 98304),
-                      std::make_tuple(114688, 196608),
-                      std::make_tuple(500000, 2*1024*1024),
-                      std::make_tuple(2*1024*1024, 4*1024*1024),
-                      std::make_tuple(5*1024*1024, 6*1024*1024),
-                      std::make_tuple(5*1024*1024, 8*1024*1024),
-                      std::make_tuple(32, 9*1024*1024)));
-
 TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSize)
 {
-    void *test[1000000];
+    void *test[1000000] = {nullptr};
     int i, max;
 
     for(int j=0; j<10; j++) {
@@ -538,7 +501,8 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSize)
             ASSERT_TRUE(i > 0.98*max);
 
         while(i > 0) {
-            memkind_free(pmem_kind, test[--i]);
+            --i;
+            memkind_free(pmem_kind, test[i]);
             test[i] = nullptr;
         }
     }
@@ -701,7 +665,7 @@ static void* thread_func(void* arg)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreads)
 {
-    int nthreads = 10;
+    int nthreads = 10, status = 0;
     pthread_t *threads = (pthread_t*)calloc(nthreads, sizeof(pthread_t));
     ASSERT_TRUE(threads != nullptr);
     int *pool_idx = (int*)calloc(nthreads, sizeof(int));
@@ -711,11 +675,13 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreads)
 
     for (int t = 0; t < nthreads; t++) {
         pool_idx[t] = npools * t;
-        pthread_create(&threads[t], nullptr, thread_func, &pool_idx[t]);
+        status = pthread_create(&threads[t], nullptr, thread_func, &pool_idx[t]);
+        ASSERT_EQ(0, status);
     }
 
     for (int t = 0; t < nthreads; t++) {
-        pthread_join(threads[t], nullptr);
+        status = pthread_join(threads[t], nullptr);
+        ASSERT_EQ(0, status);
     }
 
     free(pools);
