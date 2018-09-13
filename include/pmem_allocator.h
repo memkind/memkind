@@ -101,7 +101,7 @@ namespace pmem
         explicit allocator(const std::string& dir,
                            size_t max_size) : allocator(dir.c_str(), max_size)
         {
-        };
+        }
 
         allocator(const allocator& other) noexcept
         {
@@ -165,11 +165,14 @@ namespace pmem
 
         T* allocate(std::size_t n) const
         {
-            void* mptr = memkind_calloc(kind_ptr, n, sizeof(T));
-            return static_cast<T*>(mptr);
+            T* result = static_cast<T*>(memkind_malloc(kind_ptr, n*sizeof(T)));
+            if (!result) {
+                throw std::bad_alloc();
+            }
+            return result;
         }
 
-        void deallocate(T* const p, std::size_t n) const
+        void deallocate(T* p, std::size_t n) const
         {
             memkind_free(kind_ptr, static_cast<void*>(p));
         }
@@ -180,7 +183,7 @@ namespace pmem
             ::new((void *)p) U(std::forward<Args>(args)...);
         }
 
-        void destroy(T* const p) const
+        void destroy(T* p) const
         {
             p->~value_type();
         }
