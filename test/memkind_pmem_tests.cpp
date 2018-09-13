@@ -28,11 +28,14 @@
 #include <sys/param.h>
 #include <sys/mman.h>
 #include <stdio.h>
+#include <pthread.h>
 #include "common.h"
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4096;
 static const size_t PMEM_NO_LIMIT = 0;
 extern const char*  PMEM_DIR;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 class MemkindPmemTests: public :: testing::Test
 {
@@ -399,4 +402,75 @@ TEST_F(MemkindPmemTests,
         err = memkind_destroy_kind(pmem_temp[j]);
         EXPECT_EQ(err, 0);
     }
+}
+
+static void* thread_func_kinds(void* arg)
+{
+    memkind_t pmem_thread_kind;
+    int err = 0;
+
+    pthread_mutex_lock(&mutex);
+    pthread_cond_wait(&cond, &mutex);
+    pthread_mutex_unlock(&mutex);
+
+    err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_thread_kind);
+
+    if(err == 0) {
+        void *test = memkind_malloc(pmem_thread_kind, sizeof(void *));
+        EXPECT_TRUE(test != nullptr);
+
+        memkind_free(pmem_thread_kind, test);
+        err = memkind_destroy_kind(pmem_thread_kind);
+        EXPECT_EQ(0, err);
+    }
+
+    return nullptr;
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
+{
+    const int nthreads = 50;
+    int i, t, err;
+    int max_possible_kind = 0;
+    memkind_t pmem_kinds[MEMKIND_MAX_KIND] = {nullptr};
+    pthread_t *threads = (pthread_t*)calloc(nthreads, sizeof(pthread_t));
+    ASSERT_TRUE(threads != nullptr);
+
+    // This loop will create as many kinds as possible
+    // to obtain a real kind limit
+    for(i=0; i<MEMKIND_MAX_KIND; i++) {
+        err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kinds[i]);
+        if(err != 0) {
+            ASSERT_TRUE(i>0);
+            max_possible_kind = i;
+            --i;
+            break;
+        }
+        ASSERT_TRUE(nullptr != pmem_kinds[i]);
+    }
+
+    // destroy last kind so it will be possible
+    // to create only one pmem kind in threads
+    err = memkind_destroy_kind(pmem_kinds[i]);
+    ASSERT_EQ(0, err);
+
+    for (t = 0; t < nthreads; t++) {
+        err = pthread_create(&threads[t], nullptr, thread_func_kinds, nullptr);
+        ASSERT_EQ(0, err);
+    }
+
+    sleep(1);
+    pthread_cond_broadcast(&cond);
+
+    for (t = 0; t < nthreads; t++) {
+        err = pthread_join(threads[t], nullptr);
+        ASSERT_EQ(0, err);
+    }
+
+    for (i = 0; i < max_possible_kind - 1; i++) {
+        err = memkind_destroy_kind(pmem_kinds[i]);
+        ASSERT_EQ(0, err);
+    }
+
+    free(threads);
 }
