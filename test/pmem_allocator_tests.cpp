@@ -35,12 +35,13 @@
 #include <scoped_allocator>
 #include <thread>
 
+extern const char* PMEM_DIR;
+
 // Tests for pmem::allocator class.
-class PmemAllocatorTests: public :: testing::Test
+class PmemAllocatorTests: public ::testing::Test
 {
 
 public:
-    static constexpr const char* PMEM_DIR = "/tmp/";
     const size_t pmem_max_size = 1024*1024*1024;
 
     pmem::allocator<int> alloc_source { std::string(PMEM_DIR), pmem_max_size } ;
@@ -162,7 +163,7 @@ TEST_F(PmemAllocatorTests,
 }
 
 //Construct-destroy test
-TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_ConsructDestroy_Test)
+TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_ConstructDestroy_Test)
 {
     pmem::allocator<int> alc1 { alloc_source_f1  };
     int* created_object = alc1.allocate(1);
@@ -214,11 +215,13 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_Vector_Test)
     pmem::allocator<int> alc{ alloc_source  };
     std::vector<int, pmem::allocator<int>> vector{ alc };
 
-    for (int i = 0; i < 20; ++i) {
+    const int num = 20;
+
+    for (int i = 0; i < num; ++i) {
         vector.push_back(0xDEAD + i);
     }
 
-    for (int i = 0; i < 20; ++i) {
+    for (int i = 0; i < num; ++i) {
         ASSERT_TRUE(vector[i] == 0xDEAD + i);
     }
 }
@@ -230,14 +233,14 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_List_Test)
 
     std::list<int, pmem::allocator<int>> list{ alc };
 
-    const int nx2 = 4;
+    const int num = 4;
 
-    for (int i = 0; i < nx2; ++i) {
+    for (int i = 0; i < num; ++i) {
         list.emplace_back(0xBEAC011 + i);
         ASSERT_TRUE(list.back() == 0xBEAC011 + i);
     }
 
-    for (int i = 0; i < nx2; ++i) {
+    for (int i = 0; i < num; ++i) {
         list.pop_back();
     }
 }
@@ -250,7 +253,9 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_Map_Test)
     std::map<std::string, std::string, std::less<std::string>, pmem::allocator<std::pair<const std::string, std::string> > >
     map{ std::less<std::string>(), alc };
 
-    for (int i = 0; i < 10; ++i) {
+    const int num = 10;
+
+    for (int i = 0; i < num; ++i) {
         map[std::to_string(i)] = std::to_string(0x0CEA11 + i);
         ASSERT_TRUE(map[std::to_string(i)] == std::to_string(0x0CEA11 + i));
         map[std::to_string((i * 997 + 83) % 113)] = std::to_string(0x0CEA11 + i);
