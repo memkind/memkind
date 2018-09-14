@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2017 Intel Corporation.
+#  Copyright (C) 2014 - 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -240,3 +240,7 @@ if HAVE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 endif
 
+clean-local: test-clean
+
+test-clean:
+	find test \( -name "*.gcda" -o -name "*.gcno" \) -type f -delete

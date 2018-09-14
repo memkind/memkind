@@ -428,3 +428,4 @@ static_lib: jemalloc/obj/lib/libjemalloc_pic.a libmemkind.la
 include autohbw/Makefile.mk
 include test/Makefile.mk
 include examples/Makefile.mk
+include src/Makefile.mk
