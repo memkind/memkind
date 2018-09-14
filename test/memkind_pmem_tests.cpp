@@ -449,6 +449,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
         ASSERT_TRUE(nullptr != pmem_kinds[i]);
     }
 
+    // destroy last kind so it will be possible
+    // to create only one pmem kind in threads
     err = memkind_destroy_kind(pmem_kinds[i]);
     ASSERT_EQ(0, err);
 
@@ -465,7 +467,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
         ASSERT_EQ(0, err);
     }
 
-    for(i=0; i<114; i++) {
+    for (--i; i>=0; --i) {
         err = memkind_destroy_kind(pmem_kinds[i]);
         ASSERT_EQ(0, err);
     }
