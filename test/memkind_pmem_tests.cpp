@@ -34,8 +34,8 @@
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4096;
 static const size_t PMEM_NO_LIMIT = 0;
 extern const char*  PMEM_DIR;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 class MemkindPmemTests: public :: testing::Test
 {
@@ -420,8 +420,10 @@ static void* thread_func_kinds(void* arg)
         void *test = memkind_malloc(pmem_thread_kind, sizeof(void *));
         EXPECT_TRUE(test != nullptr);
         EXPECT_EQ(0, errno);
+
         memkind_free(pmem_thread_kind, test);
-        memkind_destroy_kind(pmem_thread_kind);
+        err = memkind_destroy_kind(pmem_thread_kind);
+        EXPECT_EQ(0, err);
     }
 
     return nullptr;
@@ -429,33 +431,43 @@ static void* thread_func_kinds(void* arg)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
 {
-    int nthreads = 50;
+    const int nthreads = 50;
     int i, t, err;
-    memkind_t pmem_kinds[125];
+    memkind_t pmem_kinds[MEMKIND_MAX_KIND] = {nullptr};
     pthread_t *threads = (pthread_t*)calloc(nthreads, sizeof(pthread_t));
     ASSERT_TRUE(threads != nullptr);
 
-    for(i=0; i<114; i++) {
+    // This loop will create as many kinds as possible
+    // to obtain a real kind limit
+    for(i=0; i<MEMKIND_MAX_KIND; i++) {
         err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kinds[i]);
-        ASSERT_EQ(0, err);
+        if(err != 0) {
+            ASSERT_TRUE(i>0);
+            --i;
+            break;
+        }
         ASSERT_TRUE(nullptr != pmem_kinds[i]);
     }
 
+    err = memkind_destroy_kind(pmem_kinds[i]);
+    ASSERT_EQ(0, err);
+
     for (t = 0; t < nthreads; t++) {
-        pthread_create(&threads[t], nullptr, thread_func_kinds, nullptr);
+        err = pthread_create(&threads[t], nullptr, thread_func_kinds, nullptr);
+        ASSERT_EQ(0, err);
     }
 
     sleep(1);
     pthread_cond_broadcast(&cond);
 
     for (t = 0; t < nthreads; t++) {
-        pthread_join(threads[t], nullptr);
+        err = pthread_join(threads[t], nullptr);
+        ASSERT_EQ(0, err);
     }
 
     for(i=0; i<114; i++) {
         err = memkind_destroy_kind(pmem_kinds[i]);
         ASSERT_EQ(0, err);
-        ASSERT_TRUE(nullptr != pmem_kinds[i]);
     }
 
     free(threads);
