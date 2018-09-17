@@ -499,21 +499,36 @@ Call to jemalloc's
 .BR malloc ()
 failed
 .TP
-.B MEMKIND_ERROR_ALLOCM
-Call to jemalloc's
-.BR allocm ()
-failed
-.TP
 .B MEMKIND_ERROR_ENVIRON
 Error parsing environment variable (MEMKIND_*)
+.TP
+.B MEMKIND_ERROR_INVALID
+Invalid input arguments to memkind routine
+.TP
+.B MEMKIND_ERROR_TOOMANY
+Error trying to initialize more than maximum
+.B MEMKIND_MAX_KIND
+number of kinds
+.TP
+.B MEMKIND_ERROR_BADOPS
+Error memkind operation structure is missing or invalid
+.TP
+.B MEMKIND_ERROR_HUGETLB
+Unable to allocate huge pages
+.TP
+.B MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE
+Error requested memory type is not available
+.TP
+.B MEMKIND_ERROR_OPERATION_FAILED
+Error memkind operation failed
 .TP
 .B MEMKIND_ERROR_ARENAS_CREATE
 Call to jemalloc's
 .BR arenas.create ()
 failed
 .TP
-.B MEMKIND_ERROR_INVALID
-Invalid input arguments to memkind routine
+.B MEMKIND_ERROR_RUNTIME
+Unspecified run-time error
 .SH "FILES"
 .TP
 .I /usr/bin/memkind-hbw-nodes
