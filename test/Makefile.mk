@@ -216,6 +216,7 @@ check_PROGRAMS += test/hello_memkind \
                   test/pmem_usable_size \
                   test/pmem_alignment \
                   test/pmem_multithreads \
+                  test/pmem_multithreads_onekind \
                   # end
 if HAVE_CXX11
 check_PROGRAMS += test/memkind_allocated
@@ -232,6 +233,7 @@ test_pmem_malloc_unlimited_LDADD = libmemkind.la
 test_pmem_usable_size_LDADD = libmemkind.la
 test_pmem_alignment_LDADD = libmemkind.la
 test_pmem_multithreads_LDADD = libmemkind.la
+test_pmem_multithreads_onekind_LDADD = libmemkind.la
 test_autohbw_candidates_LDADD = libmemkind.la \
                                 # end
 if HAVE_CXX11
@@ -248,6 +250,7 @@ test_pmem_malloc_unlimited_SOURCES = examples/pmem_malloc_unlimited.c
 test_pmem_usable_size_SOURCES = examples/pmem_usable_size.c
 test_pmem_alignment_SOURCES = examples/pmem_alignment.c
 test_pmem_multithreads_SOURCES = examples/pmem_multithreads.c
+test_pmem_multithreads_onekind_SOURCES = examples/pmem_multithreads_onekind.c
 test_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
 test_libautohbw_la_SOURCES = autohbw/autohbw.c
 noinst_LTLIBRARIES += test/libautohbw.la

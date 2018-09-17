@@ -33,7 +33,11 @@ This example shows how to use memkind alignment and how it affects allocations.
 
 ### pmem_multithreads.c
 
-This example shows how to use multithreading with pmem kinds.
+This example shows how to use multithreading with independent pmem kinds.
+
+### pmem_multithreads_onekind.c
+
+This example shows how to use multithreading with one main pmem kind.
 
 ## Other memkind examples
 

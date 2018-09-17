@@ -44,13 +44,19 @@
 
 static char* PMEM_DIR = "/tmp/";
 
-void *thread_ind(void *arg);
+struct arg_struct {
+    int id;
+    struct memkind *kind;
+    int **ptr;
+};
+void *thread_onekind(void *arg);
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 int main(int argc, char *argv[])
 {
+    struct memkind *pmem_kind_unlimited = NULL;
     int err = 0;
     struct stat st;
 
@@ -67,15 +73,31 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout,
-            "This example shows how to use multithreading with independent pmem kinds.\nPMEM kind directory: %s\n",
+            "This example shows how to use multithreading with one main pmem kind.\nPMEM kind directory: %s\n",
             PMEM_DIR);
 
-    pthread_t pmem_threads[NUM_THREADS];
-    int t;
+    /* Create PMEM partition with unlimited size */
+    err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind_unlimited);
+    if (err) {
+        perror("memkind_create_pmem()");
+        fprintf(stderr, "Unable to create pmem partition\n");
+        return errno ? -errno : 1;
+    }
 
-    /* Lets create many independent threads */
+    /* Create a few threads which will access to our main pmem_kind */
+    pthread_t pmem_threads[NUM_THREADS];
+    int *pmem_tint[NUM_THREADS][100];
+    int t, i;
+
+    struct arg_struct *args[NUM_THREADS];
+
     for (t = 0; t<NUM_THREADS; t++) {
-        err = pthread_create(&pmem_threads[t], NULL, thread_ind, NULL);
+        args[t] = malloc(sizeof(struct arg_struct));
+        args[t]->id = t;
+        args[t]->ptr = &pmem_tint[t][0];
+        args[t]->kind = pmem_kind_unlimited;
+
+        err = pthread_create(&pmem_threads[t], NULL, thread_onekind, (void *)args[t]);
         if (err != 0) {
             fprintf(stderr, "Unable to create a thread\n");
             return 1;
@@ -93,44 +115,42 @@ int main(int argc, char *argv[])
         }
     }
 
-    fprintf(stdout, "Threads successfully allocated memory in the PMEM kinds.\n");
+    /* Check if we can read the values outside of threads and free resources */
+    for (t = 0; t<NUM_THREADS; t++) {
+        for(i=0; i<100; i++) {
+            if(*pmem_tint[t][i] != t) {
+                perror("read thread memkind_malloc()");
+                fprintf(stderr, "pmem_tint value has not been saved correctly in the thread\n");
+                return 1;
+            }
+            memkind_free(args[t]->kind, *(args[t]->ptr+i));
+        }
+        free(args[t]);
+    }
+
+    fprintf(stdout, "Threads successfully allocated memory in the PMEM kind.\n");
 
     return 0;
 }
 
-void *thread_ind(void *arg)
+void *thread_onekind(void *arg)
 {
-    struct memkind *pmem_kind;
+    struct arg_struct *args = (struct arg_struct*)arg;
+    int i;
 
     pthread_mutex_lock(&mutex);
     pthread_cond_wait(&cond, &mutex);
     pthread_mutex_unlock(&mutex);
 
-    /* Create a pmem kind in thread */
-    int err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
-    if (err) {
-        perror("thread memkind_create_pmem()");
-        fprintf(stderr, "Unable to create pmem partition\n");
-        return NULL;
-    }
-
-    /* Alloc something */
-    void *test = memkind_malloc(pmem_kind, 32);
-    if (test == NULL) {
-        perror("thread memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem (test)\n");
-        return NULL;
-    }
-
-    /* Free resources */
-    memkind_free(pmem_kind, test);
-
-    /* And destroy pmem kind */
-    err = memkind_destroy_kind(pmem_kind);
-    if (err) {
-        perror("thread memkind_pmem_destroy()");
-        fprintf(stderr, "Unable to destroy pmem partition\n");
-        return NULL;
+    /* Lets alloc int and put there thread ID */
+    for(i = 0; i<100; i++) {
+        *(args->ptr+i) = (int *)memkind_malloc(args->kind, sizeof(int));
+        if (*(args->ptr+i) == NULL) {
+            perror("thread memkind_malloc()");
+            fprintf(stderr, "Unable to allocate pmem int\n");
+            return NULL;
+        }
+        **(args->ptr+i) = args->id;
     }
 
     return NULL;
