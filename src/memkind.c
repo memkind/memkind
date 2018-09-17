@@ -487,6 +487,7 @@ static int memkind_create(struct memkind_ops *ops, const char *name,
     (*kind)->partition = memkind_registry_g.num_kind;
     err = ops->create(*kind, ops, name);
     if (err) {
+        jemk_free(*kind);
         goto exit;
     }
     memkind_registry_g.partition_map[id_kind] = *kind;
