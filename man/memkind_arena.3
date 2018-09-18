@@ -25,7 +25,7 @@
 .SH "NAME"
 memkind_arena.h \- jemalloc arena allocation memkind operations.
 .br
-Note: This is EXEPRIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes), or remove.
+Note: This is EXEPRIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes) or remove.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind/internal/memkind_arena.h>
@@ -33,15 +33,18 @@ Note: This is EXEPRIMENTAL API. The functionality and the header file itself can
 .B Link with -lmemkind
 .sp
 .BI "int memkind_arena_create(struct memkind " "*kind" ", struct memkind_ops " "*ops" ", const char " "*name" );
-.BI "int memkind_arena_create_map(struct memkind " "*kind" );
+.BI "int memkind_arena_create_map(struct memkind " "*kind" ", extent_hooks_t " "*hooks" );
 .BI "int memkind_arena_destroy(struct memkind " "*kind" );
 .BI "void *memkind_arena_malloc(struct memkind " "*kind" ", size_t " "size" );
 .BI "void *memkind_arena_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" );
 .BI "int memkind_arena_posix_memalign(struct memkind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .BI "void *memkind_arena_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
-.BI "int memkind_thread_get_arena(struct memkind " "*kind" ", unsigned int " "*arena", size_t " "size" );
-.BI "int memkind_bijective_get_arena(struct memkind " "*kind" ", unsigned int " "*arena", size_t " "size" );
-.BI "void memkind_arena_free(struct memkind " "*kind" ", void " "*ptr" );
+.BI "int memkind_thread_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" ", size_t " "size" );
+.BI "int memkind_bijective_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" ", size_t " "size" );
+.BI "struct memkind *get_kind_by_arena(unsigned " "arena_ind" );
+.BI "int memkind_arena_finalize(struct memkind " "*kind" );
+.BI "void memkind_arena_init(struct memkind " "*kind" );
+.BI "void memkind_arena_free(struct memkind " "*kind" ", void* " "ptr" );
 .br
 .SH DESCRIPTION
 This header file is a collection of functions can be used to populate
@@ -128,7 +131,7 @@ interface.  It uses the memkind "get_arena" operation to select the
 arena.
 .PP
 .BR memkind_thread_get_arena ()
-Retrieves the
+retrieves the
 .I arena
 index that is bound to to the calling thread based on a hash of its
 thread ID.  The
@@ -137,7 +140,7 @@ index can be used with the MALLOCX_ARENA macro to set flags for jemalloc's
 .BR mallocx ().
 .PP
 .BR memkind_bijective_arena_get_arena ()
-Retrieves the
+retrieves the
 .I arena
 index to be used with the MALLOCX_ARENA macro to set flags for jemalloc's
 .BR mallocx ().
@@ -155,6 +158,22 @@ or
 .BR memkind_arena_realloc ()
 to be made available for future allocations.
 It uses the memkind "get_arena" operation to select the arena.
+.PP
+.BR get_kind_by_arena ()
+returns pointer to memory kind structure associated with given arena.
+.PP
+.BR memkind_arena_finalize ()
+is an implementation of the memkind "finalize" operation for memory kinds that
+use jemalloc. This function releases all resources allocated by
+.BR memkind_arena_create ()
+and it's called when
+.BR main ()
+finishes or after calling
+.BR exit ()
+function.
+.PP
+.BR memkind_arena_init ()
+creates arena map with proper hooks per specified kind.
 .SH "COPYRIGHT"
 Copyright (C) 2014 - 2018 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
