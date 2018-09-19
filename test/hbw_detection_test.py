@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2017 Intel Corporation.
+#  Copyright (C) 2017 - 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -21,12 +21,11 @@
 #  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-from distutils.spawn import find_executable
 from python_framework import CMD_helper
-
+from os.path import dirname, join
 
 class Test_hbw_detection(object):
-    binary_path = find_executable("memkind-hbw-nodes")
+    binary_path = join(dirname(dirname(__file__)), "memkind-hbw-nodes")
     environ_err_test = "../environ_err_hbw_malloc_test"
     expected_libnuma_warning = "libnuma: Warning: node argument -1 is out of range\n\n"
     fail_msg = "Test failed with:\n {0}"
