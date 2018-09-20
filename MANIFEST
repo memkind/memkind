@@ -61,6 +61,7 @@ src/memkind_pmem.c
 src/memkind_log.c
 src/memkind-hbw-nodes.c
 src/tbb_wrapper.c
+src/Makefile.mk
 include/hbwmalloc.h
 include/memkind.h
 include/memkind_deprecated.h

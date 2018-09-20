@@ -809,9 +809,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemDestroyKindArenaZero)
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreateDestroyKindLoop)
 {
     struct memkind *pmem_temp = nullptr;
-    const size_t pmem_number = 25000;
 
-    for (unsigned int i = 0; i < pmem_number; ++i) {
+    for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
         int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         EXPECT_EQ(err, 0);
         err = memkind_destroy_kind(pmem_temp);
@@ -823,10 +822,9 @@ TEST_F(MemkindPmemTests,
        test_TC_MEMKIND_PmemCreateDestroyKindLoopWithMallocSmallSize)
 {
     struct memkind *pmem_temp = nullptr;
-    const size_t pmem_number = 25000;
     const size_t size = 1024;
 
-    for (unsigned int i = 0; i < pmem_number; ++i) {
+    for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
         int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         EXPECT_EQ(err, 0);
         void *ptr = memkind_malloc(pmem_temp, size);
@@ -841,10 +839,9 @@ TEST_F(MemkindPmemTests,
        test_TC_MEMKIND_PmemCreateDestroyKindLoopWithMallocChunkSize)
 {
     struct memkind *pmem_temp = nullptr;
-    const size_t pmem_number = 25000;
     const size_t size = MEMKIND_PMEM_CHUNK_SIZE;
 
-    for (unsigned int i = 0; i < pmem_number; ++i) {
+    for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
         int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         EXPECT_EQ(err, 0);
         void *ptr = memkind_malloc(pmem_temp, size);
@@ -859,11 +856,10 @@ TEST_F(MemkindPmemTests,
        test_TC_MEMKIND_PmemCreateDestroyKindLoopWithRealloc)
 {
     struct memkind *pmem_temp = nullptr;
-    const size_t pmem_number = 25000;
     const size_t size_1 = 512;
     const size_t size_2 = 1024;
 
-    for (unsigned int i = 0; i < pmem_number; ++i) {
+    for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
         int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         EXPECT_EQ(err, 0);
         void *ptr = memkind_malloc(pmem_temp, size_1);
@@ -879,12 +875,11 @@ TEST_F(MemkindPmemTests,
 TEST_F(MemkindPmemTests,
        test_TC_MEMKIND_PmemCreateCheckErrorCodeArenaCreate)
 {
-    const size_t pmem_number = 25000;
-    struct memkind *pmem_temp[pmem_number] = { nullptr };
+    struct memkind *pmem_temp[MEMKIND_MAX_KIND] = { nullptr };
     unsigned i = 0, j = 0;
     int err = 0;
 
-    for (i = 0; i < pmem_number; ++i) {
+    for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
         err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp[i]);
         if (err) {
             EXPECT_EQ(err, MEMKIND_ERROR_ARENAS_CREATE);
