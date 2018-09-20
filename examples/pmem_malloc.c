@@ -34,19 +34,37 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <sys/stat.h>
 
-#define PMEM_MAX_SIZE (MEMKIND_PMEM_MIN_SIZE * 2)
+#define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
-#define CHUNK_SIZE (4 * 1024 * 1024) /* assume 4MB chunks */
+static char* PMEM_DIR = "/tmp/";
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-    struct memkind *pmem_kind;
+    struct memkind *pmem_kind = NULL;
     int err = 0;
+    struct stat st;
 
-    /* create PMEM partition */
-    err = memkind_create_pmem(".", PMEM_MAX_SIZE, &pmem_kind);
+    if (argc > 2) {
+        fprintf(stderr,"Usage: %s [pmem_kind_dir_path]", argv[0]);
+        return 1;
+    }
+    if (argc == 2) {
+        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
+            fprintf(stderr,"%s : Invalid path to pmem kind directory ", argv[1]);
+            return 1;
+        } else {
+            PMEM_DIR = argv[1];
+        }
+    }
+
+    fprintf(stdout,
+            "This example shows how to allocate memory and possibility to exceed pmem kind size.\nPMEM kind directory: %s\n",
+            PMEM_DIR);
+
+    /* Create PMEM partition with specific size */
+    err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
         perror("memkind_create_pmem()");
         fprintf(stderr, "Unable to create pmem partition\n");
@@ -98,6 +116,15 @@ main(int argc, char *argv[])
     memkind_free(pmem_kind, pmem_str10);
     memkind_free(pmem_kind, pmem_str11);
     memkind_free(pmem_kind, pmem_str12);
+
+    err = memkind_destroy_kind(pmem_kind);
+    if (err) {
+        perror("memkind_destroy_kind()");
+        fprintf(stderr, "Unable to destroy pmem partition\n");
+        return errno ? -errno : 1;
+    }
+
+    fprintf(stdout, "Memory was successfully allocated and released.");
 
     return 0;
 }
