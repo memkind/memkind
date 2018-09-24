@@ -62,6 +62,7 @@
 extern struct memkind_ops MEMKIND_HBW_GBTLB_OPS;
 extern struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS;
 extern struct memkind_ops MEMKIND_GBTLB_OPS;
+extern struct memkind_ops MEMKIND_PMEM_OPS;
 
 static struct memkind MEMKIND_DEFAULT_STATIC = {
     .ops =  &MEMKIND_DEFAULT_OPS,
@@ -181,6 +182,7 @@ MEMKIND_EXPORT struct memkind *MEMKIND_GBTLB = &MEMKIND_GBTLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_INTERLEAVE =
         &MEMKIND_HBW_INTERLEAVE_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_REGULAR = &MEMKIND_REGULAR_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_PMEM;
 
 struct memkind_registry {
     struct memkind *partition_map[MEMKIND_MAX_KIND];
