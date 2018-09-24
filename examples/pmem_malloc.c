@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"Usage: %s [pmem_kind_dir_path]", argv[0]);
         return 1;
     }
+    // Pass a 2nd arg to specify directory where you want temp file stored
     if (argc == 2) {
         if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
             fprintf(stderr,"%s : Invalid path to pmem kind directory ", argv[1]);
@@ -63,6 +64,7 @@ int main(int argc, char *argv[])
             "This example shows how to allocate memory and possibility to exceed pmem kind size.\nPMEM kind directory: %s\n",
             PMEM_DIR);
 
+
     /* Create PMEM partition with specific size */
     err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
@@ -71,51 +73,55 @@ int main(int argc, char *argv[])
         return errno ? -errno : 1;
     }
 
-    const size_t size = 512;
-    char *pmem_str10 = NULL;
-    char *pmem_str11 = NULL;
-    char *pmem_str12 = NULL;
-    char *pmem_str = NULL;
+    char *pmem_str1 = NULL;
+    char *pmem_str2 = NULL;
+    char *pmem_str3 = NULL;
+    char *pmem_str4 = NULL;
 
-    pmem_str10 = (char *)memkind_malloc(pmem_kind, size);
-    if (pmem_str10 == NULL) {
+    // allocate 512 Bytes of 32 MB available
+    pmem_str1 = (char *)memkind_malloc(pmem_kind, 512);
+    if (pmem_str1 == NULL) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string (pmem_str10)\n");
+        fprintf(stderr, "Unable to allocate pmem string (pmem_str1)\n");
         return errno ? -errno : 1;
     }
 
-    /* next chunk mapping */
-    pmem_str11 = (char *)memkind_malloc(pmem_kind, 8 * 1024 * 1024);
-    if (pmem_str11 == NULL) {
+    // allocate 8 MB of 31.9 MB available
+    pmem_str2 = (char *)memkind_malloc(pmem_kind, 8 * 1024 * 1024);
+    if (pmem_str2 == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate pmem string (pmem_str11)\n");
         return errno ? -errno : 1;
     }
 
-    /* extend the heap #1 */
-    pmem_str12 = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
-    if (pmem_str12 == NULL) {
+    // allocate 16 MB of 23.9 MB available
+    pmem_str3 = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
+    if (pmem_str3 == NULL) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable to allocate pmem string (pmem_str12)\n");
         return errno ? -errno : 1;
     }
 
-    /* OOM #1 */
-    pmem_str = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
-    if (pmem_str != NULL) {
+    // allocate 16 MB of 7.9 MB available -- Out Of Memory expected
+    pmem_str4 = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
+    if (pmem_str4 != NULL) {
         perror("memkind_malloc()");
         fprintf(stderr,
                 "Failure, this allocation should not be possible (expected result was NULL)\n");
         return errno ? -errno : 1;
     }
 
-    sprintf(pmem_str10, "Hello world from persistent memory\n");
+    sprintf(pmem_str1, "Hello world from pmem - pmem_str1\n");
+    sprintf(pmem_str2, "Hello world from pmem - pmem_str2\n");
+    sprintf(pmem_str3, "Hello world from persistent memory - pmem_str3\n");
 
-    fprintf(stdout, "%s", pmem_str10);
+    fprintf(stdout, "%s", pmem_str1);
+    fprintf(stdout, "%s", pmem_str2);
+    fprintf(stdout, "%s", pmem_str3);
 
-    memkind_free(pmem_kind, pmem_str10);
-    memkind_free(pmem_kind, pmem_str11);
-    memkind_free(pmem_kind, pmem_str12);
+    memkind_free(pmem_kind, pmem_str1);
+    memkind_free(pmem_kind, pmem_str2);
+    memkind_free(pmem_kind, pmem_str3);
 
     err = memkind_destroy_kind(pmem_kind);
     if (err) {
@@ -124,7 +130,7 @@ int main(int argc, char *argv[])
         return errno ? -errno : 1;
     }
 
-    fprintf(stdout, "Memory was successfully allocated and released.");
+    fprintf(stdout, "Memory was successfully allocated and released.\n");
 
     return 0;
 }
