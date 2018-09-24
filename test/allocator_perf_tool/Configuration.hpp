@@ -27,6 +27,8 @@
 #include <map>
 #include <assert.h>
 
+struct memkind *MEMKIND_PMEM;
+
 //AllocatorTypes class represent allocator types and names related to this types.
 class AllocatorTypes
 {
@@ -47,6 +49,7 @@ public:
         MEMKIND_HBW_GBTLB,
         MEMKIND_HBW_PREFERRED_GBTLB,
         HBWMALLOC_ALLOCATOR,
+        MEMKIND_PMEM,
         NUM_OF_ALLOCATOR_TYPES
     };
 
@@ -67,7 +70,8 @@ public:
             "MEMKIND_HBW_PREFERRED_HUGETLB",
             "MEMKIND_HBW_GBTLB",
             "MEMKIND_HBW_PREFERRED_GBTLB",
-            "HBWMALLOC_ALLOCATOR"
+            "HBWMALLOC_ALLOCATOR",
+            "MEMKIND_PMEM"
         };
 
         if(type >= NUM_OF_ALLOCATOR_TYPES) assert(!"Invalid input argument!");

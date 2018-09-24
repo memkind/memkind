@@ -83,6 +83,8 @@ public:
         memkind_allocators[AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB] =
             MemkindAllocatorWithTimer(MEMKIND_HBW_PREFERRED_GBTLB,
                                       AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB);
+        memkind_allocators[AllocatorTypes::MEMKIND_PMEM] = MemkindAllocatorWithTimer(
+                                                               MEMKIND_PMEM, AllocatorTypes::MEMKIND_PMEM);
     }
 
     //Get existing allocator without creating new.

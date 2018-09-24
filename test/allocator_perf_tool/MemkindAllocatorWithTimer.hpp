@@ -40,11 +40,11 @@ class MemkindAllocatorWithTimer
     : public Allocator
 {
 public:
-    MemkindAllocatorWithTimer() : kind(MEMKIND_DEFAULT) {}
+    MemkindAllocatorWithTimer() : kind(&MEMKIND_DEFAULT) {}
 
-    MemkindAllocatorWithTimer(memkind_t memory_kind, unsigned kind_type_id)
+    MemkindAllocatorWithTimer(memkind_t &memory_kind, unsigned kind_type_id)
     {
-        kind = memory_kind;
+        kind = &memory_kind;
         type_id = kind_type_id;
     }
     ~MemkindAllocatorWithTimer(void) {}
@@ -52,32 +52,32 @@ public:
     memory_operation wrapped_malloc(size_t size)
     {
         START_TEST(type_id, FunctionCalls::MALLOC)
-        data.ptr = memkind_malloc(kind, size);
+        data.ptr = memkind_malloc(*kind, size);
         END_TEST
     }
 
     memory_operation wrapped_calloc(size_t num, size_t size)
     {
         START_TEST(type_id, FunctionCalls::CALLOC)
-        data.ptr = memkind_calloc(kind, num, size);
+        data.ptr = memkind_calloc(*kind, num, size);
         END_TEST
     }
 
     memory_operation wrapped_realloc(void* ptr, size_t size)
     {
         START_TEST(type_id, FunctionCalls::REALLOC)
-        data.ptr = memkind_realloc(kind, ptr, size);
+        data.ptr = memkind_realloc(*kind, ptr, size);
         END_TEST
     }
 
     void wrapped_free(void* ptr)
     {
-        memkind_free(kind, ptr);
+        memkind_free(*kind, ptr);
     }
 
-    void change_kind(memkind_t memory_kind, unsigned kind_type_id)
+    void change_kind(memkind_t &memory_kind, unsigned kind_type_id)
     {
-        kind = memory_kind;
+        kind = &memory_kind;
         type_id = kind_type_id;
     }
 
@@ -87,11 +87,11 @@ public:
     }
     memkind_t get_kind()
     {
-        return kind;
+        return *kind;
     }
 
 private:
-    memkind_t kind;
+    memkind_t* kind;
     unsigned type_id;
 
 };
