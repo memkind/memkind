@@ -367,6 +367,14 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptr)
     memkind_free(pmem_kind, test);
 }
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptrSizeMax)
+{
+    void *test = nullptr;
+
+    test = memkind_realloc(pmem_kind, test, SIZE_MAX);
+    ASSERT_TRUE(test == nullptr);
+}
+
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptrZero)
 {
     void *test = nullptr;
