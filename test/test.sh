@@ -40,6 +40,9 @@ green=`tput setaf 2`
 yellow=`tput setaf 3`
 default=`tput sgr0`
 
+# Pmem long time stress tests skipped by default
+SKIPPED_GTESTS=":-*PmemLongTimeStress*"
+
 err=0
 
 function usage () {
@@ -64,6 +67,8 @@ OPTIONS
         skip python tests
     -x,
         skip tests that are passed as value
+    -s,
+        run pmem long time stress tests
     -h,
         parameter added to display script usage
 EOF
@@ -233,7 +238,7 @@ fi
 
 OPTIND=1
 
-while getopts "T:c:f:l:hdmgx:p:" opt; do
+while getopts "T:c:f:l:hdmgx:p:s" opt; do
     case "$opt" in
         T)
             TEST_PATH=$OPTARG;
@@ -283,6 +288,10 @@ while getopts "T:c:f:l:hdmgx:p:" opt; do
                 SKIPPED_GTESTS=$SKIPPED_GTESTS":"$OPTARG
             fi
             show_skipped_tests "$OPTARG"
+            ;;
+        s)
+            SKIPPED_GTESTS="";
+            TEST_FILTER="MemkindPmemTests.test_TC_MEMKIND_PmemLongTimeStressSmallSize";
             ;;
         h)
             usage;

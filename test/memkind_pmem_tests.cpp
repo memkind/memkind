@@ -38,6 +38,9 @@ extern const char*  PMEM_DIR;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
+static const size_t small_size[] = {8, 16, 32, 48, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 640, 768, 896, 1024, 1280, 1536, 1792, 2048, 2560, 3072, 3584, 4096, 5120, 6144, 7168, 8192, 10240, 12288, 14336};
+static const size_t large_size[] = {16384, 32768, 20480, 24576, 28672, 32768, 40960, 49152, 57344, 65536, 81920, 98304, 114688, 131072, 163840, 196608, 229376, 262144, 327680, 393216, 458752, 524288, 655360, 786432, 917504, 1048576, 1310720, 1572864, 1835008, 2097152, 2621440, 3145728, 3670016, 4194304, 5242880, 6291456, 7340032, 8388608};
+
 class MemkindPmemTests: public :: testing::Test
 {
 
@@ -969,4 +972,66 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
     }
 
     free(threads);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemLongTimeStressSmallSize)
+{
+    const double test_malloc_time = 3*24*60*60;
+    void *test = nullptr;
+    size_t i = 0;
+    TimerSysTime timer;
+    timer.start();
+
+    do {
+        for (i = 0; i < (sizeof(small_size) / sizeof(small_size[0])); i++) {
+            test = memkind_malloc(pmem_kind, small_size[i]);
+            ASSERT_TRUE(test != nullptr);
+            memkind_free(pmem_kind, test);
+        }
+    } while(timer.getElapsedTime() < test_malloc_time);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemLongTimeStressLargeSize)
+{
+    const double test_malloc_time = 3*24*60*60;
+    void *test = nullptr;
+    size_t i = 0;
+    TimerSysTime timer;
+    timer.start();
+
+    do {
+        for (i = 0; i < (sizeof(large_size) / sizeof(large_size[0])); i++) {
+            test = memkind_malloc(pmem_kind, large_size[i]);
+            ASSERT_TRUE(test != nullptr);
+            memkind_free(pmem_kind, test);
+        }
+    } while(timer.getElapsedTime() < test_malloc_time);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemLongTimeStress)
+{
+    const double test_malloc_time = 3*24*60*60;
+    void *test = nullptr;
+    size_t i = 0, j = 0;
+    TimerSysTime timer;
+    timer.start();
+
+    do {
+        if (i < (sizeof(small_size) / sizeof(small_size[0]))) {
+            test = memkind_malloc(pmem_kind, small_size[i]);
+            ASSERT_TRUE(test != nullptr);
+            memkind_free(pmem_kind, test);
+            i++;
+        } else
+            i = 0;
+
+        if (j < (sizeof(large_size) / sizeof(large_size[0]))) {
+            test = memkind_malloc(pmem_kind, large_size[j]);
+            ASSERT_TRUE(test != nullptr);
+            memkind_free(pmem_kind, test);
+            j++;
+        } else
+            j = 0;
+
+    } while(timer.getElapsedTime() < test_malloc_time);
 }
