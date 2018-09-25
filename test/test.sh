@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2014 - 2016 Intel Corporation.
+#  Copyright (C) 2014 - 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -40,12 +40,15 @@ green=`tput setaf 2`
 yellow=`tput setaf 3`
 default=`tput sgr0`
 
+# Pmem long time stress tests skipped by default
+SKIPPED_GTESTS=":-*PmemLongTimeStress*"
+
 err=0
 
 function usage () {
    cat <<EOF
 
-Usage: $PROGNAME [-c csv_file] [-l log_file] [-f test_filter] [-T tests_dir] [-d] [-m] [-g] [-h] [-p]
+Usage: $PROGNAME [-c csv_file] [-l log_file] [-f test_filter] [-T tests_dir] [-d] [-m] [-p] [-x] [-s] [-h]
 
 OPTIONS
     -c,
@@ -64,6 +67,8 @@ OPTIONS
         skip python tests
     -x,
         skip tests that are passed as value
+    -s,
+        run pmem long time stress tests
     -h,
         parameter added to display script usage
 EOF
@@ -233,7 +238,7 @@ fi
 
 OPTIND=1
 
-while getopts "T:c:f:l:hdmgx:p:" opt; do
+while getopts "T:c:f:l:hdmsx:p:" opt; do
     case "$opt" in
         T)
             TEST_PATH=$OPTARG;
@@ -283,6 +288,10 @@ while getopts "T:c:f:l:hdmgx:p:" opt; do
                 SKIPPED_GTESTS=$SKIPPED_GTESTS":"$OPTARG
             fi
             show_skipped_tests "$OPTARG"
+            ;;
+        s)
+            SKIPPED_GTESTS="";
+            TEST_FILTER="MemkindPmemStressTests.test_TC_MEMKIND_PmemLongTimeStress";
             ;;
         h)
             usage;
