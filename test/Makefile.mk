@@ -95,6 +95,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/static_kinds_tests.cpp \
                          test/hbw_verify_function_test.cpp \
                          test/dlopen_test.cpp \
+                         test/pmem_allocator_tests.cpp \
                          #end
 
 test_locality_test_SOURCES = $(fused_gtest) test/allocator_perf_tool/Allocation_info.cpp test/locality_test.cpp
@@ -219,7 +220,8 @@ check_PROGRAMS += test/hello_memkind \
                   test/pmem_multithreads_onekind \
                   # end
 if HAVE_CXX11
-check_PROGRAMS += test/memkind_allocated
+check_PROGRAMS += test/memkind_allocated \
+                  test/pmem_cpp_allocator
 endif
 
 
@@ -238,6 +240,7 @@ test_autohbw_candidates_LDADD = libmemkind.la \
                                 # end
 if HAVE_CXX11
 test_memkind_allocated_LDADD = libmemkind.la
+test_pmem_cpp_allocator_LDADD = libmemkind.la
 endif
 
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
@@ -256,6 +259,7 @@ test_libautohbw_la_SOURCES = autohbw/autohbw.c
 noinst_LTLIBRARIES += test/libautohbw.la
 if HAVE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
+test_pmem_cpp_allocator_SOURCES = examples/pmem_cpp_allocator.cpp
 endif
 
 clean-local: test-clean

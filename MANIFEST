@@ -33,6 +33,7 @@ examples/pmem_usable_size.c
 examples/pmem_alignment.c
 examples/pmem_multithreads.c
 examples/pmem_multithreads_onekind.c
+examples/pmem_cpp_allocator.cpp
 install_astyle.sh
 m4/ax_cxx_compile_stdcxx.m4
 m4/ax_cxx_compile_stdcxx_11.m4
@@ -45,6 +46,7 @@ man/memkind_hbw.3
 man/memkind_hugetlb.3
 man/memkind_pmem.3
 man/hbwallocator.3
+man/pmemallocator.3
 man/autohbw.7
 memkind.spec.mk
 src/heap_manager.c
@@ -66,6 +68,7 @@ include/hbwmalloc.h
 include/memkind.h
 include/memkind_deprecated.h
 include/hbw_allocator.h
+include/pmem_allocator.h
 include/memkind/internal/heap_manager.h
 include/memkind/internal/memkind_arena.h
 include/memkind/internal/memkind_default.h
@@ -178,6 +181,7 @@ test/freeing_memory_segfault_test.cpp
 test/dlopen_test.cpp
 test/gtest_fused/gtest/gtest-all.cc
 test/gtest_fused/gtest/gtest.h
+test/pmem_allocator_tests.cpp
 jemalloc/.appveyor.yml
 jemalloc/.autom4te.cfg
 jemalloc/.gitattributes
