@@ -85,6 +85,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/error_message_tests.cpp \
                          test/get_arena_test.cpp \
                          test/memkind_pmem_tests.cpp \
+                         test/memkind_pmem_long_time_tests.cpp \
                          test/performance/operations.hpp \
                          test/performance/perf_tests.hpp \
                          test/performance/perf_tests.cpp \
