@@ -39,4 +39,6 @@
 #define HBW_SUCCESS 0
 #define HBW_ERROR -1
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
 #endif
