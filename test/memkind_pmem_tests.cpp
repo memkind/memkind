@@ -356,6 +356,25 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocSizeMax)
     memkind_free(pmem_kind, test);
 }
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocPtrCheck)
+{
+    size_t size = 1024 * 1024;
+    void *ptr_malloc = nullptr;
+    void *ptr_malloc_copy = nullptr;
+    void *ptr_realloc = nullptr;
+
+    ptr_malloc = memkind_malloc(pmem_kind, size);
+    ASSERT_TRUE(ptr_malloc != nullptr);
+
+    ptr_malloc_copy = ptr_malloc;
+
+    ptr_realloc = memkind_realloc(pmem_kind, ptr_malloc, PMEM_PART_SIZE);
+    ASSERT_TRUE(ptr_realloc == nullptr);
+    ASSERT_TRUE(ptr_malloc == ptr_malloc_copy);
+
+    memkind_free(pmem_kind, ptr_malloc);
+}
+
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptr)
 {
     size_t size = 1024;
