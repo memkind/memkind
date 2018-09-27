@@ -598,6 +598,70 @@ INSTANTIATE_TEST_CASE_P(
                       96 * KB, 112 * KB, 128 * KB, 160 * KB, 192 * KB, 500000,
                       2 * MB, 5 * MB));
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFill)
+{
+    const size_t small_size[] = {8, 16, 32, 48, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384,
+                                 448, 512, 640, 768, 896, 1024, 1280, 1536, 1792, 2048, 2560,
+                                 3072, 3584, 4096, 5120, 6144, 7168, 8192, 10240, 12288, 14336
+                                };
+    const int malloc_limit = 10000;
+    const int loop_limit = 100;
+    int first_limit_of_allocations = 0;
+    int temp_limit_of_allocations = 0;
+    void *test[malloc_limit][ARRAY_SIZE(small_size)] = {{nullptr}};
+    int i = 0, j = 0, k = 0;
+
+    //check maximum number of allocations right after create the kind
+    [&] {
+        for (i = 0; i < malloc_limit; i++)
+        {
+            for (j = 0; j < (int)ARRAY_SIZE(small_size); j++) {
+                test[i][j] = memkind_malloc(pmem_kind, small_size[j]);
+                if (test[i][j] == nullptr)
+                    return;
+            }
+        }
+    }();
+
+    ASSERT_TRUE(malloc_limit != i);
+    first_limit_of_allocations = i;
+
+    for(; i >= 0; i--) {
+        for(j--; j >= 0; j--) {
+            memkind_free(pmem_kind, test[i][j]);
+            test[i][j] = nullptr;
+        }
+        j = ARRAY_SIZE(small_size);
+    }
+
+    //check number of allocations in consecutive iterations of malloc-free loop
+    for (i = 0; i < loop_limit; i++) {
+        [&] {
+            for (j = 0; j < malloc_limit; j++)
+            {
+                for (k = 0; k < (int)ARRAY_SIZE(small_size); k++) {
+                    test[j][k] = memkind_malloc(pmem_kind, small_size[k]);
+                    if(test[j][k] == nullptr)
+                        return;
+                }
+            }
+        }();
+
+        ASSERT_TRUE(malloc_limit != j);
+        temp_limit_of_allocations = j;
+
+        for(; j >= 0; j--) {
+            for(k--; k >= 0; k--) {
+                memkind_free(pmem_kind, test[j][k]);
+                test[j][k] = nullptr;
+            }
+            k = ARRAY_SIZE(small_size);
+        }
+
+        ASSERT_TRUE(temp_limit_of_allocations > 0.98 * first_limit_of_allocations);
+    }
+}
+
 TEST_F(MemkindPmemTests,
        test_TC_MEMKIND_PmemPosixMemalignWrongAlignmentLessThanVoidAndNotPowerOfTwo)
 {
