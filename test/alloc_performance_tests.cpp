@@ -28,8 +28,8 @@
 #include "allocator_perf_tool/Thread.hpp"
 #include "allocator_perf_tool/GTestAdapter.hpp"
 
-static const size_t PMEM_PART_SIZE = 2*MEMKIND_PMEM_MIN_SIZE;
-static const char*  PMEM_DIR = "/tmp/";
+static const size_t PMEM_PART_SIZE = 0;
+extern const char*  PMEM_DIR;
 
 class AllocPerformanceTest: public :: testing::Test
 {
