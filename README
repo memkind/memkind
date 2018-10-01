@@ -182,7 +182,7 @@ In memkind library heap management can be adjusted with MEMKIND_HEAP_MANAGER
 environment variable, which allows for switching to one of the available
 heap managers.
 Values:
-    JEMALLOC – sets the jamalloc heap manager
+    JEMALLOC – sets the jemalloc heap manager
     TBB – sets Intel Threading Building Blocks heap manager. This option requires installed
     Intel Threading Building Blocks library.
 If the MEMKIND_HEAP_MANAGER is not set than the jemalloc heap manager will be used by default.
