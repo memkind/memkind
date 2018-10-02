@@ -32,7 +32,7 @@
 #include <pthread.h>
 #include "common.h"
 
-static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4096;
+static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * KB;
 static const size_t PMEM_NO_LIMIT = 0;
 extern const char*  PMEM_DIR;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -95,7 +95,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPriv)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMalloc)
 {
-    const size_t size = 1024;
+    const size_t size = 1 * KB;
     char *default_str = nullptr;
 
     default_str = (char *)memkind_malloc(pmem_kind, size);
@@ -131,7 +131,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSizeMax)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCalloc)
 {
-    const size_t size = 1024;
+    const size_t size = 1 * KB;
     const size_t num = 1;
     char *default_str = nullptr;
 
@@ -228,7 +228,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHuge)
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
 {
     const size_t size1 = 512;
-    const size_t size2 = 1024;
+    const size_t size2 = 1 * KB;
     char *default_str = nullptr;
 
     default_str = (char *)memkind_realloc(pmem_kind, default_str, size1);
@@ -259,10 +259,10 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocUsableSize)
         {.size = 1000, .spacing = 128},
         {.size = 2000, .spacing = 256},
         {.size = 3000, .spacing = 512},
-        {.size = 1 * 1024 * 1024, .spacing = 4 * 1024 * 1024},
-        {.size = 2 * 1024 * 1024, .spacing = 4 * 1024 * 1024},
-        {.size = 3 * 1024 * 1024, .spacing = 4 * 1024 * 1024},
-        {.size = 4 * 1024 * 1024, .spacing = 4 * 1024 * 1024}
+        {.size = 1 * MB, .spacing = 4 * MB},
+        {.size = 2 * MB, .spacing = 4 * MB},
+        {.size = 3 * MB, .spacing = 4 * MB},
+        {.size = 4 * MB, .spacing = 4 * MB}
     };
     struct memkind *pmem_temp = nullptr;
 
@@ -329,7 +329,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemResize)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocZero)
 {
-    size_t size = 1024;
+    size_t size = 1 * KB;
     void *test = nullptr;
     void *new_test = nullptr;
 
@@ -342,7 +342,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocZero)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocSizeMax)
 {
-    size_t size = 1024;
+    size_t size = 1 * KB;
     void *test = nullptr;
     void *new_test = nullptr;
 
@@ -377,7 +377,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocPtrCheck)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptr)
 {
-    size_t size = 1024;
+    size_t size = 1 * KB;
     void *test = nullptr;
 
     test = memkind_realloc(pmem_kind, test, size);
@@ -404,7 +404,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptrZero)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocIncreaseSize)
 {
-    size_t size = 1024;
+    size_t size = 1 * KB;
     char *test1 = nullptr;
     char *test2 = nullptr;
     const char val[] = "test_TC_MEMKIND_PmemReallocIncreaseSize";
@@ -426,7 +426,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocIncreaseSize)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocDecreaseSize)
 {
-    size_t size = 1024;
+    size_t size = 1 * KB;
     char *test1 = nullptr;
     char *test2 = nullptr;
     const char val[] = "test_TC_MEMKIND_PmemReallocDecreaseSize";
@@ -454,20 +454,20 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocDecreaseSize)
  */
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocInPlace)
 {
-    void *test1 = memkind_malloc(pmem_kind, 10 * 1024 * 1024);
+    void *test1 = memkind_malloc(pmem_kind, 10 * MB);
     ASSERT_TRUE(test1 != nullptr);
 
     /* Several reallocations within the same jemalloc size class*/
-    void *test1r = memkind_realloc(pmem_kind, test1, 6 * 1024 * 1024);
+    void *test1r = memkind_realloc(pmem_kind, test1, 6 * MB);
     ASSERT_EQ(test1r, test1);
 
-    test1r = memkind_realloc(pmem_kind, test1, 10 * 1024 * 1024);
+    test1r = memkind_realloc(pmem_kind, test1, 10 * MB);
     ASSERT_EQ(test1r, test1);
 
-    test1r = memkind_realloc(pmem_kind, test1, 8 * 1024 * 1024);
+    test1r = memkind_realloc(pmem_kind, test1, 8 * MB);
     ASSERT_EQ(test1r, test1);
 
-    void *test2 = memkind_malloc(pmem_kind, 4 * 1024 * 1024);
+    void *test2 = memkind_malloc(pmem_kind, 4 * MB);
     ASSERT_TRUE(test2 != nullptr);
 
     /* 4MB => 16B (changing size class) */
@@ -487,7 +487,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocInPlace)
     ASSERT_NE(test1r, test1);
 
     /* ... and leaves some memory for new allocations. */
-    void *test3 = memkind_malloc(pmem_kind, 5 * 1024 * 1024);
+    void *test3 = memkind_malloc(pmem_kind, 5 * MB);
     ASSERT_TRUE(test3 != nullptr);
 
     memkind_free(pmem_kind, test1r);
@@ -594,9 +594,9 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSize)
 INSTANTIATE_TEST_CASE_P(
     MallocParam, MemkindPmemTestsMalloc,
     ::testing::Values(32, 60, 80, 100, 128, 150, 160, 250, 256, 300, 320,
-                      500, 512, 800, 896, 3000, 4096, 6000, 10000, 60000,
-                      98304, 114688, 131072, 163840, 196608, 500000,
-                      2*1024*1024, 5*1024*1024));
+                      500, 512, 800, 896, 3000, 4 * KB, 6000, 10000, 60000,
+                      96 * KB, 112 * KB, 128 * KB, 160 * KB, 192 * KB, 500000,
+                      2 * MB, 5 * MB));
 
 TEST_F(MemkindPmemTests,
        test_TC_MEMKIND_PmemPosixMemalignWrongAlignmentLessThanVoidAndNotPowerOfTwo)
@@ -690,7 +690,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalign)
     void *test = nullptr;
     int ret;
 
-    for(alignment = 1024; alignment <= 131072; alignment *= 2) {
+    for(alignment =  1 * KB; alignment <= 128 * KB; alignment *= 2) {
         for (i = 0; i < test_loop; i++) {
             for (j = 0; j < max_allocs; ++j) {
                 errno = 0;
@@ -849,7 +849,7 @@ TEST_F(MemkindPmemTests,
        test_TC_MEMKIND_PmemCreateDestroyKindLoopWithMallocSmallSize)
 {
     struct memkind *pmem_temp = nullptr;
-    const size_t size = 1024;
+    const size_t size = 1 * KB;
 
     for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
         int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
@@ -884,7 +884,7 @@ TEST_F(MemkindPmemTests,
 {
     struct memkind *pmem_temp = nullptr;
     const size_t size_1 = 512;
-    const size_t size_2 = 1024;
+    const size_t size_2 = 1 * KB;
 
     for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
         int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
