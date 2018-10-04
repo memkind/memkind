@@ -41,8 +41,6 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .B "KIND MANAGEMENT:"
 .br
 .BI "int memkind_create_kind(memkind_memtype_t " "memtype_flags" ", memkind_policy_t " "policy" ", memkind_bits_t " "flags" ", memkind_t " "*kind" );
-.br
-.BI "int memkind_check_available(memkind_t " "kind" );
 .sp
 .SS "STANDARD API:"
 .sp
@@ -71,6 +69,8 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
 .br
 .BI "int memkind_destroy_kind(memkind_t " "kind" );
+.br
+.BI "int memkind_check_available(memkind_t " "kind" );
 .sp
 .B "DECORATORS:"
 .br
