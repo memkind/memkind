@@ -227,6 +227,7 @@ $(memkind_test_dir)/run_alloc_benchmark.sh
 $(memkind_test_dir)/alloc_benchmark_hbw
 $(memkind_test_dir)/alloc_benchmark_glibc
 $(memkind_test_dir)/alloc_benchmark_tbb
+$(memkind_test_dir)/alloc_benchmark_pmem
 
 %exclude $(memkind_test_dir)/*.pyo
 %exclude $(memkind_test_dir)/*.pyc
