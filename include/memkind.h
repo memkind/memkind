@@ -247,7 +247,7 @@ int memkind_create_pmem(const char *dir, size_t max_size, memkind_t *kind);
 
 ///
 /// \brief Check if kind is available
-/// \warning EXPERIMENTAL API
+/// \note STANDARD API
 /// \param kind specified memory kind
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
 ///
