@@ -40,6 +40,15 @@
 #include "tbbmalloc.h"
 #define MALLOC_FN scalable_malloc
 #define FREE_FN scalable_free
+#elif defined (PMEMMALLOC)
+#include <sys/stat.h>
+#include "memkind.h"
+#define MALLOC_FN(x) memkind_malloc(pmem_bench_kind, (x))
+#define FREE_FN(x) memkind_free(pmem_bench_kind, (x))
+
+static const size_t PMEM_PART_SIZE = 0;
+static const char* PMEM_DIR = "/tmp/";
+static memkind_t pmem_bench_kind;
 #else
 #define MALLOC_FN malloc
 #define FREE_FN free
@@ -55,7 +64,7 @@ int main(int argc, char * argv[])
 #else
     int nthr = 1;
 #endif
-    long N, SIZE;
+    long n, size;
     size_t alloc_size;
     unsigned long i;
     double dt, t_start, t_end, t_malloc, t_free, t_first_malloc, t_first_free,
@@ -70,18 +79,45 @@ int main(int argc, char * argv[])
         return EXIT_FAILURE;
     }
 #endif
+#ifdef PMEMMALLOC
+    struct stat st;
 
     /* Handle command line arguments */
-    if (argc == 3) {
-        N = atol(argv[1]);
-        SIZE = atol(argv[2]);
+    if (argc == 3 || argc == 4) {
+        n = atol(argv[1]);
+        size = atol(argv[2]);
+
+        if (argc == 4) {
+            if (stat(argv[3], &st) != 0 || !S_ISDIR(st.st_mode)) {
+                usage(argv[0]);
+                return EXIT_FAILURE;
+            } else {
+                PMEM_DIR = argv[3];
+            }
+        }
     }
-    if (argc != 3 || N < 0 || SIZE < 0 || SIZE > (LONG_MAX >> 10)) {
+    if ((argc != 3 && argc != 4) || n < 0 || size < 0 || size > (LONG_MAX >> 10)) {
         usage(argv[0]);
         return EXIT_FAILURE;
     }
 
-    alloc_size = (size_t) SIZE * 1024;
+    int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_bench_kind);
+    if (err) {
+        printf("Error: memkind_create_pmem failed %d\n", err);
+        return EXIT_FAILURE;
+    }
+#else
+    /* Handle command line arguments */
+    if (argc == 3) {
+        n = atol(argv[1]);
+        size = atol(argv[2]);
+    }
+    if (argc != 3 || n < 0 || size < 0 || size > (LONG_MAX >> 10)) {
+        usage(argv[0]);
+        return EXIT_FAILURE;
+    }
+#endif
+    alloc_size = (size_t) size * 1024;
 
     /* Get pagesize and compute page_mask */
     const size_t page_size = sysconf(_SC_PAGESIZE);
@@ -105,7 +141,7 @@ int main(int argc, char * argv[])
     {
         malloc_time = 0.0;
         free_time = 0.0;
-        for (i=0; i<N; i++) {
+        for (i=0; i<n; i++) {
             t_malloc = ctimer();
             ptr = (void*) MALLOC_FN(alloc_size);
             malloc_time += ctimer() - t_malloc;
@@ -137,16 +173,31 @@ int main(int argc, char * argv[])
     dt = t_end - t_start;
 
     printf("%d %lu %8.6f %8.6f  %8.6f  %8.6f  %8.6f\n",
-           nthr, SIZE, dt/N, malloc_time/N, free_time/N, first_malloc_time,
+           nthr, size, dt/n, malloc_time/n, free_time/n, first_malloc_time,
            first_free_time);
+#ifdef PMEMMALLOC
+    err = memkind_destroy_kind(pmem_bench_kind);
+    if (err) {
+        printf("Error: memkind_destroy_kind failed %d\n", err);
+        return EXIT_FAILURE;
+    }
+#endif
     return EXIT_SUCCESS;
 }
 
 void usage(char * name)
 {
+#ifdef PMEMMALLOC
+    printf("Usage: %s <N> <SIZE> [DIR], where \n"
+           "N is an number of repetitions \n"
+           "SIZE is an allocation size in kbytes\n"
+           "DIR is a custom path for PMEM kind, (default: \"/tmp/\")\n",
+           name);
+#else
     printf("Usage: %s <N> <SIZE>, where \n"
            "N is an number of repetitions \n"
            "SIZE is an allocation size in kbytes\n", name);
+#endif
 }
 
 inline double ctimer()

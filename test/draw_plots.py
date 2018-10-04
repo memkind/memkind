@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2016 Intel Corporation.
+#  Copyright (C) 2016 - 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,9 @@ import numpy.ma as ma
 import os
 from shutil import rmtree
 
-files = ('alloctest_hbw.txt', 'alloctest_glibc.txt', 'alloctest_tbb.txt')
-legend = ('avg hbw', 'avg glibc', 'avg tbb', 'first operation')
-colors = ('red', 'green', 'blue')
+files = ('alloctest_hbw.txt', 'alloctest_glibc.txt', 'alloctest_tbb.txt', 'alloctest_pmem.txt')
+legend = ('avg hbw', 'avg glibc', 'avg tbb', 'avg pmem', 'first operation')
+colors = ('red', 'green', 'blue', 'black')
 first_operation_color = 'yellow'
 
 threads_values = ('1', '2', '4', '8', '16', '18', '36')
@@ -54,7 +54,7 @@ big_sizes_index    = np.arange(len(big_sizes_values))
 sizes_index = (small_sizes_index, medium_sizes_index, big_sizes_index)
 
 # 3D and 2D plots needs different width, so that bars do not cover each other in 3D
-bar_width_2D = 0.3
+bar_width_2D = 0.2
 bar_width_3D = 0.1
 
 # return times (total, allocation, free, first allocation, first free) as columns 2 - 6
@@ -129,7 +129,7 @@ def load_data_from_files():
 
 def set_bar_width_and_offsets(requested_width):
     bar_width = requested_width
-    offsets = (0, bar_width, 2*bar_width)
+    offsets = (0, bar_width, 2*bar_width, 3*bar_width)
     return bar_width, offsets
 
 if os.path.exists(output_directory):
@@ -158,7 +158,7 @@ for size_values, size_index, size_display in zip(sizes_values, sizes_index, size
                            'threads', threads_index, threads_values,
                            'time [ms]')
             legend_data = []
-            # for each allocator (hbw, glibc, tbb)
+            # for each allocator (hbw, glibc, tbb, pmem)
             for entry, offset, draw_color in zip(data, offsets, colors):
                 # remove all rows where column 1 (size) is not in size_values (current size range)
                 entry = entry[np.in1d(entry[:,1], np.array(size_values).astype(np.int))]
@@ -201,7 +201,7 @@ for size_values, size_index, size_display in zip(sizes_values, sizes_index, size
                                'time [ms]', None, None,
                                None)
                 legend_data = []
-                # for each allocator (hbw, glibc, tbb)
+                # for each allocator (hbw, glibc, tbb, pmem)
                 for entry, offset, draw_color in zip(data, offsets, colors):
                     # remove all rows where column 1 (size) is not in size_values (current size range)
                     entry = entry[np.in1d(entry[:,1], np.array(size_values).astype(np.int))]
@@ -244,7 +244,7 @@ for size_values, size_index, size_display in zip(sizes_values, sizes_index, size
                                'time [ms]', None, None,
                                None)
                 legend_data = []
-                # for each allocator (hbw, glibc, tbb)
+                # for each allocator (hbw, glibc, tbb, pmem)
                 for entry, offset, draw_color in zip(data, offsets, colors):
                     # remove all rows where column 1 (size) is not in size_values (current size range)
                     entry = entry[np.in1d(entry[:,1], np.array(size_values).astype(np.int))]
