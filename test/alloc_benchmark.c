@@ -40,6 +40,13 @@
 #include "tbbmalloc.h"
 #define MALLOC_FN scalable_malloc
 #define FREE_FN scalable_free
+#elif defined (PMEMMALLOC)
+#include "memkind.h"
+#define MALLOC_FN(x) memkind_malloc(pmem_kind, (x))
+#define FREE_FN(x) memkind_free(pmem_kind, (x))
+static const size_t PMEM_PART_SIZE = 0;
+static const char*  PMEM_DIR = "/tmp/";
+memkind_t pmem_kind;
 #else
 #define MALLOC_FN malloc
 #define FREE_FN free
@@ -67,6 +74,13 @@ int main(int argc, char * argv[])
     ret = load_tbbmalloc_symbols();
     if (ret) {
         printf("Error: TBB symbols not loaded (ret: %d)\n", ret);
+        return EXIT_FAILURE;
+    }
+#endif
+#ifdef PMEMMALLOC
+    int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind);
+    if (err) {
+        printf("memkind_create_pmem failed %d\n", err);
         return EXIT_FAILURE;
     }
 #endif
@@ -139,6 +153,13 @@ int main(int argc, char * argv[])
     printf("%d %lu %8.6f %8.6f  %8.6f  %8.6f  %8.6f\n",
            nthr, SIZE, dt/N, malloc_time/N, free_time/N, first_malloc_time,
            first_free_time);
+#ifdef PMEMMALLOC
+    err = memkind_destroy_kind(pmem_kind);
+    if (err) {
+        printf("Memkind_destroy_kind failed %d\n", err);
+        return EXIT_FAILURE;
+    }
+#endif
     return EXIT_SUCCESS;
 }
 

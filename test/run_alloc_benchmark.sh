@@ -24,7 +24,7 @@
 #
 
 # Allocator
-ALLOCATOR="glibc tbb hbw"
+ALLOCATOR="glibc tbb hbw pmem"
 # Thread configuration
 THREADS=(1 2 4 8 16 18 36)
 # Memory configuration (in kB) / iterations

@@ -188,6 +188,7 @@ endif
 check_PROGRAMS += test/alloc_benchmark_hbw \
                   test/alloc_benchmark_glibc \
                   test/alloc_benchmark_tbb \
+				  test/alloc_benchmark_pmem \
                   # end
 
 test_alloc_benchmark_hbw_LDADD = libmemkind.la
@@ -204,6 +205,10 @@ test_alloc_benchmark_tbb_SOURCES = test/alloc_benchmark.c \
                                    test/tbbmalloc.h \
                                    # end
 test_alloc_benchmark_tbb_CFLAGS = -O0 -g -fopenmp -Wall -DTBBMALLOC -ldl
+
+test_alloc_benchmark_pmem_CFLAGS = -O0 -g -fopenmp -Wall -DPMEMMALLOC -ldl
+test_alloc_benchmark_pmem_LDADD = libmemkind.la
+test_alloc_benchmark_pmem_SOURCES = test/alloc_benchmark.c
 
 # Examples as tests
 check_PROGRAMS += test/hello_memkind \

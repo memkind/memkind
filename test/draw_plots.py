@@ -29,9 +29,9 @@ import numpy.ma as ma
 import os
 from shutil import rmtree
 
-files = ('alloctest_hbw.txt', 'alloctest_glibc.txt', 'alloctest_tbb.txt')
-legend = ('avg hbw', 'avg glibc', 'avg tbb', 'first operation')
-colors = ('red', 'green', 'blue')
+files = ('alloctest_hbw.txt', 'alloctest_glibc.txt', 'alloctest_tbb.txt', 'alloctest_pmem.txt')
+legend = ('avg hbw', 'avg glibc', 'avg tbb', 'avg pmem', 'first operation')
+colors = ('red', 'green', 'blue', 'black')
 first_operation_color = 'yellow'
 
 threads_values = ('1', '2', '4', '8', '16', '18', '36')
