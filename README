@@ -176,6 +176,11 @@ and pay particular attention to the use of the procfs files:
     /proc/sys/vm/nr_overcommit_hugepages
 for enabling the kernel's huge page pool.
 
+SETTING LOGGING MECHANISM
+--------------------
+In memkind library logging mechanism could be enabled by setting MEMKIND_DEBUG
+environment variable. Setting MEMKIND_DEBUG to "1" enables printing messages
+like errors and general information about environment to stderr.
 
 SETTING HEAP MANAGER
 --------------------
