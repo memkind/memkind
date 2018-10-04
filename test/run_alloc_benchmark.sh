@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2014 - 2016 Intel Corporation.
+#  Copyright (C) 2014 - 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 #
 
 # Allocator
-ALLOCATOR="glibc tbb hbw"
+ALLOCATOR="glibc tbb hbw pmem"
 # Thread configuration
 THREADS=(1 2 4 8 16 18 36)
 # Memory configuration (in kB) / iterations
