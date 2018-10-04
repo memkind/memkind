@@ -40,6 +40,15 @@
 #include "tbbmalloc.h"
 #define MALLOC_FN scalable_malloc
 #define FREE_FN scalable_free
+#elif defined (PMEMMALLOC)
+#include <sys/stat.h>
+#include "memkind.h"
+#define MALLOC_FN(x) memkind_malloc(pmem_bench_kind, (x))
+#define FREE_FN(x) memkind_free(pmem_bench_kind, (x))
+
+static const size_t PMEM_PART_SIZE = 0;
+static const char*  PMEM_DIR = "/tmp/";
+static memkind_t pmem_bench_kind;
 #else
 #define MALLOC_FN malloc
 #define FREE_FN free
@@ -70,7 +79,34 @@ int main(int argc, char * argv[])
         return EXIT_FAILURE;
     }
 #endif
+#ifdef PMEMMALLOC
+    struct stat st;
 
+    /* Handle command line arguments */
+    if (argc == 3 || argc == 4) {
+        N = atol(argv[1]);
+        SIZE = atol(argv[2]);
+
+        if (argc == 4) {
+            if (stat(argv[3], &st) != 0 || !S_ISDIR(st.st_mode)) {
+                usage(argv[0]);
+                return EXIT_FAILURE;
+            } else {
+                PMEM_DIR = argv[3];
+            }
+        }
+    }
+    if ((argc != 3 && argc != 4) || N < 0 || SIZE < 0 || SIZE > (LONG_MAX >> 10)) {
+        usage(argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_bench_kind);
+    if (err) {
+        printf("Error: memkind_create_pmem failed %d\n", err);
+        return EXIT_FAILURE;
+    }
+#else
     /* Handle command line arguments */
     if (argc == 3) {
         N = atol(argv[1]);
@@ -80,7 +116,7 @@ int main(int argc, char * argv[])
         usage(argv[0]);
         return EXIT_FAILURE;
     }
-
+#endif
     alloc_size = (size_t) SIZE * 1024;
 
     /* Get pagesize and compute page_mask */
@@ -139,14 +175,29 @@ int main(int argc, char * argv[])
     printf("%d %lu %8.6f %8.6f  %8.6f  %8.6f  %8.6f\n",
            nthr, SIZE, dt/N, malloc_time/N, free_time/N, first_malloc_time,
            first_free_time);
+#ifdef PMEMMALLOC
+    err = memkind_destroy_kind(pmem_bench_kind);
+    if (err) {
+        printf("Error: memkind_destroy_kind failed %d\n", err);
+        return EXIT_FAILURE;
+    }
+#endif
     return EXIT_SUCCESS;
 }
 
 void usage(char * name)
 {
+#ifdef PMEMMALLOC
+    printf("Usage: %s <N> <SIZE> <DIR>, where \n"
+           "N is an number of repetitions \n"
+           "SIZE is an allocation size in kbytes\n"
+           "DIR is a custom and optional path for pmem kind, default is \"/tmp/\"\n",
+           name);
+#else
     printf("Usage: %s <N> <SIZE>, where \n"
            "N is an number of repetitions \n"
            "SIZE is an allocation size in kbytes\n", name);
+#endif
 }
 
 inline double ctimer()
