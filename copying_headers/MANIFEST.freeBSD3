@@ -5,3 +5,4 @@ examples/pmem_usable_size.c
 examples/pmem_alignment.c
 examples/pmem_multithreads.c
 examples/pmem_multithreads_onekind.c
+examples/pmem_cpp_allocator.cpp
