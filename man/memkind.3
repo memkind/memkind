@@ -41,8 +41,6 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .B "KIND MANAGEMENT:"
 .br
 .BI "int memkind_create_kind(memkind_memtype_t " "memtype_flags" ", memkind_policy_t " "policy" ", memkind_bits_t " "flags" ", memkind_t " "*kind" );
-.br
-.BI "int memkind_check_available(memkind_t " "kind" );
 .sp
 .SS "STANDARD API:"
 .sp
@@ -71,6 +69,8 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
 .br
 .BI "int memkind_destroy_kind(memkind_t " "kind" );
+.br
+.BI "int memkind_check_available(memkind_t " "kind" );
 .sp
 .B "DECORATORS:"
 .br
@@ -117,6 +117,8 @@ must specify the
 of memory with the first argument to each function. See the
 .B KINDS
 section below for a full description of the implemented kinds.
+For file-backed kind of memory see
+.BR memkind_create_pmem() .
 .PP
 .BR memkind_malloc ()
 allocates
@@ -305,7 +307,7 @@ will use some of that space for its own metadata.
 .PP
 .BR memkind_create_kind ()
 creates kind that allocates memory with specific memory type, memory binding policy and flags (see
-.B "MEMORY FLAGS"
+.B MEMORY FLAGS
 section).
 The
 .IR memtype_flags
@@ -424,11 +426,15 @@ Default allocation using standard memory and default page size.
 .TP
 .B MEMKIND_HUGETLB
 Allocate from standard memory using huge pages. Note: This kind requires
-huge pages configuration described in SYSTEM CONFIGURATION section.
+huge pages configuration described in
+.B SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_GBTLB (DEPRECATED)
 Allocate from standard memory using 1GB chunks backed by huge pages.
-Note: This kind requires huge pages configuration described in SYSTEM CONFIGURATION section.
+Note: This kind requires huge pages configuration described in
+.B SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_INTERLEAVE
 Allocate pages interleaved across all NUMA nodes with transparent huge
@@ -449,7 +455,9 @@ except decision regarding closest NUMA node is postponed until the time of first
 Same as
 .B MEMKIND_HBW
 except the allocation is backed by huge pages. Note: This kind requires
-huge pages configuration described in SYSTEM CONFIGURATION section.
+huge pages configuration described in
+.B SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_HBW_ALL_HUGETLB
 Combination of
@@ -457,7 +465,9 @@ Combination of
 and
 .B MEMKIND_HBW_HUGETLB
 properties. Note: This kind requires
-huge pages configuration described in SYSTEM CONFIGURATION section.
+huge pages configuration described in
+.B SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_HBW_PREFERRED
 Same as
@@ -469,7 +479,9 @@ the request, the allocation will fall back on standard memory.
 Same as
 .B MEMKIND_HBW_PREFERRED
 except the allocation is backed by huge pages. Note: This kind requires huge pages
-configuration described in SYSTEM CONFIGURATION section.
+configuration described in
+.B SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_HBW_GBTLB (DEPRECATED)
 Same as
@@ -478,7 +490,8 @@ except the allocation is backed by 1GB chunks of huge pages. Note that
 .I size
 can take on any value, but full gigabyte pages will allocated for each
 request, so remainder of the last page will be wasted.
-This kind requires huge pages configuration described in SYSTEM CONFIGURATION
+This kind requires huge pages configuration described in
+.B SYSTEM CONFIGURATION
 section.
 .TP
 .B MEMKIND_HBW_PREFERRED_GBTLB (DEPRECATED)
@@ -486,7 +499,9 @@ Same as
 .B MEMKIND_HBW_GBTLB
 except that if there is not enough high bandwidth memory to satisfy
 the request, the allocation will fall back on standard memory. Note: This kind
-requires huge pages configuration described in SYSTEM CONFIGURATION section.
+requires huge pages configuration described in
+.B SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_HBW_INTERLEAVE
 Same as
