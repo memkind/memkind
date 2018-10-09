@@ -5,7 +5,7 @@ interface.
 
 ## PMEM
 
-The pmem_*.c demonstrates how to create and use a file-backed memory kind.
+The pmem_*.c(pp) demonstrates how to create and use a file-backed memory kind.
 The default pmem path is "/tmp/".
 Custom directory is pass as first argument to all of PMEM example programs, e.g. to execute pmem_malloc example in /mnt/pmem location, call:
 
@@ -38,6 +38,11 @@ This example shows how to use multithreading with independent pmem kinds.
 ### pmem_multithreads_onekind.c
 
 This example shows how to use multithreading with one main pmem kind.
+
+### pmem_cpp_allocator.cpp
+
+This example shows usage of C++ allocator mechanism designed for file-backed memory
+kind with different data structures like: vector, list and map.
 
 ## Other memkind examples
 
