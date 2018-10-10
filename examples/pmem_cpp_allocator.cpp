@@ -33,6 +33,7 @@
 
 #include "pmem_allocator.h"
 
+#include <sys/stat.h>
 #include <iostream>
 #include <vector>
 #include <list>
@@ -143,14 +144,22 @@ void cpp_allocator_test(const char* pmem_directory)
 
 int main(int argc, char *argv[])
 {
-    if(argc != 2) {
-        std::cerr << "Usage: pmem_cpp_allocator <directory path>\n"
-                  << "\t<directory path> - directory where create temporary file"
+    if (argc > 2) {
+        std::cerr << "Usage: pmem_cpp_allocator [directory path]\n"
+                  << "\t[directory path] - directory where temporary file is created (default = \"/tmp/\")"
                   <<std::endl;
         return 0;
     }
+    const char* pmem_directory = "/tmp/";
 
-    const char* pmem_directory = argv[1];
+    if (argc == 2) {
+        struct stat st;
+        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
+            fprintf(stderr,"%s : Invalid path to pmem kind directory", argv[1]);
+            return 1;
+        }
+        pmem_directory = argv[1];
+    }
 
     cpp_allocator_test(pmem_directory);
     return 0;
