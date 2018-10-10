@@ -111,6 +111,25 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMalloc)
     ASSERT_EQ(nullptr, default_str);
 }
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocNullptr)
+{
+    const size_t size = 1 * KB;
+    char *default_str = nullptr;
+
+    default_str = (char *)memkind_malloc(pmem_kind, size);
+    ASSERT_TRUE(nullptr != default_str);
+
+    sprintf(default_str, "memkind_malloc MEMKIND_PMEM\n");
+    printf("%s", default_str);
+
+    memkind_free(nullptr, default_str);
+
+    // Out of memory
+    default_str = (char *)memkind_malloc(pmem_kind, 2 * PMEM_PART_SIZE);
+    ASSERT_EQ(nullptr, default_str);
+}
+
+
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocZero)
 {
     void *test1 = nullptr;
@@ -153,6 +172,32 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCalloc)
     printf("%s", default_str);
 
     memkind_free(pmem_kind, default_str);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocNullptr)
+{
+    const size_t size = 1 * KB;
+    const size_t num = 1;
+    char *default_str = nullptr;
+
+    default_str = (char *)memkind_calloc(pmem_kind, num, size);
+    ASSERT_TRUE(nullptr != default_str);
+    ASSERT_EQ(*default_str, 0);
+
+    sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
+    printf("%s", default_str);
+
+    memkind_free(nullptr, default_str);
+
+    // allocate the buffer of the same size (likely at the same address)
+    default_str = (char *)memkind_calloc(pmem_kind, num, size);
+    ASSERT_TRUE(nullptr != default_str);
+    ASSERT_EQ(*default_str, 0);
+
+    sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
+    printf("%s", default_str);
+
+    memkind_free(nullptr, default_str);
 }
 
 /*
@@ -225,6 +270,32 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHuge)
     memkind_free(pmem_kind, default_str);
 }
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHugeNullptr)
+{
+    const size_t size = MEMKIND_PMEM_CHUNK_SIZE;
+    const size_t num = 1;
+    char *default_str = nullptr;
+
+    default_str = (char *)memkind_calloc(pmem_kind, num, size);
+    ASSERT_TRUE(nullptr != default_str);
+    ASSERT_EQ(*default_str, 0);
+
+    sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
+    printf("%s", default_str);
+
+    memkind_free(nullptr, default_str);
+
+    // allocate the buffer of the same size (likely at the same address)
+    default_str = (char *)memkind_calloc(pmem_kind, num, size);
+    ASSERT_TRUE(nullptr != default_str);
+    ASSERT_EQ(*default_str, 0);
+
+    sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
+    printf("%s", default_str);
+
+    memkind_free(nullptr, default_str);
+}
+
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
 {
     const size_t size1 = 512;
@@ -244,6 +315,27 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
     printf("%s", default_str);
 
     memkind_free(pmem_kind, default_str);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptrSecond)
+{
+    const size_t size1 = 512;
+    const size_t size2 = 1 * KB;
+    char *default_str = nullptr;
+
+    default_str = (char *)memkind_realloc(pmem_kind, default_str, size1);
+    ASSERT_TRUE(nullptr != default_str);
+
+    sprintf(default_str, "memkind_realloc MEMKIND_PMEM with size %zu\n", size1);
+    printf("%s", default_str);
+
+    default_str = (char *)memkind_realloc(pmem_kind, default_str, size2);
+    ASSERT_TRUE(nullptr != default_str);
+
+    sprintf(default_str, "memkind_realloc MEMKIND_PMEM with size %zu\n", size2);
+    printf("%s", default_str);
+
+    memkind_free(nullptr, default_str);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocUsableSize)
@@ -929,6 +1021,23 @@ TEST_F(MemkindPmemTests,
 }
 
 TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCreateDestroyKindLoopWithMallocSmallSizeNullptr)
+{
+    struct memkind *pmem_temp = nullptr;
+    const size_t size = 1 * KB;
+
+    for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        ASSERT_EQ(err, 0);
+        void *ptr = memkind_malloc(pmem_temp, size);
+        ASSERT_TRUE(nullptr != ptr);
+        memkind_free(nullptr, ptr);
+        err = memkind_destroy_kind(pmem_temp);
+        ASSERT_EQ(err, 0);
+    }
+}
+
+TEST_F(MemkindPmemTests,
        test_TC_MEMKIND_PmemCreateDestroyKindLoopWithMallocChunkSize)
 {
     struct memkind *pmem_temp = nullptr;
@@ -940,6 +1049,23 @@ TEST_F(MemkindPmemTests,
         void *ptr = memkind_malloc(pmem_temp, size);
         ASSERT_TRUE(nullptr != ptr);
         memkind_free(pmem_temp, ptr);
+        err = memkind_destroy_kind(pmem_temp);
+        ASSERT_EQ(err, 0);
+    }
+}
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCreateDestroyKindLoopWithMallocChunkSizeNullptr)
+{
+    struct memkind *pmem_temp = nullptr;
+    const size_t size = MEMKIND_PMEM_CHUNK_SIZE;
+
+    for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        ASSERT_EQ(err, 0);
+        void *ptr = memkind_malloc(pmem_temp, size);
+        ASSERT_TRUE(nullptr != ptr);
+        memkind_free(nullptr, ptr);
         err = memkind_destroy_kind(pmem_temp);
         ASSERT_EQ(err, 0);
     }
@@ -960,6 +1086,26 @@ TEST_F(MemkindPmemTests,
         void *ptr_2 = memkind_realloc(pmem_temp, ptr, size_2);
         ASSERT_TRUE(nullptr != ptr_2);
         memkind_free(pmem_temp, ptr_2);
+        err = memkind_destroy_kind(pmem_temp);
+        ASSERT_EQ(err, 0);
+    }
+}
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCreateDestroyKindLoopWithReallocNullptr)
+{
+    struct memkind *pmem_temp = nullptr;
+    const size_t size_1 = 512;
+    const size_t size_2 = 1 * KB;
+
+    for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        ASSERT_EQ(err, 0);
+        void *ptr = memkind_malloc(pmem_temp, size_1);
+        ASSERT_TRUE(nullptr != ptr);
+        void *ptr_2 = memkind_realloc(pmem_temp, ptr, size_2);
+        ASSERT_TRUE(nullptr != ptr_2);
+        memkind_free(nullptr, ptr_2);
         err = memkind_destroy_kind(pmem_temp);
         ASSERT_EQ(err, 0);
     }

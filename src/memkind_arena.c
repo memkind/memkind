@@ -474,10 +474,7 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
 MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
 {
     if (ptr) {
-        unsigned int arena;
-        kind->ops->get_arena(kind, &arena, 0);
-        assert(arena != 0);
-        jemk_dallocx(ptr, MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, 0));
+        jemk_dallocx(ptr, MALLOCX_TCACHE_NONE);
     }
 }
 
