@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include "common.h"
+#include <sys/statfs.h>
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * KB;
 static const size_t PMEM_NO_LIMIT = 0;
@@ -223,6 +224,60 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHuge)
     printf("%s", default_str);
 
     memkind_free(pmem_kind, default_str);
+}
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_FillKindWithLargeAllocAndDestroyKindAndCheckMemory)
+{
+    struct statfs st;
+    int stTest;
+    double blocksAvailable;
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    blocksAvailable = st.f_bfree;
+
+    while(1) {
+        if(memkind_malloc(pmem_kind, 16 * KB) == nullptr)
+            break;
+    }
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    ASSERT_TRUE(blocksAvailable != st.f_bfree);
+
+    int err = memkind_destroy_kind(pmem_kind);
+    ASSERT_EQ(0, err);
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    ASSERT_TRUE(blocksAvailable == st.f_bfree);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_AllocSmallAndDestroyKindAndCheckMemory)
+{
+    struct statfs st;
+    int stTest;
+    double blocksAvailable;
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    blocksAvailable = st.f_bfree;
+
+    for(int i = 0; i < 100; ++i) {
+        ASSERT_TRUE(memkind_malloc(pmem_kind, 32) != nullptr);
+    }
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    ASSERT_TRUE(blocksAvailable != st.f_bfree);
+
+    int err = memkind_destroy_kind(pmem_kind);
+    ASSERT_EQ(0, err);
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    ASSERT_TRUE(blocksAvailable == st.f_bfree);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
