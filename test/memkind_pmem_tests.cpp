@@ -28,6 +28,7 @@
 
 #include <sys/param.h>
 #include <sys/mman.h>
+#include <sys/statfs.h>
 #include <stdio.h>
 #include <pthread.h>
 #include "common.h"
@@ -223,6 +224,72 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHuge)
     printf("%s", default_str);
 
     memkind_free(pmem_kind, default_str);
+}
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_FillKindWithLargeAllocAndDestroyKindAndCheckMemory)
+{
+    memkind_t pmem_kind_test;
+    struct statfs st;
+    int stTest;
+    double blocksAvailable;
+
+    // create PMEM partition
+    int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_test);
+    ASSERT_EQ(0, err);
+    ASSERT_TRUE(nullptr != pmem_kind_test);
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    blocksAvailable = st.f_bfree;
+
+    while(1) {
+        if(memkind_malloc(pmem_kind_test, 16 * KB) == nullptr)
+            break;
+    }
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    ASSERT_TRUE(blocksAvailable != st.f_bfree);
+
+    err = memkind_destroy_kind(pmem_kind_test);
+    ASSERT_EQ(0, err);
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    ASSERT_TRUE(blocksAvailable == st.f_bfree);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_AllocSmallAndDestroyKindAndCheckMemory)
+{
+    memkind_t pmem_kind_test;
+    struct statfs st;
+    int stTest;
+    double blocksAvailable;
+
+    // create PMEM partition
+    int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_test);
+    ASSERT_EQ(0, err);
+    ASSERT_TRUE(nullptr != pmem_kind_test);
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    blocksAvailable = st.f_bfree;
+
+    for(int i = 0; i < 100; ++i) {
+        ASSERT_TRUE(memkind_malloc(pmem_kind_test, 32) != nullptr);
+    }
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    ASSERT_TRUE(blocksAvailable != st.f_bfree);
+
+    err = memkind_destroy_kind(pmem_kind_test);
+    ASSERT_EQ(0, err);
+
+    stTest = statfs(PMEM_DIR, &st);
+    ASSERT_TRUE(stTest == 0);
+    ASSERT_TRUE(blocksAvailable == st.f_bfree);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
