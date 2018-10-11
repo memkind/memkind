@@ -304,6 +304,9 @@ The
 passed in is the raw size of the memory pool and
 .B jemalloc
 will use some of that space for its own metadata.
+Returns zero if the pmem memkind is created successfully or an error code from the
+.B ERRORS
+section if not.
 .PP
 .BR memkind_create_kind ()
 creates kind that allocates memory with specific memory type, memory binding policy and flags (see
@@ -317,9 +320,7 @@ section) determine memory types to allocate,
 .IR policy
 argument is policy for specifying page binding to memory types selected by
 .IR memtype_flags .
-Returns
-.IR MEMKIND_SUCCESS
-if the specified kind is created successfully or an error code from the
+Returns zero if the specified kind is created successfully or an error code from the
 .B ERRORS
 section if not.
 .PP
@@ -333,7 +334,7 @@ and all allocated memory must be freed before kind is destroyed,
 otherwise this will cause memory leak.
 .PP
 .BR memkind_check_available ()
-returns a zero if the specified
+returns zero if the specified
 .I kind
 is available or an error code from the
 .B ERRORS
@@ -417,7 +418,10 @@ section upon failure.
 The memkind library avoids setting
 .I errno
 directly, but calls to underlying libraries and system calls may set
-.IR errno .
+.IR errno
+( e.g.
+.BR memkind_create_pmem ()
+).
 .SH "KINDS"
 The available kinds of memory:
 .TP
