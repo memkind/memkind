@@ -686,7 +686,8 @@ static int memkind_tmpfile(const char *dir, int *fd)
     int dir_len = strlen(dir);
 
     if (dir_len > PATH_MAX) {
-        return MEMKIND_ERROR_RUNTIME;
+        log_err("Could not create temporary file: too long path.");
+        return MEMKIND_ERROR_INVALID;
     }
 
     char fullname[dir_len + sizeof (template)];
@@ -698,7 +699,8 @@ static int memkind_tmpfile(const char *dir, int *fd)
     (void) sigprocmask(SIG_BLOCK, &set, &oldset);
 
     if ((*fd = mkstemp(fullname)) < 0) {
-        err = MEMKIND_ERROR_RUNTIME;
+        log_err("Could not create temporary file: errno=%d.", errno);
+        err = MEMKIND_ERROR_INVALID;
         goto exit;
     }
 
@@ -725,6 +727,7 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
     int oerrno;
 
     if (max_size && max_size < MEMKIND_PMEM_MIN_SIZE) {
+        log_err("Cannot create pmem: invalid size.");
         return MEMKIND_ERROR_INVALID;
     }
 
