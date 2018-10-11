@@ -172,10 +172,11 @@ int memkind_create_kind(memkind_memtype_t memtype_flags,
 ///
 /// \brief Destroy the kind object. The kind object needs to be initialized by
 ///        memkind_create_kind() or memkind_create_pmem() before it is destroyed.
-///        The function has undefined behavior when the handle is invalid.
+///        The function has undefined behavior when the handle is invalid or
+///        memkind_destroy_kind(kind) was already called before
 /// \warning EXPERIMENTAL API
-/// \note all allocated memory must be freed before kind is destroyed, otherwise
-///       this will cause memory leak.
+/// \note in case of kind created by memkind_create_kind() all allocated memory must be freed
+///       before kind is destroyed, otherwise this will cause memory leak.
 /// \param kind specified memory kind
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, MEMKIND_ERROR_OPERATION_FAILED on failure
 ///

@@ -324,13 +324,20 @@ if the specified kind is created successfully or an error code from the
 section if not.
 .PP
 .BR memkind_destroy_kind ()
-destroys previously initialized kind object.
-Note that kind object should be initialized with
+destroys previously created kind object. The kind object
+must have been returned by a previous call to
 .BR memkind_create_pmem ()
 or
+.BR memkind_create_kind () .
+Otherwise, if
+.I memkind_destroy_kind(kind)
+was already called before, undefined behavior occurs.
+In case of kind created by
 .BR memkind_create_kind ()
-and all allocated memory must be freed before kind is destroyed,
-otherwise this will cause memory leak.
+all allocated memory must be freed before kind is destroyed,
+otherwise this will cause memory leak, in case of kind created by
+.BR memkind_create_pmem ()
+all allocated memory is freed after kind is destroyed.
 .PP
 .BR memkind_check_available ()
 returns a zero if the specified
