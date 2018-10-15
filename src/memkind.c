@@ -313,11 +313,12 @@ MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
     return MEMKIND_ERROR_INVALID;
 }
 
-static void memkind_destroy_kind_from_register(unsigned int i, memkind_t kind)
+static void memkind_destroy_dynamic_kind_from_register(unsigned int i,
+                                                       memkind_t kind)
 {
-    memkind_registry_g.partition_map[i] = NULL;
-    --memkind_registry_g.num_kind;
     if (i >= MEMKIND_NUM_BASE_KIND) {
+        memkind_registry_g.partition_map[i] = NULL;
+        --memkind_registry_g.num_kind;
         jemk_free(kind);
     }
 }
@@ -329,10 +330,10 @@ MEMKIND_EXPORT int memkind_destroy_kind(memkind_t kind)
         assert(0 && "failed to acquire mutex");
     unsigned int i;
     int err = kind->ops->destroy(kind);
-    for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
+    for (i = MEMKIND_NUM_BASE_KIND; i < MEMKIND_MAX_KIND; ++i) {
         if (memkind_registry_g.partition_map[i] &&
             strcmp(kind->name, memkind_registry_g.partition_map[i]->name) == 0) {
-            memkind_destroy_kind_from_register(i,kind);
+            memkind_destroy_dynamic_kind_from_register(i, kind);
             break;
         }
     }
@@ -528,10 +529,10 @@ static int memkind_finalize(void)
             if (err) {
                 goto exit;
             }
-            memkind_destroy_kind_from_register(i, kind);
+            memkind_destroy_dynamic_kind_from_register(i, kind);
         }
     }
-    assert(memkind_registry_g.num_kind == 0);
+    assert(memkind_registry_g.num_kind == MEMKIND_NUM_BASE_KIND);
 
 exit:
     if (pthread_mutex_unlock(&memkind_registry_g.lock) != 0)
