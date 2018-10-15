@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include "common.h"
+#include <sys/statfs.h>
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * KB;
 static const size_t PMEM_NO_LIMIT = 0;
@@ -555,6 +556,10 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSize)
     int temp_limit_of_allocations = 0;
     void *test[malloc_limit] = {nullptr};
     int i = 0, j = 0;
+    FILE *fp;
+    char fileName[25] = "Log_PmemMallocSize.txt";
+    char logMessage[250] = "";
+    int tempLimitResults[10];
 
     //check maximum number of allocations right after create the kind
     for (i = 0; i < malloc_limit; i++) {
@@ -582,6 +587,7 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSize)
         ASSERT_TRUE(malloc_limit != j);
 
         temp_limit_of_allocations = j;
+        tempLimitResults[i] = temp_limit_of_allocations;
 
         for (j = 0; j < temp_limit_of_allocations; j++) {
             memkind_free(pmem_kind, test[j]);
@@ -589,6 +595,18 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSize)
         }
 
         ASSERT_TRUE(temp_limit_of_allocations > 0.98 * first_limit_of_allocations);
+    }
+
+    fp = fopen(fileName, "a+");
+    if (fp) {
+        sprintf(logMessage,
+                "Alloc size = %lu | Starting limit of alocations: %d | 1st: %d, 2nd: %d, 3rd: %d, 4th: %d, 5th: %d, 6th: %d, 7th: %d, 8th: %d, 9th: %d, 10th: %d\n",
+                GetParam(), first_limit_of_allocations, tempLimitResults[0],
+                tempLimitResults[1], tempLimitResults[2], tempLimitResults[3],
+                tempLimitResults[4], tempLimitResults[5], tempLimitResults[6],
+                tempLimitResults[7], tempLimitResults[8], tempLimitResults[9]);
+        fputs(logMessage, fp);
+		fclose(fp);
     }
 }
 
