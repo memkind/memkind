@@ -39,6 +39,10 @@ This example shows how to use multithreading with independent pmem kinds.
 
 This example shows how to use multithreading with one main pmem kind.
 
+### pmem_and_default_kind.c
+
+This example shows how to allocate in standard memory and file-backed memory (pmem kind).
+
 ### pmem_cpp_allocator.cpp
 
 This example shows usage of C++ allocator mechanism designed for file-backed memory

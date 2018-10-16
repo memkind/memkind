@@ -31,6 +31,7 @@ noinst_PROGRAMS += examples/hello_memkind \
                    examples/pmem_malloc_unlimited \
                    examples/pmem_usable_size \
                    examples/pmem_alignment \
+                   examples/pmem_and_default_kind \
                    examples/pmem_multithreads \
                    examples/pmem_multithreads_onekind \
                    examples/autohbw_candidates \
@@ -49,6 +50,7 @@ examples_pmem_malloc_LDADD = libmemkind.la
 examples_pmem_malloc_unlimited_LDADD = libmemkind.la
 examples_pmem_usable_size_LDADD = libmemkind.la
 examples_pmem_alignment_LDADD = libmemkind.la
+examples_pmem_and_default_kind_LDADD = libmemkind.la
 examples_pmem_multithreads_LDADD = libmemkind.la
 examples_pmem_multithreads_onekind_LDADD = libmemkind.la
 examples_autohbw_candidates_LDADD = libmemkind.la
@@ -67,6 +69,7 @@ examples_pmem_malloc_SOURCES = examples/pmem_malloc.c
 examples_pmem_malloc_unlimited_SOURCES = examples/pmem_malloc_unlimited.c
 examples_pmem_usable_size_SOURCES = examples/pmem_usable_size.c
 examples_pmem_alignment_SOURCES = examples/pmem_alignment.c
+examples_pmem_and_default_kind_SOURCES = examples/pmem_and_default_kind.c
 examples_pmem_multithreads_SOURCES = examples/pmem_multithreads.c
 examples_pmem_multithreads_onekind_SOURCES = examples/pmem_multithreads_onekind.c
 examples_autohbw_candidates_SOURCES = examples/autohbw_candidates.c

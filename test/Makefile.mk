@@ -223,6 +223,7 @@ check_PROGRAMS += test/hello_memkind \
                   test/pmem_malloc_unlimited \
                   test/pmem_usable_size \
                   test/pmem_alignment \
+                  test/pmem_and_default_kind \
                   test/pmem_multithreads \
                   test/pmem_multithreads_onekind \
                   # end
@@ -241,6 +242,7 @@ test_pmem_malloc_LDADD = libmemkind.la
 test_pmem_malloc_unlimited_LDADD = libmemkind.la
 test_pmem_usable_size_LDADD = libmemkind.la
 test_pmem_alignment_LDADD = libmemkind.la
+test_pmem_and_default_kind_LDADD = libmemkind.la
 test_pmem_multithreads_LDADD = libmemkind.la
 test_pmem_multithreads_onekind_LDADD = libmemkind.la
 test_autohbw_candidates_LDADD = libmemkind.la \
@@ -259,6 +261,7 @@ test_pmem_malloc_SOURCES = examples/pmem_malloc.c
 test_pmem_malloc_unlimited_SOURCES = examples/pmem_malloc_unlimited.c
 test_pmem_usable_size_SOURCES = examples/pmem_usable_size.c
 test_pmem_alignment_SOURCES = examples/pmem_alignment.c
+test_pmem_and_default_kind_SOURCES = examples/pmem_and_default_kind.c
 test_pmem_multithreads_SOURCES = examples/pmem_multithreads.c
 test_pmem_multithreads_onekind_SOURCES = examples/pmem_multithreads_onekind.c
 test_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
