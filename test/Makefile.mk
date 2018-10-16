@@ -130,6 +130,8 @@ allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.h
                                       test/allocator_perf_tool/MemkindAllocatorWithTimer.hpp \
                                       test/allocator_perf_tool/Numastat.hpp \
                                       test/allocator_perf_tool/Runnable.hpp \
+                                      test/allocator_perf_tool/PmemMockup.cpp \
+                                      test/allocator_perf_tool/PmemMockup.hpp \
                                       test/allocator_perf_tool/ScenarioWorkload.cpp \
                                       test/allocator_perf_tool/ScenarioWorkload.h \
                                       test/allocator_perf_tool/StandardAllocatorWithTimer.hpp \

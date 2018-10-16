@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2015 - 2016 Intel Corporation.
+#  Copyright (C) 2015 - 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -22,5 +22,5 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-perf_tool: main.cpp ScenarioWorkload.cpp FunctionCallsPerformanceTask.cpp StressIncreaseToMax.cpp Allocation_info.cpp
+perf_tool: main.cpp ScenarioWorkload.cpp FunctionCallsPerformanceTask.cpp StressIncreaseToMax.cpp Allocation_info.cpp PmemMockup.cpp
 	g++ -o perf_tool $^ -O0 -lmemkind -std=c++11 -lpthread -lnuma -g
