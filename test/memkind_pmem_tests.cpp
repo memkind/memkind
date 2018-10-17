@@ -93,6 +93,48 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPriv)
     ASSERT_LT(offset, total_mem);
 }
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreatePmemFailNonExistingDirectory)
+{
+    const char* non_existing_directory = "/temp/non_exisitng_directory";
+    struct memkind *pmem_temp = nullptr;
+    errno = 0;
+    int err = memkind_create_pmem(non_existing_directory, MEMKIND_PMEM_MIN_SIZE,
+                                  &pmem_temp);
+    ASSERT_EQ(MEMKIND_ERROR_INVALID, err);
+    ASSERT_TRUE(nullptr == pmem_temp);
+    ASSERT_TRUE(ENOENT == errno);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreatePmemFailPermissionIssue)
+{
+    char temp_dir[] = "/tmp/tmpdir.XXXXXX";
+    char *dir_name = mkdtemp(temp_dir);
+    ASSERT_TRUE(nullptr != dir_name);
+    struct memkind *pmem_temp = nullptr;
+
+    struct stat path_stat;
+    mode_t mode;
+    int err= stat(dir_name, &path_stat);
+    ASSERT_EQ(0, err);
+
+    mode = path_stat.st_mode & ALLPERMS;
+
+    mode &= ~(S_IWUSR);
+
+    err=chmod(dir_name, mode);
+    ASSERT_EQ(0, err);
+
+    errno = 0;
+    err = memkind_create_pmem(dir_name, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+
+    ASSERT_EQ(MEMKIND_ERROR_INVALID, err);
+    ASSERT_TRUE(nullptr == pmem_temp);
+    ASSERT_TRUE(EACCES == errno);
+
+    err= rmdir(temp_dir);
+    ASSERT_EQ(0, err);
+}
+
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMalloc)
 {
     const size_t size = 1 * KB;
