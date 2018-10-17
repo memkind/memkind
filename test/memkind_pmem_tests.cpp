@@ -543,6 +543,17 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeNullptr)
     } while(timer.getElapsedTime() < test_time);
 }
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeNullptrNullKind)
+{
+    const double test_time = 5;
+
+    TimerSysTime timer;
+    timer.start();
+    do {
+        memkind_free(nullptr, nullptr);
+    } while(timer.getElapsedTime() < test_time);
+}
+
 /*
  * This test will stress pmem kind with malloc-free loop
  * with various sizes for malloc
@@ -899,7 +910,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemDestroyKindArenaZero)
     ASSERT_EQ(err, 0);
 }
 
-TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreateDestroyKindLoop)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreateDestroyKindEmptyLoop)
 {
     struct memkind *pmem_temp = nullptr;
 
@@ -912,7 +923,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreateDestroyKindLoop)
 }
 
 TEST_F(MemkindPmemTests,
-       test_TC_MEMKIND_PmemCreateDestroyKindLoopWithMallocSmallSize)
+       test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocSmallSizeFreeDefinedPmemKind)
 {
     struct memkind *pmem_temp = nullptr;
     const size_t size = 1 * KB;
@@ -929,17 +940,111 @@ TEST_F(MemkindPmemTests,
 }
 
 TEST_F(MemkindPmemTests,
-       test_TC_MEMKIND_PmemCreateDestroyKindLoopWithMallocChunkSize)
+       test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocDifferentSizesDifferentKindsDefinedFreeForAllKinds)
 {
     struct memkind *pmem_temp = nullptr;
-    const size_t size = MEMKIND_PMEM_CHUNK_SIZE;
-
+    const size_t size_1 = 1 * KB;
+    const size_t size_2 = MEMKIND_PMEM_CHUNK_SIZE;
+    void *ptr = nullptr;
+    void *ptr_default = nullptr;
+    void *ptr_regular = nullptr;
     for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
         int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         ASSERT_EQ(err, 0);
-        void *ptr = memkind_malloc(pmem_temp, size);
+
+        ptr = memkind_malloc(pmem_temp, size_1);
         ASSERT_TRUE(nullptr != ptr);
         memkind_free(pmem_temp, ptr);
+        ptr = memkind_malloc(pmem_temp, size_2);
+        ASSERT_TRUE(nullptr != ptr);
+        memkind_free(pmem_temp, ptr);
+        ptr_default = memkind_malloc(MEMKIND_DEFAULT, size_2);
+        ASSERT_TRUE(nullptr != ptr_default);
+        memkind_free(MEMKIND_DEFAULT, ptr_default);
+        ptr_default = memkind_malloc(MEMKIND_DEFAULT, size_1);
+        ASSERT_TRUE(nullptr != ptr_default);
+        memkind_free(MEMKIND_DEFAULT, ptr_default);
+        ptr_regular = memkind_malloc(MEMKIND_REGULAR, size_2);
+        ASSERT_TRUE(nullptr != ptr_regular);
+        memkind_free(MEMKIND_REGULAR, ptr_regular);
+        ptr_regular = memkind_malloc(MEMKIND_REGULAR, size_1);
+        ASSERT_TRUE(nullptr != ptr_regular);
+        memkind_free(MEMKIND_REGULAR, ptr_regular);
+
+        err = memkind_destroy_kind(pmem_temp);
+        ASSERT_EQ(err, 0);
+    }
+}
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocDifferentSizesDifferentKindsDefinedFreeForNotPmemKinds)
+{
+    struct memkind *pmem_temp = nullptr;
+    const size_t size_1 = 1 * KB;
+    const size_t size_2 = MEMKIND_PMEM_CHUNK_SIZE;
+    void *ptr = nullptr;
+    void *ptr_default = nullptr;
+    void *ptr_regular = nullptr;
+    for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        ASSERT_EQ(err, 0);
+
+        ptr = memkind_malloc(pmem_temp, size_1);
+        ASSERT_TRUE(nullptr != ptr);
+        memkind_free(pmem_temp, ptr);
+        ptr = memkind_malloc(pmem_temp, size_2);
+        ASSERT_TRUE(nullptr != ptr);
+        memkind_free(nullptr, ptr);
+        ptr_default = memkind_malloc(MEMKIND_DEFAULT, size_2);
+        ASSERT_TRUE(nullptr != ptr_default);
+        memkind_free(MEMKIND_DEFAULT, ptr_default);
+        ptr_default = memkind_malloc(MEMKIND_DEFAULT, size_1);
+        ASSERT_TRUE(nullptr != ptr_default);
+        memkind_free(MEMKIND_DEFAULT, ptr_default);
+        ptr_regular = memkind_malloc(MEMKIND_REGULAR, size_2);
+        ASSERT_TRUE(nullptr != ptr_regular);
+        memkind_free(MEMKIND_REGULAR, ptr_regular);
+        ptr_regular = memkind_malloc(MEMKIND_REGULAR, size_1);
+        ASSERT_TRUE(nullptr != ptr_regular);
+        memkind_free(MEMKIND_REGULAR, ptr_regular);
+
+        err = memkind_destroy_kind(pmem_temp);
+        ASSERT_EQ(err, 0);
+    }
+}
+
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocDifferentSizesDifferentKindsNullKindFree)
+{
+    struct memkind *pmem_temp = nullptr;
+    const size_t size_1 = 1 * KB;
+    const size_t size_2 = MEMKIND_PMEM_CHUNK_SIZE;
+    void *ptr = nullptr;
+    void *ptr_default = nullptr;
+    void *ptr_regular = nullptr;
+    for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        ASSERT_EQ(err, 0);
+
+        ptr = memkind_malloc(pmem_temp, size_1);
+        ASSERT_TRUE(nullptr != ptr);
+        memkind_free(pmem_temp, ptr);
+        ptr = memkind_malloc(pmem_temp, size_2);
+        ASSERT_TRUE(nullptr != ptr);
+        memkind_free(nullptr, ptr);
+        ptr_default = memkind_malloc(MEMKIND_DEFAULT, size_2);
+        ASSERT_TRUE(nullptr != ptr_default);
+        memkind_free(nullptr, ptr_default);
+        ptr_default = memkind_malloc(MEMKIND_DEFAULT, size_1);
+        ASSERT_TRUE(nullptr != ptr_default);
+        memkind_free(nullptr, ptr_default);
+        ptr_regular = memkind_malloc(MEMKIND_REGULAR, size_2);
+        ASSERT_TRUE(nullptr != ptr_regular);
+        memkind_free(nullptr, ptr_regular);
+        ptr_regular = memkind_malloc(MEMKIND_REGULAR, size_1);
+        ASSERT_TRUE(nullptr != ptr_regular);
+        memkind_free(nullptr, ptr_regular);
+
         err = memkind_destroy_kind(pmem_temp);
         ASSERT_EQ(err, 0);
     }

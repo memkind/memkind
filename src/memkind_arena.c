@@ -428,6 +428,21 @@ static void tcache_finalize(void* args)
     }
 }
 
+static inline int memkind_lookup_arena(void *ptr, unsigned int * arena)
+{
+    size_t sz = sizeof(unsigned);
+    unsigned temp_arena;
+    int err = jemk_mallctl("arenas.lookup", &temp_arena, &sz, &ptr, sizeof(ptr));
+
+    if (err) {
+        log_err("Could not found arena, err=%d", err);
+        return 1;
+    }
+
+    *arena = temp_arena;
+    return 0;
+}
+
 static inline int get_tcache_flag(unsigned partition, size_t size)
 {
 
@@ -473,11 +488,18 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
 
 MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
 {
-    if (ptr) {
+    if (!kind && ptr != NULL) {
         unsigned int arena;
-        kind->ops->get_arena(kind, &arena, 0);
-        assert(arena != 0);
-        jemk_dallocx(ptr, MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, 0));
+        int err = memkind_lookup_arena(ptr, &arena);
+        if (MEMKIND_LIKELY(!err)) {
+            kind = get_kind_by_arena(arena);
+        }
+    }
+
+    if (!kind) {
+        jemk_free(ptr);
+    } else if (ptr != NULL) {
+        jemk_dallocx(ptr, get_tcache_flag(kind->partition, 0));
     }
 }
 
