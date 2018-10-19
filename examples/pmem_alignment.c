@@ -67,7 +67,8 @@ int main(int argc, char *argv[])
     err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
         perror("memkind_create_pmem()");
-        fprintf(stderr, "Unable to create pmem partition\n");
+        fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
+                errno);
         return errno ? -errno : 1;
     }
 

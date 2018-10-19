@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2018 Intel Corporation
+ * Copyright (c) 2018 Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,16 +34,20 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <sys/resource.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 
-#define PMEM_MAX_SIZE (1024 * 1024 * 32)
+#define MB (1024 * 1024)
 
 static char* PMEM_DIR = "/tmp/";
 
 int main(int argc, char *argv[])
 {
+    const size_t size = 512;
     struct memkind *pmem_kind = NULL;
     int err = 0;
+    errno = 0;
     struct stat st;
 
     if (argc > 2) {
@@ -60,12 +64,26 @@ int main(int argc, char *argv[])
         }
     }
 
+
+    const struct rlimit heap_limit = { 100 * MB, 100 * MB};
+
+    char * ptr_default = NULL;
+    char * ptr_default_not_possible = NULL;
+    char * ptr_pmem = NULL;
+
+    //operation below limit the current size of heap just to show different place of allocation
+    err = setrlimit(RLIMIT_DATA,&heap_limit);
+    if (err) {
+        perror("setrlimit()");
+        fprintf(stderr, "Unable to set heap limit\n");
+        return errno ? -errno : 1;
+    }
+
     fprintf(stdout,
-            "This example shows how to allocate memory and possibility to exceed pmem kind size.\nPMEM kind directory: %s\n",
+            "This example shows how to allocate memory using standard memory (MEMKIND_DEFAULT) and file-backed kind of memory (PMEM). \nPMEM kind directory: %s\n",
             PMEM_DIR);
 
-    /* Create PMEM partition with specific size */
-    err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
+    err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind);
     if (err) {
         perror("memkind_create_pmem()");
         fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
@@ -73,55 +91,52 @@ int main(int argc, char *argv[])
         return errno ? -errno : 1;
     }
 
-    char *pmem_str1 = NULL;
-    char *pmem_str2 = NULL;
-    char *pmem_str3 = NULL;
-    char *pmem_str4 = NULL;
-
-    // allocate 512 Bytes of 32 MB available
-    pmem_str1 = (char *)memkind_malloc(pmem_kind, 512);
-    if (pmem_str1 == NULL) {
+    ptr_default = (char *)memkind_malloc(MEMKIND_DEFAULT, size);
+    if (!ptr_default) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string (pmem_str1)\n");
+        fprintf(stderr, "Unable allocate 512 bytes in standard memory");
         return errno ? -errno : 1;
     }
 
-    // allocate 8 MB of 31.9 MB available
-    pmem_str2 = (char *)memkind_malloc(pmem_kind, 8 * 1024 * 1024);
-    if (pmem_str2 == NULL) {
-        perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string (pmem_str11)\n");
-        return errno ? -errno : 1;
-    }
-
-    // allocate 16 MB of 23.9 MB available
-    pmem_str3 = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
-    if (pmem_str3 == NULL) {
-        perror("memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem string (pmem_str12)\n");
-        return errno ? -errno : 1;
-    }
-
-    // allocate 16 MB of 7.9 MB available -- Out Of Memory expected
-    pmem_str4 = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
-    if (pmem_str4 != NULL) {
+    errno = 0;
+    ptr_default_not_possible = (char *)memkind_malloc(MEMKIND_DEFAULT, 200 * MB);
+    if (ptr_default_not_possible) {
         perror("memkind_malloc()");
         fprintf(stderr,
-                "Failure, this allocation should not be possible (expected result was NULL)\n");
+                "Failure, this allocation should not be possible (expected result was NULL), because of setlimit function\n");
+        return errno ? -errno : 1;
+    }
+    if ( errno != ENOMEM ) {
+        perror("memkind_malloc()");
+        fprintf(stderr,
+                "Failure, this allocation should set errno to ENOMEM value, because of setlimit function\n");
         return errno ? -errno : 1;
     }
 
-    sprintf(pmem_str1, "Hello world from pmem - pmem_str1\n");
-    sprintf(pmem_str2, "Hello world from pmem - pmem_str2\n");
-    sprintf(pmem_str3, "Hello world from persistent memory - pmem_str3\n");
+    errno = 0;
+    ptr_pmem = (char *)memkind_malloc(pmem_kind, 200 * MB);
 
-    fprintf(stdout, "%s", pmem_str1);
-    fprintf(stdout, "%s", pmem_str2);
-    fprintf(stdout, "%s", pmem_str3);
+    if (!ptr_pmem) {
+        perror("memkind_malloc()");
+        fprintf(stderr, "Unable allocate 200 MB in file-backed memory");
+        return errno ? -errno : 1;
+    }
 
-    memkind_free(pmem_kind, pmem_str1);
-    memkind_free(pmem_kind, pmem_str2);
-    memkind_free(pmem_kind, pmem_str3);
+    if ( errno != 0 ) {
+        perror("memkind_malloc()");
+        fprintf(stderr, "Failure, this allocation should not set errno value\n");
+        return errno ? -errno : 1;
+    }
+
+
+    sprintf(ptr_default, "Hello world from standard memory - ptr_default\n");
+    sprintf(ptr_pmem, "Hello world from file-backed memory - ptr_pmem\n");
+
+    fprintf(stdout, "%s", ptr_default);
+    fprintf(stdout, "%s", ptr_pmem);
+
+    memkind_free(MEMKIND_DEFAULT, ptr_default);
+    memkind_free(pmem_kind, ptr_pmem);
 
     err = memkind_destroy_kind(pmem_kind);
     if (err) {

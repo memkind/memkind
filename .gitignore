@@ -75,6 +75,7 @@ autom4te.cache/
 /test/pmem_malloc_unlimited
 /test/pmem_usable_size
 /test/pmem_alignment
+/test/pmem_and_default_kind
 /test/pmem_multithreads
 /test/pmem_multithreads_onekind
 /test/pmem_cpp_allocator
@@ -101,6 +102,7 @@ autom4te.cache/
 /examples/pmem_malloc_unlimited
 /examples/pmem_usable_size
 /examples/pmem_alignment
+/examples/pmem_and_default_kind
 /examples/pmem_multithreads
 /examples/pmem_multithreads_onekind
 /examples/pmem_cpp_allocator
