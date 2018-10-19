@@ -25,7 +25,6 @@
 #include <memkind/internal/heap_manager.h>
 #include <memkind/internal/tbb_wrapper.h>
 #include <memkind/internal/memkind_arena.h>
-#include <memkind/internal/memkind_default.h>
 
 #include <stdio.h>
 #include <pthread.h>
@@ -42,7 +41,7 @@ struct heap_manager_ops {
 
 struct heap_manager_ops arena_heap_manager_g = {
     .init = memkind_arena_init,
-    .heap_manager_free = memkind_default_free
+    .heap_manager_free = memkind_arena_free
 };
 
 struct heap_manager_ops tbb_heap_manager_g = {
