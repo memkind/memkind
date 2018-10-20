@@ -96,12 +96,11 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
                         bool committed,
                         unsigned arena_ind)
 {
-    int err = madvise(addr, size, MADV_REMOVE);
-
-    if (MEMKIND_UNLIKELY(err)) {
-        log_err("syscall madvise() MADV_REMOVE returned: %d", err);
+    if (madvise(addr, size, MADV_REMOVE) == -1) {
+        if (munmap(addr, size) == -1) {
+            log_err("munmap failed!");
+        }
     }
-
     return true;
 }
 

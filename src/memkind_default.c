@@ -165,7 +165,7 @@ MEMKIND_EXPORT int memkind_nohugepage_madvise(struct memkind *kind, void *addr,
         return 0;
     }
     if (MEMKIND_UNLIKELY(err)) {
-        log_err("syscall madvise() MADV_NOHUGEPAGE returned: %d", err);
+        log_err("syscall madvise() returned: %d", err);
     }
     return err;
 }
