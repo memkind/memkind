@@ -228,7 +228,7 @@ fi
 ret=$(memkind-hbw-nodes)
 if [[ $ret == "" ]]; then
     export MEMKIND_HBW_NODES=1
-    TEST_PREFIX="numactl --membind=0 %s"
+    TEST_PREFIX="numactl --membind=0 --cpunodebind=$MEMKIND_HBW_NODES %s"
 fi
 
 OPTIND=1
