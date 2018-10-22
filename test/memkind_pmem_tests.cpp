@@ -1430,3 +1430,56 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkWithThreads)
     }
     free(threads);
 }
+
+// Test will create array of kinds, fill them and then attempt to free one ptr passing nullptr instead of kind.
+// Then it will try to malloc again and if it will be successful the test passes (memkind_free(nullptr,...) was successful)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeUsingNullptrInsteadOfKind)
+{
+    const size_t pmem_array_size = 10;
+    struct memkind* pmem_kind_array[pmem_array_size] = { nullptr };
+    const int malloc_limit = 100000;
+    void* ptr[pmem_array_size][malloc_limit] = { nullptr };
+    void* testPtr = nullptr;
+
+    for (size_t i = 0; i < pmem_array_size; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_array[i]);
+        ASSERT_EQ(0, err);
+    }
+
+    for (size_t i = 0; i < pmem_array_size; ++i) {
+        int index = 0;
+        for (index = 0; index < malloc_limit; ++index) {
+            ptr[i][index] = memkind_malloc(pmem_kind_array[i], 1 * KB);
+
+            if (ptr[i][index] == nullptr) {
+                break;
+            }
+        }
+        ASSERT_TRUE(malloc_limit != index);
+    }
+
+    memkind_free(nullptr, ptr[5][5]);
+
+    for (size_t i = 0; i < pmem_array_size; ++i) {
+        // attempt to alloc memory to the kinds
+        testPtr = memkind_malloc(pmem_kind_array[i], 1 * KB);
+        if (i == 5) {
+            // allocation should be successful - confirmation that memkind_free(nullptr,...) works fine
+            ASSERT_TRUE(testPtr != nullptr);
+            ptr[5][5] = testPtr;
+        } else {
+            // There are no more free space in other kinds
+        }
+    }
+    // free the rest of the space and destroy kinds.
+    for (size_t i = 0; i < pmem_array_size; ++i) {
+        for (int j = 0; j < malloc_limit; ++j) {
+            if (ptr[i][j] == nullptr)
+                break;
+
+            memkind_free(pmem_kind_array[i], ptr[i][j]);
+        }
+        int err = memkind_destroy_kind(pmem_kind_array[i]);
+        ASSERT_EQ(0, err);
+    }
+}
