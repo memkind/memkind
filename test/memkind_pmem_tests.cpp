@@ -1160,3 +1160,49 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
 
     free(threads);
 }
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_MemkindFreeNullptrKindTest)
+{
+    memkind *testKind[10] = { nullptr };
+    void* ptr[10][100000] = { nullptr };
+    void* testPtr = nullptr;
+
+    for (int i = 0; i < 10; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &testKind[i]);
+        ASSERT_EQ(0, err);
+    }
+
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 100000; ++j) {
+            ptr[i][j] = memkind_malloc(testKind[i], 1024);
+
+            if (ptr[i][j] == nullptr) {
+                break;
+            }
+        }
+    }
+
+    memkind_free(nullptr, ptr[5][5]);
+
+    for (int i = 0; i < 10; ++i) {
+        testPtr = memkind_malloc(testKind[i], 1024);
+        if (i == 5) {
+            ASSERT_TRUE(testPtr != nullptr);
+            ptr[5][5] = testPtr;
+        } else {
+            ASSERT_TRUE(testPtr == nullptr);
+        }
+    }
+
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 100000; ++j) {
+            if (ptr[i][j] == nullptr)
+                break;
+
+            memkind_free(testKind[i], ptr[i][j]);
+
+        }
+        int err = memkind_destroy_kind(testKind[i]);
+        EXPECT_EQ(0, err);
+    }
+}
