@@ -1160,3 +1160,55 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
 
     free(threads);
 }
+
+// Test will create array of kinds, fill them and then attempt to free one ptr passing nullptr instead of kind.
+// Then it will try to malloc again and if it will be successful the test pass (free nullptr kind was successful)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_MemkindFreeNullptrKindTest)
+{
+    const size_t pmem_array_size = 10;
+    struct memkind* pmem_kind_array[pmem_array_size] = { nullptr };
+    const int malloc_limit = 100000;
+    void* ptr[pmem_array_size][malloc_limit] = { nullptr };
+    void* testPtr = nullptr;
+
+    for (size_t i = 0; i < pmem_array_size; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_array[i]);
+        ASSERT_EQ(0, err);
+    }
+
+    for (size_t i = 0; i < pmem_array_size; ++i) {
+        for (int j = 0; j < malloc_limit; ++j) {
+            ptr[i][j] = memkind_malloc(pmem_kind_array[i], 1*KB);
+
+            if (ptr[i][j] == nullptr) {
+                break;
+            }
+        }
+    }
+
+    memkind_free(nullptr, ptr[5][5]);
+
+    for (size_t i = 0; i < pmem_array_size; ++i) {
+        testPtr = memkind_malloc(pmem_kind_array[i],
+                                 1*KB); // attempt to alloc memory to the kinds
+        if (i == 5) {
+            ASSERT_TRUE(testPtr !=
+                        nullptr); // there should be free space (nullptr free works fine)
+            ptr[5][5] = testPtr;
+        } else {
+            ASSERT_TRUE(testPtr ==
+                        nullptr); // there should be occupied space as free was called in different kind
+        }
+    }
+    // free the rest of the sapce and destroy kinds.
+    for (size_t i = 0; i < pmem_array_size; ++i) {
+        for (int j = 0; j < malloc_limit; ++j) {
+            if (ptr[i][j] == nullptr)
+                break;
+
+            memkind_free(pmem_kind_array[i], ptr[i][j]);
+        }
+        int err = memkind_destroy_kind(pmem_kind_array[i]);
+        EXPECT_EQ(0, err);
+    }
+}
