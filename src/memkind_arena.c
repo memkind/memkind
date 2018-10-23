@@ -392,10 +392,17 @@ MEMKIND_EXPORT int memkind_arena_destroy(struct memkind *kind)
     unsigned int i;
 
     if (kind->arena_map_len) {
+
+        pthread_mutex_lock(&arena_registry_write_lock);
+
         for (i = 0; i < kind->arena_map_len; ++i) {
             snprintf(cmd, 128, "arena.%u.destroy", kind->arena_zero + i);
             jemk_mallctl(cmd, NULL, NULL, NULL, 0);
+            arena_registry_g[kind->arena_zero + i] = NULL;
         }
+
+        pthread_mutex_unlock(&arena_registry_write_lock);
+
 #ifdef MEMKIND_TLS
         if (kind->ops->get_arena == memkind_thread_get_arena) {
             pthread_key_delete(kind->arena_key);
