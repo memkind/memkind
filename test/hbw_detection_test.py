@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2017 Intel Corporation.
+#  Copyright (C) 2017 - 2018 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -23,9 +23,10 @@
 #
 from distutils.spawn import find_executable
 from python_framework import CMD_helper
-
+import os
 
 class Test_hbw_detection(object):
+    os.environ["PATH"] += os.pathsep + os.path.dirname(os.path.dirname(__file__))
     binary_path = find_executable("memkind-hbw-nodes")
     environ_err_test = "../environ_err_hbw_malloc_test"
     expected_libnuma_warning = "libnuma: Warning: node argument -1 is out of range\n\n"
@@ -34,7 +35,7 @@ class Test_hbw_detection(object):
 
     def get_hbw_nodes(self, nodemask=None):
         """ This function executes memkind function 'get_mbind_nodemask' and returns its output - comma separated HBW nodes """
-        command = self.cmd_helper.get_command_path(self.binary_path)
+        command = self.binary_path
         if (nodemask):
             command = "MEMKIND_HBW_NODES={}".format(nodemask) + command
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
