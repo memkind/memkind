@@ -30,6 +30,7 @@
 #include <sys/mman.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <ctime>
 #include "common.h"
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * KB;
@@ -1155,6 +1156,188 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
 
     for (i = 0; i < max_possible_kind - 1; i++) {
         err = memkind_destroy_kind(pmem_kinds[i]);
+        ASSERT_EQ(0, err);
+    }
+
+    free(threads);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_KindFreeBenchmark)
+{
+    memkind *testKind[100] = { nullptr };
+    void* ptr[100][10000] = { nullptr };
+
+    std::clock_t start;
+    double duration;
+
+    for (int i = 0; i < 100; ++i) {
+        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &testKind[i]);
+        ASSERT_EQ(0, err);
+    }
+
+    start = std::clock();
+
+    for (int i = 0; i < 100; ++i) {
+        for (int j = 0; j < 10000; ++j) {
+            ptr[i][j] = memkind_malloc(testKind[i], 16);
+
+            if (ptr[i][j] == nullptr) {
+                break;
+            }
+        }
+    }
+
+    duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+
+    start = std::clock();
+
+    for (int i = 0; i < 100; ++i) {
+        for (int j = 0; j < 10000; ++j) {
+            if (ptr[i][j] == nullptr) {
+                break;
+            }
+            memkind_free(testKind[i], ptr[i][j]);
+
+        }
+    }
+    duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+
+    printf("Free kind time: %f\n", duration);
+
+    for (int i = 0; i < 100; ++i) {
+        for (int j = 0; j < 10000; ++j) {
+            ptr[i][j] = memkind_malloc(testKind[i], 16);
+
+            if (ptr[i][j] == nullptr) {
+                break;
+            }
+        }
+    }
+
+    start = std::clock();
+
+    for (int i = 0; i < 100; ++i) {
+        for (int j = 0; j < 10000; ++j) {
+            if (ptr[i][j] == nullptr) {
+                break;
+            }
+            memkind_free(nullptr, ptr[i][j]);
+        }
+    }
+    duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+
+    printf("Free null time: %f\n", duration);
+}
+
+
+static memkind *testKind[10] = { nullptr };
+static void* ptr[10][100000] = { nullptr };
+static void* thread_func_kinds2(void* arg)
+{
+    int kindIndex = *(int*)arg;
+
+    pthread_mutex_lock(&mutex);
+    pthread_cond_wait(&cond, &mutex);
+    pthread_mutex_unlock(&mutex);
+
+    for (int j = 0; j < 100000; ++j) {
+        if (ptr[kindIndex][j] == nullptr) {
+            break;
+        }
+        memkind_free(nullptr, ptr[kindIndex][j]);
+        ptr[kindIndex][j] = nullptr;
+    }
+
+    return nullptr;
+}
+
+static void* thread_func_kinds3(void* arg)
+{
+    int kindIndex = *(int*)arg;
+
+    pthread_mutex_lock(&mutex);
+    pthread_cond_wait(&cond, &mutex);
+    pthread_mutex_unlock(&mutex);
+
+    for (int j = 0; j < 100000; ++j) {
+        if (ptr[kindIndex][j] == nullptr) {
+            break;
+        }
+        memkind_free(testKind[kindIndex], ptr[kindIndex][j]);
+    }
+
+    return nullptr;
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_KindFreeBenchmarkWithThreads)
+{
+    int allocSize = 8;
+    std::clock_t start;
+    double duration;
+    pthread_t *threads = (pthread_t*)calloc(10, sizeof(pthread_t));
+    ASSERT_TRUE(threads != nullptr);
+
+    for (int i = 0; i < 10; i++) {
+        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &testKind[i]);
+        ASSERT_TRUE(err == 0);
+        ASSERT_TRUE(nullptr != testKind[i]);
+        for (int j = 0; j < 100000; ++j) {
+            ptr[i][j] = memkind_malloc(testKind[i], allocSize);
+
+            if (ptr[i][j] == nullptr) {
+                break;
+            }
+        }
+    }
+
+    int q[10] = { 0,1,2,3,4,5,6,7,8,9 };
+    for (int t = 0; t < 10; t++) {
+
+        int err = pthread_create(&threads[t], nullptr, thread_func_kinds2, &q[t]);
+        ASSERT_EQ(0, err);
+    }
+
+    sleep(1);
+    start = std::clock();
+    pthread_cond_broadcast(&cond);
+
+    for (int t = 0; t < 10; t++) {
+        int err = pthread_join(threads[t], nullptr);
+        ASSERT_EQ(0, err);
+    }
+
+    duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+    printf("Free null time: %f\n", duration);
+
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 100000; ++j) {
+            ptr[i][j] = memkind_malloc(testKind[i], allocSize);
+
+            if (ptr[i][j] == nullptr) {
+                break;
+            }
+        }
+    }
+
+    for (int t = 0; t < 10; t++) {
+        int err = pthread_create(&threads[t], nullptr, thread_func_kinds3, &q[t]);
+        ASSERT_EQ(0, err);
+    }
+
+    sleep(1);
+    start = std::clock();
+    pthread_cond_broadcast(&cond);
+
+    for (int t = 0; t < 10; t++) {
+        int err = pthread_join(threads[t], nullptr);
+        ASSERT_EQ(0, err);
+    }
+
+    duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+    printf("Free kind time: %f\n", duration);
+
+    for (int i = 0; i < 10; i++) {
+        int err = memkind_destroy_kind(testKind[i]);
         ASSERT_EQ(0, err);
     }
 
