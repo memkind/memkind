@@ -12,7 +12,7 @@ m4/ax_pthread.m4
 ChangeLog
 .travis.yml
 autohbw/autohbw_README
-examples/README
+examples/README.md
 test/memkind-afts.ts
 test/memkind-afts-ext.ts
 test/memkind-slts.ts
