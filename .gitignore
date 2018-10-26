@@ -84,6 +84,7 @@ autom4te.cache/
 /test/alloc_benchmark_glibc
 /test/alloc_benchmark_hbw
 /test/alloc_benchmark_tbb
+/test/alloc_benchmark_pmem
 /test/autohbw_test_helper
 /test/environ_err_hbw_malloc_test
 /test/trace_mechanism_test_helper
