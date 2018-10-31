@@ -397,7 +397,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocSizeMax)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocPtrCheck)
 {
-    size_t size = 1024 * 1024;
+    size_t size = 1 * KB;
     void *ptr_malloc = nullptr;
     void *ptr_malloc_copy = nullptr;
     void *ptr_realloc = nullptr;
@@ -812,7 +812,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalign)
                 ret = memkind_posix_memalign(pmem_kind, &test, alignment, sizeof(int *));
                 if(ret != 0) {
                     //at least one allocation must succeed
-                    //ASSERT_TRUE(j > 0); TODO: this is issue with posix_mem_align and test should be updated after resolving this, check PR#86
+                    //ASSERT_TRUE(j > 0); TODO: this is issue with posix_mem_align and test should
+                    //be updated after resolving this, check PR#86
                     malloc_counter = j;
                     break;
                 }

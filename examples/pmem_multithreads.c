@@ -55,12 +55,11 @@ int main(int argc, char *argv[])
     struct stat st;
 
     if (argc > 2) {
-        fprintf(stderr,"Usage: %s [pmem_kind_dir_path]", argv[0]);
+        fprintf(stderr, "Usage: %s [pmem_kind_dir_path]", argv[0]);
         return 1;
-    }
-    if (argc == 2) {
+    } else if (argc == 2) {
         if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr,"%s : Invalid path to pmem kind directory ", argv[1]);
+            fprintf(stderr, "%s : Invalid path to pmem kind directory", argv[1]);
             return 1;
         } else {
             PMEM_DIR = argv[1];
@@ -68,7 +67,8 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout,
-            "This example shows how to use multithreading with independent pmem kinds.\nPMEM kind directory: %s\n",
+            "This example shows how to use multithreading with independent pmem kinds."
+            "\nPMEM kind directory: %s\n",
             PMEM_DIR);
 
     pthread_t pmem_threads[NUM_THREADS];
@@ -132,7 +132,6 @@ void *thread_ind(void *arg)
     if (err) {
         perror("thread memkind_pmem_destroy()");
         fprintf(stderr, "Unable to destroy pmem partition\n");
-        return NULL;
     }
 
     return NULL;

@@ -40,7 +40,6 @@ green=`tput setaf 2`
 yellow=`tput setaf 3`
 default=`tput sgr0`
 
-
 err=0
 
 function usage () {
