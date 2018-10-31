@@ -40,8 +40,6 @@ green=`tput setaf 2`
 yellow=`tput setaf 3`
 default=`tput sgr0`
 
-# Pmem long time stress tests are skipped by default
-SKIPPED_GTESTS=":-MemkindPmemLongTimeStress*"
 
 err=0
 
@@ -68,7 +66,7 @@ OPTIONS
     -x,
         skip tests that are passed as value
     -s,
-        run pmem long time stress tests
+        run disabled test (e.g. pmem long time stress test )
     -h,
         parameter added to display script usage
 EOF
@@ -147,7 +145,7 @@ function execute_gtest()
         fi
     fi
     # Concatenate test command
-    TESTCMD=$(printf "$TESTCMD" "$TEST""$SKIPPED_GTESTS")
+    TESTCMD=$(printf "$TESTCMD" "$TEST""$SKIPPED_GTESTS""$RUN_DISABLED_GTEST")
     # And test prefix if applicable
     if [ "$TEST_PREFIX" != "" ]; then
         TESTCMD=$(printf "$TEST_PREFIX" "$TESTCMD")
@@ -290,8 +288,8 @@ while getopts "T:c:f:l:hdmsx:p:" opt; do
             show_skipped_tests "$OPTARG"
             ;;
         s)
-            SKIPPED_GTESTS="";
-            TEST_FILTER="MemkindPmemLongTimeStress*"
+            echo "Run also disabled tests"
+            RUN_DISABLED_GTEST=" --gtest_also_run_disabled_tests"
             ;;
         h)
             usage;

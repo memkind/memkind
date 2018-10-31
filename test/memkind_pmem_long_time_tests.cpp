@@ -28,7 +28,6 @@
 
 #define STRESS_TIME (3*24*60*60)
 
-static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * KB;
 extern const char*  PMEM_DIR;
 
 static const size_t small_size[] = {8, 16, 32, 48, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384,
@@ -50,8 +49,7 @@ protected:
     memkind_t pmem_kind;
     void SetUp()
     {
-        // create PMEM partition
-        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind);
+        int err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind);
         ASSERT_EQ(0, err);
         ASSERT_TRUE(nullptr != pmem_kind);
     }
@@ -63,7 +61,7 @@ protected:
     }
 };
 
-TEST_F(MemkindPmemLongTimeStress, test_TC_MEMKIND_PmemStressSmallSize)
+TEST_F(MemkindPmemLongTimeStress, DISABLED_test_TC_MEMKIND_PmemStressSmallSize)
 {
     void *test = nullptr;
     TimerSysTime timer;
@@ -78,7 +76,7 @@ TEST_F(MemkindPmemLongTimeStress, test_TC_MEMKIND_PmemStressSmallSize)
     } while (timer.getElapsedTime() < STRESS_TIME);
 }
 
-TEST_F(MemkindPmemLongTimeStress, test_TC_MEMKIND_PmemStressLargeSize)
+TEST_F(MemkindPmemLongTimeStress, DISABLED_test_TC_MEMKIND_PmemStressLargeSize)
 {
     void *test = nullptr;
     TimerSysTime timer;
@@ -93,7 +91,8 @@ TEST_F(MemkindPmemLongTimeStress, test_TC_MEMKIND_PmemStressLargeSize)
     } while (timer.getElapsedTime() < STRESS_TIME);
 }
 
-TEST_F(MemkindPmemLongTimeStress, test_TC_MEMKIND_PmemStressSmallAndLargeSize)
+TEST_F(MemkindPmemLongTimeStress,
+       DISABLED_test_TC_MEMKIND_PmemStressSmallAndLargeSize)
 {
     void *test = nullptr;
     size_t i = 0, j = 0;
