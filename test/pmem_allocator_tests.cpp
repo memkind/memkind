@@ -40,14 +40,13 @@ extern const char* PMEM_DIR;
 // Tests for pmem::allocator class.
 class PmemAllocatorTests: public ::testing::Test
 {
-
 public:
     const size_t pmem_max_size = 1024*1024*1024;
 
-    pmem::allocator<int> alloc_source { std::string(PMEM_DIR), pmem_max_size } ;
+    pmem::allocator<int> alloc_source { std::string(PMEM_DIR), pmem_max_size };
 
-    pmem::allocator<int> alloc_source_f1 { std::string(PMEM_DIR), pmem_max_size } ;
-    pmem::allocator<int> alloc_source_f2 { std::string(PMEM_DIR), pmem_max_size } ;
+    pmem::allocator<int> alloc_source_f1 { std::string(PMEM_DIR), pmem_max_size };
+    pmem::allocator<int> alloc_source_f2 { std::string(PMEM_DIR), pmem_max_size };
 
 protected:
     void SetUp()
@@ -55,7 +54,6 @@ protected:
 
     void TearDown()
     {}
-
 };
 
 
@@ -63,8 +61,8 @@ protected:
 TEST_F(PmemAllocatorTests,
        test_TC_MEMKIND_AllocatorCompare_SameKindDifferentType_Test)
 {
-    pmem::allocator<int> alc1 { alloc_source_f1  };
-    pmem::allocator<char> alc2 { alloc_source_f1  };
+    pmem::allocator<int> alc1 { alloc_source_f1 };
+    pmem::allocator<char> alc2 { alloc_source_f1 };
     ASSERT_TRUE(alc1 == alc2);
     ASSERT_FALSE(alc1 != alc2);
 }
@@ -73,8 +71,8 @@ TEST_F(PmemAllocatorTests,
 TEST_F(PmemAllocatorTests,
        test_TC_MEMKIND_AllocatorCompare_SameKindSameType_Test)
 {
-    pmem::allocator<int> alc1 { alloc_source_f1  };
-    pmem::allocator<int> alc2 { alloc_source_f1  };
+    pmem::allocator<int> alc1 { alloc_source_f1 };
+    pmem::allocator<int> alc2 { alloc_source_f1 };
     ASSERT_TRUE(alc1 == alc2);
     ASSERT_FALSE(alc1 != alc2);
 }
@@ -83,8 +81,8 @@ TEST_F(PmemAllocatorTests,
 TEST_F(PmemAllocatorTests,
        test_TC_MEMKIND_AllocatorCompare_DifferentKindDifferentType_Test)
 {
-    pmem::allocator<int> alc1 { alloc_source_f1  };
-    pmem::allocator<char> alc2 { alloc_source_f2  };
+    pmem::allocator<int> alc1 { alloc_source_f1 };
+    pmem::allocator<char> alc2 { alloc_source_f2 };
     ASSERT_FALSE(alc1 == alc2);
     ASSERT_TRUE(alc1 != alc2);
 }
@@ -93,8 +91,8 @@ TEST_F(PmemAllocatorTests,
 TEST_F(PmemAllocatorTests,
        test_TC_MEMKIND_AllocatorCompare_DifferentKindSameType_Test)
 {
-    pmem::allocator<int> alc1 { alloc_source_f1  };
-    pmem::allocator<int> alc2 { alloc_source_f2  };
+    pmem::allocator<int> alc1 { alloc_source_f1 };
+    pmem::allocator<int> alc2 { alloc_source_f2 };
     ASSERT_FALSE(alc1 == alc2);
     ASSERT_TRUE(alc1 != alc2);
 }
@@ -102,8 +100,8 @@ TEST_F(PmemAllocatorTests,
 //Copy assignment test
 TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_CopyAssignment_Test)
 {
-    pmem::allocator<int> alc1 { alloc_source_f1  };
-    pmem::allocator<int> alc2 { alloc_source_f2  };
+    pmem::allocator<int> alc1 { alloc_source_f1 };
+    pmem::allocator<int> alc2 { alloc_source_f2 };
     ASSERT_TRUE(alc1 != alc2);
     alc1 = alc2;
     ASSERT_TRUE(alc1 == alc2);
@@ -112,8 +110,8 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_CopyAssignment_Test)
 //Move constructor test
 TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_MoveConstructor_Test)
 {
-    pmem::allocator<int> alc1 { alloc_source_f2  };
-    pmem::allocator<int> alc2 { alloc_source_f2  };
+    pmem::allocator<int> alc1 { alloc_source_f2 };
+    pmem::allocator<int> alc2 { alloc_source_f2 };
     ASSERT_TRUE(alc2 == alc1);
     pmem::allocator<int> alc3 = std::move(alc1);
     ASSERT_TRUE(alc2 == alc3);
@@ -122,12 +120,12 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_MoveConstructor_Test)
 //Move assignment test
 TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_MoveAssignment_Test)
 {
-    pmem::allocator<int> alc1 { alloc_source_f1  };
-    pmem::allocator<int> alc2 { alloc_source_f2  };
+    pmem::allocator<int> alc1 { alloc_source_f1 };
+    pmem::allocator<int> alc2 { alloc_source_f2 };
     ASSERT_TRUE(alc1 != alc2);
 
     {
-        pmem::allocator<int> alc3 { alc2  };
+        pmem::allocator<int> alc3 { alc2 };
         alc1 = std::move(alc3);
     }
     ASSERT_TRUE(alc1 == alc2);
@@ -137,7 +135,7 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_MoveAssignment_Test)
 TEST_F(PmemAllocatorTests,
        test_TC_MEMKIND_Allocator_SingleAllocationDeallocation_Test)
 {
-    pmem::allocator<int> alc1 { alloc_source_f1  };
+    pmem::allocator<int> alc1 { alloc_source_f1 };
     int* created_object = alc1.allocate(1);
     alc1.deallocate(created_object, 1);
 }
@@ -146,8 +144,8 @@ TEST_F(PmemAllocatorTests,
 TEST_F(PmemAllocatorTests,
        test_TC_MEMKIND_Allocator_SharedAllocationDeallocation_Test)
 {
-    pmem::allocator<int> alc1 { alloc_source_f1  };
-    pmem::allocator<int> alc2 { alloc_source_f1  };
+    pmem::allocator<int> alc1 { alloc_source_f1 };
+    pmem::allocator<int> alc2 { alloc_source_f1 };
     int* created_object = nullptr;
     int* created_object_2 = nullptr;
     created_object = alc1.allocate(1);
@@ -165,7 +163,7 @@ TEST_F(PmemAllocatorTests,
 //Construct-destroy test
 TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_ConstructDestroy_Test)
 {
-    pmem::allocator<int> alc1 { alloc_source_f1  };
+    pmem::allocator<int> alc1 { alloc_source_f1 };
     int* created_object = alc1.allocate(1);
     alc1.construct(created_object);
     alc1.destroy(created_object);
@@ -188,8 +186,7 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_MultithreadingSupport_Test)
             for (size_t j = 0; j < iteration_count; j++) {
                 allocators_local.pop_back();
             }
-        })
-                      );
+        }));
     }
 
     for (size_t i = 0; i < num_threads; ++i) {
@@ -250,7 +247,7 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_Map_Test)
 {
     pmem::allocator<std::pair<const std::string, std::string>> alc{ alloc_source };
 
-    std::map<std::string, std::string, std::less<std::string>, pmem::allocator<std::pair<const std::string, std::string> > >
+    std::map<std::string, std::string, std::less<std::string>, pmem::allocator<std::pair<const std::string, std::string>>>
     map{ std::less<std::string>(), alc };
 
     const int num = 10;
@@ -275,7 +272,7 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_VectorOfString_Test)
     pmem_alloc alc{ alloc_source };
     pmem::allocator<char> st_alc{alc};
 
-    std::vector<pmem_string,std::scoped_allocator_adaptor<pmem_alloc> > vec{ alc };
+    std::vector<pmem_string,std::scoped_allocator_adaptor<pmem_alloc>> vec{ alc };
     pmem_string arg{ "Very very loooong striiiing", st_alc };
 
     vec.push_back(arg);
@@ -286,22 +283,22 @@ TEST_F(PmemAllocatorTests, test_TC_MEMKIND_AllocatorUsage_VectorOfString_Test)
 TEST_F(PmemAllocatorTests,
        test_TC_MEMKIND_AllocatorScopedUsage_MapOfIntString_Test)
 {
-    typedef std::basic_string<char, std::char_traits<char>, pmem::allocator<char> >
-    pmem_string;
+    typedef std::basic_string<char, std::char_traits<char>, pmem::allocator<char>>
+                                                                                pmem_string;
     typedef int key_t;
     typedef pmem_string value_t;
     typedef std::pair<key_t, value_t> target_pair;
     typedef pmem::allocator<target_pair> pmem_alloc;
     typedef pmem::allocator<char> str_allocator_t;
-    typedef std::map<key_t, value_t, std::less<key_t>, std::scoped_allocator_adaptor<pmem_alloc> >
-    map_t;
+    typedef std::map<key_t, value_t, std::less<key_t>, std::scoped_allocator_adaptor<pmem_alloc>>
+            map_t;
 
     pmem_alloc map_allocator( alloc_source );
 
     str_allocator_t str_allocator( map_allocator );
 
-    value_t source_str1( "Lorem ipsum dolor ", str_allocator);
-    value_t source_str2( "sit amet consectetuer adipiscing elit", str_allocator );
+    value_t source_str1("Lorem ipsum dolor ", str_allocator);
+    value_t source_str2("sit amet consectetuer adipiscing elit", str_allocator );
 
     map_t target_map{ std::scoped_allocator_adaptor<pmem_alloc>(map_allocator) };
 

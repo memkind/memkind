@@ -50,7 +50,7 @@ matrix:
          - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8 && JEMALLOC_CC=gcc-8 && JEMALLOC_CXX=g++-8"
       install:
       script:
-        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh 
+        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh
         - ./autogen.sh
         - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
         - make all
@@ -72,7 +72,7 @@ matrix:
         - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0 && JEMALLOC_CC=gcc-4.8 && JEMALLOC_CXX=g++-4.8"
       install:
       script:
-        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh 
+        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh
         - ./autogen.sh
         - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
         - make all

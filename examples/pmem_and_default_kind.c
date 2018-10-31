@@ -51,13 +51,11 @@ int main(int argc, char *argv[])
     struct stat st;
 
     if (argc > 2) {
-        fprintf(stderr,"Usage: %s [pmem_kind_dir_path]", argv[0]);
+        fprintf(stderr, "Usage: %s [pmem_kind_dir_path]", argv[0]);
         return 1;
-    }
-    // Pass a 2nd arg to specify directory where you want temp file stored
-    if (argc == 2) {
+    } else if (argc == 2) {
         if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr,"%s : Invalid path to pmem kind directory ", argv[1]);
+            fprintf(stderr, "%s : Invalid path to pmem kind directory", argv[1]);
             return 1;
         } else {
             PMEM_DIR = argv[1];
@@ -80,7 +78,8 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout,
-            "This example shows how to allocate memory using standard memory (MEMKIND_DEFAULT) and file-backed kind of memory (PMEM). \nPMEM kind directory: %s\n",
+            "This example shows how to allocate memory using standard memory (MEMKIND_DEFAULT) "
+            "and file-backed kind of memory (PMEM).\nPMEM kind directory: %s\n",
             PMEM_DIR);
 
     err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind);
@@ -103,7 +102,8 @@ int main(int argc, char *argv[])
     if (ptr_default_not_possible) {
         perror("memkind_malloc()");
         fprintf(stderr,
-                "Failure, this allocation should not be possible (expected result was NULL), because of setlimit function\n");
+                "Failure, this allocation should not be possible "
+                "(expected result was NULL), because of setlimit function\n");
         return errno ? -errno : 1;
     }
     if ( errno != ENOMEM ) {
@@ -115,19 +115,16 @@ int main(int argc, char *argv[])
 
     errno = 0;
     ptr_pmem = (char *)memkind_malloc(pmem_kind, 200 * MB);
-
     if (!ptr_pmem) {
         perror("memkind_malloc()");
         fprintf(stderr, "Unable allocate 200 MB in file-backed memory");
         return errno ? -errno : 1;
     }
-
     if ( errno != 0 ) {
         perror("memkind_malloc()");
         fprintf(stderr, "Failure, this allocation should not set errno value\n");
         return errno ? -errno : 1;
     }
-
 
     sprintf(ptr_default, "Hello world from standard memory - ptr_default\n");
     sprintf(ptr_pmem, "Hello world from file-backed memory - ptr_pmem\n");
