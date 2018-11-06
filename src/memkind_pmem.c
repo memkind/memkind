@@ -99,7 +99,9 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
     // if madvise fail, it means that addr isn't mapped shared (doesn't come from pmem)
     // and it should be unmapped to avoid space exhaustion when calling large number of
     // operations like memkind_create_pmem and memkind_destroy_kind
-    if (madvise(addr, size, MADV_REMOVE) == -1) {
+    // EOPNOTSUPP is returned in case of filesystem doesn't support FALLOC_FL_PUNCH_HOLE
+    errno = 0;
+    if (madvise(addr, size, MADV_REMOVE) == -1 && errno != EOPNOTSUPP) {
         if (munmap(addr, size) == -1) {
             log_err("munmap failed!");
         }
