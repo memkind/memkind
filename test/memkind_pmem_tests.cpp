@@ -1160,3 +1160,48 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
 
     free(threads);
 }
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_AfterFreeExtentCallTest)
+{
+    struct memkind* kind = nullptr;
+    void* ptr[10000] = { nullptr };
+    struct stat st;
+    double initialBlocks;
+
+    int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &kind);
+    ASSERT_EQ(err, 0);
+
+    struct memkind_pmem* priv = (memkind_pmem*)kind->priv;
+
+    for (int x = 0; x < 10; ++x) {
+        // sleep is here to help trigger dalloc extent
+        sleep(2);
+        for (int i = 0; i < 10000; ++i) {
+            ptr[i] = memkind_malloc(kind, 32);
+            if (ptr == nullptr)
+                break;
+        }
+
+        // store initial amount of allocated blocks
+        if (x == 0) {
+            ASSERT_EQ(0, fstat(priv->fd, &st));
+            initialBlocks = st.st_blocks;
+        }
+
+        for (int i = 0; i < 10000; ++i) {
+            if (ptr[i] == nullptr)
+                break;
+
+            memkind_free(kind, ptr[i]);
+        }
+
+        ASSERT_EQ(0, fstat(priv->fd, &st));
+        // if amount of blocks is less than initial, extent was called.
+        if (initialBlocks > st.st_blocks)
+            break;
+    }
+    ASSERT_GT(initialBlocks, st.st_blocks);
+
+    err = memkind_destroy_kind(kind);
+    ASSERT_EQ(0, err);
+}
