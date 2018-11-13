@@ -62,6 +62,7 @@ large_palloc(tsdn_t *tsdn, arena_t *arena, size_t usize, size_t alignment,
 
 	if (zero) {
 		assert(is_zeroed);
+		memset(extent_addr_get(extent), 0, extent_usize_get(extent));
 	} else if (config_fill && unlikely(opt_junk_alloc)) {
 		memset(extent_addr_get(extent), JEMALLOC_ALLOC_JUNK,
 		    extent_usize_get(extent));
