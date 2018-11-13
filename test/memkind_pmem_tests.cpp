@@ -167,30 +167,23 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSizeMax)
     ASSERT_TRUE(errno == ENOMEM);
 }
 
-TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCalloc)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocSmallClassMultipleTimes)
 {
     const size_t size = 1 * KB;
     const size_t num = 1;
+    const size_t iteration = 100;
     char *default_str = nullptr;
 
-    default_str = (char *)memkind_calloc(pmem_kind, num, size);
-    ASSERT_TRUE(nullptr != default_str);
-    ASSERT_EQ(*default_str, 0);
+    for (size_t i = 0; i< iteration; ++i) {
+        default_str = (char *)memkind_calloc(pmem_kind, num, size);
+        ASSERT_TRUE(nullptr != default_str);
+        ASSERT_EQ(*default_str, 0);
+        ASSERT_EQ(memcmp(default_str, default_str + 1, size - 1), 0);
 
-    sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
-    printf("%s", default_str);
+        sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
 
-    memkind_free(pmem_kind, default_str);
-
-    // allocate the buffer of the same size (likely at the same address)
-    default_str = (char *)memkind_calloc(pmem_kind, num, size);
-    ASSERT_TRUE(nullptr != default_str);
-    ASSERT_EQ(*default_str, 0);
-
-    sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
-    printf("%s", default_str);
-
-    memkind_free(pmem_kind, default_str);
+        memkind_free(pmem_kind, default_str);
+    }
 }
 
 /*
@@ -237,30 +230,23 @@ TEST_P(MemkindPmemTestsCalloc, test_TC_MEMKIND_PmemCallocNumMax)
     ASSERT_TRUE(errno == ENOMEM);
 }
 
-TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHuge)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHugeClassMultipleTimes)
 {
     const size_t size = MEMKIND_PMEM_CHUNK_SIZE;
     const size_t num = 1;
+    const size_t iteration = 100;
     char *default_str = nullptr;
 
-    default_str = (char *)memkind_calloc(pmem_kind, num, size);
-    ASSERT_TRUE(nullptr != default_str);
-    ASSERT_EQ(*default_str, 0);
+    for (size_t i = 0; i< iteration; ++i) {
+        default_str = (char *)memkind_calloc(pmem_kind, num, size);
+        ASSERT_TRUE(nullptr != default_str);
+        ASSERT_EQ(*default_str, 0);
+        ASSERT_EQ(memcmp(default_str, default_str + 1, size - 1), 0);
 
-    sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
-    printf("%s", default_str);
+        sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
 
-    memkind_free(pmem_kind, default_str);
-
-    // allocate the buffer of the same size (likely at the same address)
-    default_str = (char *)memkind_calloc(pmem_kind, num, size);
-    ASSERT_TRUE(nullptr != default_str);
-    ASSERT_EQ(*default_str, 0);
-
-    sprintf(default_str, "memkind_calloc MEMKIND_PMEM\n");
-    printf("%s", default_str);
-
-    memkind_free(pmem_kind, default_str);
+        memkind_free(pmem_kind, default_str);
+    }
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
