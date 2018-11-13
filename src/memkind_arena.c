@@ -534,6 +534,24 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
     return ptr;
 }
 
+MEMKIND_EXPORT void *memkind_arena_pmem_calloc(struct memkind *kind, size_t num,
+                                               size_t size)
+{
+    void *result = NULL;
+    int err = 0;
+    unsigned int arena;
+
+    err = kind->ops->get_arena(kind, &arena, size);
+    if (MEMKIND_LIKELY(!err)) {
+        result = jemk_mallocx_check(num * size,
+                                    MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
+        if (MEMKIND_LIKELY(result)) {
+            memset(result, 0, size);
+        }
+    }
+    return result;
+}
+
 MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num,
                                           size_t size)
 {
