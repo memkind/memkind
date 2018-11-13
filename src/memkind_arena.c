@@ -544,7 +544,10 @@ MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num,
     err = kind->ops->get_arena(kind, &arena, size);
     if (MEMKIND_LIKELY(!err)) {
         result = jemk_mallocx_check(num * size,
-                                    MALLOCX_ARENA(arena) | MALLOCX_ZERO | get_tcache_flag(kind->partition, size));
+                                    MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
+        if (MEMKIND_LIKELY(result)) {
+            memset(result, 0, size);
+        }
     }
     return result;
 }
