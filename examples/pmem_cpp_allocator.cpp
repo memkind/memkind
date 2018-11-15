@@ -101,7 +101,8 @@ void cpp_allocator_test(const char* pmem_directory)
         vec_alloc_t vec_alloc{ pmem_directory, pmem_max_size };
         str_alloc_t str_alloc{ pmem_directory, pmem_max_size };
 
-        std::vector<pmem_string, std::scoped_allocator_adaptor<vec_alloc_t> > vec{ std::scoped_allocator_adaptor<vec_alloc_t>(vec_alloc) };
+        std::vector<pmem_string, std::scoped_allocator_adaptor<vec_alloc_t> >
+        vec{ std::scoped_allocator_adaptor<vec_alloc_t>(vec_alloc) };
 
         pmem_string arg{ "Very very loooong striiiing", str_alloc };
 
@@ -116,18 +117,18 @@ void cpp_allocator_test(const char* pmem_directory)
 #ifdef STL_MAP_INT_STRING_TEST
     {
         std::cout << "INT_STRING MAP OPEN" << std::endl;
-        typedef std::basic_string<char, std::char_traits<char>, pmem::allocator<char> >
-        pmem_string;
+        typedef std::basic_string<char, std::char_traits<char>, pmem::allocator<char>>
+                                                                                    pmem_string;
         typedef int key_t;
         typedef pmem_string value_t;
         typedef pmem::allocator<char> allocator_t;
-        typedef std::map<key_t, value_t, std::less<key_t>, std::scoped_allocator_adaptor<allocator_t> >
-        map_t;
+        typedef std::map<key_t, value_t, std::less<key_t>, std::scoped_allocator_adaptor<allocator_t>>
+                map_t;
 
         allocator_t allocator( pmem_directory, pmem_max_size );
 
-        value_t source_str1( "Lorem ipsum dolor ", allocator);
-        value_t source_str2( "sit amet consectetuer adipiscing elit", allocator );
+        value_t source_str1("Lorem ipsum dolor ", allocator);
+        value_t source_str2("sit amet consectetuer adipiscing elit", allocator );
 
         map_t target_map{ std::scoped_allocator_adaptor<allocator_t>(allocator) };
 
@@ -144,15 +145,14 @@ void cpp_allocator_test(const char* pmem_directory)
 
 int main(int argc, char *argv[])
 {
+    const char* pmem_directory = "/tmp/";
+
     if (argc > 2) {
         std::cerr << "Usage: pmem_cpp_allocator [directory path]\n"
                   << "\t[directory path] - directory where temporary file is created (default = \"/tmp/\")"
                   << std::endl;
         return 0;
-    }
-    const char* pmem_directory = "/tmp/";
-
-    if (argc == 2) {
+    } else if (argc == 2) {
         struct stat st;
         if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
             fprintf(stderr,"%s : Invalid path to pmem kind directory", argv[1]);
