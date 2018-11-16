@@ -39,6 +39,7 @@
 #include <sys/time.h>
 
 #define MB (1024 * 1024)
+#define HEAP_LIMIT_SIMULATE (1024 * MB)
 
 static char* PMEM_DIR = "/tmp/";
 
@@ -62,20 +63,19 @@ int main(int argc, char *argv[])
         }
     }
 
-
-    const struct rlimit heap_limit = { 100 * MB, 100 * MB};
-
-    char * ptr_default = NULL;
-    char * ptr_default_not_possible = NULL;
-    char * ptr_pmem = NULL;
-
-    //operation below limit the current size of heap just to show different place of allocation
-    err = setrlimit(RLIMIT_DATA,&heap_limit);
+    //operation below limit the current size of heap
+    //to show different place of allocation
+    const struct rlimit heap_limit = { HEAP_LIMIT_SIMULATE, HEAP_LIMIT_SIMULATE };
+    err = setrlimit(RLIMIT_DATA, &heap_limit);
     if (err) {
         perror("setrlimit()");
         fprintf(stderr, "Unable to set heap limit\n");
         return errno ? -errno : 1;
     }
+
+    char *ptr_default = NULL;
+    char *ptr_default_not_possible = NULL;
+    char *ptr_pmem = NULL;
 
     fprintf(stdout,
             "This example shows how to allocate memory using standard memory (MEMKIND_DEFAULT) "
@@ -98,7 +98,8 @@ int main(int argc, char *argv[])
     }
 
     errno = 0;
-    ptr_default_not_possible = (char *)memkind_malloc(MEMKIND_DEFAULT, 200 * MB);
+    ptr_default_not_possible = (char *)memkind_malloc(MEMKIND_DEFAULT,
+                                                      HEAP_LIMIT_SIMULATE);
     if (ptr_default_not_possible) {
         perror("memkind_malloc()");
         fprintf(stderr,
@@ -106,7 +107,7 @@ int main(int argc, char *argv[])
                 "(expected result was NULL), because of setlimit function\n");
         return errno ? -errno : 1;
     }
-    if ( errno != ENOMEM ) {
+    if (errno != ENOMEM) {
         perror("memkind_malloc()");
         fprintf(stderr,
                 "Failure, this allocation should set errno to ENOMEM value, because of setlimit function\n");
@@ -114,13 +115,13 @@ int main(int argc, char *argv[])
     }
 
     errno = 0;
-    ptr_pmem = (char *)memkind_malloc(pmem_kind, 200 * MB);
+    ptr_pmem = (char *)memkind_malloc(pmem_kind, HEAP_LIMIT_SIMULATE);
     if (!ptr_pmem) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Unable allocate 200 MB in file-backed memory");
+        fprintf(stderr, "Unable allocate HEAP_LIMIT_SIMULATE in file-backed memory");
         return errno ? -errno : 1;
     }
-    if ( errno != 0 ) {
+    if (errno != 0) {
         perror("memkind_malloc()");
         fprintf(stderr, "Failure, this allocation should not set errno value\n");
         return errno ? -errno : 1;
