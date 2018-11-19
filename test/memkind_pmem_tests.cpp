@@ -175,7 +175,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocSmallClassMultipleTimes)
     const size_t iteration = 100;
     char *default_str = nullptr;
 
-    for (size_t i = 0; i< iteration; ++i) {
+    for (size_t i = 0; i < iteration; ++i) {
         default_str = (char *)memkind_calloc(pmem_kind, num, size);
         ASSERT_TRUE(nullptr != default_str);
         ASSERT_EQ(*default_str, 0);
@@ -238,7 +238,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHugeClassMultipleTimes)
     const size_t iteration = 100;
     char *default_str = nullptr;
 
-    for (size_t i = 0; i< iteration; ++i) {
+    for (size_t i = 0; i < iteration; ++i) {
         default_str = (char *)memkind_calloc(pmem_kind, num, size);
         ASSERT_TRUE(nullptr != default_str);
         ASSERT_EQ(*default_str, 0);
