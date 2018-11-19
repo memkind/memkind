@@ -28,6 +28,7 @@
 
 #include <sys/param.h>
 #include <sys/mman.h>
+#include <sys/statfs.h>
 #include <stdio.h>
 #include <pthread.h>
 #include "common.h"
@@ -247,6 +248,61 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCallocHugeClassMultipleTimes)
 
         memkind_free(pmem_kind, default_str);
     }
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeMemoryAfterDestroyLargeClass)
+{
+    memkind_t pmem_kind_test;
+    struct statfs st;
+    double blocksAvailable;
+
+    int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_test);
+    ASSERT_EQ(0, err);
+    ASSERT_TRUE(nullptr != pmem_kind_test);
+
+    ASSERT_EQ(0, statfs(PMEM_DIR, &st));
+    blocksAvailable = st.f_bfree;
+
+    while(1) {
+        if (memkind_malloc(pmem_kind_test, 16 * KB) == nullptr)
+            break;
+    }
+
+    ASSERT_EQ(0, statfs(PMEM_DIR, &st));
+    ASSERT_GT(blocksAvailable, st.f_bfree);
+
+    err = memkind_destroy_kind(pmem_kind_test);
+    ASSERT_EQ(0, err);
+
+    ASSERT_EQ(0, statfs(PMEM_DIR, &st));
+    ASSERT_EQ(blocksAvailable, st.f_bfree);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeMemoryAfterDestroySmallClass)
+{
+    memkind_t pmem_kind_test;
+    struct statfs st;
+    double blocksAvailable;
+
+    int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_test);
+    ASSERT_EQ(0, err);
+    ASSERT_TRUE(nullptr != pmem_kind_test);
+
+    ASSERT_EQ(0, statfs(PMEM_DIR, &st));
+    blocksAvailable = st.f_bfree;
+
+    for(int i = 0; i < 100; ++i) {
+        ASSERT_TRUE(memkind_malloc(pmem_kind_test, 32) != nullptr);
+    }
+
+    ASSERT_EQ(0, statfs(PMEM_DIR, &st));
+    ASSERT_GT(blocksAvailable, st.f_bfree);
+
+    err = memkind_destroy_kind(pmem_kind_test);
+    ASSERT_EQ(0, err);
+
+    ASSERT_EQ(0, statfs(PMEM_DIR, &st));
+    ASSERT_EQ(blocksAvailable, st.f_bfree);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
