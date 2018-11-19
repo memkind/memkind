@@ -1430,3 +1430,52 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkWithThreads)
     }
     free(threads);
 }
+
+/*
+ * This is a test which confirms that extent deallocation function ( pmem_extent_dalloc )
+ * was called correctly for pmem allocation.
+ */
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCheckExtentDalloc)
+{
+    struct memkind* kind = nullptr;
+    const int mallocLimit = 10000;
+    void* ptr[mallocLimit] = { nullptr };
+    struct stat st;
+    double initialBlocks;
+
+    int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &kind);
+    ASSERT_EQ(err, 0);
+
+    struct memkind_pmem* priv = (memkind_pmem*)kind->priv;
+
+    for (int x = 0; x < 10; ++x) {
+        // sleep is here to help trigger dalloc extent
+        sleep(2);
+        int allocCount = 0;
+        for (int i = 0; i < mallocLimit; ++i) {
+            ptr[i] = memkind_malloc(kind, 32);
+            if (ptr[i] == nullptr)
+                break;
+
+            allocCount = i;
+        }
+
+        // store initial amount of allocated blocks
+        if (x == 0) {
+            ASSERT_EQ(0, fstat(priv->fd, &st));
+            initialBlocks = st.st_blocks;
+        }
+
+        for (int i = 0; i < allocCount; ++i)
+            memkind_free(kind, ptr[i]);
+
+        ASSERT_EQ(0, fstat(priv->fd, &st));
+        // if amount of blocks is less than initial, extent was called.
+        if (initialBlocks > st.st_blocks)
+            break;
+    }
+    ASSERT_GT(initialBlocks, st.st_blocks);
+
+    err = memkind_destroy_kind(kind);
+    ASSERT_EQ(0, err);
+}
