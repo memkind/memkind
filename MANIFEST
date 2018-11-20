@@ -34,6 +34,7 @@ examples/pmem_alignment.c
 examples/pmem_and_default_kind.c
 examples/pmem_multithreads.c
 examples/pmem_multithreads_onekind.c
+examples/pmem_free_with_unknown_kind.c
 examples/pmem_cpp_allocator.cpp
 install_astyle.sh
 m4/ax_cxx_compile_stdcxx.m4
