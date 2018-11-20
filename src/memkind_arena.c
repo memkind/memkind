@@ -534,6 +534,9 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
     return ptr;
 }
 
+// TODO: function is workaround for PR#1302 in jemalloc upstream
+// and it should be removed/replaced with memkind_arena_calloc()
+// after PR will be merged
 MEMKIND_EXPORT void *memkind_arena_pmem_calloc(struct memkind *kind, size_t num,
                                                size_t size)
 {
