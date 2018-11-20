@@ -24,6 +24,7 @@
 
 noinst_PROGRAMS += examples/hello_memkind \
                    examples/hello_memkind_debug \
+				   examples/memkind_free_nullptr \
                    examples/hello_hbw \
                    examples/filter_memkind \
                    examples/pmem_kinds \
@@ -43,6 +44,7 @@ endif
 
 examples_hello_memkind_LDADD = libmemkind.la
 examples_hello_memkind_debug_LDADD = libmemkind.la
+examples_memkind_free_nullptr_LDADD = libmemkind.la
 examples_hello_hbw_LDADD = libmemkind.la
 examples_filter_memkind_LDADD = libmemkind.la
 examples_pmem_kinds_LDADD = libmemkind.la
@@ -62,6 +64,7 @@ endif
 
 examples_hello_memkind_SOURCES = examples/hello_memkind_example.c
 examples_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
+examples_memkind_free_nullptr_SOURCES = examples/memkind_free_nullptr.c
 examples_hello_hbw_SOURCES = examples/hello_hbw_example.c
 examples_filter_memkind_SOURCES = examples/filter_example.c
 examples_pmem_kinds_SOURCES = examples/pmem_kinds.c

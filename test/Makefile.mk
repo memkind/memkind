@@ -217,6 +217,7 @@ test_alloc_benchmark_pmem_CFLAGS = -O0 -g -fopenmp -Wall -DPMEMMALLOC -ldl
 check_PROGRAMS += test/hello_memkind \
                   test/autohbw_candidates \
                   test/hello_memkind_debug \
+				  test/memkind_free_nullptr \
                   test/hello_hbw \
                   test/filter_memkind \
                   test/pmem_kinds \
@@ -236,6 +237,7 @@ endif
 
 test_hello_memkind_LDADD = libmemkind.la
 test_hello_memkind_debug_LDADD = libmemkind.la
+test_memkind_free_nullptr_LDADD = libmemkind.la
 test_hello_hbw_LDADD = libmemkind.la
 test_filter_memkind_LDADD = libmemkind.la
 test_pmem_kinds_LDADD = libmemkind.la
@@ -255,6 +257,7 @@ endif
 
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
+test_memkind_free_nullptr_SOURCES = examples/memkind_free_nullptr.c
 test_hello_hbw_SOURCES = examples/hello_hbw_example.c
 test_filter_memkind_SOURCES = examples/filter_example.c
 test_pmem_kinds_SOURCES = examples/pmem_kinds.c

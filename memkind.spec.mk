@@ -194,6 +194,7 @@ $(memkind_test_dir)/filter_memkind
 $(memkind_test_dir)/hello_hbw
 $(memkind_test_dir)/hello_memkind
 $(memkind_test_dir)/hello_memkind_debug
+$(memkind_test_dir)/memkind_free_nullptr
 $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/autohbw_candidates
 ${memkind_test_dir}/pmem_kinds
