@@ -26,6 +26,7 @@ noinst_PROGRAMS += examples/hello_memkind \
                    examples/hello_memkind_debug \
                    examples/hello_hbw \
                    examples/filter_memkind \
+                   examples/pmem_free_with_unknown_kind \
                    examples/pmem_kinds \
                    examples/pmem_malloc \
                    examples/pmem_malloc_unlimited \
@@ -45,6 +46,7 @@ examples_hello_memkind_LDADD = libmemkind.la
 examples_hello_memkind_debug_LDADD = libmemkind.la
 examples_hello_hbw_LDADD = libmemkind.la
 examples_filter_memkind_LDADD = libmemkind.la
+examples_pmem_free_with_unknown_kind_LDADD = libmemkind.la
 examples_pmem_kinds_LDADD = libmemkind.la
 examples_pmem_malloc_LDADD = libmemkind.la
 examples_pmem_malloc_unlimited_LDADD = libmemkind.la
@@ -64,6 +66,7 @@ examples_hello_memkind_SOURCES = examples/hello_memkind_example.c
 examples_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 examples_hello_hbw_SOURCES = examples/hello_hbw_example.c
 examples_filter_memkind_SOURCES = examples/filter_example.c
+examples_pmem_free_with_unknown_kind_SOURCES = examples/pmem_free_with_unknown_kind.c
 examples_pmem_kinds_SOURCES = examples/pmem_kinds.c
 examples_pmem_malloc_SOURCES = examples/pmem_malloc.c
 examples_pmem_malloc_unlimited_SOURCES = examples/pmem_malloc_unlimited.c

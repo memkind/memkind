@@ -217,6 +217,7 @@ test_alloc_benchmark_pmem_CFLAGS = -O0 -g -fopenmp -Wall -DPMEMMALLOC -ldl
 check_PROGRAMS += test/hello_memkind \
                   test/autohbw_candidates \
                   test/hello_memkind_debug \
+                  test/pmem_free_with_unknown_kind \
                   test/hello_hbw \
                   test/filter_memkind \
                   test/pmem_kinds \
@@ -238,6 +239,7 @@ test_hello_memkind_LDADD = libmemkind.la
 test_hello_memkind_debug_LDADD = libmemkind.la
 test_hello_hbw_LDADD = libmemkind.la
 test_filter_memkind_LDADD = libmemkind.la
+test_pmem_free_with_unknown_kind_LDADD = libmemkind.la
 test_pmem_kinds_LDADD = libmemkind.la
 test_pmem_malloc_LDADD = libmemkind.la
 test_pmem_malloc_unlimited_LDADD = libmemkind.la
@@ -257,6 +259,7 @@ test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 test_hello_hbw_SOURCES = examples/hello_hbw_example.c
 test_filter_memkind_SOURCES = examples/filter_example.c
+test_pmem_free_with_unknown_kind_SOURCES = examples/pmem_free_with_unknown_kind.c
 test_pmem_kinds_SOURCES = examples/pmem_kinds.c
 test_pmem_malloc_SOURCES = examples/pmem_malloc.c
 test_pmem_malloc_unlimited_SOURCES = examples/pmem_malloc_unlimited.c

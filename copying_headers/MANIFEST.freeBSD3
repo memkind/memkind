@@ -7,3 +7,4 @@ examples/pmem_and_default_kind
 examples/pmem_multithreads.c
 examples/pmem_multithreads_onekind.c
 examples/pmem_cpp_allocator.cpp
+examples/pmem_free_with_unknown_kind.c

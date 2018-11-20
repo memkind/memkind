@@ -79,6 +79,7 @@ autom4te.cache/
 /test/pmem_multithreads
 /test/pmem_multithreads_onekind
 /test/pmem_cpp_allocator
+/test/pmem_free_with_unknown_kind
 /test/schedcpu_test
 /test/tieddisterr_test
 /test/alloc_benchmark_glibc
@@ -107,5 +108,6 @@ autom4te.cache/
 /examples/pmem_multithreads
 /examples/pmem_multithreads_onekind
 /examples/pmem_cpp_allocator
+/examples/pmem_free_with_unknown_kind
 /test-driver
 /vs
