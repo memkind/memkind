@@ -385,6 +385,15 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size);
 ///
 void memkind_free(memkind_t kind, void *ptr);
 
+/// \brief Update kind memory usage policy
+/// \note STANDARD API
+/// \param kind specified memory kind
+/// \param memkind_mem_usage_policy memory usage policy
+/// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
+///
+int memkind_update_memory_usage_policy(memkind_t kind,
+                                       memkind_mem_usage_policy policy);
+
 #ifdef __cplusplus
 }
 #endif

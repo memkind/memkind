@@ -1587,9 +1587,11 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeUsingNullptrInsteadOfKind)
 
 /*
  * This is a test which confirms that extent deallocation function ( pmem_extent_dalloc )
- * was called correctly for pmem allocation.
+ * was called correctly for pmem allocation and confirm that MEMKIND_MEM_USAGE_POLICY_DEFAULT
+ * is set as default
  */
-TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCheckExtentDalloc)
+TEST_F(MemkindPmemTests,
+       test_TC_MEMKIND_PmemCheckExtentDallocAndDefaultMemoryPolicy)
 {
     struct memkind *kind = nullptr;
     const int mallocLimit = 10000;
@@ -1597,39 +1599,122 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCheckExtentDalloc)
     struct stat st;
     double initialBlocks;
 
-    int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &kind);
+    //First iteration is without setting memkind policy
+    //Second iteration is with setting the memkind policy
+    const unsigned pmem_iter_max = 2;
+
+    int dalloc_counter[pmem_iter_max] = {0};
+    for (unsigned pmem_iter = 0; pmem_iter < pmem_iter_max; ++pmem_iter) {
+
+        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &kind);
+        ASSERT_EQ(err, 0);
+
+        if(pmem_iter == 1) {
+            err = memkind_update_memory_usage_policy(kind,
+                                                     MEMKIND_MEM_USAGE_POLICY_DEFAULT);
+            ASSERT_EQ(err, 0);
+        }
+
+        struct memkind_pmem *priv = (memkind_pmem *)kind->priv;
+
+        for (int x = 0; x < 10; ++x) {
+            // sleep is here to help trigger dalloc extent
+            sleep(2);
+            int allocCount = 0;
+            for (int i = 0; i < mallocLimit; ++i) {
+                dalloc_counter[pmem_iter]++;
+                ptr[i] = memkind_malloc(kind, 32);
+                if (ptr[i] == nullptr)
+                    break;
+
+                allocCount = i;
+            }
+
+            // store initial amount of allocated blocks
+            if (x == 0) {
+                ASSERT_EQ(0, fstat(priv->fd, &st));
+                initialBlocks = st.st_blocks;
+            }
+
+            for (int i = 0; i < allocCount; ++i)
+                memkind_free(kind, ptr[i]);
+
+            ASSERT_EQ(0, fstat(priv->fd, &st));
+            // if amount of blocks is less than initial, extent was called.
+            if (initialBlocks > st.st_blocks)
+                break;
+        }
+        ASSERT_GT(initialBlocks, st.st_blocks);
+
+        err = memkind_destroy_kind(kind);
+        ASSERT_EQ(0, err);
+    }
+    //Number of operations to dalloc should be the same with and without
+    //setting MEMKIND_MEM_USAGE_POLICY_DEFAULT policy
+    ASSERT_EQ(dalloc_counter[0], dalloc_counter[1]);
+}
+
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_DefaultMemoryUsagePolicyDefaultKind)
+{
+    int err =memkind_update_memory_usage_policy(MEMKIND_DEFAULT,
+                                                MEMKIND_MEM_USAGE_POLICY_DEFAULT);
+    ASSERT_EQ(err, MEMKIND_ERROR_OPERATION_FAILED);
+
+    err =memkind_update_memory_usage_policy(MEMKIND_DEFAULT,
+                                            MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
+    ASSERT_EQ(err, MEMKIND_ERROR_OPERATION_FAILED);
+}
+
+/*
+ * Test will check that extent deallocation function was called after first memkind_free()
+ */
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemConservativePolicy)
+{
+    struct memkind *pmem_temp = nullptr;
+    struct memkind_pmem *priv = nullptr;
+    void *temp_ptr = nullptr;
+    struct stat st;
+    double blocksBeforeFree = 0;
+    double blocksAfterFree = 0;
+
+    int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
     ASSERT_EQ(err, 0);
 
-    struct memkind_pmem *priv = (memkind_pmem *)kind->priv;
+    err =memkind_update_memory_usage_policy(pmem_temp,
+                                            MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
+    ASSERT_EQ(err, 0);
+    priv = (memkind_pmem *)pmem_temp->priv;
 
-    for (int x = 0; x < 10; ++x) {
-        // sleep is here to help trigger dalloc extent
-        sleep(2);
-        int allocCount = 0;
-        for (int i = 0; i < mallocLimit; ++i) {
-            ptr[i] = memkind_malloc(kind, 32);
-            if (ptr[i] == nullptr)
-                break;
+    temp_ptr = memkind_malloc(pmem_temp, 1 * KB);
 
-            allocCount = i;
-        }
+    err = fstat(priv->fd, &st);
+    ASSERT_EQ(err, 0);
+    blocksBeforeFree = st.st_blocks;
 
-        // store initial amount of allocated blocks
-        if (x == 0) {
-            ASSERT_EQ(0, fstat(priv->fd, &st));
-            initialBlocks = st.st_blocks;
-        }
+    memkind_free(pmem_temp, temp_ptr);
 
-        for (int i = 0; i < allocCount; ++i)
-            memkind_free(kind, ptr[i]);
+    err = fstat(priv->fd, &st);
+    ASSERT_EQ(err, 0);
+    blocksAfterFree = st.st_blocks;
 
-        ASSERT_EQ(0, fstat(priv->fd, &st));
-        // if amount of blocks is less than initial, extent was called.
-        if (initialBlocks > st.st_blocks)
-            break;
-    }
-    ASSERT_GT(initialBlocks, st.st_blocks);
+    //if blocksAfterFree is less than blocksBeforeFree, extent was called.
+    ASSERT_LT(blocksAfterFree, blocksBeforeFree);
 
-    err = memkind_destroy_kind(kind);
-    ASSERT_EQ(0, err);
+    err = memkind_destroy_kind(pmem_temp);
+    ASSERT_EQ(err, 0);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMemoryUsagePolicyError)
+{
+    struct memkind *pmem_temp = nullptr;
+    int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+    ASSERT_EQ(err, 0);
+
+    err =memkind_update_memory_usage_policy(pmem_temp,
+                                            MEMKIND_MEM_USAGE_POLICY_MAX_VALUE);
+    ASSERT_EQ(err, MEMKIND_ERROR_INVALID);
+
+    err = memkind_destroy_kind(pmem_temp);
+    ASSERT_EQ(err, 0);
 }
