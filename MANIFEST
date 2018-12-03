@@ -39,6 +39,7 @@ install_astyle.sh
 m4/ax_cxx_compile_stdcxx.m4
 m4/ax_cxx_compile_stdcxx_11.m4
 m4/ax_pthread.m4
+man/memkind-hbw-nodes.1
 man/hbwmalloc.3
 man/memkind.3
 man/memkind_arena.3

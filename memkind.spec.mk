@@ -175,10 +175,12 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %{_includedir}/%{namespace}.h
 %{_includedir}/%{internal_include}
 %{_includedir}/%{internal_include}/%{namespace}*.h
+%{_mandir}/man1/memkind-hbw-nodes.1
 %{_mandir}/man3/hbwmalloc.3.*
 %{_mandir}/man3/hbwallocator.3.*
 %{_mandir}/man3/pmemallocator.3.*
 %{_mandir}/man3/%{namespace}*.3.*
+%{_mandir}/man7/autohbw.7
 
 %exclude %{_includedir}/%{internal_include}/%{namespace}_log.h
 
