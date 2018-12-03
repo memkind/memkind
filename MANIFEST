@@ -5,6 +5,7 @@ ChangeLog
 INSTALL
 Makefile.am
 NEWS
+PULL_REQUEST_TEMPLATE.md
 README
 .travis.yml
 astyle.sh
