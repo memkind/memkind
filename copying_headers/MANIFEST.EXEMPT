@@ -5,6 +5,7 @@ CONTRIBUTING
 INSTALL
 NEWS
 README
+PULL_REQUEST_TEMPLATE.md
 VERSION
 m4/ax_cxx_compile_stdcxx.m4
 m4/ax_cxx_compile_stdcxx_11.m4
