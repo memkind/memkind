@@ -90,7 +90,7 @@ public:
 
     //Get existing allocator without creating new.
     //The owner of existing allocator is AllocatorFactory object.
-    Allocator* get_existing(unsigned type)
+    Allocator *get_existing(unsigned type)
     {
         switch(type) {
             case AllocatorTypes::STANDARD_ALLOCATOR:
@@ -111,7 +111,7 @@ public:
         }
     }
 
-    initialization_stat initialize_allocator(Allocator& allocator)
+    initialization_stat initialize_allocator(Allocator &allocator)
     {
         size_t initial_size = 512;
         float before_node1 = Numastat::get_total_memory(0);
@@ -175,11 +175,11 @@ public:
         return stats;
     }
 
-    VectorIterator<Allocator*> generate_random_allocator_calls(int num, int seed,
-                                                               TypesConf allocator_calls)
+    VectorIterator<Allocator *> generate_random_allocator_calls(int num, int seed,
+                                                                TypesConf allocator_calls)
     {
         srand(seed);
-        std::vector<Allocator*> allocators_calls;
+        std::vector<Allocator *> allocators_calls;
 
         for (int i=0; i<num; i++) {
             int index;
@@ -191,7 +191,7 @@ public:
             allocators_calls.push_back(get_existing(index));
         }
 
-        return VectorIterator<Allocator*>::create(allocators_calls);
+        return VectorIterator<Allocator *>::create(allocators_calls);
     }
 
     //Return kind to the corresponding AllocatorTypes enum specified in argument.

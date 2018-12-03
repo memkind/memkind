@@ -47,7 +47,7 @@ public:
 
     void run()
     {
-        void* ptr = NULL;
+        void *ptr = NULL;
 
         for(int i=0; i<mem_operations_num; i++) {
             int ret = hbw_posix_memalign_psize(&ptr, alignment_size, alloc_size, page_size);

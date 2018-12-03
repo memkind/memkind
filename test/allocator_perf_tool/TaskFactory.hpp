@@ -36,9 +36,9 @@ class TaskFactory
 {
 public:
 
-    Task* create(TaskConf conf)
+    Task *create(TaskConf conf)
     {
-        Task* task = NULL;
+        Task *task = NULL;
         task = new FunctionCallsPerformanceTask(conf);
 
         tasks.push_back(task);
@@ -54,5 +54,5 @@ public:
     }
 
 private:
-    std::vector<Task*> tasks;
+    std::vector<Task *> tasks;
 };

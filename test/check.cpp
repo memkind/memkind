@@ -65,7 +65,7 @@ Check::Check(const void *p, const size_t size, const size_t page_size)
         num_address = size / psize;
         num_address += size % psize ? 1 : 0;
 
-        address = new void* [num_address];
+        address = new void *[num_address];
         size_t i;
         for (i = 0; i < num_address - 1; ++i) {
             address[i] = (char *)ptr + i * psize;
@@ -86,7 +86,7 @@ Check::Check(const Check &other)
 {
     num_address = other.num_address;
 
-    address = new void* [num_address];
+    address = new void *[num_address];
     for (size_t i = 0; i < num_address; ++i) {
         address[i] = other.address[i];
     }

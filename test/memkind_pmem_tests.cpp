@@ -35,7 +35,7 @@
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * KB;
 static const size_t PMEM_NO_LIMIT = 0;
-extern const char*  PMEM_DIR;
+extern const char  *PMEM_DIR;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
@@ -69,7 +69,7 @@ class MemkindPmemTestsMalloc : public MemkindPmemTests,
 {
 };
 
-static void pmem_get_size(struct memkind *kind, size_t& total, size_t& free)
+static void pmem_get_size(struct memkind *kind, size_t &total, size_t &free)
 {
     struct memkind_pmem *priv = reinterpret_cast<struct memkind_pmem *>(kind->priv);
 
@@ -96,7 +96,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPriv)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreatePmemFailNonExistingDirectory)
 {
-    const char* non_existing_directory = "/temp/non_exisitng_directory";
+    const char *non_existing_directory = "/temp/non_exisitng_directory";
     struct memkind *pmem_temp = nullptr;
     errno = 0;
     int err = memkind_create_pmem(non_existing_directory, MEMKIND_PMEM_MIN_SIZE,
@@ -491,13 +491,13 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocIncreaseSize)
     const char val[] = "test_TC_MEMKIND_PmemReallocIncreaseSize";
     int status;
 
-    test1 = (char*)memkind_malloc(pmem_kind, size);
+    test1 = (char *)memkind_malloc(pmem_kind, size);
     ASSERT_TRUE(test1 != nullptr);
 
     sprintf(test1, "%s", val);
 
     size *= 2;
-    test2 = (char*)memkind_realloc(pmem_kind, test1, size);
+    test2 = (char *)memkind_realloc(pmem_kind, test1, size);
     ASSERT_TRUE(test2 != nullptr);
     status = memcmp(val, test2, sizeof(val));
     ASSERT_TRUE(status == 0);
@@ -513,13 +513,13 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocDecreaseSize)
     const char val[] = "test_TC_MEMKIND_PmemReallocDecreaseSize";
     int status;
 
-    test1 = (char*)memkind_malloc(pmem_kind, size);
+    test1 = (char *)memkind_malloc(pmem_kind, size);
     ASSERT_TRUE(test1 != nullptr);
 
     sprintf(test1, "%s", val);
 
     size = 4;
-    test2 = (char*)memkind_realloc(pmem_kind, test1, size);
+    test2 = (char *)memkind_realloc(pmem_kind, test1, size);
     ASSERT_TRUE(test2 != nullptr);
     status = memcmp(val, test2, size);
     ASSERT_TRUE(status == 0);
@@ -773,7 +773,7 @@ TEST_F(MemkindPmemTests,
 {
     void *test = nullptr;
     size_t size = 32;
-    size_t wrong_alignment = sizeof(void*)/2;
+    size_t wrong_alignment = sizeof(void *)/2;
     int ret;
 
     ret = memkind_posix_memalign(pmem_kind, &test, wrong_alignment, size);
@@ -786,7 +786,7 @@ TEST_F(MemkindPmemTests,
 {
     void *test = nullptr;
     size_t size = 32;
-    size_t wrong_alignment = sizeof(void*)+1;
+    size_t wrong_alignment = sizeof(void *)+1;
     int ret;
 
     ret = memkind_posix_memalign(pmem_kind, &test, wrong_alignment, size);
@@ -799,7 +799,7 @@ TEST_F(MemkindPmemTests,
 {
     void *test = nullptr;
     size_t size = 32;
-    size_t alignment = sizeof(void*);
+    size_t alignment = sizeof(void *);
     int ret;
 
     ret = memkind_posix_memalign(pmem_kind, &test, alignment, size);
@@ -812,7 +812,7 @@ TEST_F(MemkindPmemTests,
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignSizeZero)
 {
     void *test = nullptr;
-    size_t alignment = sizeof(void*);
+    size_t alignment = sizeof(void *);
     int ret;
 
     ret = memkind_posix_memalign(pmem_kind, &test, alignment, 0);
@@ -866,8 +866,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalign)
                 ptrs[j] = (int *)test;
 
                 //test pointer should be usable
-                *(int*)test = test_value;
-                ASSERT_EQ(*(int*)test, test_value);
+                *(int *)test = test_value;
+                ASSERT_EQ(*(int *)test, test_value);
 
                 //check for correct address alignment
                 ASSERT_EQ((uintptr_t)(test) & (alignment - 1), (uintptr_t)0);
@@ -883,7 +883,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalign)
 
 static memkind_t *pools;
 static int npools = 3;
-static void* thread_func(void* arg)
+static void *thread_func(void *arg)
 {
     int start_idx = *(int *)arg;
     int err = 0;
@@ -909,11 +909,11 @@ static void* thread_func(void* arg)
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreads)
 {
     int nthreads = 10, status = 0;
-    pthread_t *threads = (pthread_t*)calloc(nthreads, sizeof(pthread_t));
+    pthread_t *threads = (pthread_t *)calloc(nthreads, sizeof(pthread_t));
     ASSERT_TRUE(threads != nullptr);
-    int *pool_idx = (int*)calloc(nthreads, sizeof(int));
+    int *pool_idx = (int *)calloc(nthreads, sizeof(int));
     ASSERT_TRUE(pool_idx != nullptr);
-    pools = (memkind_t*)calloc(npools * nthreads, sizeof(memkind_t));
+    pools = (memkind_t *)calloc(npools * nthreads, sizeof(memkind_t));
     ASSERT_TRUE(pools != nullptr);
 
     for (int t = 0; t < nthreads; t++) {
@@ -1171,7 +1171,7 @@ TEST_F(MemkindPmemTests,
     }
 }
 
-static void* thread_func_kinds(void* arg)
+static void *thread_func_kinds(void *arg)
 {
     memkind_t pmem_thread_kind;
     int err = 0;
@@ -1200,7 +1200,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
     int i, t, err;
     int max_possible_kind = 0;
     memkind_t pmem_kinds[MEMKIND_MAX_KIND] = {nullptr};
-    pthread_t *threads = (pthread_t*)calloc(nthreads, sizeof(pthread_t));
+    pthread_t *threads = (pthread_t *)calloc(nthreads, sizeof(pthread_t));
     ASSERT_TRUE(threads != nullptr);
 
     // This loop will create as many kinds as possible
@@ -1245,9 +1245,9 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkOneThread)
 {
     const size_t pmem_array_size = 10;
-    struct memkind* pmem_kind_array[pmem_array_size] = { nullptr };
+    struct memkind *pmem_kind_array[pmem_array_size] = { nullptr };
     const int malloc_limit = 100000;
-    void* ptr[pmem_array_size][malloc_limit] = { { nullptr } };
+    void *ptr[pmem_array_size][malloc_limit] = { { nullptr } };
     TimerSysTime timer;
     double test1Time, test2Time;
 
@@ -1312,13 +1312,13 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkOneThread)
 }
 
 static const int threadsNum = 10;
-static memkind* testKind[threadsNum] = { nullptr };
+static memkind *testKind[threadsNum] = { nullptr };
 static const int mallocCount = 100000;
-static void* ptr[threadsNum][mallocCount] = { { nullptr } };
+static void *ptr[threadsNum][mallocCount] = { { nullptr } };
 
-static void* thread_func_FreeWithNullptr(void* arg)
+static void *thread_func_FreeWithNullptr(void *arg)
 {
-    int kindIndex = *(int*)arg;
+    int kindIndex = *(int *)arg;
     pthread_mutex_lock(&mutex);
     pthread_cond_wait(&cond, &mutex);
     pthread_mutex_unlock(&mutex);
@@ -1334,9 +1334,9 @@ static void* thread_func_FreeWithNullptr(void* arg)
     return nullptr;
 }
 
-static void* thread_func_FreeWithKind(void* arg)
+static void *thread_func_FreeWithKind(void *arg)
 {
-    int kindIndex = *(int*)arg;
+    int kindIndex = *(int *)arg;
     pthread_mutex_lock(&mutex);
     pthread_cond_wait(&cond, &mutex);
     pthread_mutex_unlock(&mutex);
@@ -1356,7 +1356,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkWithThreads)
     const size_t allocSize = 512;
     TimerSysTime timer;
     double duration;
-    pthread_t *threads = (pthread_t*)calloc(threadsNum, sizeof(pthread_t));
+    pthread_t *threads = (pthread_t *)calloc(threadsNum, sizeof(pthread_t));
     ASSERT_TRUE(threads != nullptr);
 
     for (int i = 0; i < threadsNum; ++i) {
@@ -1439,10 +1439,10 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkWithThreads)
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeUsingNullptrInsteadOfKind)
 {
     const size_t pmem_array_size = 10;
-    struct memkind* pmem_kind_array[pmem_array_size] = { nullptr };
+    struct memkind *pmem_kind_array[pmem_array_size] = { nullptr };
     const int malloc_limit = 100000;
-    void* ptr[pmem_array_size][malloc_limit] = { nullptr };
-    void* testPtr = nullptr;
+    void *ptr[pmem_array_size][malloc_limit] = { nullptr };
+    void *testPtr = nullptr;
 
     for (size_t i = 0; i < pmem_array_size; ++i) {
         int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_array[i]);
@@ -1494,16 +1494,16 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeUsingNullptrInsteadOfKind)
  */
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCheckExtentDalloc)
 {
-    struct memkind* kind = nullptr;
+    struct memkind *kind = nullptr;
     const int mallocLimit = 10000;
-    void* ptr[mallocLimit] = { nullptr };
+    void *ptr[mallocLimit] = { nullptr };
     struct stat st;
     double initialBlocks;
 
     int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &kind);
     ASSERT_EQ(err, 0);
 
-    struct memkind_pmem* priv = (memkind_pmem*)kind->priv;
+    struct memkind_pmem *priv = (memkind_pmem *)kind->priv;
 
     for (int x = 0; x < 10; ++x) {
         // sleep is here to help trigger dalloc extent

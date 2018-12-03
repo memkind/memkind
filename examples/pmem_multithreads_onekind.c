@@ -41,7 +41,7 @@
 
 #define NUM_THREADS 10
 
-static char* PMEM_DIR = "/tmp/";
+static char *PMEM_DIR = "/tmp/";
 
 struct arg_struct {
     int id;
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 
 void *thread_onekind(void *arg)
 {
-    struct arg_struct *args = (struct arg_struct*)arg;
+    struct arg_struct *args = (struct arg_struct *)arg;
     int i;
 
     pthread_mutex_lock(&mutex);

@@ -30,7 +30,7 @@
 #include "allocator_perf_tool/PmemMockup.hpp"
 
 static const size_t PMEM_PART_SIZE = 0;
-extern const char*  PMEM_DIR;
+extern const char  *PMEM_DIR;
 
 class AllocPerformanceTest: public :: testing::Test
 {
@@ -57,8 +57,8 @@ protected:
               size_t alloc_size, unsigned mem_operations_num)
     {
         TaskFactory task_factory;
-        std::vector<Thread*> threads;
-        std::vector<Task*> tasks;
+        std::vector<Thread *> threads;
+        std::vector<Task *> tasks;
         TypesConf func_calls;
         TypesConf allocator_types;
 
@@ -80,7 +80,7 @@ protected:
         };
 
         for (int i=0; i<threads_number; i++) {
-            Task* task = task_factory.create(conf);
+            Task *task = task_factory.create(conf);
             tasks.push_back(task);
             threads.push_back(new Thread(task));
             conf.seed += 1;

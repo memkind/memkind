@@ -42,7 +42,7 @@ public:
         return names[type];
     }
 
-    static unsigned function_type(const std::string& name)
+    static unsigned function_type(const std::string &name)
     {
         for (unsigned i=0; i<NUM_OF_FUNCTIONS; i++) {
             if(function_name(i) == name)

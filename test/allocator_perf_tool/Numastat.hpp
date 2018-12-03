@@ -44,7 +44,7 @@ public:
         std::stringstream cmd;
         cmd << "numastat " << pid;
 
-        FILE* file;
+        FILE *file;
         char buff[256];
         float result = -1.0;
 

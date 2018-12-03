@@ -48,15 +48,15 @@ protected:
         size_t alignment = 2*size_1MB;
         size_t alloc_size = 4*size_1MB;
 
-        std::vector<Thread*> threads;
-        std::vector<Task*> tasks;
+        std::vector<Thread *> threads;
+        std::vector<Task *> tasks;
 
         TimerSysTime timer;
         timer.start();
 
         // This bug occurs more frequently under stress of multithreaded allocations.
         for (int i=0; i<threads_number; i++) {
-            Task* task = new HugePageUnmap(mem_operations_num, touch_memory, alignment,
+            Task *task = new HugePageUnmap(mem_operations_num, touch_memory, alignment,
                                            alloc_size, HBW_PAGESIZE_2MB);
             tasks.push_back(task);
             threads.push_back(new Thread(task));

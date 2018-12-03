@@ -42,7 +42,7 @@
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 #define NUM_THREADS 10
 
-static char* PMEM_DIR = "/tmp/";
+static char *PMEM_DIR = "/tmp/";
 
 void *thread_ind(void *arg);
 

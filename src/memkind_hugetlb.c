@@ -59,8 +59,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HUGETLB_OPS = {
 };
 
 static int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out);
-static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask,
-                                   size_t* out);
+static int get_nr_hugepages_cached(size_t pagesize, struct bitmask *nodemask,
+                                   size_t *out);
 
 static int memkind_hugetlb_check_available(struct memkind *kind,
                                            size_t huge_size);
@@ -124,7 +124,7 @@ static int memkind_hugetlb_check_available(struct memkind *kind,
 
 struct hugepage_size_info {
     size_t size;
-    size_t* nr_hugepages_per_node_array;
+    size_t *nr_hugepages_per_node_array;
     size_t  nr_overcommit;
 };
 
@@ -156,7 +156,7 @@ static struct hugepage_size_info *allocate_hugepage_size_info()
     return newInfo;
 }
 
-static size_t get_sysfs_entry_value(const char* entry_path)
+static size_t get_sysfs_entry_value(const char *entry_path)
 {
     int errno_before;
     FILE *fid;
@@ -218,7 +218,7 @@ static void init_hugepage_size_info(size_t pagesize,
 }
 
 // get hugepage size in bytes out of sysfs dir name
-static int parse_pagesize_from_sysfs_entry(const char* entry, size_t *out)
+static int parse_pagesize_from_sysfs_entry(const char *entry, size_t *out)
 {
     size_t pagesize;
     int ret = sscanf(entry, "hugepages-%zukB", &pagesize);
@@ -238,7 +238,7 @@ static void hugepages_config_init_once()
     size_t pagesize;
     struct hugepage_size_info **hugepages_info_array = NULL;
     struct dirent *dir;
-    DIR* hugepages_sysfs = opendir("/sys/kernel/mm/hugepages");
+    DIR *hugepages_sysfs = opendir("/sys/kernel/mm/hugepages");
     if(hugepages_sysfs == NULL) {
         memkind_hugepages_config.err = MEMKIND_ERROR_HUGETLB;
         log_err("/sys/kernel/mm/hugepages directory is not available.");
@@ -313,7 +313,7 @@ static void destroy_hugepages_per_node()
 }
 
 // helper function that find and return hugepage_size_info object for specified pagesize
-static struct hugepage_size_info* get_hugepage_info_for_pagesize(
+static struct hugepage_size_info *get_hugepage_info_for_pagesize(
     size_t pagesize)
 {
     int i;
@@ -327,7 +327,7 @@ static struct hugepage_size_info* get_hugepage_info_for_pagesize(
 }
 
 // returns sum of pre-allocated hugepage for specified pagesize and set of nodes
-static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask,
+static int get_nr_hugepages_cached(size_t pagesize, struct bitmask *nodemask,
                                    size_t *out)
 {
     int i;
@@ -341,7 +341,7 @@ static int get_nr_hugepages_cached(size_t pagesize, struct bitmask* nodemask,
         return memkind_hugepages_config.err;
     }
 
-    struct hugepage_size_info* info = get_hugepage_info_for_pagesize(pagesize);
+    struct hugepage_size_info *info = get_hugepage_info_for_pagesize(pagesize);
     if(info == NULL) {
         log_err("Unable to allocate hugepages, because info about pre-allocated hugepages is not available.");
         return MEMKIND_ERROR_HUGETLB;
@@ -367,7 +367,7 @@ static int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out)
         return memkind_hugepages_config.err;
     }
 
-    struct hugepage_size_info* info = get_hugepage_info_for_pagesize(pagesize);
+    struct hugepage_size_info *info = get_hugepage_info_for_pagesize(pagesize);
     if(info == NULL) {
         log_err("Unable to allocate hugepages, because info about overcommit hugepages is not available.");
         return MEMKIND_ERROR_HUGETLB;

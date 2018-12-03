@@ -59,8 +59,8 @@ namespace pmem
                 }
             }
 
-            kind_wrapper_t(const kind_wrapper_t&) = delete;
-            void operator=(const kind_wrapper_t&) = delete;
+            kind_wrapper_t(const kind_wrapper_t &) = delete;
+            void operator=(const kind_wrapper_t &) = delete;
 
             ~kind_wrapper_t()
             {
@@ -115,40 +115,40 @@ namespace pmem
         {
         }
 
-        explicit allocator(const std::string& dir, size_t max_size) :
+        explicit allocator(const std::string &dir, size_t max_size) :
             allocator(dir.c_str(), max_size)
         {
         }
 
-        allocator(const allocator& other) = default;
+        allocator(const allocator &other) = default;
 
         template <typename U>
-        allocator(const allocator<U>& other) noexcept : kind_wrapper_ptr(
+        allocator(const allocator<U> &other) noexcept : kind_wrapper_ptr(
                 other.kind_wrapper_ptr)
         {
         }
 
-        allocator(allocator&& other) = default;
+        allocator(allocator &&other) = default;
 
         template <typename U>
-        allocator(allocator<U>&& other) noexcept :
+        allocator(allocator<U> &&other) noexcept :
             kind_wrapper_ptr(std::move(other.kind_wrapper_ptr))
         {
         }
 
-        allocator<T>& operator = (const allocator& other) = default;
+        allocator<T> &operator = (const allocator &other) = default;
 
         template <typename U>
-        allocator<T>& operator = (const allocator<U>& other) noexcept
+        allocator<T> &operator = (const allocator<U> &other) noexcept
         {
             kind_wrapper_ptr = other.kind_wrapper_ptr;
             return *this;
         }
 
-        allocator<T>& operator = (allocator&& other) = default;
+        allocator<T> &operator = (allocator &&other) = default;
 
         template <typename U>
-        allocator<T>& operator = (allocator<U>&& other) noexcept
+        allocator<T> &operator = (allocator<U> &&other) noexcept
         {
             kind_wrapper_ptr = std::move(other.kind_wrapper_ptr);
             return *this;
@@ -166,11 +166,11 @@ namespace pmem
 
         void deallocate(pointer p, size_type n) const
         {
-            memkind_free(kind_wrapper_ptr->get(), static_cast<void*>(p));
+            memkind_free(kind_wrapper_ptr->get(), static_cast<void *>(p));
         }
 
         template <class U, class... Args>
-        void construct(U* p, Args&&... args) const
+        void construct(U *p, Args &&... args) const
         {
             ::new((void *)p) U(std::forward<Args>(args)...);
         }
@@ -181,20 +181,20 @@ namespace pmem
         }
 
         template <typename U, typename V>
-        friend bool operator ==(const allocator<U>& lhs, const allocator<V>& rhs);
+        friend bool operator ==(const allocator<U> &lhs, const allocator<V> &rhs);
 
         template <typename U, typename V>
-        friend bool operator !=(const allocator<U>& lhs, const allocator<V>& rhs);
+        friend bool operator !=(const allocator<U> &lhs, const allocator<V> &rhs);
     };
 
     template <typename U, typename V>
-    bool operator ==(const allocator<U>& lhs, const allocator<V>& rhs)
+    bool operator ==(const allocator<U> &lhs, const allocator<V> &rhs)
     {
         return lhs.kind_wrapper_ptr->get() == rhs.kind_wrapper_ptr->get();
     }
 
     template <typename U, typename V>
-    bool operator !=(const allocator<U>& lhs, const allocator<V>& rhs)
+    bool operator !=(const allocator<U> &lhs, const allocator<V> &rhs)
     {
         return !(lhs == rhs);
     }

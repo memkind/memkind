@@ -63,10 +63,10 @@ namespace performance_tests
     extern "C" {
         // jemalloc function prototypes
         // full header cannot be include due to conflict with memkind jemalloc
-        extern void * jexx_malloc(size_t size);
-        extern void * jexx_calloc(size_t num, size_t size);
-        extern void * jexx_memalign(size_t alignment, size_t size);
-        extern void * jexx_realloc(void *ptr, size_t size);
+        extern void *jexx_malloc(size_t size);
+        extern void *jexx_calloc(size_t num, size_t size);
+        extern void *jexx_memalign(size_t alignment, size_t size);
+        extern void *jexx_realloc(void *ptr, size_t size);
         extern void  jexx_free(void *ptr);
     }
 #endif
@@ -156,8 +156,8 @@ namespace performance_tests
         }
 
         // perform memory operation
-        virtual void perform(const memkind_t& kind,
-                             void * &mem,
+        virtual void perform(const memkind_t &kind,
+                             void *&mem,
                              size_t size = 0,
                              size_t offset=0,
                              size_t alignment=0)
@@ -182,8 +182,8 @@ namespace performance_tests
         {
         }
 
-        virtual void perform(const memkind_t& kind,
-                             void * &mem,
+        virtual void perform(const memkind_t &kind,
+                             void *&mem,
                              size_t size,
                              size_t offset,
                              size_t alignment) const override
@@ -258,8 +258,8 @@ namespace performance_tests
         {
         }
 
-        virtual void perform(const memkind_t& kind,
-                             void * &mem,
+        virtual void perform(const memkind_t &kind,
+                             void *&mem,
                              size_t size,
                              size_t offset,
                              size_t alignment) const override
@@ -333,8 +333,8 @@ namespace performance_tests
         {
         }
 
-        virtual void perform(const memkind_t& kind,
-                             void * &mem,
+        virtual void perform(const memkind_t &kind,
+                             void *&mem,
                              size_t size,
                              size_t offset,
                              size_t alignment) const override
@@ -413,8 +413,8 @@ namespace performance_tests
         {
         }
 
-        virtual void perform(const memkind_t& kind,
-                             void * &mem,
+        virtual void perform(const memkind_t &kind,
+                             void *&mem,
                              size_t size,
                              size_t offset,
                              size_t alignment) const override

@@ -81,8 +81,8 @@ protected:
 
     //Check true allocation errors over all iterations.
     //Return iteration number (>0) when error occurs, or zero
-    int check_allocation_errors(std::vector<iteration_result>& results,
-                                const TaskConf& task_conf)
+    int check_allocation_errors(std::vector<iteration_result> &results,
+                                const TaskConf &task_conf)
     {
         for (size_t i=0; i<results.size(); i++) {
             //Check if test ends with allocation error.

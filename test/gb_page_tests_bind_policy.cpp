@@ -36,12 +36,12 @@ class GBPagesTestBindPolicy : public TGTest
 protected:
     void run(int iterations, size_t alignment, bool psize_strict)
     {
-        std::vector<void*> addr_to_free;
+        std::vector<void *> addr_to_free;
         hbw_set_policy(HBW_POLICY_BIND);
         EXPECT_EQ(HBW_POLICY_BIND, hbw_get_policy());
 
         for (int i = 0; i < iterations; i++) {
-            void* ptr = NULL;
+            void *ptr = NULL;
             int ret;
             if (psize_strict) {
                 ret = hbw_posix_memalign_psize(&ptr, alignment, GB, HBW_PAGESIZE_1GB_STRICT);

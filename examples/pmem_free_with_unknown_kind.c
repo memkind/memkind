@@ -36,7 +36,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-static char* PMEM_DIR = "/tmp/";
+static char *PMEM_DIR = "/tmp/";
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * 1024;
 
 int main(int argc, char **argv)

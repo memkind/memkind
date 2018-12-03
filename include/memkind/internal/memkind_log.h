@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,19 +33,19 @@ extern "C" {
  * For printing informational messages
  * Requires environment variable MEMKIND_DEBUG to be set to appropriate value
  */
-void log_info(const char * format, ...) PRINTF_FORMAT;
+void log_info(const char *format, ...) PRINTF_FORMAT;
 
 /*
  * For printing messages regarding errors and failures
  * Requires environment variable MEMKIND_DEBUG to be set to appropriate value
  */
-void log_err(const char * format, ...) PRINTF_FORMAT;
+void log_err(const char *format, ...) PRINTF_FORMAT;
 
 /*
  * For printing messages regarding fatal errors before calling abort()
  * Works *no matter* of MEMKIND_DEBUG state
  */
-void log_fatal(const char * format, ...)PRINTF_FORMAT;
+void log_fatal(const char *format, ...)PRINTF_FORMAT;
 
 #ifdef __cplusplus
 }

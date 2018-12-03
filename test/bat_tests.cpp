@@ -39,7 +39,7 @@
 
 #define TEST_PREFIX "test_TC_MEMKIND_BAT_"
 
-typedef void(*test_function)(Allocator*, size_t);
+typedef void(*test_function)(Allocator *, size_t);
 
 typedef std::tuple<test_function, memkind_memtype_t, memkind_policy_t, memkind_bits_t, size_t>
 memtype_policy_test_params;
@@ -108,9 +108,9 @@ class BasicAllocTest
 {
 public:
 
-    BasicAllocTest(Allocator* allocator) : allocator(allocator) {}
+    BasicAllocTest(Allocator *allocator) : allocator(allocator) {}
 
-    void check_policy_and_numa_node(void* ptr, size_t size)
+    void check_policy_and_numa_node(void *ptr, size_t size)
     {
         int policy = allocator->get_numa_policy();
 
@@ -123,16 +123,16 @@ public:
         }
     }
 
-    void record_page_association(void* ptr, size_t size)
+    void record_page_association(void *ptr, size_t size)
     {
         TestPolicy::record_page_association(ptr, size, allocator->get_page_size());
     }
 
     void malloc(size_t size)
     {
-        void* ptr = allocator->malloc(size);
+        void *ptr = allocator->malloc(size);
         ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";
-        void* memset_ret = memset(ptr, 3, size);
+        void *memset_ret = memset(ptr, 3, size);
         EXPECT_TRUE(memset_ret != NULL);
         record_page_association(ptr, size);
         check_policy_and_numa_node(ptr, size);
@@ -141,9 +141,9 @@ public:
 
     void calloc(size_t num, size_t size)
     {
-        void* ptr = allocator->calloc(num, size);
+        void *ptr = allocator->calloc(num, size);
         ASSERT_TRUE(ptr != NULL) << "calloc() returns NULL";
-        void* memset_ret = memset(ptr, 3, size);
+        void *memset_ret = memset(ptr, 3, size);
         ASSERT_TRUE(memset_ret != NULL);
         record_page_association(ptr, size);
         check_policy_and_numa_node(ptr, size);
@@ -152,12 +152,12 @@ public:
 
     void realloc(size_t size)
     {
-        void* ptr = allocator->malloc(size);
+        void *ptr = allocator->malloc(size);
         ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";
         size_t realloc_size = size+128;
         ptr = allocator->realloc(ptr, realloc_size);
         ASSERT_TRUE(ptr != NULL) << "realloc() returns NULL";
-        void* memset_ret = memset(ptr, 3, realloc_size);
+        void *memset_ret = memset(ptr, 3, realloc_size);
         ASSERT_TRUE(memset_ret != NULL);
         record_page_association(ptr, size);
         check_policy_and_numa_node(ptr, size);
@@ -166,11 +166,11 @@ public:
 
     void memalign(size_t alignment, size_t size)
     {
-        void* ptr = NULL;
+        void *ptr = NULL;
         int ret = allocator->memalign(&ptr, alignment, size);
         ASSERT_EQ(0, ret) << "posix_memalign() != 0";
         ASSERT_TRUE(ptr != NULL) << "posix_memalign() returns NULL pointer";
-        void* memset_ret = memset(ptr, 3, size);
+        void *memset_ret = memset(ptr, 3, size);
         ASSERT_TRUE(memset_ret != NULL);
         record_page_association(ptr, size);
         check_policy_and_numa_node(ptr, size);
@@ -179,7 +179,7 @@ public:
 
     void free(size_t size)
     {
-        void* ptr = allocator->malloc(size);
+        void *ptr = allocator->malloc(size);
         ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";
         allocator->free(ptr);
     }
@@ -190,27 +190,27 @@ private:
 };
 
 
-static void test_malloc(Allocator* allocator, size_t size)
+static void test_malloc(Allocator *allocator, size_t size)
 {
     BasicAllocTest(allocator).malloc(size);
 }
 
-static void test_calloc(Allocator* allocator, size_t size)
+static void test_calloc(Allocator *allocator, size_t size)
 {
     BasicAllocTest(allocator).calloc(1, size);
 }
 
-static void test_realloc(Allocator* allocator, size_t size)
+static void test_realloc(Allocator *allocator, size_t size)
 {
     BasicAllocTest(allocator).realloc(size);
 }
 
-static void test_memalign(Allocator* allocator, size_t size)
+static void test_memalign(Allocator *allocator, size_t size)
 {
     BasicAllocTest(allocator).memalign(4096, size);
 }
 
-static void test_free(Allocator* allocator, size_t size)
+static void test_free(Allocator *allocator, size_t size)
 {
     BasicAllocTest(allocator).free(size);
 }
@@ -220,7 +220,7 @@ template <typename T>
 std::vector<T> GetKeys(std::map<T, std::string> dict)
 {
     std::vector<T> keys;
-    for (auto const& item: dict) {
+    for (auto const &item: dict) {
         keys.push_back(item.first);
     }
     return keys;
@@ -415,7 +415,7 @@ TEST_F(BATest,
 TEST_F(BATest,
        test_TC_MEMKIND_free_MEMKIND_DEFAULT_free_with_NULL_kind_4096_bytes)
 {
-    void* ptr = memkind_malloc(MEMKIND_DEFAULT, 4096);
+    void *ptr = memkind_malloc(MEMKIND_DEFAULT, 4096);
     ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";
     memkind_free(0, ptr);
 }

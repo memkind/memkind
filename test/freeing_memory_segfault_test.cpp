@@ -37,7 +37,7 @@ protected:
 TEST_F(FreeingMemorySegfault,
        test_TC_MEMKIND_freeing_memory_after_thread_finish)
 {
-    void* ptr = nullptr;
+    void *ptr = nullptr;
 
     std::thread t([&] {
         ptr = memkind_malloc(MEMKIND_DEFAULT, 32);

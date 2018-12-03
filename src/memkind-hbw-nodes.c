@@ -29,7 +29,7 @@
 
 #define MAX_ARG_LEN 8
 
-const char* help_message =
+const char *help_message =
     "\n"
     "NAME\n"
     "    memkind-hbw-nodes - Print comma separated list of high bandwidth nodes.\n"
