@@ -36,7 +36,7 @@ class GTestAdapter
 {
 public:
     template<class T>
-    static void RecordProperty(const std::string& key, const T& value)
+    static void RecordProperty(const std::string &key, const T &value)
     {
         std::ostringstream tmp_value;
         tmp_value << value;

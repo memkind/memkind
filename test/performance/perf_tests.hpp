@@ -40,7 +40,7 @@ class PerfTestCase
 {
 
 private:
-    vector<vector<Operation*>> m_testOperations;
+    vector<vector<Operation *>> m_testOperations;
     Operation *m_freeOperation;
     performance_tests::PerformanceTest *m_test;
     const unsigned m_seed = 1297654;
@@ -60,7 +60,7 @@ public:
     {
         delete m_test;
         for (vector<Operation *> ops : m_testOperations) {
-            for (Operation * op : ops) {
+            for (Operation *op : ops) {
                 delete op;
             }
         }

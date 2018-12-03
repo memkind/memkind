@@ -30,7 +30,7 @@
 
 //This structure is responsible to store information about single memory operation.
 struct memory_operation {
-    void* ptr;
+    void *ptr;
     double total_time;
     size_t size_of_allocation;
     unsigned allocator_type;
@@ -41,4 +41,4 @@ struct memory_operation {
 
 double convert_bytes_to_mb(uint64_t bytes);
 
-int get_numa_node_id(void* ptr);
+int get_numa_node_id(void *ptr);

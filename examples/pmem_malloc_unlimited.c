@@ -36,7 +36,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-static char* PMEM_DIR = "/tmp/";
+static char *PMEM_DIR = "/tmp/";
 
 int main(int argc, char *argv[])
 {

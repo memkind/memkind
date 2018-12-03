@@ -73,7 +73,7 @@ extern "C" {
 #define jemk_malloc_usable_size     JE_SYMBOL(malloc_usable_size)
 
 /// \note EXPERIMENTAL API
-int je_get_defrag_hint(void* ptr, int *bin_util, int *run_util);
+int je_get_defrag_hint(void *ptr, int *bin_util, int *run_util);
 
 enum memkind_const_private {
     MEMKIND_NAME_LENGTH_PRIV = 64
@@ -119,7 +119,7 @@ struct memkind {
 
 void memkind_init(memkind_t kind, bool check_numa);
 
-void *kind_mmap(struct memkind *kind, void* addr, size_t size);
+void *kind_mmap(struct memkind *kind, void *addr, size_t size);
 
 #ifdef __cplusplus
 }

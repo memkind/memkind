@@ -24,7 +24,8 @@
 
 ASTYLE_MIN_VER="3.1"
 ASTYLE_OPT="--style=linux --indent=spaces=4 -S -r --max-continuation-indent=80 "
-ASTYLE_OPT+="--max-code-length=80 --break-after-logical --indent-namespaces -z2"
+ASTYLE_OPT+="--max-code-length=80 --break-after-logical --indent-namespaces -z2 "
+ASTYLE_OPT+="--align-pointer=name"
 if ! ASTYLE=$(which astyle)
 then
     echo "Package astyle was not found. Unable to check source files format policy." >&2

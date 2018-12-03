@@ -69,7 +69,7 @@ void memkind_free_pre(struct memkind **kind, void **ptr)
     memkind_called_g = 1;
 }
 
-void finish_testcase(int fail_condition, const char* fail_message, int *err)
+void finish_testcase(int fail_condition, const char *fail_message, int *err)
 {
 
     if(memkind_called_g != 1 || fail_condition) {

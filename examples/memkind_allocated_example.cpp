@@ -63,8 +63,8 @@ public:
     void print_message()
     {
         std::cout << message << std::endl;
-        std::cout << "Memory adress of this object is: " <<  (void*)this << std::endl <<
-                  std::endl;
+        std::cout << "Memory adress of this object is: " <<  (void *)this << std::endl
+                  << std::endl;
     }
 };
 
@@ -72,23 +72,23 @@ int main()
 {
     memkind_t specified_kind = MEMKIND_HBW_HUGETLB;
 
-    memkind_allocated_example* default_kind_example = new memkind_allocated_example(
+    memkind_allocated_example *default_kind_example = new memkind_allocated_example(
         std::string("This object has been allocated using class default kind, which is: MEMKIND_DEFAULT") );
     default_kind_example->print_message();
     delete default_kind_example;
 
-    memkind_allocated_example* specified_kind_example = new(
+    memkind_allocated_example *specified_kind_example = new(
         specified_kind) memkind_allocated_example(
         std::string("This object has been allocated using specified kind, which is: MEMKIND_HBW_HUGETLB") );
     specified_kind_example->print_message();
     delete specified_kind_example;
 
     //examples for using same aproach for allocating arrays of objects, note that objects created that way can be initialized only with default (unparameterized) constructor
-    memkind_allocated_example* default_kind_array_example = new
+    memkind_allocated_example *default_kind_array_example = new
     memkind_allocated_example[5]();
     delete[] default_kind_array_example;
 
-    memkind_allocated_example* specified_kind_array_example = new(
+    memkind_allocated_example *specified_kind_array_example = new(
         specified_kind) memkind_allocated_example[5]();
     delete[] specified_kind_array_example;
 

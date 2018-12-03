@@ -28,7 +28,7 @@
 
 #define STRESS_TIME (3*24*60*60)
 
-extern const char*  PMEM_DIR;
+extern const char  *PMEM_DIR;
 
 static const size_t small_size[] = {8, 16, 32, 48, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384,
                                     448, 512, 640, 768, 896, 1 * KB, 1280, 1536, 1792, 2 * KB, 2560, 3 * KB,

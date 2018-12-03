@@ -84,8 +84,8 @@ namespace performance_tests
 
     }
 
-    void Worker::init(const vector<Operation*> &testOperations,
-                      Operation* &freeOperation)
+    void Worker::init(const vector<Operation *> &testOperations,
+                      Operation *&freeOperation)
     {
         for(uint32_t i = 0 ; i < m_actionsCount ; i++) {
             int bucketSize = rand() % Operation::MaxBucketSize;
@@ -100,7 +100,7 @@ namespace performance_tests
                         m_kind,
                         size,
                         log2(rand() % size),
-                        sizeof(void*) * (1 << ((rand() % Operation::MemalignMaxMultiplier))));
+                        sizeof(void *) * (1 << ((rand() % Operation::MemalignMaxMultiplier))));
                     break;
                 }
             }
@@ -168,7 +168,7 @@ namespace performance_tests
         m_allocationSizes = allocationSizes;
     }
 
-    void PerformanceTest::setOperations(const vector<vector<Operation*>>
+    void PerformanceTest::setOperations(const vector<vector<Operation *>>
                                         &testOperations, Operation *freeOperation)
     {
         m_testOperations = testOperations;
@@ -190,10 +190,10 @@ namespace performance_tests
         timespec iterationStop, iterationStart;
 
         Barrier::GetInstance().reset(m_threadsCount);
-        for (Worker * worker : m_workers) {
+        for (Worker *worker : m_workers) {
             worker->run();
         }
-        for (Worker * worker : m_workers) {
+        for (Worker *worker : m_workers) {
             worker->finish();
         }
         EMIT(1, "Alloc completed");
@@ -203,7 +203,7 @@ namespace performance_tests
             (iterationStop.tv_sec  * NanoSecInSec + iterationStop.tv_nsec) -
             (iterationStart.tv_sec * NanoSecInSec + iterationStart.tv_nsec)
         );
-        for (Worker * worker : m_workers) {
+        for (Worker *worker : m_workers) {
             worker->clean();
         }
     }
@@ -236,7 +236,7 @@ namespace performance_tests
         std::sort(m_durations.begin(), m_durations.end());
 
         m_durations.erase(m_durations.end() - m_discardCount, m_durations.end());
-        for (uint64_t& duration : m_durations) {
+        for (uint64_t &duration : m_durations) {
             totalDuration += duration;
         }
 
@@ -261,14 +261,14 @@ namespace performance_tests
     }
 
     void PerformanceTest::writeMetrics(const string &suiteName,
-                                       const string &caseName, const string& fileName)
+                                       const string &caseName, const string &fileName)
     {
         Metrics metrics = getMetrics();
 
         // For thousands separation
         setlocale(LC_ALL, "");
         if (!fileName.empty()) {
-            FILE* f;
+            FILE *f;
             if((f = fopen(fileName.c_str(), "a+"))) {
                 fprintf(f,
                         "%s;%s;%zu;%zu;%lu;%f;%f;%f;%f\n",
@@ -308,7 +308,7 @@ namespace performance_tests
         //warmup kinds
         void *alloc = nullptr;
 
-        for (const memkind_t& kind : m_kinds) {
+        for (const memkind_t &kind : m_kinds) {
             m_testOperations[0][0]->perform(kind, alloc, 1e6);
             m_freeOperation->perform(kind, alloc);
         }
@@ -318,8 +318,8 @@ namespace performance_tests
                 runIteration();
             } else {
                 // Perform each operations list in separate iteration, for each thread
-                for (vector<Operation*> & ops : m_testOperations) {
-                    for (Worker * worker : m_workers) {
+                for (vector<Operation *> &ops : m_testOperations) {
+                    for (Worker *worker : m_workers) {
                         worker->init(ops, m_freeOperation);
                     }
                     runIteration();
@@ -342,7 +342,7 @@ namespace performance_tests
             } else {
                 printf("\tIteration %lu\n", i);
             }
-            for (const Operation* op : m_testOperations[i]) {
+            for (const Operation *op : m_testOperations[i]) {
                 printf("\t\t %s (bucket size: %d)\n", op->getNameStr().c_str(),
                        op->getBucketSize());
             }

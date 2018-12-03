@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ using namespace std;
 class Check
 {
 public:
-    Check(const void *p, const trial_t& trial);
+    Check(const void *p, const trial_t &trial);
     Check(const void *p, const size_t size, const size_t page_size);
     Check(const Check &);
     ~Check();

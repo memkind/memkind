@@ -38,7 +38,7 @@
 
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
-static char* PMEM_DIR = "/tmp/";
+static char *PMEM_DIR = "/tmp/";
 
 int main(int argc, char *argv[])
 {

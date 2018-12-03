@@ -209,7 +209,7 @@ static struct memkind_registry memkind_registry_g = {
     PTHREAD_MUTEX_INITIALIZER
 };
 
-void *kind_mmap(struct memkind *kind, void* addr, size_t size)
+void *kind_mmap(struct memkind *kind, void *addr, size_t size)
 {
     if (MEMKIND_LIKELY(kind->ops->mmap == NULL)) {
         return memkind_default_mmap(kind, addr, size);
@@ -269,7 +269,7 @@ static struct create_args supported_args[] = {
 MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
                                        memkind_policy_t policy,
                                        memkind_bits_t flags,
-                                       memkind_t* kind)
+                                       memkind_t *kind)
 {
     if(validate_memtype_bits(memtype_flags) != 0) {
         log_err("Cannot create kind: incorrect memtype_flags.");

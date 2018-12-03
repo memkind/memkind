@@ -42,7 +42,7 @@ namespace csv
         }
 
         template<class T>
-        void append(const T& e)
+        void append(const T &e)
         {
             row << "," << e;
         }

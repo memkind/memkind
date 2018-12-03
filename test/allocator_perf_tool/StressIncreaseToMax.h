@@ -46,7 +46,7 @@ class StressIncreaseToMax
     : public Task
 {
 public:
-    StressIncreaseToMax(const TaskConf& conf, size_t requested_memory_limit)
+    StressIncreaseToMax(const TaskConf &conf, size_t requested_memory_limit)
         : task_conf(conf),
           req_mem_limit(requested_memory_limit)
     {}
@@ -64,13 +64,13 @@ public:
     }
 
     static std::vector<iteration_result> execute_test_iterations(
-        const TaskConf& task_conf, unsigned time, size_t requested_memory_limit);
+        const TaskConf &task_conf, unsigned time, size_t requested_memory_limit);
 
 private:
     size_t req_mem_limit;
-    ScenarioWorkload* scenario_workload;
+    ScenarioWorkload *scenario_workload;
     std::vector<memory_operation> results;
-    const TaskConf& task_conf;
+    const TaskConf &task_conf;
 
     //Test status
     iteration_result test_status;

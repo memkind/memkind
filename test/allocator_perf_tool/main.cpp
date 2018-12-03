@@ -70,7 +70,7 @@ Example:
 ./perf_tool test=s1 time=120 kind=MEMKIND_HBW size_from=1048576 csv_log=true requested_memory_limit=1048576
 */
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     unsigned mem_operations_num = 1000;
     size_t size_from = 32, size_to = 2048*1024;
@@ -199,13 +199,14 @@ int main(int argc, char* argv[])
     if(cmd_line.is_option_set("test", "calls") ||
        cmd_line.is_option_set("test", "all")) {
         TaskFactory task_factory;
-        std::vector<Thread*> threads;
-        std::vector<Task*> tasks;
+        std::vector<Thread *> threads;
+        std::vector<Task *> tasks;
 
         for (int i=0; i<threads_number; i++) {
-            FunctionCallsPerformanceTask* task = static_cast<FunctionCallsPerformanceTask*>(
-                                                     task_factory.create(conf)
-                                                 );
+            FunctionCallsPerformanceTask *task =
+                static_cast<FunctionCallsPerformanceTask *>(
+                    task_factory.create(conf)
+                );
             tasks.push_back(task);
             threads.push_back(new Thread(task));
             conf.seed += 1;

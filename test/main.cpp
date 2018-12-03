@@ -24,7 +24,7 @@
 
 #include "common.h"
 
-char* PMEM_DIR = const_cast<char *>("/tmp/");
+char *PMEM_DIR = const_cast<char *>("/tmp/");
 
 int main(int argc, char **argv)
 {

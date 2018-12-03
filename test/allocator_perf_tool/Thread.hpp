@@ -30,12 +30,12 @@
 class Thread
 {
 public:
-    Thread(Runnable* runnable) : runnable_task(runnable) {}
+    Thread(Runnable *runnable) : runnable_task(runnable) {}
 
     void start()
     {
         int err = pthread_create(&thread_handle, NULL, execute_thread,
-                                 static_cast<void*>(runnable_task));
+                                 static_cast<void *>(runnable_task));
         assert(!err);
     };
 
@@ -44,29 +44,29 @@ public:
         pthread_join(thread_handle, NULL);
     };
 
-    Runnable* get_runnable_task()
+    Runnable *get_runnable_task()
     {
         return runnable_task;
     }
 
 private:
-    static void* execute_thread(void * ptr)
+    static void *execute_thread(void *ptr)
     {
-        Runnable* runnable = static_cast<Runnable*>(ptr);
+        Runnable *runnable = static_cast<Runnable *>(ptr);
         assert(runnable);
         runnable->run();
         pthread_exit(NULL);
     }
 
     pthread_t thread_handle;
-    Runnable* runnable_task;
+    Runnable *runnable_task;
 };
 
 
 class ThreadsManager
 {
 public:
-    ThreadsManager(std::vector<Thread*>& threads_vec) : threads(threads_vec) {}
+    ThreadsManager(std::vector<Thread *> &threads_vec) : threads(threads_vec) {}
     ~ThreadsManager()
     {
         release();
@@ -95,5 +95,5 @@ public:
     }
 
 private:
-    std::vector<Thread*>& threads;
+    std::vector<Thread *> &threads;
 };

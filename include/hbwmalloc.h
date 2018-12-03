@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Intel Corporation.
+ * Copyright (C) 2014 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -157,7 +157,7 @@ int hbw_check_available(void);
  *   EINVAL: if addr is NULL, size equals 0 or flags contained unsupported bit set
  *   EFAULT: could not verify memory
  */
-int hbw_verify_memory_region(void* addr, size_t size, int flags);
+int hbw_verify_memory_region(void *addr, size_t size, int flags);
 
 /*
  * Allocates size bytes of uninitialized high bandwidth memory.

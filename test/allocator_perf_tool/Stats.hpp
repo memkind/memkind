@@ -60,11 +60,11 @@ public:
 
     std::map<unsigned, std::map<unsigned, MethodStats> > stats;
 
-    TimeStats& operator+=(const std::vector<memory_operation>& data)
+    TimeStats &operator+=(const std::vector<memory_operation> &data)
     {
         for (size_t i=0; i<data.size(); i++) {
             memory_operation tmp = data[i];
-            MethodStats& method_stats = stats[tmp.allocator_type][tmp.allocation_method];
+            MethodStats &method_stats = stats[tmp.allocator_type][tmp.allocation_method];
             method_stats.allocation_size += tmp.size_of_allocation;
             method_stats.total_time += tmp.total_time;
             method_stats.samples_num++;
