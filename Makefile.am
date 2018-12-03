@@ -359,7 +359,8 @@ EXTRA_DIST = astyle.sh \
              # end
 
 dist_doc_DATA = README COPYING VERSION
-dist_man_MANS = man/hbwmalloc.3 \
+dist_man_MANS = man/memkind-hbw-nodes.1 \
+                man/hbwmalloc.3 \
                 man/memkind.3 \
                 man/memkind_arena.3 \
                 man/memkind_default.3 \
@@ -368,6 +369,7 @@ dist_man_MANS = man/hbwmalloc.3 \
                 man/memkind_pmem.3 \
                 man/hbwallocator.3 \
                 man/pmemallocator.3 \
+                man/autohbw.7 \
                 # end
 
 CLEANFILES = memkind-$(VERSION).spec
