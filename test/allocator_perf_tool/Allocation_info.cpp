@@ -30,7 +30,7 @@ double convert_bytes_to_mb(uint64_t bytes)
     return bytes / (1024.0 * 1024.0);
 }
 
-int get_numa_node_id(void* ptr)
+int get_numa_node_id(void *ptr)
 {
     int status = -1;
 

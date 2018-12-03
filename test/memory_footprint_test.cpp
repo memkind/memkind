@@ -39,7 +39,7 @@
 class Worker
 {
 public:
-    Worker(RandomSizesAllocator&& allocator, double malloc_probability)
+    Worker(RandomSizesAllocator &&allocator, double malloc_probability)
         : allocator(std::move(allocator)), malloc_probability(malloc_probability)  {}
 
     void work()
@@ -168,10 +168,10 @@ void run_multithreaded_seq_exec(unsigned n_threads, unsigned init_thread_id,
     mutex.lock();
 
     for(int tid=0; tid<n_threads; ++tid) {
-        threads.emplace_back([&, tid]() {
+        threads.emplace_back([ &, tid]() {
             while(current_call < n_calls) {
                 std::unique_lock<std::mutex> lk(mutex);
-                turns_holder.wait(lk, [&,tid] {return current_tid == tid || current_call == n_calls;});
+                turns_holder.wait(lk, [ &,tid] {return current_tid == tid || current_call == n_calls;});
                 if(current_call == n_calls) {
                     return;
                 }

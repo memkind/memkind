@@ -44,7 +44,7 @@ void StressIncreaseToMax::run()
 
 
     AllocatorFactory allocator_factory;
-    VectorIterator<Allocator*> allocators_calls =
+    VectorIterator<Allocator *> allocators_calls =
         allocator_factory.generate_random_allocator_calls(task_conf.n, task_conf.seed,
                                                           task_conf.allocators_types);
 
@@ -83,7 +83,7 @@ void StressIncreaseToMax::run()
 }
 
 std::vector<iteration_result> StressIncreaseToMax::execute_test_iterations(
-    const TaskConf& task_conf,
+    const TaskConf &task_conf,
     unsigned time,
     size_t requested_memory_limit)
 {

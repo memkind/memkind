@@ -116,7 +116,7 @@ typedef enum memkind_bits_t {
 
 /// \brief Memkind type definition
 /// \warning EXPERIMENTAL API
-typedef struct memkind* memkind_t;
+typedef struct memkind *memkind_t;
 
 
 /// \brief Memkind constant values
@@ -167,7 +167,7 @@ enum {
 int memkind_create_kind(memkind_memtype_t memtype_flags,
                         memkind_policy_t policy,
                         memkind_bits_t flags,
-                        memkind_t* kind);
+                        memkind_t *kind);
 
 ///
 /// \brief Destroy previously created kind object, which must have been returned
@@ -224,7 +224,6 @@ extern memkind_t MEMKIND_INTERLEAVE;
 /// \return Version number represented by a single integer number(major * 1000000 + minor * 1000 + patch)
 ///
 int memkind_get_version();
-
 
 ///
 /// \brief Convert error number into an error message

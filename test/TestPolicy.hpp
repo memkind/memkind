@@ -53,15 +53,15 @@ namespace TestPolicy
         return pages_number;
     }
 
-    std::vector<void*> get_address_of_pages(const void* ptr,
-                                            const size_t pages_number, const size_t page_size)
+    std::vector<void *> get_address_of_pages(const void *ptr,
+                                             const size_t pages_number, const size_t page_size)
     {
-        std::vector<void*> address(pages_number);
+        std::vector<void *> address(pages_number);
         const size_t page_mask = ~(page_size-1);
-        address[0] = (void*)((uintptr_t)ptr &
-                             page_mask); //aligned address of first page
+        address[0] = (void *)((uintptr_t)ptr &
+                              page_mask); //aligned address of first page
         for (size_t page_num = 1; page_num < pages_number; page_num++) {
-            address[page_num] = (char*)address[page_num-1] + page_size;
+            address[page_num] = (char *)address[page_num-1] + page_size;
         }
         return address;
     }
@@ -70,7 +70,8 @@ namespace TestPolicy
                                  const size_t page_size)
     {
         size_t pages_number = get_num_of_pages(size, page_size);
-        std::vector<void*> address = get_address_of_pages(ptr, pages_number, page_size);
+        std::vector<void *> address = get_address_of_pages(ptr, pages_number,
+                                                           page_size);
 
         int max_node_id = numa_max_node();
         std::vector<int> nodes(pages_number);
@@ -100,13 +101,14 @@ namespace TestPolicy
         }
     }
 
-    void check_numa_nodes(unique_bitmask_ptr& expected_bitmask, int policy,
-                          void* ptr, size_t size)
+    void check_numa_nodes(unique_bitmask_ptr &expected_bitmask, int policy,
+                          void *ptr, size_t size)
     {
 
         const size_t page_size = sysconf(_SC_PAGESIZE);
         size_t pages_number = get_num_of_pages(size, page_size);
-        std::vector<void*> address = get_address_of_pages(ptr, pages_number, page_size);
+        std::vector<void *> address = get_address_of_pages(ptr, pages_number,
+                                                           page_size);
         unique_bitmask_ptr returned_bitmask = make_nodemask_ptr();
         int status = -1;
 
@@ -134,7 +136,7 @@ namespace TestPolicy
         }
     }
 
-    void check_hbw_numa_nodes(int policy, void* ptr, size_t size)
+    void check_hbw_numa_nodes(int policy, void *ptr, size_t size)
     {
         unique_bitmask_ptr expected_bitmask = make_nodemask_ptr();
 
@@ -143,7 +145,7 @@ namespace TestPolicy
         check_numa_nodes(expected_bitmask, policy, ptr, size);
     }
 
-    void check_all_numa_nodes(int policy, void* ptr, size_t size)
+    void check_all_numa_nodes(int policy, void *ptr, size_t size)
     {
         if (policy != MPOL_INTERLEAVE && policy != MPOL_DEFAULT) return;
 

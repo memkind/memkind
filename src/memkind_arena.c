@@ -51,7 +51,7 @@
 
 static void *jemk_mallocx_check(size_t size, int flags);
 static void *jemk_rallocx_check(void *ptr, size_t size, int flags);
-static void tcache_finalize(void* args);
+static void tcache_finalize(void *args);
 
 static unsigned int integer_log2(unsigned int v)
 {
@@ -114,7 +114,7 @@ static bool memkind_hog_memory;
 
 static void arena_config_init()
 {
-    const char* str = getenv("MEMKIND_HOG_MEMORY");
+    const char *str = getenv("MEMKIND_HOG_MEMORY");
     memkind_hog_memory = str && str[0] == '1';
 
     arena_init_status = pthread_key_create(&tcache_key, tcache_finalize);
@@ -135,10 +135,10 @@ struct memkind *get_kind_by_arena(unsigned arena_ind)
 
 // Allocates size bytes aligned to alignment. Returns NULL if allocation fails.
 static void *alloc_aligned_slow(size_t size, size_t alignment,
-                                struct memkind* kind)
+                                struct memkind *kind)
 {
     size_t extended_size = size + alignment;
-    void* ptr;
+    void *ptr;
 
     ptr = kind_mmap(kind,  NULL, extended_size);
 
@@ -157,10 +157,10 @@ static void *alloc_aligned_slow(size_t size, size_t alignment,
     uintptr_t tail = aligned_addr + size;
     size_t tail_len = (addr + extended_size) - (aligned_addr + size);
     if (tail_len > 0) {
-        munmap((void*)tail, tail_len);
+        munmap((void *)tail, tail_len);
     }
 
-    return (void*)aligned_addr;
+    return (void *)aligned_addr;
 }
 
 
@@ -309,7 +309,7 @@ extent_hooks_t arena_extent_hooks_hugetlb = {
     .merge = arena_extent_merge
 };
 
-extent_hooks_t* get_extent_hooks_by_kind(struct memkind *kind)
+extent_hooks_t *get_extent_hooks_by_kind(struct memkind *kind)
 {
     if (kind == MEMKIND_HUGETLB
         || kind == MEMKIND_HBW_HUGETLB
@@ -348,7 +348,7 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
     for(i = 0; i<kind->arena_map_len; i++) {
         //create new arena with consecutive index
         unsigned arena_index;
-        err = jemk_mallctl("arenas.create", (void*)&arena_index, &unsigned_size, NULL,
+        err = jemk_mallctl("arenas.create", (void *)&arena_index, &unsigned_size, NULL,
                            0);
         if(err) {
             log_err("Could not create arena.");
@@ -362,7 +362,7 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
         //setup extent_hooks for newly created arena
         char cmd[64];
         snprintf(cmd, sizeof(cmd), "arena.%u.extent_hooks", arena_index);
-        err = jemk_mallctl(cmd, NULL, NULL, (void*)&hooks, sizeof(extent_hooks_t*));
+        err = jemk_mallctl(cmd, NULL, NULL, (void *)&hooks, sizeof(extent_hooks_t *));
         if(err) {
             goto exit;
         }
@@ -423,19 +423,19 @@ int memkind_arena_finalize(struct memkind *kind)
 // should be aligned with jemalloc opt.lg_tcache_max
 #define TCACHE_MAX (1<<12)
 
-static void tcache_finalize(void* args)
+static void tcache_finalize(void *args)
 {
     int i;
     unsigned *tcache_map = args;
     for(i = 0; i<MEMKIND_NUM_BASE_KIND; i++) {
         if(tcache_map[i] != 0) {
-            jemk_mallctl("tcache.destroy", NULL, NULL, (void*)&tcache_map[i],
+            jemk_mallctl("tcache.destroy", NULL, NULL, (void *)&tcache_map[i],
                          sizeof(unsigned));
         }
     }
 }
 
-static inline int memkind_lookup_arena(void *ptr, unsigned int * arena)
+static inline int memkind_lookup_arena(void *ptr, unsigned int *arena)
 {
     size_t sz = sizeof(unsigned);
     unsigned temp_arena;
@@ -464,12 +464,12 @@ static inline int get_tcache_flag(unsigned partition, size_t size)
         if(tcache_map == NULL) {
             return MALLOCX_TCACHE_NONE;
         }
-        pthread_setspecific(tcache_key, (void*)tcache_map);
+        pthread_setspecific(tcache_key, (void *)tcache_map);
     }
 
     if(MEMKIND_UNLIKELY(tcache_map[partition] == 0)) {
         size_t unsigned_size = sizeof(unsigned);
-        int err = jemk_mallctl("tcache.create", (void*)&tcache_map[partition],
+        int err = jemk_mallctl("tcache.create", (void *)&tcache_map[partition],
                                &unsigned_size, NULL, 0);
         if(err) {
             log_err("Could not acquire tcache, err=%d", err);

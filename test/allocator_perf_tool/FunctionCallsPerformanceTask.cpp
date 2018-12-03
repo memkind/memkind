@@ -35,7 +35,7 @@ void FunctionCallsPerformanceTask::run()
                                                             task_conf.func_calls);
 
     AllocatorFactory allocator_types;
-    VectorIterator<Allocator*> allocators_calls =
+    VectorIterator<Allocator *> allocators_calls =
         allocator_types.generate_random_allocator_calls(task_conf.n, task_conf.seed,
                                                         task_conf.allocators_types);
 

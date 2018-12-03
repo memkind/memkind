@@ -63,14 +63,14 @@ public:
         END_TEST
     }
 
-    memory_operation wrapped_realloc(void* ptr, size_t size)
+    memory_operation wrapped_realloc(void *ptr, size_t size)
     {
         START_TEST(type_id, FunctionCalls::REALLOC)
         data.ptr = memkind_realloc(*kind, ptr, size);
         END_TEST
     }
 
-    void wrapped_free(void* ptr)
+    void wrapped_free(void *ptr)
     {
         memkind_free(*kind, ptr);
     }
@@ -91,7 +91,7 @@ public:
     }
 
 private:
-    memkind_t* kind;
+    memkind_t *kind;
     unsigned type_id;
 
 };

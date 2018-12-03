@@ -32,6 +32,6 @@ public:
     virtual ~Workload(void) {}
 
 protected:
-    Allocator* allocator;
+    Allocator *allocator;
 };
 

@@ -32,13 +32,13 @@
 #include "allocator_perf_tool/Allocation_info.hpp"
 #include "allocator_perf_tool/GTestAdapter.hpp"
 
-typedef std::unique_ptr<void, void(*)(void*)> hbw_mem_ptr;
+typedef std::unique_ptr<void, void(*)(void *)> hbw_mem_ptr;
 
 
 class HBWPreferredLocalityTest: public ::testing::Test
 {
 private:
-    int find_closest_node(int node, const std::vector<int>& nodes)
+    int find_closest_node(int node, const std::vector<int> &nodes)
     {
         int min_distance = 0;
         int closest_node = -1;
@@ -60,7 +60,7 @@ private:
         return sched_setaffinity(0, sizeof(cpu_set_t), &cpu_set) != -1;
     }
 
-    void check_ptr_numa(void* ptr, int expected_numa_id, int cpu_id, size_t size)
+    void check_ptr_numa(void *ptr, int expected_numa_id, int cpu_id, size_t size)
     {
         memset(ptr, 1, size);
 
@@ -75,8 +75,8 @@ private:
 
 public:
     void pin_memory_in_requesting_mem_thread(size_t size,
-                                             const std::vector<int>& cpu_ids,
-                                             const std::vector<int>& mcdram_nodes)
+                                             const std::vector<int> &cpu_ids,
+                                             const std::vector<int> &mcdram_nodes)
     {
         int threads_num = cpu_ids.size();
         int ret = hbw_set_policy(HBW_POLICY_PREFERRED);
@@ -89,7 +89,7 @@ public:
                 continue;
             }
 
-            void* internal_ptr = hbw_malloc(size);
+            void *internal_ptr = hbw_malloc(size);
             if (!internal_ptr) {
                 ADD_FAILURE();
                 continue;
@@ -102,8 +102,8 @@ public:
     }
 
     void pin_memory_in_other_thread_than_requesting_mem(size_t size,
-                                                        const std::vector<int>& cpu_ids,
-                                                        const std::vector<int>& mcdram_nodes)
+                                                        const std::vector<int> &cpu_ids,
+                                                        const std::vector<int> &mcdram_nodes)
     {
         int threads_num = cpu_ids.size();
         int ret = hbw_set_policy(HBW_POLICY_PREFERRED);
@@ -115,7 +115,7 @@ public:
 
         std::vector<hbw_mem_ptr> ptrs;
         for (int i = 0; i < threads_num; i++) {
-            void* internal_ptr = hbw_malloc(size);
+            void *internal_ptr = hbw_malloc(size);
             ASSERT_TRUE(internal_ptr);
             ptrs.emplace_back(internal_ptr, hbw_free);
         }

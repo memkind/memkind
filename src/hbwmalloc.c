@@ -171,14 +171,14 @@ MEMKIND_EXPORT int hbw_check_available(void)
     return  (memkind_check_available(MEMKIND_HBW) == 0) ? 0 : ENODEV;
 }
 
-static inline void hbw_touch_page(void* addr)
+static inline void hbw_touch_page(void *addr)
 {
-    volatile char* temp_ptr = (volatile char*) addr;
+    volatile char *temp_ptr = (volatile char *) addr;
     char value = temp_ptr[0];
     temp_ptr[0] = value;
 }
 
-MEMKIND_EXPORT int hbw_verify_memory_region(void* addr, size_t size, int flags)
+MEMKIND_EXPORT int hbw_verify_memory_region(void *addr, size_t size, int flags)
 {
     /*
      * if size is invalid, flags have unsupported bit set or if addr is NULL.
@@ -199,7 +199,7 @@ MEMKIND_EXPORT int hbw_verify_memory_region(void* addr, size_t size, int flags)
     const unsigned block_size = 64;
 
     char *end = addr + size;
-    char *aligned_beg = (char*)((uintptr_t)addr & page_mask);
+    char *aligned_beg = (char *)((uintptr_t)addr & page_mask);
     nodemask_t nodemask;
     struct bitmask expected_nodemask = {NUMA_NUM_NODES, nodemask.n};
 
@@ -208,7 +208,7 @@ MEMKIND_EXPORT int hbw_verify_memory_region(void* addr, size_t size, int flags)
 
     while(aligned_beg < end) {
         int nodes[block_size];
-        void* pages[block_size];
+        void *pages[block_size];
         int i = 0, page_count = 0;
         char *iter_end = aligned_beg + block_size*page_size;
 

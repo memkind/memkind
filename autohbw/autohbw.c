@@ -159,8 +159,8 @@ static void printLimits()
 }
 
 struct kind_name_t {
-    memkind_t* kind;
-    const char* name;
+    memkind_t *kind;
+    const char *name;
 };
 
 static struct kind_name_t named_kinds[] = {
@@ -177,7 +177,7 @@ static struct kind_name_t named_kinds[] = {
     { &MEMKIND_HBW_INTERLEAVE, "memkind_hbw_interleave" },
 };
 
-static memkind_t get_kind_by_name(const char* name)
+static memkind_t get_kind_by_name(const char *name)
 {
     int i;
     for (i = 0; i < sizeof(named_kinds) / sizeof(named_kinds[0]); ++i)
@@ -195,7 +195,7 @@ static void setEnvValues()
 {
     // STEP: Read the log level from the env variable. Do this early because
     //       printing depends on this
-    char* log_str = getenv("AUTO_HBW_LOG");
+    char *log_str = getenv("AUTO_HBW_LOG");
     if (log_str && strlen(log_str)) {
         int level = atoi(log_str);
         LogLevel = level;
@@ -216,7 +216,7 @@ static void setEnvValues()
     // Set the memory type allocated by this library. By default, it is
     // MEMKIND_HBW, but we can use this library to allocate other memory
     // types
-    const char* memtype_str = getenv("AUTO_HBW_MEM_TYPE");
+    const char *memtype_str = getenv("AUTO_HBW_MEM_TYPE");
     if (memtype_str && strlen(memtype_str)) {
         // Find the memkind_t using the name the user has provided in the env variable
         memkind_t mty = get_kind_by_name(memtype_str);
@@ -232,14 +232,14 @@ static void setEnvValues()
     // STEP: Set the size limits (thresholds) for HBW allocation
     //
     // Reads the environment variable
-    const char* size_str = getenv("AUTO_HBW_SIZE");
+    const char *size_str = getenv("AUTO_HBW_SIZE");
     if (size_str) {
         size_t lowlim = HBWLowLimit / 1024;
         size_t highlim = HBWHighLimit / 1024;
         char lowC = 'K', highC = 'K';
 
         if (size_str) {
-            char* ptr = (char*)size_str;
+            char *ptr = (char *)size_str;
             lowlim = strtoll(ptr, &ptr, 10);
             if (*ptr != 0 && *ptr != ':')
                 lowC = *ptr++;
@@ -303,7 +303,7 @@ static void AUTOHBW_INIT autohbw_load(void)
     LOG(INFO, "INFO: autohbw.so loaded!\n");
 
     // dummy HBW call to initialize HBW arena
-    void* pp = memkind_malloc(hbw_kind, 16);
+    void *pp = memkind_malloc(hbw_kind, 16);
     if (pp == 0) {
         LOG(ALWAYS, "\t-HBW init call FAILED. "
             "Is required memory type present on your system?\n");
@@ -316,7 +316,7 @@ static void AUTOHBW_INIT autohbw_load(void)
     MemkindInitDone = true; // enable HBW allocation
 }
 
-static void* MemkindMalloc(size_t size)
+static void *MemkindMalloc(size_t size)
 {
     LOG(VERBOSE, "In my memkind malloc sz:%ld ... ", size);
 
@@ -326,13 +326,13 @@ static void* MemkindMalloc(size_t size)
     if (useHbw)
         LOG(VERBOSE, "\tHBW");
 
-    void* ptr = memkind_malloc(kind, size);
+    void *ptr = memkind_malloc(kind, size);
 
     LOG(VERBOSE, "\tptr:%p\n", ptr);
     return ptr;
 }
 
-static void* MemkindCalloc(size_t nmemb, size_t size)
+static void *MemkindCalloc(size_t nmemb, size_t size)
 {
     LOG(VERBOSE, "In my memkind calloc sz:%ld ..", size * nmemb);
 
@@ -342,13 +342,13 @@ static void* MemkindCalloc(size_t nmemb, size_t size)
     if (useHbw)
         LOG(VERBOSE, "\tHBW");
 
-    void* ptr = memkind_calloc(kind, nmemb, size);
+    void *ptr = memkind_calloc(kind, nmemb, size);
 
     LOG(VERBOSE, "\tptr:%p\n", ptr);
     return ptr;
 }
 
-static void* MemkindRealloc(void* ptr, size_t size)
+static void *MemkindRealloc(void *ptr, size_t size)
 {
     LOG(VERBOSE, "In my memkind realloc sz:%ld, p1:%p ..", size, ptr);
 
@@ -358,13 +358,13 @@ static void* MemkindRealloc(void* ptr, size_t size)
     if (useHbw)
         LOG(VERBOSE, "\tHBW");
 
-    void* nptr = memkind_realloc(kind, ptr, size);
+    void *nptr = memkind_realloc(kind, ptr, size);
 
     LOG(VERBOSE, "\tptr=%p\n", nptr);
     return nptr;
 }
 
-static int MemkindAlign(void** memptr, size_t alignment, size_t size)
+static int MemkindAlign(void **memptr, size_t alignment, size_t size)
 {
     LOG(VERBOSE, "In my memkind align sz:%ld .. ", size);
 
@@ -382,7 +382,7 @@ static int MemkindAlign(void** memptr, size_t alignment, size_t size)
 
 // memkind_free does not need the exact kind, if kind is 0. Then
 // the library can figure out the proper kind itself.
-static void MemkindFree(void* ptr)
+static void MemkindFree(void *ptr)
 {
     // avoid to many useless logs
     if (ptr)
@@ -406,31 +406,31 @@ AUTOHBW_EXPORT void disableAutoHBW()
     LOG(INFO, "INFO: HBW allocations disabled by application (for this rank)\n");
 }
 
-AUTOHBW_EXPORT void* malloc(size_t size)
+AUTOHBW_EXPORT void *malloc(size_t size)
 {
     return MemkindMalloc(size);
 }
 
-AUTOHBW_EXPORT void* calloc(size_t nmemb, size_t size)
+AUTOHBW_EXPORT void *calloc(size_t nmemb, size_t size)
 {
     return MemkindCalloc(nmemb, size);
 }
 
-AUTOHBW_EXPORT void* realloc(void* ptr, size_t size)
+AUTOHBW_EXPORT void *realloc(void *ptr, size_t size)
 {
     return MemkindRealloc(ptr, size);
 }
 
-AUTOHBW_EXPORT int posix_memalign(void** memptr, size_t alignment, size_t size)
+AUTOHBW_EXPORT int posix_memalign(void **memptr, size_t alignment, size_t size)
 {
     return MemkindAlign(memptr, alignment, size);
 }
 
 // Warn about deprecated function usage.
-AUTOHBW_EXPORT void* valloc(size_t size)
+AUTOHBW_EXPORT void *valloc(size_t size)
 {
     LOG(ALWAYS, "use of deprecated valloc. Use posix_memalign instead\n");
-    void* memptr = 0;
+    void *memptr = 0;
     size_t boundary = sysconf(_SC_PAGESIZE);
     int status = MemkindAlign(&memptr, boundary, size);
     if (status == 0 && memptr != 0)
@@ -440,10 +440,10 @@ AUTOHBW_EXPORT void* valloc(size_t size)
 }
 
 // Warn about deprecated function usage.
-AUTOHBW_EXPORT void* memalign(size_t boundary, size_t size)
+AUTOHBW_EXPORT void *memalign(size_t boundary, size_t size)
 {
     LOG(ALWAYS, "use of deprecated memalign. Use posix_memalign instead\n");
-    void* memptr = 0;
+    void *memptr = 0;
     int status = MemkindAlign(&memptr, boundary, size);
     if (status == 0 && memptr != 0)
         return memptr;
@@ -451,7 +451,7 @@ AUTOHBW_EXPORT void* memalign(size_t boundary, size_t size)
     return 0;
 }
 
-AUTOHBW_EXPORT void free(void* ptr)
+AUTOHBW_EXPORT void free(void *ptr)
 {
     return MemkindFree(ptr);
 }

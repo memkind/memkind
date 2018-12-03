@@ -35,7 +35,7 @@
 #include <scoped_allocator>
 #include <thread>
 
-extern const char* PMEM_DIR;
+extern const char *PMEM_DIR;
 
 // Tests for pmem::allocator class.
 class PmemAllocatorTests: public ::testing::Test
@@ -136,7 +136,7 @@ TEST_F(PmemAllocatorTests,
        test_TC_MEMKIND_Allocator_SingleAllocationDeallocation_Test)
 {
     pmem::allocator<int> alc1 { alloc_source_f1 };
-    int* created_object = alc1.allocate(1);
+    int *created_object = alc1.allocate(1);
     alc1.deallocate(created_object, 1);
 }
 
@@ -146,8 +146,8 @@ TEST_F(PmemAllocatorTests,
 {
     pmem::allocator<int> alc1 { alloc_source_f1 };
     pmem::allocator<int> alc2 { alloc_source_f1 };
-    int* created_object = nullptr;
-    int* created_object_2 = nullptr;
+    int *created_object = nullptr;
+    int *created_object_2 = nullptr;
     created_object = alc1.allocate(1);
     ASSERT_TRUE(alc1 == alc2);
     alc2.deallocate(created_object, 1);
@@ -164,7 +164,7 @@ TEST_F(PmemAllocatorTests,
 TEST_F(PmemAllocatorTests, test_TC_MEMKIND_Allocator_ConstructDestroy_Test)
 {
     pmem::allocator<int> alc1 { alloc_source_f1 };
-    int* created_object = alc1.allocate(1);
+    int *created_object = alc1.allocate(1);
     alc1.construct(created_object);
     alc1.destroy(created_object);
 }

@@ -65,7 +65,8 @@ Before submitting a patch for inclusion, please run the modified
 source code files through astyle with the following options
 
     $ astyle --style=linux --indent=spaces=4 -S --max-continuation-indent=80 \
-             --max-code-length=80 --break-after-logical --indent-namespaces -z2
+             --max-code-length=80 --break-after-logical --indent-namespaces -z2 \
+             --align-pointer=name
 
 More information about astyle can be found here:
 

@@ -207,16 +207,16 @@ static int numanode_bandwidth_compare(const void *a, const void *b);
 // This declaration is necesarry, cause it's missing in headers from libnuma 2.0.8
 extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
 
-static void assign_arbitrary_bandwidth_values(int* bandwidth, int bandwidth_len,
-                                              struct bitmask* hbw_nodes);
+static void assign_arbitrary_bandwidth_values(int *bandwidth, int bandwidth_len,
+                                              struct bitmask *hbw_nodes);
 
-static int fill_bandwidth_values_heuristically (int* bandwidth,
+static int fill_bandwidth_values_heuristically (int *bandwidth,
                                                 int bandwidth_len);
 
-static int fill_bandwidth_values_from_enviroment(int* bandwidth,
+static int fill_bandwidth_values_from_enviroment(int *bandwidth,
                                                  int bandwidth_len, char *hbw_nodes_env);
 
-static int fill_nodes_bandwidth(int* bandwidth, int bandwidth_len);
+static int fill_nodes_bandwidth(int *bandwidth, int bandwidth_len);
 
 MEMKIND_EXPORT int memkind_hbw_check_available(struct memkind *kind)
 {
@@ -274,8 +274,8 @@ MEMKIND_EXPORT int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
     return g->init_err;
 }
 
-static void assign_arbitrary_bandwidth_values(int* bandwidth, int bandwidth_len,
-                                              struct bitmask* hbw_nodes)
+static void assign_arbitrary_bandwidth_values(int *bandwidth, int bandwidth_len,
+                                              struct bitmask *hbw_nodes)
 {
     int i, nodes_num = numa_num_configured_nodes();
 
@@ -302,7 +302,7 @@ typedef struct registers_t {
     uint32_t edx;
 } registers_t;
 
-inline static void cpuid_asm(int leaf, int subleaf, registers_t* registers)
+inline static void cpuid_asm(int leaf, int subleaf, registers_t *registers)
 {
     asm volatile("cpuid":"=a"(registers->eax),
                  "=b"(registers->ebx),
@@ -345,12 +345,12 @@ static bool is_hbm_supported(cpu_model_data_t cpu)
            (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
 }
 
-static int get_high_bandwidth_nodes(struct bitmask* hbw_node_mask)
+static int get_high_bandwidth_nodes(struct bitmask *hbw_node_mask)
 {
     int nodes_num = numa_num_configured_nodes();
     // Check if NUMA configuration is supported.
     if(nodes_num == 2 || nodes_num == 4 || nodes_num == 8) {
-        struct bitmask* node_cpus = numa_allocate_cpumask();
+        struct bitmask *node_cpus = numa_allocate_cpumask();
 
         assert(hbw_node_mask->size >= nodes_num);
         assert(node_cpus->size >= nodes_num);
@@ -373,9 +373,9 @@ static int get_high_bandwidth_nodes(struct bitmask* hbw_node_mask)
     return MEMKIND_ERROR_UNAVAILABLE;
 }
 
-static int fill_bandwidth(int* bandwidth, int bandwidth_len)
+static int fill_bandwidth(int *bandwidth, int bandwidth_len)
 {
-    struct bitmask* hbw_node_mask = numa_allocate_nodemask();
+    struct bitmask *hbw_node_mask = numa_allocate_nodemask();
     int ret = get_high_bandwidth_nodes(hbw_node_mask);
     if(ret == 0) {
         assign_arbitrary_bandwidth_values(bandwidth, bandwidth_len, hbw_node_mask);
@@ -386,7 +386,7 @@ static int fill_bandwidth(int* bandwidth, int bandwidth_len)
 }
 
 ///This function tries to fill bandwidth array based on knowledge about known CPU models
-static int fill_bandwidth_values_heuristically(int* bandwidth,
+static int fill_bandwidth_values_heuristically(int *bandwidth,
                                                int bandwidth_len)
 {
     cpu_model_data_t cpu = get_cpu_model_data();
@@ -409,7 +409,7 @@ static int fill_bandwidth_values_heuristically(int* bandwidth,
     }
 }
 
-static int fill_bandwidth_values_from_enviroment(int* bandwidth,
+static int fill_bandwidth_values_from_enviroment(int *bandwidth,
                                                  int bandwidth_len, char *hbw_nodes_env)
 {
     struct bitmask *hbw_nodes_bm = numa_parse_nodestring(hbw_nodes_env);
@@ -425,7 +425,7 @@ static int fill_bandwidth_values_from_enviroment(int* bandwidth,
     return 0;
 }
 
-static int fill_nodes_bandwidth(int* bandwidth, int bandwidth_len)
+static int fill_nodes_bandwidth(int *bandwidth, int bandwidth_len)
 {
     char *hbw_nodes_env;
 
@@ -549,7 +549,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
             }
         }
         /* allocate output array */
-        *bandwidth_nodes = (struct bandwidth_nodes_t*)jemk_malloc(
+        *bandwidth_nodes = (struct bandwidth_nodes_t *)jemk_malloc(
                                sizeof(struct bandwidth_nodes_t) * (*num_unique) +
                                sizeof(int) * num_bandwidth);
         if (!*bandwidth_nodes) {
@@ -559,7 +559,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
     }
     if (!err) {
         /* populate output */
-        (*bandwidth_nodes)[0].numanodes = (int*)(*bandwidth_nodes + *num_unique);
+        (*bandwidth_nodes)[0].numanodes = (int *)(*bandwidth_nodes + *num_unique);
         last_bandwidth = numanode_bandwidth[0].bandwidth;
         k = 0;
         l = 0;

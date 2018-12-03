@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,9 +31,9 @@ class MemoryManager
 private:
     memkind_t kind;
     size_t memory_size;
-    void* memory_pointer;
+    void *memory_pointer;
 
-    void move(MemoryManager&& other)
+    void move(MemoryManager &&other)
     {
         kind = other.kind;
         memory_size = other.memory_size;
@@ -59,14 +59,14 @@ public:
         return memory_size;
     }
 
-    MemoryManager(const MemoryManager&) = delete;
+    MemoryManager(const MemoryManager &) = delete;
 
-    MemoryManager(MemoryManager&& other)
+    MemoryManager(MemoryManager &&other)
     {
         move(std::move(other));
     }
 
-    MemoryManager& operator=(MemoryManager&& other)
+    MemoryManager &operator=(MemoryManager &&other)
     {
         move(std::move(other));
         return *this;

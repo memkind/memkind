@@ -48,10 +48,10 @@ namespace hbw
          */
         typedef size_t size_type;
         typedef ptrdiff_t difference_type;
-        typedef T* pointer;
-        typedef const T* const_pointer;
-        typedef T& reference;
-        typedef const T& const_reference;
+        typedef T *pointer;
+        typedef const T *const_pointer;
+        typedef T &reference;
+        typedef const T &const_reference;
         typedef T value_type;
 
         template <class U>
@@ -65,7 +65,7 @@ namespace hbw
         allocator() throw() { }
 
         template <class U>
-        allocator(const allocator<U>&) throw() { }
+        allocator(const allocator<U> &) throw() { }
 
         ~allocator() throw() { }
 
@@ -100,7 +100,7 @@ namespace hbw
          */
         void deallocate(pointer p, size_type n)
         {
-            hbw_free(static_cast<void*>(p));
+            hbw_free(static_cast<void *>(p));
         }
 
         size_type max_size() const throw()
@@ -120,13 +120,13 @@ namespace hbw
     };
 
     template <class T, class U>
-    bool operator==(const allocator<T>&, const allocator<U>&)
+    bool operator==(const allocator<T> &, const allocator<U> &)
     {
         return true;
     }
 
     template <class T, class U>
-    bool operator!=(const allocator<T>&, const allocator<U>&)
+    bool operator!=(const allocator<T> &, const allocator<U> &)
     {
         return false;
     }

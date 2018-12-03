@@ -38,7 +38,7 @@ typedef enum {
     MESSAGE_TYPE_MAX_VALUE,
 } message_type_t;
 
-static char* message_prefixes[MESSAGE_TYPE_MAX_VALUE] = {
+static char *message_prefixes[MESSAGE_TYPE_MAX_VALUE] = {
     [MESSAGE_TYPE_INFO]     = "MEMKIND_INFO",
     [MESSAGE_TYPE_ERROR]    = "MEMKIND_ERROR",
     [MESSAGE_TYPE_FATAL]    = "MEMKIND_FATAL",
@@ -63,7 +63,7 @@ static void log_init_once(void)
 }
 
 static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
-static void log_generic(message_type_t type, const char * format, va_list args)
+static void log_generic(message_type_t type, const char *format, va_list args)
 {
     pthread_once(&init_once, log_init_once);
     if(log_enabled || (type == MESSAGE_TYPE_FATAL)) {
@@ -75,7 +75,7 @@ static void log_generic(message_type_t type, const char * format, va_list args)
     }
 }
 
-void log_info(const char * format, ...)
+void log_info(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -83,7 +83,7 @@ void log_info(const char * format, ...)
     va_end(args);
 }
 
-void log_err(const char * format, ...)
+void log_err(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -91,7 +91,7 @@ void log_err(const char * format, ...)
     va_end(args);
 }
 
-void log_fatal(const char * format, ...)
+void log_fatal(const char *format, ...)
 {
     va_list args;
     va_start(args, format);

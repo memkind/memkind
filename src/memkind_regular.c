@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 
 #include <numa.h>
 
-static struct bitmask* regular_nodes_mask = NULL;
+static struct bitmask *regular_nodes_mask = NULL;
 
 static void regular_nodes_init(void)
 {

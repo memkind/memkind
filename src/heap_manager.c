@@ -30,13 +30,13 @@
 #include <pthread.h>
 #include <string.h>
 
-static struct heap_manager_ops* heap_manager_g;
+static struct heap_manager_ops *heap_manager_g;
 
 pthread_once_t heap_manager_init_once_g = PTHREAD_ONCE_INIT;
 
 struct heap_manager_ops {
-    void (*init)(struct memkind* kind);
-    void (*heap_manager_free)(struct memkind* kind, void* ptr);
+    void (*init)(struct memkind *kind);
+    void (*heap_manager_free)(struct memkind *kind, void *ptr);
 };
 
 struct heap_manager_ops arena_heap_manager_g = {
@@ -52,13 +52,13 @@ struct heap_manager_ops tbb_heap_manager_g = {
 static void set_heap_manager()
 {
     heap_manager_g = &arena_heap_manager_g;
-    const char* env = getenv("MEMKIND_HEAP_MANAGER");
+    const char *env = getenv("MEMKIND_HEAP_MANAGER");
     if(env && strcmp(env, "TBB") == 0) {
         heap_manager_g = &tbb_heap_manager_g;
     }
 }
 
-static inline struct heap_manager_ops* get_heap_manager()
+static inline struct heap_manager_ops *get_heap_manager()
 {
     pthread_once(&heap_manager_init_once_g, set_heap_manager);
     return heap_manager_g;
@@ -69,7 +69,7 @@ void heap_manager_init(struct memkind *kind)
     get_heap_manager()->init(kind);
 }
 
-void heap_manager_free(struct memkind *kind, void* ptr)
+void heap_manager_free(struct memkind *kind, void *ptr)
 {
     get_heap_manager()->heap_manager_free(kind, ptr);
 }

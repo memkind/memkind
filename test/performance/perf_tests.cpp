@@ -46,7 +46,7 @@ protected:
     PerfTestCase<performance_tests::MemkindOperation> performanceTest;
 
     template<class T>
-    static void RecordProperty(const string& key, const T value)
+    static void RecordProperty(const string &key, const T value)
     {
         ostringstream values;
         values << value;

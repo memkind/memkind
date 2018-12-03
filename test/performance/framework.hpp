@@ -63,13 +63,13 @@ namespace performance_tests
         }
 
         // Get time when barrier was released
-        timespec& releasedAt()
+        timespec &releasedAt()
         {
             return m_releasedAt;
         }
 
         // Singleton
-        static Barrier& GetInstance()
+        static Barrier &GetInstance()
         {
             // Automatically created and deleted one and only instance
             static Barrier instance;
@@ -81,8 +81,8 @@ namespace performance_tests
             reset(0);
         }
         // Cannot be used with singleton, so prevent compiler from creating them automatically
-        Barrier(Barrier const&)        = delete;
-        void operator=(Barrier const&) = delete;
+        Barrier(Barrier const &)        = delete;
+        void operator=(Barrier const &) = delete;
     };
 
     // Data of a single test action, that is, memory operation (malloc, calloc, etc.)
@@ -90,18 +90,18 @@ namespace performance_tests
     class Action
     {
     protected:
-        Operation* m_operation;
-        Operation* m_freeOperation;
+        Operation *m_operation;
+        Operation *m_freeOperation;
         const memkind_t m_kind;
-        void* m_allocation;
+        void *m_allocation;
         const size_t m_size;
         const size_t m_offset;
         const size_t m_alignment;
 
     public:
         Action(
-            Operation* operation,
-            Operation* freeOperation,
+            Operation *operation,
+            Operation *freeOperation,
             const memkind_t kind,
             const size_t size,
             const size_t offset,
@@ -116,8 +116,8 @@ namespace performance_tests
         {}
 
         Action(
-            Operation* operation,
-            Operation* freeOperation,
+            Operation *operation,
+            Operation *freeOperation,
             const memkind_t kind)
             : Action(operation, freeOperation, kind, 0, 0, 0)
         {
@@ -147,13 +147,13 @@ namespace performance_tests
         // List of memory block sizes - for each memory allocation operation actual value is chosen randomly
         const vector<size_t> &m_allocationSizes;
         // List of test actions
-        vector<Action*> m_actions;
+        vector<Action *> m_actions;
         // Memory free action
         Action *m_freeAction;
         // Operation kind (useful for memkind only)
         memkind_t m_kind;
         // Working thread
-        thread* m_thread;
+        thread *m_thread;
 
     public:
         Worker(
@@ -165,7 +165,7 @@ namespace performance_tests
         ~Worker();
 
         // Set operations list for the worker
-        void init(const vector<Operation*> &testOperations, Operation * &freeOperation);
+        void init(const vector<Operation *> &testOperations, Operation *&freeOperation);
 
         // Create & start thread
         void run();
@@ -222,14 +222,14 @@ namespace performance_tests
         // List of allocation sizes
         vector<size_t>              m_allocationSizes;
         // List of list of allocation operations, utlization depends on execution mode
-        vector<vector<Operation*>>  m_testOperations;
+        vector<vector<Operation *>>  m_testOperations;
         // Free operation
-        Operation*                  m_freeOperation;
+        Operation                  *m_freeOperation;
         // List of memory kinds (for memkind allocation only)
         // distributed among threads sequentially
         vector<memkind_t>           m_kinds;
         // List of thread workers
-        vector<Worker*>             m_workers;
+        vector<Worker *>             m_workers;
         // Time measurment
         vector<uint64_t>            m_durations;
         // Execution mode
@@ -245,14 +245,14 @@ namespace performance_tests
         virtual ~PerformanceTest() {}
 
         // Set list of block sizes
-        void setAllocationSizes(const vector<size_t>& allocationSizes);
+        void setAllocationSizes(const vector<size_t> &allocationSizes);
 
         // Set list of operations per thread/per iteration (depending on execution mode)
-        void setOperations(const vector<vector<Operation*>>& testOperations,
-                           Operation* freeOperation);
+        void setOperations(const vector<vector<Operation *>> &testOperations,
+                           Operation *freeOperation);
 
         // Set per-thread list of memory kinds
-        void setKind(const vector<memkind_t>& kinds);
+        void setKind(const vector<memkind_t> &kinds);
 
         // Set execution mode (different operations per each thread/same operations for each thread, but many iterations)
         void setExecutionMode(ExecutionMode operationMode);
@@ -264,7 +264,7 @@ namespace performance_tests
         virtual void showInfo();
 
         // Write test metrics
-        void writeMetrics(const string& suiteName, const string& caseName,
+        void writeMetrics(const string &suiteName, const string &caseName,
                           const string &fileName = "");
 
         Metrics getMetrics();

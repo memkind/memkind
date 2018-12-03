@@ -49,9 +49,9 @@ private:
     char str_value[1024];
 
     // Note: this function is not thread-safe.
-    void get_stat(const char* field_name, char* value)
+    void get_stat(const char *field_name, char *value)
     {
-        char* pos = nullptr;
+        char *pos = nullptr;
         std::ifstream file("/proc/self/status", std::ifstream::in);
         if (file.is_open()) {
             while (file.getline(line, sizeof(line))) {

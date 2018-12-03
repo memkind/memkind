@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2005-2017 Intel Corporation
+    Copyright (c) 2005-2018 Intel Corporation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@
 
 #include <stdint.h>
 
-typedef void *(*rawAllocType)(intptr_t pool_id, size_t* bytes);
-typedef int   (*rawFreeType)(intptr_t pool_id, void* raw_ptr, size_t raw_bytes);
+typedef void *(*rawAllocType)(intptr_t pool_id, size_t *bytes);
+typedef int   (*rawFreeType)(intptr_t pool_id, void *raw_ptr, size_t raw_bytes);
 
 struct MemPoolPolicy {
     rawAllocType pAlloc;

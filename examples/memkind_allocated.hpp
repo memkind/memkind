@@ -38,19 +38,19 @@ public:
         return MEMKIND_DEFAULT;
     }
 
-    void* operator new(std::size_t size)
+    void *operator new(std::size_t size)
     {
         return deriving_class::operator new(size, deriving_class::getClassKind());
     }
 
-    void* operator new[](std::size_t size)
+    void *operator new[](std::size_t size)
     {
         return deriving_class::operator new(size, deriving_class::getClassKind());
     }
 
-    void* operator new(std::size_t size, memkind_t memory_kind)
+    void *operator new(std::size_t size, memkind_t memory_kind)
     {
-        void* result_ptr = NULL;
+        void *result_ptr = NULL;
         int allocation_result = 0;
 
         //This check if deriving_class has specified alignment, which is suitable
@@ -70,27 +70,27 @@ public:
         return result_ptr;
     }
 
-    void* operator new[](std::size_t size, memkind_t memory_kind)
+    void *operator new[](std::size_t size, memkind_t memory_kind)
     {
         return deriving_class::operator new(size, memory_kind);
     }
 
-    void operator delete(void* ptr, memkind_t memory_kind)
+    void operator delete(void *ptr, memkind_t memory_kind)
     {
         memkind_free(memory_kind, ptr);
     }
 
-    void operator delete(void* ptr)
+    void operator delete(void *ptr)
     {
         memkind_free(0, ptr);
     }
 
-    void operator delete[](void* ptr)
+    void operator delete[](void *ptr)
     {
         deriving_class::operator delete(ptr);
     }
 
-    void operator delete[](void* ptr, memkind_t memory_kind)
+    void operator delete[](void *ptr, memkind_t memory_kind)
     {
         deriving_class::operator delete(ptr, memory_kind);
     }
