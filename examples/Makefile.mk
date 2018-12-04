@@ -34,6 +34,7 @@ noinst_PROGRAMS += examples/hello_memkind \
                    examples/pmem_and_default_kind \
                    examples/pmem_multithreads \
                    examples/pmem_multithreads_onekind \
+                   examples/pmem_free_with_unknown_kind \
                    examples/autohbw_candidates \
                    # end
 if HAVE_CXX11
@@ -53,6 +54,7 @@ examples_pmem_alignment_LDADD = libmemkind.la
 examples_pmem_and_default_kind_LDADD = libmemkind.la
 examples_pmem_multithreads_LDADD = libmemkind.la
 examples_pmem_multithreads_onekind_LDADD = libmemkind.la
+examples_pmem_free_with_unknown_kind_LDADD = libmemkind.la
 examples_autohbw_candidates_LDADD = libmemkind.la
 
 if HAVE_CXX11
@@ -72,6 +74,7 @@ examples_pmem_alignment_SOURCES = examples/pmem_alignment.c
 examples_pmem_and_default_kind_SOURCES = examples/pmem_and_default_kind.c
 examples_pmem_multithreads_SOURCES = examples/pmem_multithreads.c
 examples_pmem_multithreads_onekind_SOURCES = examples/pmem_multithreads_onekind.c
+examples_pmem_free_with_unknown_kind_SOURCES = examples/pmem_free_with_unknown_kind.c
 examples_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
 if HAVE_CXX11
 examples_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp

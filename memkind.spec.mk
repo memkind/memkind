@@ -204,6 +204,7 @@ ${memkind_test_dir}/pmem_alignment
 ${memkind_test_dir}/pmem_and_default_kind
 ${memkind_test_dir}/pmem_multithreads
 ${memkind_test_dir}/pmem_multithreads_onekind
+$(memkind_test_dir)/pmem_free_with_unknown_kind
 ${memkind_test_dir}/pmem_cpp_allocator
 ${memkind_test_dir}/allocator_perf_tool_tests
 ${memkind_test_dir}/perf_tool
