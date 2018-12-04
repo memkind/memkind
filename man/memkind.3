@@ -222,6 +222,13 @@ function provides the same semantics as
 .BR malloc_usable_size(3),
 but operates on specified
 .I kind.
+
+.BR Note:
+.BR memkind_malloc_usable_size ()
+is not supported by TBB heap manager described in
+.B ENVIRONMENT
+section.
+
 .PP
 .BR memkind_free ()
 causes the allocated memory referenced by

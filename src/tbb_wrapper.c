@@ -157,6 +157,12 @@ void tbb_pool_free(struct memkind *kind, void *ptr)
     }
 }
 
+static size_t tbb_pool_usable_size(struct memkind *kind, void *ptr)
+{
+    log_err("memkind_malloc_usable_size() is not supported by TBB.");
+    return 0;
+}
+
 static int tbb_destroy(struct memkind* kind)
 {
     bool pool_destroy_ret = pool_destroy(kind->priv);
@@ -198,4 +204,5 @@ void tbb_initialize(struct memkind *kind)
     kind->ops->realloc = tbb_pool_realloc;
     kind->ops->free = tbb_pool_free;
     kind->ops->finalize = tbb_destroy;
+    kind->ops->malloc_usable_size = tbb_pool_usable_size;
 }
