@@ -186,6 +186,9 @@ test/dlopen_test.cpp
 test/gtest_fused/gtest/gtest-all.cc
 test/gtest_fused/gtest/gtest.h
 test/pmem_allocator_tests.cpp
+utils/docker/docker.sh
+utils/docker/Dockerfile
+utils/docker/codecov-script.sh
 jemalloc/.appveyor.yml
 jemalloc/.autom4te.cfg
 jemalloc/.gitattributes
