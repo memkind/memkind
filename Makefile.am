@@ -78,6 +78,9 @@ EXTRA_DIST = astyle.sh \
              CONTRIBUTING \
              memkind-$(VERSION).spec \
              memkind.spec.mk \
+             utils/docker/Dockerfile.ubuntu-18.04 \
+             utils/docker/docker_run_build_and_test.sh \
+             utils/docker/docker_run_coverage.sh \
              jemalloc/.appveyor.yml \
              jemalloc/.autom4te.cfg \
              jemalloc/.gitattributes \

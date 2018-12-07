@@ -155,4 +155,6 @@ test/dlopen_test.cpp
 test/pmem_allocator_tests.cpp
 man/memkind_pmem.3
 src/memkind_pmem.c
-
+utils/docker/Dockerfile.ubuntu-18.04
+utils/docker/docker_run_build_and_test.sh
+utils/docker/docker_run_coverage.sh
