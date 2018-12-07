@@ -32,11 +32,11 @@ class Allocator
 {
 public:
 
-    virtual void* malloc(size_t size) = 0;
-    virtual void* calloc(size_t num, size_t size) = 0;
-    virtual void* realloc(void* ptr, size_t size) = 0;
-    virtual int memalign(void** ptr, size_t alignment, size_t size) = 0;
-    virtual void free(void* ptr) = 0;
+    virtual void *malloc(size_t size) = 0;
+    virtual void *calloc(size_t num, size_t size) = 0;
+    virtual void *realloc(void *ptr, size_t size) = 0;
+    virtual int memalign(void **ptr, size_t alignment, size_t size) = 0;
+    virtual void free(void *ptr) = 0;
 
     /* get_numa_policy() returns MPOL_INTERLEAVE, MPOL_BIND, MPOL_PREFERRED
      or -1 when the allocator is not providing NUMA policy */
@@ -67,27 +67,27 @@ public:
         assert(kind != NULL);
     }
 
-    virtual void* malloc(size_t size)
+    virtual void *malloc(size_t size)
     {
         return memkind_malloc(kind, size);
     }
 
-    virtual void* calloc(size_t num, size_t size)
+    virtual void *calloc(size_t num, size_t size)
     {
         return memkind_calloc(kind, num, size);
     }
 
-    virtual void* realloc(void* ptr, size_t size)
+    virtual void *realloc(void *ptr, size_t size)
     {
         return memkind_realloc(kind, ptr, size);
     }
 
-    virtual int memalign(void** ptr, size_t alignment, size_t size)
+    virtual int memalign(void **ptr, size_t alignment, size_t size)
     {
         return memkind_posix_memalign(kind, ptr, alignment, size);
     }
 
-    virtual void free(void* ptr)
+    virtual void free(void *ptr)
     {
         memkind_free(kind, ptr);
     }
@@ -158,17 +158,17 @@ public:
         hbw_set_policy(hbw_policy);
     }
 
-    virtual void* malloc(size_t size)
+    virtual void *malloc(size_t size)
     {
         return hbw_malloc(size);
     }
 
-    virtual void* calloc(size_t num, size_t size)
+    virtual void *calloc(size_t num, size_t size)
     {
         return hbw_calloc(num, size);
     }
 
-    virtual void* realloc(void* ptr, size_t size)
+    virtual void *realloc(void *ptr, size_t size)
     {
         return hbw_realloc(ptr, size);
     }
@@ -178,7 +178,7 @@ public:
         page_size = psize;
     }
 
-    virtual int memalign(void** ptr, size_t alignment, size_t size)
+    virtual int memalign(void **ptr, size_t alignment, size_t size)
     {
         if (page_size == HBW_PAGESIZE_4KB) {
             return hbw_posix_memalign(ptr, alignment, size);
@@ -187,7 +187,7 @@ public:
         }
     }
 
-    virtual void free(void* ptr)
+    virtual void free(void *ptr)
     {
         hbw_free(ptr);
     }

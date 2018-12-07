@@ -543,7 +543,7 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBNullFree)
 TEST_F(NegativeTestHuge,
        test_TC_MEMKIND_hbwmalloc_memalign_psize_Interleave_Policy_PAGE_SIZE_2MB)
 {
-    void* ptr = NULL;
+    void *ptr = NULL;
     hbw_set_policy(HBW_POLICY_INTERLEAVE);
     int ret = hbw_posix_memalign_psize(&ptr, 4096, 4096, HBW_PAGESIZE_2MB);
     ASSERT_EQ(EINVAL, ret);

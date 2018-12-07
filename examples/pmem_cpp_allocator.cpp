@@ -49,7 +49,7 @@
 #define STL_MAP_INT_STRING_TEST
 #endif
 
-void cpp_allocator_test(const char* pmem_directory)
+void cpp_allocator_test(const char *pmem_directory)
 {
     std::cout << "TEST SCOPE: HELLO" << std::endl;
 
@@ -145,7 +145,7 @@ void cpp_allocator_test(const char* pmem_directory)
 
 int main(int argc, char *argv[])
 {
-    const char* pmem_directory = "/tmp/";
+    const char *pmem_directory = "/tmp/";
 
     if (argc > 2) {
         std::cerr << "Usage: pmem_cpp_allocator [directory path]\n"

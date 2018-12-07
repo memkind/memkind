@@ -41,7 +41,7 @@
 #define MB (1024 * 1024)
 #define HEAP_LIMIT_SIMULATE (1024 * MB)
 
-static char* PMEM_DIR = "/tmp/";
+static char *PMEM_DIR = "/tmp/";
 
 int main(int argc, char *argv[])
 {

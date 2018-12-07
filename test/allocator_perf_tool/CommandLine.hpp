@@ -34,7 +34,7 @@ public:
     //Parse and write to val when option exist and strtol(...) > 0, otherwise val is not changed.
     //T should be an integer type.
     template<class T>
-    void parse_with_strtol(const std::string& option, T& val)
+    void parse_with_strtol(const std::string &option, T &val)
     {
         if(args.count(option)) {
             T tmp = static_cast<T>(strtol(args[option].c_str(), NULL, 10));
@@ -48,7 +48,7 @@ public:
         }
     }
 
-    bool is_option_present(const std::string& option) const
+    bool is_option_present(const std::string &option) const
     {
         return args.count(option);
     }
@@ -60,12 +60,12 @@ public:
         return false;
     }
 
-    const std::string& get_option_value(const std::string& option)
+    const std::string &get_option_value(const std::string &option)
     {
         return args[option];
     }
 
-    CommandLine(int argc, char* argv[])
+    CommandLine(int argc, char *argv[])
     {
         for (int i=0; i<argc; i++) {
             std::string arg(argv[i]);

@@ -52,7 +52,7 @@ protected:
         post_test(stat);
     }
 
-    void post_test(AllocatorFactory::initialization_stat& stat)
+    void post_test(AllocatorFactory::initialization_stat &stat)
     {
         //Calculate (%) distance to the reference time for function calls.
         stat.ref_delta_time = allocator_factory.calc_ref_delta(ref_time,

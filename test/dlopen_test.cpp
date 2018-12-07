@@ -50,13 +50,13 @@ protected:
         dlclose(handle);
     }
 
-    void test(const char* kind_name, size_t alloc_size)
+    void test(const char *kind_name, size_t alloc_size)
     {
-        void** kind_ptr = (void**)dlsym(handle, kind_name);
+        void **kind_ptr = (void **)dlsym(handle, kind_name);
         EXPECT_TRUE(dlerror() == NULL) << "Couldn't get kind from memkind library";
         EXPECT_TRUE(kind_ptr != NULL) << "Kind ptr to memkind library is NULL";
 
-        void* allocation_ptr = memkind_malloc((*kind_ptr), alloc_size);
+        void *allocation_ptr = memkind_malloc((*kind_ptr), alloc_size);
         EXPECT_TRUE(allocation_ptr != NULL) << "Allocation with memkind_malloc failed";
 
         memset(allocation_ptr, 0, alloc_size);
@@ -74,9 +74,9 @@ protected:
     }
 
 private:
-    void* handle;
-    typedef void* (*memkind_malloc_t)(void*, size_t);
-    typedef void (*memkind_free_t)(void*, void*);
+    void *handle;
+    typedef void *(*memkind_malloc_t)(void *, size_t);
+    typedef void (*memkind_free_t)(void *, void *);
     memkind_malloc_t memkind_malloc;
     memkind_free_t memkind_free;
 };

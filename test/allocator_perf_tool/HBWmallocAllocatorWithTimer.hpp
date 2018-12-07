@@ -54,14 +54,14 @@ public:
         END_TEST
     }
 
-    memory_operation wrapped_realloc(void* ptr, size_t size)
+    memory_operation wrapped_realloc(void *ptr, size_t size)
     {
         START_TEST(AllocatorTypes::HBWMALLOC_ALLOCATOR, FunctionCalls::REALLOC)
         data.ptr = hbw_realloc(ptr, size);
         END_TEST
     }
 
-    void wrapped_free(void* ptr)
+    void wrapped_free(void *ptr)
     {
         hbw_free(ptr);
     }

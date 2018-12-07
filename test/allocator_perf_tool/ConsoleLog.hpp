@@ -31,7 +31,7 @@
 class ConsoleLog
 {
 public:
-    static void print_stats(TimeStats& stats, unsigned allocator_type,
+    static void print_stats(TimeStats &stats, unsigned allocator_type,
                             unsigned func_calls)
     {
         if(stats.stats.count(allocator_type)) {
@@ -50,7 +50,7 @@ public:
         }
     }
 
-    static void print_table(TimeStats& stats)
+    static void print_table(TimeStats &stats)
     {
         printf("\n====== Allocators function calls performance =================================================\n");
         printf(" %20s Id:   Method:    Total time:    Average time:  Allocated memory bytes/MB: \n",
@@ -64,7 +64,7 @@ public:
         printf("==============================================================================================\n");
     }
 
-    static void print_requested_memory(TimeStats& stats, std::string test_name)
+    static void print_requested_memory(TimeStats &stats, std::string test_name)
     {
         printf("\n====== Requested memory stats for %s =================\n",
                test_name.c_str());

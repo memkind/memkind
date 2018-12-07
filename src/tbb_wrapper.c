@@ -37,15 +37,15 @@
 #include <dlfcn.h>
 #include <string.h>
 
-void *(*pool_malloc)(void*, size_t);
-void *(*pool_realloc)(void*, void *, size_t);
-void *(*pool_aligned_malloc)(void*, size_t, size_t);
-bool (*pool_free)(void*, void *);
-int (*pool_create_v1)(intptr_t, const struct MemPoolPolicy*, void**);
-bool (*pool_destroy)(void*);
-void* (*pool_identify)(void *object);
+void *(*pool_malloc)(void *, size_t);
+void *(*pool_realloc)(void *, void *, size_t);
+void *(*pool_aligned_malloc)(void *, size_t, size_t);
+bool (*pool_free)(void *, void *);
+int (*pool_create_v1)(intptr_t, const struct MemPoolPolicy *, void **);
+bool (*pool_destroy)(void *);
+void *(*pool_identify)(void *object);
 
-static void* tbb_handle = NULL;
+static void *tbb_handle = NULL;
 
 static int load_tbb_symbols()
 {
@@ -85,21 +85,21 @@ static int load_tbb_symbols()
 
 //Granularity of raw_alloc allocations
 #define GRANULARITY 2*1024*1024
-static void *raw_alloc(intptr_t pool_id, size_t* bytes/*=n*GRANULARITY*/)
+static void *raw_alloc(intptr_t pool_id, size_t *bytes/*=n*GRANULARITY*/)
 {
-    void* ptr = kind_mmap((struct memkind*)pool_id, NULL, *bytes);
+    void *ptr = kind_mmap((struct memkind *)pool_id, NULL, *bytes);
     return (ptr==MAP_FAILED) ? NULL : ptr;
 }
 
-static int raw_free(intptr_t pool_id, void* raw_ptr, size_t raw_bytes)
+static int raw_free(intptr_t pool_id, void *raw_ptr, size_t raw_bytes)
 {
     return munmap(raw_ptr, raw_bytes);
 }
 
-static void *tbb_pool_malloc(struct memkind* kind, size_t size)
+static void *tbb_pool_malloc(struct memkind *kind, size_t size)
 {
     if(size_out_of_bounds(size)) return NULL;
-    void* result = pool_malloc(kind->priv, size);
+    void *result = pool_malloc(kind->priv, size);
     if (!result)
         errno = ENOMEM;
     return result;
@@ -136,7 +136,7 @@ static int tbb_pool_posix_memalign(struct memkind *kind, void **memptr,
                                    size_t alignment, size_t size)
 {
     //Check if alignment is "at least as large as sizeof(void *)".
-    if(!alignment && (0 != (alignment & (alignment-sizeof(void*))))) return EINVAL;
+    if(!alignment && (0 != (alignment & (alignment-sizeof(void *))))) return EINVAL;
     //Check if alignment is "a power of 2".
     if(alignment & (alignment-1)) return EINVAL;
     if(size_out_of_bounds(size)) return ENOMEM;
@@ -163,7 +163,7 @@ static size_t tbb_pool_usable_size(struct memkind *kind, void *ptr)
     return 0;
 }
 
-static int tbb_destroy(struct memkind* kind)
+static int tbb_destroy(struct memkind *kind)
 {
     bool pool_destroy_ret = pool_destroy(kind->priv);
     dlclose(tbb_handle);

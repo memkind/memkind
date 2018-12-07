@@ -1084,11 +1084,11 @@ namespace std
 // ByRef<T>::type is T if T is a reference; otherwise it's const T&.
             template <typename T>
             struct ByRef {
-                typedef const T& type;
+                typedef const T &type;
             };  // NOLINT
             template <typename T>
-            struct ByRef<T&> {
-                typedef T& type;
+            struct ByRef<T &> {
+                typedef T &type;
             };  // NOLINT
 
 // A handy wrapper for ByRef.
@@ -1098,11 +1098,11 @@ namespace std
 // is the same as tr1::add_reference<T>::type.
             template <typename T>
             struct AddRef {
-                typedef T& type;
+                typedef T &type;
             };  // NOLINT
             template <typename T>
-            struct AddRef<T&> {
-                typedef T& type;
+            struct AddRef<T &> {
+                typedef T &type;
             };  // NOLINT
 
 // A handy wrapper for AddRef.
@@ -1173,8 +1173,8 @@ namespace std
         {
         public:
             tuple() {}
-            tuple(const tuple& /* t */)  {}
-            tuple& operator=(const tuple& /* t */)
+            tuple(const tuple & /* t */)  {}
+            tuple &operator=(const tuple & /* t */)
             {
                 return *this;
             }
@@ -1195,19 +1195,19 @@ namespace std
             template <GTEST_1_TYPENAMES_(U)>
             tuple(const GTEST_1_TUPLE_(U)& t) : f0_(t.f0_) {}
 
-            tuple& operator=(const tuple& t) {
+            tuple &operator=(const tuple& t) {
                 return CopyFrom(t);
             }
 
             template <GTEST_1_TYPENAMES_(U)>
-            tuple& operator=(const GTEST_1_TUPLE_(U)& t) {
+            tuple &operator=(const GTEST_1_TUPLE_(U)& t) {
                 return CopyFrom(t);
             }
 
             GTEST_DECLARE_TUPLE_AS_FRIEND_
 
             template <GTEST_1_TYPENAMES_(U)>
-            tuple& CopyFrom(const GTEST_1_TUPLE_(U)& t) {
+            tuple &CopyFrom(const GTEST_1_TUPLE_(U)& t) {
                 f0_ = t.f0_;
                 return *this;
             }
@@ -1231,18 +1231,18 @@ namespace std
             template <GTEST_2_TYPENAMES_(U)>
             tuple(const GTEST_2_TUPLE_(U)& t) : f0_(t.f0_), f1_(t.f1_) {}
             template <typename U0, typename U1>
-            tuple(const ::std::pair<U0, U1>& p) : f0_(p.first), f1_(p.second) {}
+            tuple(const ::std::pair<U0, U1> &p) : f0_(p.first), f1_(p.second) {}
 
-            tuple& operator=(const tuple& t) {
+            tuple &operator=(const tuple& t) {
                 return CopyFrom(t);
             }
 
             template <GTEST_2_TYPENAMES_(U)>
-            tuple& operator=(const GTEST_2_TUPLE_(U)& t) {
+            tuple &operator=(const GTEST_2_TUPLE_(U)& t) {
                 return CopyFrom(t);
             }
             template <typename U0, typename U1>
-            tuple& operator=(const ::std::pair<U0, U1>& p) {
+            tuple &operator=(const ::std::pair<U0, U1> &p) {
                 f0_ = p.first;
                 f1_ = p.second;
                 return *this;
@@ -1251,7 +1251,7 @@ namespace std
             GTEST_DECLARE_TUPLE_AS_FRIEND_
 
             template <GTEST_2_TYPENAMES_(U)>
-            tuple& CopyFrom(const GTEST_2_TUPLE_(U)& t) {
+            tuple &CopyFrom(const GTEST_2_TUPLE_(U)& t) {
                 f0_ = t.f0_;
                 f1_ = t.f1_;
                 return *this;
@@ -1277,19 +1277,19 @@ namespace std
             template <GTEST_3_TYPENAMES_(U)>
             tuple(const GTEST_3_TUPLE_(U)& t) : f0_(t.f0_), f1_(t.f1_), f2_(t.f2_) {}
 
-            tuple& operator=(const tuple& t) {
+            tuple &operator=(const tuple& t) {
                 return CopyFrom(t);
             }
 
             template <GTEST_3_TYPENAMES_(U)>
-            tuple& operator=(const GTEST_3_TUPLE_(U)& t) {
+            tuple &operator=(const GTEST_3_TUPLE_(U)& t) {
                 return CopyFrom(t);
             }
 
             GTEST_DECLARE_TUPLE_AS_FRIEND_
 
             template <GTEST_3_TYPENAMES_(U)>
-            tuple& CopyFrom(const GTEST_3_TUPLE_(U)& t) {
+            tuple &CopyFrom(const GTEST_3_TUPLE_(U)& t) {
                 f0_ = t.f0_;
                 f1_ = t.f1_;
                 f2_ = t.f2_;
@@ -1319,19 +1319,19 @@ namespace std
             tuple(const GTEST_4_TUPLE_(U)& t) : f0_(t.f0_), f1_(t.f1_), f2_(t.f2_),
                 f3_(t.f3_) {}
 
-            tuple& operator=(const tuple& t) {
+            tuple &operator=(const tuple& t) {
                 return CopyFrom(t);
             }
 
             template <GTEST_4_TYPENAMES_(U)>
-            tuple& operator=(const GTEST_4_TUPLE_(U)& t) {
+            tuple &operator=(const GTEST_4_TUPLE_(U)& t) {
                 return CopyFrom(t);
             }
 
             GTEST_DECLARE_TUPLE_AS_FRIEND_
 
             template <GTEST_4_TYPENAMES_(U)>
-            tuple& CopyFrom(const GTEST_4_TUPLE_(U)& t) {
+            tuple &CopyFrom(const GTEST_4_TUPLE_(U)& t) {
                 f0_ = t.f0_;
                 f1_ = t.f1_;
                 f2_ = t.f2_;
@@ -1364,19 +1364,19 @@ namespace std
             tuple(const GTEST_5_TUPLE_(U)& t) : f0_(t.f0_), f1_(t.f1_), f2_(t.f2_),
                 f3_(t.f3_), f4_(t.f4_) {}
 
-            tuple& operator=(const tuple& t) {
+            tuple &operator=(const tuple& t) {
                 return CopyFrom(t);
             }
 
             template <GTEST_5_TYPENAMES_(U)>
-            tuple& operator=(const GTEST_5_TUPLE_(U)& t) {
+            tuple &operator=(const GTEST_5_TUPLE_(U)& t) {
                 return CopyFrom(t);
             }
 
             GTEST_DECLARE_TUPLE_AS_FRIEND_
 
             template <GTEST_5_TYPENAMES_(U)>
-            tuple& CopyFrom(const GTEST_5_TUPLE_(U)& t) {
+            tuple &CopyFrom(const GTEST_5_TUPLE_(U)& t) {
                 f0_ = t.f0_;
                 f1_ = t.f1_;
                 f2_ = t.f2_;
@@ -1412,19 +1412,19 @@ namespace std
             tuple(const GTEST_6_TUPLE_(U)& t) : f0_(t.f0_), f1_(t.f1_), f2_(t.f2_),
                 f3_(t.f3_), f4_(t.f4_), f5_(t.f5_) {}
 
-            tuple& operator=(const tuple& t) {
+            tuple &operator=(const tuple& t) {
                 return CopyFrom(t);
             }
 
             template <GTEST_6_TYPENAMES_(U)>
-            tuple& operator=(const GTEST_6_TUPLE_(U)& t) {
+            tuple &operator=(const GTEST_6_TUPLE_(U)& t) {
                 return CopyFrom(t);
             }
 
             GTEST_DECLARE_TUPLE_AS_FRIEND_
 
             template <GTEST_6_TYPENAMES_(U)>
-            tuple& CopyFrom(const GTEST_6_TUPLE_(U)& t) {
+            tuple &CopyFrom(const GTEST_6_TUPLE_(U)& t) {
                 f0_ = t.f0_;
                 f1_ = t.f1_;
                 f2_ = t.f2_;
@@ -1462,19 +1462,19 @@ namespace std
             tuple(const GTEST_7_TUPLE_(U)& t) : f0_(t.f0_), f1_(t.f1_), f2_(t.f2_),
                 f3_(t.f3_), f4_(t.f4_), f5_(t.f5_), f6_(t.f6_) {}
 
-            tuple& operator=(const tuple& t) {
+            tuple &operator=(const tuple& t) {
                 return CopyFrom(t);
             }
 
             template <GTEST_7_TYPENAMES_(U)>
-            tuple& operator=(const GTEST_7_TUPLE_(U)& t) {
+            tuple &operator=(const GTEST_7_TUPLE_(U)& t) {
                 return CopyFrom(t);
             }
 
             GTEST_DECLARE_TUPLE_AS_FRIEND_
 
             template <GTEST_7_TYPENAMES_(U)>
-            tuple& CopyFrom(const GTEST_7_TUPLE_(U)& t) {
+            tuple &CopyFrom(const GTEST_7_TUPLE_(U)& t) {
                 f0_ = t.f0_;
                 f1_ = t.f1_;
                 f2_ = t.f2_;
@@ -1515,19 +1515,19 @@ namespace std
             tuple(const GTEST_8_TUPLE_(U)& t) : f0_(t.f0_), f1_(t.f1_), f2_(t.f2_),
                 f3_(t.f3_), f4_(t.f4_), f5_(t.f5_), f6_(t.f6_), f7_(t.f7_) {}
 
-            tuple& operator=(const tuple& t) {
+            tuple &operator=(const tuple& t) {
                 return CopyFrom(t);
             }
 
             template <GTEST_8_TYPENAMES_(U)>
-            tuple& operator=(const GTEST_8_TUPLE_(U)& t) {
+            tuple &operator=(const GTEST_8_TUPLE_(U)& t) {
                 return CopyFrom(t);
             }
 
             GTEST_DECLARE_TUPLE_AS_FRIEND_
 
             template <GTEST_8_TYPENAMES_(U)>
-            tuple& CopyFrom(const GTEST_8_TUPLE_(U)& t) {
+            tuple &CopyFrom(const GTEST_8_TUPLE_(U)& t) {
                 f0_ = t.f0_;
                 f1_ = t.f1_;
                 f2_ = t.f2_;
@@ -1570,19 +1570,19 @@ namespace std
             tuple(const GTEST_9_TUPLE_(U)& t) : f0_(t.f0_), f1_(t.f1_), f2_(t.f2_),
                 f3_(t.f3_), f4_(t.f4_), f5_(t.f5_), f6_(t.f6_), f7_(t.f7_), f8_(t.f8_) {}
 
-            tuple& operator=(const tuple& t) {
+            tuple &operator=(const tuple& t) {
                 return CopyFrom(t);
             }
 
             template <GTEST_9_TYPENAMES_(U)>
-            tuple& operator=(const GTEST_9_TUPLE_(U)& t) {
+            tuple &operator=(const GTEST_9_TUPLE_(U)& t) {
                 return CopyFrom(t);
             }
 
             GTEST_DECLARE_TUPLE_AS_FRIEND_
 
             template <GTEST_9_TYPENAMES_(U)>
-            tuple& CopyFrom(const GTEST_9_TUPLE_(U)& t) {
+            tuple &CopyFrom(const GTEST_9_TUPLE_(U)& t) {
                 f0_ = t.f0_;
                 f1_ = t.f1_;
                 f2_ = t.f2_;
@@ -1621,7 +1621,7 @@ namespace std
                            GTEST_BY_REF_(T8) f8, GTEST_BY_REF_(T9) f9) : f0_(f0), f1_(f1), f2_(f2),
                 f3_(f3), f4_(f4), f5_(f5), f6_(f6), f7_(f7), f8_(f8), f9_(f9) {}
 
-            tuple(const tuple& t) : f0_(t.f0_), f1_(t.f1_), f2_(t.f2_), f3_(t.f3_),
+            tuple(const tuple &t) : f0_(t.f0_), f1_(t.f1_), f2_(t.f2_), f3_(t.f3_),
                 f4_(t.f4_), f5_(t.f5_), f6_(t.f6_), f7_(t.f7_), f8_(t.f8_), f9_(t.f9_) {}
 
             template <GTEST_10_TYPENAMES_(U)>
@@ -1629,13 +1629,13 @@ namespace std
                 f3_(t.f3_), f4_(t.f4_), f5_(t.f5_), f6_(t.f6_), f7_(t.f7_), f8_(t.f8_),
                 f9_(t.f9_) {}
 
-            tuple& operator=(const tuple& t)
+            tuple &operator=(const tuple &t)
             {
                 return CopyFrom(t);
             }
 
             template <GTEST_10_TYPENAMES_(U)>
-            tuple& operator=(const GTEST_10_TUPLE_(U)& t)
+            tuple &operator=(const GTEST_10_TUPLE_(U)& t)
             {
                 return CopyFrom(t);
             }
@@ -1643,7 +1643,7 @@ namespace std
             GTEST_DECLARE_TUPLE_AS_FRIEND_
 
             template <GTEST_10_TYPENAMES_(U)>
-            tuple& CopyFrom(const GTEST_10_TUPLE_(U)& t)
+            tuple &CopyFrom(const GTEST_10_TUPLE_(U)& t)
             {
                 f0_ = t.f0_;
                 f1_ = t.f1_;
@@ -1682,70 +1682,70 @@ namespace std
         }
 
         template <GTEST_1_TYPENAMES_(T)>
-        inline GTEST_1_TUPLE_(T) make_tuple(const T0& f0)
+        inline GTEST_1_TUPLE_(T) make_tuple(const T0 &f0)
         {
             return GTEST_1_TUPLE_(T)(f0);
         }
 
         template <GTEST_2_TYPENAMES_(T)>
-        inline GTEST_2_TUPLE_(T) make_tuple(const T0& f0, const T1& f1)
+        inline GTEST_2_TUPLE_(T) make_tuple(const T0 &f0, const T1 &f1)
         {
             return GTEST_2_TUPLE_(T)(f0, f1);
         }
 
         template <GTEST_3_TYPENAMES_(T)>
-        inline GTEST_3_TUPLE_(T) make_tuple(const T0& f0, const T1& f1, const T2& f2)
+        inline GTEST_3_TUPLE_(T) make_tuple(const T0 &f0, const T1 &f1, const T2 &f2)
         {
             return GTEST_3_TUPLE_(T)(f0, f1, f2);
         }
 
         template <GTEST_4_TYPENAMES_(T)>
-        inline GTEST_4_TUPLE_(T) make_tuple(const T0& f0, const T1& f1, const T2& f2,
-                                            const T3& f3)
+        inline GTEST_4_TUPLE_(T) make_tuple(const T0 &f0, const T1 &f1, const T2 &f2,
+                                            const T3 &f3)
         {
             return GTEST_4_TUPLE_(T)(f0, f1, f2, f3);
         }
 
         template <GTEST_5_TYPENAMES_(T)>
-        inline GTEST_5_TUPLE_(T) make_tuple(const T0& f0, const T1& f1, const T2& f2,
-                                            const T3& f3, const T4& f4)
+        inline GTEST_5_TUPLE_(T) make_tuple(const T0 &f0, const T1 &f1, const T2 &f2,
+                                            const T3 &f3, const T4 &f4)
         {
             return GTEST_5_TUPLE_(T)(f0, f1, f2, f3, f4);
         }
 
         template <GTEST_6_TYPENAMES_(T)>
-        inline GTEST_6_TUPLE_(T) make_tuple(const T0& f0, const T1& f1, const T2& f2,
-                                            const T3& f3, const T4& f4, const T5& f5)
+        inline GTEST_6_TUPLE_(T) make_tuple(const T0 &f0, const T1 &f1, const T2 &f2,
+                                            const T3 &f3, const T4 &f4, const T5 &f5)
         {
             return GTEST_6_TUPLE_(T)(f0, f1, f2, f3, f4, f5);
         }
 
         template <GTEST_7_TYPENAMES_(T)>
-        inline GTEST_7_TUPLE_(T) make_tuple(const T0& f0, const T1& f1, const T2& f2,
-                                            const T3& f3, const T4& f4, const T5& f5, const T6& f6)
+        inline GTEST_7_TUPLE_(T) make_tuple(const T0 &f0, const T1 &f1, const T2 &f2,
+                                            const T3 &f3, const T4 &f4, const T5 &f5, const T6 &f6)
         {
             return GTEST_7_TUPLE_(T)(f0, f1, f2, f3, f4, f5, f6);
         }
 
         template <GTEST_8_TYPENAMES_(T)>
-        inline GTEST_8_TUPLE_(T) make_tuple(const T0& f0, const T1& f1, const T2& f2,
-                                            const T3& f3, const T4& f4, const T5& f5, const T6& f6, const T7& f7)
+        inline GTEST_8_TUPLE_(T) make_tuple(const T0 &f0, const T1 &f1, const T2 &f2,
+                                            const T3 &f3, const T4 &f4, const T5 &f5, const T6 &f6, const T7 &f7)
         {
             return GTEST_8_TUPLE_(T)(f0, f1, f2, f3, f4, f5, f6, f7);
         }
 
         template <GTEST_9_TYPENAMES_(T)>
-        inline GTEST_9_TUPLE_(T) make_tuple(const T0& f0, const T1& f1, const T2& f2,
-                                            const T3& f3, const T4& f4, const T5& f5, const T6& f6, const T7& f7,
-                                            const T8& f8)
+        inline GTEST_9_TUPLE_(T) make_tuple(const T0 &f0, const T1 &f1, const T2 &f2,
+                                            const T3 &f3, const T4 &f4, const T5 &f5, const T6 &f6, const T7 &f7,
+                                            const T8 &f8)
         {
             return GTEST_9_TUPLE_(T)(f0, f1, f2, f3, f4, f5, f6, f7, f8);
         }
 
         template <GTEST_10_TYPENAMES_(T)>
-        inline GTEST_10_TUPLE_(T) make_tuple(const T0& f0, const T1& f1, const T2& f2,
-                                             const T3& f3, const T4& f4, const T5& f5, const T6& f6, const T7& f7,
-                                             const T8& f8, const T9& f9)
+        inline GTEST_10_TUPLE_(T) make_tuple(const T0 &f0, const T1 &f1, const T2 &f2,
+                                             const T3 &f3, const T4 &f4, const T5 &f5, const T6 &f6, const T7 &f7,
+                                             const T8 &f8, const T9 &f9)
         {
             return GTEST_10_TUPLE_(T)(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9);
         }
@@ -1828,14 +1828,14 @@ namespace std
             public:
                 template <class Tuple>
                 static GTEST_ADD_REF_(GTEST_TUPLE_ELEMENT_(0, Tuple))
-                Field(Tuple& t)
+                Field(Tuple &t)
                 {
                     return t.f0_;    // NOLINT
                 }
 
                 template <class Tuple>
                 static GTEST_BY_REF_(GTEST_TUPLE_ELEMENT_(0, Tuple))
-                ConstField(const Tuple& t)
+                ConstField(const Tuple &t)
                 {
                     return t.f0_;
                 }
@@ -1847,14 +1847,14 @@ namespace std
             public:
                 template <class Tuple>
                 static GTEST_ADD_REF_(GTEST_TUPLE_ELEMENT_(1, Tuple))
-                Field(Tuple& t)
+                Field(Tuple &t)
                 {
                     return t.f1_;    // NOLINT
                 }
 
                 template <class Tuple>
                 static GTEST_BY_REF_(GTEST_TUPLE_ELEMENT_(1, Tuple))
-                ConstField(const Tuple& t)
+                ConstField(const Tuple &t)
                 {
                     return t.f1_;
                 }
@@ -1866,14 +1866,14 @@ namespace std
             public:
                 template <class Tuple>
                 static GTEST_ADD_REF_(GTEST_TUPLE_ELEMENT_(2, Tuple))
-                Field(Tuple& t)
+                Field(Tuple &t)
                 {
                     return t.f2_;    // NOLINT
                 }
 
                 template <class Tuple>
                 static GTEST_BY_REF_(GTEST_TUPLE_ELEMENT_(2, Tuple))
-                ConstField(const Tuple& t)
+                ConstField(const Tuple &t)
                 {
                     return t.f2_;
                 }
@@ -1885,14 +1885,14 @@ namespace std
             public:
                 template <class Tuple>
                 static GTEST_ADD_REF_(GTEST_TUPLE_ELEMENT_(3, Tuple))
-                Field(Tuple& t)
+                Field(Tuple &t)
                 {
                     return t.f3_;    // NOLINT
                 }
 
                 template <class Tuple>
                 static GTEST_BY_REF_(GTEST_TUPLE_ELEMENT_(3, Tuple))
-                ConstField(const Tuple& t)
+                ConstField(const Tuple &t)
                 {
                     return t.f3_;
                 }
@@ -1904,14 +1904,14 @@ namespace std
             public:
                 template <class Tuple>
                 static GTEST_ADD_REF_(GTEST_TUPLE_ELEMENT_(4, Tuple))
-                Field(Tuple& t)
+                Field(Tuple &t)
                 {
                     return t.f4_;    // NOLINT
                 }
 
                 template <class Tuple>
                 static GTEST_BY_REF_(GTEST_TUPLE_ELEMENT_(4, Tuple))
-                ConstField(const Tuple& t)
+                ConstField(const Tuple &t)
                 {
                     return t.f4_;
                 }
@@ -1923,14 +1923,14 @@ namespace std
             public:
                 template <class Tuple>
                 static GTEST_ADD_REF_(GTEST_TUPLE_ELEMENT_(5, Tuple))
-                Field(Tuple& t)
+                Field(Tuple &t)
                 {
                     return t.f5_;    // NOLINT
                 }
 
                 template <class Tuple>
                 static GTEST_BY_REF_(GTEST_TUPLE_ELEMENT_(5, Tuple))
-                ConstField(const Tuple& t)
+                ConstField(const Tuple &t)
                 {
                     return t.f5_;
                 }
@@ -1942,14 +1942,14 @@ namespace std
             public:
                 template <class Tuple>
                 static GTEST_ADD_REF_(GTEST_TUPLE_ELEMENT_(6, Tuple))
-                Field(Tuple& t)
+                Field(Tuple &t)
                 {
                     return t.f6_;    // NOLINT
                 }
 
                 template <class Tuple>
                 static GTEST_BY_REF_(GTEST_TUPLE_ELEMENT_(6, Tuple))
-                ConstField(const Tuple& t)
+                ConstField(const Tuple &t)
                 {
                     return t.f6_;
                 }
@@ -1961,14 +1961,14 @@ namespace std
             public:
                 template <class Tuple>
                 static GTEST_ADD_REF_(GTEST_TUPLE_ELEMENT_(7, Tuple))
-                Field(Tuple& t)
+                Field(Tuple &t)
                 {
                     return t.f7_;    // NOLINT
                 }
 
                 template <class Tuple>
                 static GTEST_BY_REF_(GTEST_TUPLE_ELEMENT_(7, Tuple))
-                ConstField(const Tuple& t)
+                ConstField(const Tuple &t)
                 {
                     return t.f7_;
                 }
@@ -1980,14 +1980,14 @@ namespace std
             public:
                 template <class Tuple>
                 static GTEST_ADD_REF_(GTEST_TUPLE_ELEMENT_(8, Tuple))
-                Field(Tuple& t)
+                Field(Tuple &t)
                 {
                     return t.f8_;    // NOLINT
                 }
 
                 template <class Tuple>
                 static GTEST_BY_REF_(GTEST_TUPLE_ELEMENT_(8, Tuple))
-                ConstField(const Tuple& t)
+                ConstField(const Tuple &t)
                 {
                     return t.f8_;
                 }
@@ -1999,14 +1999,14 @@ namespace std
             public:
                 template <class Tuple>
                 static GTEST_ADD_REF_(GTEST_TUPLE_ELEMENT_(9, Tuple))
-                Field(Tuple& t)
+                Field(Tuple &t)
                 {
                     return t.f9_;    // NOLINT
                 }
 
                 template <class Tuple>
                 static GTEST_BY_REF_(GTEST_TUPLE_ELEMENT_(9, Tuple))
-                ConstField(const Tuple& t)
+                ConstField(const Tuple &t)
                 {
                     return t.f9_;
                 }
@@ -2045,7 +2045,7 @@ namespace std
             template <>
             struct SameSizeTuplePrefixComparator<0, 0> {
                 template <class Tuple1, class Tuple2>
-                static bool Eq(const Tuple1& /* t1 */, const Tuple2& /* t2 */)
+                static bool Eq(const Tuple1 & /* t1 */, const Tuple2 & /* t2 */)
                 {
                     return true;
                 }
@@ -2054,7 +2054,7 @@ namespace std
             template <int k>
             struct SameSizeTuplePrefixComparator<k, k> {
                 template <class Tuple1, class Tuple2>
-                static bool Eq(const Tuple1& t1, const Tuple2& t2)
+                static bool Eq(const Tuple1 &t1, const Tuple2 &t2)
                 {
                     return SameSizeTuplePrefixComparator<k - 1, k - 1>::Eq(t1, t2) &&
                            ::std::tr1::get<k - 1>(t1) == ::std::tr1::get<k - 1>(t2);
@@ -2577,33 +2577,33 @@ namespace testing
         public:
             typedef T element_type;
 
-            explicit scoped_ptr(T* p = NULL) : ptr_(p) {}
+            explicit scoped_ptr(T *p = NULL) : ptr_(p) {}
             ~scoped_ptr()
             {
                 reset();
             }
 
-            T& operator*() const
+            T &operator*() const
             {
                 return *ptr_;
             }
-            T* operator->() const
+            T *operator->() const
             {
                 return ptr_;
             }
-            T* get() const
+            T *get() const
             {
                 return ptr_;
             }
 
-            T* release()
+            T *release()
             {
-                T* const ptr = ptr_;
+                T *const ptr = ptr_;
                 ptr_ = NULL;
                 return ptr;
             }
 
-            void reset(T* p = NULL)
+            void reset(T *p = NULL)
             {
                 if (p != ptr_) {
                     if (IsTrue(sizeof(T) > 0)) {  // Makes sure T is a complete type.
@@ -2613,14 +2613,14 @@ namespace testing
                 }
             }
 
-            friend void swap(scoped_ptr& a, scoped_ptr& b)
+            friend void swap(scoped_ptr &a, scoped_ptr &b)
             {
                 using std::swap;
                 swap(a.ptr_, b.ptr_);
             }
 
         private:
-            T* ptr_;
+            T *ptr_;
 
             GTEST_DISALLOW_COPY_AND_ASSIGN_(scoped_ptr);
         };
@@ -2634,34 +2634,34 @@ namespace testing
         public:
             // A copy constructor is required by the Standard to initialize object
             // references from r-values.
-            RE(const RE& other)
+            RE(const RE &other)
             {
                 Init(other.pattern());
             }
 
             // Constructs an RE from a string.
-            RE(const ::std::string& regex)
+            RE(const ::std::string &regex)
             {
                 Init(regex.c_str());    // NOLINT
             }
 
 #if GTEST_HAS_GLOBAL_STRING
 
-            RE(const ::string& regex)
+            RE(const ::string &regex)
             {
                 Init(regex.c_str());    // NOLINT
             }
 
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-            RE(const char* regex)
+            RE(const char *regex)
             {
                 Init(regex);    // NOLINT
             }
             ~RE();
 
             // Returns the string representation of the regex.
-            const char* pattern() const
+            const char *pattern() const
             {
                 return pattern_;
             }
@@ -2673,38 +2673,38 @@ namespace testing
             //
             // TODO(wan@google.com): make FullMatch() and PartialMatch() work
             // when str contains NUL characters.
-            static bool FullMatch(const ::std::string& str, const RE& re)
+            static bool FullMatch(const ::std::string &str, const RE &re)
             {
                 return FullMatch(str.c_str(), re);
             }
-            static bool PartialMatch(const ::std::string& str, const RE& re)
+            static bool PartialMatch(const ::std::string &str, const RE &re)
             {
                 return PartialMatch(str.c_str(), re);
             }
 
 #if GTEST_HAS_GLOBAL_STRING
 
-            static bool FullMatch(const ::string& str, const RE& re)
+            static bool FullMatch(const ::string &str, const RE &re)
             {
                 return FullMatch(str.c_str(), re);
             }
-            static bool PartialMatch(const ::string& str, const RE& re)
+            static bool PartialMatch(const ::string &str, const RE &re)
             {
                 return PartialMatch(str.c_str(), re);
             }
 
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-            static bool FullMatch(const char* str, const RE& re);
-            static bool PartialMatch(const char* str, const RE& re);
+            static bool FullMatch(const char *str, const RE &re);
+            static bool PartialMatch(const char *str, const RE &re);
 
         private:
-            void Init(const char* regex);
+            void Init(const char *regex);
 
             // We use a const char* instead of an std::string, as Google Test used to be
             // used where std::string is not available.  TODO(wan@google.com): change to
             // std::string.
-            const char* pattern_;
+            const char *pattern_;
             bool is_valid_;
 
 #if GTEST_USES_POSIX_RE
@@ -2714,7 +2714,7 @@ namespace testing
 
 #else  // GTEST_USES_SIMPLE_RE
 
-            const char* full_pattern_;  // For FullMatch();
+            const char *full_pattern_;  // For FullMatch();
 
 #endif
 
@@ -2723,12 +2723,12 @@ namespace testing
 
 // Formats a source file path and a line number as they would appear
 // in an error message from the compiler used to compile this code.
-        GTEST_API_ ::std::string FormatFileLocation(const char* file, int line);
+        GTEST_API_ ::std::string FormatFileLocation(const char *file, int line);
 
 // Formats a file location for compiler-independent XML output.
 // Although this function is not platform dependent, we put it next to
 // FormatFileLocation in order to contrast the two functions.
-        GTEST_API_ ::std::string FormatCompilerIndependentFileLocation(const char* file,
+        GTEST_API_ ::std::string FormatCompilerIndependentFileLocation(const char *file,
                                                                        int line);
 
 // Defines logging utilities:
@@ -2750,12 +2750,12 @@ namespace testing
         class GTEST_API_ GTestLog
         {
         public:
-            GTestLog(GTestLogSeverity severity, const char* file, int line);
+            GTestLog(GTestLogSeverity severity, const char *file, int line);
 
             // Flushes the buffers and, if severity is GTEST_FATAL, aborts the program.
             ~GTestLog();
 
-            ::std::ostream& GetStream()
+            ::std::ostream &GetStream()
             {
                 return ::std::cerr;
             }
@@ -2817,7 +2817,7 @@ namespace testing
         using std::move;
 #else  // GTEST_HAS_STD_MOVE_
         template <typename T>
-        const T& move(const T& t)
+        const T &move(const T &t)
         {
             return t;
         }
@@ -2871,7 +2871,7 @@ namespace testing
 // similar functions users may have (e.g., down_cast). The internal
 // namespace alone is not enough because the function can be found by ADL.
         template<typename To, typename From>  // use like this: DownCast_<T*>(foo);
-        inline To DownCast_(From* f)    // so we only accept pointers
+        inline To DownCast_(From *f)    // so we only accept pointers
         {
             // Ensures that To is a sub-type of From *.  This test is here only
             // for compile-time type checking, and has no overhead in an
@@ -2881,7 +2881,7 @@ namespace testing
             if (false) {
                 GTEST_INTENTIONAL_CONST_COND_POP_()
                 const To to = NULL;
-                ::testing::internal::ImplicitCast_<From*>(to);
+                ::testing::internal::ImplicitCast_<From *>(to);
             }
 
 #if GTEST_HAS_RTTI
@@ -2897,18 +2897,18 @@ namespace testing
 // When RTTI is available, the function performs a runtime
 // check to enforce this.
         template <class Derived, class Base>
-        Derived* CheckedDowncastToActualType(Base* base)
+        Derived *CheckedDowncastToActualType(Base *base)
         {
 #if GTEST_HAS_RTTI
             GTEST_CHECK_(typeid(*base) == typeid(Derived));
 #endif
 
 #if GTEST_HAS_DOWNCAST_
-            return ::down_cast<Derived*>(base);
+            return ::down_cast<Derived *>(base);
 #elif GTEST_HAS_RTTI
-            return dynamic_cast<Derived*>(base);  // NOLINT
+            return dynamic_cast<Derived *>(base); // NOLINT
 #else
-            return static_cast<Derived*>(base);  // Poor man's downcast.
+            return static_cast<Derived *>(base); // Poor man's downcast.
 #endif
         }
 
@@ -2928,18 +2928,18 @@ namespace testing
 #endif  // GTEST_HAS_STREAM_REDIRECTION
 
 // Returns the size (in bytes) of a file.
-        GTEST_API_ size_t GetFileSize(FILE* file);
+        GTEST_API_ size_t GetFileSize(FILE *file);
 
 // Reads the entire content of a file as a string.
-        GTEST_API_ std::string ReadEntireFile(FILE* file);
+        GTEST_API_ std::string ReadEntireFile(FILE *file);
 
 // All command line arguments.
-        GTEST_API_ const ::std::vector<testing::internal::string>& GetArgvs();
+        GTEST_API_ const ::std::vector<testing::internal::string> &GetArgvs();
 
 #if GTEST_HAS_DEATH_TEST
 
-        const ::std::vector<testing::internal::string>& GetInjectableArgvs();
-        void SetInjectableArgvs(const ::std::vector<testing::internal::string>*
+        const ::std::vector<testing::internal::string> &GetInjectableArgvs();
+        void SetInjectableArgvs(const ::std::vector<testing::internal::string> *
                                 new_argvs);
 
 
@@ -3028,7 +3028,7 @@ namespace testing
             // undesirable because it defines a lot of symbols and macros that tend to
             // conflict with client code. This assumption is verified by
             // WindowsTypesTest.HANDLEIsVoidStar.
-            typedef void* Handle;
+            typedef void *Handle;
             AutoHandle();
             explicit AutoHandle(Handle handle);
 
@@ -3090,9 +3090,9 @@ namespace testing
 // example, SunStudio) treat them as different types.  Since class methods
 // cannot be defined with C-linkage we need to define a free C-function to
 // pass into pthread_create().
-        extern "C" inline void* ThreadFuncWithCLinkage(void* thread)
+        extern "C" inline void *ThreadFuncWithCLinkage(void *thread)
         {
-            static_cast<ThreadWithParamBase*>(thread)->Run();
+            static_cast<ThreadWithParamBase *>(thread)->Run();
             return NULL;
         }
 
@@ -3114,13 +3114,13 @@ namespace testing
         public:
             typedef void UserThreadFunc(T);
 
-            ThreadWithParam(UserThreadFunc* func, T param, Notification* thread_can_start)
+            ThreadWithParam(UserThreadFunc *func, T param, Notification *thread_can_start)
                 : func_(func),
                   param_(param),
                   thread_can_start_(thread_can_start),
                   finished_(false)
             {
-                ThreadWithParamBase* const base = this;
+                ThreadWithParamBase *const base = this;
                 // The thread can be created only after all fields except thread_
                 // have been initialized.
                 GTEST_CHECK_POSIX_SUCCESS_(
@@ -3147,11 +3147,11 @@ namespace testing
             }
 
         private:
-            UserThreadFunc* const func_;  // User-supplied thread function.
+            UserThreadFunc *const func_;  // User-supplied thread function.
             const T param_;  // User-supplied parameter to the thread function.
             // When non-NULL, used to block execution until the controller thread
             // notifies.
-            Notification* const thread_can_start_;
+            Notification *const thread_can_start_;
             bool finished_;  // true iff we know that the thread function has finished.
             pthread_t thread_;  // The native thread object.
 
@@ -3217,7 +3217,7 @@ namespace testing
             // by the linker.
             MutexType type_;
             long critical_section_init_phase_;  // NOLINT
-            GTEST_CRITICAL_SECTION* critical_section_;
+            GTEST_CRITICAL_SECTION *critical_section_;
 
             GTEST_DISALLOW_COPY_AND_ASSIGN_(Mutex);
         };
@@ -3236,7 +3236,7 @@ namespace testing
         class GTestMutexLock
         {
         public:
-            explicit GTestMutexLock(Mutex* mutex)
+            explicit GTestMutexLock(Mutex *mutex)
                 : mutex_(mutex)
             {
                 mutex_->Lock();
@@ -3248,7 +3248,7 @@ namespace testing
             }
 
         private:
-            Mutex* const mutex_;
+            Mutex *const mutex_;
 
             GTEST_DISALLOW_COPY_AND_ASSIGN_(GTestMutexLock);
         };
@@ -3272,7 +3272,7 @@ namespace testing
             // this ThreadLocal<T>'s constructor and returns it.  It is the caller's
             // responsibility not to call this when the ThreadLocal<T> instance already
             // has a value on the current thread.
-            virtual ThreadLocalValueHolderBase* NewValueForCurrentThread() const = 0;
+            virtual ThreadLocalValueHolderBase *NewValueForCurrentThread() const = 0;
 
         protected:
             ThreadLocalBase() {}
@@ -3290,12 +3290,12 @@ namespace testing
         public:
             // Registers thread_local_instance as having value on the current thread.
             // Returns a value that can be used to identify the thread from other threads.
-            static ThreadLocalValueHolderBase* GetValueOnCurrentThread(
-                const ThreadLocalBase* thread_local_instance);
+            static ThreadLocalValueHolderBase *GetValueOnCurrentThread(
+                const ThreadLocalBase *thread_local_instance);
 
             // Invoked when a ThreadLocal instance is destroyed.
             static void OnThreadLocalDestroyed(
-                const ThreadLocalBase* thread_local_instance);
+                const ThreadLocalBase *thread_local_instance);
         };
 
         class GTEST_API_ ThreadWithParamBase
@@ -3311,7 +3311,7 @@ namespace testing
                 virtual void Run() = 0;
             };
 
-            ThreadWithParamBase(Runnable *runnable, Notification* thread_can_start);
+            ThreadWithParamBase(Runnable *runnable, Notification *thread_can_start);
             virtual ~ThreadWithParamBase();
 
         private:
@@ -3325,7 +3325,7 @@ namespace testing
         public:
             typedef void UserThreadFunc(T);
 
-            ThreadWithParam(UserThreadFunc* func, T param, Notification* thread_can_start)
+            ThreadWithParam(UserThreadFunc *func, T param, Notification *thread_can_start)
                 : ThreadWithParamBase(new RunnableImpl(func, param), thread_can_start)
             {
             }
@@ -3335,7 +3335,7 @@ namespace testing
             class RunnableImpl : public Runnable
             {
             public:
-                RunnableImpl(UserThreadFunc* func, T param)
+                RunnableImpl(UserThreadFunc *func, T param)
                     : func_(func),
                       param_(param)
                 {
@@ -3347,7 +3347,7 @@ namespace testing
                 }
 
             private:
-                UserThreadFunc* const func_;
+                UserThreadFunc *const func_;
                 const T param_;
 
                 GTEST_DISALLOW_COPY_AND_ASSIGN_(RunnableImpl);
@@ -3388,7 +3388,7 @@ namespace testing
         {
         public:
             ThreadLocal() : default_factory_(new DefaultValueHolderFactory()) {}
-            explicit ThreadLocal(const T& value)
+            explicit ThreadLocal(const T &value)
                 : default_factory_(new InstanceValueHolderFactory(value)) {}
 
             ~ThreadLocal()
@@ -3396,19 +3396,19 @@ namespace testing
                 ThreadLocalRegistry::OnThreadLocalDestroyed(this);
             }
 
-            T* pointer()
+            T *pointer()
             {
                 return GetOrCreateValue();
             }
-            const T* pointer() const
+            const T *pointer() const
             {
                 return GetOrCreateValue();
             }
-            const T& get() const
+            const T &get() const
             {
                 return *pointer();
             }
-            void set(const T& value)
+            void set(const T &value)
             {
                 *pointer() = value;
             }
@@ -3420,9 +3420,9 @@ namespace testing
             {
             public:
                 ValueHolder() : value_() {}
-                explicit ValueHolder(const T& value) : value_(value) {}
+                explicit ValueHolder(const T &value) : value_(value) {}
 
-                T* pointer()
+                T *pointer()
                 {
                     return &value_;
                 }
@@ -3433,13 +3433,13 @@ namespace testing
             };
 
 
-            T* GetOrCreateValue() const
+            T *GetOrCreateValue() const
             {
-                return static_cast<ValueHolder*>(
+                return static_cast<ValueHolder *>(
                            ThreadLocalRegistry::GetValueOnCurrentThread(this))->pointer();
             }
 
-            virtual ThreadLocalValueHolderBase* NewValueForCurrentThread() const
+            virtual ThreadLocalValueHolderBase *NewValueForCurrentThread() const
             {
                 return default_factory_->MakeNewHolder();
             }
@@ -3449,7 +3449,7 @@ namespace testing
             public:
                 ValueHolderFactory() {}
                 virtual ~ValueHolderFactory() {}
-                virtual ValueHolder* MakeNewHolder() const = 0;
+                virtual ValueHolder *MakeNewHolder() const = 0;
 
             private:
                 GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolderFactory);
@@ -3459,7 +3459,7 @@ namespace testing
             {
             public:
                 DefaultValueHolderFactory() {}
-                virtual ValueHolder* MakeNewHolder() const
+                virtual ValueHolder *MakeNewHolder() const
                 {
                     return new ValueHolder();
                 }
@@ -3471,8 +3471,8 @@ namespace testing
             class InstanceValueHolderFactory : public ValueHolderFactory
             {
             public:
-                explicit InstanceValueHolderFactory(const T& value) : value_(value) {}
-                virtual ValueHolder* MakeNewHolder() const
+                explicit InstanceValueHolderFactory(const T &value) : value_(value) {}
+                virtual ValueHolder *MakeNewHolder() const
                 {
                     return new ValueHolder(value_);
                 }
@@ -3573,7 +3573,7 @@ namespace testing
         class GTestMutexLock
         {
         public:
-            explicit GTestMutexLock(MutexBase* mutex)
+            explicit GTestMutexLock(MutexBase *mutex)
                 : mutex_(mutex)
             {
                 mutex_->Lock();
@@ -3585,7 +3585,7 @@ namespace testing
             }
 
         private:
-            MutexBase* const mutex_;
+            MutexBase *const mutex_;
 
             GTEST_DISALLOW_COPY_AND_ASSIGN_(GTestMutexLock);
         };
@@ -3606,9 +3606,9 @@ namespace testing
 
 // Called by pthread to delete thread-local data stored by
 // pthread_setspecific().
-        extern "C" inline void DeleteThreadLocalValue(void* value_holder)
+        extern "C" inline void DeleteThreadLocalValue(void *value_holder)
         {
-            delete static_cast<ThreadLocalValueHolderBase*>(value_holder);
+            delete static_cast<ThreadLocalValueHolderBase *>(value_holder);
         }
 
 // Implements thread-local storage on pthreads-based systems.
@@ -3618,7 +3618,7 @@ namespace testing
         public:
             ThreadLocal()
                 : key_(CreateKey()), default_factory_(new DefaultValueHolderFactory()) {}
-            explicit ThreadLocal(const T& value)
+            explicit ThreadLocal(const T &value)
                 : key_(CreateKey()),
                   default_factory_(new InstanceValueHolderFactory(value)) {}
 
@@ -3632,19 +3632,19 @@ namespace testing
                 GTEST_CHECK_POSIX_SUCCESS_(pthread_key_delete(key_));
             }
 
-            T* pointer()
+            T *pointer()
             {
                 return GetOrCreateValue();
             }
-            const T* pointer() const
+            const T *pointer() const
             {
                 return GetOrCreateValue();
             }
-            const T& get() const
+            const T &get() const
             {
                 return *pointer();
             }
-            void set(const T& value)
+            void set(const T &value)
             {
                 *pointer() = value;
             }
@@ -3655,9 +3655,9 @@ namespace testing
             {
             public:
                 ValueHolder() : value_() {}
-                explicit ValueHolder(const T& value) : value_(value) {}
+                explicit ValueHolder(const T &value) : value_(value) {}
 
-                T* pointer()
+                T *pointer()
                 {
                     return &value_;
                 }
@@ -3677,16 +3677,16 @@ namespace testing
                 return key;
             }
 
-            T* GetOrCreateValue() const
+            T *GetOrCreateValue() const
             {
-                ThreadLocalValueHolderBase* const holder =
-                    static_cast<ThreadLocalValueHolderBase*>(pthread_getspecific(key_));
+                ThreadLocalValueHolderBase *const holder =
+                    static_cast<ThreadLocalValueHolderBase *>(pthread_getspecific(key_));
                 if (holder != NULL) {
                     return CheckedDowncastToActualType<ValueHolder>(holder)->pointer();
                 }
 
-                ValueHolder* const new_holder = default_factory_->MakeNewHolder();
-                ThreadLocalValueHolderBase* const holder_base = new_holder;
+                ValueHolder *const new_holder = default_factory_->MakeNewHolder();
+                ThreadLocalValueHolderBase *const holder_base = new_holder;
                 GTEST_CHECK_POSIX_SUCCESS_(pthread_setspecific(key_, holder_base));
                 return new_holder->pointer();
             }
@@ -3696,7 +3696,7 @@ namespace testing
             public:
                 ValueHolderFactory() {}
                 virtual ~ValueHolderFactory() {}
-                virtual ValueHolder* MakeNewHolder() const = 0;
+                virtual ValueHolder *MakeNewHolder() const = 0;
 
             private:
                 GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolderFactory);
@@ -3706,7 +3706,7 @@ namespace testing
             {
             public:
                 DefaultValueHolderFactory() {}
-                virtual ValueHolder* MakeNewHolder() const
+                virtual ValueHolder *MakeNewHolder() const
                 {
                     return new ValueHolder();
                 }
@@ -3718,8 +3718,8 @@ namespace testing
             class InstanceValueHolderFactory : public ValueHolderFactory
             {
             public:
-                explicit InstanceValueHolderFactory(const T& value) : value_(value) {}
-                virtual ValueHolder* MakeNewHolder() const
+                explicit InstanceValueHolderFactory(const T &value) : value_(value) {}
+                virtual ValueHolder *MakeNewHolder() const
                 {
                     return new ValueHolder(value_);
                 }
@@ -3768,7 +3768,7 @@ namespace testing
         class GTestMutexLock
         {
         public:
-            explicit GTestMutexLock(Mutex*) {}  // NOLINT
+            explicit GTestMutexLock(Mutex *) {} // NOLINT
         };
 
         typedef GTestMutexLock MutexLock;
@@ -3778,20 +3778,20 @@ namespace testing
         {
         public:
             ThreadLocal() : value_() {}
-            explicit ThreadLocal(const T& value) : value_(value) {}
-            T* pointer()
+            explicit ThreadLocal(const T &value) : value_(value) {}
+            T *pointer()
             {
                 return &value_;
             }
-            const T* pointer() const
+            const T *pointer() const
             {
                 return &value_;
             }
-            const T& get() const
+            const T &get() const
             {
                 return value_;
             }
-            void set(const T& value)
+            void set(const T &value)
             {
                 value_ = value;
             }
@@ -3841,7 +3841,7 @@ namespace testing
         struct is_pointer : public false_type {};
 
         template <typename T>
-        struct is_pointer<T*> : public true_type {};
+        struct is_pointer<T *> : public true_type {};
 
         template <typename Iterator>
         struct IteratorTraits {
@@ -3849,12 +3849,12 @@ namespace testing
         };
 
         template <typename T>
-        struct IteratorTraits<T*> {
+        struct IteratorTraits<T *> {
             typedef T value_type;
         };
 
         template <typename T>
-        struct IteratorTraits<const T*> {
+        struct IteratorTraits<const T *> {
             typedef T value_type;
         };
 
@@ -3947,11 +3947,11 @@ namespace testing
             {
                 return isatty(fd);
             }
-            inline int StrCaseCmp(const char* s1, const char* s2)
+            inline int StrCaseCmp(const char *s1, const char *s2)
             {
                 return stricmp(s1, s2);
             }
-            inline char* StrDup(const char* src)
+            inline char *StrDup(const char *src)
             {
                 return strdup(src);
             }
@@ -3967,37 +3967,37 @@ namespace testing
                 return _isatty(fd);
             }
 #  endif  // GTEST_OS_WINDOWS_MOBILE
-            inline int StrCaseCmp(const char* s1, const char* s2)
+            inline int StrCaseCmp(const char *s1, const char *s2)
             {
                 return _stricmp(s1, s2);
             }
-            inline char* StrDup(const char* src)
+            inline char *StrDup(const char *src)
             {
                 return _strdup(src);
             }
 # endif  // __BORLANDC__
 
 # if GTEST_OS_WINDOWS_MOBILE
-            inline int FileNo(FILE* file)
+            inline int FileNo(FILE *file)
             {
                 return reinterpret_cast<int>(_fileno(file));
             }
 // Stat(), RmDir(), and IsDir() are not needed on Windows CE at this
 // time and thus not defined there.
 # else
-            inline int FileNo(FILE* file)
+            inline int FileNo(FILE *file)
             {
                 return _fileno(file);
             }
-            inline int Stat(const char* path, StatStruct* buf)
+            inline int Stat(const char *path, StatStruct *buf)
             {
                 return _stat(path, buf);
             }
-            inline int RmDir(const char* dir)
+            inline int RmDir(const char *dir)
             {
                 return _rmdir(dir);
             }
-            inline bool IsDir(const StatStruct& st)
+            inline bool IsDir(const StatStruct &st)
             {
                 return (_S_IFDIR & st.st_mode) != 0;
             }
@@ -4007,7 +4007,7 @@ namespace testing
 
             typedef struct stat StatStruct;
 
-            inline int FileNo(FILE* file)
+            inline int FileNo(FILE *file)
             {
                 return fileno(file);
             }
@@ -4015,23 +4015,23 @@ namespace testing
             {
                 return isatty(fd);
             }
-            inline int Stat(const char* path, StatStruct* buf)
+            inline int Stat(const char *path, StatStruct *buf)
             {
                 return stat(path, buf);
             }
-            inline int StrCaseCmp(const char* s1, const char* s2)
+            inline int StrCaseCmp(const char *s1, const char *s2)
             {
                 return strcasecmp(s1, s2);
             }
-            inline char* StrDup(const char* src)
+            inline char *StrDup(const char *src)
             {
                 return strdup(src);
             }
-            inline int RmDir(const char* dir)
+            inline int RmDir(const char *dir)
             {
                 return rmdir(dir);
             }
-            inline bool IsDir(const StatStruct& st)
+            inline bool IsDir(const StatStruct &st)
             {
                 return S_ISDIR(st.st_mode);
             }
@@ -4042,7 +4042,7 @@ namespace testing
 
             GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996 /* deprecated function */)
 
-            inline const char* StrNCpy(char* dest, const char* src, size_t n)
+            inline const char *StrNCpy(char *dest, const char *src, size_t n)
             {
                 return strncpy(dest, src, n);
             }
@@ -4052,35 +4052,35 @@ namespace testing
 // defined there.
 
 #if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
-            inline int ChDir(const char* dir)
+            inline int ChDir(const char *dir)
             {
                 return chdir(dir);
             }
 #endif
-            inline FILE* FOpen(const char* path, const char* mode)
+            inline FILE *FOpen(const char *path, const char *mode)
             {
                 return fopen(path, mode);
             }
 #if !GTEST_OS_WINDOWS_MOBILE
-            inline FILE *FReopen(const char* path, const char* mode, FILE* stream)
+            inline FILE *FReopen(const char *path, const char *mode, FILE *stream)
             {
                 return freopen(path, mode, stream);
             }
-            inline FILE* FDOpen(int fd, const char* mode)
+            inline FILE *FDOpen(int fd, const char *mode)
             {
                 return fdopen(fd, mode);
             }
 #endif
-            inline int FClose(FILE* fp)
+            inline int FClose(FILE *fp)
             {
                 return fclose(fp);
             }
 #if !GTEST_OS_WINDOWS_MOBILE
-            inline int Read(int fd, void* buf, unsigned int count)
+            inline int Read(int fd, void *buf, unsigned int count)
             {
                 return static_cast<int>(read(fd, buf, count));
             }
-            inline int Write(int fd, const void* buf, unsigned int count)
+            inline int Write(int fd, const void *buf, unsigned int count)
             {
                 return static_cast<int>(write(fd, buf, count));
             }
@@ -4088,12 +4088,12 @@ namespace testing
             {
                 return close(fd);
             }
-            inline const char* StrError(int errnum)
+            inline const char *StrError(int errnum)
             {
                 return strerror(errnum);
             }
 #endif
-            inline const char* GetEnv(const char* name)
+            inline const char *GetEnv(const char *name)
             {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE | GTEST_OS_WINDOWS_RT
                 // We are on Windows CE, which has no environment variables.
@@ -4102,7 +4102,7 @@ namespace testing
 #elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
                 // Environment variables which we programmatically clear will be set to the
                 // empty string rather than unset (NULL).  Handle that case.
-                const char* const env = getenv(name);
+                const char *const env = getenv(name);
                 return (env != NULL && env[0] != '\0') ? env : NULL;
 #else
                 return getenv(name);
@@ -4256,13 +4256,13 @@ namespace testing
 // TODO(chandlerc): Find a better way to refactor flag and environment parsing
 // out of both gtest-port.cc and gtest.cc to avoid exporting this utility
 // function.
-        bool ParseInt32(const Message& src_text, const char* str, Int32* value);
+        bool ParseInt32(const Message &src_text, const char *str, Int32 *value);
 
 // Parses a bool/Int32/string from the environment variable
 // corresponding to the given Google Test flag.
-        bool BoolFromGTestEnv(const char* flag, bool default_val);
-        GTEST_API_ Int32 Int32FromGTestEnv(const char* flag, Int32 default_val);
-        std::string StringFromGTestEnv(const char* flag, const char* default_val);
+        bool BoolFromGTestEnv(const char *flag, bool default_val);
+        GTEST_API_ Int32 Int32FromGTestEnv(const char *flag, Int32 default_val);
+        std::string StringFromGTestEnv(const char *flag, const char *default_val);
 
     }  // namespace internal
 
@@ -4348,7 +4348,7 @@ namespace testing
 
 // Ensures that there is at least one operator<< in the global namespace.
 // See Message& operator<<(...) below for why.
-void operator<<(const testing::internal::Secret&, int);
+void operator<<(const testing::internal::Secret &, int);
 
 namespace testing
 {
@@ -4384,20 +4384,20 @@ namespace testing
     private:
         // The type of basic IO manipulators (endl, ends, and flush) for
         // narrow streams.
-        typedef std::ostream& (*BasicNarrowIoManip)(std::ostream&);
+        typedef std::ostream &(*BasicNarrowIoManip)(std::ostream &);
 
     public:
         // Constructs an empty Message.
         Message();
 
         // Copy constructor.
-        Message(const Message& msg) : ss_(new ::std::stringstream)    // NOLINT
+        Message(const Message &msg) : ss_(new ::std::stringstream)    // NOLINT
         {
             *ss_ << msg.GetString();
         }
 
         // Constructs a Message from a C-string.
-        explicit Message(const char* str) : ss_(new ::std::stringstream)
+        explicit Message(const char *str) : ss_(new ::std::stringstream)
         {
             *ss_ << str;
         }
@@ -4405,7 +4405,7 @@ namespace testing
 #if GTEST_OS_SYMBIAN
         // Streams a value (either a pointer or not) to this object.
         template <typename T>
-        inline Message& operator <<(const T& value)
+        inline Message &operator <<(const T &value)
         {
             StreamHelper(typename internal::is_pointer<T>::type(), value);
             return *this;
@@ -4413,7 +4413,7 @@ namespace testing
 #else
         // Streams a non-pointer value to this object.
         template <typename T>
-        inline Message& operator <<(const T& val)
+        inline Message &operator <<(const T &val)
         {
             // Some libraries overload << for STL containers.  These
             // overloads are defined in the global namespace instead of ::std.
@@ -4448,7 +4448,7 @@ namespace testing
         // ensure consistent result across compilers, we always treat NULL
         // as "(null)".
         template <typename T>
-        inline Message& operator <<(T* const& pointer)    // NOLINT
+        inline Message &operator <<(T *const &pointer)    // NOLINT
         {
             if (pointer == NULL) {
                 *ss_ << "(null)";
@@ -4465,33 +4465,33 @@ namespace testing
         // templatized version above.  Without this definition, streaming
         // endl or other basic IO manipulators to Message will confuse the
         // compiler.
-        Message& operator <<(BasicNarrowIoManip val)
+        Message &operator <<(BasicNarrowIoManip val)
         {
             *ss_ << val;
             return *this;
         }
 
         // Instead of 1/0, we want to see true/false for bool values.
-        Message& operator <<(bool b)
+        Message &operator <<(bool b)
         {
             return *this << (b ? "true" : "false");
         }
 
         // These two overloads allow streaming a wide C string to a Message
         // using the UTF-8 encoding.
-        Message& operator <<(const wchar_t* wide_c_str);
-        Message& operator <<(wchar_t* wide_c_str);
+        Message &operator <<(const wchar_t *wide_c_str);
+        Message &operator <<(wchar_t *wide_c_str);
 
 #if GTEST_HAS_STD_WSTRING
         // Converts the given wide string to a narrow string using the UTF-8
         // encoding, and streams the result to this Message object.
-        Message& operator <<(const ::std::wstring& wstr);
+        Message &operator <<(const ::std::wstring &wstr);
 #endif  // GTEST_HAS_STD_WSTRING
 
 #if GTEST_HAS_GLOBAL_WSTRING
         // Converts the given wide string to a narrow string using the UTF-8
         // encoding, and streams the result to this Message object.
-        Message& operator <<(const ::wstring& wstr);
+        Message &operator <<(const ::wstring &wstr);
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
         // Gets the text streamed to this object so far as an std::string.
@@ -4508,7 +4508,7 @@ namespace testing
         // decide between class template specializations for T and T*, so a
         // tr1::type_traits-like is_pointer works, and we can overload on that.
         template <typename T>
-        inline void StreamHelper(internal::true_type /*is_pointer*/, T* pointer)
+        inline void StreamHelper(internal::true_type /*is_pointer*/, T *pointer)
         {
             if (pointer == NULL) {
                 *ss_ << "(null)";
@@ -4518,7 +4518,7 @@ namespace testing
         }
         template <typename T>
         inline void StreamHelper(internal::false_type /*is_pointer*/,
-                                 const T& value)
+                                 const T &value)
         {
             // See the comments in Message& operator <<(const T&) above for why
             // we need this using statement.
@@ -4532,11 +4532,11 @@ namespace testing
 
         // We declare (but don't implement) this to prevent the compiler
         // from implementing the assignment operator.
-        void operator=(const Message&);
+        void operator=(const Message &);
     };
 
 // Streams a Message to an ostream.
-    inline std::ostream& operator <<(std::ostream& os, const Message& sb)
+    inline std::ostream &operator <<(std::ostream &os, const Message &sb)
     {
         return os << sb.GetString();
     }
@@ -4549,7 +4549,7 @@ namespace testing
 // ::std::string, ::wstring, or ::std::wstring object, each NUL
 // character in it is replaced with "\\0".
         template <typename T>
-        std::string StreamableToString(const T& streamable)
+        std::string StreamableToString(const T &streamable)
         {
             return (Message() << streamable).GetString();
         }
@@ -4628,7 +4628,7 @@ namespace testing
             //
             // This is different from strdup() in string.h, which allocates
             // memory using malloc().
-            static const char* CloneCString(const char* c_str);
+            static const char *CloneCString(const char *c_str);
 
 #if GTEST_OS_WINDOWS_MOBILE
             // Windows CE does not have the 'ANSI' versions of Win32 APIs. To be
@@ -4643,7 +4643,7 @@ namespace testing
             // The wide string is created using the ANSI codepage (CP_ACP) to
             // match the behaviour of the ANSI versions of Win32 calls and the
             // C runtime.
-            static LPCWSTR AnsiToUtf16(const char* c_str);
+            static LPCWSTR AnsiToUtf16(const char *c_str);
 
             // Creates an ANSI string from the given wide string, allocating
             // memory using new. The caller is responsible for deleting the return
@@ -4653,7 +4653,7 @@ namespace testing
             // The returned string is created using the ANSI codepage (CP_ACP) to
             // match the behaviour of the ANSI versions of Win32 calls and the
             // C runtime.
-            static const char* Utf16ToAnsi(LPCWSTR utf16_str);
+            static const char *Utf16ToAnsi(LPCWSTR utf16_str);
 #endif
 
             // Compares two C strings.  Returns true iff they have the same content.
@@ -4661,13 +4661,13 @@ namespace testing
             // Unlike strcmp(), this function can handle NULL argument(s).  A
             // NULL C string is considered different to any non-NULL C string,
             // including the empty string.
-            static bool CStringEquals(const char* lhs, const char* rhs);
+            static bool CStringEquals(const char *lhs, const char *rhs);
 
             // Converts a wide C string to a String using the UTF-8 encoding.
             // NULL will be converted to "(null)".  If an error occurred during
             // the conversion, "(failed to convert from wide string)" is
             // returned.
-            static std::string ShowWideCString(const wchar_t* wide_c_str);
+            static std::string ShowWideCString(const wchar_t *wide_c_str);
 
             // Compares two wide C strings.  Returns true iff they have the same
             // content.
@@ -4675,7 +4675,7 @@ namespace testing
             // Unlike wcscmp(), this function can handle NULL argument(s).  A
             // NULL C string is considered different to any non-NULL C string,
             // including the empty string.
-            static bool WideCStringEquals(const wchar_t* lhs, const wchar_t* rhs);
+            static bool WideCStringEquals(const wchar_t *lhs, const wchar_t *rhs);
 
             // Compares two C strings, ignoring case.  Returns true iff they
             // have the same content.
@@ -4683,8 +4683,8 @@ namespace testing
             // Unlike strcasecmp(), this function can handle NULL argument(s).
             // A NULL C string is considered different to any non-NULL C string,
             // including the empty string.
-            static bool CaseInsensitiveCStringEquals(const char* lhs,
-                                                     const char* rhs);
+            static bool CaseInsensitiveCStringEquals(const char *lhs,
+                                                     const char *rhs);
 
             // Compares two wide C strings, ignoring case.  Returns true iff they
             // have the same content.
@@ -4698,13 +4698,13 @@ namespace testing
             // which compares according to LC_CTYPE category of the current locale.
             // On MacOS X, it uses towlower, which also uses LC_CTYPE category of the
             // current locale.
-            static bool CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
-                                                         const wchar_t* rhs);
+            static bool CaseInsensitiveWideCStringEquals(const wchar_t *lhs,
+                                                         const wchar_t *rhs);
 
             // Returns true iff the given string ends with the given suffix, ignoring
             // case. Any string is considered to end with an empty suffix.
             static bool EndsWithCaseInsensitive(
-                const std::string& str, const std::string& suffix);
+                const std::string &str, const std::string &suffix);
 
             // Formats an int value as "%02d".
             static std::string FormatIntWidth2(int value);  // "%02d" for width == 2
@@ -4721,7 +4721,7 @@ namespace testing
 
 // Gets the content of the stringstream's buffer as an std::string.  Each '\0'
 // character in the buffer is replaced with "\\0".
-        GTEST_API_ std::string StringStreamToString(::std::stringstream* stream);
+        GTEST_API_ std::string StringStreamToString(::std::stringstream *stream);
 
     }  // namespace internal
 }  // namespace testing
@@ -4790,29 +4790,29 @@ namespace testing
         {
         public:
             FilePath() : pathname_("") { }
-            FilePath(const FilePath& rhs) : pathname_(rhs.pathname_) { }
+            FilePath(const FilePath &rhs) : pathname_(rhs.pathname_) { }
 
-            explicit FilePath(const std::string& pathname) : pathname_(pathname)
+            explicit FilePath(const std::string &pathname) : pathname_(pathname)
             {
                 Normalize();
             }
 
-            FilePath& operator=(const FilePath& rhs)
+            FilePath &operator=(const FilePath &rhs)
             {
                 Set(rhs);
                 return *this;
             }
 
-            void Set(const FilePath& rhs)
+            void Set(const FilePath &rhs)
             {
                 pathname_ = rhs.pathname_;
             }
 
-            const std::string& string() const
+            const std::string &string() const
             {
                 return pathname_;
             }
-            const char* c_str() const
+            const char *c_str() const
             {
                 return pathname_.c_str();
             }
@@ -4824,16 +4824,16 @@ namespace testing
             // extension = "xml", returns "dir/test.xml". If number is greater
             // than zero (e.g., 12), returns "dir/test_12.xml".
             // On Windows platform, uses \ as the separator rather than /.
-            static FilePath MakeFileName(const FilePath& directory,
-                                         const FilePath& base_name,
+            static FilePath MakeFileName(const FilePath &directory,
+                                         const FilePath &base_name,
                                          int number,
-                                         const char* extension);
+                                         const char *extension);
 
             // Given directory = "dir", relative_path = "test.xml",
             // returns "dir/test.xml".
             // On Windows, uses \ as the separator rather than /.
-            static FilePath ConcatPaths(const FilePath& directory,
-                                        const FilePath& relative_path);
+            static FilePath ConcatPaths(const FilePath &directory,
+                                        const FilePath &relative_path);
 
             // Returns a pathname for a file that does not currently exist. The pathname
             // will be directory/base_name.extension or
@@ -4843,9 +4843,9 @@ namespace testing
             // Examples: 'dir/foo_test.xml' or 'dir/foo_test_1.xml'.
             // There could be a race condition if two or more processes are calling this
             // function at the same time -- they could both pick the same filename.
-            static FilePath GenerateUniqueFileName(const FilePath& directory,
-                                                   const FilePath& base_name,
-                                                   const char* extension);
+            static FilePath GenerateUniqueFileName(const FilePath &directory,
+                                                   const FilePath &base_name,
+                                                   const char *extension);
 
             // Returns true iff the path is "".
             bool IsEmpty() const
@@ -4878,7 +4878,7 @@ namespace testing
             // Example: FilePath("dir/file.exe").RemoveExtension("EXE") returns
             // FilePath("dir/file"). If a case-insensitive extension is not
             // found, returns a copy of the original FilePath.
-            FilePath RemoveExtension(const char* extension) const;
+            FilePath RemoveExtension(const char *extension) const;
 
             // Creates directories so that path exists. Returns true if successful or if
             // the directories already exist; returns false if unable to create
@@ -4938,7 +4938,7 @@ namespace testing
             // Returns a pointer to the last occurence of a valid path separator in
             // the FilePath. On Windows, for example, both '/' and '\' are valid path
             // separators. Returns NULL if no path separator was found.
-            const char* FindLastPathSeparator() const;
+            const char *FindLastPathSeparator() const;
 
             std::string pathname_;
         };  // class FilePath
@@ -5015,7 +5015,7 @@ namespace testing
         {
 # if GTEST_HAS_RTTI
 
-            const char* const name = typeid(T).name();
+            const char *const name = typeid(T).name();
 #  if GTEST_HAS_CXXABI_H_ || defined(__HP_aCC)
             int status = 0;
             // gcc's implementation of typeid(T).name() mangles the type name,
@@ -5023,7 +5023,7 @@ namespace testing
 #   if GTEST_HAS_CXXABI_H_
             using abi::__cxa_demangle;
 #   endif  // GTEST_HAS_CXXABI_H_
-            char* const readable_name = __cxa_demangle(name, 0, 0, &status);
+            char *const readable_name = __cxa_demangle(name, 0, 0, &status);
             const std::string name_str(status == 0 ? readable_name : name);
             free(readable_name);
             return name_str;
@@ -8312,7 +8312,7 @@ namespace testing
     class UnitTest;                        // A collection of test cases.
 
     template <typename T>
-    ::std::string PrintToString(const T& value);
+    ::std::string PrintToString(const T &value);
 
     namespace internal
     {
@@ -8340,7 +8340,7 @@ namespace testing
 // a null pointer literal.  Therefore, we know that x is a null
 // pointer literal if and only if the first version is picked by the
 // compiler.
-        char IsNullLiteralHelper(Secret* p);
+        char IsNullLiteralHelper(Secret *p);
         char (&IsNullLiteralHelper(...))[2];  // NOLINT
 
 // A compile-time bool constant that is true if and only if x is a
@@ -8357,7 +8357,7 @@ namespace testing
 
 // Appends the user-supplied message to the Google-Test-generated message.
         GTEST_API_ std::string AppendUserMessage(
-            const std::string& gtest_msg, const Message& user_msg);
+            const std::string &gtest_msg, const Message &user_msg);
 
 #if GTEST_HAS_EXCEPTIONS
 
@@ -8370,7 +8370,7 @@ namespace testing
         class GTEST_API_ GoogleTestFailureException : public ::std::runtime_error
         {
         public:
-            explicit GoogleTestFailureException(const TestPartResult& failure);
+            explicit GoogleTestFailureException(const TestPartResult &failure);
         };
 
 #endif  // GTEST_HAS_EXCEPTIONS
@@ -8381,7 +8381,7 @@ namespace testing
         public:
             // The c'tor pushes the given source file location and message onto
             // a trace stack maintained by Google Test.
-            ScopedTrace(const char* file, int line, const Message& message);
+            ScopedTrace(const char *file, int line, const Message &message);
 
             // The d'tor pops the info pushed by the c'tor.
             //
@@ -8404,16 +8404,16 @@ namespace testing
 // See http://en.wikipedia.org/wiki/Wagner-Fischer_algorithm
             enum EditType { kMatch, kAdd, kRemove, kReplace };
             GTEST_API_ std::vector<EditType> CalculateOptimalEdits(
-                const std::vector<size_t>& left, const std::vector<size_t>& right);
+                const std::vector<size_t> &left, const std::vector<size_t> &right);
 
 // Same as above, but the input is represented as strings.
             GTEST_API_ std::vector<EditType> CalculateOptimalEdits(
-                const std::vector<std::string>& left,
-                const std::vector<std::string>& right);
+                const std::vector<std::string> &left,
+                const std::vector<std::string> &right);
 
 // Create a diff of the input strings in Unified diff format.
-            GTEST_API_ std::string CreateUnifiedDiff(const std::vector<std::string>& left,
-                                                     const std::vector<std::string>& right,
+            GTEST_API_ std::string CreateUnifiedDiff(const std::vector<std::string> &left,
+                                                     const std::vector<std::string> &right,
                                                      size_t context = 2);
 
         }  // namespace edit_distance
@@ -8422,9 +8422,9 @@ namespace testing
 // format.
 // If not null, stores in 'total_line_count' the total number of lines found
 // in left + right.
-        GTEST_API_ std::string DiffStrings(const std::string& left,
-                                           const std::string& right,
-                                           size_t* total_line_count);
+        GTEST_API_ std::string DiffStrings(const std::string &left,
+                                           const std::string &right,
+                                           size_t *total_line_count);
 
 // Constructs and returns the message for an equality assertion
 // (e.g. ASSERT_EQ, EXPECT_STREQ, etc) failure.
@@ -8441,18 +8441,18 @@ namespace testing
 // The ignoring_case parameter is true iff the assertion is a
 // *_STRCASEEQ*.  When it's true, the string " (ignoring case)" will
 // be inserted into the message.
-        GTEST_API_ AssertionResult EqFailure(const char* expected_expression,
-                                             const char* actual_expression,
-                                             const std::string& expected_value,
-                                             const std::string& actual_value,
+        GTEST_API_ AssertionResult EqFailure(const char *expected_expression,
+                                             const char *actual_expression,
+                                             const std::string &expected_value,
+                                             const std::string &actual_value,
                                              bool ignoring_case);
 
 // Constructs a failure message for Boolean assertions such as EXPECT_TRUE.
         GTEST_API_ std::string GetBoolAssertionFailureMessage(
-            const AssertionResult& assertion_result,
-            const char* expression_text,
-            const char* actual_predicate_value,
-            const char* expected_predicate_value);
+            const AssertionResult &assertion_result,
+            const char *expression_text,
+            const char *actual_predicate_value,
+            const char *expected_predicate_value);
 
 // This template class represents an IEEE floating-point number
 // (either single-precision or double-precision, depending on the
@@ -8533,7 +8533,7 @@ namespace testing
             // around may change its bits, although the new value is guaranteed
             // to be also a NAN.  Therefore, don't expect this constructor to
             // preserve the bits in x when x is a NAN.
-            explicit FloatingPoint(const RawType& x)
+            explicit FloatingPoint(const RawType &x)
             {
                 u_.value_ = x;
             }
@@ -8599,7 +8599,7 @@ namespace testing
             //   - returns false if either number is (or both are) NAN.
             //   - treats really large numbers as almost equal to infinity.
             //   - thinks +0.0 and -0.0 are 0 DLP's apart.
-            bool AlmostEquals(const FloatingPoint& rhs) const
+            bool AlmostEquals(const FloatingPoint &rhs) const
             {
                 // The IEEE standard says that any comparison operation involving
                 // a NAN must return false.
@@ -8679,7 +8679,7 @@ namespace testing
 // used to hold such IDs.  The user should treat TypeId as an opaque
 // type: the only operation allowed on TypeId values is to compare
 // them for equality using the == operator.
-        typedef const void* TypeId;
+        typedef const void *TypeId;
 
         template <typename T>
         class TypeIdHelper
@@ -8723,7 +8723,7 @@ namespace testing
 
             // Creates a test instance to run. The instance is both created and destroyed
             // within TestInfoImpl::Run()
-            virtual Test* CreateTest() = 0;
+            virtual Test *CreateTest() = 0;
 
         protected:
             TestFactoryBase() {}
@@ -8738,7 +8738,7 @@ namespace testing
         class TestFactoryImpl : public TestFactoryBase
         {
         public:
-            virtual Test* CreateTest()
+            virtual Test *CreateTest()
             {
                 return new TestClass;
             }
@@ -8750,9 +8750,9 @@ namespace testing
 // {ASSERT|EXPECT}_HRESULT_{SUCCEEDED|FAILED}
 // We pass a long instead of HRESULT to avoid causing an
 // include dependency for the HRESULT type.
-        GTEST_API_ AssertionResult IsHRESULTSuccess(const char* expr,
+        GTEST_API_ AssertionResult IsHRESULTSuccess(const char *expr,
                                                     long hr);  // NOLINT
-        GTEST_API_ AssertionResult IsHRESULTFailure(const char* expr,
+        GTEST_API_ AssertionResult IsHRESULTFailure(const char *expr,
                                                     long hr);  // NOLINT
 
 #endif  // GTEST_OS_WINDOWS
@@ -8762,7 +8762,7 @@ namespace testing
         typedef void (*TearDownTestCaseFunc)();
 
         struct CodeLocation {
-            CodeLocation(const std::string& a_file, int a_line)
+            CodeLocation(const std::string &a_file, int a_line)
                 : file(a_file), line(a_line) {}
 
             std::string file;
@@ -8787,21 +8787,21 @@ namespace testing
 //   factory:          pointer to the factory that creates a test object.
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
-        GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
-            const char* test_case_name,
-            const char* name,
-            const char* type_param,
-            const char* value_param,
+        GTEST_API_ TestInfo *MakeAndRegisterTestInfo(
+            const char *test_case_name,
+            const char *name,
+            const char *type_param,
+            const char *value_param,
             CodeLocation code_location,
             TypeId fixture_class_id,
             SetUpTestCaseFunc set_up_tc,
             TearDownTestCaseFunc tear_down_tc,
-            TestFactoryBase* factory);
+            TestFactoryBase *factory);
 
 // If *pstr starts with the given prefix, modifies *pstr to be right
 // past the prefix and returns true; otherwise leaves *pstr unchanged
 // and returns false.  None of pstr, *pstr, and prefix can be NULL.
-        GTEST_API_ bool SkipPrefix(const char* prefix, const char** pstr);
+        GTEST_API_ bool SkipPrefix(const char *prefix, const char **pstr);
 
 #if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
 
@@ -8814,8 +8814,8 @@ namespace testing
             // Adds the given test name to defined_test_names_ and return true
             // if the test case hasn't been registered; otherwise aborts the
             // program.
-            bool AddTestName(const char* file, int line, const char* case_name,
-                             const char* test_name)
+            bool AddTestName(const char *file, int line, const char *case_name,
+                             const char *test_name)
             {
                 if (registered_) {
                     fprintf(stderr, "%s Test %s must be defined before "
@@ -8829,12 +8829,12 @@ namespace testing
                 return true;
             }
 
-            bool TestExists(const std::string& test_name) const
+            bool TestExists(const std::string &test_name) const
             {
                 return registered_tests_.count(test_name) > 0;
             }
 
-            const CodeLocation& GetCodeLocation(const std::string& test_name) const
+            const CodeLocation &GetCodeLocation(const std::string &test_name) const
             {
                 RegisteredTestsMap::const_iterator it = registered_tests_.find(test_name);
                 GTEST_CHECK_(it != registered_tests_.end());
@@ -8844,8 +8844,8 @@ namespace testing
             // Verifies that registered_tests match the test names in
             // defined_test_names_; returns registered_tests if successful, or
             // aborts the program otherwise.
-            const char* VerifyRegisteredTestNames(
-                const char* file, int line, const char* registered_tests);
+            const char *VerifyRegisteredTestNames(
+                const char *file, int line, const char *registered_tests);
 
         private:
             typedef ::std::map<std::string, CodeLocation> RegisteredTestsMap;
@@ -8856,9 +8856,9 @@ namespace testing
 
 // Skips to the first non-space char after the first comma in 'str';
 // returns NULL if no comma is found in 'str'.
-        inline const char* SkipComma(const char* str)
+        inline const char *SkipComma(const char *str)
         {
-            const char* comma = strchr(str, ',');
+            const char *comma = strchr(str, ',');
             if (comma == NULL) {
                 return NULL;
             }
@@ -8868,16 +8868,16 @@ namespace testing
 
 // Returns the prefix of 'str' before the first comma in it; returns
 // the entire string if it contains no comma.
-        inline std::string GetPrefixUntilComma(const char* str)
+        inline std::string GetPrefixUntilComma(const char *str)
         {
-            const char* comma = strchr(str, ',');
+            const char *comma = strchr(str, ',');
             return comma == NULL ? str : std::string(str, comma);
         }
 
 // Splits a given string on a given delimiter, populating a given
 // vector with the fields.
-        void SplitString(const ::std::string& str, char delimiter,
-                         ::std::vector< ::std::string>* dest);
+        void SplitString(const ::std::string &str, char delimiter,
+                         ::std::vector< ::std::string> *dest);
 
 // TypeParameterizedTest<Fixture, TestSel, Types>::Register()
 // registers a list of type-parameterized tests with Google Test.  The
@@ -8894,9 +8894,9 @@ namespace testing
             // specified in INSTANTIATE_TYPED_TEST_CASE_P(Prefix, TestCase,
             // Types).  Valid values for 'index' are [0, N - 1] where N is the
             // length of Types.
-            static bool Register(const char* prefix,
+            static bool Register(const char *prefix,
                                  CodeLocation code_location,
-                                 const char* case_name, const char* test_names,
+                                 const char *case_name, const char *test_names,
                                  int index)
             {
                 typedef typename Types::Head Type;
@@ -8928,8 +8928,8 @@ namespace testing
         class TypeParameterizedTest<Fixture, TestSel, Types0>
         {
         public:
-            static bool Register(const char* /*prefix*/, CodeLocation,
-                                 const char* /*case_name*/, const char* /*test_names*/,
+            static bool Register(const char * /*prefix*/, CodeLocation,
+                                 const char * /*case_name*/, const char * /*test_names*/,
                                  int /*index*/)
             {
                 return true;
@@ -8944,9 +8944,9 @@ namespace testing
         class TypeParameterizedTestCase
         {
         public:
-            static bool Register(const char* prefix, CodeLocation code_location,
-                                 const TypedTestCasePState* state,
-                                 const char* case_name, const char* test_names)
+            static bool Register(const char *prefix, CodeLocation code_location,
+                                 const TypedTestCasePState *state,
+                                 const char *case_name, const char *test_names)
             {
                 std::string test_name = StripTrailingSpaces(
                                             GetPrefixUntilComma(test_names));
@@ -8958,7 +8958,7 @@ namespace testing
                     fflush(stderr);
                     posix::Abort();
                 }
-                const CodeLocation& test_location = state->GetCodeLocation(test_name);
+                const CodeLocation &test_location = state->GetCodeLocation(test_name);
 
                 typedef typename Tests::Head Head;
 
@@ -8978,9 +8978,9 @@ namespace testing
         class TypeParameterizedTestCase<Fixture, Templates0, Types>
         {
         public:
-            static bool Register(const char* /*prefix*/, CodeLocation,
-                                 const TypedTestCasePState* /*state*/,
-                                 const char* /*case_name*/, const char* /*test_names*/)
+            static bool Register(const char * /*prefix*/, CodeLocation,
+                                 const TypedTestCasePState * /*state*/,
+                                 const char * /*case_name*/, const char * /*test_names*/)
             {
                 return true;
             }
@@ -8999,7 +8999,7 @@ namespace testing
 // GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
 // the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
         GTEST_API_ std::string GetCurrentOsStackTraceExceptTop(
-            UnitTest* unit_test, int skip_count);
+            UnitTest *unit_test, int skip_count);
 
 // Helpers for suppressing warnings on unreachable code or constant
 // condition.
@@ -9017,12 +9017,12 @@ namespace testing
 // variable declared in a conditional expression always being NULL in
 // the else branch.
         struct GTEST_API_ ConstCharPtr {
-            ConstCharPtr(const char* str) : value(str) {}
+            ConstCharPtr(const char *str) : value(str) {}
             operator bool() const
             {
                 return true;
             }
-            const char* value;
+            const char *value;
         };
 
 // A simple Linear Congruential Generator for generating random
@@ -9068,7 +9068,7 @@ namespace testing
             typedef T type;
         };  // NOLINT
         template <typename T>
-        struct RemoveReference<T&> {
+        struct RemoveReference<T &> {
             typedef T type;
         };  // NOLINT
 
@@ -9121,11 +9121,11 @@ namespace testing
 // tr1::add_reference, which is not widely available yet.
         template <typename T>
         struct AddReference {
-            typedef T& type;
+            typedef T &type;
         };  // NOLINT
         template <typename T>
-        struct AddReference<T&> {
-            typedef T& type;
+        struct AddReference<T &> {
+            typedef T &type;
         };  // NOLINT
 
 // A handy wrapper around AddReference that works when the argument T
@@ -9200,8 +9200,8 @@ namespace testing
         template <typename T>
         struct IsAProtocolMessage
             : public bool_constant<
-              ImplicitlyConvertible<const T*, const ::ProtocolMessage*>::value ||
-              ImplicitlyConvertible<const T*, const ::proto2::Message*>::value> {
+              ImplicitlyConvertible<const T *, const ::ProtocolMessage *>::value ||
+              ImplicitlyConvertible<const T *, const ::proto2::Message *>::value> {
         };
 
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
@@ -9228,8 +9228,8 @@ namespace testing
         typedef int IsContainer;
         template <class C>
         IsContainer IsContainerTest(int /* dummy */,
-                                    typename C::iterator* /* it */ = NULL,
-                                    typename C::const_iterator* /* const_it */ = NULL)
+                                    typename C::iterator * /* it */ = NULL,
+                                    typename C::const_iterator * /* const_it */ = NULL)
         {
             return 0;
         }
@@ -9257,11 +9257,11 @@ namespace testing
 // 0, ArrayEq() degenerates into comparing a single pair of values.
 
         template <typename T, typename U>
-        bool ArrayEq(const T* lhs, size_t size, const U* rhs);
+        bool ArrayEq(const T *lhs, size_t size, const U *rhs);
 
 // This generic version is used when k is 0.
         template <typename T, typename U>
-        inline bool ArrayEq(const T& lhs, const U& rhs)
+        inline bool ArrayEq(const T &lhs, const U &rhs)
         {
             return lhs == rhs;
         }
@@ -9277,7 +9277,7 @@ namespace testing
 // the previous ArrayEq() function, arrays with different sizes would
 // lead to different copies of the template code.
         template <typename T, typename U>
-        bool ArrayEq(const T* lhs, size_t size, const U* rhs)
+        bool ArrayEq(const T *lhs, size_t size, const U *rhs)
         {
             for (size_t i = 0; i != size; i++) {
                 if (!internal::ArrayEq(lhs[i], rhs[i]))
@@ -9289,7 +9289,7 @@ namespace testing
 // Finds the first element in the iterator range [begin, end) that
 // equals elem.  Element may be a native array type itself.
         template <typename Iter, typename Element>
-        Iter ArrayAwareFind(Iter begin, Iter end, const Element& elem)
+        Iter ArrayAwareFind(Iter begin, Iter end, const Element &elem)
         {
             for (Iter it = begin; it != end; ++it) {
                 if (internal::ArrayEq(*it, elem))
@@ -9303,11 +9303,11 @@ namespace testing
 // CopyArray() degenerates into copying a single value.
 
         template <typename T, typename U>
-        void CopyArray(const T* from, size_t size, U* to);
+        void CopyArray(const T *from, size_t size, U *to);
 
 // This generic version is used when k is 0.
         template <typename T, typename U>
-        inline void CopyArray(const T& from, U* to)
+        inline void CopyArray(const T &from, U *to)
         {
             *to = from;
         }
@@ -9323,7 +9323,7 @@ namespace testing
 // the previous CopyArray() function, arrays with different sizes
 // would lead to different copies of the template code.
         template <typename T, typename U>
-        void CopyArray(const T* from, size_t size, U* to)
+        void CopyArray(const T *from, size_t size, U *to)
         {
             for (size_t i = 0; i != size; i++) {
                 internal::CopyArray(from[i], to + i);
@@ -9351,23 +9351,23 @@ namespace testing
         public:
             // STL-style container typedefs.
             typedef Element value_type;
-            typedef Element* iterator;
-            typedef const Element* const_iterator;
+            typedef Element *iterator;
+            typedef const Element *const_iterator;
 
             // Constructs from a native array. References the source.
-            NativeArray(const Element* array, size_t count, RelationToSourceReference)
+            NativeArray(const Element *array, size_t count, RelationToSourceReference)
             {
                 InitRef(array, count);
             }
 
             // Constructs from a native array. Copies the source.
-            NativeArray(const Element* array, size_t count, RelationToSourceCopy)
+            NativeArray(const Element *array, size_t count, RelationToSourceCopy)
             {
                 InitCopy(array, count);
             }
 
             // Copy constructor.
-            NativeArray(const NativeArray& rhs)
+            NativeArray(const NativeArray &rhs)
             {
                 (this->*rhs.clone_)(rhs.array_, rhs.size_);
             }
@@ -9391,7 +9391,7 @@ namespace testing
             {
                 return array_ + size_;
             }
-            bool operator==(const NativeArray& rhs) const
+            bool operator==(const NativeArray &rhs) const
             {
                 return size() == rhs.size() &&
                        ArrayEq(begin(), size(), rhs.begin());
@@ -9404,9 +9404,9 @@ namespace testing
             };
 
             // Initializes this object with a copy of the input.
-            void InitCopy(const Element* array, size_t a_size)
+            void InitCopy(const Element *array, size_t a_size)
             {
-                Element* const copy = new Element[a_size];
+                Element *const copy = new Element[a_size];
                 CopyArray(array, a_size, copy);
                 array_ = copy;
                 size_ = a_size;
@@ -9414,16 +9414,16 @@ namespace testing
             }
 
             // Initializes this object with a reference of the input.
-            void InitRef(const Element* array, size_t a_size)
+            void InitRef(const Element *array, size_t a_size)
             {
                 array_ = array;
                 size_ = a_size;
                 clone_ = &NativeArray::InitRef;
             }
 
-            const Element* array_;
+            const Element *array_;
             size_t size_;
-            void (NativeArray::*clone_)(const Element*, size_t);
+            void (NativeArray::*clone_)(const Element *, size_t);
 
             GTEST_DISALLOW_ASSIGN_(NativeArray);
         };
@@ -9688,8 +9688,8 @@ namespace testing
             // argument is set.  If the death test should be skipped, the pointer
             // is set to NULL; otherwise, it is set to the address of a new concrete
             // DeathTest object that controls the execution of the current test.
-            static bool Create(const char* statement, const RE* regex,
-                               const char* file, int line, DeathTest** test);
+            static bool Create(const char *statement, const RE *regex,
+                               const char *file, int line, DeathTest **test);
             DeathTest();
             virtual ~DeathTest() { }
 
@@ -9697,13 +9697,13 @@ namespace testing
             class ReturnSentinel
             {
             public:
-                explicit ReturnSentinel(DeathTest* test) : test_(test) { }
+                explicit ReturnSentinel(DeathTest *test) : test_(test) { }
                 ~ReturnSentinel()
                 {
                     test_->Abort(TEST_ENCOUNTERED_RETURN_STATEMENT);
                 }
             private:
-                DeathTest* const test_;
+                DeathTest *const test_;
                 GTEST_DISALLOW_COPY_AND_ASSIGN_(ReturnSentinel);
             } GTEST_ATTRIBUTE_UNUSED_;
 
@@ -9741,9 +9741,9 @@ namespace testing
 
             // Returns a human-readable outcome message regarding the outcome of
             // the last death test.
-            static const char* LastMessage();
+            static const char *LastMessage();
 
-            static void set_last_death_test_message(const std::string& message);
+            static void set_last_death_test_message(const std::string &message);
 
         private:
             // A string containing a description of the outcome of the last death test.
@@ -9757,16 +9757,16 @@ namespace testing
         {
         public:
             virtual ~DeathTestFactory() { }
-            virtual bool Create(const char* statement, const RE* regex,
-                                const char* file, int line, DeathTest** test) = 0;
+            virtual bool Create(const char *statement, const RE *regex,
+                                const char *file, int line, DeathTest **test) = 0;
         };
 
 // A concrete DeathTestFactory implementation for normal use.
         class DefaultDeathTestFactory : public DeathTestFactory
         {
         public:
-            virtual bool Create(const char* statement, const RE* regex,
-                                const char* file, int line, DeathTest** test);
+            virtual bool Create(const char *statement, const RE *regex,
+                                const char *file, int line, DeathTest **test);
         };
 
 // Returns true if exit_status describes a process that was terminated
@@ -9852,7 +9852,7 @@ namespace testing
         class InternalRunDeathTestFlag
         {
         public:
-            InternalRunDeathTestFlag(const std::string& a_file,
+            InternalRunDeathTestFlag(const std::string &a_file,
                                      int a_line,
                                      int an_index,
                                      int a_write_fd)
@@ -9865,7 +9865,7 @@ namespace testing
                     posix::Close(write_fd_);
             }
 
-            const std::string& file() const
+            const std::string &file() const
             {
                 return file_;
             }
@@ -9894,7 +9894,7 @@ namespace testing
 // Returns a newly created InternalRunDeathTestFlag object with fields
 // initialized from the GTEST_FLAG(internal_run_death_test) flag if
 // the flag is specified; otherwise returns NULL.
-        InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag();
+        InternalRunDeathTestFlag *ParseInternalRunDeathTestFlag();
 
 #else  // GTEST_HAS_DEATH_TEST
 
@@ -10106,7 +10106,7 @@ namespace testing
         bool operator()(int exit_status) const;
     private:
         // No implementation - assignment is unsupported.
-        void operator=(const ExitedWithCode& other);
+        void operator=(const ExitedWithCode &other);
 
         const int exit_code_;
     };
@@ -10265,7 +10265,7 @@ namespace testing
 // copyable type. If it's a raw pointer, you are responsible for managing the
 // lifespan of the pointed values.
 
-class FooTest : public ::testing::TestWithParam<const char*>
+class FooTest : public ::testing::TestWithParam<const char *>
 {
     // You can implement all the usual class fixture members here.
 };
@@ -10334,7 +10334,7 @@ INSTANTIATE_TEST_CASE_P(InstantiationName,
 // This statement will instantiate all tests from FooTest again, each
 // with parameter values "cat" and "dog":
 
-const char* pets[] = {"cat", "dog"};
+const char *pets[] = {"cat", "dog"};
 INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
 
 // The tests from the instantiation above will have these names:
@@ -10558,12 +10558,12 @@ namespace testing
             // framework.
 
             // Join an existing circle.
-            void join(linked_ptr_internal const* ptr)
+            void join(linked_ptr_internal const *ptr)
             GTEST_LOCK_EXCLUDED_(g_linked_ptr_mutex)
             {
                 MutexLock lock(&g_linked_ptr_mutex);
 
-                linked_ptr_internal const* p = ptr;
+                linked_ptr_internal const *p = ptr;
                 while (p->next_ != ptr) {
                     assert(p->next_ != this &&
                            "Trying to join() a linked ring we are already in. "
@@ -10582,7 +10582,7 @@ namespace testing
                 MutexLock lock(&g_linked_ptr_mutex);
 
                 if (next_ == this) return true;
-                linked_ptr_internal const* p = next_;
+                linked_ptr_internal const *p = next_;
                 while (p->next_ != this) {
                     assert(p->next_ != next_ &&
                            "Trying to depart() a linked ring we are not in. "
@@ -10594,7 +10594,7 @@ namespace testing
             }
 
         private:
-            mutable linked_ptr_internal const* next_;
+            mutable linked_ptr_internal const *next_;
         };
 
         template <typename T>
@@ -10605,7 +10605,7 @@ namespace testing
 
             // Take over ownership of a raw pointer.  This should happen as soon as
             // possible after the object is created.
-            explicit linked_ptr(T* ptr = NULL)
+            explicit linked_ptr(T *ptr = NULL)
             {
                 capture(ptr);
             }
@@ -10615,25 +10615,25 @@ namespace testing
             }
 
             // Copy an existing linked_ptr<>, adding ourselves to the list of references.
-            template <typename U> linked_ptr(linked_ptr<U> const& ptr)
+            template <typename U> linked_ptr(linked_ptr<U> const &ptr)
             {
                 copy(&ptr);
             }
-            linked_ptr(linked_ptr const& ptr)    // NOLINT
+            linked_ptr(linked_ptr const &ptr)    // NOLINT
             {
                 assert(&ptr != this);
                 copy(&ptr);
             }
 
             // Assignment releases the old value and acquires the new.
-            template <typename U> linked_ptr& operator=(linked_ptr<U> const& ptr)
+            template <typename U> linked_ptr &operator=(linked_ptr<U> const &ptr)
             {
                 depart();
                 copy(&ptr);
                 return *this;
             }
 
-            linked_ptr& operator=(linked_ptr const& ptr)
+            linked_ptr &operator=(linked_ptr const &ptr)
             {
                 if (&ptr != this) {
                     depart();
@@ -10643,39 +10643,39 @@ namespace testing
             }
 
             // Smart pointer members.
-            void reset(T* ptr = NULL)
+            void reset(T *ptr = NULL)
             {
                 depart();
                 capture(ptr);
             }
-            T* get() const
+            T *get() const
             {
                 return value_;
             }
-            T* operator->() const
+            T *operator->() const
             {
                 return value_;
             }
-            T& operator*() const
+            T &operator*() const
             {
                 return *value_;
             }
 
-            bool operator==(T* p) const
+            bool operator==(T *p) const
             {
                 return value_ == p;
             }
-            bool operator!=(T* p) const
+            bool operator!=(T *p) const
             {
                 return value_ != p;
             }
             template <typename U>
-            bool operator==(linked_ptr<U> const& ptr) const
+            bool operator==(linked_ptr<U> const &ptr) const
             {
                 return value_ == ptr.get();
             }
             template <typename U>
-            bool operator!=(linked_ptr<U> const& ptr) const
+            bool operator!=(linked_ptr<U> const &ptr) const
             {
                 return value_ != ptr.get();
             }
@@ -10684,7 +10684,7 @@ namespace testing
             template <typename U>
             friend class linked_ptr;
 
-            T* value_;
+            T *value_;
             linked_ptr_internal link_;
 
             void depart()
@@ -10692,13 +10692,13 @@ namespace testing
                 if (link_.depart()) delete value_;
             }
 
-            void capture(T* ptr)
+            void capture(T *ptr)
             {
                 value_ = ptr;
                 link_.join_new();
             }
 
-            template <typename U> void copy(linked_ptr<U> const* ptr)
+            template <typename U> void copy(linked_ptr<U> const *ptr)
             {
                 value_ = ptr->get();
                 if (value_)
@@ -10709,13 +10709,13 @@ namespace testing
         };
 
         template<typename T> inline
-        bool operator==(T* ptr, const linked_ptr<T>& x)
+        bool operator==(T *ptr, const linked_ptr<T> &x)
         {
             return ptr == x.get();
         }
 
         template<typename T> inline
-        bool operator!=(T* ptr, const linked_ptr<T>& x)
+        bool operator!=(T *ptr, const linked_ptr<T> &x)
         {
             return ptr != x.get();
         }
@@ -10724,7 +10724,7 @@ namespace testing
 // Doing e.g. make_linked_ptr(new FooBarBaz<type>(arg)) is a shorter notation
 // for linked_ptr<FooBarBaz<type> >(new FooBarBaz<type>(arg))
         template <typename T>
-        linked_ptr<T> make_linked_ptr(T* ptr)
+        linked_ptr<T> make_linked_ptr(T *ptr)
         {
             return linked_ptr<T>(ptr);
         }
@@ -10850,9 +10850,9 @@ namespace testing
 
 // Prints the given number of bytes in the given object to the given
 // ostream.
-        GTEST_API_ void PrintBytesInObjectTo(const unsigned char* obj_bytes,
+        GTEST_API_ void PrintBytesInObjectTo(const unsigned char *obj_bytes,
                                              size_t count,
-                                             ::std::ostream* os);
+                                             ::std::ostream *os);
 
 // For selecting which printer to use when a given type has neither <<
 // nor PrintTo().
@@ -10872,9 +10872,9 @@ namespace testing
         {
         public:
             // This default version is called when kTypeKind is kOtherType.
-            static void PrintValue(const T& value, ::std::ostream* os)
+            static void PrintValue(const T &value, ::std::ostream *os)
             {
-                PrintBytesInObjectTo(reinterpret_cast<const unsigned char*>(&value),
+                PrintBytesInObjectTo(reinterpret_cast<const unsigned char *>(&value),
                                      sizeof(value), os);
             }
         };
@@ -10888,7 +10888,7 @@ namespace testing
         class TypeWithoutFormatter<T, kProtobuf>
         {
         public:
-            static void PrintValue(const T& value, ::std::ostream* os)
+            static void PrintValue(const T &value, ::std::ostream *os)
             {
                 std::string pretty_str = value.ShortDebugString();
                 if (pretty_str.length() > kProtobufOneLinerMaxLength) {
@@ -10909,7 +10909,7 @@ namespace testing
             // case printing it as an integer is the desired behavior.  In case
             // T is not an enum, printing it as an integer is the best we can do
             // given that it has no user-defined printer.
-            static void PrintValue(const T& value, ::std::ostream* os)
+            static void PrintValue(const T &value, ::std::ostream *os)
             {
                 const internal::BiggestInt kBigInt = value;
                 *os << kBigInt;
@@ -10941,12 +10941,12 @@ namespace testing
 // operator<<(std::basic_stream<Char, CharTraits>, const Foo&) is more
 // specific.
         template <typename Char, typename CharTraits, typename T>
-        ::std::basic_ostream<Char, CharTraits>& operator<<(
-            ::std::basic_ostream<Char, CharTraits>& os, const T& x)
+        ::std::basic_ostream<Char, CharTraits> &operator<<(
+            ::std::basic_ostream<Char, CharTraits> &os, const T &x)
         {
             TypeWithoutFormatter<T,
                                  (internal::IsAProtocolMessage<T>::value ? kProtobuf :
-                                  internal::ImplicitlyConvertible<const T&, internal::BiggestInt>::value ?
+                                  internal::ImplicitlyConvertible<const T &, internal::BiggestInt>::value ?
                                   kConvertibleToInteger : kOtherType)>::PrintValue(x, &os);
             return os;
         }
@@ -10962,7 +10962,7 @@ namespace testing_internal
 // Used to print a value that is not an STL-style container when the
 // user doesn't define PrintTo() for it.
     template <typename T>
-    void DefaultPrintNonContainerTo(const T& value, ::std::ostream* os)
+    void DefaultPrintNonContainerTo(const T &value, ::std::ostream *os)
     {
         // With the following statement, during unqualified name lookup,
         // testing::internal2::operator<< appears as if it was declared in
@@ -11019,7 +11019,7 @@ namespace testing
         class FormatForComparison
         {
         public:
-            static ::std::string Format(const ToPrint& value)
+            static ::std::string Format(const ToPrint &value)
             {
                 return ::testing::PrintToString(value);
             }
@@ -11030,9 +11030,9 @@ namespace testing
         class FormatForComparison<ToPrint[N], OtherOperand>
         {
         public:
-            static ::std::string Format(const ToPrint* value)
+            static ::std::string Format(const ToPrint *value)
             {
-                return FormatForComparison<const ToPrint*, OtherOperand>::Format(value);
+                return FormatForComparison<const ToPrint *, OtherOperand>::Format(value);
             }
         };
 
@@ -11097,7 +11097,7 @@ namespace testing
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
         template <typename T1, typename T2>
         std::string FormatForComparisonFailureMessage(
-            const T1& value, const T2& /* other_operand */)
+            const T1 &value, const T2 & /* other_operand */)
         {
             return FormatForComparison<T1, T2>::Format(value);
         }
@@ -11113,7 +11113,7 @@ namespace testing
         class UniversalPrinter;
 
         template <typename T>
-        void UniversalPrint(const T& value, ::std::ostream* os);
+        void UniversalPrint(const T &value, ::std::ostream *os);
 
         enum DefaultPrinterType {
             kPrintContainer,
@@ -11127,7 +11127,7 @@ namespace testing
 // a PrintTo() for it.
         template <typename C>
         void DefaultPrintTo(WrapPrinterType<kPrintContainer> /* dummy */,
-                            const C& container, ::std::ostream* os)
+                            const C &container, ::std::ostream *os)
         {
             const size_t kMaxCount = 32;  // The maximum number of elements to print.
             *os << '{';
@@ -11161,7 +11161,7 @@ namespace testing
 // bytes.)
         template <typename T>
         void DefaultPrintTo(WrapPrinterType<kPrintPointer> /* dummy */,
-                            T* p, ::std::ostream* os)
+                            T *p, ::std::ostream *os)
         {
             if (p == NULL) {
                 *os << "NULL";
@@ -11174,7 +11174,7 @@ namespace testing
         }
         template <typename T>
         void DefaultPrintTo(WrapPrinterType<kPrintFunctionPointer> /* dummy */,
-                            T* p, ::std::ostream* os)
+                            T *p, ::std::ostream *os)
         {
             if (p == NULL) {
                 *os << "NULL";
@@ -11185,7 +11185,7 @@ namespace testing
                 // even using reinterpret_cast, as earlier versions of gcc
                 // (e.g. 3.4.5) cannot compile the cast when p is a function
                 // pointer.  Casting to UInt64 first solves the problem.
-                *os << reinterpret_cast<const void*>(
+                *os << reinterpret_cast<const void *>(
                         reinterpret_cast<internal::UInt64>(p));
             }
         }
@@ -11194,7 +11194,7 @@ namespace testing
 // doesn't define PrintTo() for it.
         template <typename T>
         void DefaultPrintTo(WrapPrinterType<kPrintOther> /* dummy */,
-                            const T& value, ::std::ostream* os)
+                            const T &value, ::std::ostream *os)
         {
             ::testing_internal::DefaultPrintNonContainerTo(value, os);
         }
@@ -11211,7 +11211,7 @@ namespace testing
 // or there is already a << operator but it doesn't do what the user
 // wants).
         template <typename T>
-        void PrintTo(const T& value, ::std::ostream* os)
+        void PrintTo(const T &value, ::std::ostream *os)
         {
             // DefaultPrintTo() is overloaded.  The type of its first argument
             // determines which version will be picked.
@@ -11239,7 +11239,7 @@ namespace testing
 #if GTEST_LANG_CXX11
                 : std::is_function<typename std::remove_pointer<T>::type>::value
 #else
-                : !internal::ImplicitlyConvertible<T, const void*>::value
+                : !internal::ImplicitlyConvertible<T, const void *>::value
 #endif
                 ? kPrintFunctionPointer
                 : kPrintPointer>(),
@@ -11251,9 +11251,9 @@ namespace testing
 // types, strings, plain arrays, and pointers).
 
 // Overloads for various char types.
-        GTEST_API_ void PrintTo(unsigned char c, ::std::ostream* os);
-        GTEST_API_ void PrintTo(signed char c, ::std::ostream* os);
-        inline void PrintTo(char c, ::std::ostream* os)
+        GTEST_API_ void PrintTo(unsigned char c, ::std::ostream *os);
+        GTEST_API_ void PrintTo(signed char c, ::std::ostream *os);
+        inline void PrintTo(char c, ::std::ostream *os)
         {
             // When printing a plain char, we always treat it as unsigned.  This
             // way, the output won't be affected by whether the compiler thinks
@@ -11262,7 +11262,7 @@ namespace testing
         }
 
 // Overloads for other simple built-in types.
-        inline void PrintTo(bool x, ::std::ostream* os)
+        inline void PrintTo(bool x, ::std::ostream *os)
         {
             *os << (x ? "true" : "false");
         }
@@ -11274,32 +11274,32 @@ namespace testing
 // as signed integer when wchar_t is implemented by the compiler
 // as a signed type and is printed as an unsigned integer when wchar_t
 // is implemented as an unsigned type.
-        GTEST_API_ void PrintTo(wchar_t wc, ::std::ostream* os);
+        GTEST_API_ void PrintTo(wchar_t wc, ::std::ostream *os);
 
 // Overloads for C strings.
-        GTEST_API_ void PrintTo(const char* s, ::std::ostream* os);
-        inline void PrintTo(char* s, ::std::ostream* os)
+        GTEST_API_ void PrintTo(const char *s, ::std::ostream *os);
+        inline void PrintTo(char *s, ::std::ostream *os)
         {
-            PrintTo(ImplicitCast_<const char*>(s), os);
+            PrintTo(ImplicitCast_<const char *>(s), os);
         }
 
 // signed/unsigned char is often used for representing binary data, so
 // we print pointers to it as void* to be safe.
-        inline void PrintTo(const signed char* s, ::std::ostream* os)
+        inline void PrintTo(const signed char *s, ::std::ostream *os)
         {
-            PrintTo(ImplicitCast_<const void*>(s), os);
+            PrintTo(ImplicitCast_<const void *>(s), os);
         }
-        inline void PrintTo(signed char* s, ::std::ostream* os)
+        inline void PrintTo(signed char *s, ::std::ostream *os)
         {
-            PrintTo(ImplicitCast_<const void*>(s), os);
+            PrintTo(ImplicitCast_<const void *>(s), os);
         }
-        inline void PrintTo(const unsigned char* s, ::std::ostream* os)
+        inline void PrintTo(const unsigned char *s, ::std::ostream *os)
         {
-            PrintTo(ImplicitCast_<const void*>(s), os);
+            PrintTo(ImplicitCast_<const void *>(s), os);
         }
-        inline void PrintTo(unsigned char* s, ::std::ostream* os)
+        inline void PrintTo(unsigned char *s, ::std::ostream *os)
         {
-            PrintTo(ImplicitCast_<const void*>(s), os);
+            PrintTo(ImplicitCast_<const void *>(s), os);
         }
 
 // MSVC can be configured to define wchar_t as a typedef of unsigned
@@ -11309,10 +11309,10 @@ namespace testing
 // possibly causing invalid memory accesses.
 #if !defined(_MSC_VER) || defined(_NATIVE_WCHAR_T_DEFINED)
 // Overloads for wide C strings
-        GTEST_API_ void PrintTo(const wchar_t* s, ::std::ostream* os);
-        inline void PrintTo(wchar_t* s, ::std::ostream* os)
+        GTEST_API_ void PrintTo(const wchar_t *s, ::std::ostream *os);
+        inline void PrintTo(wchar_t *s, ::std::ostream *os)
         {
-            PrintTo(ImplicitCast_<const wchar_t*>(s), os);
+            PrintTo(ImplicitCast_<const wchar_t *>(s), os);
         }
 #endif
 
@@ -11322,7 +11322,7 @@ namespace testing
 // Prints the given number of elements in an array, without printing
 // the curly braces.
         template <typename T>
-        void PrintRawArrayTo(const T a[], size_t count, ::std::ostream* os)
+        void PrintRawArrayTo(const T a[], size_t count, ::std::ostream *os)
         {
             UniversalPrint(a[0], os);
             for (size_t i = 1; i != count; i++) {
@@ -11333,31 +11333,31 @@ namespace testing
 
 // Overloads for ::string and ::std::string.
 #if GTEST_HAS_GLOBAL_STRING
-        GTEST_API_ void PrintStringTo(const ::string&s, ::std::ostream* os);
-        inline void PrintTo(const ::string& s, ::std::ostream* os)
+        GTEST_API_ void PrintStringTo(const ::string &s, ::std::ostream *os);
+        inline void PrintTo(const ::string &s, ::std::ostream *os)
         {
             PrintStringTo(s, os);
         }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-        GTEST_API_ void PrintStringTo(const ::std::string&s, ::std::ostream* os);
-        inline void PrintTo(const ::std::string& s, ::std::ostream* os)
+        GTEST_API_ void PrintStringTo(const ::std::string &s, ::std::ostream *os);
+        inline void PrintTo(const ::std::string &s, ::std::ostream *os)
         {
             PrintStringTo(s, os);
         }
 
 // Overloads for ::wstring and ::std::wstring.
 #if GTEST_HAS_GLOBAL_WSTRING
-        GTEST_API_ void PrintWideStringTo(const ::wstring&s, ::std::ostream* os);
-        inline void PrintTo(const ::wstring& s, ::std::ostream* os)
+        GTEST_API_ void PrintWideStringTo(const ::wstring &s, ::std::ostream *os);
+        inline void PrintTo(const ::wstring &s, ::std::ostream *os)
         {
             PrintWideStringTo(s, os);
         }
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
 #if GTEST_HAS_STD_WSTRING
-        GTEST_API_ void PrintWideStringTo(const ::std::wstring&s, ::std::ostream* os);
-        inline void PrintTo(const ::std::wstring& s, ::std::ostream* os)
+        GTEST_API_ void PrintWideStringTo(const ::std::wstring &s, ::std::ostream *os);
+        inline void PrintTo(const ::std::wstring &s, ::std::ostream *os)
         {
             PrintWideStringTo(s, os);
         }
@@ -11367,7 +11367,7 @@ namespace testing
 // Helper function for printing a tuple.  T must be instantiated with
 // a tuple type.
         template <typename T>
-        void PrintTupleTo(const T& t, ::std::ostream* os);
+        void PrintTupleTo(const T &t, ::std::ostream *os);
 #endif  // GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
 
 #if GTEST_HAS_TR1_TUPLE
@@ -11379,70 +11379,70 @@ namespace testing
 // regardless of whether tr1::tuple is implemented using the
 // non-standard variadic template feature or not.
 
-        inline void PrintTo(const ::std::tr1::tuple<>& t, ::std::ostream* os)
+        inline void PrintTo(const ::std::tr1::tuple<> &t, ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
 
         template <typename T1>
-        void PrintTo(const ::std::tr1::tuple<T1>& t, ::std::ostream* os)
+        void PrintTo(const ::std::tr1::tuple<T1> &t, ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
 
         template <typename T1, typename T2>
-        void PrintTo(const ::std::tr1::tuple<T1, T2>& t, ::std::ostream* os)
+        void PrintTo(const ::std::tr1::tuple<T1, T2> &t, ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
 
         template <typename T1, typename T2, typename T3>
-        void PrintTo(const ::std::tr1::tuple<T1, T2, T3>& t, ::std::ostream* os)
+        void PrintTo(const ::std::tr1::tuple<T1, T2, T3> &t, ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
 
         template <typename T1, typename T2, typename T3, typename T4>
-        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4>& t, ::std::ostream* os)
+        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4> &t, ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
 
         template <typename T1, typename T2, typename T3, typename T4, typename T5>
-        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5>& t,
-                     ::std::ostream* os)
+        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5> &t,
+                     ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
 
         template <typename T1, typename T2, typename T3, typename T4, typename T5,
                   typename T6>
-        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6>& t,
-                     ::std::ostream* os)
+        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6> &t,
+                     ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
 
         template <typename T1, typename T2, typename T3, typename T4, typename T5,
                   typename T6, typename T7>
-        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7>& t,
-                     ::std::ostream* os)
+        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7> &t,
+                     ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
 
         template <typename T1, typename T2, typename T3, typename T4, typename T5,
                   typename T6, typename T7, typename T8>
-        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7, T8>& t,
-                     ::std::ostream* os)
+        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7, T8> &t,
+                     ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
 
         template <typename T1, typename T2, typename T3, typename T4, typename T5,
                   typename T6, typename T7, typename T8, typename T9>
-        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>& t,
-                     ::std::ostream* os)
+        void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9> &t,
+                     ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
@@ -11450,8 +11450,8 @@ namespace testing
         template <typename T1, typename T2, typename T3, typename T4, typename T5,
                   typename T6, typename T7, typename T8, typename T9, typename T10>
         void PrintTo(
-            const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>& t,
-            ::std::ostream* os)
+            const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> &t,
+            ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
@@ -11459,7 +11459,7 @@ namespace testing
 
 #if GTEST_HAS_STD_TUPLE_
         template <typename... Types>
-        void PrintTo(const ::std::tuple<Types...>& t, ::std::ostream* os)
+        void PrintTo(const ::std::tuple<Types...> &t, ::std::ostream *os)
         {
             PrintTupleTo(t, os);
         }
@@ -11467,7 +11467,7 @@ namespace testing
 
 // Overload for std::pair.
         template <typename T1, typename T2>
-        void PrintTo(const ::std::pair<T1, T2>& value, ::std::ostream* os)
+        void PrintTo(const ::std::pair<T1, T2> &value, ::std::ostream *os)
         {
             *os << '(';
             // We cannot use UniversalPrint(value.first, os) here, as T1 may be
@@ -11491,7 +11491,7 @@ namespace testing
             // Note: we deliberately don't call this PrintTo(), as that name
             // conflicts with ::testing::internal::PrintTo in the body of the
             // function.
-            static void Print(const T& value, ::std::ostream* os)
+            static void Print(const T &value, ::std::ostream *os)
             {
                 // By default, ::testing::internal::PrintTo() is used for printing
                 // the value.
@@ -11510,7 +11510,7 @@ namespace testing
 // UniversalPrintArray(begin, len, os) prints an array of 'len'
 // elements, starting at address 'begin'.
         template <typename T>
-        void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os)
+        void UniversalPrintArray(const T *begin, size_t len, ::std::ostream *os)
         {
             if (len == 0) {
                 *os << "{}";
@@ -11534,11 +11534,11 @@ namespace testing
         }
 // This overload prints a (const) char array compactly.
         GTEST_API_ void UniversalPrintArray(
-            const char* begin, size_t len, ::std::ostream* os);
+            const char *begin, size_t len, ::std::ostream *os);
 
 // This overload prints a (const) wchar_t array compactly.
         GTEST_API_ void UniversalPrintArray(
-            const wchar_t* begin, size_t len, ::std::ostream* os);
+            const wchar_t *begin, size_t len, ::std::ostream *os);
 
 // Implements printing an array type T[N].
         template <typename T, size_t N>
@@ -11547,7 +11547,7 @@ namespace testing
         public:
             // Prints the given array, omitting some elements when there are too
             // many.
-            static void Print(const T (&a)[N], ::std::ostream* os)
+            static void Print(const T (&a)[N], ::std::ostream *os)
             {
                 UniversalPrintArray(a, N, os);
             }
@@ -11555,18 +11555,18 @@ namespace testing
 
 // Implements printing a reference type T&.
         template <typename T>
-        class UniversalPrinter<T&>
+        class UniversalPrinter<T &>
         {
         public:
             // MSVC warns about adding const to a function type, so we want to
             // disable the warning.
             GTEST_DISABLE_MSC_WARNINGS_PUSH_(4180)
 
-            static void Print(const T& value, ::std::ostream* os)
+            static void Print(const T &value, ::std::ostream *os)
             {
                 // Prints the address of the value.  We use reinterpret_cast here
                 // as static_cast doesn't compile when T is a function type.
-                *os << "@" << reinterpret_cast<const void*>(&value) << " ";
+                *os << "@" << reinterpret_cast<const void *>(&value) << " ";
 
                 // Then prints the value itself.
                 UniversalPrint(value, os);
@@ -11583,16 +11583,16 @@ namespace testing
         class UniversalTersePrinter
         {
         public:
-            static void Print(const T& value, ::std::ostream* os)
+            static void Print(const T &value, ::std::ostream *os)
             {
                 UniversalPrint(value, os);
             }
         };
         template <typename T>
-        class UniversalTersePrinter<T&>
+        class UniversalTersePrinter<T &>
         {
         public:
-            static void Print(const T& value, ::std::ostream* os)
+            static void Print(const T &value, ::std::ostream *os)
             {
                 UniversalPrint(value, os);
             }
@@ -11601,16 +11601,16 @@ namespace testing
         class UniversalTersePrinter<T[N]>
         {
         public:
-            static void Print(const T (&value)[N], ::std::ostream* os)
+            static void Print(const T (&value)[N], ::std::ostream *os)
             {
                 UniversalPrinter<T[N]>::Print(value, os);
             }
         };
         template <>
-        class UniversalTersePrinter<const char*>
+        class UniversalTersePrinter<const char *>
         {
         public:
-            static void Print(const char* str, ::std::ostream* os)
+            static void Print(const char *str, ::std::ostream *os)
             {
                 if (str == NULL) {
                     *os << "NULL";
@@ -11620,21 +11620,21 @@ namespace testing
             }
         };
         template <>
-        class UniversalTersePrinter<char*>
+        class UniversalTersePrinter<char *>
         {
         public:
-            static void Print(char* str, ::std::ostream* os)
+            static void Print(char *str, ::std::ostream *os)
             {
-                UniversalTersePrinter<const char*>::Print(str, os);
+                UniversalTersePrinter<const char *>::Print(str, os);
             }
         };
 
 #if GTEST_HAS_STD_WSTRING
         template <>
-        class UniversalTersePrinter<const wchar_t*>
+        class UniversalTersePrinter<const wchar_t *>
         {
         public:
-            static void Print(const wchar_t* str, ::std::ostream* os)
+            static void Print(const wchar_t *str, ::std::ostream *os)
             {
                 if (str == NULL) {
                     *os << "NULL";
@@ -11646,17 +11646,17 @@ namespace testing
 #endif
 
         template <>
-        class UniversalTersePrinter<wchar_t*>
+        class UniversalTersePrinter<wchar_t *>
         {
         public:
-            static void Print(wchar_t* str, ::std::ostream* os)
+            static void Print(wchar_t *str, ::std::ostream *os)
             {
-                UniversalTersePrinter<const wchar_t*>::Print(str, os);
+                UniversalTersePrinter<const wchar_t *>::Print(str, os);
             }
         };
 
         template <typename T>
-        void UniversalTersePrint(const T& value, ::std::ostream* os)
+        void UniversalTersePrint(const T &value, ::std::ostream *os)
         {
             UniversalTersePrinter<T>::Print(value, os);
         }
@@ -11666,7 +11666,7 @@ namespace testing
 // (const) char pointer, this prints both the pointer and the
 // NUL-terminated string.
         template <typename T>
-        void UniversalPrint(const T& value, ::std::ostream* os)
+        void UniversalPrint(const T &value, ::std::ostream *os)
         {
             // A workarond for the bug in VC++ 7.1 that prevents us from instantiating
             // UniversalPrinter with T directly.
@@ -11698,7 +11698,7 @@ namespace testing
             template <size_t I>
             static typename AddReference<
             const typename ::std::tr1::tuple_element<I, Tuple>::type>::type get(
-                const Tuple& tuple)
+                const Tuple &tuple)
             {
                 return ::std::tr1::get<I>(tuple);
             }
@@ -11717,8 +11717,8 @@ namespace testing
             struct tuple_element : ::std::tuple_element<I, Tuple> {};
 
             template <size_t I>
-            static const typename ::std::tuple_element<I, Tuple>::type& get(
-                const Tuple& tuple)
+            static const typename ::std::tuple_element<I, Tuple>::type &get(
+                const Tuple &tuple)
             {
                 return ::std::get<I>(tuple);
             }
@@ -11740,7 +11740,7 @@ namespace testing
         struct TuplePrefixPrinter {
             // Prints the first N fields of a tuple.
             template <typename Tuple>
-            static void PrintPrefixTo(const Tuple& t, ::std::ostream* os)
+            static void PrintPrefixTo(const Tuple &t, ::std::ostream *os)
             {
                 TuplePrefixPrinter<N - 1>::PrintPrefixTo(t, os);
                 GTEST_INTENTIONAL_CONST_COND_PUSH_()
@@ -11756,7 +11756,7 @@ namespace testing
             // Tersely prints the first N fields of a tuple to a string vector,
             // one element for each field.
             template <typename Tuple>
-            static void TersePrintPrefixToStrings(const Tuple& t, Strings* strings)
+            static void TersePrintPrefixToStrings(const Tuple &t, Strings *strings)
             {
                 TuplePrefixPrinter<N - 1>::TersePrintPrefixToStrings(t, strings);
                 ::std::stringstream ss;
@@ -11769,16 +11769,16 @@ namespace testing
         template <>
         struct TuplePrefixPrinter<0> {
             template <typename Tuple>
-            static void PrintPrefixTo(const Tuple&, ::std::ostream*) {}
+            static void PrintPrefixTo(const Tuple &, ::std::ostream *) {}
 
             template <typename Tuple>
-            static void TersePrintPrefixToStrings(const Tuple&, Strings*) {}
+            static void TersePrintPrefixToStrings(const Tuple &, Strings *) {}
         };
 
 // Helper function for printing a tuple.
 // Tuple must be either std::tr1::tuple or std::tuple type.
         template <typename Tuple>
-        void PrintTupleTo(const Tuple& t, ::std::ostream* os)
+        void PrintTupleTo(const Tuple &t, ::std::ostream *os)
         {
             *os << "(";
             TuplePrefixPrinter<TuplePolicy<Tuple>::tuple_size>::PrintPrefixTo(t, os);
@@ -11789,7 +11789,7 @@ namespace testing
 // element for each field.  See the comment before
 // UniversalTersePrint() for how we define "tersely".
         template <typename Tuple>
-        Strings UniversalTersePrintTupleFieldsToStrings(const Tuple& value)
+        Strings UniversalTersePrintTupleFieldsToStrings(const Tuple &value)
         {
             Strings result;
             TuplePrefixPrinter<TuplePolicy<Tuple>::tuple_size>::
@@ -11801,7 +11801,7 @@ namespace testing
     }  // namespace internal
 
     template <typename T>
-    ::std::string PrintToString(const T& value)
+    ::std::string PrintToString(const T &value)
     {
         ::std::stringstream ss;
         internal::UniversalTersePrinter<T>::Print(value, &ss);
@@ -11867,7 +11867,7 @@ namespace testing
 // Consists of the parameter value and the integer parameter index.
     template <class ParamType>
     struct TestParamInfo {
-        TestParamInfo(const ParamType& a_param, size_t an_index) :
+        TestParamInfo(const ParamType &a_param, size_t an_index) :
             param(a_param),
             index(an_index) {}
         ParamType param;
@@ -11878,7 +11878,7 @@ namespace testing
 // testing::PrintToString.
     struct PrintToStringParamName {
         template <class ParamType>
-        std::string operator()(const TestParamInfo<ParamType>& info) const
+        std::string operator()(const TestParamInfo<ParamType> &info) const
         {
             return PrintToString(info.param);
         }
@@ -11893,7 +11893,7 @@ namespace testing
 // fixture class for the same test case. This may happen when
 // TEST_P macro is used to define two tests with the same name
 // but in different namespaces.
-        GTEST_API_ void ReportInvalidTestCaseType(const char* test_case_name,
+        GTEST_API_ void ReportInvalidTestCaseType(const char *test_case_name,
                                                   CodeLocation code_location);
 
         template <typename> class ParamGeneratorInterface;
@@ -11909,7 +11909,7 @@ namespace testing
             // A pointer to the base generator instance.
             // Used only for the purposes of iterator comparison
             // to make sure that two iterators belong to the same generator.
-            virtual const ParamGeneratorInterface<T>* BaseGenerator() const = 0;
+            virtual const ParamGeneratorInterface<T> *BaseGenerator() const = 0;
             // Advances iterator to point to the next element
             // provided by the generator. The caller is responsible
             // for not calling Advance() on an iterator equal to
@@ -11917,16 +11917,16 @@ namespace testing
             virtual void Advance() = 0;
             // Clones the iterator object. Used for implementing copy semantics
             // of ParamIterator<T>.
-            virtual ParamIteratorInterface* Clone() const = 0;
+            virtual ParamIteratorInterface *Clone() const = 0;
             // Dereferences the current iterator and provides (read-only) access
             // to the pointed value. It is the caller's responsibility not to call
             // Current() on an iterator equal to BaseGenerator()->End().
             // Used for implementing ParamGenerator<T>::operator*().
-            virtual const T* Current() const = 0;
+            virtual const T *Current() const = 0;
             // Determines whether the given iterator and other point to the same
             // element in the sequence generated by the generator.
             // Used for implementing ParamGenerator<T>::operator==().
-            virtual bool Equals(const ParamIteratorInterface& other) const = 0;
+            virtual bool Equals(const ParamIteratorInterface &other) const = 0;
         };
 
 // Class iterating over elements provided by an implementation of
@@ -11937,28 +11937,28 @@ namespace testing
         {
         public:
             typedef T value_type;
-            typedef const T& reference;
+            typedef const T &reference;
             typedef ptrdiff_t difference_type;
 
             // ParamIterator assumes ownership of the impl_ pointer.
-            ParamIterator(const ParamIterator& other) : impl_(other.impl_->Clone()) {}
-            ParamIterator& operator=(const ParamIterator& other)
+            ParamIterator(const ParamIterator &other) : impl_(other.impl_->Clone()) {}
+            ParamIterator &operator=(const ParamIterator &other)
             {
                 if (this != &other)
                     impl_.reset(other.impl_->Clone());
                 return *this;
             }
 
-            const T& operator*() const
+            const T &operator*() const
             {
                 return *impl_->Current();
             }
-            const T* operator->() const
+            const T *operator->() const
             {
                 return impl_->Current();
             }
             // Prefix version of operator++.
-            ParamIterator& operator++()
+            ParamIterator &operator++()
             {
                 impl_->Advance();
                 return *this;
@@ -11966,22 +11966,22 @@ namespace testing
             // Postfix version of operator++.
             ParamIterator operator++(int /*unused*/)
             {
-                ParamIteratorInterface<T>* clone = impl_->Clone();
+                ParamIteratorInterface<T> *clone = impl_->Clone();
                 impl_->Advance();
                 return ParamIterator(clone);
             }
-            bool operator==(const ParamIterator& other) const
+            bool operator==(const ParamIterator &other) const
             {
                 return impl_.get() == other.impl_.get() || impl_->Equals(*other.impl_);
             }
-            bool operator!=(const ParamIterator& other) const
+            bool operator!=(const ParamIterator &other) const
             {
                 return !(*this == other);
             }
 
         private:
             friend class ParamGenerator<T>;
-            explicit ParamIterator(ParamIteratorInterface<T>* impl) : impl_(impl) {}
+            explicit ParamIterator(ParamIteratorInterface<T> *impl) : impl_(impl) {}
             scoped_ptr<ParamIteratorInterface<T> > impl_;
         };
 
@@ -11996,8 +11996,8 @@ namespace testing
             virtual ~ParamGeneratorInterface() {}
 
             // Generator interface definition
-            virtual ParamIteratorInterface<T>* Begin() const = 0;
-            virtual ParamIteratorInterface<T>* End() const = 0;
+            virtual ParamIteratorInterface<T> *Begin() const = 0;
+            virtual ParamIteratorInterface<T> *End() const = 0;
         };
 
 // Wraps ParamGeneratorInterface<T> and provides general generator syntax
@@ -12011,10 +12011,10 @@ namespace testing
         public:
             typedef ParamIterator<T> iterator;
 
-            explicit ParamGenerator(ParamGeneratorInterface<T>* impl) : impl_(impl) {}
-            ParamGenerator(const ParamGenerator& other) : impl_(other.impl_) {}
+            explicit ParamGenerator(ParamGeneratorInterface<T> *impl) : impl_(impl) {}
+            ParamGenerator(const ParamGenerator &other) : impl_(other.impl_) {}
 
-            ParamGenerator& operator=(const ParamGenerator& other)
+            ParamGenerator &operator=(const ParamGenerator &other)
             {
                 impl_ = other.impl_;
                 return *this;
@@ -12046,11 +12046,11 @@ namespace testing
                   step_(step), end_index_(CalculateEndIndex(begin, end, step)) {}
             virtual ~RangeGenerator() {}
 
-            virtual ParamIteratorInterface<T>* Begin() const
+            virtual ParamIteratorInterface<T> *Begin() const
             {
                 return new Iterator(this, begin_, 0, step_);
             }
-            virtual ParamIteratorInterface<T>* End() const
+            virtual ParamIteratorInterface<T> *End() const
             {
                 return new Iterator(this, end_, end_index_, step_);
             }
@@ -12059,12 +12059,12 @@ namespace testing
             class Iterator : public ParamIteratorInterface<T>
             {
             public:
-                Iterator(const ParamGeneratorInterface<T>* base, T value, int index,
+                Iterator(const ParamGeneratorInterface<T> *base, T value, int index,
                          IncrementT step)
                     : base_(base), value_(value), index_(index), step_(step) {}
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<T>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<T> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -12073,15 +12073,15 @@ namespace testing
                     value_ = static_cast<T>(value_ + step_);
                     index_++;
                 }
-                virtual ParamIteratorInterface<T>* Clone() const
+                virtual ParamIteratorInterface<T> *Clone() const
                 {
                     return new Iterator(*this);
                 }
-                virtual const T* Current() const
+                virtual const T *Current() const
                 {
                     return &value_;
                 }
-                virtual bool Equals(const ParamIteratorInterface<T>& other) const
+                virtual bool Equals(const ParamIteratorInterface<T> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
@@ -12094,23 +12094,23 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                     : ParamIteratorInterface<T>(),
                       base_(other.base_), value_(other.value_), index_(other.index_),
                       step_(other.step_) {}
 
                 // No implementation - assignment is unsupported.
-                void operator=(const Iterator& other);
+                void operator=(const Iterator &other);
 
-                const ParamGeneratorInterface<T>* const base_;
+                const ParamGeneratorInterface<T> *const base_;
                 T value_;
                 int index_;
                 const IncrementT step_;
             };  // class RangeGenerator::Iterator
 
-            static int CalculateEndIndex(const T& begin,
-                                         const T& end,
-                                         const IncrementT& step)
+            static int CalculateEndIndex(const T &begin,
+                                         const T &end,
+                                         const IncrementT &step)
             {
                 int end_index = 0;
                 for (T i = begin; i < end; i = static_cast<T>(i + step))
@@ -12119,7 +12119,7 @@ namespace testing
             }
 
             // No implementation - assignment is unsupported.
-            void operator=(const RangeGenerator& other);
+            void operator=(const RangeGenerator &other);
 
             const T begin_;
             const T end_;
@@ -12143,11 +12143,11 @@ namespace testing
                 : container_(begin, end) {}
             virtual ~ValuesInIteratorRangeGenerator() {}
 
-            virtual ParamIteratorInterface<T>* Begin() const
+            virtual ParamIteratorInterface<T> *Begin() const
             {
                 return new Iterator(this, container_.begin());
             }
-            virtual ParamIteratorInterface<T>* End() const
+            virtual ParamIteratorInterface<T> *End() const
             {
                 return new Iterator(this, container_.end());
             }
@@ -12158,12 +12158,12 @@ namespace testing
             class Iterator : public ParamIteratorInterface<T>
             {
             public:
-                Iterator(const ParamGeneratorInterface<T>* base,
+                Iterator(const ParamGeneratorInterface<T> *base,
                          typename ContainerType::const_iterator iterator)
                     : base_(base), iterator_(iterator) {}
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<T>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<T> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -12172,7 +12172,7 @@ namespace testing
                     ++iterator_;
                     value_.reset();
                 }
-                virtual ParamIteratorInterface<T>* Clone() const
+                virtual ParamIteratorInterface<T> *Clone() const
                 {
                     return new Iterator(*this);
                 }
@@ -12183,13 +12183,13 @@ namespace testing
                 // can advance iterator_ beyond the end of the range, and we cannot
                 // detect that fact. The client code, on the other hand, is
                 // responsible for not calling Current() on an out-of-range iterator.
-                virtual const T* Current() const
+                virtual const T *Current() const
                 {
                     if (value_.get() == NULL)
                         value_.reset(new T(*iterator_));
                     return value_.get();
                 }
-                virtual bool Equals(const ParamIteratorInterface<T>& other) const
+                virtual bool Equals(const ParamIteratorInterface<T> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
@@ -12201,14 +12201,14 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                 // The explicit constructor call suppresses a false warning
                 // emitted by gcc when supplied with the -Wextra option.
                     : ParamIteratorInterface<T>(),
                       base_(other.base_),
                       iterator_(other.iterator_) {}
 
-                const ParamGeneratorInterface<T>* const base_;
+                const ParamGeneratorInterface<T> *const base_;
                 typename ContainerType::const_iterator iterator_;
                 // A cached value of *iterator_. We keep it here to allow access by
                 // pointer in the wrapping iterator's operator->().
@@ -12219,7 +12219,7 @@ namespace testing
             };  // class ValuesInIteratorRangeGenerator::Iterator
 
             // No implementation - assignment is unsupported.
-            void operator=(const ValuesInIteratorRangeGenerator& other);
+            void operator=(const ValuesInIteratorRangeGenerator &other);
 
             const ContainerType container_;
         };  // class ValuesInIteratorRangeGenerator
@@ -12229,7 +12229,7 @@ namespace testing
 // Default parameterized test name generator, returns a string containing the
 // integer test parameter index.
         template <class ParamType>
-        std::string DefaultParamName(const TestParamInfo<ParamType>& info)
+        std::string DefaultParamName(const TestParamInfo<ParamType> &info)
         {
             Message name_stream;
             name_stream << info.index;
@@ -12249,7 +12249,7 @@ namespace testing
 
         template <class ParamType>
         struct ParamNameGenFunc {
-            typedef std::string Type(const TestParamInfo<ParamType>&);
+            typedef std::string Type(const TestParamInfo<ParamType> &);
         };
 
         template <class ParamType>
@@ -12269,7 +12269,7 @@ namespace testing
             typedef typename TestClass::ParamType ParamType;
             explicit ParameterizedTestFactory(ParamType parameter) :
                 parameter_(parameter) {}
-            virtual Test* CreateTest()
+            virtual Test *CreateTest()
             {
                 TestClass::SetParam(&parameter_);
                 return new TestClass();
@@ -12291,7 +12291,7 @@ namespace testing
         public:
             virtual ~TestMetaFactoryBase() {}
 
-            virtual TestFactoryBase* CreateTestFactory(ParamType parameter) = 0;
+            virtual TestFactoryBase *CreateTestFactory(ParamType parameter) = 0;
         };
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
@@ -12311,7 +12311,7 @@ namespace testing
 
             TestMetaFactory() {}
 
-            virtual TestFactoryBase* CreateTestFactory(ParamType parameter)
+            virtual TestFactoryBase *CreateTestFactory(ParamType parameter)
             {
                 return new ParameterizedTestFactory<TestCase>(parameter);
             }
@@ -12336,7 +12336,7 @@ namespace testing
             virtual ~ParameterizedTestCaseInfoBase() {}
 
             // Base part of test case name for display purposes.
-            virtual const std::string& GetTestCaseName() const = 0;
+            virtual const std::string &GetTestCaseName() const = 0;
             // Test case id to verify identity.
             virtual TypeId GetTestCaseTypeId() const = 0;
             // UnitTest class invokes this method to register tests in this
@@ -12372,11 +12372,11 @@ namespace testing
             typedef typename ParamNameGenFunc<ParamType>::Type ParamNameGeneratorFunc;
 
             explicit ParameterizedTestCaseInfo(
-                const char* name, CodeLocation code_location)
+                const char *name, CodeLocation code_location)
                 : test_case_name_(name), code_location_(code_location) {}
 
             // Test case base name for display purposes.
-            virtual const std::string& GetTestCaseName() const
+            virtual const std::string &GetTestCaseName() const
             {
                 return test_case_name_;
             }
@@ -12391,9 +12391,9 @@ namespace testing
             // prefix). test_base_name is the name of an individual test without
             // parameter index. For the test SequenceA/FooTest.DoBar/1 FooTest is
             // test case base name and DoBar is test base name.
-            void AddTestPattern(const char* test_case_name,
-                                const char* test_base_name,
-                                TestMetaFactoryBase<ParamType>* meta_factory)
+            void AddTestPattern(const char *test_case_name,
+                                const char *test_base_name,
+                                TestMetaFactoryBase<ParamType> *meta_factory)
             {
                 tests_.push_back(linked_ptr<TestInfo>(new TestInfo(test_case_name,
                                                                    test_base_name,
@@ -12401,10 +12401,10 @@ namespace testing
             }
             // INSTANTIATE_TEST_CASE_P macro uses AddGenerator() to record information
             // about a generator.
-            int AddTestCaseInstantiation(const std::string& instantiation_name,
-                                         GeneratorCreationFunc* func,
-                                         ParamNameGeneratorFunc* name_func,
-                                         const char* file, int line)
+            int AddTestCaseInstantiation(const std::string &instantiation_name,
+                                         GeneratorCreationFunc *func,
+                                         ParamNameGeneratorFunc *name_func,
+                                         const char *file, int line)
             {
                 instantiations_.push_back(
                     InstantiationInfo(instantiation_name, func, name_func, file, line));
@@ -12423,10 +12423,10 @@ namespace testing
                     for (typename InstantiationContainer::iterator gen_it =
                              instantiations_.begin(); gen_it != instantiations_.end();
                          ++gen_it) {
-                        const std::string& instantiation_name = gen_it->name;
+                        const std::string &instantiation_name = gen_it->name;
                         ParamGenerator<ParamType> generator((*gen_it->generator)());
-                        ParamNameGeneratorFunc* name_func = gen_it->name_func;
-                        const char* file = gen_it->file;
+                        ParamNameGeneratorFunc *name_func = gen_it->name_func;
+                        const char *file = gen_it->file;
                         int line = gen_it->line;
 
                         std::string test_case_name;
@@ -12475,9 +12475,9 @@ namespace testing
             // LocalTestInfo structure keeps information about a single test registered
             // with TEST_P macro.
             struct TestInfo {
-                TestInfo(const char* a_test_case_base_name,
-                         const char* a_test_base_name,
-                         TestMetaFactoryBase<ParamType>* a_test_meta_factory) :
+                TestInfo(const char *a_test_case_base_name,
+                         const char *a_test_base_name,
+                         TestMetaFactoryBase<ParamType> *a_test_meta_factory) :
                     test_case_base_name(a_test_case_base_name),
                     test_base_name(a_test_base_name),
                     test_meta_factory(a_test_meta_factory) {}
@@ -12492,9 +12492,9 @@ namespace testing
             //     Name generator function, Source file, Source line>
             struct InstantiationInfo {
                 InstantiationInfo(const std::string &name_in,
-                                  GeneratorCreationFunc* generator_in,
-                                  ParamNameGeneratorFunc* name_func_in,
-                                  const char* file_in,
+                                  GeneratorCreationFunc *generator_in,
+                                  ParamNameGeneratorFunc *name_func_in,
+                                  const char *file_in,
                                   int line_in)
                     : name(name_in),
                       generator(generator_in),
@@ -12503,14 +12503,14 @@ namespace testing
                       line(line_in) {}
 
                 std::string name;
-                GeneratorCreationFunc* generator;
-                ParamNameGeneratorFunc* name_func;
-                const char* file;
+                GeneratorCreationFunc *generator;
+                ParamNameGeneratorFunc *name_func;
+                const char *file;
                 int line;
             };
             typedef ::std::vector<InstantiationInfo> InstantiationContainer;
 
-            static bool IsValidParamName(const std::string& name)
+            static bool IsValidParamName(const std::string &name)
             {
                 // Check for empty string
                 if (name.empty())
@@ -12554,11 +12554,11 @@ namespace testing
             // Looks up or creates and returns a structure containing information about
             // tests and instantiations of a particular test case.
             template <class TestCase>
-            ParameterizedTestCaseInfo<TestCase>* GetTestCasePatternHolder(
-                const char* test_case_name,
+            ParameterizedTestCaseInfo<TestCase> *GetTestCasePatternHolder(
+                const char *test_case_name,
                 CodeLocation code_location)
             {
-                ParameterizedTestCaseInfo<TestCase>* typed_test_info = NULL;
+                ParameterizedTestCaseInfo<TestCase> *typed_test_info = NULL;
                 for (TestCaseInfoContainer::iterator it = test_case_infos_.begin();
                      it != test_case_infos_.end(); ++it) {
                     if ((*it)->GetTestCaseName() == test_case_name) {
@@ -12594,7 +12594,7 @@ namespace testing
             }
 
         private:
-            typedef ::std::vector<ParameterizedTestCaseInfoBase*> TestCaseInfoContainer;
+            typedef ::std::vector<ParameterizedTestCaseInfoBase *> TestCaseInfoContainer;
 
             TestCaseInfoContainer test_case_infos_;
 
@@ -12676,7 +12676,7 @@ namespace testing
 
     template <class Container>
     internal::ParamGenerator<typename Container::value_type> ValuesIn(
-        const Container& container);
+        const Container &container);
 
     namespace internal
     {
@@ -12697,7 +12697,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray1& other);
+            void operator=(const ValueArray1 &other);
 
             const T1 v1_;
         };
@@ -12717,7 +12717,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray2& other);
+            void operator=(const ValueArray2 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -12740,7 +12740,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray3& other);
+            void operator=(const ValueArray3 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -12765,7 +12765,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray4& other);
+            void operator=(const ValueArray4 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -12791,7 +12791,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray5& other);
+            void operator=(const ValueArray5 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -12820,7 +12820,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray6& other);
+            void operator=(const ValueArray6 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -12850,7 +12850,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray7& other);
+            void operator=(const ValueArray7 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -12882,7 +12882,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray8& other);
+            void operator=(const ValueArray8 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -12916,7 +12916,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray9& other);
+            void operator=(const ValueArray9 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -12951,7 +12951,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray10& other);
+            void operator=(const ValueArray10 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -12988,7 +12988,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray11& other);
+            void operator=(const ValueArray11 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13027,7 +13027,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray12& other);
+            void operator=(const ValueArray12 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13068,7 +13068,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray13& other);
+            void operator=(const ValueArray13 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13110,7 +13110,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray14& other);
+            void operator=(const ValueArray14 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13154,7 +13154,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray15& other);
+            void operator=(const ValueArray15 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13201,7 +13201,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray16& other);
+            void operator=(const ValueArray16 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13249,7 +13249,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray17& other);
+            void operator=(const ValueArray17 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13299,7 +13299,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray18& other);
+            void operator=(const ValueArray18 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13350,7 +13350,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray19& other);
+            void operator=(const ValueArray19 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13403,7 +13403,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray20& other);
+            void operator=(const ValueArray20 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13459,7 +13459,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray21& other);
+            void operator=(const ValueArray21 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13516,7 +13516,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray22& other);
+            void operator=(const ValueArray22 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13575,7 +13575,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray23& other);
+            void operator=(const ValueArray23 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13636,7 +13636,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray24& other);
+            void operator=(const ValueArray24 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13698,7 +13698,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray25& other);
+            void operator=(const ValueArray25 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13762,7 +13762,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray26& other);
+            void operator=(const ValueArray26 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13829,7 +13829,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray27& other);
+            void operator=(const ValueArray27 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13897,7 +13897,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray28& other);
+            void operator=(const ValueArray28 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -13966,7 +13966,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray29& other);
+            void operator=(const ValueArray29 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14038,7 +14038,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray30& other);
+            void operator=(const ValueArray30 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14112,7 +14112,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray31& other);
+            void operator=(const ValueArray31 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14187,7 +14187,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray32& other);
+            void operator=(const ValueArray32 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14265,7 +14265,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray33& other);
+            void operator=(const ValueArray33 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14344,7 +14344,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray34& other);
+            void operator=(const ValueArray34 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14424,7 +14424,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray35& other);
+            void operator=(const ValueArray35 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14507,7 +14507,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray36& other);
+            void operator=(const ValueArray36 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14592,7 +14592,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray37& other);
+            void operator=(const ValueArray37 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14678,7 +14678,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray38& other);
+            void operator=(const ValueArray38 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14766,7 +14766,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray39& other);
+            void operator=(const ValueArray39 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14856,7 +14856,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray40& other);
+            void operator=(const ValueArray40 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -14948,7 +14948,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray41& other);
+            void operator=(const ValueArray41 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -15042,7 +15042,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray42& other);
+            void operator=(const ValueArray42 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -15137,7 +15137,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray43& other);
+            void operator=(const ValueArray43 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -15234,7 +15234,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray44& other);
+            void operator=(const ValueArray44 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -15333,7 +15333,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray45& other);
+            void operator=(const ValueArray45 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -15434,7 +15434,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray46& other);
+            void operator=(const ValueArray46 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -15537,7 +15537,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray47& other);
+            void operator=(const ValueArray47 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -15642,7 +15642,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray48& other);
+            void operator=(const ValueArray48 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -15748,7 +15748,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray49& other);
+            void operator=(const ValueArray49 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -15855,7 +15855,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const ValueArray50& other);
+            void operator=(const ValueArray50 &other);
 
             const T1 v1_;
             const T2 v2_;
@@ -15922,16 +15922,16 @@ namespace testing
         public:
             typedef ::testing::tuple<T1, T2> ParamType;
 
-            CartesianProductGenerator2(const ParamGenerator<T1>& g1,
-                                       const ParamGenerator<T2>& g2)
+            CartesianProductGenerator2(const ParamGenerator<T1> &g1,
+                                       const ParamGenerator<T2> &g2)
                 : g1_(g1), g2_(g2) {}
             virtual ~CartesianProductGenerator2() {}
 
-            virtual ParamIteratorInterface<ParamType>* Begin() const
+            virtual ParamIteratorInterface<ParamType> *Begin() const
             {
                 return new Iterator(this, g1_, g1_.begin(), g2_, g2_.begin());
             }
-            virtual ParamIteratorInterface<ParamType>* End() const
+            virtual ParamIteratorInterface<ParamType> *End() const
             {
                 return new Iterator(this, g1_, g1_.end(), g2_, g2_.end());
             }
@@ -15940,11 +15940,11 @@ namespace testing
             class Iterator : public ParamIteratorInterface<ParamType>
             {
             public:
-                Iterator(const ParamGeneratorInterface<ParamType>* base,
-                         const ParamGenerator<T1>& g1,
-                         const typename ParamGenerator<T1>::iterator& current1,
-                         const ParamGenerator<T2>& g2,
-                         const typename ParamGenerator<T2>::iterator& current2)
+                Iterator(const ParamGeneratorInterface<ParamType> *base,
+                         const ParamGenerator<T1> &g1,
+                         const typename ParamGenerator<T1>::iterator &current1,
+                         const ParamGenerator<T2> &g2,
+                         const typename ParamGenerator<T2>::iterator &current2)
                     : base_(base),
                       begin1_(g1.begin()), end1_(g1.end()), current1_(current1),
                       begin2_(g2.begin()), end2_(g2.end()), current2_(current2)
@@ -15953,7 +15953,7 @@ namespace testing
                 }
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<ParamType>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<ParamType> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -15969,22 +15969,22 @@ namespace testing
                     }
                     ComputeCurrentValue();
                 }
-                virtual ParamIteratorInterface<ParamType>* Clone() const
+                virtual ParamIteratorInterface<ParamType> *Clone() const
                 {
                     return new Iterator(*this);
                 }
-                virtual const ParamType* Current() const
+                virtual const ParamType *Current() const
                 {
                     return &current_value_;
                 }
-                virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const
+                virtual bool Equals(const ParamIteratorInterface<ParamType> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
                     GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
                             << "The program attempted to compare iterators "
                             << "from different generators." << std::endl;
-                    const Iterator* typed_other =
+                    const Iterator *typed_other =
                         CheckedDowncastToActualType<const Iterator>(&other);
                     // We must report iterators equal if they both point beyond their
                     // respective ranges. That can happen in a variety of fashions,
@@ -15996,7 +15996,7 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                     : base_(other.base_),
                       begin1_(other.begin1_),
                       end1_(other.end1_),
@@ -16023,9 +16023,9 @@ namespace testing
                 }
 
                 // No implementation - assignment is unsupported.
-                void operator=(const Iterator& other);
+                void operator=(const Iterator &other);
 
-                const ParamGeneratorInterface<ParamType>* const base_;
+                const ParamGeneratorInterface<ParamType> *const base_;
                 // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
                 // current[i]_ is the actual traversing iterator.
                 const typename ParamGenerator<T1>::iterator begin1_;
@@ -16038,7 +16038,7 @@ namespace testing
             };  // class CartesianProductGenerator2::Iterator
 
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductGenerator2& other);
+            void operator=(const CartesianProductGenerator2 &other);
 
             const ParamGenerator<T1> g1_;
             const ParamGenerator<T2> g2_;
@@ -16052,17 +16052,17 @@ namespace testing
         public:
             typedef ::testing::tuple<T1, T2, T3> ParamType;
 
-            CartesianProductGenerator3(const ParamGenerator<T1>& g1,
-                                       const ParamGenerator<T2>& g2, const ParamGenerator<T3>& g3)
+            CartesianProductGenerator3(const ParamGenerator<T1> &g1,
+                                       const ParamGenerator<T2> &g2, const ParamGenerator<T3> &g3)
                 : g1_(g1), g2_(g2), g3_(g3) {}
             virtual ~CartesianProductGenerator3() {}
 
-            virtual ParamIteratorInterface<ParamType>* Begin() const
+            virtual ParamIteratorInterface<ParamType> *Begin() const
             {
                 return new Iterator(this, g1_, g1_.begin(), g2_, g2_.begin(), g3_,
                                     g3_.begin());
             }
-            virtual ParamIteratorInterface<ParamType>* End() const
+            virtual ParamIteratorInterface<ParamType> *End() const
             {
                 return new Iterator(this, g1_, g1_.end(), g2_, g2_.end(), g3_, g3_.end());
             }
@@ -16071,13 +16071,13 @@ namespace testing
             class Iterator : public ParamIteratorInterface<ParamType>
             {
             public:
-                Iterator(const ParamGeneratorInterface<ParamType>* base,
-                         const ParamGenerator<T1>& g1,
-                         const typename ParamGenerator<T1>::iterator& current1,
-                         const ParamGenerator<T2>& g2,
-                         const typename ParamGenerator<T2>::iterator& current2,
-                         const ParamGenerator<T3>& g3,
-                         const typename ParamGenerator<T3>::iterator& current3)
+                Iterator(const ParamGeneratorInterface<ParamType> *base,
+                         const ParamGenerator<T1> &g1,
+                         const typename ParamGenerator<T1>::iterator &current1,
+                         const ParamGenerator<T2> &g2,
+                         const typename ParamGenerator<T2>::iterator &current2,
+                         const ParamGenerator<T3> &g3,
+                         const typename ParamGenerator<T3>::iterator &current3)
                     : base_(base),
                       begin1_(g1.begin()), end1_(g1.end()), current1_(current1),
                       begin2_(g2.begin()), end2_(g2.end()), current2_(current2),
@@ -16087,7 +16087,7 @@ namespace testing
                 }
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<ParamType>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<ParamType> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -16107,22 +16107,22 @@ namespace testing
                     }
                     ComputeCurrentValue();
                 }
-                virtual ParamIteratorInterface<ParamType>* Clone() const
+                virtual ParamIteratorInterface<ParamType> *Clone() const
                 {
                     return new Iterator(*this);
                 }
-                virtual const ParamType* Current() const
+                virtual const ParamType *Current() const
                 {
                     return &current_value_;
                 }
-                virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const
+                virtual bool Equals(const ParamIteratorInterface<ParamType> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
                     GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
                             << "The program attempted to compare iterators "
                             << "from different generators." << std::endl;
-                    const Iterator* typed_other =
+                    const Iterator *typed_other =
                         CheckedDowncastToActualType<const Iterator>(&other);
                     // We must report iterators equal if they both point beyond their
                     // respective ranges. That can happen in a variety of fashions,
@@ -16135,7 +16135,7 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                     : base_(other.base_),
                       begin1_(other.begin1_),
                       end1_(other.end1_),
@@ -16166,9 +16166,9 @@ namespace testing
                 }
 
                 // No implementation - assignment is unsupported.
-                void operator=(const Iterator& other);
+                void operator=(const Iterator &other);
 
-                const ParamGeneratorInterface<ParamType>* const base_;
+                const ParamGeneratorInterface<ParamType> *const base_;
                 // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
                 // current[i]_ is the actual traversing iterator.
                 const typename ParamGenerator<T1>::iterator begin1_;
@@ -16184,7 +16184,7 @@ namespace testing
             };  // class CartesianProductGenerator3::Iterator
 
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductGenerator3& other);
+            void operator=(const CartesianProductGenerator3 &other);
 
             const ParamGenerator<T1> g1_;
             const ParamGenerator<T2> g2_;
@@ -16199,18 +16199,18 @@ namespace testing
         public:
             typedef ::testing::tuple<T1, T2, T3, T4> ParamType;
 
-            CartesianProductGenerator4(const ParamGenerator<T1>& g1,
-                                       const ParamGenerator<T2>& g2, const ParamGenerator<T3>& g3,
-                                       const ParamGenerator<T4>& g4)
+            CartesianProductGenerator4(const ParamGenerator<T1> &g1,
+                                       const ParamGenerator<T2> &g2, const ParamGenerator<T3> &g3,
+                                       const ParamGenerator<T4> &g4)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4) {}
             virtual ~CartesianProductGenerator4() {}
 
-            virtual ParamIteratorInterface<ParamType>* Begin() const
+            virtual ParamIteratorInterface<ParamType> *Begin() const
             {
                 return new Iterator(this, g1_, g1_.begin(), g2_, g2_.begin(), g3_,
                                     g3_.begin(), g4_, g4_.begin());
             }
-            virtual ParamIteratorInterface<ParamType>* End() const
+            virtual ParamIteratorInterface<ParamType> *End() const
             {
                 return new Iterator(this, g1_, g1_.end(), g2_, g2_.end(), g3_, g3_.end(),
                                     g4_, g4_.end());
@@ -16220,15 +16220,15 @@ namespace testing
             class Iterator : public ParamIteratorInterface<ParamType>
             {
             public:
-                Iterator(const ParamGeneratorInterface<ParamType>* base,
-                         const ParamGenerator<T1>& g1,
-                         const typename ParamGenerator<T1>::iterator& current1,
-                         const ParamGenerator<T2>& g2,
-                         const typename ParamGenerator<T2>::iterator& current2,
-                         const ParamGenerator<T3>& g3,
-                         const typename ParamGenerator<T3>::iterator& current3,
-                         const ParamGenerator<T4>& g4,
-                         const typename ParamGenerator<T4>::iterator& current4)
+                Iterator(const ParamGeneratorInterface<ParamType> *base,
+                         const ParamGenerator<T1> &g1,
+                         const typename ParamGenerator<T1>::iterator &current1,
+                         const ParamGenerator<T2> &g2,
+                         const typename ParamGenerator<T2>::iterator &current2,
+                         const ParamGenerator<T3> &g3,
+                         const typename ParamGenerator<T3>::iterator &current3,
+                         const ParamGenerator<T4> &g4,
+                         const typename ParamGenerator<T4>::iterator &current4)
                     : base_(base),
                       begin1_(g1.begin()), end1_(g1.end()), current1_(current1),
                       begin2_(g2.begin()), end2_(g2.end()), current2_(current2),
@@ -16239,7 +16239,7 @@ namespace testing
                 }
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<ParamType>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<ParamType> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -16263,22 +16263,22 @@ namespace testing
                     }
                     ComputeCurrentValue();
                 }
-                virtual ParamIteratorInterface<ParamType>* Clone() const
+                virtual ParamIteratorInterface<ParamType> *Clone() const
                 {
                     return new Iterator(*this);
                 }
-                virtual const ParamType* Current() const
+                virtual const ParamType *Current() const
                 {
                     return &current_value_;
                 }
-                virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const
+                virtual bool Equals(const ParamIteratorInterface<ParamType> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
                     GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
                             << "The program attempted to compare iterators "
                             << "from different generators." << std::endl;
-                    const Iterator* typed_other =
+                    const Iterator *typed_other =
                         CheckedDowncastToActualType<const Iterator>(&other);
                     // We must report iterators equal if they both point beyond their
                     // respective ranges. That can happen in a variety of fashions,
@@ -16292,7 +16292,7 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                     : base_(other.base_),
                       begin1_(other.begin1_),
                       end1_(other.end1_),
@@ -16328,9 +16328,9 @@ namespace testing
                 }
 
                 // No implementation - assignment is unsupported.
-                void operator=(const Iterator& other);
+                void operator=(const Iterator &other);
 
-                const ParamGeneratorInterface<ParamType>* const base_;
+                const ParamGeneratorInterface<ParamType> *const base_;
                 // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
                 // current[i]_ is the actual traversing iterator.
                 const typename ParamGenerator<T1>::iterator begin1_;
@@ -16349,7 +16349,7 @@ namespace testing
             };  // class CartesianProductGenerator4::Iterator
 
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductGenerator4& other);
+            void operator=(const CartesianProductGenerator4 &other);
 
             const ParamGenerator<T1> g1_;
             const ParamGenerator<T2> g2_;
@@ -16365,18 +16365,18 @@ namespace testing
         public:
             typedef ::testing::tuple<T1, T2, T3, T4, T5> ParamType;
 
-            CartesianProductGenerator5(const ParamGenerator<T1>& g1,
-                                       const ParamGenerator<T2>& g2, const ParamGenerator<T3>& g3,
-                                       const ParamGenerator<T4>& g4, const ParamGenerator<T5>& g5)
+            CartesianProductGenerator5(const ParamGenerator<T1> &g1,
+                                       const ParamGenerator<T2> &g2, const ParamGenerator<T3> &g3,
+                                       const ParamGenerator<T4> &g4, const ParamGenerator<T5> &g5)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5) {}
             virtual ~CartesianProductGenerator5() {}
 
-            virtual ParamIteratorInterface<ParamType>* Begin() const
+            virtual ParamIteratorInterface<ParamType> *Begin() const
             {
                 return new Iterator(this, g1_, g1_.begin(), g2_, g2_.begin(), g3_,
                                     g3_.begin(), g4_, g4_.begin(), g5_, g5_.begin());
             }
-            virtual ParamIteratorInterface<ParamType>* End() const
+            virtual ParamIteratorInterface<ParamType> *End() const
             {
                 return new Iterator(this, g1_, g1_.end(), g2_, g2_.end(), g3_, g3_.end(),
                                     g4_, g4_.end(), g5_, g5_.end());
@@ -16386,17 +16386,17 @@ namespace testing
             class Iterator : public ParamIteratorInterface<ParamType>
             {
             public:
-                Iterator(const ParamGeneratorInterface<ParamType>* base,
-                         const ParamGenerator<T1>& g1,
-                         const typename ParamGenerator<T1>::iterator& current1,
-                         const ParamGenerator<T2>& g2,
-                         const typename ParamGenerator<T2>::iterator& current2,
-                         const ParamGenerator<T3>& g3,
-                         const typename ParamGenerator<T3>::iterator& current3,
-                         const ParamGenerator<T4>& g4,
-                         const typename ParamGenerator<T4>::iterator& current4,
-                         const ParamGenerator<T5>& g5,
-                         const typename ParamGenerator<T5>::iterator& current5)
+                Iterator(const ParamGeneratorInterface<ParamType> *base,
+                         const ParamGenerator<T1> &g1,
+                         const typename ParamGenerator<T1>::iterator &current1,
+                         const ParamGenerator<T2> &g2,
+                         const typename ParamGenerator<T2>::iterator &current2,
+                         const ParamGenerator<T3> &g3,
+                         const typename ParamGenerator<T3>::iterator &current3,
+                         const ParamGenerator<T4> &g4,
+                         const typename ParamGenerator<T4>::iterator &current4,
+                         const ParamGenerator<T5> &g5,
+                         const typename ParamGenerator<T5>::iterator &current5)
                     : base_(base),
                       begin1_(g1.begin()), end1_(g1.end()), current1_(current1),
                       begin2_(g2.begin()), end2_(g2.end()), current2_(current2),
@@ -16408,7 +16408,7 @@ namespace testing
                 }
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<ParamType>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<ParamType> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -16436,22 +16436,22 @@ namespace testing
                     }
                     ComputeCurrentValue();
                 }
-                virtual ParamIteratorInterface<ParamType>* Clone() const
+                virtual ParamIteratorInterface<ParamType> *Clone() const
                 {
                     return new Iterator(*this);
                 }
-                virtual const ParamType* Current() const
+                virtual const ParamType *Current() const
                 {
                     return &current_value_;
                 }
-                virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const
+                virtual bool Equals(const ParamIteratorInterface<ParamType> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
                     GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
                             << "The program attempted to compare iterators "
                             << "from different generators." << std::endl;
-                    const Iterator* typed_other =
+                    const Iterator *typed_other =
                         CheckedDowncastToActualType<const Iterator>(&other);
                     // We must report iterators equal if they both point beyond their
                     // respective ranges. That can happen in a variety of fashions,
@@ -16466,7 +16466,7 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                     : base_(other.base_),
                       begin1_(other.begin1_),
                       end1_(other.end1_),
@@ -16506,9 +16506,9 @@ namespace testing
                 }
 
                 // No implementation - assignment is unsupported.
-                void operator=(const Iterator& other);
+                void operator=(const Iterator &other);
 
-                const ParamGeneratorInterface<ParamType>* const base_;
+                const ParamGeneratorInterface<ParamType> *const base_;
                 // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
                 // current[i]_ is the actual traversing iterator.
                 const typename ParamGenerator<T1>::iterator begin1_;
@@ -16530,7 +16530,7 @@ namespace testing
             };  // class CartesianProductGenerator5::Iterator
 
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductGenerator5& other);
+            void operator=(const CartesianProductGenerator5 &other);
 
             const ParamGenerator<T1> g1_;
             const ParamGenerator<T2> g2_;
@@ -16549,19 +16549,19 @@ namespace testing
         public:
             typedef ::testing::tuple<T1, T2, T3, T4, T5, T6> ParamType;
 
-            CartesianProductGenerator6(const ParamGenerator<T1>& g1,
-                                       const ParamGenerator<T2>& g2, const ParamGenerator<T3>& g3,
-                                       const ParamGenerator<T4>& g4, const ParamGenerator<T5>& g5,
-                                       const ParamGenerator<T6>& g6)
+            CartesianProductGenerator6(const ParamGenerator<T1> &g1,
+                                       const ParamGenerator<T2> &g2, const ParamGenerator<T3> &g3,
+                                       const ParamGenerator<T4> &g4, const ParamGenerator<T5> &g5,
+                                       const ParamGenerator<T6> &g6)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5), g6_(g6) {}
             virtual ~CartesianProductGenerator6() {}
 
-            virtual ParamIteratorInterface<ParamType>* Begin() const
+            virtual ParamIteratorInterface<ParamType> *Begin() const
             {
                 return new Iterator(this, g1_, g1_.begin(), g2_, g2_.begin(), g3_,
                                     g3_.begin(), g4_, g4_.begin(), g5_, g5_.begin(), g6_, g6_.begin());
             }
-            virtual ParamIteratorInterface<ParamType>* End() const
+            virtual ParamIteratorInterface<ParamType> *End() const
             {
                 return new Iterator(this, g1_, g1_.end(), g2_, g2_.end(), g3_, g3_.end(),
                                     g4_, g4_.end(), g5_, g5_.end(), g6_, g6_.end());
@@ -16571,19 +16571,19 @@ namespace testing
             class Iterator : public ParamIteratorInterface<ParamType>
             {
             public:
-                Iterator(const ParamGeneratorInterface<ParamType>* base,
-                         const ParamGenerator<T1>& g1,
-                         const typename ParamGenerator<T1>::iterator& current1,
-                         const ParamGenerator<T2>& g2,
-                         const typename ParamGenerator<T2>::iterator& current2,
-                         const ParamGenerator<T3>& g3,
-                         const typename ParamGenerator<T3>::iterator& current3,
-                         const ParamGenerator<T4>& g4,
-                         const typename ParamGenerator<T4>::iterator& current4,
-                         const ParamGenerator<T5>& g5,
-                         const typename ParamGenerator<T5>::iterator& current5,
-                         const ParamGenerator<T6>& g6,
-                         const typename ParamGenerator<T6>::iterator& current6)
+                Iterator(const ParamGeneratorInterface<ParamType> *base,
+                         const ParamGenerator<T1> &g1,
+                         const typename ParamGenerator<T1>::iterator &current1,
+                         const ParamGenerator<T2> &g2,
+                         const typename ParamGenerator<T2>::iterator &current2,
+                         const ParamGenerator<T3> &g3,
+                         const typename ParamGenerator<T3>::iterator &current3,
+                         const ParamGenerator<T4> &g4,
+                         const typename ParamGenerator<T4>::iterator &current4,
+                         const ParamGenerator<T5> &g5,
+                         const typename ParamGenerator<T5>::iterator &current5,
+                         const ParamGenerator<T6> &g6,
+                         const typename ParamGenerator<T6>::iterator &current6)
                     : base_(base),
                       begin1_(g1.begin()), end1_(g1.end()), current1_(current1),
                       begin2_(g2.begin()), end2_(g2.end()), current2_(current2),
@@ -16596,7 +16596,7 @@ namespace testing
                 }
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<ParamType>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<ParamType> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -16628,22 +16628,22 @@ namespace testing
                     }
                     ComputeCurrentValue();
                 }
-                virtual ParamIteratorInterface<ParamType>* Clone() const
+                virtual ParamIteratorInterface<ParamType> *Clone() const
                 {
                     return new Iterator(*this);
                 }
-                virtual const ParamType* Current() const
+                virtual const ParamType *Current() const
                 {
                     return &current_value_;
                 }
-                virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const
+                virtual bool Equals(const ParamIteratorInterface<ParamType> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
                     GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
                             << "The program attempted to compare iterators "
                             << "from different generators." << std::endl;
-                    const Iterator* typed_other =
+                    const Iterator *typed_other =
                         CheckedDowncastToActualType<const Iterator>(&other);
                     // We must report iterators equal if they both point beyond their
                     // respective ranges. That can happen in a variety of fashions,
@@ -16659,7 +16659,7 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                     : base_(other.base_),
                       begin1_(other.begin1_),
                       end1_(other.end1_),
@@ -16703,9 +16703,9 @@ namespace testing
                 }
 
                 // No implementation - assignment is unsupported.
-                void operator=(const Iterator& other);
+                void operator=(const Iterator &other);
 
-                const ParamGeneratorInterface<ParamType>* const base_;
+                const ParamGeneratorInterface<ParamType> *const base_;
                 // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
                 // current[i]_ is the actual traversing iterator.
                 const typename ParamGenerator<T1>::iterator begin1_;
@@ -16730,7 +16730,7 @@ namespace testing
             };  // class CartesianProductGenerator6::Iterator
 
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductGenerator6& other);
+            void operator=(const CartesianProductGenerator6 &other);
 
             const ParamGenerator<T1> g1_;
             const ParamGenerator<T2> g2_;
@@ -16750,20 +16750,20 @@ namespace testing
         public:
             typedef ::testing::tuple<T1, T2, T3, T4, T5, T6, T7> ParamType;
 
-            CartesianProductGenerator7(const ParamGenerator<T1>& g1,
-                                       const ParamGenerator<T2>& g2, const ParamGenerator<T3>& g3,
-                                       const ParamGenerator<T4>& g4, const ParamGenerator<T5>& g5,
-                                       const ParamGenerator<T6>& g6, const ParamGenerator<T7>& g7)
+            CartesianProductGenerator7(const ParamGenerator<T1> &g1,
+                                       const ParamGenerator<T2> &g2, const ParamGenerator<T3> &g3,
+                                       const ParamGenerator<T4> &g4, const ParamGenerator<T5> &g5,
+                                       const ParamGenerator<T6> &g6, const ParamGenerator<T7> &g7)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5), g6_(g6), g7_(g7) {}
             virtual ~CartesianProductGenerator7() {}
 
-            virtual ParamIteratorInterface<ParamType>* Begin() const
+            virtual ParamIteratorInterface<ParamType> *Begin() const
             {
                 return new Iterator(this, g1_, g1_.begin(), g2_, g2_.begin(), g3_,
                                     g3_.begin(), g4_, g4_.begin(), g5_, g5_.begin(), g6_, g6_.begin(), g7_,
                                     g7_.begin());
             }
-            virtual ParamIteratorInterface<ParamType>* End() const
+            virtual ParamIteratorInterface<ParamType> *End() const
             {
                 return new Iterator(this, g1_, g1_.end(), g2_, g2_.end(), g3_, g3_.end(),
                                     g4_, g4_.end(), g5_, g5_.end(), g6_, g6_.end(), g7_, g7_.end());
@@ -16773,21 +16773,21 @@ namespace testing
             class Iterator : public ParamIteratorInterface<ParamType>
             {
             public:
-                Iterator(const ParamGeneratorInterface<ParamType>* base,
-                         const ParamGenerator<T1>& g1,
-                         const typename ParamGenerator<T1>::iterator& current1,
-                         const ParamGenerator<T2>& g2,
-                         const typename ParamGenerator<T2>::iterator& current2,
-                         const ParamGenerator<T3>& g3,
-                         const typename ParamGenerator<T3>::iterator& current3,
-                         const ParamGenerator<T4>& g4,
-                         const typename ParamGenerator<T4>::iterator& current4,
-                         const ParamGenerator<T5>& g5,
-                         const typename ParamGenerator<T5>::iterator& current5,
-                         const ParamGenerator<T6>& g6,
-                         const typename ParamGenerator<T6>::iterator& current6,
-                         const ParamGenerator<T7>& g7,
-                         const typename ParamGenerator<T7>::iterator& current7)
+                Iterator(const ParamGeneratorInterface<ParamType> *base,
+                         const ParamGenerator<T1> &g1,
+                         const typename ParamGenerator<T1>::iterator &current1,
+                         const ParamGenerator<T2> &g2,
+                         const typename ParamGenerator<T2>::iterator &current2,
+                         const ParamGenerator<T3> &g3,
+                         const typename ParamGenerator<T3>::iterator &current3,
+                         const ParamGenerator<T4> &g4,
+                         const typename ParamGenerator<T4>::iterator &current4,
+                         const ParamGenerator<T5> &g5,
+                         const typename ParamGenerator<T5>::iterator &current5,
+                         const ParamGenerator<T6> &g6,
+                         const typename ParamGenerator<T6>::iterator &current6,
+                         const ParamGenerator<T7> &g7,
+                         const typename ParamGenerator<T7>::iterator &current7)
                     : base_(base),
                       begin1_(g1.begin()), end1_(g1.end()), current1_(current1),
                       begin2_(g2.begin()), end2_(g2.end()), current2_(current2),
@@ -16801,7 +16801,7 @@ namespace testing
                 }
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<ParamType>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<ParamType> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -16837,22 +16837,22 @@ namespace testing
                     }
                     ComputeCurrentValue();
                 }
-                virtual ParamIteratorInterface<ParamType>* Clone() const
+                virtual ParamIteratorInterface<ParamType> *Clone() const
                 {
                     return new Iterator(*this);
                 }
-                virtual const ParamType* Current() const
+                virtual const ParamType *Current() const
                 {
                     return &current_value_;
                 }
-                virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const
+                virtual bool Equals(const ParamIteratorInterface<ParamType> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
                     GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
                             << "The program attempted to compare iterators "
                             << "from different generators." << std::endl;
-                    const Iterator* typed_other =
+                    const Iterator *typed_other =
                         CheckedDowncastToActualType<const Iterator>(&other);
                     // We must report iterators equal if they both point beyond their
                     // respective ranges. That can happen in a variety of fashions,
@@ -16869,7 +16869,7 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                     : base_(other.base_),
                       begin1_(other.begin1_),
                       end1_(other.end1_),
@@ -16917,9 +16917,9 @@ namespace testing
                 }
 
                 // No implementation - assignment is unsupported.
-                void operator=(const Iterator& other);
+                void operator=(const Iterator &other);
 
-                const ParamGeneratorInterface<ParamType>* const base_;
+                const ParamGeneratorInterface<ParamType> *const base_;
                 // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
                 // current[i]_ is the actual traversing iterator.
                 const typename ParamGenerator<T1>::iterator begin1_;
@@ -16947,7 +16947,7 @@ namespace testing
             };  // class CartesianProductGenerator7::Iterator
 
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductGenerator7& other);
+            void operator=(const CartesianProductGenerator7 &other);
 
             const ParamGenerator<T1> g1_;
             const ParamGenerator<T2> g2_;
@@ -16968,22 +16968,22 @@ namespace testing
         public:
             typedef ::testing::tuple<T1, T2, T3, T4, T5, T6, T7, T8> ParamType;
 
-            CartesianProductGenerator8(const ParamGenerator<T1>& g1,
-                                       const ParamGenerator<T2>& g2, const ParamGenerator<T3>& g3,
-                                       const ParamGenerator<T4>& g4, const ParamGenerator<T5>& g5,
-                                       const ParamGenerator<T6>& g6, const ParamGenerator<T7>& g7,
-                                       const ParamGenerator<T8>& g8)
+            CartesianProductGenerator8(const ParamGenerator<T1> &g1,
+                                       const ParamGenerator<T2> &g2, const ParamGenerator<T3> &g3,
+                                       const ParamGenerator<T4> &g4, const ParamGenerator<T5> &g5,
+                                       const ParamGenerator<T6> &g6, const ParamGenerator<T7> &g7,
+                                       const ParamGenerator<T8> &g8)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5), g6_(g6), g7_(g7),
                   g8_(g8) {}
             virtual ~CartesianProductGenerator8() {}
 
-            virtual ParamIteratorInterface<ParamType>* Begin() const
+            virtual ParamIteratorInterface<ParamType> *Begin() const
             {
                 return new Iterator(this, g1_, g1_.begin(), g2_, g2_.begin(), g3_,
                                     g3_.begin(), g4_, g4_.begin(), g5_, g5_.begin(), g6_, g6_.begin(), g7_,
                                     g7_.begin(), g8_, g8_.begin());
             }
-            virtual ParamIteratorInterface<ParamType>* End() const
+            virtual ParamIteratorInterface<ParamType> *End() const
             {
                 return new Iterator(this, g1_, g1_.end(), g2_, g2_.end(), g3_, g3_.end(),
                                     g4_, g4_.end(), g5_, g5_.end(), g6_, g6_.end(), g7_, g7_.end(), g8_,
@@ -16994,23 +16994,23 @@ namespace testing
             class Iterator : public ParamIteratorInterface<ParamType>
             {
             public:
-                Iterator(const ParamGeneratorInterface<ParamType>* base,
-                         const ParamGenerator<T1>& g1,
-                         const typename ParamGenerator<T1>::iterator& current1,
-                         const ParamGenerator<T2>& g2,
-                         const typename ParamGenerator<T2>::iterator& current2,
-                         const ParamGenerator<T3>& g3,
-                         const typename ParamGenerator<T3>::iterator& current3,
-                         const ParamGenerator<T4>& g4,
-                         const typename ParamGenerator<T4>::iterator& current4,
-                         const ParamGenerator<T5>& g5,
-                         const typename ParamGenerator<T5>::iterator& current5,
-                         const ParamGenerator<T6>& g6,
-                         const typename ParamGenerator<T6>::iterator& current6,
-                         const ParamGenerator<T7>& g7,
-                         const typename ParamGenerator<T7>::iterator& current7,
-                         const ParamGenerator<T8>& g8,
-                         const typename ParamGenerator<T8>::iterator& current8)
+                Iterator(const ParamGeneratorInterface<ParamType> *base,
+                         const ParamGenerator<T1> &g1,
+                         const typename ParamGenerator<T1>::iterator &current1,
+                         const ParamGenerator<T2> &g2,
+                         const typename ParamGenerator<T2>::iterator &current2,
+                         const ParamGenerator<T3> &g3,
+                         const typename ParamGenerator<T3>::iterator &current3,
+                         const ParamGenerator<T4> &g4,
+                         const typename ParamGenerator<T4>::iterator &current4,
+                         const ParamGenerator<T5> &g5,
+                         const typename ParamGenerator<T5>::iterator &current5,
+                         const ParamGenerator<T6> &g6,
+                         const typename ParamGenerator<T6>::iterator &current6,
+                         const ParamGenerator<T7> &g7,
+                         const typename ParamGenerator<T7>::iterator &current7,
+                         const ParamGenerator<T8> &g8,
+                         const typename ParamGenerator<T8>::iterator &current8)
                     : base_(base),
                       begin1_(g1.begin()), end1_(g1.end()), current1_(current1),
                       begin2_(g2.begin()), end2_(g2.end()), current2_(current2),
@@ -17025,7 +17025,7 @@ namespace testing
                 }
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<ParamType>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<ParamType> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -17065,22 +17065,22 @@ namespace testing
                     }
                     ComputeCurrentValue();
                 }
-                virtual ParamIteratorInterface<ParamType>* Clone() const
+                virtual ParamIteratorInterface<ParamType> *Clone() const
                 {
                     return new Iterator(*this);
                 }
-                virtual const ParamType* Current() const
+                virtual const ParamType *Current() const
                 {
                     return &current_value_;
                 }
-                virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const
+                virtual bool Equals(const ParamIteratorInterface<ParamType> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
                     GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
                             << "The program attempted to compare iterators "
                             << "from different generators." << std::endl;
-                    const Iterator* typed_other =
+                    const Iterator *typed_other =
                         CheckedDowncastToActualType<const Iterator>(&other);
                     // We must report iterators equal if they both point beyond their
                     // respective ranges. That can happen in a variety of fashions,
@@ -17098,7 +17098,7 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                     : base_(other.base_),
                       begin1_(other.begin1_),
                       end1_(other.end1_),
@@ -17150,9 +17150,9 @@ namespace testing
                 }
 
                 // No implementation - assignment is unsupported.
-                void operator=(const Iterator& other);
+                void operator=(const Iterator &other);
 
-                const ParamGeneratorInterface<ParamType>* const base_;
+                const ParamGeneratorInterface<ParamType> *const base_;
                 // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
                 // current[i]_ is the actual traversing iterator.
                 const typename ParamGenerator<T1>::iterator begin1_;
@@ -17183,7 +17183,7 @@ namespace testing
             };  // class CartesianProductGenerator8::Iterator
 
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductGenerator8& other);
+            void operator=(const CartesianProductGenerator8 &other);
 
             const ParamGenerator<T1> g1_;
             const ParamGenerator<T2> g2_;
@@ -17205,22 +17205,22 @@ namespace testing
         public:
             typedef ::testing::tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9> ParamType;
 
-            CartesianProductGenerator9(const ParamGenerator<T1>& g1,
-                                       const ParamGenerator<T2>& g2, const ParamGenerator<T3>& g3,
-                                       const ParamGenerator<T4>& g4, const ParamGenerator<T5>& g5,
-                                       const ParamGenerator<T6>& g6, const ParamGenerator<T7>& g7,
-                                       const ParamGenerator<T8>& g8, const ParamGenerator<T9>& g9)
+            CartesianProductGenerator9(const ParamGenerator<T1> &g1,
+                                       const ParamGenerator<T2> &g2, const ParamGenerator<T3> &g3,
+                                       const ParamGenerator<T4> &g4, const ParamGenerator<T5> &g5,
+                                       const ParamGenerator<T6> &g6, const ParamGenerator<T7> &g7,
+                                       const ParamGenerator<T8> &g8, const ParamGenerator<T9> &g9)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5), g6_(g6), g7_(g7), g8_(g8),
                   g9_(g9) {}
             virtual ~CartesianProductGenerator9() {}
 
-            virtual ParamIteratorInterface<ParamType>* Begin() const
+            virtual ParamIteratorInterface<ParamType> *Begin() const
             {
                 return new Iterator(this, g1_, g1_.begin(), g2_, g2_.begin(), g3_,
                                     g3_.begin(), g4_, g4_.begin(), g5_, g5_.begin(), g6_, g6_.begin(), g7_,
                                     g7_.begin(), g8_, g8_.begin(), g9_, g9_.begin());
             }
-            virtual ParamIteratorInterface<ParamType>* End() const
+            virtual ParamIteratorInterface<ParamType> *End() const
             {
                 return new Iterator(this, g1_, g1_.end(), g2_, g2_.end(), g3_, g3_.end(),
                                     g4_, g4_.end(), g5_, g5_.end(), g6_, g6_.end(), g7_, g7_.end(), g8_,
@@ -17231,25 +17231,25 @@ namespace testing
             class Iterator : public ParamIteratorInterface<ParamType>
             {
             public:
-                Iterator(const ParamGeneratorInterface<ParamType>* base,
-                         const ParamGenerator<T1>& g1,
-                         const typename ParamGenerator<T1>::iterator& current1,
-                         const ParamGenerator<T2>& g2,
-                         const typename ParamGenerator<T2>::iterator& current2,
-                         const ParamGenerator<T3>& g3,
-                         const typename ParamGenerator<T3>::iterator& current3,
-                         const ParamGenerator<T4>& g4,
-                         const typename ParamGenerator<T4>::iterator& current4,
-                         const ParamGenerator<T5>& g5,
-                         const typename ParamGenerator<T5>::iterator& current5,
-                         const ParamGenerator<T6>& g6,
-                         const typename ParamGenerator<T6>::iterator& current6,
-                         const ParamGenerator<T7>& g7,
-                         const typename ParamGenerator<T7>::iterator& current7,
-                         const ParamGenerator<T8>& g8,
-                         const typename ParamGenerator<T8>::iterator& current8,
-                         const ParamGenerator<T9>& g9,
-                         const typename ParamGenerator<T9>::iterator& current9)
+                Iterator(const ParamGeneratorInterface<ParamType> *base,
+                         const ParamGenerator<T1> &g1,
+                         const typename ParamGenerator<T1>::iterator &current1,
+                         const ParamGenerator<T2> &g2,
+                         const typename ParamGenerator<T2>::iterator &current2,
+                         const ParamGenerator<T3> &g3,
+                         const typename ParamGenerator<T3>::iterator &current3,
+                         const ParamGenerator<T4> &g4,
+                         const typename ParamGenerator<T4>::iterator &current4,
+                         const ParamGenerator<T5> &g5,
+                         const typename ParamGenerator<T5>::iterator &current5,
+                         const ParamGenerator<T6> &g6,
+                         const typename ParamGenerator<T6>::iterator &current6,
+                         const ParamGenerator<T7> &g7,
+                         const typename ParamGenerator<T7>::iterator &current7,
+                         const ParamGenerator<T8> &g8,
+                         const typename ParamGenerator<T8>::iterator &current8,
+                         const ParamGenerator<T9> &g9,
+                         const typename ParamGenerator<T9>::iterator &current9)
                     : base_(base),
                       begin1_(g1.begin()), end1_(g1.end()), current1_(current1),
                       begin2_(g2.begin()), end2_(g2.end()), current2_(current2),
@@ -17265,7 +17265,7 @@ namespace testing
                 }
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<ParamType>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<ParamType> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -17309,22 +17309,22 @@ namespace testing
                     }
                     ComputeCurrentValue();
                 }
-                virtual ParamIteratorInterface<ParamType>* Clone() const
+                virtual ParamIteratorInterface<ParamType> *Clone() const
                 {
                     return new Iterator(*this);
                 }
-                virtual const ParamType* Current() const
+                virtual const ParamType *Current() const
                 {
                     return &current_value_;
                 }
-                virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const
+                virtual bool Equals(const ParamIteratorInterface<ParamType> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
                     GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
                             << "The program attempted to compare iterators "
                             << "from different generators." << std::endl;
-                    const Iterator* typed_other =
+                    const Iterator *typed_other =
                         CheckedDowncastToActualType<const Iterator>(&other);
                     // We must report iterators equal if they both point beyond their
                     // respective ranges. That can happen in a variety of fashions,
@@ -17343,7 +17343,7 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                     : base_(other.base_),
                       begin1_(other.begin1_),
                       end1_(other.end1_),
@@ -17400,9 +17400,9 @@ namespace testing
                 }
 
                 // No implementation - assignment is unsupported.
-                void operator=(const Iterator& other);
+                void operator=(const Iterator &other);
 
-                const ParamGeneratorInterface<ParamType>* const base_;
+                const ParamGeneratorInterface<ParamType> *const base_;
                 // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
                 // current[i]_ is the actual traversing iterator.
                 const typename ParamGenerator<T1>::iterator begin1_;
@@ -17436,7 +17436,7 @@ namespace testing
             };  // class CartesianProductGenerator9::Iterator
 
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductGenerator9& other);
+            void operator=(const CartesianProductGenerator9 &other);
 
             const ParamGenerator<T1> g1_;
             const ParamGenerator<T2> g2_;
@@ -17459,23 +17459,23 @@ namespace testing
         public:
             typedef ::testing::tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> ParamType;
 
-            CartesianProductGenerator10(const ParamGenerator<T1>& g1,
-                                        const ParamGenerator<T2>& g2, const ParamGenerator<T3>& g3,
-                                        const ParamGenerator<T4>& g4, const ParamGenerator<T5>& g5,
-                                        const ParamGenerator<T6>& g6, const ParamGenerator<T7>& g7,
-                                        const ParamGenerator<T8>& g8, const ParamGenerator<T9>& g9,
-                                        const ParamGenerator<T10>& g10)
+            CartesianProductGenerator10(const ParamGenerator<T1> &g1,
+                                        const ParamGenerator<T2> &g2, const ParamGenerator<T3> &g3,
+                                        const ParamGenerator<T4> &g4, const ParamGenerator<T5> &g5,
+                                        const ParamGenerator<T6> &g6, const ParamGenerator<T7> &g7,
+                                        const ParamGenerator<T8> &g8, const ParamGenerator<T9> &g9,
+                                        const ParamGenerator<T10> &g10)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5), g6_(g6), g7_(g7), g8_(g8),
                   g9_(g9), g10_(g10) {}
             virtual ~CartesianProductGenerator10() {}
 
-            virtual ParamIteratorInterface<ParamType>* Begin() const
+            virtual ParamIteratorInterface<ParamType> *Begin() const
             {
                 return new Iterator(this, g1_, g1_.begin(), g2_, g2_.begin(), g3_,
                                     g3_.begin(), g4_, g4_.begin(), g5_, g5_.begin(), g6_, g6_.begin(), g7_,
                                     g7_.begin(), g8_, g8_.begin(), g9_, g9_.begin(), g10_, g10_.begin());
             }
-            virtual ParamIteratorInterface<ParamType>* End() const
+            virtual ParamIteratorInterface<ParamType> *End() const
             {
                 return new Iterator(this, g1_, g1_.end(), g2_, g2_.end(), g3_, g3_.end(),
                                     g4_, g4_.end(), g5_, g5_.end(), g6_, g6_.end(), g7_, g7_.end(), g8_,
@@ -17486,27 +17486,27 @@ namespace testing
             class Iterator : public ParamIteratorInterface<ParamType>
             {
             public:
-                Iterator(const ParamGeneratorInterface<ParamType>* base,
-                         const ParamGenerator<T1>& g1,
-                         const typename ParamGenerator<T1>::iterator& current1,
-                         const ParamGenerator<T2>& g2,
-                         const typename ParamGenerator<T2>::iterator& current2,
-                         const ParamGenerator<T3>& g3,
-                         const typename ParamGenerator<T3>::iterator& current3,
-                         const ParamGenerator<T4>& g4,
-                         const typename ParamGenerator<T4>::iterator& current4,
-                         const ParamGenerator<T5>& g5,
-                         const typename ParamGenerator<T5>::iterator& current5,
-                         const ParamGenerator<T6>& g6,
-                         const typename ParamGenerator<T6>::iterator& current6,
-                         const ParamGenerator<T7>& g7,
-                         const typename ParamGenerator<T7>::iterator& current7,
-                         const ParamGenerator<T8>& g8,
-                         const typename ParamGenerator<T8>::iterator& current8,
-                         const ParamGenerator<T9>& g9,
-                         const typename ParamGenerator<T9>::iterator& current9,
-                         const ParamGenerator<T10>& g10,
-                         const typename ParamGenerator<T10>::iterator& current10)
+                Iterator(const ParamGeneratorInterface<ParamType> *base,
+                         const ParamGenerator<T1> &g1,
+                         const typename ParamGenerator<T1>::iterator &current1,
+                         const ParamGenerator<T2> &g2,
+                         const typename ParamGenerator<T2>::iterator &current2,
+                         const ParamGenerator<T3> &g3,
+                         const typename ParamGenerator<T3>::iterator &current3,
+                         const ParamGenerator<T4> &g4,
+                         const typename ParamGenerator<T4>::iterator &current4,
+                         const ParamGenerator<T5> &g5,
+                         const typename ParamGenerator<T5>::iterator &current5,
+                         const ParamGenerator<T6> &g6,
+                         const typename ParamGenerator<T6>::iterator &current6,
+                         const ParamGenerator<T7> &g7,
+                         const typename ParamGenerator<T7>::iterator &current7,
+                         const ParamGenerator<T8> &g8,
+                         const typename ParamGenerator<T8>::iterator &current8,
+                         const ParamGenerator<T9> &g9,
+                         const typename ParamGenerator<T9>::iterator &current9,
+                         const ParamGenerator<T10> &g10,
+                         const typename ParamGenerator<T10>::iterator &current10)
                     : base_(base),
                       begin1_(g1.begin()), end1_(g1.end()), current1_(current1),
                       begin2_(g2.begin()), end2_(g2.end()), current2_(current2),
@@ -17523,7 +17523,7 @@ namespace testing
                 }
                 virtual ~Iterator() {}
 
-                virtual const ParamGeneratorInterface<ParamType>* BaseGenerator() const
+                virtual const ParamGeneratorInterface<ParamType> *BaseGenerator() const
                 {
                     return base_;
                 }
@@ -17571,22 +17571,22 @@ namespace testing
                     }
                     ComputeCurrentValue();
                 }
-                virtual ParamIteratorInterface<ParamType>* Clone() const
+                virtual ParamIteratorInterface<ParamType> *Clone() const
                 {
                     return new Iterator(*this);
                 }
-                virtual const ParamType* Current() const
+                virtual const ParamType *Current() const
                 {
                     return &current_value_;
                 }
-                virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const
+                virtual bool Equals(const ParamIteratorInterface<ParamType> &other) const
                 {
                     // Having the same base generator guarantees that the other
                     // iterator is of the same type and we can downcast.
                     GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
                             << "The program attempted to compare iterators "
                             << "from different generators." << std::endl;
-                    const Iterator* typed_other =
+                    const Iterator *typed_other =
                         CheckedDowncastToActualType<const Iterator>(&other);
                     // We must report iterators equal if they both point beyond their
                     // respective ranges. That can happen in a variety of fashions,
@@ -17606,7 +17606,7 @@ namespace testing
                 }
 
             private:
-                Iterator(const Iterator& other)
+                Iterator(const Iterator &other)
                     : base_(other.base_),
                       begin1_(other.begin1_),
                       end1_(other.end1_),
@@ -17667,9 +17667,9 @@ namespace testing
                 }
 
                 // No implementation - assignment is unsupported.
-                void operator=(const Iterator& other);
+                void operator=(const Iterator &other);
 
-                const ParamGeneratorInterface<ParamType>* const base_;
+                const ParamGeneratorInterface<ParamType> *const base_;
                 // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
                 // current[i]_ is the actual traversing iterator.
                 const typename ParamGenerator<T1>::iterator begin1_;
@@ -17706,7 +17706,7 @@ namespace testing
             };  // class CartesianProductGenerator10::Iterator
 
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductGenerator10& other);
+            void operator=(const CartesianProductGenerator10 &other);
 
             const ParamGenerator<T1> g1_;
             const ParamGenerator<T2> g2_;
@@ -17731,7 +17731,7 @@ namespace testing
         class CartesianProductHolder2
         {
         public:
-            CartesianProductHolder2(const Generator1& g1, const Generator2& g2)
+            CartesianProductHolder2(const Generator1 &g1, const Generator2 &g2)
                 : g1_(g1), g2_(g2) {}
             template <typename T1, typename T2>
             operator ParamGenerator< ::testing::tuple<T1, T2> >() const
@@ -17744,7 +17744,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductHolder2& other);
+            void operator=(const CartesianProductHolder2 &other);
 
             const Generator1 g1_;
             const Generator2 g2_;
@@ -17754,8 +17754,8 @@ namespace testing
         class CartesianProductHolder3
         {
         public:
-            CartesianProductHolder3(const Generator1& g1, const Generator2& g2,
-                                    const Generator3& g3)
+            CartesianProductHolder3(const Generator1 &g1, const Generator2 &g2,
+                                    const Generator3 &g3)
                 : g1_(g1), g2_(g2), g3_(g3) {}
             template <typename T1, typename T2, typename T3>
             operator ParamGenerator< ::testing::tuple<T1, T2, T3> >() const
@@ -17769,7 +17769,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductHolder3& other);
+            void operator=(const CartesianProductHolder3 &other);
 
             const Generator1 g1_;
             const Generator2 g2_;
@@ -17781,8 +17781,8 @@ namespace testing
         class CartesianProductHolder4
         {
         public:
-            CartesianProductHolder4(const Generator1& g1, const Generator2& g2,
-                                    const Generator3& g3, const Generator4& g4)
+            CartesianProductHolder4(const Generator1 &g1, const Generator2 &g2,
+                                    const Generator3 &g3, const Generator4 &g4)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4) {}
             template <typename T1, typename T2, typename T3, typename T4>
             operator ParamGenerator< ::testing::tuple<T1, T2, T3, T4> >() const
@@ -17797,7 +17797,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductHolder4& other);
+            void operator=(const CartesianProductHolder4 &other);
 
             const Generator1 g1_;
             const Generator2 g2_;
@@ -17810,8 +17810,8 @@ namespace testing
         class CartesianProductHolder5
         {
         public:
-            CartesianProductHolder5(const Generator1& g1, const Generator2& g2,
-                                    const Generator3& g3, const Generator4& g4, const Generator5& g5)
+            CartesianProductHolder5(const Generator1 &g1, const Generator2 &g2,
+                                    const Generator3 &g3, const Generator4 &g4, const Generator5 &g5)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5) {}
             template <typename T1, typename T2, typename T3, typename T4, typename T5>
             operator ParamGenerator< ::testing::tuple<T1, T2, T3, T4, T5> >() const
@@ -17827,7 +17827,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductHolder5& other);
+            void operator=(const CartesianProductHolder5 &other);
 
             const Generator1 g1_;
             const Generator2 g2_;
@@ -17841,9 +17841,9 @@ namespace testing
         class CartesianProductHolder6
         {
         public:
-            CartesianProductHolder6(const Generator1& g1, const Generator2& g2,
-                                    const Generator3& g3, const Generator4& g4, const Generator5& g5,
-                                    const Generator6& g6)
+            CartesianProductHolder6(const Generator1 &g1, const Generator2 &g2,
+                                    const Generator3 &g3, const Generator4 &g4, const Generator5 &g5,
+                                    const Generator6 &g6)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5), g6_(g6) {}
             template <typename T1, typename T2, typename T3, typename T4, typename T5,
                       typename T6>
@@ -17861,7 +17861,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductHolder6& other);
+            void operator=(const CartesianProductHolder6 &other);
 
             const Generator1 g1_;
             const Generator2 g2_;
@@ -17876,9 +17876,9 @@ namespace testing
         class CartesianProductHolder7
         {
         public:
-            CartesianProductHolder7(const Generator1& g1, const Generator2& g2,
-                                    const Generator3& g3, const Generator4& g4, const Generator5& g5,
-                                    const Generator6& g6, const Generator7& g7)
+            CartesianProductHolder7(const Generator1 &g1, const Generator2 &g2,
+                                    const Generator3 &g3, const Generator4 &g4, const Generator5 &g5,
+                                    const Generator6 &g6, const Generator7 &g7)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5), g6_(g6), g7_(g7) {}
             template <typename T1, typename T2, typename T3, typename T4, typename T5,
                       typename T6, typename T7>
@@ -17898,7 +17898,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductHolder7& other);
+            void operator=(const CartesianProductHolder7 &other);
 
             const Generator1 g1_;
             const Generator2 g2_;
@@ -17915,9 +17915,9 @@ namespace testing
         class CartesianProductHolder8
         {
         public:
-            CartesianProductHolder8(const Generator1& g1, const Generator2& g2,
-                                    const Generator3& g3, const Generator4& g4, const Generator5& g5,
-                                    const Generator6& g6, const Generator7& g7, const Generator8& g8)
+            CartesianProductHolder8(const Generator1 &g1, const Generator2 &g2,
+                                    const Generator3 &g3, const Generator4 &g4, const Generator5 &g5,
+                                    const Generator6 &g6, const Generator7 &g7, const Generator8 &g8)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5), g6_(g6), g7_(g7),
                   g8_(g8) {}
             template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -17939,7 +17939,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductHolder8& other);
+            void operator=(const CartesianProductHolder8 &other);
 
             const Generator1 g1_;
             const Generator2 g2_;
@@ -17957,10 +17957,10 @@ namespace testing
         class CartesianProductHolder9
         {
         public:
-            CartesianProductHolder9(const Generator1& g1, const Generator2& g2,
-                                    const Generator3& g3, const Generator4& g4, const Generator5& g5,
-                                    const Generator6& g6, const Generator7& g7, const Generator8& g8,
-                                    const Generator9& g9)
+            CartesianProductHolder9(const Generator1 &g1, const Generator2 &g2,
+                                    const Generator3 &g3, const Generator4 &g4, const Generator5 &g5,
+                                    const Generator6 &g6, const Generator7 &g7, const Generator8 &g8,
+                                    const Generator9 &g9)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5), g6_(g6), g7_(g7), g8_(g8),
                   g9_(g9) {}
             template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -17984,7 +17984,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductHolder9& other);
+            void operator=(const CartesianProductHolder9 &other);
 
             const Generator1 g1_;
             const Generator2 g2_;
@@ -18003,10 +18003,10 @@ namespace testing
         class CartesianProductHolder10
         {
         public:
-            CartesianProductHolder10(const Generator1& g1, const Generator2& g2,
-                                     const Generator3& g3, const Generator4& g4, const Generator5& g5,
-                                     const Generator6& g6, const Generator7& g7, const Generator8& g8,
-                                     const Generator9& g9, const Generator10& g10)
+            CartesianProductHolder10(const Generator1 &g1, const Generator2 &g2,
+                                     const Generator3 &g3, const Generator4 &g4, const Generator5 &g5,
+                                     const Generator6 &g6, const Generator7 &g7, const Generator8 &g8,
+                                     const Generator9 &g9, const Generator10 &g10)
                 : g1_(g1), g2_(g2), g3_(g3), g4_(g4), g5_(g5), g6_(g6), g7_(g7), g8_(g8),
                   g9_(g9), g10_(g10) {}
             template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -18032,7 +18032,7 @@ namespace testing
 
         private:
             // No implementation - assignment is unsupported.
-            void operator=(const CartesianProductHolder10& other);
+            void operator=(const CartesianProductHolder10 &other);
 
             const Generator1 g1_;
             const Generator2 g2_;
@@ -18189,7 +18189,7 @@ namespace testing
 
     template <class Container>
     internal::ParamGenerator<typename Container::value_type> ValuesIn(
-        const Container& container)
+        const Container &container)
     {
         return ValuesIn(container.begin(), container.end());
     }
@@ -19192,7 +19192,7 @@ namespace testing
 //
     template <typename Generator1, typename Generator2>
     internal::CartesianProductHolder2<Generator1, Generator2> Combine(
-        const Generator1& g1, const Generator2& g2)
+        const Generator1 &g1, const Generator2 &g2)
     {
         return internal::CartesianProductHolder2<Generator1, Generator2>(
                    g1, g2);
@@ -19200,7 +19200,7 @@ namespace testing
 
     template <typename Generator1, typename Generator2, typename Generator3>
     internal::CartesianProductHolder3<Generator1, Generator2, Generator3> Combine(
-        const Generator1& g1, const Generator2& g2, const Generator3& g3)
+        const Generator1 &g1, const Generator2 &g2, const Generator3 &g3)
     {
         return internal::CartesianProductHolder3<Generator1, Generator2, Generator3>(
                    g1, g2, g3);
@@ -19210,8 +19210,8 @@ namespace testing
               typename Generator4>
     internal::CartesianProductHolder4<Generator1, Generator2, Generator3,
              Generator4> Combine(
-                 const Generator1& g1, const Generator2& g2, const Generator3& g3,
-                 const Generator4& g4)
+                 const Generator1 &g1, const Generator2 &g2, const Generator3 &g3,
+                 const Generator4 &g4)
     {
         return internal::CartesianProductHolder4<Generator1, Generator2, Generator3,
                Generator4>(
@@ -19222,8 +19222,8 @@ namespace testing
               typename Generator4, typename Generator5>
     internal::CartesianProductHolder5<Generator1, Generator2, Generator3,
              Generator4, Generator5> Combine(
-                 const Generator1& g1, const Generator2& g2, const Generator3& g3,
-                 const Generator4& g4, const Generator5& g5)
+                 const Generator1 &g1, const Generator2 &g2, const Generator3 &g3,
+                 const Generator4 &g4, const Generator5 &g5)
     {
         return internal::CartesianProductHolder5<Generator1, Generator2, Generator3,
                Generator4, Generator5>(
@@ -19234,8 +19234,8 @@ namespace testing
               typename Generator4, typename Generator5, typename Generator6>
     internal::CartesianProductHolder6<Generator1, Generator2, Generator3,
              Generator4, Generator5, Generator6> Combine(
-                 const Generator1& g1, const Generator2& g2, const Generator3& g3,
-                 const Generator4& g4, const Generator5& g5, const Generator6& g6)
+                 const Generator1 &g1, const Generator2 &g2, const Generator3 &g3,
+                 const Generator4 &g4, const Generator5 &g5, const Generator6 &g6)
     {
         return internal::CartesianProductHolder6<Generator1, Generator2, Generator3,
                Generator4, Generator5, Generator6>(
@@ -19247,9 +19247,9 @@ namespace testing
               typename Generator7>
     internal::CartesianProductHolder7<Generator1, Generator2, Generator3,
              Generator4, Generator5, Generator6, Generator7> Combine(
-                 const Generator1& g1, const Generator2& g2, const Generator3& g3,
-                 const Generator4& g4, const Generator5& g5, const Generator6& g6,
-                 const Generator7& g7)
+                 const Generator1 &g1, const Generator2 &g2, const Generator3 &g3,
+                 const Generator4 &g4, const Generator5 &g5, const Generator6 &g6,
+                 const Generator7 &g7)
     {
         return internal::CartesianProductHolder7<Generator1, Generator2, Generator3,
                Generator4, Generator5, Generator6, Generator7>(
@@ -19261,9 +19261,9 @@ namespace testing
               typename Generator7, typename Generator8>
     internal::CartesianProductHolder8<Generator1, Generator2, Generator3,
              Generator4, Generator5, Generator6, Generator7, Generator8> Combine(
-                 const Generator1& g1, const Generator2& g2, const Generator3& g3,
-                 const Generator4& g4, const Generator5& g5, const Generator6& g6,
-                 const Generator7& g7, const Generator8& g8)
+                 const Generator1 &g1, const Generator2 &g2, const Generator3 &g3,
+                 const Generator4 &g4, const Generator5 &g5, const Generator6 &g6,
+                 const Generator7 &g7, const Generator8 &g8)
     {
         return internal::CartesianProductHolder8<Generator1, Generator2, Generator3,
                Generator4, Generator5, Generator6, Generator7, Generator8>(
@@ -19276,9 +19276,9 @@ namespace testing
     internal::CartesianProductHolder9<Generator1, Generator2, Generator3,
              Generator4, Generator5, Generator6, Generator7, Generator8,
              Generator9> Combine(
-                 const Generator1& g1, const Generator2& g2, const Generator3& g3,
-                 const Generator4& g4, const Generator5& g5, const Generator6& g6,
-                 const Generator7& g7, const Generator8& g8, const Generator9& g9)
+                 const Generator1 &g1, const Generator2 &g2, const Generator3 &g3,
+                 const Generator4 &g4, const Generator5 &g5, const Generator6 &g6,
+                 const Generator7 &g7, const Generator8 &g8, const Generator9 &g9)
     {
         return internal::CartesianProductHolder9<Generator1, Generator2, Generator3,
                Generator4, Generator5, Generator6, Generator7, Generator8, Generator9>(
@@ -19292,10 +19292,10 @@ namespace testing
     internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
              Generator4, Generator5, Generator6, Generator7, Generator8, Generator9,
              Generator10> Combine(
-                 const Generator1& g1, const Generator2& g2, const Generator3& g3,
-                 const Generator4& g4, const Generator5& g5, const Generator6& g6,
-                 const Generator7& g7, const Generator8& g8, const Generator9& g9,
-                 const Generator10& g10)
+                 const Generator1 &g1, const Generator2 &g2, const Generator3 &g3,
+                 const Generator4 &g4, const Generator5 &g5, const Generator6 &g6,
+                 const Generator7 &g7, const Generator8 &g8, const Generator9 &g9,
+                 const Generator10 &g10)
     {
         return internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
                Generator4, Generator5, Generator6, Generator7, Generator8, Generator9,
@@ -19489,9 +19489,9 @@ namespace testing
         // Always use this constructor (with parameters) to create a
         // TestPartResult object.
         TestPartResult(Type a_type,
-                       const char* a_file_name,
+                       const char *a_file_name,
                        int a_line_number,
-                       const char* a_message)
+                       const char *a_message)
             : type_(a_type),
               file_name_(a_file_name == NULL ? "" : a_file_name),
               line_number_(a_line_number),
@@ -19508,7 +19508,7 @@ namespace testing
 
         // Gets the name of the source file where the test part took place, or
         // NULL if it's unknown.
-        const char* file_name() const
+        const char *file_name() const
         {
             return file_name_.empty() ? NULL : file_name_.c_str();
         }
@@ -19521,13 +19521,13 @@ namespace testing
         }
 
         // Gets the summary of the failure message.
-        const char* summary() const
+        const char *summary() const
         {
             return summary_.c_str();
         }
 
         // Gets the message associated with the test part.
-        const char* message() const
+        const char *message() const
         {
             return message_.c_str();
         }
@@ -19561,7 +19561,7 @@ namespace testing
 
         // Gets the summary of the failure message by omitting the stack
         // trace in it.
-        static std::string ExtractSummary(const char* message);
+        static std::string ExtractSummary(const char *message);
 
         // The name of the source file where the test part took place, or
         // "" if the source file is unknown.
@@ -19574,7 +19574,7 @@ namespace testing
     };
 
 // Prints a TestPartResult object.
-    std::ostream& operator<<(std::ostream& os, const TestPartResult& result);
+    std::ostream &operator<<(std::ostream &os, const TestPartResult &result);
 
 // An array of TestPartResult objects.
 //
@@ -19586,10 +19586,10 @@ namespace testing
         TestPartResultArray() {}
 
         // Appends the given TestPartResult to the array.
-        void Append(const TestPartResult& result);
+        void Append(const TestPartResult &result);
 
         // Returns the TestPartResult at the given index (0-based).
-        const TestPartResult& GetTestPartResult(int index) const;
+        const TestPartResult &GetTestPartResult(int index) const;
 
         // Returns the number of TestPartResult objects in the array.
         int size() const;
@@ -19606,7 +19606,7 @@ namespace testing
     public:
         virtual ~TestPartResultReporterInterface() {}
 
-        virtual void ReportTestPartResult(const TestPartResult& result) = 0;
+        virtual void ReportTestPartResult(const TestPartResult &result) = 0;
     };
 
     namespace internal
@@ -19624,14 +19624,14 @@ namespace testing
         public:
             HasNewFatalFailureHelper();
             virtual ~HasNewFatalFailureHelper();
-            virtual void ReportTestPartResult(const TestPartResult& result);
+            virtual void ReportTestPartResult(const TestPartResult &result);
             bool has_new_fatal_failure() const
             {
                 return has_new_fatal_failure_;
             }
         private:
             bool has_new_fatal_failure_;
-            TestPartResultReporterInterface* original_reporter_;
+            TestPartResultReporterInterface *original_reporter_;
 
             GTEST_DISALLOW_COPY_AND_ASSIGN_(HasNewFatalFailureHelper);
         };
@@ -20011,9 +20011,9 @@ namespace testing
         class TestEventRepeater;
         class UnitTestRecordPropertyTestHelper;
         class WindowsDeathTest;
-        class UnitTestImpl* GetUnitTestImpl();
+        class UnitTestImpl *GetUnitTestImpl();
         void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
-                                            const std::string& message);
+                                            const std::string &message);
 
     }  // namespace internal
 
@@ -20109,7 +20109,7 @@ namespace testing
     public:
         // Copy constructor.
         // Used in EXPECT_TRUE/FALSE(assertion_result).
-        AssertionResult(const AssertionResult& other);
+        AssertionResult(const AssertionResult &other);
 
         GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800 /* forcing value to bool */)
 
@@ -20122,16 +20122,16 @@ namespace testing
         // we want AssertionResult's copy constructor to be used.
         template <typename T>
         explicit AssertionResult(
-            const T& success,
+            const T &success,
             typename internal::EnableIf<
-            !internal::ImplicitlyConvertible<T, AssertionResult>::value>::type*
+            !internal::ImplicitlyConvertible<T, AssertionResult>::value>::type *
             /*enabler*/ = NULL)
             : success_(success) {}
 
         GTEST_DISABLE_MSC_WARNINGS_POP_()
 
         // Assignment operator.
-        AssertionResult& operator=(AssertionResult other)
+        AssertionResult &operator=(AssertionResult other)
         {
             swap(other);
             return *this;
@@ -20150,19 +20150,19 @@ namespace testing
         // use it when they fail (i.e., the predicate's outcome doesn't match the
         // assertion's expectation). When nothing has been streamed into the
         // object, returns an empty string.
-        const char* message() const
+        const char *message() const
         {
             return message_.get() != NULL ?  message_->c_str() : "";
         }
         // TODO(vladl@google.com): Remove this after making sure no clients use it.
         // Deprecated; please use message() instead.
-        const char* failure_message() const
+        const char *failure_message() const
         {
             return message();
         }
 
         // Streams a custom failure message into this object.
-        template <typename T> AssertionResult& operator<<(const T& value)
+        template <typename T> AssertionResult &operator<<(const T &value)
         {
             AppendMessage(Message() << value);
             return *this;
@@ -20170,8 +20170,8 @@ namespace testing
 
         // Allows streaming basic output manipulators such as endl or flush into
         // this object.
-        AssertionResult& operator<<(
-            ::std::ostream& (*basic_manipulator)(::std::ostream& stream))
+        AssertionResult &operator<<(
+            ::std::ostream& (*basic_manipulator)(::std::ostream &stream))
         {
             AppendMessage(Message() << basic_manipulator);
             return *this;
@@ -20179,7 +20179,7 @@ namespace testing
 
     private:
         // Appends the contents of message to message_.
-        void AppendMessage(const Message& a_message)
+        void AppendMessage(const Message &a_message)
         {
             if (message_.get() == NULL)
                 message_.reset(new ::std::string);
@@ -20187,7 +20187,7 @@ namespace testing
         }
 
         // Swap the contents of this AssertionResult with other.
-        void swap(AssertionResult& other);
+        void swap(AssertionResult &other);
 
         // Stores result of the assertion predicate.
         bool success_;
@@ -20206,7 +20206,7 @@ namespace testing
 
 // Makes a failed assertion result with the given failure message.
 // Deprecated; use AssertionFailure() << msg.
-    GTEST_API_ AssertionResult AssertionFailure(const Message& msg);
+    GTEST_API_ AssertionResult AssertionFailure(const Message &msg);
 
 // The abstract class that all tests inherit from.
 //
@@ -20286,8 +20286,8 @@ namespace testing
         // global context (before or after invocation of RUN_ALL_TESTS and from
         // SetUp/TearDown method of Environment objects registered with Google
         // Test) will be output as attributes of the <testsuites> element.
-        static void RecordProperty(const std::string& key, const std::string& value);
-        static void RecordProperty(const std::string& key, int value);
+        static void RecordProperty(const std::string &key, const std::string &value);
+        static void RecordProperty(const std::string &key, int value);
 
     protected:
         // Creates a Test object.
@@ -20341,7 +20341,7 @@ namespace testing
         // If you see an error about overriding the following function or
         // about it being private, you have mis-spelled SetUp() as Setup().
         struct Setup_should_be_spelled_SetUp {};
-        virtual Setup_should_be_spelled_SetUp* Setup()
+        virtual Setup_should_be_spelled_SetUp *Setup()
         {
             return NULL;
         }
@@ -20362,25 +20362,25 @@ namespace testing
         // C'tor.  TestProperty does NOT have a default constructor.
         // Always use this constructor (with parameters) to create a
         // TestProperty object.
-        TestProperty(const std::string& a_key, const std::string& a_value) :
+        TestProperty(const std::string &a_key, const std::string &a_value) :
             key_(a_key), value_(a_value)
         {
         }
 
         // Gets the user supplied key.
-        const char* key() const
+        const char *key() const
         {
             return key_.c_str();
         }
 
         // Gets the user supplied value.
-        const char* value() const
+        const char *value() const
         {
             return value_.c_str();
         }
 
         // Sets a new value, overriding the one supplied in the constructor.
-        void SetValue(const std::string& new_value)
+        void SetValue(const std::string &new_value)
         {
             value_ = new_value;
         }
@@ -20438,12 +20438,12 @@ namespace testing
         // Returns the i-th test part result among all the results. i can range
         // from 0 to test_property_count() - 1. If i is not in that range, aborts
         // the program.
-        const TestPartResult& GetTestPartResult(int i) const;
+        const TestPartResult &GetTestPartResult(int i) const;
 
         // Returns the i-th test property. i can range from 0 to
         // test_property_count() - 1. If i is not in that range, aborts the
         // program.
-        const TestProperty& GetTestProperty(int i) const;
+        const TestProperty &GetTestProperty(int i) const;
 
     private:
         friend class TestInfo;
@@ -20456,13 +20456,13 @@ namespace testing
         friend class internal::WindowsDeathTest;
 
         // Gets the vector of TestPartResults.
-        const std::vector<TestPartResult>& test_part_results() const
+        const std::vector<TestPartResult> &test_part_results() const
         {
             return test_part_results_;
         }
 
         // Gets the vector of TestProperties.
-        const std::vector<TestProperty>& test_properties() const
+        const std::vector<TestProperty> &test_properties() const
         {
             return test_properties_;
         }
@@ -20479,17 +20479,17 @@ namespace testing
         // value will be updated, rather than storing multiple values for the same
         // key.  xml_element specifies the element for which the property is being
         // recorded and is used for validation.
-        void RecordProperty(const std::string& xml_element,
-                            const TestProperty& test_property);
+        void RecordProperty(const std::string &xml_element,
+                            const TestProperty &test_property);
 
         // Adds a failure if the key is a reserved attribute of Google Test
         // testcase tags.  Returns true if the property is valid.
         // TODO(russr): Validate attribute names are legal and human readable.
-        static bool ValidateTestProperty(const std::string& xml_element,
-                                         const TestProperty& test_property);
+        static bool ValidateTestProperty(const std::string &xml_element,
+                                         const TestProperty &test_property);
 
         // Adds a test part result to the list.
-        void AddTestPartResult(const TestPartResult& test_part_result);
+        void AddTestPartResult(const TestPartResult &test_part_result);
 
         // Returns the death test count.
         int death_test_count() const
@@ -20545,20 +20545,20 @@ namespace testing
         ~TestInfo();
 
         // Returns the test case name.
-        const char* test_case_name() const
+        const char *test_case_name() const
         {
             return test_case_name_.c_str();
         }
 
         // Returns the test name.
-        const char* name() const
+        const char *name() const
         {
             return name_.c_str();
         }
 
         // Returns the name of the parameter type, or NULL if this is not a typed
         // or a type-parameterized test.
-        const char* type_param() const
+        const char *type_param() const
         {
             if (type_param_.get() != NULL)
                 return type_param_->c_str();
@@ -20567,7 +20567,7 @@ namespace testing
 
         // Returns the text representation of the value parameter, or NULL if this
         // is not a value-parameterized test.
-        const char* value_param() const
+        const char *value_param() const
         {
             if (value_param_.get() != NULL)
                 return value_param_->c_str();
@@ -20575,7 +20575,7 @@ namespace testing
         }
 
         // Returns the file name where this test is defined.
-        const char* file() const
+        const char *file() const
         {
             return location_.file.c_str();
         }
@@ -20617,7 +20617,7 @@ namespace testing
         }
 
         // Returns the result of the test.
-        const TestResult* result() const
+        const TestResult *result() const
         {
             return &result_;
         }
@@ -20630,26 +20630,26 @@ namespace testing
         friend class TestCase;
         friend class internal::UnitTestImpl;
         friend class internal::StreamingListenerTest;
-        friend TestInfo* internal::MakeAndRegisterTestInfo(
-            const char* test_case_name,
-            const char* name,
-            const char* type_param,
-            const char* value_param,
+        friend TestInfo *internal::MakeAndRegisterTestInfo(
+            const char *test_case_name,
+            const char *name,
+            const char *type_param,
+            const char *value_param,
             internal::CodeLocation code_location,
             internal::TypeId fixture_class_id,
             Test::SetUpTestCaseFunc set_up_tc,
             Test::TearDownTestCaseFunc tear_down_tc,
-            internal::TestFactoryBase* factory);
+            internal::TestFactoryBase *factory);
 
         // Constructs a TestInfo object. The newly constructed instance assumes
         // ownership of the factory object.
-        TestInfo(const std::string& test_case_name,
-                 const std::string& name,
-                 const char* a_type_param,   // NULL if not a type-parameterized test
-                 const char* a_value_param,  // NULL if not a value-parameterized test
+        TestInfo(const std::string &test_case_name,
+                 const std::string &name,
+                 const char *a_type_param,   // NULL if not a type-parameterized test
+                 const char *a_value_param,  // NULL if not a value-parameterized test
                  internal::CodeLocation a_code_location,
                  internal::TypeId fixture_class_id,
-                 internal::TestFactoryBase* factory);
+                 internal::TestFactoryBase *factory);
 
         // Increments the number of death tests encountered in this test so
         // far.
@@ -20662,7 +20662,7 @@ namespace testing
         // deletes it.
         void Run();
 
-        static void ClearTestResult(TestInfo* test_info)
+        static void ClearTestResult(TestInfo *test_info)
         {
             test_info->result_.Clear();
         }
@@ -20682,7 +20682,7 @@ namespace testing
         bool is_disabled_;                // True iff this test is disabled
         bool matches_filter_;             // True if this test matches the
         // user-specified filter.
-        internal::TestFactoryBase* const factory_;  // The factory that creates
+        internal::TestFactoryBase *const factory_;  // The factory that creates
         // the test object
 
         // This field is mutable and needs to be reset before running the
@@ -20710,7 +20710,7 @@ namespace testing
         //                 this is not a type-parameterized test.
         //   set_up_tc:    pointer to the function that sets up the test case
         //   tear_down_tc: pointer to the function that tears down the test case
-        TestCase(const char* name, const char* a_type_param,
+        TestCase(const char *name, const char *a_type_param,
                  Test::SetUpTestCaseFunc set_up_tc,
                  Test::TearDownTestCaseFunc tear_down_tc);
 
@@ -20718,14 +20718,14 @@ namespace testing
         virtual ~TestCase();
 
         // Gets the name of the TestCase.
-        const char* name() const
+        const char *name() const
         {
             return name_.c_str();
         }
 
         // Returns the name of the parameter type, or NULL if this is not a
         // type-parameterized test case.
-        const char* type_param() const
+        const char *type_param() const
         {
             if (type_param_.get() != NULL)
                 return type_param_->c_str();
@@ -20779,11 +20779,11 @@ namespace testing
 
         // Returns the i-th test among all the tests. i can range from 0 to
         // total_test_count() - 1. If i is not in that range, returns NULL.
-        const TestInfo* GetTestInfo(int i) const;
+        const TestInfo *GetTestInfo(int i) const;
 
         // Returns the TestResult that holds test properties recorded during
         // execution of SetUpTestCase and TearDownTestCase.
-        const TestResult& ad_hoc_test_result() const
+        const TestResult &ad_hoc_test_result() const
         {
             return ad_hoc_test_result_;
         }
@@ -20793,20 +20793,20 @@ namespace testing
         friend class internal::UnitTestImpl;
 
         // Gets the (mutable) vector of TestInfos in this TestCase.
-        std::vector<TestInfo*>& test_info_list()
+        std::vector<TestInfo *> &test_info_list()
         {
             return test_info_list_;
         }
 
         // Gets the (immutable) vector of TestInfos in this TestCase.
-        const std::vector<TestInfo*>& test_info_list() const
+        const std::vector<TestInfo *> &test_info_list() const
         {
             return test_info_list_;
         }
 
         // Returns the i-th test among all the tests. i can range from 0 to
         // total_test_count() - 1. If i is not in that range, returns NULL.
-        TestInfo* GetMutableTestInfo(int i);
+        TestInfo *GetMutableTestInfo(int i);
 
         // Sets the should_run member.
         void set_should_run(bool should)
@@ -20816,13 +20816,13 @@ namespace testing
 
         // Adds a TestInfo to this test case.  Will delete the TestInfo upon
         // destruction of the TestCase object.
-        void AddTestInfo(TestInfo * test_info);
+        void AddTestInfo(TestInfo *test_info);
 
         // Clears the results of all tests in this test case.
         void ClearResult();
 
         // Clears the results of all tests in the given test case.
-        static void ClearTestCaseResult(TestCase* test_case)
+        static void ClearTestCaseResult(TestCase *test_case)
         {
             test_case->ClearResult();
         }
@@ -20845,44 +20845,44 @@ namespace testing
         }
 
         // Returns true iff test passed.
-        static bool TestPassed(const TestInfo* test_info)
+        static bool TestPassed(const TestInfo *test_info)
         {
             return test_info->should_run() && test_info->result()->Passed();
         }
 
         // Returns true iff test failed.
-        static bool TestFailed(const TestInfo* test_info)
+        static bool TestFailed(const TestInfo *test_info)
         {
             return test_info->should_run() && test_info->result()->Failed();
         }
 
         // Returns true iff the test is disabled and will be reported in the XML
         // report.
-        static bool TestReportableDisabled(const TestInfo* test_info)
+        static bool TestReportableDisabled(const TestInfo *test_info)
         {
             return test_info->is_reportable() && test_info->is_disabled_;
         }
 
         // Returns true iff test is disabled.
-        static bool TestDisabled(const TestInfo* test_info)
+        static bool TestDisabled(const TestInfo *test_info)
         {
             return test_info->is_disabled_;
         }
 
         // Returns true iff this test will appear in the XML report.
-        static bool TestReportable(const TestInfo* test_info)
+        static bool TestReportable(const TestInfo *test_info)
         {
             return test_info->is_reportable();
         }
 
         // Returns true if the given test should run.
-        static bool ShouldRunTest(const TestInfo* test_info)
+        static bool ShouldRunTest(const TestInfo *test_info)
         {
             return test_info->should_run();
         }
 
         // Shuffles the tests in this test case.
-        void ShuffleTests(internal::Random* random);
+        void ShuffleTests(internal::Random *random);
 
         // Restores the test order to before the first shuffle.
         void UnshuffleTests();
@@ -20894,7 +20894,7 @@ namespace testing
         const internal::scoped_ptr<const ::std::string> type_param_;
         // The vector of TestInfos in their original order.  It owns the
         // elements in the vector.
-        std::vector<TestInfo*> test_info_list_;
+        std::vector<TestInfo *> test_info_list_;
         // Provides a level of indirection for the test list to allow easy
         // shuffling and restoring the test order.  The i-th element in this
         // vector is the index of the i-th test in the shuffled test list.
@@ -20944,7 +20944,7 @@ namespace testing
         // If you see an error about overriding the following function or
         // about it being private, you have mis-spelled SetUp() as Setup().
         struct Setup_should_be_spelled_SetUp {};
-        virtual Setup_should_be_spelled_SetUp* Setup()
+        virtual Setup_should_be_spelled_SetUp *Setup()
         {
             return NULL;
         }
@@ -20958,47 +20958,47 @@ namespace testing
         virtual ~TestEventListener() {}
 
         // Fired before any test activity starts.
-        virtual void OnTestProgramStart(const UnitTest& unit_test) = 0;
+        virtual void OnTestProgramStart(const UnitTest &unit_test) = 0;
 
         // Fired before each iteration of tests starts.  There may be more than
         // one iteration if GTEST_FLAG(repeat) is set. iteration is the iteration
         // index, starting from 0.
-        virtual void OnTestIterationStart(const UnitTest& unit_test,
+        virtual void OnTestIterationStart(const UnitTest &unit_test,
                                           int iteration) = 0;
 
         // Fired before environment set-up for each iteration of tests starts.
-        virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test) = 0;
+        virtual void OnEnvironmentsSetUpStart(const UnitTest &unit_test) = 0;
 
         // Fired after environment set-up for each iteration of tests ends.
-        virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test) = 0;
+        virtual void OnEnvironmentsSetUpEnd(const UnitTest &unit_test) = 0;
 
         // Fired before the test case starts.
-        virtual void OnTestCaseStart(const TestCase& test_case) = 0;
+        virtual void OnTestCaseStart(const TestCase &test_case) = 0;
 
         // Fired before the test starts.
-        virtual void OnTestStart(const TestInfo& test_info) = 0;
+        virtual void OnTestStart(const TestInfo &test_info) = 0;
 
         // Fired after a failed assertion or a SUCCEED() invocation.
-        virtual void OnTestPartResult(const TestPartResult& test_part_result) = 0;
+        virtual void OnTestPartResult(const TestPartResult &test_part_result) = 0;
 
         // Fired after the test ends.
-        virtual void OnTestEnd(const TestInfo& test_info) = 0;
+        virtual void OnTestEnd(const TestInfo &test_info) = 0;
 
         // Fired after the test case ends.
-        virtual void OnTestCaseEnd(const TestCase& test_case) = 0;
+        virtual void OnTestCaseEnd(const TestCase &test_case) = 0;
 
         // Fired before environment tear-down for each iteration of tests starts.
-        virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test) = 0;
+        virtual void OnEnvironmentsTearDownStart(const UnitTest &unit_test) = 0;
 
         // Fired after environment tear-down for each iteration of tests ends.
-        virtual void OnEnvironmentsTearDownEnd(const UnitTest& unit_test) = 0;
+        virtual void OnEnvironmentsTearDownEnd(const UnitTest &unit_test) = 0;
 
         // Fired after each iteration of tests finishes.
-        virtual void OnTestIterationEnd(const UnitTest& unit_test,
+        virtual void OnTestIterationEnd(const UnitTest &unit_test,
                                         int iteration) = 0;
 
         // Fired after all test activities have ended.
-        virtual void OnTestProgramEnd(const UnitTest& unit_test) = 0;
+        virtual void OnTestProgramEnd(const UnitTest &unit_test) = 0;
     };
 
 // The convenience class for users who need to override just one or two
@@ -21009,21 +21009,21 @@ namespace testing
     class EmptyTestEventListener : public TestEventListener
     {
     public:
-        virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {}
-        virtual void OnTestIterationStart(const UnitTest& /*unit_test*/,
+        virtual void OnTestProgramStart(const UnitTest & /*unit_test*/) {}
+        virtual void OnTestIterationStart(const UnitTest & /*unit_test*/,
                                           int /*iteration*/) {}
-        virtual void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) {}
-        virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
-        virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
-        virtual void OnTestStart(const TestInfo& /*test_info*/) {}
-        virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) {}
-        virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
-        virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {}
-        virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) {}
-        virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
-        virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
+        virtual void OnEnvironmentsSetUpStart(const UnitTest & /*unit_test*/) {}
+        virtual void OnEnvironmentsSetUpEnd(const UnitTest & /*unit_test*/) {}
+        virtual void OnTestCaseStart(const TestCase & /*test_case*/) {}
+        virtual void OnTestStart(const TestInfo & /*test_info*/) {}
+        virtual void OnTestPartResult(const TestPartResult & /*test_part_result*/) {}
+        virtual void OnTestEnd(const TestInfo & /*test_info*/) {}
+        virtual void OnTestCaseEnd(const TestCase & /*test_case*/) {}
+        virtual void OnEnvironmentsTearDownStart(const UnitTest & /*unit_test*/) {}
+        virtual void OnEnvironmentsTearDownEnd(const UnitTest & /*unit_test*/) {}
+        virtual void OnTestIterationEnd(const UnitTest & /*unit_test*/,
                                         int /*iteration*/) {}
-        virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
+        virtual void OnTestProgramEnd(const UnitTest & /*unit_test*/) {}
     };
 
 // TestEventListeners lets users add listeners to track events in Google Test.
@@ -21036,19 +21036,19 @@ namespace testing
         // Appends an event listener to the end of the list. Google Test assumes
         // the ownership of the listener (i.e. it will delete the listener when
         // the test program finishes).
-        void Append(TestEventListener* listener);
+        void Append(TestEventListener *listener);
 
         // Removes the given event listener from the list and returns it.  It then
         // becomes the caller's responsibility to delete the listener. Returns
         // NULL if the listener is not found in the list.
-        TestEventListener* Release(TestEventListener* listener);
+        TestEventListener *Release(TestEventListener *listener);
 
         // Returns the standard listener responsible for the default console
         // output.  Can be removed from the listeners list to shut down default
         // console output.  Note that removing this object from the listener list
         // with Release transfers its ownership to the caller and makes this
         // function return NULL the next time.
-        TestEventListener* default_result_printer() const
+        TestEventListener *default_result_printer() const
         {
             return default_result_printer_;
         }
@@ -21060,7 +21060,7 @@ namespace testing
         // removing this object from the listener list with Release transfers its
         // ownership to the caller and makes this function return NULL the next
         // time.
-        TestEventListener* default_xml_generator() const
+        TestEventListener *default_xml_generator() const
         {
             return default_xml_generator_;
         }
@@ -21075,21 +21075,21 @@ namespace testing
 
         // Returns repeater that broadcasts the TestEventListener events to all
         // subscribers.
-        TestEventListener* repeater();
+        TestEventListener *repeater();
 
         // Sets the default_result_printer attribute to the provided listener.
         // The listener is also added to the listener list and previous
         // default_result_printer is removed from it and deleted. The listener can
         // also be NULL in which case it will not be added to the list. Does
         // nothing if the previous and the current listener objects are the same.
-        void SetDefaultResultPrinter(TestEventListener* listener);
+        void SetDefaultResultPrinter(TestEventListener *listener);
 
         // Sets the default_xml_generator attribute to the provided listener.  The
         // listener is also added to the listener list and previous
         // default_xml_generator is removed from it and deleted. The listener can
         // also be NULL in which case it will not be added to the list. Does
         // nothing if the previous and the current listener objects are the same.
-        void SetDefaultXmlGenerator(TestEventListener* listener);
+        void SetDefaultXmlGenerator(TestEventListener *listener);
 
         // Controls whether events will be forwarded by the repeater to the
         // listeners in the list.
@@ -21097,11 +21097,11 @@ namespace testing
         void SuppressEventForwarding();
 
         // The actual list of listeners.
-        internal::TestEventRepeater* repeater_;
+        internal::TestEventRepeater *repeater_;
         // Listener responsible for the standard result output.
-        TestEventListener* default_result_printer_;
+        TestEventListener *default_result_printer_;
         // Listener responsible for the creation of the XML output file.
-        TestEventListener* default_xml_generator_;
+        TestEventListener *default_xml_generator_;
 
         // We disallow copying TestEventListeners.
         GTEST_DISALLOW_COPY_AND_ASSIGN_(TestEventListeners);
@@ -21123,7 +21123,7 @@ namespace testing
         // Gets the singleton UnitTest object.  The first time this method
         // is called, a UnitTest object is constructed and returned.
         // Consecutive calls will return the same object.
-        static UnitTest* GetInstance();
+        static UnitTest *GetInstance();
 
         // Runs all tests in this UnitTest object and prints the result.
         // Returns 0 if successful, or 1 otherwise.
@@ -21135,16 +21135,16 @@ namespace testing
 
         // Returns the working directory when the first TEST() or TEST_F()
         // was executed.  The UnitTest object owns the string.
-        const char* original_working_dir() const;
+        const char *original_working_dir() const;
 
         // Returns the TestCase object for the test that's currently running,
         // or NULL if no test is running.
-        const TestCase* current_test_case() const
+        const TestCase *current_test_case() const
         GTEST_LOCK_EXCLUDED_(mutex_);
 
         // Returns the TestInfo object for the test that's currently running,
         // or NULL if no test is running.
-        const TestInfo* current_test_info() const
+        const TestInfo *current_test_info() const
         GTEST_LOCK_EXCLUDED_(mutex_);
 
         // Returns the random seed used at the start of the current test run.
@@ -21155,7 +21155,7 @@ namespace testing
         // value-parameterized tests and instantiate and register them.
         //
         // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-        internal::ParameterizedTestCaseRegistry& parameterized_test_registry()
+        internal::ParameterizedTestCaseRegistry &parameterized_test_registry()
         GTEST_LOCK_EXCLUDED_(mutex_);
 #endif  // GTEST_HAS_PARAM_TEST
 
@@ -21209,15 +21209,15 @@ namespace testing
 
         // Gets the i-th test case among all the test cases. i can range from 0 to
         // total_test_case_count() - 1. If i is not in that range, returns NULL.
-        const TestCase* GetTestCase(int i) const;
+        const TestCase *GetTestCase(int i) const;
 
         // Returns the TestResult containing information on test failures and
         // properties logged outside of individual test cases.
-        const TestResult& ad_hoc_test_result() const;
+        const TestResult &ad_hoc_test_result() const;
 
         // Returns the list of event listeners that can be used to track events
         // inside Google Test.
-        TestEventListeners& listeners();
+        TestEventListeners &listeners();
 
     private:
         // Registers and returns a global test environment.  When a test
@@ -21229,17 +21229,17 @@ namespace testing
         // The UnitTest object takes ownership of the given environment.
         //
         // This method can only be called from the main thread.
-        Environment* AddEnvironment(Environment* env);
+        Environment *AddEnvironment(Environment *env);
 
         // Adds a TestPartResult to the current TestResult object.  All
         // Google Test assertion macros (e.g. ASSERT_TRUE, EXPECT_EQ, etc)
         // eventually call this to report their results.  The user code
         // should use the assertion macros instead of calling this directly.
         void AddTestPartResult(TestPartResult::Type result_type,
-                               const char* file_name,
+                               const char *file_name,
                                int line_number,
-                               const std::string& message,
-                               const std::string& os_stack_trace)
+                               const std::string &message,
+                               const std::string &os_stack_trace)
         GTEST_LOCK_EXCLUDED_(mutex_);
 
         // Adds a TestProperty to the current TestResult object when invoked from
@@ -21247,18 +21247,18 @@ namespace testing
         // from SetUpTestCase or TearDownTestCase, or to the global property set
         // when invoked elsewhere.  If the result already contains a property with
         // the same key, the value will be updated.
-        void RecordProperty(const std::string& key, const std::string& value);
+        void RecordProperty(const std::string &key, const std::string &value);
 
         // Gets the i-th test case among all the test cases. i can range from 0 to
         // total_test_case_count() - 1. If i is not in that range, returns NULL.
-        TestCase* GetMutableTestCase(int i);
+        TestCase *GetMutableTestCase(int i);
 
         // Accessors for the implementation object.
-        internal::UnitTestImpl* impl()
+        internal::UnitTestImpl *impl()
         {
             return impl_;
         }
-        const internal::UnitTestImpl* impl() const
+        const internal::UnitTestImpl *impl() const
         {
             return impl_;
         }
@@ -21270,11 +21270,11 @@ namespace testing
         friend class internal::ScopedTrace;
         friend class internal::StreamingListenerTest;
         friend class internal::UnitTestRecordPropertyTestHelper;
-        friend Environment* AddGlobalTestEnvironment(Environment* env);
-        friend internal::UnitTestImpl* internal::GetUnitTestImpl();
+        friend Environment *AddGlobalTestEnvironment(Environment *env);
+        friend internal::UnitTestImpl *internal::GetUnitTestImpl();
         friend void internal::ReportFailureInUnknownLocation(
             TestPartResult::Type result_type,
-            const std::string& message);
+            const std::string &message);
 
         // Creates an empty UnitTest.
         UnitTest();
@@ -21284,7 +21284,7 @@ namespace testing
 
         // Pushes a trace defined by SCOPED_TRACE() on to the per-thread
         // Google Test trace stack.
-        void PushGTestTrace(const internal::TraceInfo& trace)
+        void PushGTestTrace(const internal::TraceInfo &trace)
         GTEST_LOCK_EXCLUDED_(mutex_);
 
         // Pops a trace from the per-thread Google Test trace stack.
@@ -21299,7 +21299,7 @@ namespace testing
         // the object is constructed.  We don't mark it as const here, as
         // doing so will cause a warning in the constructor of UnitTest.
         // Mutable state in *impl_ is protected by mutex_.
-        internal::UnitTestImpl* impl_;
+        internal::UnitTestImpl *impl_;
 
         // We disallow copying UnitTest.
         GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTest);
@@ -21323,7 +21323,7 @@ namespace testing
 // translation units and the environments have dependencies among them
 // (remember that the compiler doesn't guarantee the order in which
 // global variables from different translation units are initialized).
-    inline Environment* AddGlobalTestEnvironment(Environment* env)
+    inline Environment *AddGlobalTestEnvironment(Environment *env)
     {
         return UnitTest::GetInstance()->AddEnvironment(env);
     }
@@ -21337,11 +21337,11 @@ namespace testing
 // updated.
 //
 // Calling the function for the second time has no user-visible effect.
-    GTEST_API_ void InitGoogleTest(int* argc, char** argv);
+    GTEST_API_ void InitGoogleTest(int *argc, char **argv);
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-    GTEST_API_ void InitGoogleTest(int* argc, wchar_t** argv);
+    GTEST_API_ void InitGoogleTest(int *argc, wchar_t **argv);
     GTEST_API_ bool GetGtestHelpFlag();
 
     namespace internal
@@ -21351,9 +21351,9 @@ namespace testing
 // frame size of CmpHelperEQ. This helps reduce the overhead of some sanitizers
 // when calling EXPECT_* in a tight loop.
         template <typename T1, typename T2>
-        AssertionResult CmpHelperEQFailure(const char* lhs_expression,
-                                           const char* rhs_expression,
-                                           const T1& lhs, const T2& rhs)
+        AssertionResult CmpHelperEQFailure(const char *lhs_expression,
+                                           const char *rhs_expression,
+                                           const T1 &lhs, const T2 &rhs)
         {
             return EqFailure(lhs_expression,
                              rhs_expression,
@@ -21364,10 +21364,10 @@ namespace testing
 
 // The helper function for {ASSERT|EXPECT}_EQ.
         template <typename T1, typename T2>
-        AssertionResult CmpHelperEQ(const char* lhs_expression,
-                                    const char* rhs_expression,
-                                    const T1& lhs,
-                                    const T2& rhs)
+        AssertionResult CmpHelperEQ(const char *lhs_expression,
+                                    const char *rhs_expression,
+                                    const T1 &lhs,
+                                    const T2 &rhs)
         {
             GTEST_DISABLE_MSC_WARNINGS_PUSH_(4389 /* signed/unsigned mismatch */)
             if (lhs == rhs) {
@@ -21381,8 +21381,8 @@ namespace testing
 // With this overloaded version, we allow anonymous enums to be used
 // in {ASSERT|EXPECT}_EQ when compiled with gcc 4, as anonymous enums
 // can be implicitly cast to BiggestInt.
-        GTEST_API_ AssertionResult CmpHelperEQ(const char* lhs_expression,
-                                               const char* rhs_expression,
+        GTEST_API_ AssertionResult CmpHelperEQ(const char *lhs_expression,
+                                               const char *rhs_expression,
                                                BiggestInt lhs,
                                                BiggestInt rhs);
 
@@ -21396,10 +21396,10 @@ namespace testing
         public:
             // This templatized version is for the general case.
             template <typename T1, typename T2>
-            static AssertionResult Compare(const char* lhs_expression,
-                                           const char* rhs_expression,
-                                           const T1& lhs,
-                                           const T2& rhs)
+            static AssertionResult Compare(const char *lhs_expression,
+                                           const char *rhs_expression,
+                                           const T1 &lhs,
+                                           const T2 &rhs)
             {
                 return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
             }
@@ -21410,8 +21410,8 @@ namespace testing
             //
             // Even though its body looks the same as the above version, we
             // cannot merge the two, as it will make anonymous enums unhappy.
-            static AssertionResult Compare(const char* lhs_expression,
-                                           const char* rhs_expression,
+            static AssertionResult Compare(const char *lhs_expression,
+                                           const char *rhs_expression,
                                            BiggestInt lhs,
                                            BiggestInt rhs)
             {
@@ -21431,16 +21431,16 @@ namespace testing
             // EXPECT_EQ(false, a_bool).
             template <typename T1, typename T2>
             static AssertionResult Compare(
-                const char* lhs_expression,
-                const char* rhs_expression,
-                const T1& lhs,
-                const T2& rhs,
+                const char *lhs_expression,
+                const char *rhs_expression,
+                const T1 &lhs,
+                const T2 &rhs,
                 // The following line prevents this overload from being considered if T2
                 // is not a pointer type.  We need this because ASSERT_EQ(NULL, my_ptr)
                 // expands to Compare("", "", NULL, my_ptr), which requires a conversion
                 // to match the Secret* in the other overload, which would otherwise make
                 // this template match better.
-                typename EnableIf<!is_pointer<T2>::value>::type* = 0)
+                typename EnableIf<!is_pointer<T2>::value>::type * = 0)
             {
                 return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
             }
@@ -21449,20 +21449,20 @@ namespace testing
             // pointer, e.g. ASSERT_EQ(NULL, a_pointer).
             template <typename T>
             static AssertionResult Compare(
-                const char* lhs_expression,
-                const char* rhs_expression,
+                const char *lhs_expression,
+                const char *rhs_expression,
                 // We used to have a second template parameter instead of Secret*.  That
                 // template parameter would deduce to 'long', making this a better match
                 // than the first overload even without the first overload's EnableIf.
                 // Unfortunately, gcc with -Wconversion-null warns when "passing NULL to
                 // non-pointer argument" (even a deduced integral argument), so the old
                 // implementation caused warnings in user code.
-                Secret* /* lhs (NULL) */,
-                T* rhs)
+                Secret * /* lhs (NULL) */,
+                T *rhs)
             {
                 // We already know that 'lhs' is a null pointer.
                 return CmpHelperEQ(lhs_expression, rhs_expression,
-                                   static_cast<T*>(NULL), rhs);
+                                   static_cast<T *>(NULL), rhs);
             }
         };
 
@@ -21470,9 +21470,9 @@ namespace testing
 // frame size of CmpHelperOP. This helps reduce the overhead of some sanitizers
 // when calling EXPECT_OP in a tight loop.
         template <typename T1, typename T2>
-        AssertionResult CmpHelperOpFailure(const char* expr1, const char* expr2,
-                                           const T1& val1, const T2& val2,
-                                           const char* op)
+        AssertionResult CmpHelperOpFailure(const char *expr1, const char *expr2,
+                                           const T1 &val1, const T2 &val2,
+                                           const char *op)
         {
             return AssertionFailure()
                    << "Expected: (" << expr1 << ") " << op << " (" << expr2
@@ -21522,51 +21522,51 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
 // The helper function for {ASSERT|EXPECT}_STREQ.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-        GTEST_API_ AssertionResult CmpHelperSTREQ(const char* s1_expression,
-                                                  const char* s2_expression,
-                                                  const char* s1,
-                                                  const char* s2);
+        GTEST_API_ AssertionResult CmpHelperSTREQ(const char *s1_expression,
+                                                  const char *s2_expression,
+                                                  const char *s1,
+                                                  const char *s2);
 
 // The helper function for {ASSERT|EXPECT}_STRCASEEQ.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-        GTEST_API_ AssertionResult CmpHelperSTRCASEEQ(const char* s1_expression,
-                                                      const char* s2_expression,
-                                                      const char* s1,
-                                                      const char* s2);
+        GTEST_API_ AssertionResult CmpHelperSTRCASEEQ(const char *s1_expression,
+                                                      const char *s2_expression,
+                                                      const char *s1,
+                                                      const char *s2);
 
 // The helper function for {ASSERT|EXPECT}_STRNE.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-        GTEST_API_ AssertionResult CmpHelperSTRNE(const char* s1_expression,
-                                                  const char* s2_expression,
-                                                  const char* s1,
-                                                  const char* s2);
+        GTEST_API_ AssertionResult CmpHelperSTRNE(const char *s1_expression,
+                                                  const char *s2_expression,
+                                                  const char *s1,
+                                                  const char *s2);
 
 // The helper function for {ASSERT|EXPECT}_STRCASENE.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-        GTEST_API_ AssertionResult CmpHelperSTRCASENE(const char* s1_expression,
-                                                      const char* s2_expression,
-                                                      const char* s1,
-                                                      const char* s2);
+        GTEST_API_ AssertionResult CmpHelperSTRCASENE(const char *s1_expression,
+                                                      const char *s2_expression,
+                                                      const char *s1,
+                                                      const char *s2);
 
 
 // Helper function for *_STREQ on wide strings.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-        GTEST_API_ AssertionResult CmpHelperSTREQ(const char* s1_expression,
-                                                  const char* s2_expression,
-                                                  const wchar_t* s1,
-                                                  const wchar_t* s2);
+        GTEST_API_ AssertionResult CmpHelperSTREQ(const char *s1_expression,
+                                                  const char *s2_expression,
+                                                  const wchar_t *s1,
+                                                  const wchar_t *s2);
 
 // Helper function for *_STRNE on wide strings.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-        GTEST_API_ AssertionResult CmpHelperSTRNE(const char* s1_expression,
-                                                  const char* s2_expression,
-                                                  const wchar_t* s1,
-                                                  const wchar_t* s2);
+        GTEST_API_ AssertionResult CmpHelperSTRNE(const char *s1_expression,
+                                                  const char *s2_expression,
+                                                  const wchar_t *s1,
+                                                  const wchar_t *s2);
 
     }  // namespace internal
 
@@ -21579,31 +21579,31 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
 // The {needle,haystack}_expr arguments are the stringified
 // expressions that generated the two real arguments.
     GTEST_API_ AssertionResult IsSubstring(
-        const char* needle_expr, const char* haystack_expr,
-        const char* needle, const char* haystack);
+        const char *needle_expr, const char *haystack_expr,
+        const char *needle, const char *haystack);
     GTEST_API_ AssertionResult IsSubstring(
-        const char* needle_expr, const char* haystack_expr,
-        const wchar_t* needle, const wchar_t* haystack);
+        const char *needle_expr, const char *haystack_expr,
+        const wchar_t *needle, const wchar_t *haystack);
     GTEST_API_ AssertionResult IsNotSubstring(
-        const char* needle_expr, const char* haystack_expr,
-        const char* needle, const char* haystack);
+        const char *needle_expr, const char *haystack_expr,
+        const char *needle, const char *haystack);
     GTEST_API_ AssertionResult IsNotSubstring(
-        const char* needle_expr, const char* haystack_expr,
-        const wchar_t* needle, const wchar_t* haystack);
+        const char *needle_expr, const char *haystack_expr,
+        const wchar_t *needle, const wchar_t *haystack);
     GTEST_API_ AssertionResult IsSubstring(
-        const char* needle_expr, const char* haystack_expr,
-        const ::std::string& needle, const ::std::string& haystack);
+        const char *needle_expr, const char *haystack_expr,
+        const ::std::string &needle, const ::std::string &haystack);
     GTEST_API_ AssertionResult IsNotSubstring(
-        const char* needle_expr, const char* haystack_expr,
-        const ::std::string& needle, const ::std::string& haystack);
+        const char *needle_expr, const char *haystack_expr,
+        const ::std::string &needle, const ::std::string &haystack);
 
 #if GTEST_HAS_STD_WSTRING
     GTEST_API_ AssertionResult IsSubstring(
-        const char* needle_expr, const char* haystack_expr,
-        const ::std::wstring& needle, const ::std::wstring& haystack);
+        const char *needle_expr, const char *haystack_expr,
+        const ::std::wstring &needle, const ::std::wstring &haystack);
     GTEST_API_ AssertionResult IsNotSubstring(
-        const char* needle_expr, const char* haystack_expr,
-        const ::std::wstring& needle, const ::std::wstring& haystack);
+        const char *needle_expr, const char *haystack_expr,
+        const ::std::wstring &needle, const ::std::wstring &haystack);
 #endif  // GTEST_HAS_STD_WSTRING
 
     namespace internal
@@ -21617,8 +21617,8 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
         template <typename RawType>
-        AssertionResult CmpHelperFloatingPointEQ(const char* lhs_expression,
-                                                 const char* rhs_expression,
+        AssertionResult CmpHelperFloatingPointEQ(const char *lhs_expression,
+                                                 const char *rhs_expression,
                                                  RawType lhs_value,
                                                  RawType rhs_value)
         {
@@ -21646,9 +21646,9 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
 // Helper function for implementing ASSERT_NEAR.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-        GTEST_API_ AssertionResult DoubleNearPredFormat(const char* expr1,
-                                                        const char* expr2,
-                                                        const char* abs_error_expr,
+        GTEST_API_ AssertionResult DoubleNearPredFormat(const char *expr1,
+                                                        const char *expr2,
+                                                        const char *abs_error_expr,
                                                         double val1,
                                                         double val2,
                                                         double abs_error);
@@ -21660,14 +21660,14 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
         public:
             // Constructor.
             AssertHelper(TestPartResult::Type type,
-                         const char* file,
+                         const char *file,
                          int line,
-                         const char* message);
+                         const char *message);
             ~AssertHelper();
 
             // Message assignment is a semantic trick to enable assertion
             // streaming; see the GTEST_MESSAGE_ macro below.
-            void operator=(const Message& message) const;
+            void operator=(const Message &message) const;
 
         private:
             // We put our data in a struct so that the size of the AssertHelper class can
@@ -21676,13 +21676,13 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
             // reserves stack space for another AssertHelper.
             struct AssertHelperData {
                 AssertHelperData(TestPartResult::Type t,
-                                 const char* srcfile,
+                                 const char *srcfile,
                                  int line_num,
-                                 const char* msg)
+                                 const char *msg)
                     : type(t), file(srcfile), line(line_num), message(msg) { }
 
                 TestPartResult::Type const type;
-                const char* const file;
+                const char *const file;
                 int const line;
                 std::string const message;
 
@@ -21690,7 +21690,7 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
                 GTEST_DISALLOW_COPY_AND_ASSIGN_(AssertHelperData);
             };
 
-            AssertHelperData* const data_;
+            AssertHelperData *const data_;
 
             GTEST_DISALLOW_COPY_AND_ASSIGN_(AssertHelper);
         };
@@ -21744,7 +21744,7 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
         // references static data, to reduce the opportunity for incorrect uses
         // like writing 'WithParamInterface<bool>::GetParam()' for a test that
         // uses a fixture whose parameter type is int.
-        const ParamType& GetParam() const
+        const ParamType &GetParam() const
         {
             GTEST_CHECK_(parameter_ != NULL)
                     << "GetParam() can only be called inside a value-parameterized test "
@@ -21755,20 +21755,20 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
     private:
         // Sets parameter value. The caller is responsible for making sure the value
         // remains alive and unchanged throughout the current test.
-        static void SetParam(const ParamType* parameter)
+        static void SetParam(const ParamType *parameter)
         {
             parameter_ = parameter;
         }
 
         // Static value used for accessing parameter during a test lifetime.
-        static const ParamType* parameter_;
+        static const ParamType *parameter_;
 
         // TestClass must be a subclass of WithParamInterface<T> and Test.
         template <class TestClass> friend class internal::ParameterizedTestFactory;
     };
 
     template <typename T>
-    const T* WithParamInterface<T>::parameter_ = NULL;
+    const T *WithParamInterface<T>::parameter_ = NULL;
 
 // Most value-parameterized classes can ignore the existence of
 // WithParamInterface, and can just inherit from ::testing::TestWithParam.
@@ -21952,10 +21952,10 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
 // this in your code.
     template <typename Pred,
               typename T1>
-    AssertionResult AssertPred1Helper(const char* pred_text,
-                                      const char* e1,
+    AssertionResult AssertPred1Helper(const char *pred_text,
+                                      const char *e1,
                                       Pred pred,
-                                      const T1& v1)
+                                      const T1 &v1)
     {
         if (pred(v1)) return AssertionSuccess();
 
@@ -21995,12 +21995,12 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
     template <typename Pred,
               typename T1,
               typename T2>
-    AssertionResult AssertPred2Helper(const char* pred_text,
-                                      const char* e1,
-                                      const char* e2,
+    AssertionResult AssertPred2Helper(const char *pred_text,
+                                      const char *e1,
+                                      const char *e2,
                                       Pred pred,
-                                      const T1& v1,
-                                      const T2& v2)
+                                      const T1 &v1,
+                                      const T2 &v2)
     {
         if (pred(v1, v2)) return AssertionSuccess();
 
@@ -22045,14 +22045,14 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
               typename T1,
               typename T2,
               typename T3>
-    AssertionResult AssertPred3Helper(const char* pred_text,
-                                      const char* e1,
-                                      const char* e2,
-                                      const char* e3,
+    AssertionResult AssertPred3Helper(const char *pred_text,
+                                      const char *e1,
+                                      const char *e2,
+                                      const char *e3,
                                       Pred pred,
-                                      const T1& v1,
-                                      const T2& v2,
-                                      const T3& v3)
+                                      const T1 &v1,
+                                      const T2 &v2,
+                                      const T3 &v3)
     {
         if (pred(v1, v2, v3)) return AssertionSuccess();
 
@@ -22102,16 +22102,16 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
               typename T2,
               typename T3,
               typename T4>
-    AssertionResult AssertPred4Helper(const char* pred_text,
-                                      const char* e1,
-                                      const char* e2,
-                                      const char* e3,
-                                      const char* e4,
+    AssertionResult AssertPred4Helper(const char *pred_text,
+                                      const char *e1,
+                                      const char *e2,
+                                      const char *e3,
+                                      const char *e4,
                                       Pred pred,
-                                      const T1& v1,
-                                      const T2& v2,
-                                      const T3& v3,
-                                      const T4& v4)
+                                      const T1 &v1,
+                                      const T2 &v2,
+                                      const T3 &v3,
+                                      const T4 &v4)
     {
         if (pred(v1, v2, v3, v4)) return AssertionSuccess();
 
@@ -22166,18 +22166,18 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
               typename T3,
               typename T4,
               typename T5>
-    AssertionResult AssertPred5Helper(const char* pred_text,
-                                      const char* e1,
-                                      const char* e2,
-                                      const char* e3,
-                                      const char* e4,
-                                      const char* e5,
+    AssertionResult AssertPred5Helper(const char *pred_text,
+                                      const char *e1,
+                                      const char *e2,
+                                      const char *e3,
+                                      const char *e4,
+                                      const char *e5,
                                       Pred pred,
-                                      const T1& v1,
-                                      const T2& v2,
-                                      const T3& v3,
-                                      const T4& v4,
-                                      const T5& v5)
+                                      const T1 &v1,
+                                      const T2 &v2,
+                                      const T3 &v3,
+                                      const T4 &v4,
+                                      const T5 &v5)
     {
         if (pred(v1, v2, v3, v4, v5)) return AssertionSuccess();
 
@@ -22412,9 +22412,9 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
 
 // Asserts that val1 is less than, or almost equal to, val2.  Fails
 // otherwise.  In particular, it fails if either val1 or val2 is NaN.
-    GTEST_API_ AssertionResult FloatLE(const char* expr1, const char* expr2,
+    GTEST_API_ AssertionResult FloatLE(const char *expr1, const char *expr2,
                                        float val1, float val2);
-    GTEST_API_ AssertionResult DoubleLE(const char* expr1, const char* expr2,
+    GTEST_API_ AssertionResult DoubleLE(const char *expr1, const char *expr2,
                                         double val1, double val2);
 
 

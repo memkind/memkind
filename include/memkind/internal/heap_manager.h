@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017 - 2018 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,5 +26,5 @@
 
 #include <memkind.h>
 
-void heap_manager_init(struct memkind* kind);
-void heap_manager_free(struct memkind *kind, void* ptr);
+void heap_manager_init(struct memkind *kind);
+void heap_manager_free(struct memkind *kind, void *ptr);

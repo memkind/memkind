@@ -64,7 +64,7 @@ TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AddressConvertion)
     const size_t size = 512;
     hbw::allocator<int> allocator;
 
-    int* ptr = allocator.allocate(size);
+    int *ptr = allocator.allocate(size);
 
     ASSERT_TRUE(NULL != ptr);
 

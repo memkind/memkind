@@ -27,7 +27,7 @@
 int load_tbbmalloc_symbols()
 {
     const char so_name[]="libtbbmalloc.so.2";
-    void* tbb_handle = dlopen(so_name, RTLD_LAZY);
+    void *tbb_handle = dlopen(so_name, RTLD_LAZY);
     if(!tbb_handle) {
         printf("Cannot load %s\n", so_name);
         return -1;

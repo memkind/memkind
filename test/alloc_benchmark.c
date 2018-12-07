@@ -47,7 +47,7 @@
 #define FREE_FN(x) memkind_free(pmem_bench_kind, (x))
 
 static const size_t PMEM_PART_SIZE = 0;
-static const char* PMEM_DIR = "/tmp/";
+static const char *PMEM_DIR = "/tmp/";
 static memkind_t pmem_bench_kind;
 #else
 #define MALLOC_FN malloc
@@ -55,9 +55,9 @@ static memkind_t pmem_bench_kind;
 #endif
 
 double ctimer(void);
-void usage(char * name);
+void usage(char *name);
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
 #ifdef _OPENMP
     int nthr = omp_get_max_threads();
@@ -69,7 +69,7 @@ int main(int argc, char * argv[])
     unsigned long i;
     double dt, t_start, t_end, t_malloc, t_free, t_first_malloc, t_first_free,
            malloc_time = 0.0, free_time = 0.0, first_malloc_time, first_free_time;
-    void* ptr;
+    void *ptr;
 #ifdef TBBMALLOC
     int ret;
 
@@ -143,7 +143,7 @@ int main(int argc, char * argv[])
         free_time = 0.0;
         for (i=0; i<n; i++) {
             t_malloc = ctimer();
-            ptr = (void*) MALLOC_FN(alloc_size);
+            ptr = (void *) MALLOC_FN(alloc_size);
             malloc_time += ctimer() - t_malloc;
             #pragma omp critical
             {
@@ -154,10 +154,10 @@ int main(int argc, char * argv[])
             }
 
             /* Make sure to touch every page */
-            char* end = ptr + alloc_size;
-            char* aligned_beg = (char*)((uintptr_t)ptr & page_mask);
+            char *end = ptr + alloc_size;
+            char *aligned_beg = (char *)((uintptr_t)ptr & page_mask);
             while(aligned_beg < end) {
-                char* temp_ptr = (char*) aligned_beg;
+                char *temp_ptr = (char *) aligned_beg;
                 char value = temp_ptr[0];
                 temp_ptr[0] = value;
                 aligned_beg += page_size;
@@ -185,7 +185,7 @@ int main(int argc, char * argv[])
     return EXIT_SUCCESS;
 }
 
-void usage(char * name)
+void usage(char *name)
 {
 #ifdef PMEMMALLOC
     printf("Usage: %s <N> <SIZE> [DIR], where \n"

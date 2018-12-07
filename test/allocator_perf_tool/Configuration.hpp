@@ -51,7 +51,7 @@ public:
         NUM_OF_ALLOCATOR_TYPES
     };
 
-    static const std::string& allocator_name(unsigned type)
+    static const std::string &allocator_name(unsigned type)
     {
         static const std::string names[] = {
             "STANDARD_ALLOCATOR",
@@ -77,7 +77,7 @@ public:
         return names[type];
     }
 
-    static unsigned allocator_type(const std::string& name)
+    static unsigned allocator_type(const std::string &name)
     {
         for (unsigned i=0; i<NUM_OF_ALLOCATOR_TYPES; i++) {
             if(allocator_name(i) == name)
