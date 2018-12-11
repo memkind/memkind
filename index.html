@@ -51,6 +51,7 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
             <a href="http://memkind.github.io/memkind/memkind_arch_20150318.pdf" class="btn btn-link">Architecture [PDF]</a>
             <a href="http://memkind.github.io/memkind/man_pages/memkind.html" class="btn btn-link">memkind API</a>
             <a href="http://memkind.github.io/memkind/man_pages/hbwmalloc.html" class="btn btn-link">hbwmalloc API</a>
+            <a href="http://memkind.github.io/memkind/man_pages/pmemallocator.html" class="btn btn-link">pmemallocator API</a>
           </p>
           <h2>
             Sources
@@ -64,7 +65,7 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
             Binaries
           </h2>
           <p>
-            <a href="http://download.opensuse.org/repositories/home:/pkochane/" class="btn btn-link">RPMs for misc OSes</a>
+            <a href="http://download.opensuse.org/repositories/home:/mbiesek/" class="btn btn-link">RPMs for misc OSes</a>
           </p>
         </div>
         <div id="faq" class='bs-docs-section'>
@@ -82,7 +83,29 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
           <h1 class="page-header">
             Blog
           </h1>
-          <p class="lead">Release 1.7.0 is available</p><span class="post-date">Fri Jan 26 2018</span><p>I would like to announce memkind release <strong>1.7.0</strong>. Changes since 1.6.0:</p>
+<p class="lead">Release 1.8.0 is available</p><span class="post-date">Tue Dec 11 2018</span><p>I would like to announce memkind release <strong>1.8.0</strong>. Changes since 1.7.0:</p>
+<ul>
+<li>Mon Dec 10 2018 Michal Biesek <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#x3a;&#109;&#105;&#99;&#104;&#97;&#108;&#x2e;&#98;&#105;&#101;&#115;&#101;&#107;&#64;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;">&#109;&#105;&#99;&#104;&#97;&#108;&#x2e;&#98;&#105;&#101;&#115;&#101;&#107;&#64;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;</a> v1.8.0</li>
+</ul>
+<ul>
+<li>Fixed error with realloc/free method with passing thread-specific cache flag</li>
+<li>Fixed error with memkind_create_pmem(), if other PMEM kind was destroyed before</li>
+<li>Fixed error with zeroing large allocations in PMEM kind</li>
+<li>Added support to create kind without maximum size limit of PMEM kind (max_size=0)</li>
+<li>Extended memkind API with memkind_malloc_usable_size()</li>
+<li>Removed EXPERIMENTAL from most methods in memkind API</li>
+<li>Added MEMKIND_ERROR_ARENAS_CREATE code</li>
+<li>Added C++ allocator for PMEM kind</li>
+<li>Extended PMEM examples</li>
+<li>Fixed integration with Travis CI</li>
+<li>Extended Travis CI configuration with Astyle and Coverage</li>
+<li>Added PMEM kind tests</li>
+</ul>
+<p>Sources are available on:
+<a href="https://github.com/memkind/memkind/releases/tag/v1.8.0">https://github.com/memkind/memkind/releases/tag/v1.8.0</a></p>
+<p>Best Regards,</p>
+<p><em>Michal Biesek</em></p>
+<p class="lead">Release 1.7.0 is available</p><span class="post-date">Fri Jan 26 2018</span><p>I would like to announce memkind release <strong>1.7.0</strong>. Changes since 1.6.0:</p>
 <ul>
 <li>Wed Jan 24 2018 Pawel Kochanek <a href="&#x6d;&#97;&#105;&#108;&#x74;&#111;&#x3a;&#112;&#97;&#119;&#x65;&#x6c;&#46;&#x62;&#46;&#107;&#111;&#99;&#104;&#x61;&#x6e;&#101;&#x6b;&#64;&#x69;&#x6e;&#116;&#x65;&#x6c;&#x2e;&#99;&#x6f;&#109;">&#112;&#97;&#119;&#x65;&#x6c;&#46;&#x62;&#46;&#107;&#111;&#99;&#104;&#x61;&#x6e;&#101;&#x6b;&#64;&#x69;&#x6e;&#116;&#x65;&#x6c;&#x2e;&#99;&#x6f;&#109;</a> v1.7.0</li>
 </ul>
