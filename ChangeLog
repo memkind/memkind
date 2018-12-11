@@ -1,3 +1,17 @@
+* Mon Dec 10 2018 Michal Biesek <michal.biesek@intel.com> v1.8.0
+- Fixed error with realloc/free method with passing thread-specific cache flag
+- Fixed error with memkind_create_pmem(), if other PMEM kind was destroyed before
+- Fixed error with zeroing large allocations in PMEM kind
+- Added support to create kind without maximum size limit of PMEM kind (max_size=0)
+- Extended memkind API with memkind_malloc_usable_size()
+- Removed EXPERIMENTAL from most methods in memkind API
+- Added MEMKIND_ERROR_ARENAS_CREATE code
+- Added C++ allocator for PMEM kind
+- Extended PMEM examples
+- Fixed integration with Travis CI
+- Extended Travis CI configuration with Astyle and Coverage
+- Added PMEM kind tests
+
 * Wed Jan 24 2018 Pawel Kochanek <pawel.b.kochanek@intel.com> v1.7.0
 - Updated internally used jemalloc to upstream version 5.0.
 - Fixed error that has been occuring while memkind was dynamically loaded.
