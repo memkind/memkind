@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.20 -->
-<!-- CreationDate: Wed Sep 27 17:45:22 2017 -->
+<!-- CreationDate: Tue Dec 11 23:51:42 2018 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,8 +25,14 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#RETURN VALUE">RETURN VALUE</a><br>
 <a href="#KINDS">KINDS</a><br>
+<a href="#MEMORY TYPES">MEMORY TYPES</a><br>
+<a href="#MEMORY BINDING POLICY">MEMORY BINDING POLICY</a><br>
+<a href="#MEMORY FLAGS">MEMORY FLAGS</a><br>
 <a href="#ERRORS">ERRORS</a><br>
 <a href="#FILES">FILES</a><br>
+<a href="#MEMORY TYPES">MEMORY TYPES</a><br>
+<a href="#MEMORY BINDING POLICY">MEMORY BINDING POLICY</a><br>
+<a href="#MEMORY FLAGS">MEMORY FLAGS</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
 <a href="#SYSTEM CONFIGURATION">SYSTEM CONFIGURATION</a><br>
 <a href="#STATIC LINKING">STATIC LINKING</a><br>
@@ -45,9 +51,8 @@
 <p style="margin-left:11%; margin-top: 1em">memkind &minus;
 Heap manager that enables allocations to memory with
 different properties. <br>
-This header expose EXPERIMENTAL API in except of STANDARD
-API placed in section LIBRARY VERSION. API Standards are
-described below in this man page.</p>
+This header expose STANDARD and EXPERIMENTAL API. API
+Standards are described below in this man page.</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
@@ -60,10 +65,30 @@ described below in this man page.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>Link with
 -lmemkind</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>ERROR
-HANDLING: <br>
+
+<p style="margin-left:11%; margin-top: 1em"><b>EXPERIMENTAL
+API: <br>
+HEAP MANAGEMENT: <br>
+int memkind_posix_memalign(memkind_t</b> <i>kind</i><b>,
+void</b> <i>**memptr</i><b>, size_t</b> <i>alignment</i><b>,
+size_t</b> <i>size</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>KIND
+MANAGEMENT: <br>
+int memkind_create_kind(memkind_memtype_t</b>
+<i>memtype_flags</i><b>, memkind_policy_t</b>
+<i>policy</i><b>, memkind_bits_t</b> <i>flags</i><b>,
+memkind_t</b> <i>*kind</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>STANDARD
+API: <br>
+ERROR HANDLING: <br>
 void memkind_error_message(int</b> <i>err</i><b>, char</b>
 <i>*msg</i><b>, size_t</b> <i>size</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>LIBRARY
+VERSION: <br>
+int memkind_get_version();</b></p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>HEAP
 MANAGEMENT: <br>
@@ -73,17 +98,17 @@ void *memkind_calloc(memkind_t</b> <i>kind</i><b>,
 size_t</b> <i>num</i><b>, size_t</b> <i>size</i><b>); <br>
 void *memkind_realloc(memkind_t</b> <i>kind</i><b>, void</b>
 <i>*ptr</i><b>, size_t</b> <i>size</i><b>); <br>
-int memkind_posix_memalign(memkind_t</b> <i>kind</i><b>,
-void</b> <i>**memptr</i><b>, size_t</b> <i>alignment</i><b>,
-size_t</b> <i>size</i><b>); <br>
 void memkind_free(memkind_t</b> <i>kind</i><b>, void</b>
-<i>*ptr</i><b>);</b></p>
+<i>*ptr</i><b>); <br>
+size_t memkind_malloc_usable_size(memkind_t</b>
+<i>kind</i><b>, void</b> <i>*ptr</i><b>);</b></p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>KIND
-MANAGMENT: <br>
+MANAGEMENT: <br>
 int memkind_create_pmem(const char</b> <i>*dir</i><b>,
 size_t</b> <i>max_size</i><b>, memkind_t</b>
 <i>*kind</i><b>); <br>
+int memkind_destroy_kind(memkind_t</b> <i>kind</i><b>); <br>
 int memkind_check_available(memkind_t</b>
 <i>kind</i><b>);</b></p>
 
@@ -109,17 +134,13 @@ void memkind_posix_memalign_post(memkind_t</b>
 <i>*err</i><b>); <br>
 void memkind_realloc_pre(memkind_t</b> <i>*kind</i><b>,
 void</b> <i>**ptr</i><b>, size_t</b> <i>*size</i><b>); <br>
-void memkind_realloc_post(memkind_t</b> <i>kind</i><b>,
+void memkind_realloc_post(memkind_t</b> <i>*kind</i><b>,
 void</b> <i>*ptr</i><b>, size_t</b> <i>size</i><b>, void</b>
 <i>**result</i><b>); <br>
 void memkind_free_pre(memkind_t</b> <i>*kind</i><b>,
 void</b> <i>**ptr</i><b>); <br>
 void memkind_free_post(memkind_t</b> <i>kind</i><b>,
 void</b> <i>*ptr</i><b>);</b></p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>LIBRARY
-VERSION: <br>
-int memkind_get_version();</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -134,13 +155,14 @@ the maximum size of the message is passed by the <i>size</i>
 parameter.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>HEAP
-MANAGMENT:</b> <br>
+MANAGEMENT:</b> <br>
 The functions described in this section define a heap
 manager with an interface modeled on the ISO C standard
 API&rsquo;s, except that the user must specify the
 <i>kind</i> of memory with the first argument to each
 function. See the <b>KINDS</b> section below for a full
-description of the implemented kinds.</p>
+description of the implemented kinds. For file-backed kind
+of memory see <b>memkind_create_pmem()</b>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_malloc</b>()
@@ -197,6 +219,16 @@ large as <i>sizeof(void *)</i>. If <i>size</i> is 0, then
 <b>memkind_posix_memalign</b>() returns NULL.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_malloc_usable_size</b>()
+function provides the same semantics as
+<b>malloc_usable_size(3),</b> but operates on specified
+<i>kind.</i></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Note:
+memkind_malloc_usable_size</b>() is not supported by TBB
+heap manager described in <b>ENVIRONMENT</b> section.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_free</b>()
 causes the allocated memory referenced by <i>ptr</i> to be
 made available for future allocations. This pointer must
@@ -217,16 +249,16 @@ non-zero value.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>KIND
 MANAGEMENT:</b> <br>
-There are built-in kinds that are always available, and
-these are enumerated in the <b>KINDS</b> section. The user
-can also create their own kinds of memory. This section
+There are built-in kinds that are always available and these
+are enumerated in the <b>KINDS</b> section. The user can
+also create their own kinds of memory. This section
 describes the API&rsquo;s that enable the tracking of the
 different kinds of memory and determining their
 properties.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_create_pmem</b>()
-is a convenience function used to create a file-backed kind
+is a convenient function used to create a file-backed kind
 of memory. It allocates a temporary file in the given
 directory <i>dir</i>. The file is created in a fashion
 similar to <b>tmpfile</b>(3), so that the file name does not
@@ -239,22 +271,57 @@ immediately, but only on a call to
 <b>memkind_pmem_mmap</b>() (see <b>memkind_pmem</b>(3)).
 This allows to create a pmem memkind of a pretty large size
 without the need to reserve in advance the corresponding
-file system space for the entire heap. The minimum
-<i>max_size</i> value allowed by the library is defined in
-<b>&lt;memkind_pmem.h&gt;</b> as
+file system space for the entire heap. If the value of
+<i>max_size</i> equals 0, pmem memkind is only limited by
+the capacity of the file system mounted under <i>dir</i>
+argument. <br>
+The minimum <i>max_size</i> value which allows to limit the
+size of kind by the library is defined as
 <b>MEMKIND_PMEM_MIN_SIZE</b>. Calling
 <b>memkind_create_pmem</b>() with a size smaller than that
-will return an error. The maximum allowed size is not
-limited by <b>memkind</b>, but by the file system specified
-by the <i>dir</i> argument. The <i>max_size</i> passed in is
-the raw size of the memory pool and <b>jemalloc</b> will use
-some of that space for its own metadata.</p>
+and different than 0 will return an error. The maximum
+allowed size is not limited by <b>memkind</b>, but by the
+file system specified by the <i>dir</i> argument. The
+<i>max_size</i> passed in is the raw size of the memory pool
+and <b>jemalloc</b> will use some of that space for its own
+metadata. Returns zero if the pmem memkind is created
+successfully or an error code from the <b>ERRORS</b> section
+if not.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_create_kind</b>()
+creates kind that allocates memory with specific memory
+type, memory binding policy and flags (see <b>MEMORY
+FLAGS</b> section). The <i>memtype_flags</i> (see <b>MEMORY
+TYPES</b> section) determine memory types to allocate,
+<i>policy</i> argument is policy for specifying page binding
+to memory types selected by <i>memtype_flags</i>. Returns
+zero if the specified kind is created successfully or an
+error code from the <b>ERRORS</b> section if not.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_destroy_kind</b>()
+destroys previously created kind object, which must have
+been returned by a previous call to
+<b>memkind_create_pmem</b>() or
+<b>memkind_create_kind</b>()<b>.</b> Otherwise, or if
+<i>memkind_destroy_kind(kind)</i> was already called before,
+undefined behavior occurs. Note that, when the kind was
+returned by <b>memkind_create_kind</b>() all allocated
+memory must be freed before kind is destroyed, otherwise
+this will cause memory leak. When the kind was returned by
+<b>memkind_create_pmem</b>() all allocated memory will be
+freed after kind will be destroyed.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_check_available</b>()
-Returns a zero if the specified <i>kind</i> is available or
-an error code from the <b>ERRORS</b> section if it is
-not.</p>
+returns zero if the specified <i>kind</i> is available or an
+error code from the <b>ERRORS</b> section if it is not.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_PMEM_MIN_SIZE</b>
+The minimum size which allows to limit the file-backed
+memory partition.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>DECORATORS:</b>
@@ -263,22 +330,22 @@ The memkind library enables the user to define decorator
 functions that can be called before and after each memkind
 heap management API. The decorators that are called at the
 beginning of the function end are named after that function
-with <i>_pre</i> appended to the name, and those that are
+with <i>_pre</i> appended to the name and those that are
 called at the end of the function are named after that
 function with <i>_post</i> appended to the name. These are
-weak symbols, and if they are not present at link time they
+weak symbols and if they are not present at link time they
 are not called. The memkind library does not define these
 symbols which are reserved for user definition. These
 decorators can be used to track calls to the heap management
 interface or to modify parameters. The decorators that are
 called at the beginning of the allocator pass all inputs by
-reference, and the decorators that are called at the end of
+reference and the decorators that are called at the end of
 the allocator pass the output by reference. This enables the
 modification of the input and output of each heap management
 function by the decorators.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>LIBRARY
-VERSION</b> <br>
+VERSION:</b> <br>
 The memkind library version scheme consist major, minor and
 patch numbers separated by dot. Combining those numbers, we
 got the following representation: <br>
@@ -301,7 +368,7 @@ major.minor.patch, where:</p>
 
 
 <p>-minor number is incremented whenever additional
-extensions are introduced, or behavior has been changed,</p></td></tr>
+extensions are introduced or behavior has been changed,</p></td></tr>
 <tr valign="top" align="left">
 <td width="8%"></td>
 <td width="7%"></td>
@@ -314,9 +381,12 @@ are added.</p></td></tr>
 
 <p style="margin-left:11%; margin-top: 1em">memkind library
 provide numeric representation of the version by exposing
-the following API: <br>
-int memkind_get_version() return version number represented
-by a single integer number, obtained from the formula: <br>
+the following API:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_get_version</b>()
+return version number represented by a single integer
+number, obtained from the formula: <br>
 major * 1000000 + minor * 1000 + patch</p>
 
 <p style="margin-left:11%; margin-top: 1em">Note: major
@@ -338,14 +408,19 @@ subject to change</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_calloc</b>(),
 <b>memkind_malloc</b>(), and <b>memkind_realloc</b>(),
-return the pointer to the allocated memory, or NULL if the
-request fails. <b>memkind_free</b>() and
-<b>memkind_error_message</b>() do not have return values.
-All other memkind API&rsquo;s return 0 upon success, and an
-error code defined in the ERRORS section upon failure. The
-memkind library avoids setting <i>errno</i> directly, but
-calls to underlying libraries and system calls may set
-<i>errno</i>.</p>
+returns the pointer to the allocated memory or NULL if the
+request fails. <b>memkind_malloc_usable_size</b>() returns
+the number of usable bytes in the block of allocated memory
+pointed to by <i>ptr,</i> a pointer to a block of memory
+allocated by <b>memkind_malloc</b>() or a related function.
+If <i>ptr</i> is NULL, 0 is returned. <b>memkind_free</b>()
+and <b>memkind_error_message</b>() do not have return
+values. All other memkind API&rsquo;s return 0 upon success
+and an error code defined in the <b>ERRORS</b> section upon
+failure. The memkind library avoids setting <i>errno</i>
+directly, but calls to underlying libraries and system calls
+may set <i>errno</i> ( e.g. <b>memkind_create_pmem</b>()
+).</p>
 
 <h2>KINDS
 <a name="KINDS"></a>
@@ -353,7 +428,7 @@ calls to underlying libraries and system calls may set
 
 
 <p style="margin-left:11%; margin-top: 1em">The available
-kinds of memory <b><br>
+kinds of memory: <b><br>
 MEMKIND_DEFAULT</b></p>
 
 <p style="margin-left:22%;">Default allocation using
@@ -363,15 +438,16 @@ standard memory and default page size.</p>
 
 <p style="margin-left:22%;">Allocate from standard memory
 using huge pages. Note: This kind requires huge pages
-configuration described in SYSTEM CONFIGURATION section.</p>
+configuration described in <b>SYSTEM CONFIGURATION</b>
+section.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_GBTLB
 (DEPRECATED)</b></p>
 
 <p style="margin-left:22%;">Allocate from standard memory
 using 1GB chunks backed by huge pages. Note: This kind
-requires huge pages configuration described in SYSTEM
-CONFIGURATION section.</p>
+requires huge pages configuration described in <b>SYSTEM
+CONFIGURATION</b> section.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_INTERLEAVE</b></p>
 
@@ -397,8 +473,8 @@ until the time of first write.</p>
 
 <p style="margin-left:22%;">Same as <b>MEMKIND_HBW</b>
 except the allocation is backed by huge pages. Note: This
-kind requires huge pages configuration described in SYSTEM
-CONFIGURATION section.</p>
+kind requires huge pages configuration described in
+<b>SYSTEM CONFIGURATION</b> section.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_ALL_HUGETLB</b></p>
@@ -406,7 +482,8 @@ CONFIGURATION section.</p>
 <p style="margin-left:22%;">Combination of
 <b>MEMKIND_HBW_ALL</b> and <b>MEMKIND_HBW_HUGETLB</b>
 properties. Note: This kind requires huge pages
-configuration described in SYSTEM CONFIGURATION section.</p>
+configuration described in <b>SYSTEM CONFIGURATION</b>
+section.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_PREFERRED</b></p>
@@ -422,7 +499,8 @@ standard memory.</p>
 <p style="margin-left:22%;">Same as
 <b>MEMKIND_HBW_PREFERRED</b> except the allocation is backed
 by huge pages. Note: This kind requires huge pages
-configuration described in SYSTEM CONFIGURATION section.</p>
+configuration described in <b>SYSTEM CONFIGURATION</b>
+section.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_GBTLB
 (DEPRECATED)</b></p>
@@ -432,7 +510,7 @@ except the allocation is backed by 1GB chunks of huge pages.
 Note that <i>size</i> can take on any value, but full
 gigabyte pages will allocated for each request, so remainder
 of the last page will be wasted. This kind requires huge
-pages configuration described in SYSTEM CONFIGURATION
+pages configuration described in <b>SYSTEM CONFIGURATION</b>
 section.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_PREFERRED_GBTLB
@@ -442,8 +520,8 @@ section.</p>
 <b>MEMKIND_HBW_GBTLB</b> except that if there is not enough
 high bandwidth memory to satisfy the request, the allocation
 will fall back on standard memory. Note: This kind requires
-huge pages configuration described in SYSTEM CONFIGURATION
-section.</p>
+huge pages configuration described in <b>SYSTEM
+CONFIGURATION</b> section.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_INTERLEAVE</b></p>
@@ -459,6 +537,86 @@ huge pages are disabled.</p>
 using the default page size. Regular means general purpose
 memory from the NUMA nodes containing CPUs.</p>
 
+<h2>MEMORY TYPES
+<a name="MEMORY TYPES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The available
+types of memory: <b><br>
+MEMKIND_MEMTYPE_DEFAULT</b></p>
+
+<p style="margin-left:22%;">Standard memory, the same as
+process uses.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_MEMTYPE_HIGH_BANDWIDTH</b></p>
+
+<p style="margin-left:22%;">High bandwidth memory (HBM).
+There must be at least two memory types with different
+bandwidth to determine which is the HBM.</p>
+
+<h2>MEMORY BINDING POLICY
+<a name="MEMORY BINDING POLICY"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The available
+types of memory binding policy: <b><br>
+MEMKIND_POLICY_BIND_LOCAL</b></p>
+
+<p style="margin-left:22%;">Allocate local memory. If there
+is not enough memory to satisfy the request <i>errno</i> is
+set to <b>ENOMEM</b> and the allocated pointer is set to
+<i>NULL</i>.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_POLICY_BIND_ALL</b></p>
+
+<p style="margin-left:22%;">Memory locality is ignored. If
+there is not enough memory to satisfy the request
+<i>errno</i> is set to <b>ENOMEM</b> and the allocated
+pointer is set to <i>NULL</i>.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_POLICY_PREFERRED_LOCAL</b></p>
+
+<p style="margin-left:22%;">Allocate preferred memory that
+is local. If there is not enough preferred memory to satisfy
+the request or preferred memory is not available, the
+allocation will fall back on any other memory.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_POLICY_INTERLEAVE_LOCAL</b></p>
+
+<p style="margin-left:22%;">Interleave allocation across
+local memory. For n memory types the allocation will be
+interleaved across all of them.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_POLICY_INTERLEAVE_ALL</b></p>
+
+<p style="margin-left:22%;">Interleave allocation. Locality
+is ignored. For n memory types the allocation will be
+interleaved across all of them.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_POLICY_MAX_VALUE</b></p>
+
+<p style="margin-left:22%;">Max policy value.</p>
+
+<h2>MEMORY FLAGS
+<a name="MEMORY FLAGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The available
+types of memory flags: <b><br>
+MEMKIND_MASK_PAGE_SIZE_2MB</b></p>
+
+<p style="margin-left:22%;">Allocation backed by 2MB page
+size.</p>
+
 <h2>ERRORS
 <a name="ERRORS"></a>
 </h2>
@@ -471,7 +629,7 @@ memory from the NUMA nodes containing CPUs.</p>
 standard error codes <b>EINVAL</b> or <b>ENOMEM</b> as
 defined in <i>&lt;errno.h&gt;</i> if an error occurs (these
 have positive values). If the <i>alignment</i> parameter is
-not a power of two, or is not a multiple of <i>sizoeof(void
+not a power of two or is not a multiple of <i>sizeof(void
 *)</i>, then <b>EINVAL</b> is returned. If there is
 insufficient memory to satisfy the request then
 <b>ENOMEM</b> is returned.</p>
@@ -503,12 +661,6 @@ failed</p>
 <b>malloc</b>() failed</p>
 
 
-<p style="margin-left:11%;"><b>MEMKIND_ERROR_ALLOCM</b></p>
-
-<p style="margin-left:22%;">Call to jemalloc&rsquo;s
-<b>allocm</b>() failed</p>
-
-
 <p style="margin-left:11%;"><b>MEMKIND_ERROR_ENVIRON</b></p>
 
 <p style="margin-left:22%;">Error parsing environment
@@ -520,6 +672,47 @@ variable (MEMKIND_*)</p>
 <p style="margin-left:22%;">Invalid input arguments to
 memkind routine</p>
 
+
+<p style="margin-left:11%;"><b>MEMKIND_ERROR_TOOMANY</b></p>
+
+<p style="margin-left:22%;">Error trying to initialize more
+than maximum <b>MEMKIND_MAX_KIND</b> number of kinds</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_ERROR_BADOPS</b></p>
+
+<p style="margin-left:22%;">Error memkind operation
+structure is missing or invalid</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_ERROR_HUGETLB</b></p>
+
+<p style="margin-left:22%;">Unable to allocate huge
+pages</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE</b></p>
+
+<p style="margin-left:22%;">Error requested memory type is
+not available</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_ERROR_OPERATION_FAILED</b></p>
+
+<p style="margin-left:22%;">Error memkind operation
+failed</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_ERROR_ARENAS_CREATE</b></p>
+
+<p style="margin-left:22%;">Call to jemalloc&rsquo;s
+<b>arenas.create</b>() failed</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_ERROR_RUNTIME</b></p>
+
+<p style="margin-left:22%;">Unspecified run-time error</p>
+
 <h2>FILES
 <a name="FILES"></a>
 </h2>
@@ -530,6 +723,83 @@ memkind routine</p>
 
 <p style="margin-left:22%;">Prints a comma separated list
 of high bandwidth nodes.</p>
+
+<h2>MEMORY TYPES
+<a name="MEMORY TYPES"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_MEMTYPE_DEFAULT</b></p>
+
+<p style="margin-left:22%;">Standard memory, the same as
+process uses.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_MEMTYPE_HIGH_BANDWIDTH</b></p>
+
+<p style="margin-left:22%;">High bandwidth memory (HBM).
+There must be at least two memory types with different
+bandwidth to determine which is the HBM.</p>
+
+<h2>MEMORY BINDING POLICY
+<a name="MEMORY BINDING POLICY"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_POLICY_BIND_LOCAL</b></p>
+
+<p style="margin-left:22%;">Allocate local memory. If there
+is not enough memory to satisfy the request <i>errno</i> is
+set to <b>ENOMEM</b> and the allocated pointer is set to
+<i>NULL</i>.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_POLICY_BIND_ALL</b></p>
+
+<p style="margin-left:22%;">Memory locality is ignored. If
+there is not enough memory to satisfy the request
+<i>errno</i> is set to <b>ENOMEM</b> and the allocated
+pointer is set to <i>NULL</i>.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_POLICY_PREFERRED_LOCAL</b></p>
+
+<p style="margin-left:22%;">Allocate preferred memory that
+is local. If there is not enough preferred memory to satisfy
+the request or preferred memory is not available, the
+allocation will fall back on any other memory.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_POLICY_INTERLEAVE_LOCAL</b></p>
+
+<p style="margin-left:22%;">Interleave allocation across
+local memory. For n memory types the allocation will be
+interleaved across all of them.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_POLICY_INTERLEAVE_ALL</b></p>
+
+<p style="margin-left:22%;">Interleave allocation. Locality
+is ignored. For n memory types the allocation will be
+interleaved across all of them.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_POLICY_MAX_VALUE</b></p>
+
+<p style="margin-left:22%;">Max policy value.</p>
+
+<h2>MEMORY FLAGS
+<a name="MEMORY FLAGS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_MASK_PAGE_SIZE_2MB</b></p>
+
+<p style="margin-left:22%;">Allocation backed by 2MB page
+size.</p>
 
 <h2>ENVIRONMENT
 <a name="ENVIRONMENT"></a>
@@ -544,7 +814,7 @@ comma separated list of NUMA nodes that are treated as high
 bandwidth. Uses the <i>libnuma</i> routine
 <b>numa_parse_nodestring</b>() for parsing, so the syntax
 described in the <b>numa</b>(3) man page for this routine
-applies: e.g 1-3,5 is a valid setting.</p>
+applies: e.g. 1-3,5 is a valid setting.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_ARENA_NUM_PER_KIND</b></p>
@@ -574,7 +844,7 @@ operations but increase memory usage.</p>
 <p style="margin-left:22%;">Controls logging mechanism in
 memkind. Setting <b>MEMKIND_DEBUG</b> to &quot;1&quot;
 enables printing messages like errors and general
-informations about environment to <i>stderr.</i></p>
+information about environment to <i>stderr</i>.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_HEAP_MANAGER</b></p>
@@ -583,11 +853,11 @@ informations about environment to <i>stderr.</i></p>
 behavior in memkind library by switching to one of the
 available heap managers. <br>
 Values: <br>
-JEMALLOC &acirc; sets the jamalloc heap manager <br>
+JEMALLOC &acirc; sets the jemalloc heap manager <br>
 TBB &acirc; sets the Intel Threading Building Blocks heap
 manager. This option requires installed <br>
 Intel Threading Building Blocks library. If the
-MEMKIND_HEAP_MANAGER is not set than the jemalloc heap
+MEMKIND_HEAP_MANAGER is not set then the jemalloc heap
 manager will be used by default.</p>
 
 <h2>SYSTEM CONFIGURATION
@@ -605,7 +875,7 @@ HUGETLB (huge pages)</b></p>
 /proc/sys/vm/nr_hugepages file. Proposed way of setting
 hugepages is: &quot;sudo sysctl
 vm.nr_hugepages=&lt;number_of_hugepages&gt;&quot;. More
-informations can be found here:
+information can be found here:
 https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</p>
 
 <h2>STATIC LINKING
@@ -644,7 +914,7 @@ extra huge pages (e.g. 8 huge pages).</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright (C)
-2014 - 2017 Intel Corporation. All rights reserved.</p>
+2014 - 2018 Intel Corporation. All rights reserved.</p>
 
 <h2>SEE ALSO
 <a name="SEE ALSO"></a>
@@ -653,8 +923,9 @@ extra huge pages (e.g. 8 huge pages).</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>malloc</b>(3),
-<b>numa</b>(3), <b>numactl</b>(8), <b>mbind</b>(2),
-<b>mmap</b>(2), <b>move_pages</b>(2), <b>jemalloc</b>(3),
+<b>malloc_usable_size</b>(3), <b>numa</b>(3),
+<b>numactl</b>(8), <b>mbind</b>(2), <b>mmap</b>(2),
+<b>move_pages</b>(2), <b>jemalloc</b>(3),
 <b>memkind_default</b>(3), <b>memkind_arena</b>(3),
 <b>memkind_hbw</b>(3), <b>memkind_hugetlb</b>(3),
 <b>memkind_pmem</b>(3)</p>

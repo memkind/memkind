@@ -1,0 +1,161 @@
+<!-- Creator     : groff version 1.20 -->
+<!-- CreationDate: Tue Dec 11 23:51:43 2018 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>PMEMALLOCATOR</title>
+
+</head>
+<body>
+
+<h1 align="center">PMEMALLOCATOR</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">pmem::allocator&lt;T&gt;
+&minus; The C++ allocator compatible with the C++ standard
+library allocator concepts <br>
+Note: This is EXPERIMENTAL API. The functionality and the
+header file itself can be changed (including non-backward
+compatible changes), or removed.</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>#include
+&lt;pmem_allocator.h&gt;</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Link with
+-lmemkind</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>pmem::allocator(const
+char *dir, size_t max_size) <br>
+pmem::allocator(const std::string&amp; dir, size_t max_size)
+<br>
+template &lt;typename U&gt;
+pmem::allocator&lt;T&gt;::allocator(const
+pmem::allocator&lt;U&gt;&amp;) noexcept <br>
+template &lt;typename U&gt; pmem::allocator(const
+allocator&lt;U&gt;&amp;&amp; other) noexcept <br>
+pmem::allocator&lt;T&gt;::~allocator() <br>
+T* pmem::allocator&lt;T&gt;::allocate(std::size_t n) const
+<br>
+void pmem::allocator&lt;T&gt;::deallocate(T* p, std::size_t
+n) const <br>
+template &lt;class U, class... Args&gt; void
+pmem::allocator&lt;T&gt;::construct(U* p, Args... args)
+const <br>
+void pmem::allocator&lt;T&gt;::destroy(T* p) const</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+pmem::allocator&lt;T&gt; is intended to be used with STL
+containers to allocate persistent memory. Memory management
+is based on memkind_pmem (memkind library). Refer
+memkind_pmem(3) and memkind(3) man page for more
+details.</p>
+
+<p style="margin-left:11%; margin-top: 1em">All public
+member types and functions corresponds to standard library
+allocator concepts and definitions. The current
+implementation supports C++11 standard.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Template
+arguments: <br>
+T is an object type aliased by value_type. <br>
+U is an object type.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Note: <br>
+T* pmem::allocator&lt;T&gt;::allocate(std::size_t n)
+allocates persistent memory memory using
+<i>memkind_malloc()</i>. Throw <i>std::bad_alloc</i>
+when:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="7%"></td>
+<td width="85%">
+
+
+<p><i>n</i> = 0,</p></td></tr>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="7%"></td>
+<td width="85%">
+
+
+<p>or there is not enough memory to satisfy the
+request.</p> </td></tr>
+</table>
+
+<p style="margin-left:11%; margin-top: 1em">void
+pmem::allocator&lt;T&gt;::deallocate(T* p, std::size_t n)
+deallocates memory associated with pointer returned by
+<i>allocate()</i> using <i>memkind_free()</i>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To find out
+more about <i>memkind_malloc()</i> and <i>memkind_free()</i>
+read memkind(3) man page.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+<i>pmem::allocator&lt;T&gt;</i> behavior depends on the heap
+manager used by memkind. Refer memkind(3) man page for more
+details.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright (C)
+2018 Intel Corporation. All rights reserved.</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_pmem(3),
+memkind</b>(3)</p>
+<hr>
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.20 -->
-<!-- CreationDate: Wed Sep 27 18:04:50 2017 -->
+<!-- CreationDate: Tue Dec 11 23:51:42 2018 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -83,8 +83,9 @@ size_t</b> <i>size</i><b>, int</b> <i>flags</i><b>);</b></p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_check_available</b>()
-returns 0 if high bandwidth memory is available and an error
-code described in the <b>ERRORS</b> section if not.</p>
+returns zero if high bandwidth memory is available or an
+error code described in the <b>ERRORS</b> section if
+not.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_malloc</b>()
@@ -201,7 +202,7 @@ are not supported with HBW_POLICY_INTERLEAVE policy.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_get_policy</b>()
 returns the current fallback policy when insufficient high
-bandwith memory is available.</p>
+bandwidth memory is available.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_set_policy</b>()
@@ -249,12 +250,11 @@ pages (the Transparent Huge Page feature is disabled).</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_verify_memory_region</b>()
 verifies if memory region fully fall into high bandwidth
-memory. Returns: 0 if memory in address range from
-<i>addr</i> to <i>addr</i> + <i>size</i> is allocated in
-high bandwidth memory, -1 if any fragment of memory was not
-backed by high bandwidth memory [e.g. when memory is not
-initalized] or one of error codes described in ERRORS
-section.</p>
+memory. Returns 0 if memory address range from <i>addr</i>
+to <i>addr</i> + <i>size</i> is allocated in high bandwidth
+memory, -1 if any fragment of memory was not backed by high
+bandwidth memory [e.g. when memory is not initialized] or
+one of error codes described in ERRORS section.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Using this
 function in production code may result in serious
@@ -268,8 +268,8 @@ HBW_TOUCH_PAGES</b></p>
 <p style="margin-left:22%;">Before checking pages, function
 will touch first byte of all pages in address range starting
 from <i>addr</i> to <i>addr</i> + <i>size</i> by read and
-write (so the content will be overwitten by the same data as
-it was read). Using this option may trigger Out Of Memory
+write (so the content will be overwritten by the same data
+as it was read). Using this option may trigger Out Of Memory
 killer.</p>
 
 <h2>RETURN VALUE
@@ -392,11 +392,11 @@ See section &quot;IMPLEMENTATION NOTES&quot; of
 behavior in memkind library by switching to one of the
 available heap managers. <br>
 Values: <br>
-JEMALLOC &acirc; sets the jamalloc heap manager <br>
+JEMALLOC &acirc; sets the jemalloc heap manager <br>
 TBB &acirc; sets the Intel Threading Building Blocks heap
 manager. This option requires installed <br>
 Intel Threading Building Blocks library. If the
-MEMKIND_HEAP_MANAGER is not set than the jemalloc heap
+MEMKIND_HEAP_MANAGER is not set then the jemalloc heap
 manager will be used by default.</p>
 
 <h2>SYSTEM CONFIGURATION
@@ -414,7 +414,7 @@ HUGETLB (huge pages)</b></p>
 /proc/sys/vm/nr_hugepages file. Proposed way of setting
 hugepages is: &quot;sudo sysctl
 vm.nr_hugepages=&lt;number_of_hugepages&gt;&quot;. More
-informations can be found here:
+information can be found here:
 https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</p>
 
 <h2>KNOWN ISSUES
@@ -436,7 +436,7 @@ extra huge pages (e.g. 8 huge pages).</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright (C)
-2014 - 2016 Intel Corporation. All rights reserved.</p>
+2014 - 2018 Intel Corporation. All rights reserved.</p>
 
 <h2>SEE ALSO
 <a name="SEE ALSO"></a>
