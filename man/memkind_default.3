@@ -121,7 +121,9 @@ can use this function for freeing.
 .BR memkind_default_mmap ()
 This calls the ops->get_mmap_flags()
 operations for the kind, or falls back on the default implementations
-if the function pointers are NULL.  The results of these calls are
+if the function pointers are
+.IR "NULL" .
+The results of these calls are
 passed to the
 .BR mmap (2)
 call to allocate pages from the operating system.  The

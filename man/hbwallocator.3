@@ -53,21 +53,27 @@ Note: This is EXPERIMENTAL API. The functionality and the header file itself can
 .B void hbw::allocator<T>::destroy(hbw::allocator<T>::pointer p)
 .fi
 .SH "DESCRIPTION"
-The hbw::allocator<T> is intended to be used with STL containers to allocate high bandwidth memory. Memory management is based on hbwmalloc (memkind library), enabling users to gain performance in multithreaded applications. Refer hbwmalloc(3) and memkind(3) man page for more details.
+The hbw::allocator<T> is intended to be used with STL containers to allocate high bandwidth memory. Memory management is based on hbwmalloc (memkind library), enabling users to gain performance in multithreaded applications. Refer
+.BR hbwmalloc (3)
+and
+.BR memkind (3)
+man page for more details.
 .PP
 All public member types and functions corresponds to standard library allocator concepts and definitions. The current implementation supports C++03 standard.
 .PP
 Template arguments:
 .br
-T is an object type aliased by value_type.
+.I T
+is an object type aliased by value_type.
 .br
-U is an object type.
+.I U
+is an object type.
 .PP
 Note:
 .br
-hbw::allocator<T>::pointer hbw::allocator<T>::allocate(hbw::allocator<T>::size_type n, const void * = 0)
+.BR "hbw::allocator<T>::pointer hbw::allocator<T>::allocate(hbw::allocator<T>::size_type n, const void * = 0)"
 allocates high bandwidth memory using
-.IR "hbw_malloc()".
+.BR hbw_malloc() .
 Throw
 .I std::bad_alloc
 when:
@@ -79,33 +85,26 @@ when:
 	or there is not enough memory to satisfy the request.
 
 .PP
-void hbw::allocator<T>::deallocate(hbw::allocator<T>::pointer p, hbw::allocator<T>::size_type n) deallocates memory associated with pointer returned by
+.BR "hbw::allocator<T>::deallocate(hbw::allocator<T>::pointer p, hbw::allocator<T>::size_type n)"
+deallocates memory associated with pointer returned by
 .I allocate()
 using
-.IR "hbw_free()".
-.PP
-To find out more about
-.I hbw_malloc()
-and
-.I hbw_free()
-read hbwmalloc(3) man page.
-
+.BR hbw_free() .
 
 .SH ERRORS
-.TP
-The same as described in ERRORS section of hbwmalloc(3) man page.
+The same as described in ERRORS section of
+.BR hbwmalloc (3)
+man page.
 .SH "NOTES"
-The
-.I hbw::allocator<T>
-behavior depends on hbwmalloc heap management policy. To get and set the policy please use
-.I hbw_get_policy()
+The hbw::allocator<T> behavior depends on hbwmalloc heap management policy. To get and set the policy please use
+.BR hbw_get_policy()
 and
-.I hbw_set_policy()
+.BR hbw_set_policy()
 respectively.
 .SH "COPYRIGHT"
 Copyright (C) 2015 - 2018 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
-.BR hbwmalloc(3),
+.BR hbwmalloc (3),
 .BR numa (3),
 .BR numactl (8),
 .BR memkind (3)

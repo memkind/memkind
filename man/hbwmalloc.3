@@ -68,7 +68,8 @@ type of object. If
 .I size
 is zero then
 .BR hbw_malloc ()
-returns NULL.
+returns
+.IR "NULL" .
 .PP
 .BR hbw_calloc ()
 allocates space for
@@ -86,7 +87,8 @@ or
 .I size
 is 0, then
 .BR hbw_calloc ()
-returns NULL.
+returns
+.IR "NULL" .
 .PP
 .BR hbw_realloc ()
 changes the size of the previously allocated high bandwidth memory
@@ -110,14 +112,18 @@ than
 
 If
 .I ptr
-is NULL, the
+is
+.IR "NULL" ,
+the
 .BR hbw_realloc ()
 function behaves identically to
 .BR hbw_malloc ()
 for the specified size.
 The address
 .IR "ptr" ,
-if not NULL, was returned by a previous call to
+if not
+.IR "NULL" ,
+was returned by a previous call to
 .BR hbw_malloc (),
 .BR hbw_calloc (),
 .BR hbw_realloc (),
@@ -139,10 +145,14 @@ causes the allocated memory referenced by
 .I ptr
 to be made available for future allocations. If
 .I ptr
-is NULL, no action occurs.
+is
+.IR "NULL" ,
+no action occurs.
 The address
 .IR "ptr" ,
-if not NULL, must have been returned by a previous call to
+if not
+.IR "NULL" ,
+must have been returned by a previous call to
 .BR hbw_malloc (),
 .BR hbw_calloc (),
 .BR hbw_realloc (),
@@ -216,7 +226,8 @@ Note: If the policy is not set, than HBW_POLICY_PREFERRED will be used by defaul
 .TP
 .B HBW_POLICY_BIND
 If insufficient high bandwidth memory from the nearest NUMA node is
-available to satisfy a request, the allocated pointer is set to NULL
+available to satisfy a request, the allocated pointer is set to 
+.I NULL
 and
 .I errno
 is set to ENOMEM.  If insufficient high bandwidth memory pages are
@@ -226,7 +237,9 @@ node nearest at time of allocation, not at time of fault.
 .TP
 .B HBW_POLICY_BIND_ALL
 If insufficient high bandwidth memory is available to satisfy a request,
-the allocated pointer is set to NULL and
+the allocated pointer is set to
+.I NULL
+and
 .I errno
 is set to ENOMEM.  If insufficient high bandwidth memory pages are
 available at fault time the Out Of Memory (OOM) killer is triggered.
@@ -284,8 +297,9 @@ do not have return value.
 .BR hbw_calloc (),
 and
 .BR hbw_realloc ()
-return the pointer to the allocated memory, or NULL if the request
-fails.
+return the pointer to the allocated memory, or
+.I NULL
+if the request fails.
 .BR hbw_posix_memalign (),
 .BR hbw_posix_memalign_psize ()
 and
@@ -338,7 +352,8 @@ returns
 .B EINVAL
 if
 .IR "addr"
-is NULL,
+is 
+.IR "NULL" ,
 .IR "size"
 equals 0 or
 .IR "flags"
@@ -385,11 +400,12 @@ Controls heap management behavior in memkind library by switching to one of the 
 .br
 Values:
 .br
-    JEMALLOC – sets the jemalloc heap manager
+    JEMALLOC - sets the jemalloc heap manager
 .br
-    TBB – sets the Intel Threading Building Blocks heap manager. This option requires installed
+    TBB - sets the Intel Threading Building Blocks heap manager. This option requires installed
     Intel Threading Building Blocks library.
-If the MEMKIND_HEAP_MANAGER is not set then the jemalloc heap manager will be used by default.
+If the
+.B MEMKIND_HEAP_MANAGER is not set then the jemalloc heap manager will be used by default.
 .SH "SYSTEM CONFIGURATION"
 Interfaces for obtaining 2MB (HUGETLB) need allocated
 huge pages in the kernel's huge page pool.
@@ -398,7 +414,8 @@ huge pages in the kernel's huge page pool.
 Current number of "persistent" huge pages can be read from /proc/sys/vm/nr_hugepages file.
 Proposed way of setting hugepages is: "sudo sysctl vm.nr_hugepages=<number_of_hugepages>".
 More information can be found here:
-https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+.UR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+.UE
 .SH "KNOWN ISSUES"
 .TP
 .B HUGETLB (huge pages)
