@@ -118,7 +118,7 @@ of memory with the first argument to each function. See the
 .B KINDS
 section below for a full description of the implemented kinds.
 For file-backed kind of memory see
-.BR memkind_create_pmem() .
+.BR memkind_create_pmem () .
 .PP
 .BR memkind_malloc ()
 allocates
@@ -130,7 +130,8 @@ coercion) for storage of any type of object. If
 .I size
 is 0, then
 .BR memkind_malloc ()
-returns NULL.
+returns
+.IR "NULL" .
 .PP
 .BR memkind_calloc ()
 allocates space for
@@ -151,7 +152,8 @@ or
 .I size
 is 0, then
 .BR memkind_calloc ()
-returns NULL.
+returns
+.IR "NULL" .
 .PP
 .BR memkind_realloc ()
 changes the size of the previously allocated memory referenced by
@@ -176,17 +178,21 @@ than
 
 If
 .I ptr
-is NULL, the
+is
+.IR "NULL" ,
+the
 .BR memkind_realloc ()
 function behaves identically to
 .BR memkind_malloc ()
 for the specified size.
 The address
 .IR "ptr" ,
-if not NULL, must have been returned by a previous call to
+if not
+.IR "NULL" ,
+must have been returned by a previous call to
 .BR memkind_malloc (),
 .BR memkind_calloc (),
-.BR memkind_realloc (),
+.BR memkind_realloc ()
 or
 .BR memkind_posix_memalign ()
 with the same
@@ -215,13 +221,14 @@ If
 .I size
 is 0, then
 .BR memkind_posix_memalign ()
-returns NULL.
+returns
+.IR "NULL" .
 .PP
 .BR memkind_malloc_usable_size ()
 function provides the same semantics as
 .BR malloc_usable_size(3),
 but operates on specified
-.I kind.
+.IR "kind" .
 
 .BR Note:
 .BR memkind_malloc_usable_size ()
@@ -237,7 +244,7 @@ to be made available for future allocations. This pointer
 must have been returned by a previous call to
 .BR memkind_malloc (),
 .BR memkind_calloc (),
-.BR memkind_realloc (),
+.BR memkind_realloc ()
 or
 .BR memkind_posix_memalign ().
 Otherwise, if
@@ -245,7 +252,9 @@ Otherwise, if
 was already called before, undefined behavior occurs.
 If
 .I ptr
-is NULL, no operation is performed.
+is
+.IR "NULL" ,
+no operation is performed.
 The value of
 .B MEMKIND_DEFAULT
 can be given as the
@@ -408,18 +417,22 @@ API standards:
 .sp
 .SH "RETURN VALUE"
 .BR memkind_calloc (),
-.BR memkind_malloc (),
+.BR memkind_malloc ()
 and
-.BR memkind_realloc (),
-returns the pointer to the allocated memory or NULL if the request fails.
+.BR memkind_realloc ()
+returns the pointer to the allocated memory or
+.I NULL
+if the request fails.
 .BR memkind_malloc_usable_size ()
 returns the number of usable bytes in the block of allocated memory pointed to by
-.I ptr,
+.IR "ptr" ,
 a pointer to a block of memory allocated by
 .BR memkind_malloc ()
 or a related function. If
 .I ptr
-is NULL, 0 is returned.
+is
+.IR "NULL" ,
+0 is returned.
 .BR memkind_free ()
 and
 .BR memkind_error_message ()
@@ -461,7 +474,8 @@ pages disabled.
 Allocate from the closest high bandwidth memory NUMA node at time
 of allocation. If there is not enough high bandwidth memory to satisfy the request
 .I errno
-is set to ENOMEM and the allocated pointer is set to NULL.
+is set to ENOMEM and the allocated pointer is set to
+.IR "NULL" .
 .TP
 .B MEMKIND_HBW_ALL
 Same as
@@ -656,55 +670,6 @@ Unspecified run-time error
 .TP
 .I /usr/bin/memkind-hbw-nodes
 Prints a comma separated list of high bandwidth nodes.
-.SH "MEMORY TYPES"
-.TP
-.B MEMKIND_MEMTYPE_DEFAULT
-Standard memory, the same as process uses.
-.TP
-.B MEMKIND_MEMTYPE_HIGH_BANDWIDTH
-High bandwidth memory (HBM). There must be at least two memory types with different bandwidth to determine which is the HBM.
-.SH "MEMORY BINDING POLICY"
-.TP
-.B MEMKIND_POLICY_BIND_LOCAL
-Allocate local memory.
-If there is not enough memory to satisfy the request 
-.I errno
-is set to
-.BR ENOMEM
-and the allocated pointer is set to
-.I NULL\fR.
-.TP
-.B MEMKIND_POLICY_BIND_ALL
-Memory locality is ignored.
-If there is not enough memory to satisfy the request 
-.I errno
-is set to
-.B ENOMEM
-and the allocated pointer is set to 
-.IR NULL .
-.TP
-.B MEMKIND_POLICY_PREFERRED_LOCAL
-Allocate preferred memory that is local.
-If there is not enough preferred memory to satisfy the request or
-preferred memory is not available, the allocation will fall back on any
-other memory.
-.TP
-.B MEMKIND_POLICY_INTERLEAVE_LOCAL
-Interleave allocation across local memory.
-For n memory types the allocation will be interleaved across all of
-them.
-.TP
-.B MEMKIND_POLICY_INTERLEAVE_ALL
-Interleave allocation. Locality is ignored.
-For n memory types the allocation will be interleaved across all of
-them.
-.TP
-.B MEMKIND_POLICY_MAX_VALUE
-Max policy value.
-.SH "MEMORY FLAGS"
-.TP
-.B MEMKIND_MASK_PAGE_SIZE_2MB
-Allocation backed by 2MB page size.
 .SH "ENVIRONMENT"
 .TP
 .B MEMKIND_HBW_NODES
@@ -745,11 +710,13 @@ Controls heap management behavior in memkind library by switching to one of the 
 .br
 Values:
 .br
-    JEMALLOC – sets the jemalloc heap manager
+    JEMALLOC - sets the jemalloc heap manager
 .br
-    TBB – sets the Intel Threading Building Blocks heap manager. This option requires installed
+    TBB - sets the Intel Threading Building Blocks heap manager. This option requires installed
     Intel Threading Building Blocks library.
-If the MEMKIND_HEAP_MANAGER is not set then the jemalloc heap manager will be used by default.
+If the
+.B MEMKIND_HEAP_MANAGER
+is not set then the jemalloc heap manager will be used by default.
 .SH "SYSTEM CONFIGURATION"
 Interfaces for obtaining 2MB (HUGETLB) need allocated
 huge pages in the kernel's huge page pool.
@@ -758,7 +725,8 @@ huge pages in the kernel's huge page pool.
 Current number of "persistent" huge pages can be read from /proc/sys/vm/nr_hugepages file.
 Proposed way of setting hugepages is: "sudo sysctl vm.nr_hugepages=<number_of_hugepages>".
 More information can be found here:
-https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+.UR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+.UE
 .SH "STATIC LINKING"
 .TP
 When linking statically against memkind, libmemkind.a should be used together with its dependencies libnuma and pthread. Pthread can be linked by adding /usr/lib64/libpthread.a as a dependency (exact path may vary). Typically libnuma will need to be compiled from sources to use it as a static dependency. libnuma can be reached on github: https://github.com/numactl/numactl
