@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2018 Intel Corporation.
+.\" Copyright (C) 2018 - 2019 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -25,74 +25,77 @@
 .SH "NAME"
 pmem::allocator<T> \- The C++ allocator compatible with the C++ standard library allocator concepts
 .br
-Note: This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes), or removed.
+.BR Note:
+This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes), or removed.
 .SH "SYNOPSIS"
 .nf
 .B #include <pmem_allocator.h>
 .sp
 .B Link with -lmemkind
 .sp
-.B pmem::allocator(const char *dir, size_t max_size)
+.BI "pmem::allocator(const char " "*dir" ", size_t " "max_size" );
 .br
-.B pmem::allocator(const std::string& dir, size_t max_size)
+.BI "pmem::allocator(const std::string " "&dir" ", size_t " "max_size" );
 .br
-.B template <typename U> pmem::allocator<T>::allocator(const pmem::allocator<U>&) noexcept
+.BI "template <typename U> pmem::allocator<T>::allocator(const pmem::allocator<U>&)" " "noexcept;
 .br
-.B template <typename U> pmem::allocator(const allocator<U>&& other) noexcept
+.BI "template <typename U> pmem::allocator(const allocator<U>&& " "other" ) " "noexcept;
 .br
-.B pmem::allocator<T>::~allocator()
+.BI "pmem::allocator<T>::~allocator();
 .br
-.B T* pmem::allocator<T>::allocate(std::size_t n) const
+.BI "T *pmem::allocator<T>::allocate(std::size_t " "n" ) " "const;
 .br
-.B void pmem::allocator<T>::deallocate(T* p, std::size_t n) const
+.BI "void pmem::allocator<T>::deallocate(T " "*p" ", std::size_t " "n" ) " "const;
 .br
-.B template <class U, class... Args> void pmem::allocator<T>::construct(U* p, Args... args) const
+.BI "template <class U, class... Args> void pmem::allocator<T>::construct(U " "*p" ", Args... " "args" ) " "const;
 .br
-.B void pmem::allocator<T>::destroy(T* p) const
+.BI "void pmem::allocator<T>::destroy(T " "*p" ) " "const;
 .fi
 .SH "DESCRIPTION"
-The pmem::allocator<T> is intended to be used with STL containers to allocate persistent memory. Memory management is based on memkind_pmem (memkind library). Refer memkind_pmem(3) and memkind(3) man page for more details.
+The
+.BR pmem::allocator<T>
+is intended to be used with STL containers to allocate persistent memory. Memory management is based on memkind_pmem (memkind library). Refer
+.BR memkind_pmem (3)
+and
+.BR memkind (3)
+man page for more details.
 .PP
 All public member types and functions corresponds to standard library allocator concepts and definitions. The current implementation supports C++11 standard.
 .PP
 Template arguments:
 .br
-T is an object type aliased by value_type.
+.I T
+is an object type aliased by value_type.
 .br
-U is an object type.
+.I U
+is an object type.
 .PP
-Note:
+.BR Note:
 .br
-T* pmem::allocator<T>::allocate(std::size_t n)
+.BI "T *pmem::allocator<T>::allocate(std::size_t " "n")
 allocates persistent memory memory using
-.IR "memkind_malloc()".
+.BR memkind_malloc ().
 Throw
 .I std::bad_alloc
 when:
 .br
-.IR		n " = 0,"
+.RS
+.I n
+= 0
+.RE
 .br
-	or there is not enough memory to satisfy the request.
-
+.RS
+or there is not enough memory to satisfy the request.
+.RE
 .PP
-void pmem::allocator<T>::deallocate(T* p, std::size_t n) deallocates memory associated with pointer returned by
-.I allocate()
+.BI "pmem::allocator<T>::deallocate(T " "*p" ", std::size_t " "n")
+deallocates memory associated with pointer returned by
+.BR allocate ()
 using
-.IR "memkind_free()".
-.PP
-To find out more about
-.I "memkind_malloc()
-and
-.I "memkind_free()
-read memkind(3) man page.
+.BR memkind_free ().
 
-
-.SH "NOTES"
-The
-.I pmem::allocator<T>
-behavior depends on the heap manager used by memkind. Refer memkind(3) man page for more details.
 .SH "COPYRIGHT"
-Copyright (C) 2018 Intel Corporation. All rights reserved.
+Copyright (C) 2018 - 2019 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
-.BR memkind_pmem(3),
+.BR memkind_pmem (3),
 .BR memkind (3)

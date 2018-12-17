@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 - 2018 Intel Corporation.
+.\" Copyright (C) 2014 - 2019 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -23,9 +23,10 @@
 .\"
 .TH "MEMKIND_ARENA" 3 "2015-04-21" "Intel Corporation" "MEMKIND_ARENA" \" -*- nroff -*-
 .SH "NAME"
-memkind_arena.h \- jemalloc arena allocation memkind operations.
+memkind_arena \- jemalloc arena allocation memkind operations.
 .br
-Note: This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes) or removed.
+.BR Note:
+This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes) or removed.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind/internal/memkind_arena.h>
@@ -56,7 +57,7 @@ is an implementation of the memkind "create" operation for memory
 kinds that use jemalloc.  This calls
 .BR memkind_default_create ()
 (see
-.BR memkind_default.h (3))
+.BR memkind_default (3))
 followed by
 .BR memkind_arena_create_map ()
 described below.
@@ -163,7 +164,7 @@ is an implementation of the memkind "free" operation for memory
 kinds that use jemalloc.  It causes the allocated memory referenced by
 .IR ptr ,
 which must have been returned by a previous call to
-.BR memkind_arena_malloc () ,
+.BR memkind_arena_malloc (),
 .BR memkind_arena_calloc ()
 or
 .BR memkind_arena_realloc ()
@@ -186,7 +187,7 @@ function.
 .BR memkind_arena_init ()
 creates arena map with proper hooks per specified kind.
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2018 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2019 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3),
 .BR memkind_default (3),
