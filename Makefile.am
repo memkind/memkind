@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2018 Intel Corporation.
+#  Copyright (C) 2014 - 2019 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,11 @@ EXTRA_DIST = astyle.sh \
              CONTRIBUTING \
              memkind-$(VERSION).spec \
              memkind.spec.mk \
+             utils/docker/Dockerfile.ubuntu-18.04 \
+             utils/docker/docker_run_build_and_test.sh \
+             utils/docker/docker_run_coverage.sh \
+             utils/docker/run_local.sh \
+             utils/docker/README.md \
              jemalloc/.appveyor.yml \
              jemalloc/.autom4te.cfg \
              jemalloc/.gitattributes \

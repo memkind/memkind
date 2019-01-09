@@ -14,6 +14,7 @@ ChangeLog
 .travis.yml
 autohbw/autohbw_README
 examples/README
+utils/docker/README.md
 test/memkind-afts.ts
 test/memkind-afts-ext.ts
 test/memkind-slts.ts
