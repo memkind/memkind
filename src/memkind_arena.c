@@ -40,7 +40,6 @@
 #include <jemalloc/jemalloc.h>
 #include <utmpx.h>
 #include <sched.h>
-#include <smmintrin.h>
 #include <limits.h>
 #include <sys/mman.h>
 #include <sys/param.h>
@@ -644,7 +643,11 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
             log_err("jemk_malloc() failed.");
         }
         if (!err) {
-            *arena_tsd = _mm_crc32_u64(0, (uint64_t)pthread_self()) %
+            // On glibc pthread_self() is incremented by 0x801000 for every
+            // thread (no matter the arch's word width).  This might change
+            // in the future, but even in the worst case the hash will
+            // degenerate to a single bucket with no loss of correctness.
+            *arena_tsd = ((uint64_t)pthread_self() >> 12) %
                          kind->arena_map_len;
             err = pthread_setspecific(kind->arena_key, arena_tsd) ?
                   MEMKIND_ERROR_RUNTIME : 0;
