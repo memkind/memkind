@@ -304,10 +304,14 @@ typedef struct registers_t {
 
 inline static void cpuid_asm(int leaf, int subleaf, registers_t *registers)
 {
+#ifdef __x86_64__
     asm volatile("cpuid":"=a"(registers->eax),
                  "=b"(registers->ebx),
                  "=c"(registers->ecx),
                  "=d"(registers->edx):"0"(leaf), "2"(subleaf));
+#else
+    registers->eax = 0;
+#endif
 }
 
 #define CPUID_MODEL_SHIFT       (4)
