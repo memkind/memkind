@@ -8,6 +8,7 @@ NEWS
 PULL_REQUEST_TEMPLATE.md
 README
 .travis.yml
+.codecov.yml
 astyle.sh
 autogen.sh
 build.sh

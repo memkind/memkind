@@ -113,9 +113,6 @@ cd $BUILD_DIR/examples/.libs
 find . -name "pmem*" -executable -type f -exec sh -c "sudo "{}" /mnt/$PMEM_DIR" \;
 
 # executing coverage script if codecov token is set
-# TODO: create codecov yaml file with configuration
 if [ -n "$CODECOV_TOKEN" ]; then
-    cd $BUILD_DIR
-    make test-clean
     /docker_run_coverage.sh $CODECOV_TOKEN $BUILD_DIR
 fi
