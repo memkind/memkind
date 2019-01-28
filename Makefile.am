@@ -433,6 +433,13 @@ static_lib: jemalloc/obj/lib/libjemalloc_pic.a libmemkind.la
 	rm libmemkind.a
 
 
+unit_tests: checkprogs
+	test/all_tests --gtest_filter=*free_with_NULL_kind_4096_bytes:NegativeTest.*:ErrorMessage.*:GetArenaTest.*:MemkindVersioningTests.*
+	test/decorator_test
+
+unit_tests_pmem: checkprogs
+	test/all_tests --gtest_filter=*MemkindPmemTests.*:PmemAllocatorTests.*
+
 include autohbw/Makefile.mk
 include test/Makefile.mk
 include examples/Makefile.mk
