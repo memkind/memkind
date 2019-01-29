@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 - 2018 Intel Corporation.
+.\" Copyright (C) 2014 - 2019 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -23,9 +23,10 @@
 .\"
 .TH "MEMKIND_DEFAULT" 3 "2015-04-21" "Intel Corporation" "MEMKIND_DEFAULT" \" -*- nroff -*-
 .SH "NAME"
-memkind_default.h \- default implementations for memkind operations.
+memkind_default \- default implementations for memkind operations.
 .br
-Note: This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes), or removed.
+.BR Note:
+This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes), or removed.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind/internal/memkind_default.h>
@@ -109,7 +110,7 @@ is a direct call through the jemalloc's
 is a direct call through the jemalloc's
 .BR realloc ().
 .PP
-.BR memkind_default_free ().
+.BR memkind_default_free ()
 is a direct call through the jemalloc's
 .BR free ().
 Note that this method can be called on any pointer returned by a
@@ -121,7 +122,9 @@ can use this function for freeing.
 .BR memkind_default_mmap ()
 This calls the ops->get_mmap_flags()
 operations for the kind, or falls back on the default implementations
-if the function pointers are NULL.  The results of these calls are
+if the function pointers are
+.IR "NULL" .
+The results of these calls are
 passed to the
 .BR mmap (2)
 call to allocate pages from the operating system.  The
@@ -202,11 +205,11 @@ can be used to check the alignment value for
 .BR memkind_posix_memalign ()
 to ensure that is abides by the POSIX requirements:
 alignment must be a power of 2 at least as large as
-.BR sizeof( "void *" ).
+.IR "sizeof(void*)" .
 .PP
 .BR memkind_default_get_mbind_nodemask ()
 wraps jemalloc's
-.BR copy_bitmask_to_bitmask.
+.BR copy_bitmask_to_bitmask .
 This function copies body of the bitmask structure into passed pointer.
 .PP
 .BR memkind_default_init_once ()
@@ -215,7 +218,7 @@ initializes heap manager.
 .BR size_out_of_bounds ()
 returns true if given size is out of bounds, otherwise will return false.
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2018 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2019 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3),
 .BR memkind_arena (3),

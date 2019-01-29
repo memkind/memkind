@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 - 2018 Intel Corporation.
+.\" Copyright (C) 2014 - 2019 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -23,9 +23,10 @@
 .\"
 .TH "MEMKIND_HBW" 3 "2016-06-13" "Intel Corporation" "MEMKIND_HBW" \" -*- nroff -*-
 .SH "NAME"
-memkind_hbw.h \- high bandwidth memory memkind operations.
+memkind_hbw \- high bandwidth memory memkind operations.
 .br
-Note: This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes) or removed.
+.BR Note:
+This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes) or removed.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind/internal/memkind_hbw.h>
@@ -70,8 +71,10 @@ man page.
 .PP
 .BR memkind_hbw_hugetlb_check_available ()
 In addition to checking for high bandwidth memory as is done by
-memkind_hbw_check_available (), this also checks for 2MB huge pages as
-is done by memkind_hugetlb_check_available_2mb().
+.BR memkind_hbw_check_available (),
+this also checks for 2MB huge pages as
+is done by
+.BR memkind_hugetlb_check_available_2mb ().
 .PP
 .BR memkind_hbw_get_mbind_nodemask ()
 sets the
@@ -101,42 +104,54 @@ can be used in conjunction with the
 system call.
 .PP
 .BR memkind_hbw_init_once ()
-This function initializes MEMKIND_HBW kind and it should not be called more than once.
-Note:
+This function initializes
+.B MEMKIND_HBW
+kind and it should not be called more than once.
+.BR Note:
 .BR memkind_hbw_init_once ()
 may reserve some extra memory.
 .PP
 .BR memkind_hbw_hugetlb_init_once ()
-This function initializes MEMKIND_HBW_HUGETLB kind and it should not be called more than once.
-Note:
+This function initializes
+.B MEMKIND_HBW_HUGETLB
+kind and it should not be called more than once.
+.BR Note:
 .BR memkind_hbw_hugetlb_init_once ()
 may reserve some extra memory.
 .PP
 .BR memkind_hbw_preferred_init_once ()
-This function initializes MEMKIND_HBW_PREFERRED kind and it should not be called more than once.
-Note:
+This function initializes
+.B MEMKIND_HBW_PREFERRED
+kind and it should not be called more than once.
+.BR Note:
 .BR memkind_hbw_preferred_init_once ()
 may reserve some extra memory.
 .PP
 .BR memkind_hbw_preferred_hugetlb_init_once ()
-This function initializes MEMKIND_HBW_PREFERRED_HUGETLB kind and it should not be called more than once.
-Note:
+This function initializes
+.B MEMKIND_HBW_PREFERRED_HUGETLB
+kind and it should not be called more than once.
+.BR Note:
 .BR memkind_hbw_preferred_hugetlb_init_once ()
 may reserve some extra memory.
 .PP
 .BR memkind_hbw_all_hugetlb_init_once ()
-This function initializes MEMKIND_HBW_ALL_HUGETLB kind and it should not be called more than once.
-Note:
-.BR memkind_hbw_all_hugetlb_init_once()
+This function initializes
+.B MEMKIND_HBW_ALL_HUGETLB
+kind and it should not be called more than once.
+.BR Note:
+.BR memkind_hbw_all_hugetlb_init_once ()
 may reserve some extra memory.
 .PP
 .BR memkind_hbw_interleave_init_once ()
-This function initializes MEMKIND_HBW_INTERLEAVE kind and it should not be called more than once.
-Note:
+This function initializes
+.B MEMKIND_HBW_INTERLEAVE
+kind and it should not be called more than once.
+.BR Note:
 .BR memkind_hbw_interleave_init_once ()
 may reserve some extra memory.
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2018 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2019 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3),
 .BR memkind_arena (3),
