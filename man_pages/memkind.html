@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.20 -->
-<!-- CreationDate: Tue Dec 11 23:51:42 2018 -->
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Jan 10 22:25:06 2019 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -30,9 +30,6 @@
 <a href="#MEMORY FLAGS">MEMORY FLAGS</a><br>
 <a href="#ERRORS">ERRORS</a><br>
 <a href="#FILES">FILES</a><br>
-<a href="#MEMORY TYPES">MEMORY TYPES</a><br>
-<a href="#MEMORY BINDING POLICY">MEMORY BINDING POLICY</a><br>
-<a href="#MEMORY FLAGS">MEMORY FLAGS</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
 <a href="#SYSTEM CONFIGURATION">SYSTEM CONFIGURATION</a><br>
 <a href="#STATIC LINKING">STATIC LINKING</a><br>
@@ -48,9 +45,9 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">memkind &minus;
-Heap manager that enables allocations to memory with
-different properties. <br>
+<p style="margin-left:11%; margin-top: 1em">memkind - Heap
+manager that enables allocations to memory with different
+properties. <br>
 This header expose STANDARD and EXPERIMENTAL API. API
 Standards are described below in this man page.</p>
 
@@ -162,7 +159,7 @@ API&rsquo;s, except that the user must specify the
 <i>kind</i> of memory with the first argument to each
 function. See the <b>KINDS</b> section below for a full
 description of the implemented kinds. For file-backed kind
-of memory see <b>memkind_create_pmem()</b>.</p>
+of memory see <b>memkind_create_pmem</b>().</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_malloc</b>()
@@ -170,23 +167,23 @@ allocates <i>size</i> bytes of uninitialized memory of the
 specified <i>kind</i>. The allocated space is suitably
 aligned (after possible pointer coercion) for storage of any
 type of object. If <i>size</i> is 0, then
-<b>memkind_malloc</b>() returns NULL.</p>
+<b>memkind_malloc</b>() returns <i>NULL</i>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_calloc</b>()
 allocates space for <i>num</i> objects each <i>size</i>
 bytes in length in memory of the specified <i>kind</i>. The
 result is identical to calling <b>memkind_malloc</b>() with
-an argument of <i>num</i>*<i>size</i>, with the exception
+an argument of <i>num</i> * <i>size</i>, with the exception
 that the allocated memory is explicitly initialized to zero
 bytes. If <i>num</i> or <i>size</i> is 0, then
-<b>memkind_calloc</b>() returns NULL.</p>
+<b>memkind_calloc</b>() returns <i>NULL</i>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_realloc</b>()
 changes the size of the previously allocated memory
 referenced by <i>ptr</i> to <i>size</i> bytes of the
-specified <i>kind</i>. The contents of the memory are
+specified <i>kind</i>. The contents of the memory remain
 unchanged up to the lesser of the new and old sizes. If the
 new size is larger, the contents of the newly allocated
 portion of the memory are undefined. Upon success, the
@@ -198,15 +195,16 @@ memkind_realloc</b>() may move the memory allocation,
 resulting in a different return value than <i>ptr</i>.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If <i>ptr</i>
-is NULL, the <b>memkind_realloc</b>() function behaves
-identically to <b>memkind_malloc</b>() for the specified
-size. The address <i>ptr</i>, if not NULL, must have been
-returned by a previous call to <b>memkind_malloc</b>(),
-<b>memkind_calloc</b>(), <b>memkind_realloc</b>(), or
-<b>memkind_posix_memalign</b>() with the same <i>kind</i> as
-specified to the call to <b>memkind_realloc</b>().
-Otherwise, if <i>memkind_free(kind, ptr)</i> was called
-before, undefined behavior occurs.</p>
+is <i>NULL</i>, the <b>memkind_realloc</b>() function
+behaves identically to <b>memkind_malloc</b>() for the
+specified size. The address <i>ptr</i>, if not <i>NULL</i>,
+must have been returned by a previous call to
+<b>memkind_malloc</b>(), <b>memkind_calloc</b>(),
+<b>memkind_realloc</b>() or <b>memkind_posix_memalign</b>()
+with the same <i>kind</i> as specified to the call to
+<b>memkind_realloc</b>(). Otherwise, if
+<i>memkind_free(kind, ptr)</i> was called before, undefined
+behavior occurs.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_posix_memalign</b>()
@@ -215,14 +213,14 @@ allocates <i>size</i> bytes of memory of a specified
 an even multiple of <i>alignment</i>, and returns the
 allocation in the value pointed to by <i>memptr</i>. The
 requested <i>alignment</i> must be a power of 2 at least as
-large as <i>sizeof(void *)</i>. If <i>size</i> is 0, then
-<b>memkind_posix_memalign</b>() returns NULL.</p>
+large as <i>sizeof(void*)</i>. If <i>size</i> is 0, then
+<b>memkind_posix_memalign</b>() returns <i>NULL</i>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_malloc_usable_size</b>()
 function provides the same semantics as
-<b>malloc_usable_size(3),</b> but operates on specified
-<i>kind.</i></p>
+<b>malloc_usable_size</b>(3), but operates on specified
+<i>kind</i>.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Note:
 memkind_malloc_usable_size</b>() is not supported by TBB
@@ -234,18 +232,17 @@ causes the allocated memory referenced by <i>ptr</i> to be
 made available for future allocations. This pointer must
 have been returned by a previous call to
 <b>memkind_malloc</b>(), <b>memkind_calloc</b>(),
-<b>memkind_realloc</b>(), or
-<b>memkind_posix_memalign</b>(). Otherwise, if
-<i>memkind_free(kind, ptr)</i> was already called before,
-undefined behavior occurs. If <i>ptr</i> is NULL, no
-operation is performed. The value of <b>MEMKIND_DEFAULT</b>
-can be given as the <i>kind</i> for all buffers allocated by
-a kind that leverages the jemalloc allocator. In cases where
-the kind is unknown in the context of the call to
-<b>memkind_free</b>() <b>0</b> can be given as the
-<i>kind</i> specified to <b>memkind_free</b>() but this will
-require a look up that can be bypassed by specifying a
-non-zero value.</p>
+<b>memkind_realloc</b>() or <b>memkind_posix_memalign</b>().
+Otherwise, if <i>memkind_free(kind, ptr)</i> was already
+called before, undefined behavior occurs. If <i>ptr</i> is
+<i>NULL</i>, no operation is performed. The value of
+<b>MEMKIND_DEFAULT</b> can be given as the <i>kind</i> for
+all buffers allocated by a kind that leverages the jemalloc
+allocator. In cases where the kind is unknown in the context
+of the call to <b>memkind_free</b>() <i>NULL</i>, can be
+given as the <i>kind</i> specified to <b>memkind_free</b>()
+but this will require a look up that can be bypassed by
+specifying a non-zero value.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>KIND
 MANAGEMENT:</b> <br>
@@ -274,9 +271,8 @@ without the need to reserve in advance the corresponding
 file system space for the entire heap. If the value of
 <i>max_size</i> equals 0, pmem memkind is only limited by
 the capacity of the file system mounted under <i>dir</i>
-argument. <br>
-The minimum <i>max_size</i> value which allows to limit the
-size of kind by the library is defined as
+argument. The minimum <i>max_size</i> value which allows to
+limit the size of kind by the library is defined as
 <b>MEMKIND_PMEM_MIN_SIZE</b>. Calling
 <b>memkind_create_pmem</b>() with a size smaller than that
 and different than 0 will return an error. The maximum
@@ -304,7 +300,7 @@ error code from the <b>ERRORS</b> section if not.</p>
 destroys previously created kind object, which must have
 been returned by a previous call to
 <b>memkind_create_pmem</b>() or
-<b>memkind_create_kind</b>()<b>.</b> Otherwise, or if
+<b>memkind_create_kind</b>(). Otherwise, or if
 <i>memkind_destroy_kind(kind)</i> was already called before,
 undefined behavior occurs. Note that, when the kind was
 returned by <b>memkind_create_kind</b>() all allocated
@@ -385,12 +381,12 @@ the following API:</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_get_version</b>()
-return version number represented by a single integer
+returns version number represented by a single integer
 number, obtained from the formula: <br>
 major * 1000000 + minor * 1000 + patch</p>
 
-<p style="margin-left:11%; margin-top: 1em">Note: major
-&lt; 1 means unstable API.</p>
+<p style="margin-left:11%; margin-top: 1em"><b>Note:</b>
+major &lt; 1 means unstable API.</p>
 
 <p style="margin-left:11%; margin-top: 1em">API standards:
 <br>
@@ -407,20 +403,20 @@ subject to change</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_calloc</b>(),
-<b>memkind_malloc</b>(), and <b>memkind_realloc</b>(),
-returns the pointer to the allocated memory or NULL if the
+<b>memkind_malloc</b>() and <b>memkind_realloc</b>() returns
+the pointer to the allocated memory or <i>NULL</i> if the
 request fails. <b>memkind_malloc_usable_size</b>() returns
 the number of usable bytes in the block of allocated memory
-pointed to by <i>ptr,</i> a pointer to a block of memory
+pointed to by <i>ptr</i>, a pointer to a block of memory
 allocated by <b>memkind_malloc</b>() or a related function.
-If <i>ptr</i> is NULL, 0 is returned. <b>memkind_free</b>()
-and <b>memkind_error_message</b>() do not have return
-values. All other memkind API&rsquo;s return 0 upon success
-and an error code defined in the <b>ERRORS</b> section upon
-failure. The memkind library avoids setting <i>errno</i>
-directly, but calls to underlying libraries and system calls
-may set <i>errno</i> ( e.g. <b>memkind_create_pmem</b>()
-).</p>
+If <i>ptr</i> is <i>NULL</i>, 0 is returned.
+<b>memkind_free</b>() and <b>memkind_error_message</b>() do
+not have return values. All other memkind API&rsquo;s return
+0 upon success and an error code defined in the
+<b>ERRORS</b> section upon failure. The memkind library
+avoids setting <i>errno</i> directly, but calls to
+underlying libraries and system calls may set <i>errno</i>
+(e.g. <b>memkind_create_pmem</b>()).</p>
 
 <h2>KINDS
 <a name="KINDS"></a>
@@ -437,7 +433,7 @@ standard memory and default page size.</p>
 <p style="margin-left:11%;"><b>MEMKIND_HUGETLB</b></p>
 
 <p style="margin-left:22%;">Allocate from standard memory
-using huge pages. Note: This kind requires huge pages
+using huge pages. <b>Note:</b> This kind requires huge pages
 configuration described in <b>SYSTEM CONFIGURATION</b>
 section.</p>
 
@@ -445,9 +441,9 @@ section.</p>
 (DEPRECATED)</b></p>
 
 <p style="margin-left:22%;">Allocate from standard memory
-using 1GB chunks backed by huge pages. Note: This kind
-requires huge pages configuration described in <b>SYSTEM
-CONFIGURATION</b> section.</p>
+using 1GB chunks backed by huge pages. <b>Note:</b> This
+kind requires huge pages configuration described in
+<b>SYSTEM CONFIGURATION</b> section.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_INTERLEAVE</b></p>
 
@@ -460,8 +456,8 @@ disabled.</p>
 <p style="margin-left:22%;">Allocate from the closest high
 bandwidth memory NUMA node at time of allocation. If there
 is not enough high bandwidth memory to satisfy the request
-<i>errno</i> is set to ENOMEM and the allocated pointer is
-set to NULL.</p>
+<i>errno</i> is set to <b>ENOMEM</b> and the allocated
+pointer is set to <i>NULL</i>.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_ALL</b></p>
 
@@ -472,8 +468,8 @@ until the time of first write.</p>
 <p style="margin-left:11%;"><b>MEMKIND_HBW_HUGETLB</b></p>
 
 <p style="margin-left:22%;">Same as <b>MEMKIND_HBW</b>
-except the allocation is backed by huge pages. Note: This
-kind requires huge pages configuration described in
+except the allocation is backed by huge pages. <b>Note:</b>
+This kind requires huge pages configuration described in
 <b>SYSTEM CONFIGURATION</b> section.</p>
 
 
@@ -481,7 +477,7 @@ kind requires huge pages configuration described in
 
 <p style="margin-left:22%;">Combination of
 <b>MEMKIND_HBW_ALL</b> and <b>MEMKIND_HBW_HUGETLB</b>
-properties. Note: This kind requires huge pages
+properties. <b>Note:</b> This kind requires huge pages
 configuration described in <b>SYSTEM CONFIGURATION</b>
 section.</p>
 
@@ -498,7 +494,7 @@ standard memory.</p>
 
 <p style="margin-left:22%;">Same as
 <b>MEMKIND_HBW_PREFERRED</b> except the allocation is backed
-by huge pages. Note: This kind requires huge pages
+by huge pages. <b>Note:</b> This kind requires huge pages
 configuration described in <b>SYSTEM CONFIGURATION</b>
 section.</p>
 
@@ -519,8 +515,8 @@ section.</p>
 <p style="margin-left:22%;">Same as
 <b>MEMKIND_HBW_GBTLB</b> except that if there is not enough
 high bandwidth memory to satisfy the request, the allocation
-will fall back on standard memory. Note: This kind requires
-huge pages configuration described in <b>SYSTEM
+will fall back on standard memory. <b>Note:</b> This kind
+requires huge pages configuration described in <b>SYSTEM
 CONFIGURATION</b> section.</p>
 
 
@@ -629,9 +625,9 @@ size.</p>
 standard error codes <b>EINVAL</b> or <b>ENOMEM</b> as
 defined in <i>&lt;errno.h&gt;</i> if an error occurs (these
 have positive values). If the <i>alignment</i> parameter is
-not a power of two or is not a multiple of <i>sizeof(void
-*)</i>, then <b>EINVAL</b> is returned. If there is
-insufficient memory to satisfy the request then
+not a power of two or is not a multiple of
+<i>sizeof(void*)</i>, then <b>EINVAL</b> is returned. If
+there is insufficient memory to satisfy the request then
 <b>ENOMEM</b> is returned.</p>
 
 <p style="margin-left:11%; margin-top: 1em">All functions
@@ -664,7 +660,7 @@ failed</p>
 <p style="margin-left:11%;"><b>MEMKIND_ERROR_ENVIRON</b></p>
 
 <p style="margin-left:22%;">Error parsing environment
-variable (MEMKIND_*)</p>
+variable <i>MEMKIND_*</i></p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_ERROR_INVALID</b></p>
@@ -724,83 +720,6 @@ failed</p>
 <p style="margin-left:22%;">Prints a comma separated list
 of high bandwidth nodes.</p>
 
-<h2>MEMORY TYPES
-<a name="MEMORY TYPES"></a>
-</h2>
-
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_MEMTYPE_DEFAULT</b></p>
-
-<p style="margin-left:22%;">Standard memory, the same as
-process uses.</p>
-
-
-<p style="margin-left:11%;"><b>MEMKIND_MEMTYPE_HIGH_BANDWIDTH</b></p>
-
-<p style="margin-left:22%;">High bandwidth memory (HBM).
-There must be at least two memory types with different
-bandwidth to determine which is the HBM.</p>
-
-<h2>MEMORY BINDING POLICY
-<a name="MEMORY BINDING POLICY"></a>
-</h2>
-
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_POLICY_BIND_LOCAL</b></p>
-
-<p style="margin-left:22%;">Allocate local memory. If there
-is not enough memory to satisfy the request <i>errno</i> is
-set to <b>ENOMEM</b> and the allocated pointer is set to
-<i>NULL</i>.</p>
-
-
-<p style="margin-left:11%;"><b>MEMKIND_POLICY_BIND_ALL</b></p>
-
-<p style="margin-left:22%;">Memory locality is ignored. If
-there is not enough memory to satisfy the request
-<i>errno</i> is set to <b>ENOMEM</b> and the allocated
-pointer is set to <i>NULL</i>.</p>
-
-
-<p style="margin-left:11%;"><b>MEMKIND_POLICY_PREFERRED_LOCAL</b></p>
-
-<p style="margin-left:22%;">Allocate preferred memory that
-is local. If there is not enough preferred memory to satisfy
-the request or preferred memory is not available, the
-allocation will fall back on any other memory.</p>
-
-
-<p style="margin-left:11%;"><b>MEMKIND_POLICY_INTERLEAVE_LOCAL</b></p>
-
-<p style="margin-left:22%;">Interleave allocation across
-local memory. For n memory types the allocation will be
-interleaved across all of them.</p>
-
-
-<p style="margin-left:11%;"><b>MEMKIND_POLICY_INTERLEAVE_ALL</b></p>
-
-<p style="margin-left:22%;">Interleave allocation. Locality
-is ignored. For n memory types the allocation will be
-interleaved across all of them.</p>
-
-
-<p style="margin-left:11%;"><b>MEMKIND_POLICY_MAX_VALUE</b></p>
-
-<p style="margin-left:22%;">Max policy value.</p>
-
-<h2>MEMORY FLAGS
-<a name="MEMORY FLAGS"></a>
-</h2>
-
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_MASK_PAGE_SIZE_2MB</b></p>
-
-<p style="margin-left:22%;">Allocation backed by 2MB page
-size.</p>
-
 <h2>ENVIRONMENT
 <a name="ENVIRONMENT"></a>
 </h2>
@@ -822,29 +741,29 @@ applies: e.g. 1-3,5 is a valid setting.</p>
 <p style="margin-left:22%;">This environment variable
 allows leveraging internal mechanism of the library for
 setting number of arenas per kind. Value should be a
-positive integer (not greater than INT_MAX defined in
-limits.h). The user should set the value based on the
-characteristics of application that is using the library.
-Higher value can provide better performance in extremely
-multithreaded applications at the cost of memory overhead.
-See section &quot;IMPLEMENTATION NOTES&quot; of
+positive integer (not greater than <b>INT_MAX</b> defined in
+<i>&lt;limits.h&gt;</i>). The user should set the value
+based on the characteristics of application that is using
+the library. Higher value can provide better performance in
+extremely multithreaded applications at the cost of memory
+overhead. See section <b>IMPLEMENTATION NOTES</b> of
 <b>jemalloc</b>(3) for more details about arenas.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_HOG_MEMORY</b></p>
 
 <p style="margin-left:22%;">Controls behavior of memkind
 with regards to returning memory to underlaying OS. Setting
-<b>MEMKIND_HOG_MEMORY</b> to &quot;1&quot; causes memkind to
-not release memory to OS in anticipation of memory reuse
-soon. This will improve latency of &rsquo;free&rsquo;
-operations but increase memory usage.</p>
+<b>MEMKIND_HOG_MEMORY</b> to 1 causes memkind to not release
+memory to OS in anticipation of memory reuse soon. This will
+improve latency of &rsquo;free&rsquo; operations but
+increase memory usage.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_DEBUG</b></p>
 
 <p style="margin-left:22%;">Controls logging mechanism in
-memkind. Setting <b>MEMKIND_DEBUG</b> to &quot;1&quot;
-enables printing messages like errors and general
-information about environment to <i>stderr</i>.</p>
+memkind. Setting <b>MEMKIND_DEBUG</b> to 1 enables printing
+messages like errors and general information about
+environment to <i>stderr</i>.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_HEAP_MANAGER</b></p>
@@ -853,12 +772,14 @@ information about environment to <i>stderr</i>.</p>
 behavior in memkind library by switching to one of the
 available heap managers. <br>
 Values: <br>
-JEMALLOC &acirc; sets the jemalloc heap manager <br>
-TBB &acirc; sets the Intel Threading Building Blocks heap
-manager. This option requires installed <br>
-Intel Threading Building Blocks library. If the
-MEMKIND_HEAP_MANAGER is not set then the jemalloc heap
-manager will be used by default.</p>
+JEMALLOC - sets the jemalloc heap manager <br>
+TBB - sets the Intel Threading Building Blocks heap manager.
+This option requires installed <br>
+Intel Threading Building Blocks library.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If the
+<b>MEMKIND_HEAP_MANAGER</b> is not set then the jemalloc
+heap manager will be used by default.</p>
 
 <h2>SYSTEM CONFIGURATION
 <a name="SYSTEM CONFIGURATION"></a>
@@ -872,11 +793,11 @@ HUGETLB (huge pages)</b></p>
 
 <p style="margin-left:22%;">Current number of
 &quot;persistent&quot; huge pages can be read from
-/proc/sys/vm/nr_hugepages file. Proposed way of setting
-hugepages is: &quot;sudo sysctl
-vm.nr_hugepages=&lt;number_of_hugepages&gt;&quot;. More
+<i>/proc/sys/vm/nr_hugepages</i> file. Proposed way of
+setting hugepages is: <b>sudo sysctl
+vm.nr_hugepages=&lt;number_of_hugepages&gt;</b>. More
 information can be found here:
-https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</p>
+<a href="https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt">https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</a></p>
 
 <h2>STATIC LINKING
 <a name="STATIC LINKING"></a>
@@ -884,16 +805,14 @@ https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">When linking
-statically against memkind, libmemkind.a should be used <br>
-together with its dependencies libnuma and pthread. Pthread
-can be <br>
-linked by adding /usr/lib64/libpthread.a as a dependency
-(exact path <br>
-may vary). Typically libnuma will need to be compiled from
-sources to <br>
-use it as a static dependency. libnuma can be reached on
-github: <br>
-https://github.com/numactl/numactl</p>
+statically against memkind, <i>libmemkind.a</i> should be
+used together with its dependencies <i>libnuma</i> and
+pthread. Pthread can be linked by adding
+<i>/usr/lib64/libpthread.a</i> as a dependency (exact path
+may vary). Typically <i>libnuma</i> will need to be compiled
+from sources to use it as a static dependency.
+<i>libnuma</i> can be reached on GitHub:
+<a href="https://github.com/numactl/numactl">https://github.com/numactl/numactl</a></p>
 
 <h2>KNOWN ISSUES
 <a name="KNOWN ISSUES"></a>
@@ -914,7 +833,7 @@ extra huge pages (e.g. 8 huge pages).</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright (C)
-2014 - 2018 Intel Corporation. All rights reserved.</p>
+2014 - 2019 Intel Corporation. All rights reserved.</p>
 
 <h2>SEE ALSO
 <a name="SEE ALSO"></a>

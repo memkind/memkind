@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.20 -->
-<!-- CreationDate: Tue Dec 11 23:51:42 2018 -->
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Jan 10 22:25:06 2019 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -41,10 +41,10 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">hbwmalloc
-&minus; The high bandwidth memory interface <br>
-Note: hbwmalloc.h functionality is considered as stable API
-(STANDARD API).</p>
+<p style="margin-left:11%; margin-top: 1em">hbwmalloc - The
+high bandwidth memory interface <b><br>
+Note:</b> <i>hbwmalloc.h</i> functionality is considered as
+stable API (STANDARD API).</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
@@ -93,39 +93,39 @@ allocates <i>size</i> bytes of uninitialized high bandwidth
 memory. The allocated space is suitably aligned (after
 possible pointer coercion) for storage of any type of
 object. If <i>size</i> is zero then <b>hbw_malloc</b>()
-returns NULL.</p>
+returns <i>NULL</i>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_calloc</b>()
 allocates space for <i>nmemb</i> objects in high bandwidth
 memory, each <i>size</i> bytes in length. The result is
 identical to calling <b>hbw_malloc</b>() with an argument of
-<i>nmemb</i>*<i>size</i> , with the exception that the
+<i>nmemb</i> * <i>size</i>, with the exception that the
 allocated memory is explicitly initialized to zero bytes. If
 <i>nmemb</i> or <i>size</i> is 0, then <b>hbw_calloc</b>()
-returns NULL.</p>
+returns <i>NULL</i>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_realloc</b>()
 changes the size of the previously allocated high bandwidth
 memory referenced by <i>ptr</i> to <i>size</i> bytes. The
-contents of the memory are unchanged up to the lesser of the
-new and old sizes. If the new size is larger, the contents
-of the newly allocated portion of the memory are undefined.
-Upon success, the memory referenced by <i>ptr</i> is freed
-and a pointer to the newly allocated high bandwidth memory
-is returned.</p>
+contents of the memory remain unchanged up to the lesser of
+the new and old sizes. If the new size is larger, the
+contents of the newly allocated portion of the memory are
+undefined. Upon success, the memory referenced by <i>ptr</i>
+is freed and a pointer to the newly allocated high bandwidth
+memory is returned.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Note:
 hbw_realloc</b>() may move the memory allocation, resulting
 in a different return value than <i>ptr</i>.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If <i>ptr</i>
-is NULL, the <b>hbw_realloc</b>() function behaves
+is <i>NULL</i>, the <b>hbw_realloc</b>() function behaves
 identically to <b>hbw_malloc</b>() for the specified size.
-The address <i>ptr</i>, if not NULL, was returned by a
-previous call to <b>hbw_malloc</b>(), <b>hbw_calloc</b>(),
-<b>hbw_realloc</b>(), or <b>hbw_posix_memalign</b>().
+The address <i>ptr</i>, if not <i>NULL</i>, was returned by
+a previous call to <b>hbw_malloc</b>(), <b>hbw_calloc</b>(),
+<b>hbw_realloc</b>() or <b>hbw_posix_memalign</b>().
 Otherwise, or if <i>hbw_free(ptr)</i> was called before,
 undefined behavior occurs.</p>
 
@@ -137,10 +137,10 @@ hbw_realloc</b>() cannot be used with a pointer returned by
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_free</b>()
 causes the allocated memory referenced by <i>ptr</i> to be
 made available for future allocations. If <i>ptr</i> is
-NULL, no action occurs. The address <i>ptr</i>, if not NULL,
-must have been returned by a previous call to
-<b>hbw_malloc</b>(), <b>hbw_calloc</b>(),
-<b>hbw_realloc</b>(), <b>hbw_posix_memalign</b>(), or
+<i>NULL</i>, no action occurs. The address <i>ptr</i>, if
+not <i>NULL</i>, must have been returned by a previous call
+to <b>hbw_malloc</b>(), <b>hbw_calloc</b>(),
+<b>hbw_realloc</b>(), <b>hbw_posix_memalign</b>() or
 <b>hbw_posix_memalign_psize</b>(). Otherwise, if
 <i>hbw_free(ptr)</i> was called before, undefined behavior
 occurs.</p>
@@ -151,8 +151,8 @@ allocates <i>size</i> bytes of high bandwidth memory such
 that the allocation&rsquo;s base address is an even multiple
 of <i>alignment</i>, and returns the allocation in the value
 pointed to by <i>memptr</i>. The requested <i>alignment</i>
-must be a power of 2 at least as large as <i>sizeof(void
-*)</i>.</p>
+must be a power of 2 at least as large as
+<i>sizeof(void*)</i>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_posix_memalign_psize</b>()
@@ -160,10 +160,10 @@ allocates <i>size</i> bytes of high bandwidth memory such
 that the allocation&rsquo;s base address is an even multiple
 of <i>alignment</i>, and returns the allocation in the value
 pointed to by <i>memptr</i>. The requested <i>alignment</i>
-must be a power of 2 at least as large as <i>sizeof(void
-*)</i>. The memory will be allocated using pages determined
-by the <i>pagesize</i> variable which may be one of the
-following enumerated values: <b><br>
+must be a power of 2 at least as large as
+<i>sizeof(void*)</i>. The memory will be allocated using
+pages determined by the <i>pagesize</i> variable which may
+be one of the following enumerated values: <b><br>
 HBW_PAGESIZE_4KB</b></p>
 
 <p style="margin-left:22%;">The four kilobyte page size
@@ -174,8 +174,9 @@ megabyte pages.</p>
 <p style="margin-left:11%;"><b>HBW_PAGESIZE_2MB</b></p>
 
 <p style="margin-left:22%;">The two megabyte page size
-option. Note: This page size requires huge pages
-configuration described in SYSTEM CONFIGURATION section.</p>
+option. <b>Note:</b> This page size requires huge pages
+configuration described in <b>SYSTEM CONFIGURATION</b>
+section.</p>
 
 <p style="margin-left:11%;"><b>HBW_PAGESIZE_1GB
 (DEPRECATED)</b></p>
@@ -183,21 +184,23 @@ configuration described in SYSTEM CONFIGURATION section.</p>
 <p style="margin-left:22%;">This option allows the user to
 specify arbitrary sizes backed by 1GB chunks of huge pages.
 Huge pages are allocated even if the size is not a modulo of
-1GB. Note: This page size requires huge pages configuration
-described in SYSTEM CONFIGURATION section.</p>
+1GB. <b>Note:</b> This page size requires huge pages
+configuration described in <b>SYSTEM CONFIGURATION</b>
+section.</p>
 
 <p style="margin-left:11%;"><b>HBW_PAGESIZE_1GB_STRICT
 (DEPRECATED)</b></p>
 
 <p style="margin-left:22%;">The total size of the
 allocation must be a multiple of 1GB with this option,
-otherwise the allocation will fail. Note: This page size
-requires huge pages configuration described in SYSTEM
-CONFIGURATION section.</p>
+otherwise the allocation will fail. <b>Note:</b> This page
+size requires huge pages configuration described in
+<b>SYSTEM CONFIGURATION</b> section.</p>
 
-<p style="margin-left:11%;">HBW_PAGESIZE_2MB,
-HBW_PAGESIZE_1GB and HBW_PAGESIZE_1GB_STRICT options <br>
-are not supported with HBW_POLICY_INTERLEAVE policy.</p>
+<p style="margin-left:11%; margin-top: 1em"><b>Note:
+HBW_PAGESIZE_2MB</b>, <b>HBW_PAGESIZE_1GB</b> and
+<b>HBW_PAGESIZE_1GB_STRICT</b> options are not supported
+with <b>HBW_POLICY_INTERLEAVE</b> policy.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_get_policy</b>()
@@ -208,17 +211,19 @@ bandwidth memory is available.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_set_policy</b>()
 sets the current fallback policy. The policy can be modified
 only once in the lifetime of an application and before
-calling hbw_*alloc() or hbw_posix_memalign*() function. <br>
-Note: If the policy is not set, than HBW_POLICY_PREFERRED
-will be used by default. <b><br>
+calling <b>hbw_malloc</b>(), <b>hbw_calloc</b>(),
+<b>hbw_realloc</b>(), <b>hbw_posix_memalign</b>(), or
+<b>hbw_posix_memalign_psize</b>() function. <b><br>
+Note:</b> If the policy is not set, than
+<b>HBW_POLICY_PREFERRED</b> will be used by default. <b><br>
 HBW_POLICY_BIND</b></p>
 
 <p style="margin-left:22%;">If insufficient high bandwidth
 memory from the nearest NUMA node is available to satisfy a
-request, the allocated pointer is set to NULL and
-<i>errno</i> is set to ENOMEM. If insufficient high
+request, the allocated pointer is set to <i>NULL</i> and
+<i>errno</i> is set to <b>ENOMEM</b>. If insufficient high
 bandwidth memory pages are available at fault time the Out
-Of Memory (OOM) killer is triggered. Note that pages are
+Of Memory (OOM) Killer is triggered. Note that pages are
 faulted exclusively from the high bandwidth NUMA node
 nearest at time of allocation, not at time of fault.</p>
 
@@ -226,11 +231,12 @@ nearest at time of allocation, not at time of fault.</p>
 
 <p style="margin-left:22%;">If insufficient high bandwidth
 memory is available to satisfy a request, the allocated
-pointer is set to NULL and <i>errno</i> is set to ENOMEM. If
-insufficient high bandwidth memory pages are available at
-fault time the Out Of Memory (OOM) killer is triggered. Note
-that pages are faulted from the high bandwidth NUMA nodes.
-Nearest NUMA node is selected at time of page fault.</p>
+pointer is set to <i>NULL</i> and <i>errno</i> is set to
+<b>ENOMEM</b>. If insufficient high bandwidth memory pages
+are available at fault time the Out Of Memory (OOM) Killer
+is triggered. Note that pages are faulted from the high
+bandwidth NUMA nodes. Nearest NUMA node is selected at time
+of page fault.</p>
 
 
 <p style="margin-left:11%;"><b>HBW_POLICY_PREFERRED</b></p>
@@ -249,20 +255,20 @@ pages (the Transparent Huge Page feature is disabled).</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_verify_memory_region</b>()
-verifies if memory region fully fall into high bandwidth
+verifies if memory region fully falls into high bandwidth
 memory. Returns 0 if memory address range from <i>addr</i>
 to <i>addr</i> + <i>size</i> is allocated in high bandwidth
 memory, -1 if any fragment of memory was not backed by high
-bandwidth memory [e.g. when memory is not initialized] or
-one of error codes described in ERRORS section.</p>
+bandwidth memory (e.g. when memory is not initialized) or
+one of error codes described in <b>ERRORS</b> section.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Using this
 function in production code may result in serious
 performance penalty.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><i>Flags</i>
-argument may include optional flags that modifies function
-behaviour: <b><br>
+<p style="margin-left:11%; margin-top: 1em">The
+<i>Flags</i> argument may include optional flags that modify
+function behavior: <b><br>
 HBW_TOUCH_PAGES</b></p>
 
 <p style="margin-left:22%;">Before checking pages, function
@@ -270,7 +276,7 @@ will touch first byte of all pages in address range starting
 from <i>addr</i> to <i>addr</i> + <i>size</i> by read and
 write (so the content will be overwritten by the same data
 as it was read). Using this option may trigger Out Of Memory
-killer.</p>
+Killer.</p>
 
 <h2>RETURN VALUE
 <a name="RETURN VALUE"></a>
@@ -283,9 +289,9 @@ returns <b>HBW_POLICY_BIND, HBW_POLICY_BIND_ALL,
 HBW_POLICY_PREFERRED</b> or <b>HBW_POLICY_INTERLEAVE</b>
 which represents the current high bandwidth policy.
 <b>hbw_free</b>() do not have return value.
-<b>hbw_malloc</b>() <b>hbw_calloc</b>(), and
+<b>hbw_malloc</b>() <b>hbw_calloc</b>() and
 <b>hbw_realloc</b>() return the pointer to the allocated
-memory, or NULL if the request fails.
+memory, or <i>NULL</i> if the request fails.
 <b>hbw_posix_memalign</b>(),
 <b>hbw_posix_memalign_psize</b>() and
 <b>hbw_set_policy</b>() return zero on success and return an
@@ -299,8 +305,12 @@ on failure.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Error codes
 described here are the POSIX standard error codes as <br>
-defined in &lt;errno.h&gt; <b><br>
-hbw_check_available</b>()</p>
+defined in</p>
+
+<p style="margin-left:22%;"><i>&lt;errno.h&gt;</i></p>
+
+
+<p style="margin-left:11%;"><b>hbw_check_available</b>()</p>
 
 <p style="margin-left:22%;">returns <b>ENODEV</b> if
 high-bandwidth memory is unavailable.</p>
@@ -310,29 +320,28 @@ high-bandwidth memory is unavailable.</p>
 
 <p style="margin-left:22%;">If the <i>alignment</i>
 parameter is not a power of two, or was not a multiple of
-<i>sizoeof(void *)</i>, then <b>EINVAL</b> is returned. If
-the policy and <i>pagesize</i> combination is unsupported
-then <b>EINVAL</b> is returned. If there was insufficient
-memory to satisfy the request then <b>ENOMEM</b> is
-returned.</p>
+<i>sizeof(void*)</i>, then <b>EINVAL</b> is returned. If the
+policy and <i>pagesize</i> combination is unsupported then
+<b>EINVAL</b> is returned. If there was insufficient memory
+to satisfy the request then <b>ENOMEM</b> is returned.</p>
 
 <p style="margin-left:11%;"><b>hbw_set_policy</b>()</p>
 
 <p style="margin-left:22%;">returns <b>EPERM</b> if
-hbw_set_policy () was called more than once, or <b>EINVAL
-if</b> <i>mode</i> argument was neither
-<b>HBW_POLICY_PREFERRED, HBW_POLICY_BIND,
-HBW_POLICY_BIND_ALL</b> nor
-<b>HBW_POLICY_INTERLEAVE.</b></p>
+<b>hbw_set_policy</b>() was called more than once, or
+<b>EINVAL</b> if <i>mode</i> argument was neither
+<b>HBW_POLICY_PREFERRED</b>, <b>HBW_POLICY_BIND</b>,
+<b>HBW_POLICY_BIND_ALL</b> nor
+<b>HBW_POLICY_INTERLEAVE</b>.</p>
 
 
 <p style="margin-left:11%;"><b>hbw_verify_memory_region</b>()</p>
 
 <p style="margin-left:22%;">returns <b>EINVAL</b> if
-<i>addr</i> is NULL, <i>size</i> equals 0 or <i>flags</i>
-contained unsupported bit set. If memory pointed by
-<i>addr</i> could not be verified then <b>EFAULT</b> is
-returned.</p>
+<i>addr</i> is <i>NULL</i>, <i>size</i> equals 0 or
+<i>flags</i> contained unsupported bit set. If memory
+pointed by <i>addr</i> could not be verified then
+<b>EFAULT</b> is returned.</p>
 
 <h2>NOTES
 <a name="NOTES"></a>
@@ -340,10 +349,10 @@ returned.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">The
-<i>hbwmalloc.h</i> file defines the external functions and
-enumerations for the hbwmalloc library. These interfaces
-define a heap manager that targets high bandwidth memory
-numa nodes.</p>
+<i>&lt;hbwmalloc.h&gt;</i> file defines the external
+functions and enumerations for the hbwmalloc library. These
+interfaces define a heap manager that targets high bandwidth
+memory numa nodes.</p>
 
 <h2>FILES
 <a name="FILES"></a>
@@ -377,12 +386,12 @@ applies for example: 1-3,5 is a valid setting.</p>
 <p style="margin-left:22%;">This environment variable
 allows leveraging internal mechanism of the library for
 setting number of arenas per kind. Value should be a
-positive integer (not greater than INT_MAX defined in
-limits.h). The user should set the value based on the
-characteristics of application that is using the library.
-Higher value can provide better performance in extremely
-multithreaded applications at the cost of memory overhead.
-See section &quot;IMPLEMENTATION NOTES&quot; of
+positive integer (not greater than <b>INT_MAX</b> defined in
+<i>&lt;limits.h&gt;</i>). The user should set the value
+based on the characteristics of application that is using
+the library. Higher value can provide better performance in
+extremely multithreaded applications at the cost of memory
+overhead. See section <b>IMPLEMENTATION NOTES</b> of
 <b>jemalloc</b>(3) for more details about arenas.</p>
 
 
@@ -392,12 +401,14 @@ See section &quot;IMPLEMENTATION NOTES&quot; of
 behavior in memkind library by switching to one of the
 available heap managers. <br>
 Values: <br>
-JEMALLOC &acirc; sets the jemalloc heap manager <br>
-TBB &acirc; sets the Intel Threading Building Blocks heap
-manager. This option requires installed <br>
-Intel Threading Building Blocks library. If the
-MEMKIND_HEAP_MANAGER is not set then the jemalloc heap
-manager will be used by default.</p>
+JEMALLOC - sets the jemalloc heap manager <br>
+TBB - sets the Intel Threading Building Blocks heap manager.
+This option requires installed <br>
+Intel Threading Building Blocks library.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Note:</b> If
+the <b>MEMKIND_HEAP_MANAGER</b> is not set then the jemalloc
+heap manager will be used by default.</p>
 
 <h2>SYSTEM CONFIGURATION
 <a name="SYSTEM CONFIGURATION"></a>
@@ -411,11 +422,11 @@ HUGETLB (huge pages)</b></p>
 
 <p style="margin-left:22%;">Current number of
 &quot;persistent&quot; huge pages can be read from
-/proc/sys/vm/nr_hugepages file. Proposed way of setting
-hugepages is: &quot;sudo sysctl
-vm.nr_hugepages=&lt;number_of_hugepages&gt;&quot;. More
+<i>/proc/sys/vm/nr_hugepages</i> file. Proposed way of
+setting hugepages is: <b>sudo sysctl
+vm.nr_hugepages=&lt;number_of_hugepages&gt;</b>. More
 information can be found here:
-https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</p>
+<a href="https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt">https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</a></p>
 
 <h2>KNOWN ISSUES
 <a name="KNOWN ISSUES"></a>
@@ -436,7 +447,7 @@ extra huge pages (e.g. 8 huge pages).</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright (C)
-2014 - 2018 Intel Corporation. All rights reserved.</p>
+2014 - 2019 Intel Corporation. All rights reserved.</p>
 
 <h2>SEE ALSO
 <a name="SEE ALSO"></a>
@@ -446,7 +457,7 @@ extra huge pages (e.g. 8 huge pages).</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>malloc</b>(3),
 <b>numa</b>(3), <b>numactl</b>(8), <b>mbind</b>(2),
-<b>mmap</b>(2), <b>move_pages</b>(2) <b>jemalloc</b>(3)
+<b>mmap</b>(2), <b>move_pages</b>(2), <b>jemalloc</b>(3),
 <b>memkind</b>(3)</p>
 <hr>
 </body>
