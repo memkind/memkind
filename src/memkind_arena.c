@@ -662,12 +662,13 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
  * For more read: https://www.akkadia.org/drepper/tls.pdf
  * We could consider using rdfsbase when it will arrive to linux kernel
  *
+ * This approach works only on glibc (and possibly similar implementations)
+ * but that covers our current needs.
+ *
  */
 static uintptr_t get_fs_base()
 {
-    uintptr_t fs_base;
-    asm ("movq %%fs:0, %0" : "=r" (fs_base));
-    return fs_base;
+    return (uintptr_t)pthread_self();
 }
 
 MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
