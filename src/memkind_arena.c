@@ -665,9 +665,7 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
  */
 static uintptr_t get_fs_base()
 {
-    uintptr_t fs_base;
-    asm ("movq %%fs:0, %0" : "=r" (fs_base));
-    return fs_base;
+    return (uintptr_t)pthread_self();
 }
 
 MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
