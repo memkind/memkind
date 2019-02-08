@@ -52,11 +52,11 @@ int main(int argc, char *argv[])
     struct stat st;
 
     if (argc > 2) {
-        fprintf(stderr, "Usage: %s [pmem_kind_dir_path]", argv[0]);
+        fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
         if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr, "%s : Invalid path to pmem kind directory", argv[1]);
+            fprintf(stderr, "%s : Invalid path to pmem kind directory\n", argv[1]);
             return 1;
         } else {
             PMEM_DIR = argv[1];
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     ptr_default = (char *)memkind_malloc(MEMKIND_DEFAULT, size);
     if (!ptr_default) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Unable allocate 512 bytes in standard memory");
+        fprintf(stderr, "Unable allocate 512 bytes in standard memory\n");
         return errno ? -errno : 1;
     }
 
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     ptr_pmem = (char *)memkind_malloc(pmem_kind, HEAP_LIMIT_SIMULATE);
     if (!ptr_pmem) {
         perror("memkind_malloc()");
-        fprintf(stderr, "Unable allocate HEAP_LIMIT_SIMULATE in file-backed memory");
+        fprintf(stderr, "Unable allocate HEAP_LIMIT_SIMULATE in file-backed memory\n");
         return errno ? -errno : 1;
     }
     if (errno != 0) {

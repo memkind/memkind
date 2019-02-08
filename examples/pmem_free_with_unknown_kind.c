@@ -50,11 +50,11 @@ int main(int argc, char **argv)
     int err = 0;
 
     if (argc > 2) {
-        fprintf(stderr, "Usage: %s [pmem_kind_dir_path]", argv[0]);
+        fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
         if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr, "%s : Invalid path to pmem kind directory", argv[1]);
+            fprintf(stderr, "%s : Invalid path to pmem kind directory\n", argv[1]);
             return 1;
         } else {
             PMEM_DIR = argv[1];
