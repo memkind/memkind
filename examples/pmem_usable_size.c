@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2018-2019 Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,11 +45,11 @@ int main(int argc, char *argv[])
     struct stat st;
 
     if (argc > 2) {
-        fprintf(stderr, "Usage: %s [pmem_kind_dir_path]", argv[0]);
+        fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
         if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr, "%s : Invalid path to pmem kind directory", argv[1]);
+            fprintf(stderr, "%s : Invalid path to pmem kind directory\n", argv[1]);
             return 1;
         } else {
             PMEM_DIR = argv[1];
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout,
-            "The real size of the allocation has been successfully read.");
+            "The real size of the allocation has been successfully read.\n");
 
     return 0;
 }

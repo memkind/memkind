@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2018-2019 Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
     } else if (argc == 2) {
         struct stat st;
         if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr,"%s : Invalid path to pmem kind directory", argv[1]);
+            fprintf(stderr,"%s : Invalid path to pmem kind directory\n", argv[1]);
             return 1;
         }
         pmem_directory = argv[1];
