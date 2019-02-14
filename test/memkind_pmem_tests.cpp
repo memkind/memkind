@@ -868,10 +868,12 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignSizeZero)
 {
     void *test = nullptr;
     size_t alignment = sizeof(void *);
-    int ret;
 
-    ret = memkind_posix_memalign(pmem_kind, &test, alignment, 0);
-    ASSERT_TRUE(ret != 0);
+    errno = 0;
+    int ret = memkind_posix_memalign(pmem_kind, &test, alignment, 0);
+
+    ASSERT_TRUE(errno == 0);
+    ASSERT_TRUE(ret == 0);
     ASSERT_TRUE(test == nullptr);
 }
 

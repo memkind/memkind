@@ -232,8 +232,10 @@ If
 .I size
 is 0, then
 .BR memkind_posix_memalign ()
-returns
-.IR "NULL" .
+returns 0, with a
+.I NULL
+returned in
+.IR "memptr" .
 .PP
 .BR memkind_malloc_usable_size ()
 function provides the same semantics as
