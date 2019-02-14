@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -584,6 +584,9 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
         err = memkind_posix_check_alignment(kind, alignment);
     }
     if (MEMKIND_LIKELY(!err)) {
+        if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
+            return 0;
+        }
         /* posix_memalign should not change errno.
            Set it to its previous value after calling jemalloc */
         errno_before = errno;

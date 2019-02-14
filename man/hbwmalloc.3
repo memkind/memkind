@@ -178,6 +178,14 @@ The requested
 .I alignment
 must be a power of 2 at least as large as
 .IR "sizeof(void*)" .
+If
+.I size
+is 0, then
+.BR hbw_posix_memalign ()
+returns 0, with a
+.IR "NULL"
+returned in
+.IR "memptr" .
 .PP
 .BR hbw_posix_memalign_psize ()
 allocates

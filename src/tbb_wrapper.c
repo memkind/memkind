@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 - 2018 Intel Corporation.
+ * Copyright (C) 2017 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,7 +139,10 @@ static int tbb_pool_posix_memalign(struct memkind *kind, void **memptr,
     if(!alignment && (0 != (alignment & (alignment-sizeof(void *))))) return EINVAL;
     //Check if alignment is "a power of 2".
     if(alignment & (alignment-1)) return EINVAL;
-    if(size_out_of_bounds(size)) return ENOMEM;
+    if(size_out_of_bounds(size)) {
+        *memptr = NULL;
+        return 0;
+    }
     void *result = pool_aligned_malloc(kind->priv, size, alignment);
     if (!result) {
         return ENOMEM;

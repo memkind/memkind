@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,8 @@ MEMKIND_EXPORT int memkind_default_posix_memalign(struct memkind *kind,
                                                   void **memptr, size_t alignment, size_t size)
 {
     if(MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
-        return EINVAL;
+        *memptr = NULL;
+        return 0;
     }
     return jemk_posix_memalign(memptr, alignment, size);
 }
