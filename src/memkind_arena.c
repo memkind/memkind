@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -517,7 +517,7 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
     unsigned int arena;
 
     if (size == 0 && ptr != NULL) {
-        memkind_free(kind, ptr);
+        memkind_arena_free(kind, ptr);
         ptr = NULL;
     } else {
         err = kind->ops->get_arena(kind, &arena, size);

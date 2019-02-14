@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Intel Corporation.
+ * Copyright (C) 2015 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -437,6 +437,23 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocSizeMax)
     memkind_free(pmem_kind, test);
 }
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocSizeZero)
+{
+    size_t size = 1 * KB;
+    void *test = nullptr;
+    void *new_test = nullptr;
+    const size_t iteration = 100;
+
+    for (unsigned i = 0; i < iteration; ++i) {
+        test = memkind_malloc(pmem_kind, size);
+        ASSERT_TRUE(test != nullptr);
+        errno = 0;
+        new_test = memkind_realloc(pmem_kind, test, 0);
+        ASSERT_TRUE(new_test == nullptr);
+        ASSERT_TRUE(errno == 0);
+    }
+}
+
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocPtrCheck)
 {
     size_t size = 1 * KB;
@@ -620,7 +637,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeNullptr)
     timer.start();
     do {
         memkind_free(pmem_kind, nullptr);
-    } while(timer.getElapsedTime() < test_time);
+    } while (timer.getElapsedTime() < test_time);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeNullptrNullKind)
@@ -631,7 +648,45 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeNullptrNullKind)
     timer.start();
     do {
         memkind_free(nullptr, nullptr);
-    } while(timer.getElapsedTime() < test_time);
+    } while (timer.getElapsedTime() < test_time);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptrSizeZero)
+{
+    const double test_time = 5;
+    void *test_nullptr = nullptr;
+    TimerSysTime timer;
+    timer.start();
+    do {
+        errno = 0;
+        //equivalent to memkind_malloc(pmem_kind,0)
+        test_nullptr = memkind_realloc(pmem_kind, nullptr, 0);
+        ASSERT_EQ(test_nullptr, nullptr);
+        ASSERT_EQ(errno, 0);
+    } while (timer.getElapsedTime() < test_time);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_DefaultReallocNullptrSizeZero)
+{
+    const double test_time = 5;
+    void *test_nullptr = nullptr;
+    void *test_ptr_malloc = nullptr;
+    void *test_ptr_realloc = nullptr;
+    TimerSysTime timer;
+    timer.start();
+    do {
+        test_ptr_malloc = memkind_malloc(MEMKIND_DEFAULT, 5 * MB);
+        errno = 0;
+        test_ptr_realloc = memkind_realloc(MEMKIND_DEFAULT, test_ptr_malloc, 0);
+        ASSERT_EQ(test_ptr_realloc, nullptr);
+        ASSERT_EQ(errno, 0);
+
+        errno = 0;
+        //equivalent to memkind_malloc(MEMKIND_DEFAULT,0)
+        test_nullptr = memkind_realloc(MEMKIND_DEFAULT, nullptr, 0);
+        ASSERT_EQ(test_nullptr, nullptr);
+        ASSERT_EQ(errno, 0);
+    } while (timer.getElapsedTime() < test_time);
 }
 
 /*

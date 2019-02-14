@@ -123,7 +123,17 @@ the
 function behaves identically to
 .BR hbw_malloc ()
 for the specified size.
-The address
+If
+.I size
+is equal to zero, and
+.I ptr
+is not
+.IR "NULL" ,
+then the call is equivalent to
+.I hbw_free(ptr)
+and
+.IR "NULL"
+is returned. The address
 .IR "ptr" ,
 if not
 .IR "NULL" ,
