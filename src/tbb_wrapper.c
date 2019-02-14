@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 - 2018 Intel Corporation.
+ * Copyright (C) 2017 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -125,7 +125,6 @@ static void *tbb_pool_calloc(struct memkind *kind, size_t num, size_t size)
 
 static void *tbb_pool_realloc(struct memkind *kind, void *ptr, size_t size)
 {
-    if(size_out_of_bounds(size)) return NULL;
     void *result = pool_realloc(kind->priv, ptr, size);
     if (!result && size)
         errno = ENOMEM;
