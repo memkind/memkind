@@ -513,7 +513,7 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
     unsigned int arena;
 
     if (size == 0 && ptr != NULL) {
-        memkind_free(kind, ptr);
+        memkind_arena_free(kind, ptr);
         ptr = NULL;
     } else {
         err = kind->ops->get_arena(kind, &arena, size);
