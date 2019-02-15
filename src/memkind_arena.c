@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <smmintrin.h>
 #include <limits.h>
 #include <sys/mman.h>
+#include <sys/param.h>
 #include <assert.h>
 
 #include "config.h"
@@ -68,11 +69,6 @@ static unsigned int round_pow2_up(unsigned int v)
     return v;
 }
 
-static int min_int(int a, int b)
-{
-    return a > b ? b : a;
-}
-
 MEMKIND_EXPORT int memkind_set_arena_map_len(struct memkind *kind)
 {
     if (kind->ops->get_arena == memkind_bijective_get_arena) {
@@ -94,7 +90,7 @@ MEMKIND_EXPORT int memkind_set_arena_map_len(struct memkind *kind)
             int calculated_arena_num = numa_num_configured_cpus() * 4;
 
 #if ARENA_LIMIT_PER_KIND != 0
-            calculated_arena_num = min_int(ARENA_LIMIT_PER_KIND, calculated_arena_num);
+            calculated_arena_num = MIN((ARENA_LIMIT_PER_KIND), calculated_arena_num);
 #endif
             kind->arena_map_len = calculated_arena_num;
         }
