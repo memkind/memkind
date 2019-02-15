@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Intel Corporation.
+ * Copyright (C) 2017 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,9 @@ void tbb_initialize(struct memkind *kind);
 
 /* ptr pointer must come from the valid TBB pool allocation */
 void tbb_pool_free(struct memkind *kind, void *ptr);
+
+/* ptr pointer must come from the valid TBB pool allocation */
+void tbb_pool_free_with_kind_detect(void *ptr);
 
 #ifdef __cplusplus
 }

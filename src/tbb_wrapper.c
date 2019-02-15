@@ -151,13 +151,14 @@ static int tbb_pool_posix_memalign(struct memkind *kind, void **memptr,
     return 0;
 }
 
+void tbb_pool_free_with_kind_detect(void *ptr)
+{
+    pool_free(pool_identify(ptr), ptr);
+}
+
 void tbb_pool_free(struct memkind *kind, void *ptr)
 {
-    if(kind) {
-        pool_free(kind->priv, ptr);
-    } else {
-        pool_free(pool_identify(ptr), ptr);
-    }
+    pool_free(kind->priv, ptr);
 }
 
 static size_t tbb_pool_usable_size(struct memkind *kind, void *ptr)

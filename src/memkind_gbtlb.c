@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .calloc = memkind_arena_calloc,
     .posix_memalign = memkind_arena_posix_memalign,
     .realloc = memkind_arena_realloc,
-    .free = memkind_default_free,
+    .free = memkind_arena_free,
     .mmap = gbtlb_mmap,
     .check_available = memkind_hugetlb_check_available_2mb,
     .mbind = memkind_default_mbind,
@@ -62,7 +62,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .calloc = memkind_arena_calloc,
     .posix_memalign = memkind_arena_posix_memalign,
     .realloc = memkind_arena_realloc,
-    .free = memkind_default_free,
+    .free = memkind_arena_free,
     .mmap = gbtlb_mmap,
     .check_available = memkind_hugetlb_check_available_2mb,
     .mbind = memkind_default_mbind,
@@ -81,7 +81,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
     .calloc = memkind_arena_calloc,
     .posix_memalign = memkind_arena_posix_memalign,
     .realloc = memkind_arena_realloc,
-    .free = memkind_default_free,
+    .free = memkind_arena_free,
     .mmap = gbtlb_mmap,
     .check_available = memkind_hugetlb_check_available_2mb,
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,

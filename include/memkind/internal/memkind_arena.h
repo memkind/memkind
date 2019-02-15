@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,7 @@ int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena,
 int memkind_arena_finalize(struct memkind *kind);
 void memkind_arena_init(struct memkind *kind);
 void memkind_arena_free(struct memkind *kind, void *ptr);
+void memkind_arena_free_with_kind_detect(void *ptr);
 
 #ifdef __cplusplus
 }
