@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2018 Intel Corporation.
+#  Copyright (C) 2014 - 2019 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -373,7 +373,7 @@ dist_man_MANS = man/memkind-hbw-nodes.1 \
                 # end
 
 CLEANFILES = memkind-$(VERSION).spec
-DISTCLEANFILES = VERSION
+DISTCLEANFILES = VERSION configure
 
 bin_PROGRAMS = memkind-hbw-nodes
 
