@@ -31,7 +31,7 @@ AC_INIT([memkind],m4_esyscmd([tr -d '\n' < VERSION]))
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([memkind.spec.mk])
 
-AM_INIT_AUTOMAKE([-Wall -Werror foreign 1.11 silent-rules subdir-objects parallel-tests tar-pax])
+AM_INIT_AUTOMAKE([-Wall foreign 1.11 silent-rules subdir-objects parallel-tests tar-pax])
 AM_SILENT_RULES([yes])
 
 # Checks for programs and libraries.
@@ -48,7 +48,7 @@ AM_PROG_CC_C_O
 #============================tls===============================================
 # Check for tls_model attribute support
 SAVED_CFLAGS="${CFLAGS}"
-CFLAGS="$CFLAGS -Werror"
+CFLAGS="$CFLAGS"
 AC_MSG_CHECKING([for tls_model attribute support])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
 [[
