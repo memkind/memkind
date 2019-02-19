@@ -466,4 +466,3 @@ jemalloc/test/unit/tsd.c
 jemalloc/test/unit/witness.c
 jemalloc/test/unit/zero.c
 jemalloc/test/unit/zero.sh
-build_jemalloc.sh
