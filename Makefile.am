@@ -29,55 +29,53 @@ lib_LTLIBRARIES = libmemkind.la
 
 libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/heap_manager.c \
-                        src/memkind_arena.c \
                         src/memkind.c \
+                        src/memkind_arena.c \
                         src/memkind_default.c \
                         src/memkind_gbtlb.c \
                         src/memkind_hbw.c \
-                        src/memkind_regular.c \
                         src/memkind_hugetlb.c \
-                        src/memkind_pmem.c \
                         src/memkind_interleave.c \
                         src/memkind_log.c \
+                        src/memkind_pmem.c \
+                        src/memkind_regular.c \
                         src/tbb_wrapper.c \
                         # end
 
 
 libmemkind_la_LIBADD = jemalloc/obj/lib/libjemalloc_pic.a
 libmemkind_la_LDFLAGS = -version-info 0:1:0 -ldl
-include_HEADERS = include/hbwmalloc.h \
-                  include/hbw_allocator.h \
-                  include/pmem_allocator.h \
+include_HEADERS = include/hbw_allocator.h \
+                  include/hbwmalloc.h \
                   include/memkind.h \
                   include/memkind_deprecated.h \
+                  include/pmem_allocator.h \
                   # end
 
 nonstandardincludedir = $(includedir)/memkind/internal
-nonstandardinclude_HEADERS = include/memkind/internal/memkind_arena.h \
-                  include/memkind/internal/heap_manager.h \
+nonstandardinclude_HEADERS = include/memkind/internal/heap_manager.h \
+                  include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_default.h \
                   include/memkind/internal/memkind_gbtlb.h \
                   include/memkind/internal/memkind_hbw.h \
-                  include/memkind/internal/memkind_regular.h \
                   include/memkind/internal/memkind_hugetlb.h \
                   include/memkind/internal/memkind_interleave.h \
+                  include/memkind/internal/memkind_log.h \
                   include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
-                  include/memkind/internal/memkind_log.h \
-                  include/memkind/internal/tbb_wrapper.h \
+                  include/memkind/internal/memkind_regular.h \
                   include/memkind/internal/tbb_mem_pool_policy.h \
+                  include/memkind/internal/tbb_wrapper.h \
                   # end
 
-EXTRA_DIST = astyle.sh \
+EXTRA_DIST = CONTRIBUTING \
+             VERSION \
+             astyle.sh \
              autogen.sh \
              build.sh \
              build_jemalloc.sh \
+             build_jemalloc.sh \
              examples/README \
-             test/test.sh \
-             VERSION \
-             CONTRIBUTING \
-             memkind-$(VERSION).spec \
-             memkind.spec.mk \
              jemalloc/.appveyor.yml \
              jemalloc/.autom4te.cfg \
              jemalloc/.gitattributes \
@@ -355,22 +353,24 @@ EXTRA_DIST = astyle.sh \
              jemalloc/test/unit/witness.c \
              jemalloc/test/unit/zero.c \
              jemalloc/test/unit/zero.sh \
-             build_jemalloc.sh \
+             memkind-$(VERSION).spec \
+             memkind.spec.mk \
+             test/test.sh \
              # end
 
-dist_doc_DATA = README COPYING VERSION
-dist_man_MANS = man/memkind-hbw-nodes.1 \
-                man/hbwmalloc.3 \
-                man/memkind.3 \
-                man/memkind_arena.3 \
-                man/memkind_default.3 \
-                man/memkind_hbw.3 \
-                man/memkind_hugetlb.3 \
-                man/memkind_pmem.3 \
-                man/hbwallocator.3 \
-                man/pmemallocator.3 \
-                man/autohbw.7 \
-                # end
+dist_doc_DATA = COPYING README VERSION
+dist_man_MANS =  man/autohbw.7 \
+                 man/hbwallocator.3 \
+                 man/hbwmalloc.3 \
+                 man/memkind-hbw-nodes.1 \
+                 man/memkind.3 \
+                 man/memkind_arena.3 \
+                 man/memkind_default.3 \
+                 man/memkind_hbw.3 \
+                 man/memkind_hugetlb.3 \
+                 man/memkind_pmem.3 \
+                 man/pmemallocator.3 \
+                 # end
 
 CLEANFILES = memkind-$(VERSION).spec
 DISTCLEANFILES = VERSION configure
