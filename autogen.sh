@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2014-2017 Intel Corporation.
+#  Copyright (C) 2014 - 2019 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -27,18 +27,27 @@ set -e
 
 # If the VERSION file does not exist, then create it based on git
 # describe or if not in a git repo just set VERSION to 0.0.0.
+# Determine VERSION scheme, based on git:
+# -if HEAD is tag annotated - it is official release e.g. setting VERSION to "1.9.0"
+# -if HEAD is not tag annotated - it is snapshot e.g. setting VERSION to "1.8.0+dev19+g1c93b2d"
+
 if [ ! -f VERSION ]; then
     if [ -f .git/config ]; then
-        sha=$(git describe --long --always | awk -F- '{print $(NF)}')
+        sha=$(git describe --long | awk -F- '{print $(NF)}')
         release=$(git describe --long | awk -F- '{print $(NF-1)}')
         version=$(git describe --long | sed -e "s|\(.*\)-$release-$sha|\1|" -e "s|-|+|g" -e "s|^v||")
-        if [ "$release" == "" ]; then
-            version=${sha}
+        current_commit_sha=$(git rev-parse HEAD)
+        tag_from_current_commit=$(git describe --exact-match "$current_commit_sha") || true
+        is_release=$(git for-each-ref refs/tags | grep refs/tags/"$tag_from_current_commit" | awk -F ' ' '{print $2}')
+        if [ "$is_release" == "tag" ]; then
+            echo "Annotated tag refering to this commit was found, setting version as official release" 2>&1
+            version=${version}
         else
-            version=${version}+dev${release}-${sha}
+            echo "WARNING: No annotated tag refering to this commit was found, setting version to development build " 2>&1
+            version=${version}+dev${release}+${sha}
         fi
     else
-        echo "WARNING:  VERSION file does not exist and working directory is not a git repository, setting verison to 0.0.0" 2>&1
+        echo "WARNING: VERSION file does not exist and working directory is not a git repository, setting version to 0.0.0" 2>&1
         version=0.0.0
     fi
     echo $version > VERSION
