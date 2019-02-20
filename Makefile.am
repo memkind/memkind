@@ -409,8 +409,7 @@ memkind-$(VERSION).spec:
 	$(MAKE) version="$(VERSION)" -f memkind.spec.mk $@
 
 rpm: dist
-	$(MAKE) version="$(VERSION)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
-		-f memkind.spec.mk $@
+	$(MAKE) version="$(VERSION)" -f memkind.spec.mk $@
 
 all: static_lib
 
