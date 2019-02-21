@@ -1534,7 +1534,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeUsingNullptrInsteadOfKind)
     const size_t pmem_array_size = 10;
     struct memkind *pmem_kind_array[pmem_array_size] = { nullptr };
     const int malloc_limit = 100000;
-    void *ptr[pmem_array_size][malloc_limit] = { nullptr };
+    void *ptr[pmem_array_size][malloc_limit] = {{ nullptr }};
     void *testPtr = nullptr;
 
     for (size_t i = 0; i < pmem_array_size; ++i) {
