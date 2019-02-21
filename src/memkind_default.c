@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,6 +102,7 @@ MEMKIND_EXPORT void *memkind_default_realloc(struct memkind *kind, void *ptr,
                                              size_t size)
 {
     if(MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
+        jemk_free(ptr);
         return NULL;
     }
     return jemk_realloc(ptr, size);
