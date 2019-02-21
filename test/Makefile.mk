@@ -103,8 +103,8 @@ test_all_tests_SOURCES = $(fused_gtest) \
 test_locality_test_SOURCES = $(fused_gtest) test/allocator_perf_tool/Allocation_info.cpp test/locality_test.cpp
 test_locality_test_LDADD = libmemkind.la
 
-test_locality_test_CPPFLAGS = -fopenmp -O0 -Wno-error $(AM_CPPFLAGS)
-test_locality_test_CXXFLAGS = -fopenmp -O0 -Wno-error $(AM_CPPFLAGS)
+test_locality_test_CPPFLAGS = $(OPENMP_CFLAGS) -O0 -Wno-error $(AM_CPPFLAGS)
+test_locality_test_CXXFLAGS = $(OPENMP_CFLAGS) -O0 -Wno-error $(AM_CPPFLAGS)
 
 test_autohbw_test_helper_SOURCES = test/autohbw_test_helper.c
 test_decorator_test_SOURCES = $(fused_gtest) test/decorator_test.cpp test/decorator_test.h
@@ -167,11 +167,13 @@ test_allocator_perf_tool_tests_SOURCES = $(allocator_perf_tool_library_sources) 
                                          # end
 
 
-test_allocator_perf_tool_tests_CPPFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
-test_allocator_perf_tool_tests_CXXFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
+test_allocator_perf_tool_tests_CPPFLAGS = -Itest/allocator_perf_tool/ -O0 -Wno-error $(AM_CPPFLAGS)
+test_allocator_perf_tool_tests_CXXFLAGS = -Itest/allocator_perf_tool/ -O0 -Wno-error $(AM_CPPFLAGS)
+test_allocator_perf_tool_tests_LDFLAGS = -lpthread -lnuma
 
 NUMAKIND_MAX = 2048
-test_all_tests_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS) -DNUMAKIND_MAX=$(NUMAKIND_MAX) -ldl
+test_all_tests_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS) -DNUMAKIND_MAX=$(NUMAKIND_MAX)
+test_all_tests_LDFLAGS = -ldl
 
 #Allocator Perf Tool stand alone app
 check_PROGRAMS += test/perf_tool
@@ -181,8 +183,9 @@ test_perf_tool_SOURCES = $(allocator_perf_tool_library_sources) \
                          # end
 
 
-test_perf_tool_CPPFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
-test_perf_tool_CXXFLAGS = -Itest/allocator_perf_tool/ -lpthread -lnuma -O0 -Wno-error $(AM_CPPFLAGS)
+test_perf_tool_CPPFLAGS = -Itest/allocator_perf_tool/ -O0 -Wno-error $(AM_CPPFLAGS)
+test_perf_tool_CXXFLAGS = -Itest/allocator_perf_tool/ -O0 -Wno-error $(AM_CPPFLAGS)
+test_perf_tool_LDFLAGS = -lpthread -lnuma
 if HAVE_CXX11
 test_perf_tool_CPPFLAGS += -std=c++11
 test_perf_tool_CXXFLAGS += -std=c++11
@@ -195,20 +198,23 @@ check_PROGRAMS += test/alloc_benchmark_glibc \
                   test/alloc_benchmark_tbb \
                   # end
 
-test_alloc_benchmark_glibc_CFLAGS = -O0 -g -fopenmp -Wall
+test_alloc_benchmark_glibc_CFLAGS = -O0 -g $(OPENMP_CFLAGS) -Wall
 test_alloc_benchmark_glibc_LDADD = libmemkind.la
 test_alloc_benchmark_glibc_SOURCES = test/alloc_benchmark.c
 
-test_alloc_benchmark_hbw_CFLAGS = -O0 -g -fopenmp -Wall -DHBWMALLOC -lmemkind
+test_alloc_benchmark_hbw_CFLAGS = -O0 -g $(OPENMP_CFLAGS) -Wall -DHBWMALLOC
 test_alloc_benchmark_hbw_LDADD = libmemkind.la
+test_alloc_benchmark_hbw_LDFLAGS = -lmemkind
 test_alloc_benchmark_hbw_SOURCES = test/alloc_benchmark.c
 
-test_alloc_benchmark_pmem_CFLAGS = -O0 -g -fopenmp -Wall -DPMEMMALLOC -ldl
+test_alloc_benchmark_pmem_CFLAGS = -O0 -g $(OPENMP_CFLAGS) -Wall -DPMEMMALLOC
 test_alloc_benchmark_pmem_LDADD = libmemkind.la
+test_alloc_benchmark_pmem_LDFLAGS = -ldl
 test_alloc_benchmark_pmem_SOURCES = test/alloc_benchmark.c
 
-test_alloc_benchmark_tbb_CFLAGS = -O0 -g -fopenmp -Wall -DTBBMALLOC -ldl
+test_alloc_benchmark_tbb_CFLAGS = -O0 -g $(OPENMP_CFLAGS) -Wall -DTBBMALLOC
 test_alloc_benchmark_tbb_LDADD = libmemkind.la
+test_alloc_benchmark_tbb_LDFLAGS = -ldl
 test_alloc_benchmark_tbb_SOURCES = test/alloc_benchmark.c \
                                    test/load_tbbmalloc_symbols.c \
                                    test/tbbmalloc.h \
