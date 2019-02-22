@@ -37,16 +37,19 @@ pthread_once_t heap_manager_init_once_g = PTHREAD_ONCE_INIT;
 struct heap_manager_ops {
     void (*init)(struct memkind *kind);
     void (*heap_manager_free)(void *ptr);
+    void *(*heap_manager_realloc)(void *ptr, size_t size);
 };
 
 struct heap_manager_ops arena_heap_manager_g = {
     .init = memkind_arena_init,
-    .heap_manager_free = memkind_arena_free_with_kind_detect
+    .heap_manager_free = memkind_arena_free_with_kind_detect,
+    .heap_manager_realloc = memkind_arena_realloc_with_kind_detect
 };
 
 struct heap_manager_ops tbb_heap_manager_g = {
     .init = tbb_initialize,
-    .heap_manager_free = tbb_pool_free_with_kind_detect
+    .heap_manager_free = tbb_pool_free_with_kind_detect,
+    .heap_manager_realloc = tbb_pool_realloc_with_kind_detect
 };
 
 static void set_heap_manager()
@@ -72,4 +75,9 @@ void heap_manager_init(struct memkind *kind)
 void heap_manager_free(void *ptr)
 {
     get_heap_manager()->heap_manager_free(ptr);
+}
+
+void *heap_manager_realloc(void *ptr, size_t size)
+{
+    return get_heap_manager()->heap_manager_realloc(ptr, size);
 }
