@@ -511,6 +511,17 @@ exit:
 }
 
 #ifdef __GNUC__
+__attribute__((constructor))
+#endif
+static void memkind_construct(void)
+{
+    const char *env = getenv("MEMKIND_HEAP_MANAGER");
+    if (env && strcmp(env, "TBB") == 0) {
+        load_tbb_symbols();
+    }
+}
+
+#ifdef __GNUC__
 __attribute__((destructor))
 #endif
 static int memkind_finalize(void)

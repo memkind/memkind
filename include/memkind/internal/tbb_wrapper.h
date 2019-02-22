@@ -30,6 +30,9 @@
 extern "C" {
 #endif
 
+/* dynamically load TBB symbols */
+void load_tbb_symbols(void);
+
 /* ops callbacks are replaced by TBB callbacks. */
 void tbb_initialize(struct memkind *kind);
 
