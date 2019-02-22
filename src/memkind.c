@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -666,7 +666,7 @@ MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
     }
 #endif
     if (!kind) {
-        heap_manager_free(kind, ptr);
+        heap_manager_free(ptr);
     } else {
         pthread_once(&kind->init_once, kind->ops->init_once);
         kind->ops->free(kind, ptr);

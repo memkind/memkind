@@ -47,6 +47,7 @@ This is EXPERIMENTAL API. The functionality and the header file itself can be ch
 .BI "int memkind_arena_finalize(struct memkind " "*kind" );
 .BI "void memkind_arena_init(struct memkind " "*kind" );
 .BI "void memkind_arena_free(struct memkind " "*kind" ", void " "*ptr" );
+.BI "void memkind_arena_free_with_kind_detect(void " "*ptr" );
 .br
 .SH DESCRIPTION
 This header file is a collection of functions can be used to populate
@@ -170,6 +171,12 @@ or
 .BR memkind_arena_realloc ()
 to be made available for future allocations.
 It uses the memkind "get_arena" operation to select the arena.
+.PP
+.BR memkind_arena_free_with_kind_detect ()
+function will look up for kind associated to the allocated memory referenced by
+.I ptr
+and call
+.BR memkind_arena_free ().
 .PP
 .BR get_kind_by_arena ()
 returns pointer to memory kind structure associated with given arena.

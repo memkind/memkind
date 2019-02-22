@@ -266,21 +266,21 @@ If
 is
 .IR "NULL" ,
 no operation is performed.
-The value of
-.B MEMKIND_DEFAULT
-can be given as the
-.I kind
-for all buffers allocated by a kind that leverages the jemalloc
-allocator. In cases where the kind is unknown in the
+In cases where the kind is unknown in the
 context of the call to
 .BR memkind_free ()
 .IR "NULL" ,
 can be given as the
 .I kind
 specified to
-.BR memkind_free ()
-but this will require a look up that can be bypassed by specifying
-a non-zero value.
+.BR memkind_free (),
+but this will require a internal look up for correct kind.
+.BR Note:
+The look up for
+.I kind
+could result in serious performance penalty,
+which can be avoided by specifying a correct
+.IR kind .
 .sp
 .B "KIND MANAGEMENT:"
 .br
