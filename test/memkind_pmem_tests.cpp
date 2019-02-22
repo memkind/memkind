@@ -275,7 +275,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeMemoryAfterDestroyLargeClass)
     ASSERT_EQ(0, err);
 
     ASSERT_EQ(0, statfs(PMEM_DIR, &st));
-    ASSERT_EQ(blocksAvailable, st.f_bfree);
+    ASSERT_NEAR(blocksAvailable, st.f_bfree, 1);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeMemoryAfterDestroySmallClass)
@@ -302,7 +302,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeMemoryAfterDestroySmallClass)
     ASSERT_EQ(0, err);
 
     ASSERT_EQ(0, statfs(PMEM_DIR, &st));
-    ASSERT_EQ(blocksAvailable, st.f_bfree);
+    ASSERT_NEAR(blocksAvailable, st.f_bfree, 1);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
