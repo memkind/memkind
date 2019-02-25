@@ -82,6 +82,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/get_arena_test.cpp \
                          test/hbw_allocator_tests.cpp \
                          test/hbw_verify_function_test.cpp \
+                         test/memkind_null_kind_test.cpp \
                          test/memkind_pmem_long_time_tests.cpp \
                          test/memkind_pmem_tests.cpp \
                          test/memkind_versioning_tests.cpp \
