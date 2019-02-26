@@ -175,7 +175,7 @@ void tbb_pool_free_with_kind_detect(void *ptr)
     }
 }
 
-void tbb_pool_free(struct memkind *kind, void *ptr)
+static void tbb_pool_free(struct memkind *kind, void *ptr)
 {
     pool_free(kind->priv, ptr);
 }
