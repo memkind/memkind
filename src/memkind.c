@@ -342,6 +342,11 @@ MEMKIND_EXPORT int memkind_destroy_kind(memkind_t kind)
     return err;
 }
 
+MEMKIND_EXPORT memkind_t memkind_detect_kind(void *ptr)
+{
+    return heap_manager_detect_kind(ptr);
+}
+
 /* Declare weak symbols for allocator decorators */
 extern void memkind_malloc_pre(struct memkind **,
                                size_t *) __attribute__((weak));

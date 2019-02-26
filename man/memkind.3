@@ -63,6 +63,8 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .BI "void memkind_free(memkind_t " "kind" ", void " "*ptr" );
 .br
 .BI "size_t memkind_malloc_usable_size(memkind_t " "kind" ", void " "*ptr" );
+.br
+.BI "memkind_t memkind_detect_kind(void " "*ptr" );
 .sp
 .B "KIND MANAGEMENT:"
 .br
@@ -273,13 +275,33 @@ function provides the same semantics as
 .BR malloc_usable_size (3),
 but operates on specified
 .IR "kind" .
-
+.br
 .BR Note:
 .BR memkind_malloc_usable_size ()
 is not supported by TBB heap manager described in
 .B ENVIRONMENT
 section.
-
+.PP
+.BR memkind_detect_kind ()
+returns the kind associated with allocated memory referenced by
+.IR ptr .
+This pointer
+must have been returned by a previous call to
+.BR memkind_malloc (),
+.BR memkind_calloc (),
+.BR memkind_realloc ()
+or
+.BR memkind_posix_memalign ().
+If
+.I ptr
+is
+.IR "NULL" ,
+then
+.BR memkind_detect_kind ()
+returns
+.IR "NULL" .
+.BR Note:
+This function has non-trivial performance overhead.
 .PP
 .BR memkind_free ()
 causes the allocated memory referenced by
