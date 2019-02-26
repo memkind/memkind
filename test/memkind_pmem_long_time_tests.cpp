@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Intel Corporation.
+ * Copyright (C) 2018 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ protected:
     {
         int err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind);
         ASSERT_EQ(0, err);
-        ASSERT_TRUE(nullptr != pmem_kind);
+        ASSERT_NE(nullptr, pmem_kind);
     }
 
     void TearDown()
@@ -70,7 +70,7 @@ TEST_F(MemkindPmemLongTimeStress, DISABLED_test_TC_MEMKIND_PmemStressSmallSize)
     do {
         for (size_t i = 0; i < ARRAY_SIZE(small_size); i++) {
             test = memkind_malloc(pmem_kind, small_size[i]);
-            ASSERT_TRUE(test != nullptr);
+            ASSERT_NE(test, nullptr);
             memkind_free(pmem_kind, test);
         }
     } while (timer.getElapsedTime() < STRESS_TIME);
@@ -85,7 +85,7 @@ TEST_F(MemkindPmemLongTimeStress, DISABLED_test_TC_MEMKIND_PmemStressLargeSize)
     do {
         for (size_t i = 0; i < ARRAY_SIZE(large_size); i++) {
             test = memkind_malloc(pmem_kind, large_size[i]);
-            ASSERT_TRUE(test != nullptr);
+            ASSERT_NE(test, nullptr);
             memkind_free(pmem_kind, test);
         }
     } while (timer.getElapsedTime() < STRESS_TIME);
@@ -102,7 +102,7 @@ TEST_F(MemkindPmemLongTimeStress,
     do {
         if (i < ARRAY_SIZE(small_size)) {
             test = memkind_malloc(pmem_kind, small_size[i]);
-            ASSERT_TRUE(test != nullptr);
+            ASSERT_NE(test, nullptr);
             memkind_free(pmem_kind, test);
             i++;
         } else
@@ -110,7 +110,7 @@ TEST_F(MemkindPmemLongTimeStress,
 
         if (j < ARRAY_SIZE(large_size)) {
             test = memkind_malloc(pmem_kind, large_size[j]);
-            ASSERT_TRUE(test != nullptr);
+            ASSERT_NE(test, nullptr);
             memkind_free(pmem_kind, test);
             j++;
         } else
