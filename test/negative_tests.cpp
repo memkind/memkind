@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -285,6 +285,22 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorMemAlign)
     EXPECT_EQ(errno, 0);
 }
 
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_DefaultSizeZero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_DEFAULT,
+                                 &ptr,
+                                 16,
+                                 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+    ASSERT_TRUE(ptr == NULL);
+}
+
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorAlignment)
 {
     int ret = 0;
@@ -298,6 +314,22 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorAlignment)
                                  100);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_HBWSizeZero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_HBW,
+                                 &ptr,
+                                 16,
+                                 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+    ASSERT_TRUE(ptr == NULL);
 }
 
 
@@ -393,6 +425,17 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_hbw_posix_memalign_over_size)
     int ret = hbw_posix_memalign(&ptr, 4096, SIZE_MAX);
     EXPECT_TRUE(ptr == NULL);
     EXPECT_EQ(ENOMEM, ret);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_hbw_posix_memalign_size_zero)
+{
+    void *ptr = NULL;
+    errno = 0;
+
+    int ret = hbw_posix_memalign(&ptr, 4096, 0);
+    EXPECT_TRUE(ptr == NULL);
+    EXPECT_EQ(0, ret);
+    EXPECT_EQ(0, errno);
 }
 
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_memkind_posix_memalign_over_size)
