@@ -25,7 +25,7 @@
 .SH "NAME"
 memkind \- Heap manager that enables allocations to memory with different properties.
 .br
-This header expose STANDARD and EXPERIMENTAL API. API Standards are described below in this man page.
+This header expose STANDARD, NON-STANDARD and EXPERIMENTAL API. API Standards are described below in this man page.
 .SH "SYNOPSIS"
 .nf
 .B #include <memkind.h>
@@ -41,6 +41,13 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .B "KIND MANAGEMENT:"
 .br
 .BI "int memkind_create_kind(memkind_memtype_t " "memtype_flags" ", memkind_policy_t " "policy" ", memkind_bits_t " "flags" ", memkind_t " "*kind" );
+.sp
+.sp
+.SS "NON-STANDARD API:"
+.sp
+.B "HEAP MANAGEMENT:"
+.br
+.BI "memkind_t memkind_detect_kind(void " "*ptr" );
 .sp
 .SS "STANDARD API:"
 .sp
@@ -273,13 +280,33 @@ function provides the same semantics as
 .BR malloc_usable_size (3),
 but operates on specified
 .IR "kind" .
-
+.br
 .BR Note:
 .BR memkind_malloc_usable_size ()
 is not supported by TBB heap manager described in
 .B ENVIRONMENT
 section.
-
+.PP
+.BR memkind_detect_kind ()
+get the kind associated with allocated memory referenced by
+.IR ptr .
+This pointer
+must have been returned by a previous call to
+.BR memkind_malloc (),
+.BR memkind_calloc (),
+.BR memkind_realloc ()
+or
+.BR memkind_posix_memalign ().
+If
+.I ptr
+is
+.IR "NULL" ,
+then
+.BR memkind_detect_kind ()
+returns
+.IR "NULL" .
+.BR Note:
+This operation is part of NON-STANDARD API, depending on usage it could result in performance overhead.
 .PP
 .BR memkind_free ()
 causes the allocated memory referenced by

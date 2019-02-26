@@ -149,6 +149,23 @@ void *tbb_pool_realloc_with_kind_detect(void *ptr, size_t size)
     return tbb_pool_common_realloc(pool_identify(ptr), ptr, size);
 }
 
+struct memkind *tbb_detect_kind(void *ptr)
+{
+    if (!ptr) {
+        return NULL;
+    }
+    struct memkind *kind = NULL;
+    unsigned i;
+    void *pool = pool_identify(ptr);
+    for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        int err = memkind_get_kind_by_partition(i, &kind);
+        if (!err && kind->priv == pool) {
+            break;
+        }
+    }
+    return kind;
+}
+
 static int tbb_pool_posix_memalign(struct memkind *kind, void **memptr,
                                    size_t alignment, size_t size)
 {
