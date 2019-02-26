@@ -446,17 +446,21 @@ static inline int memkind_lookup_arena(void *ptr, unsigned int *arena)
     return 0;
 }
 
-static struct memkind *get_kind_by_ptr(void *ptr)
+MEMKIND_EXPORT struct memkind *memkind_arena_detect_kind(void *ptr)
 {
-    struct memkind *kind = NULL;
-    if (ptr != NULL) {
-        unsigned arena;
-        int err = memkind_lookup_arena(ptr, &arena);
-        if (MEMKIND_LIKELY(!err)) {
-            kind = get_kind_by_arena(arena);
-        }
+    if (!ptr) {
+        return NULL;
     }
-    return kind;
+    struct memkind *kind = NULL;
+    unsigned arena;
+    int err = memkind_lookup_arena(ptr, &arena);
+    if (MEMKIND_LIKELY(!err)) {
+        kind = get_kind_by_arena(arena);
+    }
+
+    //if no kind was associated with arena it means that allocation doesn't come from
+    // jemk_*allocx API- it is jemk_*alloc API (MEMKIND_DEFAULT)
+    return (kind) ? kind : MEMKIND_DEFAULT;
 }
 
 static inline int get_tcache_flag(unsigned partition, size_t size)
@@ -504,7 +508,7 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
 
 MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
 {
-    if (!kind) {
+    if (kind == MEMKIND_DEFAULT) {
         jemk_free(ptr);
     } else if (ptr != NULL) {
         jemk_dallocx(ptr, get_tcache_flag(kind->partition, 0));
@@ -513,7 +517,7 @@ MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
 
 MEMKIND_EXPORT void memkind_arena_free_with_kind_detect(void *ptr)
 {
-    struct memkind *kind = get_kind_by_ptr(ptr);
+    struct memkind *kind = memkind_arena_detect_kind(ptr);
 
     memkind_arena_free(kind, ptr);
 }
@@ -549,8 +553,8 @@ MEMKIND_EXPORT void *memkind_arena_realloc_with_kind_detect(void *ptr,
         errno = EINVAL;
         return NULL;
     }
-    struct memkind *kind = get_kind_by_ptr(ptr);
-    if (!kind) {
+    struct memkind *kind = memkind_arena_detect_kind(ptr);
+    if (kind == MEMKIND_DEFAULT) {
         return memkind_default_realloc(kind, ptr, size);
     } else {
         return memkind_arena_realloc(kind, ptr, size);

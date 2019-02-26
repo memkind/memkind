@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,6 +182,14 @@ int memkind_create_kind(memkind_memtype_t memtype_flags,
 ///
 int memkind_destroy_kind(memkind_t kind);
 
+///
+/// \brief Get kind associated with allocated memory refernced by ptr
+/// \warning STANDARD API
+/// \note This function have non-trivial performance overhead
+/// \param ptr pointer to the allocated memory
+/// \return Kind associated with allocated memory, NULL on failure
+///
+memkind_t memkind_detect_kind(void *ptr);
 
 #include "memkind_deprecated.h"
 
@@ -284,6 +292,7 @@ size_t memkind_malloc_usable_size(memkind_t kind, void *ptr);
 ///
 void *memkind_calloc(memkind_t kind, size_t num, size_t size);
 
+///
 /// \brief Allocates size bytes of the specified kind and places the address of the allocated memory
 ///        in *memptr. The address of the allocated memory will be a multiple of alignment,
 ///        which must be a power of two and a multiple of sizeof(void *)
