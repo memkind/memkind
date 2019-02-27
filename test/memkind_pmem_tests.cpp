@@ -522,6 +522,28 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocIncreaseSize)
     memkind_free(pmem_kind, test2);
 }
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocIncreaseSizeNullKindVariant)
+{
+    size_t size = 1 * KB;
+    char *test1 = nullptr;
+    char *test2 = nullptr;
+    const char val[] = "test_TC_MEMKIND_PmemReallocIncreaseSizeNullKindVariant";
+    int status;
+
+    test1 = (char *)memkind_malloc(pmem_kind, size);
+    ASSERT_TRUE(test1 != nullptr);
+
+    sprintf(test1, "%s", val);
+
+    size *= 2;
+    test2 = (char *)memkind_realloc(nullptr, test1, size);
+    ASSERT_TRUE(test2 != nullptr);
+    status = memcmp(val, test2, sizeof(val));
+    ASSERT_TRUE(status == 0);
+
+    memkind_free(pmem_kind, test2);
+}
+
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocDecreaseSize)
 {
     size_t size = 1 * KB;
@@ -537,6 +559,28 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocDecreaseSize)
 
     size = 4;
     test2 = (char *)memkind_realloc(pmem_kind, test1, size);
+    ASSERT_TRUE(test2 != nullptr);
+    status = memcmp(val, test2, size);
+    ASSERT_TRUE(status == 0);
+
+    memkind_free(pmem_kind, test2);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocDecreaseSizeNullKindVariant)
+{
+    size_t size = 1 * KB;
+    char *test1 = nullptr;
+    char *test2 = nullptr;
+    const char val[] = "test_TC_MEMKIND_PmemReallocDecreaseSizeNullKindVariant";
+    int status;
+
+    test1 = (char *)memkind_malloc(pmem_kind, size);
+    ASSERT_TRUE(test1 != nullptr);
+
+    sprintf(test1, "%s", val);
+
+    size = 4;
+    test2 = (char *)memkind_realloc(nullptr, test1, size);
     ASSERT_TRUE(test2 != nullptr);
     status = memcmp(val, test2, size);
     ASSERT_TRUE(status == 0);
@@ -650,6 +694,28 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptrSizeZero)
         errno = 0;
         //equivalent to memkind_malloc(pmem_kind,0)
         test_nullptr = memkind_realloc(pmem_kind, nullptr, 0);
+        ASSERT_EQ(test_nullptr, nullptr);
+        ASSERT_EQ(errno, 0);
+    } while (timer.getElapsedTime() < test_time);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullKindSizeZero)
+{
+    const double test_time = 5;
+    void *test_ptr_malloc = nullptr;
+    void *test_nullptr = nullptr;
+    size_t size = 1 * KB;
+
+    TimerSysTime timer;
+    timer.start();
+    do {
+        errno = 0;
+        test_ptr_malloc = memkind_malloc(pmem_kind, size);
+        ASSERT_NE(test_ptr_malloc, nullptr);
+        ASSERT_EQ(errno, 0);
+
+        errno = 0;
+        test_nullptr = memkind_realloc(nullptr, test_ptr_malloc, 0);
         ASSERT_EQ(test_nullptr, nullptr);
         ASSERT_EQ(errno, 0);
     } while (timer.getElapsedTime() < test_time);
