@@ -98,6 +98,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/static_kinds_tests.cpp \
                          test/trial_generator.cpp \
                          test/trial_generator.h \
+                         test/defrag_hint_tests.cpp \
                          #end
 
 test_locality_test_SOURCES = $(fused_gtest) test/allocator_perf_tool/Allocation_info.cpp test/locality_test.cpp
