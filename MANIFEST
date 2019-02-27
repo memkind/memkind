@@ -439,6 +439,7 @@ test/memkind-perf-ext.ts
 test/memkind-perf.ts
 test/memkind-pytests.ts
 test/memkind-slts.ts
+test/memkind_default_get_defrag_hint_tests.cpp
 test/memkind_null_kind_test.cpp
 test/memkind_pmem_long_time_tests.cpp
 test/memkind_pmem_tests.cpp
