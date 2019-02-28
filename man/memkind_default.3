@@ -69,6 +69,8 @@ This is EXPERIMENTAL API. The functionality and the header file itself can be ch
 .br
 .BI "void memkind_default_init_once(void);"
 .br
+.BI "int memkind_default_get_defrag_hint(void " "*ptr" ", int " "*bin_util" ", int " "*run_util" );
+.br
 .BI "bool size_out_of_bounds(size_t " "size" );
 .br
 .SH DESCRIPTION
@@ -214,6 +216,13 @@ This function copies body of the bitmask structure into passed pointer.
 .PP
 .BR memkind_default_init_once ()
 initializes heap manager.
+.PP
+.BR memkind_default_get_defrag_hint ()
+is a direct call through the jemalloc's
+.BR get_defrag_hint ().
+If
+.BR get_defrag_hint ()
+is not supported function returns -1.
 .PP
 .BR size_out_of_bounds ()
 returns true if given size is out of bounds, otherwise will return false.

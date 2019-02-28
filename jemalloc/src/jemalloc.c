@@ -3157,7 +3157,7 @@ jemalloc_postfork_child(void) {
  * returns the bin utilization and run utilization both in fixed point 16:16.
  * If the application decides to re-allocate it should use MALLOCX_TCACHE_NONE when doing so. */
 JEMALLOC_EXPORT int JEMALLOC_NOTHROW
-get_defrag_hint(void* ptr, int *bin_util, int *run_util) {
+je_get_defrag_hint(void* ptr, int *bin_util, int *run_util) {
 	assert(ptr != NULL);
 	return iget_defrag_hint(TSDN_NULL, ptr, bin_util, run_util);
 }
