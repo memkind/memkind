@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -283,7 +283,7 @@ void TGTest :: SetUp()
 {
     size_t node;
     char *hbw_nodes_env, *endptr;
-    tgen = std::move(std::unique_ptr<TrialGenerator>(new TrialGenerator()));
+    tgen = std::unique_ptr<TrialGenerator>(new TrialGenerator());
 
     hbw_nodes_env = getenv("MEMKIND_HBW_NODES");
     if (hbw_nodes_env) {
