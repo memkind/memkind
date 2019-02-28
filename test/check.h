@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,6 @@ private:
     size_t num_address;
     list<smaps_entry_t>smaps_table;
     ifstream ip;
-    int smaps_fd;
     string skip_to_next_entry(ifstream &);
     string skip_to_next_kpage(ifstream &);
     void get_address_range(string &line, unsigned long long *start_addr,
