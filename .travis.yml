@@ -27,16 +27,10 @@ matrix:
             - g++-4.8
             - libnuma-dev
       env:
-         - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8 && JEMALLOC_CC=gcc-4.8 && JEMALLOC_CXX=g++-4.8"
+         - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
       install:
       script:
-        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh
-        - ./autogen.sh
-        - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
-        - make all
-        - make checkprogs
-      before_install:
-        - eval "${MATRIX_EVAL}"
+        - ./build.sh
 
     - name: "GCC 8.0"
       addons:
@@ -47,34 +41,25 @@ matrix:
             - g++-8
             - libnuma-dev
       env:
-         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8 && JEMALLOC_CC=gcc-8 && JEMALLOC_CXX=g++-8"
+         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
       install:
       script:
-        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh
-        - ./autogen.sh
-        - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
-        - make all
-        - make checkprogs
-      before_install:
-        - eval "${MATRIX_EVAL}"
+        - ./build.sh
 
-    - name: "Clang 7"
+    - name: "Clang 8"
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-7
+            - llvm-toolchain-trusty-8
           packages:
-            - g++-4.8
-            - clang-7
+            - clang-8
             - libnuma-dev
       env:
-        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7 && JEMALLOC_CC=gcc-4.8 && JEMALLOC_CXX=g++-4.8"
+        - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
       install:
       script:
-        - CXX=$JEMALLOC_CXX CC=$JEMALLOC_CC LDFLAGS="-lrt -Wl,--no-as-needed" ./build_jemalloc.sh
-        - ./autogen.sh
-        - LDFLAGS="-lrt -Wl,--no-as-needed" ./configure
-        - make all
-      before_install:
-        - eval "${MATRIX_EVAL}"
+        - ./build.sh
+
+before_install:
+  - eval "${MATRIX_EVAL}"
