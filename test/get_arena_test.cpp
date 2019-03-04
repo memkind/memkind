@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@ bool uint_comp(unsigned int a, unsigned int b)
 
 TEST_F(GetArenaTest, test_TC_MEMKIND_ThreadHash)
 {
+#ifdef _OPENMP
     int num_threads = omp_get_max_threads();
     std::vector<unsigned int> arena_idx(num_threads);
     unsigned int thread_idx, idx;
@@ -84,4 +85,7 @@ TEST_F(GetArenaTest, test_TC_MEMKIND_ThreadHash)
     }
     EXPECT_LE(max_collisions, collisions_limit);
     RecordProperty("max_collisions", max_collisions);
+#else
+    std::cout << "[ SKIPPED ] Feature OPENMP not supported" << std::endl;
+#endif
 }
