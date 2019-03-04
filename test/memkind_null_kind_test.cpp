@@ -69,21 +69,21 @@ TEST_F(MemkindNullKindTests, test_TC_MEMKIND_DefaultRegularKindFreeNullPtr)
     void *ptr_regular = nullptr;
     for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
         ptr_default = memkind_malloc(MEMKIND_DEFAULT, size_2);
-        ASSERT_NE(ptr_default, nullptr);
+        ASSERT_NE(nullptr, ptr_default);
         memkind_free(nullptr, ptr_default);
         ptr_default = memkind_malloc(MEMKIND_DEFAULT, size_1);
-        ASSERT_NE(ptr_default, nullptr);
+        ASSERT_NE(nullptr, ptr_default);
         memkind_free(nullptr, ptr_default);
         ptr_regular = memkind_malloc(MEMKIND_REGULAR, size_2);
-        ASSERT_NE(ptr_regular, nullptr);
+        ASSERT_NE(nullptr, ptr_regular);
         memkind_free(nullptr, ptr_regular);
         ptr_regular = memkind_malloc(MEMKIND_REGULAR, size_1);
-        ASSERT_NE(ptr_regular, nullptr);
+        ASSERT_NE(nullptr, ptr_regular);
         memkind_free(nullptr, ptr_regular);
     }
 }
 
-TEST_F(MemkindNullKindTests, test_TC_MEMKIND_DefaultKindReallocNullptrSizeZero)
+TEST_F(MemkindNullKindTests, test_TC_MEMKIND_DefaultReallocNullptrSizeZero)
 {
     const double test_time = 5;
     void *test_nullptr = nullptr;

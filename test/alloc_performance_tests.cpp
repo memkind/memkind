@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2016 - 2018 Intel Corporation.
+* Copyright (C) 2016 - 2019 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ protected:
 
         int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &MEMKIND_PMEM_MOCKUP);
         ASSERT_EQ(0, err);
-        ASSERT_TRUE(nullptr != MEMKIND_PMEM_MOCKUP);
+        ASSERT_NE(nullptr, MEMKIND_PMEM_MOCKUP);
     }
 
     void TearDown()
