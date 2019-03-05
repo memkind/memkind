@@ -735,6 +735,36 @@ exit:
     return err;
 }
 
+MEMKIND_EXPORT struct memkind_config *memkind_create_config(void)
+{
+    struct memkind_config *cfg= (struct memkind_config *)jemk_malloc(sizeof(
+                                                                         struct memkind_config));
+    return cfg;
+}
+
+MEMKIND_EXPORT void memkind_destroy_config(struct memkind_config *cfg)
+{
+    jemk_free(cfg);
+}
+
+MEMKIND_EXPORT void memkind_config_set_path(struct memkind_config *cfg,
+                                            const char *pmem_dir)
+{
+    cfg->pmem_dir = pmem_dir;
+}
+
+MEMKIND_EXPORT void memkind_config_set_size(struct memkind_config *cfg,
+                                            size_t pmem_size)
+{
+    cfg->pmem_size = pmem_size;
+}
+
+MEMKIND_EXPORT void memkind_config_set_memory_usage_policy(
+    struct memkind_config *cfg, memkind_mem_usage_policy policy)
+{
+    cfg->policy = policy;
+}
+
 MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
                                        struct memkind **kind)
 {
@@ -782,6 +812,18 @@ exit:
     errno = oerrno;
     return err;
 }
+
+MEMKIND_EXPORT int memkind_create_pmem_with_config(struct memkind_config *cfg,
+                                                   struct memkind **kind)
+{
+    int status = memkind_create_pmem(cfg->pmem_dir, cfg->pmem_size, kind);
+    if (MEMKIND_LIKELY(!status)) {
+        status = memkind_arena_update_memory_usage_policy(*kind, cfg->policy);
+    }
+
+    return status;
+}
+
 
 static int memkind_get_kind_by_partition_internal(int partition,
                                                   struct memkind **kind)

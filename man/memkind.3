@@ -64,9 +64,23 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .br
 .BI "size_t memkind_malloc_usable_size(memkind_t " "kind" ", void " "*ptr" );
 .sp
+.B "KIND CONFIGURATION MANAGEMENT:"
+.br
+.BI "struct memkind_config *memkind_create_config();"
+.br
+.BI "void memkind_destroy_config(struct memkind_config " "*cfg" );
+.br
+.BI "void memkind_config_set_path(struct memkind_config " "*cfg" ", const char " "*pmem_dir" );
+.br
+.BI "void memkind_config_set_size(struct memkind_config " "*cfg" ", size_t " "pmem_size" );
+.br
+.BI "void memkind_config_set_memory_usage_policy(struct memkind_config " "*cfg" ", memkind_mem_usage_policy " "policy" );
+.sp
 .B "KIND MANAGEMENT:"
 .br
 .BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
+.br
+.BI "int memkind_create_pmem_with_config(struct memkind_config " "*cfg" ", memkind_t " "*kind" );
 .br
 .BI "int memkind_destroy_kind(memkind_t " "kind" );
 .br
@@ -118,7 +132,9 @@ of memory with the first argument to each function. See the
 .B KINDS
 section below for a full description of the implemented kinds.
 For file-backed kind of memory see
-.BR memkind_create_pmem ().
+.BR memkind_create_pmem ()
+or
+.BR memkind_create_pmem_with_config ().
 .PP
 .BR memkind_malloc ()
 allocates
@@ -315,6 +331,56 @@ could result in serious performance penalty,
 which can be avoided by specifying a correct
 .IR kind .
 .sp
+.B "KIND CONFIGURATION MANAGEMENT:"
+.br
+The functions described in this section define a way to create and update kind specific configuration.
+Except of
+.BR memkind_create_config (),
+user must specify the memkind configuration with the first argument to each function.
+API described here is most useful with file-backed kind of memory, e.g.
+.BR memkind_create_pmem_with_config ()
+method.
+.PP
+.BR memkind_create_config ()
+creates the memkind configuration.
+.PP
+.BR memkind_destroy_config ()
+destroys previously created memkind configuration, which must have been returned by a previous call to
+.BR memkind_create_config ().
+.PP
+.BR memkind_config_set_path ()
+update the memkind
+.IR pmem_dir
+configuration parameter, which specify directory path, where file-backed kind of memory will be created.
+.BR Note:
+This function does not validate that
+.I pmem_dir
+specifies a valid path.
+.PP
+.BR memkind_config_set_size ()
+update the memkind
+.IR pmem_size
+configuration parameter, which allows to limit the file-backed kind memory partition.
+.BR Note:
+This function does not validate that
+.I pmem_size
+is in valid range.
+.PP
+.BR memkind_config_set_memory_usage_policy ()
+update the memkind
+.IR policy
+configuration parameter, which allows to tune up memory utilization.
+The user should set the value based on the characteristics of application that is using
+the library (e.g. prioritize memory usage, CPU utilization), for more details about
+.IR policy
+see the
+.BR "MEMORY USAGE POLICY"
+section below.
+.BR Note:
+This function does not validate that
+.I policy
+is in valid range.
+.sp
 .B "KIND MANAGEMENT:"
 .br
 There are built-in kinds that are always available and these are enumerated in the
@@ -368,6 +434,21 @@ Returns zero if the pmem memkind is created successfully or an error code from t
 .B ERRORS
 section if not.
 .PP
+.BR memkind_create_pmem_with_config ()
+is a second function used to create a file-backed kind of memory.
+Function behaves simillar () to
+.BR memkind_create_pmem ()
+but instead of passing
+.I dir
+and
+.I max_size
+arguments,
+it uses
+.I config
+param to specify characteristics of created file-backed kind of memory. (see
+.B KIND CONFIGURATION MANAGEMENT
+section).
+.PP
 .BR memkind_create_kind ()
 creates kind that allocates memory with specific memory type, memory binding policy and flags (see
 .B MEMORY FLAGS
@@ -386,7 +467,8 @@ section if not.
 .PP
 .BR memkind_destroy_kind ()
 destroys previously created kind object, which must have been returned by a previous call to
-.BR memkind_create_pmem ()
+.BR memkind_create_pmem (),
+.BR memkind_create_pmem_with_config ()
 or
 .BR memkind_create_kind ().
 Otherwise, or if
@@ -397,6 +479,8 @@ Note that, when the kind was returned by
 all allocated memory must be freed before kind is destroyed,
 otherwise this will cause memory leak. When the kind was returned by
 .BR memkind_create_pmem ()
+or
+.BR memkind_create_pmem_with_config ()
 all allocated memory will be freed after kind will be destroyed.
 .PP
 .BR memkind_check_available ()
@@ -644,6 +728,14 @@ The available types of memory flags:
 .TP
 .B MEMKIND_MASK_PAGE_SIZE_2MB
 Allocation backed by 2MB page size.
+.SH "MEMORY USAGE POLICY"
+The available types of memory usage policy:
+.TP
+.B MEMKIND_MEM_USAGE_POLICY_DEFAULT
+Default memory usage policy.
+.TP
+.B MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE
+Conservative memory usage policy - prioritize memory usage at cost of performance.
 .SH "ERRORS"
 .TP
 .BR memkind_posix_memalign ()

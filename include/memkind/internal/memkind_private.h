@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Intel Corporation.
+ * Copyright (C) 2016 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,6 +113,12 @@ struct memkind {
     unsigned int
     arena_map_mask; // arena_map_len - 1 to optimize modulo operation on arena_map_len
     unsigned int arena_zero; // index first jemalloc arena of this kind
+};
+
+struct memkind_config {
+    const char *pmem_dir;            //PMEM kind Path
+    size_t pmem_size;                //PMEM kind size
+    memkind_mem_usage_policy policy; //kind memory usage policy
 };
 
 void memkind_init(memkind_t kind, bool check_numa);

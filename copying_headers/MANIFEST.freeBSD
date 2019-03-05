@@ -130,6 +130,7 @@ test/load_tbbmalloc_symbols.c
 test/locality_test.cpp
 test/main.cpp
 test/memkind_null_kind_test.cpp
+test/memkind_pmem_config_tests.cpp
 test/memkind_pmem_long_time_tests.cpp
 test/memkind_pmem_tests.cpp
 test/memkind_versioning_tests.cpp
