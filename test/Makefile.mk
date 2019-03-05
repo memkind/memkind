@@ -84,6 +84,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/hbw_verify_function_test.cpp \
                          test/memkind_detect_kind_tests.cpp \
                          test/memkind_null_kind_test.cpp \
+                         test/memkind_pmem_config_tests.cpp \
                          test/memkind_pmem_long_time_tests.cpp \
                          test/memkind_pmem_tests.cpp \
                          test/memkind_versioning_tests.cpp \
@@ -230,6 +231,7 @@ check_PROGRAMS += test/autohbw_candidates \
                   test/hello_memkind_debug \
                   test/pmem_alignment \
                   test/pmem_and_default_kind \
+                  test/pmem_config \
                   test/pmem_detect_kind \
                   test/pmem_free_with_unknown_kind \
                   test/pmem_kinds \
