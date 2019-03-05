@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2017 - 2018 Intel Corporation.
+* Copyright (C) 2017 - 2019 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,7 @@ public:
                                              const std::vector<int> &cpu_ids,
                                              const std::vector<int> &mcdram_nodes)
     {
+#ifdef _OPENMP
         int threads_num = cpu_ids.size();
         int ret = hbw_set_policy(HBW_POLICY_PREFERRED);
         ASSERT_EQ(ret, 0);
@@ -99,12 +100,16 @@ public:
                                                      mcdram_nodes);
             check_ptr_numa(ptr.get(), expected_numa_id, cpu_ids[i], size);
         }
+#else
+        std::cout << "[ SKIPPED ] Feature OPENMP not supported" << std::endl;
+#endif
     }
 
     void pin_memory_in_other_thread_than_requesting_mem(size_t size,
                                                         const std::vector<int> &cpu_ids,
                                                         const std::vector<int> &mcdram_nodes)
     {
+#ifdef _OPENMP
         int threads_num = cpu_ids.size();
         int ret = hbw_set_policy(HBW_POLICY_PREFERRED);
         ASSERT_EQ(ret, 0);
@@ -128,6 +133,9 @@ public:
             }
             check_ptr_numa(ptrs[i].get(), expected_numa_id, cpu_ids[i], size);
         }
+#else
+        std::cout << "[ SKIPPED ] Feature OPENMP not supported" << std::endl;
+#endif
     }
 };
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2017 - 2018 Intel Corporation.
+* Copyright (C) 2017 - 2019 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,6 @@ public:
     MemkindAllocator(memkind_memtype_t memtype, memkind_policy_t policy,
                      memkind_bits_t flags) :
         memtype(memtype),
-        policy(policy),
         flags(flags)
     {
         int ret = memkind_create_kind(memtype, policy, flags, &kind);
@@ -145,7 +144,6 @@ public:
 private:
     memkind_t kind = NULL;
     memkind_memtype_t memtype = memkind_memtype_t();
-    memkind_policy_t policy = MEMKIND_POLICY_MAX_VALUE;
     memkind_bits_t flags = memkind_bits_t();
 };
 
