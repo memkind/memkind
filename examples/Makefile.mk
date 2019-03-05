@@ -29,6 +29,7 @@ noinst_PROGRAMS += examples/autohbw_candidates \
                    examples/hello_memkind_debug \
                    examples/pmem_alignment \
                    examples/pmem_and_default_kind \
+                   examples/pmem_config \
                    examples/pmem_detect_kind \
                    examples/pmem_free_with_unknown_kind \
                    examples/pmem_kinds \
@@ -50,6 +51,7 @@ examples_hello_memkind_LDADD = libmemkind.la
 examples_hello_memkind_debug_LDADD = libmemkind.la
 examples_pmem_alignment_LDADD = libmemkind.la
 examples_pmem_and_default_kind_LDADD = libmemkind.la
+examples_pmem_config_LDADD = libmemkind.la
 examples_pmem_detect_kind_LDADD = libmemkind.la
 examples_pmem_free_with_unknown_kind_LDADD = libmemkind.la
 examples_pmem_kinds_LDADD = libmemkind.la
@@ -71,6 +73,7 @@ examples_hello_memkind_SOURCES = examples/hello_memkind_example.c
 examples_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 examples_pmem_alignment_SOURCES = examples/pmem_alignment.c
 examples_pmem_and_default_kind_SOURCES = examples/pmem_and_default_kind.c
+examples_pmem_config_SOURCES = examples/pmem_config.c
 examples_pmem_detect_kind_SOURCES = examples/pmem_detect_kind.c
 examples_pmem_free_with_unknown_kind_SOURCES = examples/pmem_free_with_unknown_kind.c
 examples_pmem_kinds_SOURCES = examples/pmem_kinds.c

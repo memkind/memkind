@@ -48,6 +48,10 @@ This example shows how to allocate in standard memory and file-backed memory (pm
 
 This example shows how to distinguish allocation from different kinds using detect kind function.
 
+### pmem_config.c
+
+This example shows how to use custom configuration to create pmem kind.
+
 ### pmem_free_with_unknown_kind.c
 
 This example shows how to allocate in standard memory and file-backed memory (pmem kind)

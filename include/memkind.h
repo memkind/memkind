@@ -146,6 +146,57 @@ enum {
     MEMKIND_ERROR_RUNTIME = -255                /**<  Error: Unspecified run-time error */
 };
 
+/* KIND CONFIGURATION MANAGEMENT INTERFACE */
+
+/// \brief Memkind memory usage policy
+typedef enum memkind_mem_usage_policy {
+    MEMKIND_MEM_USAGE_POLICY_DEFAULT      = 0,        /**<  Default  memory usage  */
+    MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE = 1,        /**<  Minimize memory usage at all costs, */
+    MEMKIND_MEM_USAGE_POLICY_MAX_VALUE
+} memkind_mem_usage_policy;
+
+/// \brief Forward declaration of memkind configuration
+struct memkind_config;
+
+///
+/// \brief Create a memkind configuration
+/// \note STANDARD API
+/// \return Memkind configuration, NULL on failure
+///
+struct memkind_config *memkind_config_new(void);
+
+///
+/// \brief Delete memkind configuration
+/// \note STANDARD API
+/// \param Memkind configuration
+///
+void memkind_config_delete(struct memkind_config *cfg);
+
+///
+/// \brief Update memkind configuration with path to specified directory parameter
+/// \note STANDARD API
+/// \param cfg memkind configuration
+/// \param dir path to specified directory for PMEM kind
+///
+void memkind_config_set_path(struct memkind_config *cfg, const char *pmem_dir);
+
+///
+/// \brief Update memkind configuration with PMEM kind size
+/// \note STANDARD API
+/// \param cfg memkind configuration
+/// \param size size limit for PMEM kind
+///
+void memkind_config_set_size(struct memkind_config *cfg, size_t pmem_size);
+
+///
+/// \brief Update memkind configuration with memory usage policy parameter
+/// \note STANDARD API
+/// \param cfg memkind configuration
+/// \param memkind_mem_usage_policy memkind memory usage policy
+///
+void memkind_config_set_memory_usage_policy(struct memkind_config *cfg,
+                                            memkind_mem_usage_policy policy);
+
 ///
 /// \brief Create kind that allocates memory with specific memory type, memory binding policy and flags.
 /// \warning EXPERIMENTAL API
@@ -252,6 +303,16 @@ void memkind_error_message(int err, char *msg, size_t size);
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
 ///
 int memkind_create_pmem(const char *dir, size_t max_size, memkind_t *kind);
+
+///
+/// \brief Create a new PMEM kind with given memkind configuration
+/// \note STANDARD API
+/// \param cfg memkind configuration for specifying PMEM parameters
+/// \param kind pointer to kind which will be created
+/// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
+///
+int memkind_create_pmem_with_config(struct memkind_config *cfg,
+                                    memkind_t *kind);
 
 ///
 /// \brief Check if kind is available
