@@ -116,7 +116,10 @@ static void arena_config_init()
     arena_init_status = pthread_key_create(&tcache_key, tcache_finalize);
 }
 
-#define MALLOCX_ARENA_MAX 0xffe // copy-pasted from jemalloc/internal/jemalloc_internal.h
+#define MALLOCX_ARENA_MAX           0xffe        // copy-pasted from jemalloc/internal/jemalloc_internal.h
+#define DIRTY_DECAY_MS_DEFAULT      10000        // copy-pasted from jemalloc/internal/arena_types.h DIRTY_DECAY_MS_DEFAULT
+#define DIRTY_DECAY_MS_CONSERVATIVE     0
+
 static struct memkind *arena_registry_g[MALLOCX_ARENA_MAX];
 static pthread_mutex_t arena_registry_write_lock;
 
@@ -555,6 +558,38 @@ MEMKIND_EXPORT void *memkind_arena_realloc_with_kind_detect(void *ptr,
     } else {
         return memkind_arena_realloc(kind, ptr, size);
     }
+}
+
+MEMKIND_EXPORT int memkind_arena_update_memory_usage_policy(
+    struct memkind *kind, memkind_mem_usage_policy policy)
+{
+    int err = MEMKIND_SUCCESS;
+    unsigned i;
+    ssize_t dirty_decay_val = 0;
+    switch ( policy ) {
+        case MEMKIND_MEM_USAGE_POLICY_DEFAULT:
+            dirty_decay_val = DIRTY_DECAY_MS_DEFAULT;
+            break;
+        case MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE:
+            dirty_decay_val = DIRTY_DECAY_MS_CONSERVATIVE;
+            break;
+        default:
+            log_err("Unrecognized memory policy %d", policy);
+            return MEMKIND_ERROR_INVALID;
+    }
+
+    for (i = 0; i < kind->arena_map_len; ++i) {
+        char cmd[64];
+
+        snprintf(cmd, sizeof(cmd), "arena.%u.dirty_decay_ms", kind->arena_zero + i);
+        err = jemk_mallctl(cmd, NULL, NULL, (void *)&dirty_decay_val, sizeof(ssize_t));
+        if ( err ) {
+            log_err("Incorrect dirty_decay_ms value %zu", dirty_decay_val);
+            return MEMKIND_ERROR_INVALID;
+        }
+    }
+
+    return err;
 }
 
 // TODO: function is workaround for PR#1302 in jemalloc upstream
