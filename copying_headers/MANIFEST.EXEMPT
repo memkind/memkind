@@ -293,6 +293,7 @@ jemalloc/test/unit/zero.sh
 m4/ax_cxx_compile_stdcxx.m4
 m4/ax_cxx_compile_stdcxx_11.m4
 m4/ax_pthread.m4
+test/fragmentation/README.md
 test/gtest_fused/gtest/gtest-all.cc
 test/gtest_fused/gtest/gtest.h
 test/memkind-afts-ext.ts
