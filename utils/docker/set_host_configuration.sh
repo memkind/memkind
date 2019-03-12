@@ -22,46 +22,22 @@
 #  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Pull base image
-FROM ubuntu:18.04
+#
+# set_host_configuration.sh - set Huge Pages parameters required for memkind tests
 
-LABEL maintainer="katarzyna.wasiuta@intel.com"
+MEMKIND_HUGE_PAGES_NO=3000
+MEMKIND_OVERCOMMIT_HUGEPAGES_NO=128
 
-# Update the Apt cache and install basic tools
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    automake \
-    ca-certificates \
-    curl \
-    devscripts \
-    g++ \
-    git \
-    libnuma-dev \
-    libtool \
-    numactl \
-    sudo \
-    whois \
- && rm -rf /var/lib/apt/lists/*
+# find out current configuration
+MEMKIND_HUGE_PAGES_FOUND=$(cat /proc/sys/vm/nr_hugepages)
+MEMKIND_OVERCOMMIT_HUGEPAGES_FOUND=$(cat /proc/sys/vm/nr_overcommit_hugepages)
 
-# Add user
-ENV USER memkinduser
-ENV USERPASS memkindpass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-# Create directory for memkind repository
-WORKDIR /home/$USER/memkind
-
-# Allow user to create files in the home directory
-RUN chown -R $USER:sudo /home/$USER
-
-# Change user to $USER
-USER $USER
-
-# Copy scripts responsible for running tests to container
-COPY docker_install_tbb.sh /docker_install_tbb.sh
-COPY docker_run_build_and_test.sh /docker_run_build_and_test.sh
-COPY docker_run_coverage.sh /docker_run_coverage.sh
-
-# Set git user name and email to allow automatic merging
-RUN git config --global user.email "memkinduser@intel.com"
-RUN git config --global user.name $USER
+# set expected configuration
+if [ "$MEMKIND_HUGE_PAGES_FOUND" != "$MEMKIND_HUGE_PAGES_NO" ]; then
+    echo "Setting number of hugepages to ${MEMKIND_HUGE_PAGES_NO}."
+    sudo sysctl vm.nr_hugepages="$MEMKIND_HUGE_PAGES_NO"
+fi
+if [ "$MEMKIND_OVERCOMMIT_HUGEPAGES_FOUND" != "$MEMKIND_OVERCOMMIT_HUGEPAGES_NO" ]; then
+    echo "Setting number of overcommit hugepages to ${MEMKIND_OVERCOMMIT_HUGEPAGES_NO}."
+    sudo sysctl vm.nr_overcommit_hugepages="$MEMKIND_OVERCOMMIT_HUGEPAGES_NO"
+fi
