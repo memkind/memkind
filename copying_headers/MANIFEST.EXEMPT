@@ -1,3 +1,4 @@
+.codecov.yml
 .gitignore
 .travis.yml
 AUTHORS
@@ -300,3 +301,4 @@ test/memkind-perf-ext.ts
 test/memkind-perf.ts
 test/memkind-pytests.ts
 test/memkind-slts.ts
+utils/docker/README.md
