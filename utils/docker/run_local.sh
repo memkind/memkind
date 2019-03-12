@@ -29,25 +29,29 @@
 # Optional parameters:
 # -number of pull request on memkind repository on GitHub
 # -Codecov token for memkind repository to upload the coverage results
+# -Threading Building Blocks library version (e.g. "2019_U4")
 #
 
 usage() {
  echo "Runs memkind unit tests inside docker container.
 When pull request number specified, it checks out repository on specific pull request,
 otherwise tests run on master branch.
-For measuring coverage of tests, Codecov token must be passed as parameter
-
-Usage: docker_run_build_and_test.sh [-p <PR_number>] [-c <codecov_token>]"
+For measuring coverage of tests, Codecov token must be passed as parameter.
+For testing Threading Building Blocks, TBB library version tag must be passed as parameter.
+Usage: docker_run_build_and_test.sh [-p <PR_number>] [-c <codecov_token>] [-t <TBB_LIBRARY_VERSION>]"
  exit 1;
 }
 
-while getopts ":p:c:" opt; do
+while getopts ":p:c:t:" opt; do
     case "${opt}" in
         p)
             PULL_REQUEST_NO=${OPTARG}
             ;;
         c)
             CODECOV_TOKEN=${OPTARG}
+            ;;
+        t)
+            TBB_LIBRARY_VERSION=${OPTARG}
             ;;
         \?)
             usage
@@ -56,9 +60,17 @@ while getopts ":p:c:" opt; do
     esac
 done
 
-docker build -t memkind_cont -f Dockerfile.ubuntu-18.04 --build-arg http_proxy=$http_proxy \
---build-arg https_proxy=$https_proxy .
-
-docker run --rm --privileged=true -e http_proxy=$http_proxy -e https_proxy=$https_proxy \
--e GIT_SSL_NO_VERIFY=true -e PULL_REQUEST_NO="$PULL_REQUEST_NO" -e CODECOV_TOKEN="$CODECOV_TOKEN" \
-memkind_cont /docker_run_build_and_test.sh
+docker build --tag memkind_cont \
+             --file Dockerfile.ubuntu-18.04 \
+             --build-arg http_proxy=$http_proxy \
+             --build-arg https_proxy=$https_proxy \
+             .
+docker run --rm \
+           --privileged=true \
+           --env http_proxy=$http_proxy \
+           --env https_proxy=$https_proxy \
+           --env GIT_SSL_NO_VERIFY=true \
+           --env PULL_REQUEST_NO="$PULL_REQUEST_NO" \
+           --env CODECOV_TOKEN="$CODECOV_TOKEN" \
+           --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
+           memkind_cont /docker_run_build_and_test.sh
