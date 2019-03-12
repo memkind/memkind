@@ -2,6 +2,8 @@ dist: trusty
 sudo: required
 language: cpp
 cache: ccache
+git:
+  depth: false
 matrix:
   fast_finish: true
   include:
