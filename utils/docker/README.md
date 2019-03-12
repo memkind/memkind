@@ -10,6 +10,9 @@ to build, test and optionally measure test coverage of any pull request to memki
 
 *'docker_run_coverage.sh'*  is used for uploading coverage report on [Codecov.io](Codecov.io)
 
+*'docker_install_tbb.sh'*  is used to install Intel Threading Building Blocks library.
+
+*'set_host_configuration.sh'*  is used to set hugepages configuration on host machine.
 
 # Building and running the container
 
