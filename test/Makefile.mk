@@ -162,9 +162,11 @@ test_allocator_perf_tool_tests_SOURCES = $(allocator_perf_tool_library_sources) 
                                          $(fused_gtest) \
                                          test/alloc_performance_tests.cpp \
                                          test/allocate_to_max_stress_test.cpp \
+                                         test/hbw_allocator_performance_tests.cpp \
                                          test/heap_manager_init_perf_test.cpp \
                                          test/huge_page_test.cpp \
                                          test/memory_footprint_test.cpp \
+                                         test/pmem_alloc_performance_tests.cpp \
                                          # end
 
 
