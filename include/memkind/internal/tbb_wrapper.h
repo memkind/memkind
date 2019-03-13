@@ -42,6 +42,9 @@ void tbb_pool_free_with_kind_detect(void *ptr);
 /* ptr pointer must come from the valid TBB pool allocation */
 void *tbb_pool_realloc_with_kind_detect(void *ptr, size_t size);
 
+/* ptr pointer must come from the valid TBB pool allocation */
+struct memkind *tbb_detect_kind(void *ptr);
+
 #ifdef __cplusplus
 }
 #endif

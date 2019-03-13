@@ -82,6 +82,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/get_arena_test.cpp \
                          test/hbw_allocator_tests.cpp \
                          test/hbw_verify_function_test.cpp \
+                         test/memkind_detect_kind_tests.cpp \
                          test/memkind_null_kind_test.cpp \
                          test/memkind_pmem_long_time_tests.cpp \
                          test/memkind_pmem_tests.cpp \
@@ -229,6 +230,7 @@ check_PROGRAMS += test/autohbw_candidates \
                   test/hello_memkind_debug \
                   test/pmem_alignment \
                   test/pmem_and_default_kind \
+                  test/pmem_detect_kind \
                   test/pmem_free_with_unknown_kind \
                   test/pmem_kinds \
                   test/pmem_malloc \
@@ -249,6 +251,7 @@ test_hello_memkind_LDADD = libmemkind.la
 test_hello_memkind_debug_LDADD = libmemkind.la
 test_pmem_alignment_LDADD = libmemkind.la
 test_pmem_and_default_kind_LDADD = libmemkind.la
+test_pmem_detect_kind_LDADD = libmemkind.la
 test_pmem_free_with_unknown_kind_LDADD = libmemkind.la
 test_pmem_kinds_LDADD = libmemkind.la
 test_pmem_malloc_LDADD = libmemkind.la
@@ -268,6 +271,7 @@ test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 test_pmem_alignment_SOURCES = examples/pmem_alignment.c
 test_pmem_and_default_kind_SOURCES = examples/pmem_and_default_kind.c
+test_pmem_detect_kind_SOURCES = examples/pmem_detect_kind.c
 test_pmem_free_with_unknown_kind_SOURCES = examples/pmem_free_with_unknown_kind.c
 test_pmem_kinds_SOURCES = examples/pmem_kinds.c
 test_pmem_malloc_SOURCES = examples/pmem_malloc.c

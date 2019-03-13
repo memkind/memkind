@@ -70,6 +70,7 @@ autom4te.cache/
 /test/memkind_allocated
 /test/new_kind
 /test/perf_tool
+/test/pmem_detect_kind
 /test/pmem_kinds
 /test/pmem_malloc
 /test/pmem_malloc_unlimited
@@ -99,6 +100,7 @@ autom4te.cache/
 /examples/new_kind
 /examples/numakind_test
 /examples/numakind_macro.h
+/examples/pmem_detect_kind
 /examples/pmem_kinds
 /examples/pmem_malloc
 /examples/pmem_malloc_unlimited
