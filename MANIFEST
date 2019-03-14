@@ -1,3 +1,4 @@
+.codecov.yml
 .travis.yml
 AUTHORS
 CONTRIBUTING
@@ -30,6 +31,7 @@ examples/memkind_decorator_debug.c
 examples/pmem_alignment.c
 examples/pmem_and_default_kind.c
 examples/pmem_cpp_allocator.cpp
+examples/pmem_detect_kind.c
 examples/pmem_free_with_unknown_kind.c
 examples/pmem_kinds.c
 examples/pmem_malloc.c
@@ -440,6 +442,7 @@ test/memkind-perf.ts
 test/memkind-pytests.ts
 test/memkind-slts.ts
 test/memkind_default_get_defrag_hint_tests.cpp
+test/memkind_detect_kind_tests.cpp
 test/memkind_null_kind_test.cpp
 test/memkind_pmem_long_time_tests.cpp
 test/memkind_pmem_tests.cpp
@@ -468,3 +471,8 @@ test/trace_mechanism_test.py
 test/trace_mechanism_test_helper.c
 test/trial_generator.cpp
 test/trial_generator.h
+utils/docker/Dockerfile.ubuntu-18.04
+utils/docker/README.md
+utils/docker/docker_run_build_and_test.sh
+utils/docker/docker_run_coverage.sh
+utils/docker/run_local.sh

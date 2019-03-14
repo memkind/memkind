@@ -44,6 +44,7 @@ bool (*pool_free)(void *, void *);
 int (*pool_create_v1)(intptr_t, const struct MemPoolPolicy *, void **);
 bool (*pool_destroy)(void *);
 void *(*pool_identify)(void *object);
+size_t (*pool_msize)(void *, void *);
 
 static void *tbb_handle = NULL;
 static bool TBBInitDone = false;
@@ -66,6 +67,7 @@ void load_tbb_symbols(void)
                            "_ZN3rml14pool_create_v1ElPKNS_13MemPoolPolicyEPPNS_10MemoryPoolE");
     pool_destroy = dlsym(tbb_handle, "_ZN3rml12pool_destroyEPNS_10MemoryPoolE");
     pool_identify = dlsym(tbb_handle, "_ZN3rml13pool_identifyEPv");
+    pool_msize = dlsym(tbb_handle, "_ZN3rml10pool_msizeEPNS_10MemoryPoolEPv");
 
     if(!pool_malloc ||
        !pool_realloc ||
@@ -73,9 +75,7 @@ void load_tbb_symbols(void)
        !pool_free ||
        !pool_create_v1 ||
        !pool_destroy ||
-       !pool_identify)
-
-    {
+       !pool_identify ) {
         log_fatal("Could not find symbols in %s.", so_name);
         dlclose(tbb_handle);
         abort();
@@ -149,6 +149,24 @@ void *tbb_pool_realloc_with_kind_detect(void *ptr, size_t size)
     return tbb_pool_common_realloc(pool_identify(ptr), ptr, size);
 }
 
+struct memkind *tbb_detect_kind(void *ptr)
+{
+    if (!ptr) {
+        return NULL;
+    }
+    struct memkind *kind = NULL;
+    unsigned i;
+    void *pool = pool_identify(ptr);
+    for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
+        int err = memkind_get_kind_by_partition(i, &kind);
+        if (!err && kind->priv == pool) {
+            break;
+        }
+    }
+
+    return kind;
+}
+
 static int tbb_pool_posix_memalign(struct memkind *kind, void **memptr,
                                    size_t alignment, size_t size)
 {
@@ -182,8 +200,12 @@ static void tbb_pool_free(struct memkind *kind, void *ptr)
 
 static size_t tbb_pool_usable_size(struct memkind *kind, void *ptr)
 {
-    log_err("memkind_malloc_usable_size() is not supported by TBB.");
-    return 0;
+    if (pool_msize) {
+        return pool_msize(kind->priv, ptr);
+    } else {
+        log_err("memkind_malloc_usable_size() is not supported by this TBB version.");
+        return 0;
+    }
 }
 
 static int tbb_destroy(struct memkind *kind)
