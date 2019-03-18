@@ -22,46 +22,40 @@
 #  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Pull base image
-FROM ubuntu:18.04
+# docker_install_tbb.sh - is called inside a Docker container;
+# installs Threading Building Block library
+#
+# Parameters:
+# -Threading Building Block library version (e.g. "2019_U4")
 
-LABEL maintainer="katarzyna.wasiuta@intel.com"
+set -e
 
-# Update the Apt cache and install basic tools
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    automake \
-    ca-certificates \
-    curl \
-    devscripts \
-    g++ \
-    git \
-    libnuma-dev \
-    libtool \
-    numactl \
-    sudo \
-    whois \
- && rm -rf /var/lib/apt/lists/*
+TBB_VERSION="$1"
+TBB_TAR_GZ="$TBB_VERSION".tar.gz
+TBB_TAR_URL=https://github.com/01org/tbb/archive/"$TBB_TAR_GZ"
+TBB_VARS_SH="tbbvars.sh"
 
-# Add user
-ENV USER memkinduser
-ENV USERPASS memkindpass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# check if specired TBB library version exist
+if [ curl --output /dev/null --silent --head --fail "$TBB_TAR_URL" ]; then
+  echo "TBB version ${TBB_VERSION} exist."
+else
+  echo "TBB url: ${TBB_TAR_URL} is not valid. TBB version: ${TBB_VERSION} doesn't exist."
+  exit 1
+fi
 
-# Create directory for memkind repository
-WORKDIR /home/$USER/memkind
+TBB_LOCAL_DIR="$HOME"/"$TBB_VERSION"
+TBB_LOCAL_TAR_GZ="$TBB_LOCAL_DIR"/"$TBB_TAR_GZ"
 
-# Allow user to create files in the home directory
-RUN chown -R $USER:sudo /home/$USER
+# create TBB directory in home directory
+mkdir "$TBB_LOCAL_DIR"
 
-# Change user to $USER
-USER $USER
+# download and untar TBB library to TBB directory
+curl -L "$TBB_TAR_URL" -o "$TBB_LOCAL_TAR_GZ"
+tar -xzvf "$TBB_LOCAL_TAR_GZ" -C "$TBB_LOCAL_DIR" --strip-components=1
 
-# Copy scripts responsible for running tests to container
-COPY docker_install_tbb.sh /docker_install_tbb.sh
-COPY docker_run_build_and_test.sh /docker_run_build_and_test.sh
-COPY docker_run_coverage.sh /docker_run_coverage.sh
+# build TBB library
+make -j "$(nproc --all)" --directory="$TBB_LOCAL_DIR"
+TBB_RELEASE_DIR=$(ls -d "$TBB_LOCAL_DIR"/build/*release)
 
-# Set git user name and email to allow automatic merging
-RUN git config --global user.email "memkinduser@intel.com"
-RUN git config --global user.name $USER
+# set environment variables regarding TBB package
+source "$TBB_RELEASE_DIR"/"$TBB_VARS_SH"

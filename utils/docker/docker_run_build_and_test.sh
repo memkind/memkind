@@ -26,6 +26,7 @@
 # docker_run_build_and_test.sh - is called inside a Docker container;
 # prepares and runs memkind unit tests for specified pull request number
 #
+set -e
 
 if [ -n "$CODECOV_TOKEN" ]; then
     GCOV_OPTION="--enable-gcov"
@@ -33,18 +34,14 @@ fi
 
 MEMKIND_URL=https://github.com/memkind/memkind.git
 
-# set parameters for enabling the kernel's huge page pool
-# TODO: move to higher layer
-sudo sysctl vm.nr_hugepages=3000
-sudo sysctl vm.nr_overcommit_hugepages=128
-
 # cloning the repo
 git clone $MEMKIND_URL .
 
 # if pull request number specified, checking out to that PR
 if [ -n "$PULL_REQUEST_NO" ]; then
-    git fetch origin pull/$PULL_REQUEST_NO/head:PR-${PULL_REQUEST_NO}
-    git checkout PR-${PULL_REQUEST_NO}
+    git fetch origin pull/"$PULL_REQUEST_NO"/head:PR-"$PULL_REQUEST_NO"
+    git checkout PR-"$PULL_REQUEST_NO"
+    git diff --check master PR-"$PULL_REQUEST_NO"
     git merge master --no-commit --no-ff
 fi
 
@@ -52,25 +49,26 @@ fi
 ./build_jemalloc.sh
 ./autogen.sh
 ./configure --prefix=/usr $GCOV_OPTION
-make -j $(nproc --all)
-make checkprogs -j $(nproc --all)
+make -j "$(nproc --all)"
+make checkprogs -j "$(nproc --all)"
 
 # installing memkind
 sudo make install
 
-# running tests
-if [ -n "$CODECOV_TOKEN" ]; then
-# always execute coverage script even if some tests fail
-    make check || true
-    cat test-suite.log
-else
-    make check
+# if TBB library version is specified install library and use it
+# as MEMKIND_HEAP_MANAGER
+if [ -n "$TBB_LIBRARY_VERSION" ]; then
+    source /docker_install_tbb.sh "$TBB_LIBRARY_VERSION"
+    HEAP_MANAGER="TBB"
 fi
 
+# running tests and display output in case of failure
+make check || { cat test-suite.log; exit 1; }
+
 # running pmem examples
-find examples/.libs -name "pmem*" -executable -type f -exec sh -c "sudo "{}" " \;
+find examples/.libs -name "pmem*" -executable -type f -exec sh -c "MEMKIND_HEAP_MANAGER=$HEAP_MANAGER "{}" " \;
 
 # executing coverage script if codecov token is set
 if [ -n "$CODECOV_TOKEN" ]; then
-    /docker_run_coverage.sh $CODECOV_TOKEN $PWD
+    /docker_run_coverage.sh "$CODECOV_TOKEN" "$PWD"
 fi
