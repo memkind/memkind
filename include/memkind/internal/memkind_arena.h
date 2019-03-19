@@ -55,7 +55,7 @@ void *memkind_arena_pmem_calloc(struct memkind *kind, size_t num, size_t size);
 int memkind_arena_posix_memalign(struct memkind *kind, void **memptr,
                                  size_t alignment, size_t size);
 void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size);
-void *memkind_arena_realloc_with_kind_detect(void *pt, size_t size);
+void *memkind_arena_realloc_with_kind_detect(void *ptr, size_t size);
 int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena,
                                 size_t size);
 int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena,
@@ -64,7 +64,8 @@ int memkind_arena_finalize(struct memkind *kind);
 void memkind_arena_init(struct memkind *kind);
 void memkind_arena_free(struct memkind *kind, void *ptr);
 void memkind_arena_free_with_kind_detect(void *ptr);
-
+int memkind_arena_update_memory_usage_policy(struct memkind *kind,
+                                             memkind_mem_usage_policy policy);
 #ifdef __cplusplus
 }
 #endif
