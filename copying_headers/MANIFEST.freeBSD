@@ -121,6 +121,7 @@ test/error_message_tests.cpp
 test/freeing_memory_segfault_test.cpp
 test/gb_page_tests_bind_policy.cpp
 test/get_arena_test.cpp
+test/hbw_allocator_performance_tests.cpp
 test/hbw_allocator_tests.cpp
 test/hbw_detection_test.py
 test/hbw_verify_function_test.cpp
@@ -143,6 +144,7 @@ test/performance/framework.hpp
 test/performance/operations.hpp
 test/performance/perf_tests.cpp
 test/performance/perf_tests.hpp
+test/pmem_alloc_performance_tests.cpp
 test/pmem_allocator_tests.cpp
 test/proc_stat.h
 test/python_framework/__init__.py
