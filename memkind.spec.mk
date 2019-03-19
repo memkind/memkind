@@ -66,15 +66,9 @@ Provides: memkind libmemkind0
 %define docdir %{_defaultdocdir}/%{namespace}-%{version}
 %endif
 
-# x86_64 is the only arch memkind will build due to its
-# current dependency on SSE4.2 CRC32 instruction which
-# is used to compute thread local storage arena mappings
-# with polynomial accumulations via GCC's intrinsic _mm_crc32_u64
-# For further info check:
-# - /lib/gcc/<target>/<version>/include/smmintrin.h
-# - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=36095
-# - http://en.wikipedia.org/wiki/SSE4
-ExclusiveArch: x86_64
+# Upstream testing of memkind is done exclusively on x86_64; other archs
+# are unsupported but may work. aarch64 is known to be broken.
+ExclusiveArch: x86_64 ppc64 ppc64le s390x
 
 # default values if version is a tagged release on github
 %{!?commit: %define commit %{version}}
