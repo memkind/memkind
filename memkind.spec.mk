@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2018 Intel Corporation.
+#  Copyright (C) 2014 - 2019 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -55,8 +55,10 @@ BuildRequires: numactl-devel
 
 Prefix: %{_prefix}
 Prefix: %{_unitdir}
+%if %{undefined suse_version}
 Obsoletes: memkind
 Provides: memkind libmemkind0
+%endif
 
 %define namespace memkind
 
@@ -94,8 +96,10 @@ Feedback on design or implementation is greatly appreciated.
 Summary: Memkind User Extensible Heap Manager development lib and tools
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
+%if %{undefined suse_version}
 Obsoletes: memkind-devel
 Provides: memkind-devel
+%endif
 
 %description devel
 Install header files and development aids to link memkind library into

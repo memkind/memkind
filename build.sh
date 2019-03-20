@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2016 Intel Corporation.
+#  Copyright (C) 2016 - 2019 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -44,5 +44,5 @@ if [ ! -f ./Makefile ]; then
 fi
 
 #use V=1 for full cmdlines of build
-make all -j $MAKEOPTS
-make checkprogs -j $MAKEOPTS
+make all -j`nproc`
+make checkprogs -j`nproc`
