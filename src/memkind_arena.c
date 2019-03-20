@@ -525,6 +525,11 @@ MEMKIND_EXPORT void memkind_arena_free_with_kind_detect(void *ptr)
     memkind_arena_free(kind, ptr);
 }
 
+MEMKIND_EXPORT size_t memkind_arena_malloc_usable_size(void *ptr)
+{
+    return memkind_default_malloc_usable_size(NULL, ptr);
+}
+
 MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
                                            size_t size)
 {

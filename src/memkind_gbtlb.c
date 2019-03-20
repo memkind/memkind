@@ -52,6 +52,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_gbtlb_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 
@@ -71,6 +72,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_preferred_gbtlb_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 
@@ -87,6 +89,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_gbtlb_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 

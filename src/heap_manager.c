@@ -36,6 +36,7 @@ pthread_once_t heap_manager_init_once_g = PTHREAD_ONCE_INIT;
 
 struct heap_manager_ops {
     void (*init)(struct memkind *kind);
+    size_t (*heap_manager_malloc_usable_size)(void *ptr);
     void (*heap_manager_free)(void *ptr);
     void *(*heap_manager_realloc)(void *ptr, size_t size);
     struct memkind *(*heap_manager_detect_kind)(void *ptr);
@@ -43,6 +44,7 @@ struct heap_manager_ops {
 
 struct heap_manager_ops arena_heap_manager_g = {
     .init = memkind_arena_init,
+    .heap_manager_malloc_usable_size = memkind_arena_malloc_usable_size,
     .heap_manager_free = memkind_arena_free_with_kind_detect,
     .heap_manager_realloc = memkind_arena_realloc_with_kind_detect,
     .heap_manager_detect_kind = memkind_arena_detect_kind
@@ -50,6 +52,7 @@ struct heap_manager_ops arena_heap_manager_g = {
 
 struct heap_manager_ops tbb_heap_manager_g = {
     .init = tbb_initialize,
+    .heap_manager_malloc_usable_size = tbb_pool_malloc_usable_size_with_kind_detect,
     .heap_manager_free = tbb_pool_free_with_kind_detect,
     .heap_manager_realloc = tbb_pool_realloc_with_kind_detect,
     .heap_manager_detect_kind = tbb_detect_kind
@@ -73,6 +76,11 @@ static inline struct heap_manager_ops *get_heap_manager()
 void heap_manager_init(struct memkind *kind)
 {
     get_heap_manager()->init(kind);
+}
+
+size_t heap_manager_malloc_usable_size(void *ptr)
+{
+    return get_heap_manager()->heap_manager_malloc_usable_size(ptr);
 }
 
 void heap_manager_free(void *ptr)

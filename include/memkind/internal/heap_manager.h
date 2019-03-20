@@ -28,5 +28,6 @@
 
 void heap_manager_init(struct memkind *kind);
 void heap_manager_free(void *ptr);
+size_t heap_manager_malloc_usable_size(void *ptr);
 void *heap_manager_realloc(void *ptr, size_t size);
 struct memkind *heap_manager_detect_kind(void *ptr);

@@ -293,6 +293,15 @@ but operates on specified
 .IR "kind" .
 .br
 .BR Note:
+In cases where the kind is unknown in the
+context of the call to
+.BR memkind_malloc_usable_size ()
+.IR "NULL" ,
+can be given as the
+.I kind
+specified to
+.BR memkind_malloc_usable_size (),
+but this could require a internal look up for correct kind.
 .BR memkind_malloc_usable_size ()
 is supported by TBB heap manager described in
 .B ENVIRONMENT

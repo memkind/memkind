@@ -45,8 +45,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
     .mmap = memkind_pmem_mmap,
     .get_mmap_flags = memkind_pmem_get_mmap_flags,
     .get_arena = memkind_thread_get_arena,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_pmem_destroy,
-    .malloc_usable_size = memkind_default_malloc_usable_size
 };
 
 void *pmem_extent_alloc(extent_hooks_t *extent_hooks,

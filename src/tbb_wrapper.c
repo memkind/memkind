@@ -198,14 +198,28 @@ static void tbb_pool_free(struct memkind *kind, void *ptr)
     pool_free(kind->priv, ptr);
 }
 
-static size_t tbb_pool_usable_size(struct memkind *kind, void *ptr)
+static size_t tbb_pool_common_malloc_usable_size(void *pool, void *ptr)
 {
     if (pool_msize) {
-        return pool_msize(kind->priv, ptr);
+        return pool_msize(pool, ptr);
     } else {
         log_err("memkind_malloc_usable_size() is not supported by this TBB version.");
         return 0;
     }
+}
+
+static size_t tbb_pool_malloc_usable_size(struct memkind *kind, void *ptr)
+{
+    return tbb_pool_common_malloc_usable_size(kind->priv, ptr);
+}
+
+size_t tbb_pool_malloc_usable_size_with_kind_detect(void *ptr)
+{
+    size_t size = 0;
+    if (ptr) {
+        size = tbb_pool_common_malloc_usable_size(pool_identify(ptr), ptr);
+    }
+    return size;
 }
 
 static int tbb_destroy(struct memkind *kind)
@@ -249,5 +263,5 @@ void tbb_initialize(struct memkind *kind)
     kind->ops->realloc = tbb_pool_realloc;
     kind->ops->free = tbb_pool_free;
     kind->ops->finalize = tbb_destroy;
-    kind->ops->malloc_usable_size = tbb_pool_usable_size;
+    kind->ops->malloc_usable_size = tbb_pool_malloc_usable_size;
 }
