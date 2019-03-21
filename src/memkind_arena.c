@@ -500,6 +500,7 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
     unsigned int arena;
 
     err = kind->ops->get_arena(kind, &arena, size);
+	//printf("arena: %d\n", arena);
     if (MEMKIND_LIKELY(!err)) {
         result = jemk_mallocx_check(size,
                                     MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));

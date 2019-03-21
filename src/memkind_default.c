@@ -131,6 +131,12 @@ MEMKIND_EXPORT int memkind_default_get_defrag_hint(void *ptr, int *bin_util,
 #endif
 }
 
+MEMKIND_EXPORT int memkind_default_mallctl(const char *name,void *oldp,
+	size_t *oldlenp,void *newp, size_t newlen)
+{
+	return jemk_mallctl(name,oldp,oldlenp,newp,newlen);
+}
+
 
 MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr,
                                           size_t size)

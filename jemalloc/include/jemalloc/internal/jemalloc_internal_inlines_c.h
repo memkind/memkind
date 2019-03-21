@@ -4,6 +4,7 @@
 #include "jemalloc/internal/jemalloc_internal_types.h"
 #include "jemalloc/internal/sz.h"
 #include "jemalloc/internal/witness.h"
+#include "stdio.h"
 
 JEMALLOC_ALWAYS_INLINE arena_t *
 iaalloc(tsdn_t *tsdn, const void *ptr) {
@@ -213,8 +214,9 @@ iget_defrag_hint(tsdn_t *tsdn, void* ptr, int *bin_util, int *run_util) {
 		if (slab != bin->slabcur) {
 			const arena_bin_info_t *bin_info = &arena_bin_info[binind];
 			size_t availregs = bin_info->nregs * bin->stats.curslabs;
-			*bin_util = ((long long)bin->stats.curregs<<16) / availregs;
-			*run_util = ((long long)(bin_info->nregs - extent_nfree_get(slab))<<16) / bin_info->nregs;
+			//printf("availregs = %zu\n",availregs);
+			*bin_util = ((long long)bin->stats.curregs << 16) / availregs;
+			*run_util = ((long long)(bin_info->nregs - extent_nfree_get(slab)) << 16) / bin_info->nregs;
 			defrag = 1;
 		}
 		malloc_mutex_unlock(tsdn, &bin->lock);

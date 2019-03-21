@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include "common.h"
 
-#define PMEM_MAX_SIZE (1024 * 1024 * 1024)
+#define PMEM_MAX_SIZE (1024 * 1024 * 64)
 extern const char *PMEM_DIR;
 
 class MemkindDefaultGetDefragHintTests : public ::testing::Test
@@ -188,23 +188,20 @@ void printStats(unsigned int arena)
 	unsigned int number;
 	char buf[50];
 
-	int nbins;
-	memkind_default_mallctl("arenas.nbins", &nbins, &len, NULL, 0);
-	//printf("nbins: %d\n", nbins);
-	sprintf(buf, "stats.arenas.%d.pactive", arena);
+	sprintf(buf, "astats.arenas.%d.pactive", arena);
 	memkind_default_mallctl(buf, &size, &len, NULL, 0);
 	printf("pages active: %zu\n", size);
 	memkind_default_mallctl("stats.active", &size, &len, NULL, 0);
-	//printf("total number of bytes in active pages allocated by the application: %zu\n", size);
+	printf("total number of bytes in active pages allocated by the application: %zu\n", size);
 	memkind_default_mallctl("stats.mapped", &size, &len, NULL, 0);
-	//printf("number of bytes in active extents: %zu\n", size);
+	printf("number of bytes in active extents: %zu\n", size);
 	sprintf(buf, "stats.arenas.%d.mapped", arena);
 	memkind_default_mallctl(buf, &size, &len, NULL, 0);
-	//printf("mapped bytes in arena: %zu\n", size);
+	printf("mapped bytes in arena: %zu\n", size);
 	sprintf(buf, "stats.arenas.%d.small.allocated", arena);
 	memkind_default_mallctl(buf, &size, &len, NULL, 0);
-	//printf("allocated bytes of small obj: %zu\n", size);
-	for (int i = 0; i < nbins; i++)
+	printf("allocated bytes of small obj: %zu\n", size);
+	for (int i = 0; i < 36; i++)
 	{
 		int availregs = 0;
 		sprintf(buf, "arenas.bin.%d.nregs", i);
@@ -222,15 +219,8 @@ void printStats(unsigned int arena)
 		memkind_default_mallctl(buf, &size, &len, NULL, 0);
 		//printf("%d. curregs [bin %d]:%zu\n", i,i,size << 16);
 		
-		if (availregs == 0)
-		{
-			printf("%d. bin util: 0 division!\n", i);
-		}
-		else
-		{
-			long int bin = (long long)size << 16 / availregs;
-			printf("%d. bin util: %ld\n", i, bin);
-		}
+		//long int bin = (long long)size << 16 / availregs;
+		//printf("%d. bin util: %ld\n", i, bin);
 
 		sprintf(buf, "stats.arenas.%d.bins.%d.nslabs", arena, i);
 		memkind_default_mallctl(buf, &number, &len, NULL, 0);
@@ -238,16 +228,8 @@ void printStats(unsigned int arena)
 
 		sprintf(buf, "stats.arenas.%d.bins.%d.nreslabs", arena, i);
 		memkind_default_mallctl(buf, &number, &len, NULL, 0);
-		//printf("%d. reslabs: %d\n", i, number);
+		printf("%d. reslabs: %d\n", i, number);
 	}
-}
-
-void UpdateStats()
-{
-	// Update the statistics cached by mallctl.
-	uint64_t epoch = 1;
-	size_t sz = sizeof(epoch);
-	memkind_default_mallctl("epoch", &epoch, &sz, &epoch, sz);
 }
 
 TEST_F(MemkindDefaultGetDefragHintTests, test_TC_mctltest)
@@ -257,34 +239,32 @@ TEST_F(MemkindDefaultGetDefragHintTests, test_TC_mctltest)
 	if (err != 0)
 		printf("err = %d\n", err); 
 	unsigned int arena;
-	kind->ops->get_arena(kind, &arena, 2 * KB);
+	kind->ops->get_arena(kind, &arena, 1 * KB);
 	
 	printf("arena: %d\n", arena);
-	size_t len;
+	//size_t len;
 	//size_t size;
 	//unsigned int number;
-	unsigned int nbins;
 	//char buf[50];
-	memkind_default_mallctl("arenas.nbins", &nbins, &len, NULL, 0);
-	printf("nbins: %d\n", nbins);
+
 	int bin, run;
 	//long long bin_util[2][36];
 	//long long run_util[2][36];*/
-	int alloc = 100000;
+	int alloc = 50000;
 	void* ptr[alloc];
 	printf("Init:\n");
 	printf("arena_zero: %d\n", kind->arena_zero);
-	UpdateStats();
 	printStats(arena);
-
+	
 	for (int i = 0; i < alloc; i++)
 	{
-		ptr[i] = memkind_calloc(kind, 1,2 * KB);
-		*(long double*)ptr[i] = 123456789012345.678;
+		ptr[i] = memkind_calloc(kind, 1,1 * KB);
+		const char str[395] = "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq";
+		**ptr[i] = str;
 	}
 	printf("\nAfter %d malloc:\n", alloc);
-	UpdateStats();
 	printStats(arena);
+
 	for (int i = 1; i < alloc;)
 	{
 		memkind_free(kind, ptr[i]);
@@ -296,13 +276,34 @@ TEST_F(MemkindDefaultGetDefragHintTests, test_TC_mctltest)
 			i += 5;
 	}
 	printf("\nAfter free:\n");
-	UpdateStats();
 	printStats(arena);
-
+	//for (int i = 0; i < 36; i++)
+	//{
+	//	stats.arenas.<i>.bins.<j>.nslabs // culminative number of slabs created
+	//	int availregs = 0;
+	//	sprintf(buf, "arenas.bin.%d.nregs", i);
+	//	memkind_default_mallctl(buf, &number, &len, NULL, 0);
+	//	availregs = number;
+	//	sprintf(buf, "stats.arenas.%d.bins.%d.curslabs",arena, i);
+	//	memkind_default_mallctl(buf, &number, &len, NULL, 0);
+	//	availregs *= number;
+	//	printf("%d. availregs = %d\n", i, availregs);
+	//	sprintf(buf, "stats.arenas.%d.bins.%d.curregs",arena, i);
+	//	memkind_default_mallctl(buf, &size, &len, NULL, 0);
+	//	bin_util[0][i] = (long long)size << 16 / availregs;
+	//}
 	for (int i = 0; i < alloc; i++)
 	{
 		if (ptr[i] != NULL)
 		{
+			//int availregs = 0;
+			//sprintf(buf, "arenas.bin.0.nregs");
+			//memkind_default_mallctl(buf, &number, &len, NULL, 0);
+			//printf("nregs: %d\n", number);
+			//sprintf(buf, "stats.arenas.255.bins.0.curslabs");
+			//memkind_default_mallctl(buf, &number, &len, NULL, 0);
+			//printf("curslabs: %d", number);
+			//printf("availregs = %d = %d * %d \n vs \n", availregs * number, availregs, number);
 			int hint = memkind_default_get_defrag_hint(ptr[i], &bin, &run);
 			if (hint)
 			{
@@ -311,18 +312,53 @@ TEST_F(MemkindDefaultGetDefragHintTests, test_TC_mctltest)
 				{}
 				else
 				{
-					void* newptr = memkind_malloc(kind, 2 * KB);
-					memcpy(newptr, ptr[i], 2 * KB);
+					//printf("i: %d\n", i);
+					//printf("1. run: %d\n", run);
+					//printf("1. bin: %d\n", bin);
+					void* newptr = memkind_calloc(kind,1, 1 * KB);
+					memcpy(newptr, ptr[i], 1 * KB);
 					memkind_free(kind, ptr[i]);
 					ptr[i] = newptr;
+					////memkind_free(kind, newptr);
+					//hint = memkind_default_get_defrag_hint(ptr[i], &bin, &run);
+					//printf("2. run: %d\n", run);
+					//printf("2. bin: %d\n", bin);
 				}
 			}
+			//availregs = 0;
+			//sprintf(buf, "arenas.bin.0.nregs");
+			//memkind_default_mallctl(buf, &number, &len, NULL, 0);
+			//printf("nregs: %d\n", number);
+			//sprintf(buf, "stats.arenas.255.bins.0.curslabs");
+			//memkind_default_mallctl(buf, &number, &len, NULL, 0);
+			//printf("curslabs: %d", number);
+			//printf("availregs = %d = %d * %d \n\n", availregs * number, availregs, number);
 		}
 	}
 	printf("\nAfter defrag:\n");
-	UpdateStats();
 	printStats(arena);
+	//for (int i = 0; i < 36; i++)
+	//{
+	//	int availregs = 0;
+	//	sprintf(buf, "arenas.bin.%d.nregs", i);
+	//	memkind_default_mallctl(buf, &number, &len, NULL, 0);
+	//	availregs = number;
+	//	sprintf(buf, "stats.arenas.%d.bins.%d.curslabs", arena, i);
+	//	memkind_default_mallctl(buf, &number, &len, NULL, 0);
+	//	availregs *= number;
+	//	printf("%d. availregs = %d\n", i, availregs);
+	//	sprintf(buf, "stats.arenas.%d.bins.%d.curregs", arena, i);
+	//	memkind_default_mallctl(buf, &size, &len, NULL, 0);
+	//	bin_util[1][i] = (long long)size << 16 / availregs;
+	//}
 
+	//for (int i = 0; i < 36; i++)
+	//{
+	//	if (bin_util[0][i] > bin_util[1][i])
+	//		printf("%lld > %lld\n", bin_util[0][i], bin_util[1][i]);
+	//	else
+	//		printf("%lld <= %lld\n", bin_util[0][i], bin_util[1][i]);
+	//}
 	for (int i = 1; i < alloc; i++)
 	{
 		memkind_free(kind, ptr[i]);

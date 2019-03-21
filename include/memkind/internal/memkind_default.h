@@ -64,6 +64,8 @@ int memkind_posix_check_alignment(struct memkind *kind, size_t alignment);
 void memkind_default_init_once(void);
 size_t memkind_default_malloc_usable_size(struct memkind *kind, void *ptr);
 int memkind_default_get_defrag_hint(void *ptr, int *bin_util, int *run_util);
+int memkind_default_mallctl(const char *name, void *oldp,
+	size_t *oldlenp, void *newp, size_t newlen);
 static inline bool size_out_of_bounds(size_t size)
 {
     return !size;
