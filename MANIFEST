@@ -30,6 +30,7 @@ examples/memkind_allocated_example.cpp
 examples/memkind_decorator_debug.c
 examples/pmem_alignment.c
 examples/pmem_and_default_kind.c
+examples/pmem_config.c
 examples/pmem_cpp_allocator.cpp
 examples/pmem_detect_kind.c
 examples/pmem_free_with_unknown_kind.c
@@ -427,6 +428,7 @@ test/gb_page_tests_bind_policy.cpp
 test/get_arena_test.cpp
 test/gtest_fused/gtest/gtest-all.cc
 test/gtest_fused/gtest/gtest.h
+test/hbw_allocator_performance_tests.cpp
 test/hbw_allocator_tests.cpp
 test/hbw_detection_test.py
 test/hbw_verify_function_test.cpp
@@ -444,6 +446,7 @@ test/memkind-slts.ts
 test/memkind_detect_kind_tests.cpp
 test/memkind_default_get_defrag_hint_tests.cpp
 test/memkind_null_kind_test.cpp
+test/memkind_pmem_config_tests.cpp
 test/memkind_pmem_long_time_tests.cpp
 test/memkind_pmem_tests.cpp
 test/memkind_versioning_tests.cpp
@@ -456,6 +459,7 @@ test/performance/framework.hpp
 test/performance/operations.hpp
 test/performance/perf_tests.cpp
 test/performance/perf_tests.hpp
+test/pmem_alloc_performance_tests.cpp
 test/pmem_allocator_tests.cpp
 test/proc_stat.h
 test/python_framework/__init__.py

@@ -393,7 +393,7 @@ noinst_LTLIBRARIES =
 noinst_HEADERS =
 TESTS =
 
-req_flags = -fvisibility=hidden -Wall -Werror -msse4.2 -D_GNU_SOURCE -DMEMKIND_INTERNAL_API -DJE_PREFIX=$(JE_PREFIX)
+req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DMEMKIND_INTERNAL_API -DJE_PREFIX=$(JE_PREFIX)
 
 AM_CFLAGS = $(req_flags)
 AM_CXXFLAGS = $(req_flags)
@@ -433,6 +433,13 @@ static_lib: jemalloc/obj/lib/libjemalloc_pic.a libmemkind.la
 	cp libmemkind.a .libs/
 	rm libmemkind.a
 
+
+unit_tests: checkprogs
+	test/all_tests --gtest_filter=*free_with_NULL_kind_4096_bytes:NegativeTest.*:ErrorMessage.*:GetArenaTest.*:MemkindVersioningTests.*
+	test/decorator_test
+
+unit_tests_pmem: checkprogs
+	test/all_tests --gtest_filter=*MemkindPmemTests.*:PmemAllocatorTests.*
 
 include autohbw/Makefile.mk
 include test/Makefile.mk

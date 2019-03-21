@@ -61,6 +61,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 
@@ -79,6 +80,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
     .get_mbind_nodemask = memkind_hbw_all_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_all_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 
@@ -97,6 +99,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_hugetlb_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 
@@ -115,6 +118,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
     .get_mbind_nodemask = memkind_hbw_all_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_all_hugetlb_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 
@@ -133,6 +137,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_preferred_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 
@@ -151,6 +156,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_preferred_hugetlb_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 
@@ -170,6 +176,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .get_mbind_nodemask = memkind_hbw_all_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_interleave_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 
@@ -304,10 +311,15 @@ typedef struct registers_t {
 
 inline static void cpuid_asm(int leaf, int subleaf, registers_t *registers)
 {
+#ifdef __x86_64__
     asm volatile("cpuid":"=a"(registers->eax),
                  "=b"(registers->ebx),
                  "=c"(registers->ecx),
                  "=d"(registers->edx):"0"(leaf), "2"(subleaf));
+#else
+    // Non-x86 can't possibly be Knight's Landing nor Knight's Mill.
+    registers->eax = 0;
+#endif
 }
 
 #define CPUID_MODEL_SHIFT       (4)

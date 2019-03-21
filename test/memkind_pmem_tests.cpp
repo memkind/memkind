@@ -350,13 +350,17 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocUsableSize)
     ASSERT_EQ(0, err);
     ASSERT_NE(nullptr, pmem_temp);
     size_t usable_size = memkind_malloc_usable_size(pmem_temp, nullptr);
+    size_t nullkind_usable_size = memkind_malloc_usable_size(nullptr, nullptr);
     ASSERT_EQ(0u, usable_size);
+    ASSERT_EQ(nullkind_usable_size, usable_size);
     for (unsigned int i = 0; i < ARRAY_SIZE(check_sizes); ++i) {
         size_t size = check_sizes[i].size;
         void *alloc = memkind_malloc(pmem_temp, size);
         ASSERT_NE(nullptr, alloc);
 
         usable_size = memkind_malloc_usable_size(pmem_temp, alloc);
+        nullkind_usable_size = memkind_malloc_usable_size(nullptr, alloc);
+        ASSERT_EQ(nullkind_usable_size, usable_size);
         size_t diff = usable_size - size;
         ASSERT_GE(usable_size, size);
         ASSERT_LE(diff, check_sizes[i].spacing);

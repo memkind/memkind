@@ -40,7 +40,6 @@
 #include <jemalloc/jemalloc.h>
 #include <utmpx.h>
 #include <sched.h>
-#include <smmintrin.h>
 #include <limits.h>
 #include <sys/mman.h>
 #include <sys/param.h>
@@ -116,7 +115,10 @@ static void arena_config_init()
     arena_init_status = pthread_key_create(&tcache_key, tcache_finalize);
 }
 
-#define MALLOCX_ARENA_MAX 0xffe // copy-pasted from jemalloc/internal/jemalloc_internal.h
+#define MALLOCX_ARENA_MAX           0xffe        // copy-pasted from jemalloc/internal/jemalloc_internal.h
+#define DIRTY_DECAY_MS_DEFAULT      10000        // copy-pasted from jemalloc/internal/arena_types.h DIRTY_DECAY_MS_DEFAULT
+#define DIRTY_DECAY_MS_CONSERVATIVE     0
+
 static struct memkind *arena_registry_g[MALLOCX_ARENA_MAX];
 static pthread_mutex_t arena_registry_write_lock;
 
@@ -524,6 +526,11 @@ MEMKIND_EXPORT void memkind_arena_free_with_kind_detect(void *ptr)
     memkind_arena_free(kind, ptr);
 }
 
+MEMKIND_EXPORT size_t memkind_arena_malloc_usable_size(void *ptr)
+{
+    return memkind_default_malloc_usable_size(NULL, ptr);
+}
+
 MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
                                            size_t size)
 {
@@ -561,6 +568,38 @@ MEMKIND_EXPORT void *memkind_arena_realloc_with_kind_detect(void *ptr,
     } else {
         return memkind_arena_realloc(kind, ptr, size);
     }
+}
+
+MEMKIND_EXPORT int memkind_arena_update_memory_usage_policy(
+    struct memkind *kind, memkind_mem_usage_policy policy)
+{
+    int err = MEMKIND_SUCCESS;
+    unsigned i;
+    ssize_t dirty_decay_val = 0;
+    switch ( policy ) {
+        case MEMKIND_MEM_USAGE_POLICY_DEFAULT:
+            dirty_decay_val = DIRTY_DECAY_MS_DEFAULT;
+            break;
+        case MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE:
+            dirty_decay_val = DIRTY_DECAY_MS_CONSERVATIVE;
+            break;
+        default:
+            log_err("Unrecognized memory policy %d", policy);
+            return MEMKIND_ERROR_INVALID;
+    }
+
+    for (i = 0; i < kind->arena_map_len; ++i) {
+        char cmd[64];
+
+        snprintf(cmd, sizeof(cmd), "arena.%u.dirty_decay_ms", kind->arena_zero + i);
+        err = jemk_mallctl(cmd, NULL, NULL, (void *)&dirty_decay_val, sizeof(ssize_t));
+        if ( err ) {
+            log_err("Incorrect dirty_decay_ms value %zu", dirty_decay_val);
+            return MEMKIND_ERROR_INVALID;
+        }
+    }
+
+    return err;
 }
 
 // TODO: function is workaround for PR#1302 in jemalloc upstream
@@ -650,7 +689,11 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
             log_err("jemk_malloc() failed.");
         }
         if (!err) {
-            *arena_tsd = _mm_crc32_u64(0, (uint64_t)pthread_self()) %
+            // On glibc pthread_self() is incremented by 0x801000 for every
+            // thread (no matter the arch's word width).  This might change
+            // in the future, but even in the worst case the hash will
+            // degenerate to a single bucket with no loss of correctness.
+            *arena_tsd = ((uint64_t)pthread_self() >> 12) %
                          kind->arena_map_len;
             err = pthread_setspecific(kind->arena_key, arena_tsd) ?
                   MEMKIND_ERROR_RUNTIME : 0;
@@ -668,12 +711,13 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
  * For more read: https://www.akkadia.org/drepper/tls.pdf
  * We could consider using rdfsbase when it will arrive to linux kernel
  *
+ * This approach works only on glibc (and possibly similar implementations)
+ * but that covers our current needs.
+ *
  */
 static uintptr_t get_fs_base()
 {
-    uintptr_t fs_base;
-    asm ("movq %%fs:0, %0" : "=r" (fs_base));
-    return fs_base;
+    return (uintptr_t)pthread_self();
 }
 
 MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,

@@ -31,15 +31,16 @@
 set -e
 
 TBB_VERSION="$1"
+TBB_RELEASE_URL=https://github.com/01org/tbb/releases/tag/"$TBB_VERSION"
 TBB_TAR_GZ="$TBB_VERSION".tar.gz
-TBB_TAR_URL=https://github.com/01org/tbb/archive/"$TBB_TAR_GZ"
+TBB_TARBALL_URL=https://github.com/01org/tbb/archive/"$TBB_TAR_GZ"
 TBB_VARS_SH="tbbvars.sh"
 
-# check if specired TBB library version exist
-if [ curl --output /dev/null --silent --head --fail "$TBB_TAR_URL" ]; then
+# check if specified TBB release exist
+if curl --output /dev/null --silent --head --fail "$TBB_RELEASE_URL"; then
   echo "TBB version ${TBB_VERSION} exist."
 else
-  echo "TBB url: ${TBB_TAR_URL} is not valid. TBB version: ${TBB_VERSION} doesn't exist."
+  echo "TBB url: ${TBB_RELEASE_URL} is not valid. TBB version: ${TBB_VERSION} doesn't exist."
   exit 1
 fi
 
@@ -50,7 +51,7 @@ TBB_LOCAL_TAR_GZ="$TBB_LOCAL_DIR"/"$TBB_TAR_GZ"
 mkdir "$TBB_LOCAL_DIR"
 
 # download and untar TBB library to TBB directory
-curl -L "$TBB_TAR_URL" -o "$TBB_LOCAL_TAR_GZ"
+curl -L "$TBB_TARBALL_URL" -o "$TBB_LOCAL_TAR_GZ"
 tar -xzvf "$TBB_LOCAL_TAR_GZ" -C "$TBB_LOCAL_DIR" --strip-components=1
 
 # build TBB library

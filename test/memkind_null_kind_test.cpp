@@ -61,6 +61,17 @@ TEST_F(MemkindNullKindTests, test_TC_MEMKIND_NullKindFreeNullPtr)
     } while (timer.getElapsedTime() < test_time);
 }
 
+TEST_F(MemkindNullKindTests, test_TC_MEMKIND_NullKindUsableSizeNullPtr)
+{
+    const double test_time = 5;
+
+    TimerSysTime timer;
+    timer.start();
+    do {
+        memkind_malloc_usable_size(nullptr, nullptr);
+    } while (timer.getElapsedTime() < test_time);
+}
+
 TEST_F(MemkindNullKindTests, test_TC_MEMKIND_DefaultRegularKindFreeNullPtr)
 {
     const size_t size_1 = 1 * KB;
