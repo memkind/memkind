@@ -55,6 +55,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hugetlb_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
 

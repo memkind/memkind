@@ -50,6 +50,7 @@ This is EXPERIMENTAL API. The functionality and the header file itself can be ch
 .BI "void memkind_arena_init(struct memkind " "*kind" );
 .BI "void memkind_arena_free(struct memkind " "*kind" ", void " "*ptr" );
 .BI "void memkind_arena_free_with_kind_detect(void " "*ptr" );
+.BI "size_t memkind_arena_malloc_usable_size(void " "*ptr" );
 .BI "int memkind_arena_update_memory_usage_policy(struct memkind " "*kind" ", memkind_mem_usage_policy " "policy" );
 .br
 .SH DESCRIPTION
@@ -195,6 +196,9 @@ returns pointer to memory kind structure associated with given allocated memory 
 .PP
 .BR get_kind_by_arena ()
 returns pointer to memory kind structure associated with given arena.
+.PP
+.BR memkind_arena_malloc_usable_size ()
+is an implementation of the memkind "usable_size" operation for memory kinds that use jemalloc.
 .PP
 .BR memkind_arena_finalize ()
 is an implementation of the memkind "finalize" operation for memory kinds that
