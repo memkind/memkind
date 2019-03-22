@@ -123,12 +123,7 @@ MEMKIND_EXPORT size_t memkind_default_malloc_usable_size(struct memkind *kind,
 MEMKIND_EXPORT int memkind_default_get_defrag_hint(void *ptr, int *bin_util,
                                                    int *run_util)
 {
-#ifdef JEMALLOC_FRAG_HINT
     return jemk_get_defrag_hint(ptr,bin_util,run_util);
-#else
-    log_err("jemk_get_defrag_hint() is not available in jemalloc.");
-    return -1;
-#endif
 }
 
 
