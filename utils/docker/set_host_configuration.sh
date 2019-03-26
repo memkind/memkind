@@ -24,6 +24,7 @@
 
 #
 # set_host_configuration.sh - set Huge Pages parameters required for memkind tests
+set -e
 
 MEMKIND_HUGE_PAGES_NO=3000
 MEMKIND_OVERCOMMIT_HUGEPAGES_NO=128
