@@ -25,41 +25,7 @@
 #
 # run_local.sh - builds a container with ubuntu-18.04 image
 # and runs docker_run_build_and_test.sh script inside it
-#
-# Optional parameters:
-# -number of pull request on memkind repository on GitHub
-# -Codecov token for memkind repository to upload the coverage results
-# -Threading Building Blocks library version (e.g. "2019_U4")
-#
-
-usage() {
- echo "Runs memkind unit tests inside docker container.
-When pull request number specified, it checks out repository on specific pull request,
-otherwise tests run on master branch.
-For measuring coverage of tests, Codecov token must be passed as parameter.
-For testing Threading Building Blocks, TBB library version tag must be passed as parameter,
-See https://github.com/01org/tbb/tags.
-Usage: docker_run_build_and_test.sh [-p <PR_number>] [-c <codecov_token>] [-t <TBB_LIBRARY_VERSION>]"
- exit 1;
-}
-
-while getopts ":p:c:t:" opt; do
-    case "${opt}" in
-        p)
-            PULL_REQUEST_NO=${OPTARG}
-            ;;
-        c)
-            CODECOV_TOKEN=${OPTARG}
-            ;;
-        t)
-            TBB_LIBRARY_VERSION=${OPTARG}
-            ;;
-        \?)
-            usage
-            exit 1
-            ;;
-    esac
-done
+set -e
 
 docker build --tag memkind_cont \
              --file Dockerfile.ubuntu-18.04 \
