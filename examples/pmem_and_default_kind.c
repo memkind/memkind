@@ -35,13 +35,18 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/resource.h>
-#include <sys/stat.h>
-#include <sys/time.h>
 
 #define MB (1024 * 1024)
 #define HEAP_LIMIT_SIMULATE (1024 * MB)
 
 static char *PMEM_DIR = "/tmp/";
+
+static void print_err_message(int err)
+{
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+}
 
 int main(int argc, char *argv[])
 {
@@ -49,18 +54,12 @@ int main(int argc, char *argv[])
     struct memkind *pmem_kind = NULL;
     int err = 0;
     errno = 0;
-    struct stat st;
 
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
-        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr, "%s : Invalid path to pmem kind directory\n", argv[1]);
-            return 1;
-        } else {
-            PMEM_DIR = argv[1];
-        }
+        PMEM_DIR = argv[1];
     }
 
     //operation below limit the current size of heap
@@ -68,9 +67,8 @@ int main(int argc, char *argv[])
     const struct rlimit heap_limit = { HEAP_LIMIT_SIMULATE, HEAP_LIMIT_SIMULATE };
     err = setrlimit(RLIMIT_DATA, &heap_limit);
     if (err) {
-        perror("setrlimit()");
-        fprintf(stderr, "Unable to set heap limit\n");
-        return errno ? -errno : 1;
+        fprintf(stderr, "Unable to set heap limit.\n");
+        return 1;
     }
 
     char *ptr_default = NULL;
@@ -84,51 +82,44 @@ int main(int argc, char *argv[])
 
     err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind);
     if (err) {
-        perror("memkind_create_pmem()");
-        fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
-                errno);
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     ptr_default = (char *)memkind_malloc(MEMKIND_DEFAULT, size);
     if (!ptr_default) {
-        perror("memkind_malloc()");
-        fprintf(stderr, "Unable allocate 512 bytes in standard memory\n");
-        return errno ? -errno : 1;
+        fprintf(stderr, "Unable allocate 512 bytes in standard memory.\n");
+        return 1;
     }
 
     errno = 0;
     ptr_default_not_possible = (char *)memkind_malloc(MEMKIND_DEFAULT,
                                                       HEAP_LIMIT_SIMULATE);
     if (ptr_default_not_possible) {
-        perror("memkind_malloc()");
         fprintf(stderr,
                 "Failure, this allocation should not be possible "
-                "(expected result was NULL), because of setlimit function\n");
-        return errno ? -errno : 1;
+                "(expected result was NULL), because of setlimit function.\n");
+        return 1;
     }
     if (errno != ENOMEM) {
-        perror("memkind_malloc()");
         fprintf(stderr,
-                "Failure, this allocation should set errno to ENOMEM value, because of setlimit function\n");
-        return errno ? -errno : 1;
+                "Failure, this allocation should set errno to ENOMEM value, because of setlimit function.\n");
+        return 1;
     }
 
     errno = 0;
     ptr_pmem = (char *)memkind_malloc(pmem_kind, HEAP_LIMIT_SIMULATE);
     if (!ptr_pmem) {
-        perror("memkind_malloc()");
-        fprintf(stderr, "Unable allocate HEAP_LIMIT_SIMULATE in file-backed memory\n");
-        return errno ? -errno : 1;
+        fprintf(stderr, "Unable allocate HEAP_LIMIT_SIMULATE in file-backed memory.\n");
+        return 1;
     }
     if (errno != 0) {
-        perror("memkind_malloc()");
-        fprintf(stderr, "Failure, this allocation should not set errno value\n");
-        return errno ? -errno : 1;
+        fprintf(stderr, "Failure, this allocation should not set errno value.\n");
+        return 1;
     }
 
-    sprintf(ptr_default, "Hello world from standard memory - ptr_default\n");
-    sprintf(ptr_pmem, "Hello world from file-backed memory - ptr_pmem\n");
+    sprintf(ptr_default, "Hello world from standard memory - ptr_default.\n");
+    sprintf(ptr_pmem, "Hello world from file-backed memory - ptr_pmem.\n");
 
     fprintf(stdout, "%s", ptr_default);
     fprintf(stdout, "%s", ptr_pmem);
@@ -138,9 +129,8 @@ int main(int argc, char *argv[])
 
     err = memkind_destroy_kind(pmem_kind);
     if (err) {
-        perror("memkind_destroy_kind()");
-        fprintf(stderr, "Unable to destroy pmem partition\n");
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     fprintf(stdout, "Memory was successfully allocated and released.\n");

@@ -33,10 +33,8 @@
 #include <memkind.h>
 
 #include <stdio.h>
-#include <errno.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
@@ -49,21 +47,22 @@ void *thread_ind(void *arg);
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
+static void print_err_message(int err)
+{
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+}
+
 int main(int argc, char *argv[])
 {
     int err = 0;
-    struct stat st;
 
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
-        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr, "%s : Invalid path to pmem kind directory\n", argv[1]);
-            return 1;
-        } else {
-            PMEM_DIR = argv[1];
-        }
+        PMEM_DIR = argv[1];
     }
 
     fprintf(stdout,
@@ -78,7 +77,7 @@ int main(int argc, char *argv[])
     for (t = 0; t < NUM_THREADS; t++) {
         err = pthread_create(&pmem_threads[t], NULL, thread_ind, NULL);
         if (err) {
-            fprintf(stderr, "Unable to create a thread\n");
+            fprintf(stderr, "Unable to create a thread.\n");
             return 1;
         }
     }
@@ -89,7 +88,7 @@ int main(int argc, char *argv[])
     for (t = 0; t < NUM_THREADS; t++) {
         err = pthread_join(pmem_threads[t], NULL);
         if (err) {
-            fprintf(stderr, "Thread join failed\n");
+            fprintf(stderr, "Thread join failed.\n");
             return 1;
         }
     }
@@ -110,17 +109,14 @@ void *thread_ind(void *arg)
     /* Create a pmem kind in thread */
     int err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
-        perror("thread memkind_create_pmem()");
-        fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
-                errno);
+        print_err_message(err);
         return NULL;
     }
 
     /* Alloc something */
     void *test = memkind_malloc(pmem_kind, 32);
     if (test == NULL) {
-        perror("thread memkind_malloc()");
-        fprintf(stderr, "Unable to allocate pmem (test)\n");
+        fprintf(stderr, "Unable to allocate pmem (test).\n");
         return NULL;
     }
 
@@ -130,8 +126,7 @@ void *thread_ind(void *arg)
     /* And destroy pmem kind */
     err = memkind_destroy_kind(pmem_kind);
     if (err) {
-        perror("thread memkind_pmem_destroy()");
-        fprintf(stderr, "Unable to destroy pmem partition\n");
+        print_err_message(err);
     }
 
     return NULL;

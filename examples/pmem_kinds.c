@@ -33,12 +33,17 @@
 #include <memkind.h>
 
 #include <stdio.h>
-#include <errno.h>
-#include <sys/stat.h>
 
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
 static char *PMEM_DIR = "/tmp/";
+
+static void print_err_message(int err)
+{
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+}
 
 int main(int argc, char *argv[])
 {
@@ -47,18 +52,12 @@ int main(int argc, char *argv[])
     struct memkind *pmem_kind_unlimited = NULL;
 
     int err = 0, i = 0;
-    struct stat st;
 
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
-        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr, "%s : Invalid path to pmem kind directory\n", argv[1]);
-            return 1;
-        } else {
-            PMEM_DIR = argv[1];
-        }
+        PMEM_DIR = argv[1];
     }
 
     fprintf(stdout,
@@ -69,44 +68,36 @@ int main(int argc, char *argv[])
     /* Create PMEM partition with specific size */
     err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
-        perror("memkind_create_pmem()");
-        fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
-                errno);
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     /* Create PMEM partition with unlimited size */
     err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind_unlimited);
     if (err) {
-        perror("memkind_create_pmem()");
-        fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
-                errno);
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     /* and delete them */
     err = memkind_destroy_kind(pmem_kind);
     if (err) {
-        perror("memkind_destroy_kind()");
-        fprintf(stderr, "Unable to destroy pmem partition\n");
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     err = memkind_destroy_kind(pmem_kind_unlimited);
     if (err) {
-        perror("memkind_destroy_kind()");
-        fprintf(stderr, "Unable to destroy pmem partition\n");
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     /* Create many PMEM kinds */
     for (i = 0; i < 10; i++) {
         err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kinds[i]);
         if (err) {
-            perror("memkind_create_pmem()");
-            fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
-                    errno);
-            return errno ? -errno : 1;
+            print_err_message(err);
+            return 1;
         }
     }
 
@@ -114,9 +105,8 @@ int main(int argc, char *argv[])
     for (i = 0; i < 10; i++) {
         err = memkind_destroy_kind(pmem_kinds[i]);
         if (err) {
-            perror("memkind_pmem_destroy()");
-            fprintf(stderr, "Unable to destroy pmem partition\n");
-            return errno ? -errno : 1;
+            print_err_message(err);
+            return 1;
         }
     }
 
