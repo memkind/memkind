@@ -33,8 +33,6 @@
 #include <memkind.h>
 
 #include <stdio.h>
-#include <errno.h>
-#include <sys/stat.h>
 
 static char *PMEM_DIR = "/tmp/";
 
@@ -43,6 +41,13 @@ static char *PMEM_DIR = "/tmp/";
 #define ALLOC_LIMIT  1000U
 
 static void *alloc_buffer[ALLOC_LIMIT];
+
+static void print_err_message(int err)
+{
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+}
 
 static int allocate_pmem_and_default_kind(struct memkind *pmem_kind)
 {
@@ -54,7 +59,6 @@ static int allocate_pmem_and_default_kind(struct memkind *pmem_kind)
             alloc_buffer[i] = memkind_malloc(MEMKIND_DEFAULT, MALLOC_SIZE);
 
         if (!alloc_buffer[i]) {
-            perror("memkind_malloc()");
             return 1;
         }
     }
@@ -69,7 +73,6 @@ static int realloc_using_get_kind_only_on_pmem()
         if (memkind_detect_kind(alloc_buffer[i]) != MEMKIND_DEFAULT) {
             void *temp = memkind_realloc(NULL, alloc_buffer[i], REALLOC_SIZE);
             if (!temp) {
-                perror("memkind_realloc()");
                 return 1;
             }
             alloc_buffer[i] = temp;
@@ -104,18 +107,12 @@ int main(int argc, char *argv[])
 
     struct memkind *pmem_kind = NULL;
     int err = 0;
-    struct stat st;
 
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
-        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr, "%s : Invalid path to pmem kind directory\n", argv[1]);
-            return 1;
-        } else {
-            PMEM_DIR = argv[1];
-        }
+        PMEM_DIR = argv[1];
     }
 
     fprintf(stdout,
@@ -126,21 +123,19 @@ int main(int argc, char *argv[])
 
     err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind);
     if (err) {
-        perror("memkind_create_pmem()");
-        fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
-                errno);
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     fprintf(stdout, "Allocate to PMEM and DEFAULT kind.\n");
 
     if (allocate_pmem_and_default_kind(pmem_kind)) {
-        perror("allocate_pmem_and_default_kind()");
+        fprintf(stderr, "allocate_pmem_and_default_kind().\n");
         return 1;
     }
 
     if (verify_allocation_size(pmem_kind, MALLOC_SIZE)) {
-        perror("verify_allocation_size() before resize");
+        fprintf(stderr, "verify_allocation_size() before resize.\n");
         return 1;
     }
 
@@ -148,20 +143,19 @@ int main(int argc, char *argv[])
             "Reallocate memory only on PMEM kind using memkind_detect_kind().\n");
 
     if (realloc_using_get_kind_only_on_pmem()) {
-        perror("realloc_using_get_kind_only_on_pmem()");
+        fprintf(stderr, "realloc_using_get_kind_only_on_pmem().\n");
         return 1;
     }
 
     if (verify_allocation_size(pmem_kind, REALLOC_SIZE)) {
-        perror("verify_allocation_size() after resize");
+        fprintf(stderr, "verify_allocation_size() after resize.\n");
         return 1;
     }
 
     err = memkind_destroy_kind(pmem_kind);
     if (err) {
-        perror("memkind_destroy_kind()");
-        fprintf(stderr, "Unable to destroy pmem partition\n");
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     fprintf(stdout, "Memory from PMEM kind was successfully reallocated.\n");
