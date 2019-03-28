@@ -476,7 +476,7 @@ and
 arguments,
 it uses
 .I config
-param to specify characteristics of created file-backed kind of memory. (see
+param to specify characteristics of created file-backed kind of memory (see
 .B KIND CONFIGURATION MANAGEMENT
 section).
 .PP
@@ -767,6 +767,10 @@ Default memory usage policy.
 .TP
 .B MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE
 Conservative memory usage policy - prioritize memory usage at cost of performance.
+.BR Note:
+This policy is not supported by TBB heap manager described in
+.B ENVIRONMENT
+section.
 .SH "ERRORS"
 .TP
 .BR memkind_posix_memalign ()
