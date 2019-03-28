@@ -33,15 +33,20 @@
 #include <memkind.h>
 
 #include <stdio.h>
-#include <errno.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #define NUM_THREADS 10
-
+#define NUM_ALLOCS 100
 static char *PMEM_DIR = "/tmp/";
+
+static void print_err_message(int err)
+{
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+}
 
 struct arg_struct {
     int id;
@@ -58,18 +63,12 @@ int main(int argc, char *argv[])
 {
     struct memkind *pmem_kind_unlimited = NULL;
     int err = 0;
-    struct stat st;
 
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
-        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr, "%s : Invalid path to pmem kind directory\n", argv[1]);
-            return 1;
-        } else {
-            PMEM_DIR = argv[1];
-        }
+        PMEM_DIR = argv[1];
     }
 
     fprintf(stdout,
@@ -77,18 +76,16 @@ int main(int argc, char *argv[])
             "\nPMEM kind directory: %s\n",
             PMEM_DIR);
 
-    /* Create PMEM partition with unlimited size */
+    // Create PMEM partition with unlimited size
     err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind_unlimited);
     if (err) {
-        perror("memkind_create_pmem()");
-        fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
-                errno);
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
-    /* Create a few threads which will access to our main pmem_kind */
+    // Create a few threads which will access to our main pmem_kind
     pthread_t pmem_threads[NUM_THREADS];
-    int *pmem_tint[NUM_THREADS][100];
+    int *pmem_tint[NUM_THREADS][NUM_ALLOCS];
     int t = 0, i = 0;
 
     struct arg_struct *args[NUM_THREADS];
@@ -101,7 +98,7 @@ int main(int argc, char *argv[])
 
         err = pthread_create(&pmem_threads[t], NULL, thread_onekind, (void *)args[t]);
         if (err) {
-            fprintf(stderr, "Unable to create a thread\n");
+            fprintf(stderr, "Unable to create a thread.\n");
             return 1;
         }
     }
@@ -112,17 +109,17 @@ int main(int argc, char *argv[])
     for (t = 0; t < NUM_THREADS; t++) {
         err = pthread_join(pmem_threads[t], NULL);
         if (err) {
-            fprintf(stderr, "Thread join failed\n");
+            fprintf(stderr, "Thread join failed.\n");
             return 1;
         }
     }
 
-    /* Check if we can read the values outside of threads and free resources */
+    // Check if we can read the values outside of threads and free resources
     for (t = 0; t < NUM_THREADS; t++) {
-        for (i = 0; i < 100; i++) {
+        for (i = 0; i < NUM_ALLOCS; i++) {
             if(*pmem_tint[t][i] != t) {
-                perror("read thread memkind_malloc()");
-                fprintf(stderr, "pmem_tint value has not been saved correctly in the thread\n");
+                fprintf(stderr,
+                        "pmem_tint value has not been saved correctly in the thread.\n");
                 return 1;
             }
             memkind_free(args[t]->kind, *(args[t]->ptr+i));
@@ -144,12 +141,11 @@ void *thread_onekind(void *arg)
     pthread_cond_wait(&cond, &mutex);
     pthread_mutex_unlock(&mutex);
 
-    /* Lets alloc int and put there thread ID */
-    for (i = 0; i < 100; i++) {
+    // Lets alloc int and put there thread ID
+    for (i = 0; i < NUM_ALLOCS; i++) {
         *(args->ptr+i) = (int *)memkind_malloc(args->kind, sizeof(int));
         if (*(args->ptr+i) == NULL) {
-            perror("thread memkind_malloc()");
-            fprintf(stderr, "Unable to allocate pmem int\n");
+            fprintf(stderr, "Unable to allocate pmem int.\n");
             return NULL;
         }
         **(args->ptr+i) = args->id;

@@ -33,29 +33,28 @@
 #include <memkind.h>
 
 #include <stdio.h>
-#include <errno.h>
-#include <sys/stat.h>
 
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
 static char *PMEM_DIR = "/tmp/";
 
+static void print_err_message(int err)
+{
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+}
+
 int main(int argc, char *argv[])
 {
     struct memkind *pmem_kind = NULL;
     int err = 0;
-    struct stat st;
 
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
-        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr, "%s : Invalid path to pmem kind directory\n", argv[1]);
-            return 1;
-        } else {
-            PMEM_DIR = argv[1];
-        }
+        PMEM_DIR = argv[1];
     }
 
     fprintf(stdout,
@@ -65,7 +64,7 @@ int main(int argc, char *argv[])
 
     struct memkind_config *test_cfg = memkind_config_new();
     if (!test_cfg) {
-        perror("memkind_config_new()");
+        fprintf(stderr, "Unable to create memkind cfg.\n");
         return 1;
     }
 
@@ -75,20 +74,17 @@ int main(int argc, char *argv[])
                                            MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
 
 
-    /* Create PMEM partition with specific configuration */
+    // Create PMEM partition with specific configuration
     err =  memkind_create_pmem_with_config(test_cfg, &pmem_kind);
     if (err) {
-        perror("memkind_create_pmem()");
-        fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
-                errno);
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     err = memkind_destroy_kind(pmem_kind);
     if (err) {
-        perror("memkind_destroy_kind()");
-        fprintf(stderr, "Unable to destroy pmem partition\n");
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     memkind_config_delete(test_cfg);

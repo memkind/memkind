@@ -33,17 +33,21 @@
 #include <memkind.h>
 
 #include <stdio.h>
-#include <errno.h>
-#include <sys/stat.h>
 
 static char *PMEM_DIR = "/tmp/";
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * 1024;
+
+static void print_err_message(int err)
+{
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+}
 
 int main(int argc, char **argv)
 {
     const size_t size = 512;
     struct memkind *pmem_kind = NULL;
-    struct stat st;
     const int arraySize = 100;
     char *ptr[100] = { NULL };
     int i = 0;
@@ -53,12 +57,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
-        if (stat(argv[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
-            fprintf(stderr, "%s : Invalid path to pmem kind directory\n", argv[1]);
-            return 1;
-        } else {
-            PMEM_DIR = argv[1];
-        }
+        PMEM_DIR = argv[1];
     }
 
     fprintf(stdout,
@@ -66,26 +65,22 @@ int main(int argc, char **argv)
 
     err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind);
     if (err) {
-        perror("memkind_create_pmem()");
-        fprintf(stderr, "Unable to create pmem partition err=%d errno=%d\n", err,
-                errno);
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     for (i = 0; i < arraySize; ++i) {
         if (i < 50) {
             ptr[i] = memkind_malloc(MEMKIND_DEFAULT, size);
             if (ptr[i] == NULL) {
-                perror("memkind_malloc()");
-                fprintf(stderr, "Unable to allocate memkind default\n");
-                return errno ? -errno : 1;
+                fprintf(stderr, "Unable to allocate memkind default.\n");
+                return 1;
             }
         } else {
             ptr[i] = memkind_malloc(pmem_kind, size);
             if (ptr[i] == NULL) {
-                perror("memkind_malloc()");
-                fprintf(stderr, "Unable to allocate pmem\n");
-                return errno ? -errno : 1;
+                fprintf(stderr, "Unable to allocate pmem.\n");
+                return 1;
             }
         }
     }
@@ -107,9 +102,8 @@ int main(int argc, char **argv)
 
     err = memkind_destroy_kind(pmem_kind);
     if (err) {
-        perror("memkind_destroy_kind()");
-        fprintf(stderr, "Unable to destroy pmem partition\n");
-        return errno ? -errno : 1;
+        print_err_message(err);
+        return 1;
     }
 
     fprintf(stdout, "Memory was successfully released.\n");
