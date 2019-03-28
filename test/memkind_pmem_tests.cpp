@@ -535,15 +535,15 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocIncreaseSizeNullKindVariant)
     int status;
 
     test1 = (char *)memkind_malloc(pmem_kind, size);
-    ASSERT_TRUE(test1 != nullptr);
+    ASSERT_NE(test1, nullptr);
 
     sprintf(test1, "%s", val);
 
     size *= 2;
     test2 = (char *)memkind_realloc(nullptr, test1, size);
-    ASSERT_TRUE(test2 != nullptr);
+    ASSERT_NE(test2, nullptr);
     status = memcmp(val, test2, sizeof(val));
-    ASSERT_TRUE(status == 0);
+    ASSERT_EQ(status, 0);
 
     memkind_free(pmem_kind, test2);
 }
@@ -579,15 +579,15 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocDecreaseSizeNullKindVariant)
     int status;
 
     test1 = (char *)memkind_malloc(pmem_kind, size);
-    ASSERT_TRUE(test1 != nullptr);
+    ASSERT_NE(test1, nullptr);
 
     sprintf(test1, "%s", val);
 
     size = 4;
     test2 = (char *)memkind_realloc(nullptr, test1, size);
-    ASSERT_TRUE(test2 != nullptr);
+    ASSERT_NE(test2, nullptr);
     status = memcmp(val, test2, size);
-    ASSERT_TRUE(status == 0);
+    ASSERT_EQ(status, 0);
 
     memkind_free(pmem_kind, test2);
 }
