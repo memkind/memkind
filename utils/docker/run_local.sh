@@ -27,6 +27,14 @@
 # and runs docker_run_build_and_test.sh script inside it
 set -e
 
+if [[ -z "$MEMKIND_HOST_WORKDIR" ]]; then
+    echo "MEMKIND_HOST_WORKDIR have to be set."
+    exit 1
+fi
+
+#need to be inline with Dockerfile WORKDIR
+MEMKIND_CONTAINTER_WORKDIR=/home/memkinduser/memkind/
+
 docker build --tag memkind_cont \
              --file Dockerfile.ubuntu-18.04 \
              --build-arg http_proxy=$http_proxy \
@@ -36,8 +44,7 @@ docker run --rm \
            --privileged=true \
            --env http_proxy=$http_proxy \
            --env https_proxy=$https_proxy \
-           --env GIT_SSL_NO_VERIFY=true \
-           --env PULL_REQUEST_NO="$PULL_REQUEST_NO" \
            --env CODECOV_TOKEN="$CODECOV_TOKEN" \
            --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
-           memkind_cont /docker_run_build_and_test.sh
+           --mount type=bind,source="$MEMKIND_HOST_WORKDIR",target="$MEMKIND_CONTAINTER_WORKDIR" \
+           memkind_cont utils/docker/docker_run_build_and_test.sh
