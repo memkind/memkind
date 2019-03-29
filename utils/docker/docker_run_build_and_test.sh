@@ -46,11 +46,7 @@ if [ -n "$PULL_REQUEST_NO" ]; then
 fi
 
 # building jemalloc and memkind
-./build_jemalloc.sh
-./autogen.sh
-./configure --prefix=/usr $GCOV_OPTION
-make -j "$(nproc --all)"
-make checkprogs -j "$(nproc --all)"
+./build.sh --prefix=/usr $GCOV_OPTION
 
 # installing memkind
 sudo make install
