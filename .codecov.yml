@@ -1,6 +1,9 @@
 ignore:
-  - "test/.*"
   - "autohbw/.*"
+  - "examples/autohbw*"
+  - "examples/*example*"
+  - "examples/memkind*"
+  - "test/.*"
 comment:
   layout: "diff"
   behaviour: default
