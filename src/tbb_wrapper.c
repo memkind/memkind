@@ -222,6 +222,17 @@ size_t tbb_pool_malloc_usable_size_with_kind_detect(void *ptr)
     return size;
 }
 
+static int tbb_update_memory_usage_policy(struct memkind *kind,
+                                          memkind_mem_usage_policy policy)
+{
+    int status = MEMKIND_SUCCESS;
+    if (policy != MEMKIND_MEM_USAGE_POLICY_DEFAULT) {
+        log_err("memkind_mem_usage_policy is not supported by TBB.");
+        status = MEMKIND_ERROR_OPERATION_FAILED;
+    }
+    return status;
+}
+
 static int tbb_destroy(struct memkind *kind)
 {
     bool pool_destroy_ret = pool_destroy(kind->priv);
@@ -264,4 +275,5 @@ void tbb_initialize(struct memkind *kind)
     kind->ops->free = tbb_pool_free;
     kind->ops->finalize = tbb_destroy;
     kind->ops->malloc_usable_size = tbb_pool_malloc_usable_size;
+    kind->ops->update_memory_usage_policy = tbb_update_memory_usage_policy;
 }

@@ -822,7 +822,7 @@ MEMKIND_EXPORT int memkind_create_pmem_with_config(struct memkind_config *cfg,
 {
     int status = memkind_create_pmem(cfg->pmem_dir, cfg->pmem_size, kind);
     if (MEMKIND_LIKELY(!status)) {
-        status = memkind_arena_update_memory_usage_policy(*kind, cfg->policy);
+        status = (*kind)->ops->update_memory_usage_policy(*kind, cfg->policy);
     }
 
     return status;
