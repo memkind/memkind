@@ -7,9 +7,10 @@ to build, test and optionally measure test coverage of any pull request to memki
 
 # Environment variables
 
-* **CODECOV_TOKEN** - Codecov token for memkind repository to upload the coverage results.
+* **MEMKIND_HOST_WORKDIR** - Defines the absolute path to memkind project root directory on host environment.
+    **This variable must be defined.**
 
-* **PULL_REQUEST_NO** - Number of pull request on memkind repository on GitHub.
+* **CODECOV_TOKEN** - Codecov token for memkind repository to upload the coverage results.
 
 * **TBB_LIBRARY_VERSION** - Intel Threading Building Blocks library version.
 For testing Threading Building Blocks, TBB library version tag must be passed as parameter,
@@ -30,3 +31,7 @@ One can use the script *run_local.sh* just to build and run tests.
 ```
 $ ./run_local.sh
 ```
+
+**Note:**
+
+Others class group must have write permission to MEMKIND_HOST_WORKDIR to use the run_local script.
