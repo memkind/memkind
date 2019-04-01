@@ -54,11 +54,18 @@ or
 
 ## Building
 The memkind library has a dependency on a related fork of jemalloc.
-Building and installing memkind can be as simple as typing the following while
-in the root directory of the source tree:
+Building and installing memkind in standard system location can be as simple as
+typing the following while in the root directory of the source tree:
 
     ./build.sh
     make install
+
+To install this library into **other locations**, you can use the prefix variable, e.g.:
+
+    ./build.sh prefix=/usr/
+    make install
+
+This will install files to /usr/lib, /usr/include, /usr/share/doc/, usr/share/man.
 
 ## Build Prerequisites
 
@@ -222,9 +229,10 @@ In memkind library heap management can be adjusted with MEMKIND_HEAP_MANAGER
 environment variable, which allows for switching to one of the available
 heap managers.
 Values:
-    JEMALLOC - sets the jemalloc heap manager
-    TBB - sets Intel Threading Building Blocks heap manager. This option requires installed
-    Intel Threading Building Blocks library.
+- JEMALLOC - sets the jemalloc heap manager
+- TBB - sets Intel Threading Building Blocks heap manager. This option requires installed
+Intel Threading Building Blocks library.
+
 If the MEMKIND_HEAP_MANAGER is not set then the jemalloc heap manager will be used by default.
 
 ## Testing
