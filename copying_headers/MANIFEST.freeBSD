@@ -118,6 +118,7 @@ test/dlopen_test.cpp
 test/draw_plots.py
 test/environ_err_hbw_malloc_test.cpp
 test/error_message_tests.cpp
+test/fragmentation/pmem_fragmentation.cpp
 test/freeing_memory_segfault_test.cpp
 test/gb_page_tests_bind_policy.cpp
 test/get_arena_test.cpp
