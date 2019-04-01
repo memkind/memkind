@@ -37,6 +37,7 @@
 /examples/memkind_allocated
 /examples/pmem_alignment
 /examples/pmem_and_default_kind
+/examples/pmem_config
 /examples/pmem_cpp_allocator
 /examples/pmem_detect_kind
 /examples/pmem_free_with_unknown_kind
