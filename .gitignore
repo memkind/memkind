@@ -82,6 +82,7 @@
 /test/environerr_hbw_malloc_test
 /test/environerr_test
 /test/filter_memkind
+/test/fragmentation_benchmark_pmem
 /test/freeing_memory_segfault_test
 /test/gb_page_tests_bind_policy
 /test/hello_hbw
