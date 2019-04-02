@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Jan 10 22:25:06 2019 -->
+<!-- CreationDate: Tue Apr  2 06:36:26 2019 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -28,6 +28,7 @@
 <a href="#MEMORY TYPES">MEMORY TYPES</a><br>
 <a href="#MEMORY BINDING POLICY">MEMORY BINDING POLICY</a><br>
 <a href="#MEMORY FLAGS">MEMORY FLAGS</a><br>
+<a href="#MEMORY USAGE POLICY">MEMORY USAGE POLICY</a><br>
 <a href="#ERRORS">ERRORS</a><br>
 <a href="#FILES">FILES</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
@@ -98,12 +99,30 @@ void *memkind_realloc(memkind_t</b> <i>kind</i><b>, void</b>
 void memkind_free(memkind_t</b> <i>kind</i><b>, void</b>
 <i>*ptr</i><b>); <br>
 size_t memkind_malloc_usable_size(memkind_t</b>
-<i>kind</i><b>, void</b> <i>*ptr</i><b>);</b></p>
+<i>kind</i><b>, void</b> <i>*ptr</i><b>); <br>
+memkind_t memkind_detect_kind(void</b>
+<i>*ptr</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>KIND
+CONFIGURATION MANAGEMENT: <br>
+struct memkind_config *memkind_config_new(); <br>
+void memkind_config_delete(struct memkind_config</b>
+<i>*cfg</i><b>); <br>
+void memkind_config_set_path(struct memkind_config</b>
+<i>*cfg</i><b>, const char</b> <i>*pmem_dir</i><b>); <br>
+void memkind_config_set_size(struct memkind_config</b>
+<i>*cfg</i><b>, size_t</b> <i>pmem_size</i><b>); <br>
+void memkind_config_set_memory_usage_policy(struct
+memkind_config</b> <i>*cfg</i><b>,
+memkind_mem_usage_policy</b> <i>policy</i><b>);</b></p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>KIND
 MANAGEMENT: <br>
 int memkind_create_pmem(const char</b> <i>*dir</i><b>,
 size_t</b> <i>max_size</i><b>, memkind_t</b>
+<i>*kind</i><b>); <br>
+int memkind_create_pmem_with_config(struct
+memkind_config</b> <i>*cfg</i><b>, memkind_t</b>
 <i>*kind</i><b>); <br>
 int memkind_destroy_kind(memkind_t</b> <i>kind</i><b>); <br>
 int memkind_check_available(memkind_t</b>
@@ -159,7 +178,8 @@ API&rsquo;s, except that the user must specify the
 <i>kind</i> of memory with the first argument to each
 function. See the <b>KINDS</b> section below for a full
 description of the implemented kinds. For file-backed kind
-of memory see <b>memkind_create_pmem</b>().</p>
+of memory see <b>memkind_create_pmem</b>() or
+<b>memkind_create_pmem_with_config</b>().</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_malloc</b>()
@@ -188,7 +208,7 @@ unchanged up to the lesser of the new and old sizes. If the
 new size is larger, the contents of the newly allocated
 portion of the memory are undefined. Upon success, the
 memory referenced by <i>ptr</i> is freed and a pointer to
-the newly allocated high bandwidth memory is returned.</p>
+the newly allocated memory is returned.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Note:
 memkind_realloc</b>() may move the memory allocation,
@@ -197,14 +217,26 @@ resulting in a different return value than <i>ptr</i>.</p>
 <p style="margin-left:11%; margin-top: 1em">If <i>ptr</i>
 is <i>NULL</i>, the <b>memkind_realloc</b>() function
 behaves identically to <b>memkind_malloc</b>() for the
-specified size. The address <i>ptr</i>, if not <i>NULL</i>,
-must have been returned by a previous call to
+specified size. If <i>size</i> is equal to zero, and
+<i>ptr</i> is not <i>NULL</i>, then the call is equivalent
+to <i>memkind_free(kind, ptr)</i> and <i>NULL</i> is
+returned. The address <i>ptr</i>, if not <i>NULL</i>, must
+have been returned by a previous call to
 <b>memkind_malloc</b>(), <b>memkind_calloc</b>(),
 <b>memkind_realloc</b>() or <b>memkind_posix_memalign</b>()
 with the same <i>kind</i> as specified to the call to
 <b>memkind_realloc</b>(). Otherwise, if
 <i>memkind_free(kind, ptr)</i> was called before, undefined
-behavior occurs.</p>
+behavior occurs. In cases where the kind is unknown in the
+context of the call to <b>memkind_realloc</b>() <i>NULL</i>,
+can be given as the <i>kind</i> specified to
+<b>memkind_realloc</b>(), but this will require a internal
+look up for correct kind. <b>Note:</b> The look up for
+<i>kind</i> could result in serious performance penalty,
+which can be avoided by specifying a correct <i>kind</i>. If
+<i>kind</i> is <i>NULL</i> and <i>ptr</i> is <i>NULL</i>,
+then <b>memkind_realloc</b>() returns <i>NULL</i> and sets
+<i>errno</i> to <b>EINVAL</b>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_posix_memalign</b>()
@@ -214,17 +246,33 @@ an even multiple of <i>alignment</i>, and returns the
 allocation in the value pointed to by <i>memptr</i>. The
 requested <i>alignment</i> must be a power of 2 at least as
 large as <i>sizeof(void*)</i>. If <i>size</i> is 0, then
-<b>memkind_posix_memalign</b>() returns <i>NULL</i>.</p>
+<b>memkind_posix_memalign</b>() returns 0, with a
+<i>NULL</i> returned in <i>memptr</i>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_malloc_usable_size</b>()
 function provides the same semantics as
 <b>malloc_usable_size</b>(3), but operates on specified
-<i>kind</i>.</p>
+<i>kind</i>. <b><br>
+Note:</b> In cases where the kind is unknown in the context
+of the call to <b>memkind_malloc_usable_size</b>()
+<i>NULL</i>, can be given as the <i>kind</i> specified to
+<b>memkind_malloc_usable_size</b>(), but this could require
+a internal look up for correct kind.
+<b>memkind_malloc_usable_size</b>() is supported by TBB heap
+manager described in <b>ENVIRONMENT</b> section since Intel
+TBB 2019 Update 4.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>Note:
-memkind_malloc_usable_size</b>() is not supported by TBB
-heap manager described in <b>ENVIRONMENT</b> section.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_detect_kind</b>()
+returns the kind associated with allocated memory referenced
+by <i>ptr</i>. This pointer must have been returned by a
+previous call to <b>memkind_malloc</b>(),
+<b>memkind_calloc</b>(), <b>memkind_realloc</b>() or
+<b>memkind_posix_memalign</b>(). If <i>ptr</i> is
+<i>NULL</i>, then <b>memkind_detect_kind</b>() returns
+<i>NULL</i>. <b>Note:</b> This function has non-trivial
+performance overhead.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_free</b>()
@@ -235,14 +283,59 @@ have been returned by a previous call to
 <b>memkind_realloc</b>() or <b>memkind_posix_memalign</b>().
 Otherwise, if <i>memkind_free(kind, ptr)</i> was already
 called before, undefined behavior occurs. If <i>ptr</i> is
-<i>NULL</i>, no operation is performed. The value of
-<b>MEMKIND_DEFAULT</b> can be given as the <i>kind</i> for
-all buffers allocated by a kind that leverages the jemalloc
-allocator. In cases where the kind is unknown in the context
-of the call to <b>memkind_free</b>() <i>NULL</i>, can be
-given as the <i>kind</i> specified to <b>memkind_free</b>()
-but this will require a look up that can be bypassed by
-specifying a non-zero value.</p>
+<i>NULL</i>, no operation is performed. In cases where the
+kind is unknown in the context of the call to
+<b>memkind_free</b>() <i>NULL</i>, can be given as the
+<i>kind</i> specified to <b>memkind_free</b>(), but this
+will require a internal look up for correct kind.
+<b>Note:</b> The look up for <i>kind</i> could result in
+serious performance penalty, which can be avoided by
+specifying a correct <i>kind</i>.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>KIND
+CONFIGURATION MANAGEMENT:</b> <br>
+The functions described in this section define a way to
+create, delete and update kind specific configuration.
+Except of <b>memkind_config_new</b>(), user must specify the
+memkind configuration with the first argument to each
+function. API described here is most useful with file-backed
+kind of memory, e.g.
+<b>memkind_create_pmem_with_config</b>() method.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_config_new</b>()
+creates the memkind configuration.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_config_delete</b>()
+deletes previously created memkind configuration, which must
+have been returned by a previous call to
+<b>memkind_config_new</b>().</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_config_set_path</b>()
+updates the memkind <i>pmem_dir</i> configuration parameter,
+which specifies directory path, where file-backed kind of
+memory will be created. <b>Note:</b> This function does not
+validate that <i>pmem_dir</i> specifies a valid path.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_config_set_size</b>()
+updates the memkind <i>pmem_size</i> configuration
+parameter, which allows to limit the file-backed kind memory
+partition. <b>Note:</b> This function does not validate that
+<i>pmem_size</i> is in valid range.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_config_set_memory_usage_policy</b>()
+updates the memkind <i>policy</i> configuration parameter,
+which allows to tune up memory utilization. The user should
+set the value based on the characteristics of application
+that is using the library (e.g. prioritize memory usage, CPU
+utilization), for more details about <i>policy</i> see the
+<b>MEMORY USAGE POLICY</b> section below. <b>Note:</b> This
+function does not validate that <i>policy</i> is in valid
+range.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>KIND
 MANAGEMENT:</b> <br>
@@ -285,6 +378,16 @@ successfully or an error code from the <b>ERRORS</b> section
 if not.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_create_pmem_with_config</b>()
+is a second function used to create a file-backed kind of
+memory. Function behaves simillar to
+<b>memkind_create_pmem</b>() but instead of passing
+<i>dir</i> and <i>max_size</i> arguments, it uses
+<i>config</i> param to specify characteristics of created
+file-backed kind of memory (see <b>KIND CONFIGURATION
+MANAGEMENT</b> section).</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_create_kind</b>()
 creates kind that allocates memory with specific memory
 type, memory binding policy and flags (see <b>MEMORY
@@ -299,15 +402,17 @@ error code from the <b>ERRORS</b> section if not.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_destroy_kind</b>()
 destroys previously created kind object, which must have
 been returned by a previous call to
-<b>memkind_create_pmem</b>() or
+<b>memkind_create_pmem</b>(),
+<b>memkind_create_pmem_with_config</b>() or
 <b>memkind_create_kind</b>(). Otherwise, or if
 <i>memkind_destroy_kind(kind)</i> was already called before,
 undefined behavior occurs. Note that, when the kind was
 returned by <b>memkind_create_kind</b>() all allocated
 memory must be freed before kind is destroyed, otherwise
 this will cause memory leak. When the kind was returned by
-<b>memkind_create_pmem</b>() all allocated memory will be
-freed after kind will be destroyed.</p>
+<b>memkind_create_pmem</b>() or
+<b>memkind_create_pmem_with_config</b>() all allocated
+memory will be freed after kind will be destroyed.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_check_available</b>()
@@ -612,6 +717,26 @@ MEMKIND_MASK_PAGE_SIZE_2MB</b></p>
 
 <p style="margin-left:22%;">Allocation backed by 2MB page
 size.</p>
+
+<h2>MEMORY USAGE POLICY
+<a name="MEMORY USAGE POLICY"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The available
+types of memory usage policy: <b><br>
+MEMKIND_MEM_USAGE_POLICY_DEFAULT</b></p>
+
+<p style="margin-left:22%;">Default memory usage
+policy.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE</b></p>
+
+<p style="margin-left:22%;">Conservative memory usage
+policy - prioritize memory usage at cost of performance.
+<b>Note:</b> Memory usage policies have no effect for TBB
+heap manager described in <b>ENVIRONMENT</b> section.</p>
 
 <h2>ERRORS
 <a name="ERRORS"></a>

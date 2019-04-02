@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Jan 10 22:25:06 2019 -->
+<!-- CreationDate: Tue Apr  2 06:36:25 2019 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -123,8 +123,11 @@ in a different return value than <i>ptr</i>.</p>
 <p style="margin-left:11%; margin-top: 1em">If <i>ptr</i>
 is <i>NULL</i>, the <b>hbw_realloc</b>() function behaves
 identically to <b>hbw_malloc</b>() for the specified size.
-The address <i>ptr</i>, if not <i>NULL</i>, was returned by
-a previous call to <b>hbw_malloc</b>(), <b>hbw_calloc</b>(),
+If <i>size</i> is equal to zero, and <i>ptr</i> is not
+<i>NULL</i>, then the call is equivalent to
+<i>hbw_free(ptr)</i> and <i>NULL</i> is returned. The
+address <i>ptr</i>, if not <i>NULL</i>, was returned by a
+previous call to <b>hbw_malloc</b>(), <b>hbw_calloc</b>(),
 <b>hbw_realloc</b>() or <b>hbw_posix_memalign</b>().
 Otherwise, or if <i>hbw_free(ptr)</i> was called before,
 undefined behavior occurs.</p>
@@ -152,7 +155,9 @@ that the allocation&rsquo;s base address is an even multiple
 of <i>alignment</i>, and returns the allocation in the value
 pointed to by <i>memptr</i>. The requested <i>alignment</i>
 must be a power of 2 at least as large as
-<i>sizeof(void*)</i>.</p>
+<i>sizeof(void*)</i>. If <i>size</i> is 0, then
+<b>hbw_posix_memalign</b>() returns 0, with a <i>NULL</i>
+returned in <i>memptr</i>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_posix_memalign_psize</b>()
