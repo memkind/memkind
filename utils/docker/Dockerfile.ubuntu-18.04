@@ -54,12 +54,3 @@ RUN chown -R $USER:sudo /home/$USER
 
 # Change user to $USER
 USER $USER
-
-# Copy scripts responsible for running tests to container
-COPY docker_install_tbb.sh /docker_install_tbb.sh
-COPY docker_run_build_and_test.sh /docker_run_build_and_test.sh
-COPY docker_run_coverage.sh /docker_run_coverage.sh
-
-# Set git user name and email to allow automatic merging
-RUN git config --global user.email "memkinduser@intel.com"
-RUN git config --global user.name $USER
