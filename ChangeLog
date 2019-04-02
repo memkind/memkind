@@ -1,3 +1,16 @@
+* Wed Apr 3 2019 Michal Biesek <michal.biesek@intel.com> v1.9.0
+- Provided a second function to create PMEM kind memkind_create_pmem_with_config()
+- Provided the memkind_detect_kind() function to recognize a kind from memory allocation
+- Provided memkind_config_set_memory_usage_policy() function
+  that modifies the default memory usage policy behavior
+- Provided the ability to pass a NULL kind to memkind_malloc_usable_size() and memkind_realloc()
+- Unified the memkind_realloc() behavior for all kinds
+- Added the support for the pool_msize() function to TBB
+- Extended build arch to ppc64, ppc64le, s390x
+- Removed disable-stats from used jemalloc
+- Fixed compilation under the Clang and rpm build configuration
+- Provided the support for Dockerfile
+
 * Mon Dec 10 2018 Michal Biesek <michal.biesek@intel.com> v1.8.0
 - Fixed error with realloc/free method with passing thread-specific cache flag
 - Fixed error with memkind_create_pmem(), if other PMEM kind was destroyed before
