@@ -29,7 +29,7 @@ features.  Memkind interface allows to create and control file-backed memory
 	* [Dependencies](#dependencies)
 	* [Kernel](#kernel)
 4. [PMEM Kind Usage](#pmem-kind-usage)
-5. [Kind Detection Mechanism](#kind-detection-mechanism)
+5. [The Detection Mechanism of the Kind](#the-detection-mechanism-of-the-kind)
 6. [Setting Logging Mechanism](#setting-logging-mechanism)
 7. [Setting Heap Manager](#setting-heap-manager)
 8. [Testing](#testing)
@@ -207,12 +207,21 @@ Application using memkind library supports managing a data placement:
 | PMEM           | PMEM kind                 |
 | DRAM           | e.g. MEMKIND_DEFAULT kind |
 
-## Kind Detection Mechanism
-One of notable features of memkind is detecting the correct kind of previously allocated memory.
-Operations like freeing or reallocating memory, which was previously allocated for different kinds
-could be unified.
+Currently, the PMEM kind is supported only by the jemalloc heap manager.
 
-For details, please see following
+## The Detection Mechanism of the Kind
+One of the notable features of the memkind is to detect the correct kind of previously allocated memory.
+
+| Operations                             | Memkind API function                  |
+|----------------------------------------|---------------------------------------|
+| Freeing memory                         | memkind_free(kind, ptr)               |
+| Reallocating memory                    | memkind_realloc(kind, ptr, size)      |
+| Obtaining the size of allocated memory | memkind_malloc_usable_size(kind, ptr) |
+
+Operations above could be unified for all used memory kinds
+by passing a NULL value as a kind to the functions mentioned above.
+
+For more details, please see the following
 [example](https://github.com/memkind/memkind/blob/master/examples/pmem_free_with_unknown_kind.c).
 
 **Important Notes:**
