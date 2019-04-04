@@ -353,6 +353,7 @@ EXTRA_DIST = CONTRIBUTING \
              jemalloc/test/unit/zero.c \
              jemalloc/test/unit/zero.sh \
              memkind-$(VERSION).spec \
+             memkind.pc.in \
              memkind.spec.mk \
              test/test.sh \
              utils/docker/Dockerfile.ubuntu-18.04 \
@@ -378,7 +379,10 @@ dist_man_MANS =  man/autohbw.7 \
                  man/pmemallocator.3 \
                  # end
 
-CLEANFILES = memkind-$(VERSION).spec
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = memkind.pc
+
+CLEANFILES = memkind-$(VERSION).spec pkgconfig_DATA
 DISTCLEANFILES = VERSION configure
 
 bin_PROGRAMS = memkind-hbw-nodes

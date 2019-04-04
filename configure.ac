@@ -169,7 +169,7 @@ AM_CONDITIONAL([HAVE_CXX11], [test "x$HAVE_CXX11" = x1])
 LT_PREREQ([2.2])
 LT_INIT
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile memkind.pc])
 
 AC_OUTPUT
 

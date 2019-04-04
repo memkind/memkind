@@ -108,3 +108,4 @@
 /test/trace_mechanism_test_helper
 /vs
 autom4te.cache/
+memkind.pc
