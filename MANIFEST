@@ -350,6 +350,7 @@ man/memkind_hbw.3
 man/memkind_hugetlb.3
 man/memkind_pmem.3
 man/pmemallocator.3
+memkind.pc.in
 memkind.spec.mk
 src/Makefile.mk
 src/hbwmalloc.c

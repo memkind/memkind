@@ -170,6 +170,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %{_includedir}/pmem_allocator.h
 %{_libdir}/lib%{namespace}.so
 %{_libdir}/libautohbw.so
+%{_libdir}/pkgconfig/memkind.pc
 %{_includedir}/%{namespace}.h
 %{_includedir}/%{internal_include}
 %{_includedir}/%{internal_include}/%{namespace}*.h
