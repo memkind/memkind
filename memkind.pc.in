@@ -1,0 +1,12 @@
+version=@VERSION@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: memkind
+Description: User Extensible Heap Manager
+URL: http://memkind.github.io/memkind
+Version: @VERSION@
+Cflags: -I${includedir}
+Libs: -L${libdir} -lmemkind

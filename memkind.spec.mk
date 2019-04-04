@@ -46,7 +46,7 @@ License: BSD-2-Clause
 Group: System Environment/Libraries
 URL: http://memkind.github.io/memkind
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: automake libtool gcc-c++ unzip
+BuildRequires: automake libtool gcc-c++ pkgconfig unzip
 %if %{defined suse_version}
 BuildRequires: libnuma-devel
 %else
@@ -170,6 +170,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %{_includedir}/pmem_allocator.h
 %{_libdir}/lib%{namespace}.so
 %{_libdir}/libautohbw.so
+%{_libdir}/pkgconfig/memkind.pc
 %{_includedir}/%{namespace}.h
 %{_includedir}/%{internal_include}
 %{_includedir}/%{internal_include}/%{namespace}*.h

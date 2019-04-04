@@ -46,6 +46,16 @@ AX_PTHREAD([LIBS="$PTHREAD_LIBS $LIBS" CFLAGS="$CFLAGS $PTHREAD_CFLAGS" CC="$PTH
 
 AM_PROG_CC_C_O
 
+#============================pkg-config========================================
+# Allow the pkg-config directory to be set
+AC_ARG_WITH(pkgconfigdir,
+            AC_HELP_STRING([--with-pkgconfigdir],
+            [Use the specified pkgconfig dir (default is libdir/pkgconfig)]),
+            [pkgconfigdir=${withval}],
+            [pkgconfigdir='${libdir}/pkgconfig'])
+
+AC_SUBST([pkgconfigdir])
+
 #============================tls===============================================
 # Check for thread local storage support
 AC_ARG_ENABLE([tls],
@@ -169,7 +179,7 @@ AM_CONDITIONAL([HAVE_CXX11], [test "x$HAVE_CXX11" = x1])
 LT_PREREQ([2.2])
 LT_INIT
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile memkind.pc])
 
 AC_OUTPUT
 

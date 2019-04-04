@@ -77,6 +77,7 @@ You will need to install required packages on the build system:
 * **libnuma-devel**
 * **libtool**
 * **numactl-devel**
+* **pkg-config**
 * **unzip**
 
 The configure scripts and gtest source code are distributed with the
