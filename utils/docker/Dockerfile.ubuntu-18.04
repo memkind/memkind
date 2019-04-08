@@ -36,9 +36,14 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     libnuma-dev \
     libtool \
     numactl \
+    python-pip \
+    python-setuptools \
     sudo \
     whois \
  && rm -rf /var/lib/apt/lists/*
+
+# Install pytest
+RUN pip install -U pytest
 
 # Add user
 ENV USER memkinduser
