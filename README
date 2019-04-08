@@ -21,22 +21,22 @@ features.  Memkind interface allows to create and control file-backed memory
 ## Contents
 
 1. [Interfaces](#interfaces)
-2. [Building](#building)
-	* [Build Prerequisites](#build-prerequisites)
+2. [Dependencies](#dependencies)
+3. [Building and Installing](#building-and-installing)
 	* [jemalloc](#jemalloc)
 	* [memkind library](#memkind-library)
-3. [Run Requirements](#run-requirements)
+4. [Run Requirements](#run-requirements)
 	* [Dependencies](#dependencies)
 	* [Kernel](#kernel)
-4. [PMEM Kind Usage](#pmem-kind-usage)
-5. [The Detection Mechanism of the Kind](#the-detection-mechanism-of-the-kind)
-6. [Setting Logging Mechanism](#setting-logging-mechanism)
-7. [Setting Heap Manager](#setting-heap-manager)
-8. [Testing](#testing)
-9. [Simulating High Bandwidth Memory](#simulating-high-bandwidth-memory)
-10. [Notes](#notes)
-11. [Status](#status)
-12. [Disclaimer](#disclaimer)
+5. [PMEM Kind Usage](#pmem-kind-usage)
+6. [The Detection Mechanism of the Kind](#the-detection-mechanism-of-the-kind)
+7. [Setting Logging Mechanism](#setting-logging-mechanism)
+8. [Setting Heap Manager](#setting-heap-manager)
+9. [Testing](#testing)
+10. [Simulating High Bandwidth Memory](#simulating-high-bandwidth-memory)
+11. [Notes](#notes)
+12. [Status](#status)
+13. [Disclaimer](#disclaimer)
 
 ## Interfaces
 The memkind library delivers two interfaces:
@@ -52,8 +52,31 @@ or
 
     man hbwmalloc
 
-## Building
+## Dependencies
+
+You will need to install required packages on the build system:
+
+* **autoconf**
+* **automake**
+* **gcc-c++**
+* **libnuma-devel**
+* **libtool**
+* **numactl-devel**
+* **unzip**
+
+## Building and Installing
+
 The memkind library has a dependency on a related fork of jemalloc.
+The configure scripts and gtest source code are distributed with the
+source tarball included in the source RPM, and this tarball is created
+with the memkind "make dist" target. In contrast to the distributed source
+tarball, the git repository does not include any generated files.
+For this reason some additional steps are required when building
+from a checkout of the git repo. Those steps include running
+the bash script called "autogen.sh" prior to configure.  This script
+will populate a VERSION file based on "git describe", and use
+autoreconf to generate a configure script.
+
 Building and installing memkind in standard system location can be as simple as
 typing the following while in the root directory of the source tree:
 
@@ -67,27 +90,11 @@ To install this library into **other locations**, you can use the prefix variabl
 
 This will install files to /usr/lib, /usr/include, /usr/share/doc/, usr/share/man.
 
-## Build Prerequisites
+See the output of:
 
-You will need to install required packages on the build system:
+    ./configure --help
 
-* **autoconf**
-* **automake**
-* **gcc-c++**
-* **libnuma-devel**
-* **libtool**
-* **numactl-devel**
-* **unzip**
-
-The configure scripts and gtest source code are distributed with the
-source tarball included in the source RPM, and this tarball is created
-with the memkind "make dist" target.  In contrast to the distributed source
-tarball, the git repository does not include any generated files.
-For this reason some additional steps are required when building
-from a checkout of the git repo.  Those steps include running
-the bash script called "autogen.sh" prior to configure.  This script
-will populate a VERSION file based on "git describe", and use
-autoreconf to generate a configure script.
+for more information about either the memkind or the jemalloc configuration options.
 
 ## jemalloc
 The jemalloc source was forked from jemalloc version 5.0.  This source tree
@@ -125,14 +132,6 @@ To configure, build and install memkind, you can follow this step-by-step instru
     ./configure
     make
     make install
-
-See the output of:
-
-    ./configure --help
-
-for more information about either the memkind or the jemalloc
-configuration options.  Some useful information about building with autotools
-can also be found in the [INSTALL](INSTALL) file.
 
 **Important Notes:**
 
