@@ -83,6 +83,26 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
           <h1 class="page-header">
             Blog
           </h1>
+<p class="lead">Release 1.9.0 is available</p><span class="post-date">Tue Apr 02 2019</span><p>I would like to announce memkind release <strong>1.9.0</strong>. Changes since 1.8.0:</p>
+<ul>
+<li>Wed Apr 03 2019 Michal Biesek <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#x3a;&#109;&#105;&#99;&#104;&#97;&#108;&#x2e;&#98;&#105;&#101;&#115;&#101;&#107;&#64;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;">&#109;&#105;&#99;&#104;&#97;&#108;&#x2e;&#98;&#105;&#101;&#115;&#101;&#107;&#64;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;</a> v1.9.0</li>
+</ul>
+<ul>
+<li>Provided a second function to create PMEM kind memkind_create_pmem_with_config()</li>
+<li>Provided the memkind_detect_kind() function to recognize a kind from memory allocation</li>
+<li>Provided memkind_config_set_memory_usage_policy() function that modifies the default memory usage policy behavior</li>
+<li>Provided the ability to pass a NULL kind to memkind_malloc_usable_size() and memkind_realloc()</li>
+<li>Unified the memkind_realloc() behavior for all kinds</li>
+<li>Added the support for the pool_msize() function to TBB</li>
+<li>Extended build arch to ppc64, ppc64le, s390x</li>
+<li>Removed disable-stats from used jemalloc</li>
+<li>Fixed compilation under the Clang and rpm build configuration</li>
+<li>Provided support for Dockerfile</li>
+</ul>
+<p>Sources are available on:
+<a href="https://github.com/memkind/memkind/releases/tag/v1.9.0">https://github.com/memkind/memkind/releases/tag/v1.9.0</a></p>
+<p>Best Regards,</p>
+<p><em>Michal Biesek</em></p>
 <p class="lead">Release 1.8.0 is available</p><span class="post-date">Tue Dec 11 2018</span><p>I would like to announce memkind release <strong>1.8.0</strong>. Changes since 1.7.0:</p>
 <ul>
 <li>Mon Dec 10 2018 Michal Biesek <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#x3a;&#109;&#105;&#99;&#104;&#97;&#108;&#x2e;&#98;&#105;&#101;&#115;&#101;&#107;&#64;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;">&#109;&#105;&#99;&#104;&#97;&#108;&#x2e;&#98;&#105;&#101;&#115;&#101;&#107;&#64;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;</a> v1.8.0</li>
