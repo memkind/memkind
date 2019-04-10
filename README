@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/memkind/memkind.svg)](https://travis-ci.org/memkind/memkind)
 [![MEMKIND version](https://img.shields.io/github/tag/memkind/memkind.svg)](https://github.com/memkind/memkind/releases/latest)
 [![Coverage Status](http://codecov.io/github/memkind/memkind/coverage.svg?branch=master)](http://codecov.io/gh/memkind/memkind?branch=master)
+[![Packaging status](https://repology.org/badge/tiny-repos/memkind.svg)](https://repology.org/project/memkind/versions)
 
 The memkind library is a user extensible heap manager built on top of
 jemalloc which enables control of memory characteristics and a
