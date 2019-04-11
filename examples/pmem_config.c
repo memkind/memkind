@@ -32,11 +32,13 @@
 
 #include <memkind.h>
 
+#include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
-static char *PMEM_DIR = "/tmp/";
+static char path[PATH_MAX] = "/tmp/";
 
 static void print_err_message(int err)
 {
@@ -53,14 +55,14 @@ int main(int argc, char *argv[])
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
-    } else if (argc == 2) {
-        PMEM_DIR = argv[1];
+    } else if (argc == 2 && (realpath(argv[1], path) == NULL)) {
+        fprintf(stderr, "Incorrect pmem_kind_dir_path %s\n", argv[1]);
+        return 1;
     }
 
     fprintf(stdout,
             "This example shows how to use custom configuration to create pmem kind."
-            "\nPMEM kind directory: %s\n",
-            PMEM_DIR);
+            "\nPMEM kind directory: %s\n", path);
 
     struct memkind_config *test_cfg = memkind_config_new();
     if (!test_cfg) {
@@ -68,7 +70,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    memkind_config_set_path(test_cfg, PMEM_DIR);
+    memkind_config_set_path(test_cfg, path);
     memkind_config_set_size(test_cfg, PMEM_MAX_SIZE);
     memkind_config_set_memory_usage_policy(test_cfg,
                                            MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);

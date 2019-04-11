@@ -32,9 +32,11 @@
 
 #include <memkind.h>
 
+#include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-static char *PMEM_DIR = "/tmp/";
+static char path[PATH_MAX]="/tmp/";
 
 #define MALLOC_SIZE 512U
 #define REALLOC_SIZE 2048U
@@ -111,17 +113,16 @@ int main(int argc, char *argv[])
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
-    } else if (argc == 2) {
-        PMEM_DIR = argv[1];
+    } else if (argc == 2 && (realpath(argv[1], path) == NULL)) {
+        fprintf(stderr, "Incorrect pmem_kind_dir_path %s\n", argv[1]);
+        return 1;
     }
 
     fprintf(stdout,
             "This example shows how to distinguish allocation from different kinds using detect kind function"
-            "\nPMEM kind directory: %s\n",
-            PMEM_DIR);
+            "\nPMEM kind directory: %s\n", path);
 
-
-    err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind);
+    err = memkind_create_pmem(path, 0, &pmem_kind);
     if (err) {
         print_err_message(err);
         return 1;

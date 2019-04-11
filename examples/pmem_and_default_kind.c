@@ -32,14 +32,16 @@
 
 #include <memkind.h>
 
+#include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <sys/resource.h>
 
 #define MB (1024 * 1024)
 #define HEAP_LIMIT_SIMULATE (1024 * MB)
 
-static char *PMEM_DIR = "/tmp/";
+static char path[PATH_MAX]="/tmp/";
 
 static void print_err_message(int err)
 {
@@ -59,7 +61,10 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
     } else if (argc == 2) {
-        PMEM_DIR = argv[1];
+        if (realpath(argv[1], path) == NULL) {
+            fprintf(stderr, "Incorrect pmem_kind_dir_path %s\n", argv[1]);
+            return 1;
+        }
     }
 
     // Operation below limit the current size of heap
@@ -77,10 +82,9 @@ int main(int argc, char *argv[])
 
     fprintf(stdout,
             "This example shows how to allocate memory using standard memory (MEMKIND_DEFAULT) "
-            "and file-backed kind of memory (PMEM).\nPMEM kind directory: %s\n",
-            PMEM_DIR);
+            "and file-backed kind of memory (PMEM).\nPMEM kind directory: %s\n", path);
 
-    err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind);
+    err = memkind_create_pmem(path, 0, &pmem_kind);
     if (err) {
         print_err_message(err);
         return 1;
