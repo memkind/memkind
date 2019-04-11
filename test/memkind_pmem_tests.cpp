@@ -1273,9 +1273,9 @@ static void *thread_func_kinds(void *arg)
     memkind_t pmem_thread_kind;
     int err = 0;
 
-    pthread_mutex_lock(&mutex);
-    pthread_cond_wait(&cond, &mutex);
-    pthread_mutex_unlock(&mutex);
+    EXPECT_TRUE(pthread_mutex_lock(&mutex) == 0);
+    EXPECT_TRUE(pthread_cond_wait(&cond, &mutex) == 0);
+    EXPECT_TRUE(pthread_mutex_unlock(&mutex) == 0);
 
     err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_thread_kind);
 
@@ -1324,7 +1324,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
     }
 
     sleep(1);
-    pthread_cond_broadcast(&cond);
+    err = pthread_cond_broadcast(&cond);
+    ASSERT_EQ(0, err);
 
     for (t = 0; t < nthreads; t++) {
         err = pthread_join(threads[t], nullptr);
@@ -1416,9 +1417,9 @@ static void *ptr[threadsNum][mallocCount] = { { nullptr } };
 static void *thread_func_FreeWithNullptr(void *arg)
 {
     int kindIndex = *(int *)arg;
-    pthread_mutex_lock(&mutex);
-    pthread_cond_wait(&cond, &mutex);
-    pthread_mutex_unlock(&mutex);
+    EXPECT_TRUE(pthread_mutex_lock(&mutex) == 0);
+    EXPECT_TRUE(pthread_cond_wait(&cond, &mutex) == 0);
+    EXPECT_TRUE(pthread_mutex_unlock(&mutex) == 0);
 
     for (int j = 0; j < mallocCount; ++j) {
         if (ptr[kindIndex][j] == nullptr) {
@@ -1434,9 +1435,9 @@ static void *thread_func_FreeWithNullptr(void *arg)
 static void *thread_func_FreeWithKind(void *arg)
 {
     int kindIndex = *(int *)arg;
-    pthread_mutex_lock(&mutex);
-    pthread_cond_wait(&cond, &mutex);
-    pthread_mutex_unlock(&mutex);
+    EXPECT_TRUE(pthread_mutex_lock(&mutex) == 0);
+    EXPECT_TRUE(pthread_cond_wait(&cond, &mutex) == 0);
+    EXPECT_TRUE(pthread_mutex_unlock(&mutex) == 0);
 
     for (int j = 0; j < mallocCount; ++j) {
         if (ptr[kindIndex][j] == nullptr) {
@@ -1451,13 +1452,14 @@ static void *thread_func_FreeWithKind(void *arg)
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkWithThreads)
 {
     const size_t allocSize = 512;
+    int err;
     TimerSysTime timer;
     double duration;
     pthread_t *threads = (pthread_t *)calloc(threadsNum, sizeof(pthread_t));
     ASSERT_NE(threads, nullptr);
 
     for (int i = 0; i < threadsNum; ++i) {
-        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &testKind[i]);
+        err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &testKind[i]);
         ASSERT_EQ(err, 0);
         ASSERT_NE(nullptr, testKind[i]);
         int j = 0;
@@ -1476,15 +1478,16 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkWithThreads)
     }
 
     for (int t = 0; t < threadsNum; t++) {
-        int err = pthread_create(&threads[t], nullptr, thread_func_FreeWithKind,
-                                 &threadIndex[t]);
+        err = pthread_create(&threads[t], nullptr, thread_func_FreeWithKind,
+                             &threadIndex[t]);
         ASSERT_EQ(0, err);
     }
 
     // sleep is here to ensure that all threads start at one the same time
     sleep(1);
     timer.start();
-    pthread_cond_broadcast(&cond);
+    err = pthread_cond_broadcast(&cond);
+    ASSERT_EQ(0, err);
     for (int t = 0; t < threadsNum; ++t) {
         int err = pthread_join(threads[t], nullptr);
         ASSERT_EQ(0, err);
@@ -1504,17 +1507,18 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkWithThreads)
     }
 
     for (int t = 0; t < threadsNum; ++t) {
-        int err = pthread_create(&threads[t], nullptr, thread_func_FreeWithNullptr,
-                                 &threadIndex[t]);
+        err = pthread_create(&threads[t], nullptr, thread_func_FreeWithNullptr,
+                             &threadIndex[t]);
         ASSERT_EQ(0, err);
     }
 
     // sleep is here to ensure that all threads start at one the same time
     sleep(1);
     timer.start();
-    pthread_cond_broadcast(&cond);
+    err = pthread_cond_broadcast(&cond);
+    ASSERT_EQ(0, err);
     for (int t = 0; t < threadsNum; t++) {
-        int err = pthread_join(threads[t], nullptr);
+        err = pthread_join(threads[t], nullptr);
         ASSERT_EQ(0, err);
     }
 
@@ -1522,7 +1526,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkWithThreads)
     printf("Free time with implicitly kind: %f\n", duration);
 
     for (int i = 0; i < threadsNum; ++i) {
-        int err = memkind_destroy_kind(testKind[i]);
+        err = memkind_destroy_kind(testKind[i]);
         ASSERT_EQ(0, err);
     }
     free(threads);
