@@ -340,7 +340,8 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
     }
 #endif
 
-    pthread_mutex_lock(&arena_registry_write_lock);
+    if (pthread_mutex_lock(&arena_registry_write_lock) != 0)
+        assert(0 && "failed to acquire mutex");
     unsigned i = 0;
     kind->arena_zero = UINT_MAX;
     for(i = 0; i<kind->arena_map_len; i++) {
@@ -368,7 +369,8 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
     }
 
 exit:
-    pthread_mutex_unlock(&arena_registry_write_lock);
+    if (pthread_mutex_unlock(&arena_registry_write_lock) != 0)
+        assert(0 && "failed to release mutex");
     return err;
 }
 
@@ -391,7 +393,8 @@ MEMKIND_EXPORT int memkind_arena_destroy(struct memkind *kind)
 
     if (kind->arena_map_len) {
 
-        pthread_mutex_lock(&arena_registry_write_lock);
+        if (pthread_mutex_lock(&arena_registry_write_lock) != 0)
+            assert(0 && "failed to acquire mutex");
 
         for (i = 0; i < kind->arena_map_len; ++i) {
             snprintf(cmd, 128, "arena.%u.destroy", kind->arena_zero + i);
@@ -399,7 +402,8 @@ MEMKIND_EXPORT int memkind_arena_destroy(struct memkind *kind)
             arena_registry_g[kind->arena_zero + i] = NULL;
         }
 
-        pthread_mutex_unlock(&arena_registry_write_lock);
+        if (pthread_mutex_unlock(&arena_registry_write_lock) != 0)
+            assert(0 && "failed to release mutex");
 
 #ifdef MEMKIND_TLS
         if (kind->ops->get_arena == memkind_thread_get_arena) {

@@ -96,19 +96,21 @@ int main(int argc, char *argv[])
         args[t]->ptr = &pmem_tint[t][0];
         args[t]->kind = pmem_kind_unlimited;
 
-        err = pthread_create(&pmem_threads[t], NULL, thread_onekind, (void *)args[t]);
-        if (err) {
+        if (pthread_create(&pmem_threads[t], NULL, thread_onekind,
+                           (void *)args[t])!= 0) {
             fprintf(stderr, "Unable to create a thread.\n");
             return 1;
         }
     }
 
     sleep(1);
-    pthread_cond_broadcast(&cond);
+    if (pthread_cond_broadcast(&cond) != 0) {
+        fprintf(stderr, "Unable to broadcast a condition.\n");
+        return 1;
+    }
 
     for (t = 0; t < NUM_THREADS; t++) {
-        err = pthread_join(pmem_threads[t], NULL);
-        if (err) {
+        if (pthread_join(pmem_threads[t], NULL) != 0) {
             fprintf(stderr, "Thread join failed.\n");
             return 1;
         }
@@ -137,9 +139,18 @@ void *thread_onekind(void *arg)
     struct arg_struct *args = (struct arg_struct *)arg;
     int i;
 
-    pthread_mutex_lock(&mutex);
-    pthread_cond_wait(&cond, &mutex);
-    pthread_mutex_unlock(&mutex);
+    if (pthread_mutex_lock(&mutex) != 0) {
+        fprintf(stderr, "Failed to acquire mutex.\n");
+        return NULL;
+    }
+    if (pthread_cond_wait(&cond, &mutex) != 0) {
+        fprintf(stderr, "Failed to block mutex on condition.\n");
+        return NULL;
+    }
+    if (pthread_mutex_unlock(&mutex) != 0) {
+        fprintf(stderr, "Failed to release mutex.\n");
+        return NULL;
+    }
 
     // Lets alloc int and put there thread ID
     for (i = 0; i < NUM_ALLOCS; i++) {

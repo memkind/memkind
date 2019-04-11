@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Intel Corporation.
+ * Copyright (C) 2015 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -250,12 +250,14 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr,
         assert(0 && "failed to acquire mutex");
 
     if (priv->max_size != 0 && (size_t)priv->offset + size > priv->max_size) {
-        pthread_mutex_unlock(&priv->pmem_lock);
+        if (pthread_mutex_unlock(&priv->pmem_lock) != 0)
+            assert(0 && "failed to release mutex");
         return MAP_FAILED;
     }
 
     if ((errno = posix_fallocate(priv->fd, priv->offset, (off_t)size)) != 0) {
-        pthread_mutex_unlock(&priv->pmem_lock);
+        if (pthread_mutex_unlock(&priv->pmem_lock) != 0)
+            assert(0 && "failed to release mutex");
         return MAP_FAILED;
     }
 
@@ -264,7 +266,8 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr,
         priv->offset += size;
     }
 
-    pthread_mutex_unlock(&priv->pmem_lock);
+    if (pthread_mutex_unlock(&priv->pmem_lock) != 0)
+        assert(0 && "failed to release mutex");
 
     return result;
 }
