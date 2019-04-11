@@ -32,9 +32,11 @@
 
 #include <memkind.h>
 
+#include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-static char *PMEM_DIR = "/tmp/";
+static char path[PATH_MAX]="/tmp/";
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * 1024;
 
 static void print_err_message(int err)
@@ -56,14 +58,15 @@ int main(int argc, char **argv)
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
-    } else if (argc == 2) {
-        PMEM_DIR = argv[1];
+    } else if (argc == 2 && (realpath(argv[1], path) == NULL)) {
+        fprintf(stderr, "Incorrect pmem_kind_dir_path %s\n", argv[1]);
+        return 1;
     }
 
     fprintf(stdout,
             "This example shows how to use memkind_free with unknown kind as a parameter.\n");
 
-    err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind);
+    err = memkind_create_pmem(path, PMEM_PART_SIZE, &pmem_kind);
     if (err) {
         print_err_message(err);
         return 1;

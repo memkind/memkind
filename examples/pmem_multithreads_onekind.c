@@ -32,6 +32,7 @@
 
 #include <memkind.h>
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -39,7 +40,7 @@
 
 #define NUM_THREADS 10
 #define NUM_ALLOCS 100
-static char *PMEM_DIR = "/tmp/";
+static char path[PATH_MAX]="/tmp/";
 
 static void print_err_message(int err)
 {
@@ -67,17 +68,17 @@ int main(int argc, char *argv[])
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
-    } else if (argc == 2) {
-        PMEM_DIR = argv[1];
+    } else if (argc == 2 && (realpath(argv[1], path) == NULL)) {
+        fprintf(stderr, "Incorrect pmem_kind_dir_path %s\n", argv[1]);
+        return 1;
     }
 
     fprintf(stdout,
             "This example shows how to use multithreading with one main pmem kind."
-            "\nPMEM kind directory: %s\n",
-            PMEM_DIR);
+            "\nPMEM kind directory: %s\n", path);
 
     // Create PMEM partition with unlimited size
-    err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind_unlimited);
+    err = memkind_create_pmem(path, 0, &pmem_kind_unlimited);
     if (err) {
         print_err_message(err);
         return 1;

@@ -32,6 +32,7 @@
 
 #include <memkind.h>
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -40,7 +41,7 @@
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 #define NUM_THREADS 10
 
-static char *PMEM_DIR = "/tmp/";
+static char path[PATH_MAX]="/tmp/";
 
 void *thread_ind(void *arg);
 
@@ -59,14 +60,14 @@ int main(int argc, char *argv[])
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
-    } else if (argc == 2) {
-        PMEM_DIR = argv[1];
+    } else if (argc == 2 && (realpath(argv[1], path) == NULL)) {
+        fprintf(stderr, "Incorrect pmem_kind_dir_path %s\n", argv[1]);
+        return 1;
     }
 
     fprintf(stdout,
             "This example shows how to use multithreading with independent pmem kinds."
-            "\nPMEM kind directory: %s\n",
-            PMEM_DIR);
+            "\nPMEM kind directory: %s\n", path);
 
     pthread_t pmem_threads[NUM_THREADS];
     int t;
@@ -114,7 +115,7 @@ void *thread_ind(void *arg)
         return NULL;
     }
 
-    int err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
+    int err = memkind_create_pmem(path, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
         print_err_message(err);
         return NULL;
