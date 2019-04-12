@@ -32,6 +32,7 @@
 
 #include <memkind.h>
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -39,7 +40,7 @@
 
 #define NUM_THREADS 10
 #define NUM_ALLOCS 100
-static char *PMEM_DIR = "/tmp/";
+static char path[PATH_MAX]="/tmp/";
 
 static void print_err_message(int err)
 {
@@ -67,17 +68,17 @@ int main(int argc, char *argv[])
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
-    } else if (argc == 2) {
-        PMEM_DIR = argv[1];
+    } else if (argc == 2 && (realpath(argv[1], path) == NULL)) {
+        fprintf(stderr, "Incorrect pmem_kind_dir_path %s\n", argv[1]);
+        return 1;
     }
 
     fprintf(stdout,
             "This example shows how to use multithreading with one main pmem kind."
-            "\nPMEM kind directory: %s\n",
-            PMEM_DIR);
+            "\nPMEM kind directory: %s\n", path);
 
     // Create PMEM partition with unlimited size
-    err = memkind_create_pmem(PMEM_DIR, 0, &pmem_kind_unlimited);
+    err = memkind_create_pmem(path, 0, &pmem_kind_unlimited);
     if (err) {
         print_err_message(err);
         return 1;
@@ -96,19 +97,21 @@ int main(int argc, char *argv[])
         args[t]->ptr = &pmem_tint[t][0];
         args[t]->kind = pmem_kind_unlimited;
 
-        err = pthread_create(&pmem_threads[t], NULL, thread_onekind, (void *)args[t]);
-        if (err) {
+        if (pthread_create(&pmem_threads[t], NULL, thread_onekind,
+                           (void *)args[t])!= 0) {
             fprintf(stderr, "Unable to create a thread.\n");
             return 1;
         }
     }
 
     sleep(1);
-    pthread_cond_broadcast(&cond);
+    if (pthread_cond_broadcast(&cond) != 0) {
+        fprintf(stderr, "Unable to broadcast a condition.\n");
+        return 1;
+    }
 
     for (t = 0; t < NUM_THREADS; t++) {
-        err = pthread_join(pmem_threads[t], NULL);
-        if (err) {
+        if (pthread_join(pmem_threads[t], NULL) != 0) {
             fprintf(stderr, "Thread join failed.\n");
             return 1;
         }
@@ -137,9 +140,18 @@ void *thread_onekind(void *arg)
     struct arg_struct *args = (struct arg_struct *)arg;
     int i;
 
-    pthread_mutex_lock(&mutex);
-    pthread_cond_wait(&cond, &mutex);
-    pthread_mutex_unlock(&mutex);
+    if (pthread_mutex_lock(&mutex) != 0) {
+        fprintf(stderr, "Failed to acquire mutex.\n");
+        return NULL;
+    }
+    if (pthread_cond_wait(&cond, &mutex) != 0) {
+        fprintf(stderr, "Failed to block mutex on condition.\n");
+        return NULL;
+    }
+    if (pthread_mutex_unlock(&mutex) != 0) {
+        fprintf(stderr, "Failed to release mutex.\n");
+        return NULL;
+    }
 
     // Lets alloc int and put there thread ID
     for (i = 0; i < NUM_ALLOCS; i++) {

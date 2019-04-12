@@ -32,6 +32,7 @@
 
 #include <memkind.h>
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -40,7 +41,7 @@
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 #define NUM_THREADS 10
 
-static char *PMEM_DIR = "/tmp/";
+static char path[PATH_MAX]="/tmp/";
 
 void *thread_ind(void *arg);
 
@@ -56,38 +57,37 @@ static void print_err_message(int err)
 
 int main(int argc, char *argv[])
 {
-    int err = 0;
-
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [pmem_kind_dir_path]\n", argv[0]);
         return 1;
-    } else if (argc == 2) {
-        PMEM_DIR = argv[1];
+    } else if (argc == 2 && (realpath(argv[1], path) == NULL)) {
+        fprintf(stderr, "Incorrect pmem_kind_dir_path %s\n", argv[1]);
+        return 1;
     }
 
     fprintf(stdout,
             "This example shows how to use multithreading with independent pmem kinds."
-            "\nPMEM kind directory: %s\n",
-            PMEM_DIR);
+            "\nPMEM kind directory: %s\n", path);
 
     pthread_t pmem_threads[NUM_THREADS];
     int t;
 
     // Create many independent threads
     for (t = 0; t < NUM_THREADS; t++) {
-        err = pthread_create(&pmem_threads[t], NULL, thread_ind, NULL);
-        if (err) {
+        if (pthread_create(&pmem_threads[t], NULL, thread_ind, NULL) != 0) {
             fprintf(stderr, "Unable to create a thread.\n");
             return 1;
         }
     }
 
     sleep(1);
-    pthread_cond_broadcast(&cond);
+    if (pthread_cond_broadcast(&cond) != 0) {
+        fprintf(stderr, "Unable to broadcast a condition.\n");
+        return 1;
+    }
 
     for (t = 0; t < NUM_THREADS; t++) {
-        err = pthread_join(pmem_threads[t], NULL);
-        if (err) {
+        if (pthread_join(pmem_threads[t], NULL) != 0) {
             fprintf(stderr, "Thread join failed.\n");
             return 1;
         }
@@ -102,11 +102,20 @@ void *thread_ind(void *arg)
 {
     struct memkind *pmem_kind;
 
-    pthread_mutex_lock(&mutex);
-    pthread_cond_wait(&cond, &mutex);
-    pthread_mutex_unlock(&mutex);
+    if (pthread_mutex_lock(&mutex) != 0) {
+        fprintf(stderr, "Failed to acquire mutex.\n");
+        return NULL;
+    }
+    if (pthread_cond_wait(&cond, &mutex) != 0) {
+        fprintf(stderr, "Failed to block mutex on condition.\n");
+        return NULL;
+    }
+    if (pthread_mutex_unlock(&mutex) != 0) {
+        fprintf(stderr, "Failed to release mutex.\n");
+        return NULL;
+    }
 
-    int err = memkind_create_pmem(PMEM_DIR, PMEM_MAX_SIZE, &pmem_kind);
+    int err = memkind_create_pmem(path, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
         print_err_message(err);
         return NULL;
