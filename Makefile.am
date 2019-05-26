@@ -46,7 +46,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
 
 
 libmemkind_la_LIBADD = jemalloc/lib/libjemalloc_pic.a
-libmemkind_la_LDFLAGS = -version-info 0:1:0 -ldl
+libmemkind_la_LDFLAGS = -version-info 0:1:0 -ldl -lrt
 include_HEADERS = include/hbw_allocator.h \
                   include/hbwmalloc.h \
                   include/memkind.h \
