@@ -233,6 +233,13 @@ void *hbw_realloc(void *ptr, size_t size);
  */
 void hbw_free(void *ptr);
 
+/* The hbw_malloc_usable_size() function returns the number of usable bytes
+ * in the block pointed to by ptr, a pointer to a block of memory
+ * allocated by hbw_malloc(), hbw_calloc(), hbw_realloc(), hbw_posix_memalign(), or
+ * hbw_posix_memalign_psize() or a related function.
+ */
+size_t hbw_malloc_usable_size (void *ptr);
+
 #ifdef __cplusplus
 }
 #endif

@@ -295,3 +295,8 @@ MEMKIND_EXPORT void hbw_free(void *ptr)
 {
     memkind_free(0, ptr);
 }
+
+MEMKIND_EXPORT size_t hbw_malloc_usable_size (void *ptr)
+{
+	return memkind_malloc_usable_size (0, ptr);
+}
