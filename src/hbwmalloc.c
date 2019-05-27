@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -294,4 +294,9 @@ MEMKIND_EXPORT void *hbw_realloc(void *ptr, size_t size)
 MEMKIND_EXPORT void hbw_free(void *ptr)
 {
     memkind_free(0, ptr);
+}
+
+MEMKIND_EXPORT size_t hbw_malloc_usable_size(void *ptr)
+{
+    return memkind_malloc_usable_size(0, ptr);
 }
