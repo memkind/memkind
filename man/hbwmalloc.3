@@ -44,6 +44,8 @@ functionality is considered as stable API (STANDARD API).
 .br
 .BI "void hbw_free(void " "*ptr" );
 .br
+.BI "size_t hbw_malloc_usable_size(void " "*ptr" );
+.br
 .BI "int hbw_posix_memalign(void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
 .br
 .BI "int hbw_posix_memalign_psize(void " "**memptr" ", size_t " "alignment" ", size_t " "size" ", hbw_pagesize_t " "pagesize" );
@@ -175,6 +177,17 @@ or
 Otherwise, if
 .I hbw_free(ptr)
 was called before, undefined behavior occurs.
+.PP
+.BR hbw_malloc_usable_size ()
+returns the number of usable bytes in the block pointed to by
+.IR "ptr" ,
+a pointer to a block of memory allocated by
+.BR hbw_malloc (),
+.BR hbw_calloc (),
+.BR hbw_realloc (),
+.BR hbw_posix_memalign (),
+or
+.BR hbw_posix_memalign_psize ().
 .PP
 .BR hbw_posix_memalign ()
 allocates
