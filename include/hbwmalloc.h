@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -232,6 +232,13 @@ void *hbw_realloc(void *ptr, size_t size);
  * undefined behavior occurs.
  */
 void hbw_free(void *ptr);
+
+/*
+ * Returns the number of usable bytes in the block pointed to by ptr, a pointer
+ * to a block of memory allocated by hbw_malloc(), hbw_calloc(), hbw_realloc(),
+ * hbw_posix_memalign(), or hbw_posix_memalign_psize().
+ */
+size_t hbw_malloc_usable_size(void *ptr);
 
 #ifdef __cplusplus
 }

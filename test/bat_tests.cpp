@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -430,6 +430,85 @@ TEST_F(BATest, test_TC_MEMKIND_free_ext_MEMKIND_GBTLB_4096_bytes)
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_CheckAvailable)
 {
     ASSERT_EQ(0, hbw_check_available());
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbw_malloc_usable_size_NULL_0bytes)
+{
+    ASSERT_EQ(0U, hbw_malloc_usable_size(NULL));
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbw_malloc_usable_size_hbw_malloc_16bytes)
+{
+    void *ptr = hbw_malloc (16);
+    ASSERT_NE(nullptr, ptr);
+    ASSERT_GE(hbw_malloc_usable_size(ptr), 16U);
+    hbw_free(ptr);
+}
+
+TEST_F(BATest,
+       test_TC_MEMKIND_memkind_malloc_usable_size_memkind_malloc_16bytes_def_kind)
+{
+    void *ptr = memkind_malloc(MEMKIND_DEFAULT, 16);
+    ASSERT_NE(nullptr, ptr);
+    ASSERT_GE(memkind_malloc_usable_size(MEMKIND_DEFAULT, ptr), 16U);
+    memkind_free(MEMKIND_DEFAULT, ptr);
+}
+
+TEST_F(BATest,
+       test_TC_MEMKIND_hbw_malloc_usable_size_hbw_calloc_16bytes_16bytes)
+{
+    void *ptr = hbw_calloc(16, 16);
+    ASSERT_NE(nullptr, ptr);
+    ASSERT_GE(hbw_malloc_usable_size(ptr), 16U*16U);
+    hbw_free(ptr);
+}
+
+TEST_F(BATest,
+       test_TC_MEMKIND_memkind_malloc_usable_size_memkind_calloc_16bytes_16bytes_def_kind)
+{
+    void *ptr = memkind_calloc(MEMKIND_DEFAULT, 16, 16);
+    ASSERT_NE(nullptr, ptr);
+    ASSERT_GE(memkind_malloc_usable_size(MEMKIND_DEFAULT, ptr), 16U*16U);
+    memkind_free(MEMKIND_DEFAULT, ptr);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbw_malloc_usable_size_hbw_realloc_1024bytes)
+{
+    void *ptr = hbw_realloc(NULL, 1024);
+    ASSERT_NE(nullptr, ptr);
+    ASSERT_GE(hbw_malloc_usable_size(ptr), 1024U);
+    hbw_free(ptr);
+}
+
+TEST_F(BATest,
+       test_TC_MEMKIND_memkind_malloc_usable_size_memkind_realloc_1024bytes_def_kind)
+{
+    void *ptr = memkind_realloc(MEMKIND_DEFAULT, NULL, 1024);
+    ASSERT_NE(nullptr, ptr);
+    ASSERT_GE(memkind_malloc_usable_size(MEMKIND_DEFAULT, ptr), 1024U);
+    memkind_free(MEMKIND_DEFAULT, ptr);
+}
+
+TEST_F(BATest,
+       test_TC_MEMKIND_hbw_malloc_usable_size_hbw_posix_memalign_32bytes)
+{
+    void *ptr = NULL;
+    int res = hbw_posix_memalign(&ptr, 64, 32);
+    ASSERT_EQ(0, res);
+    ASSERT_NE(nullptr, ptr);
+    ASSERT_GE(hbw_malloc_usable_size(ptr), 32U);
+    hbw_free(ptr);
+}
+
+TEST_F(BATest,
+       test_TC_MEMKIND_memkind_malloc_usable_size_memkind_posix_memalign_32bytes_def_kind)
+{
+    void *ptr = NULL;
+    int res = memkind_posix_memalign(MEMKIND_DEFAULT, &ptr, 64, 32);
+    ASSERT_EQ(0, res);
+    ASSERT_NE(nullptr, ptr);
+    ASSERT_GE(memkind_malloc_usable_size(MEMKIND_DEFAULT, ptr), 32U);
+    memkind_free(MEMKIND_DEFAULT, ptr);
 }
 
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_Policy)
