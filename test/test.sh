@@ -233,6 +233,8 @@ if [[ $ret == "" ]]; then
     TEST_PREFIX="numactl --membind=0 --cpunodebind=$MEMKIND_HBW_NODES %s"
 fi
 
+export MEMKIND_DAX_KMEM_NODES=1
+
 OPTIND=1
 
 while getopts "T:c:f:l:hdmsx:p:" opt; do

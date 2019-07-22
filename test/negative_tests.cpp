@@ -108,17 +108,6 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_incorrect_mask)
     ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
 }
 
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_create_kind_DEFAULT_BIND_LOCAL)
-{
-    memkind_t kind;
-    int ret = memkind_create_kind(
-                  MEMKIND_MEMTYPE_DEFAULT,
-                  MEMKIND_POLICY_BIND_LOCAL,
-                  memkind_bits_t(),
-                  &kind);
-    ASSERT_EQ(ret, MEMKIND_ERROR_INVALID);
-}
-
 TEST_F(NegativeTest,
        test_TC_MEMKIND_Negative_create_kind_DEFAULT_BIND_LOCAL_PAGE_SIZE_2MB)
 {
