@@ -32,6 +32,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind.c \
                         src/memkind_arena.c \
                         src/memkind_bandwidth.c \
+                        src/memkind_dax_kmem.c \
                         src/memkind_default.c \
                         src/memkind_gbtlb.c \
                         src/memkind_hbw.c \
@@ -56,6 +57,7 @@ include_HEADERS = include/hbw_allocator.h \
 noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_bandwidth.h \
+                  include/memkind/internal/memkind_dax_kmem.h \
                   include/memkind/internal/memkind_default.h \
                   include/memkind/internal/memkind_gbtlb.h \
                   include/memkind/internal/memkind_hbw.h \
@@ -374,6 +376,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind-hbw-nodes.1 \
                  man/memkind.3 \
                  man/memkind_arena.3 \
+                 man/memkind_dax_kmem.3 \
                  man/memkind_default.3 \
                  man/memkind_hbw.3 \
                  man/memkind_hugetlb.3 \
