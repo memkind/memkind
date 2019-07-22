@@ -420,6 +420,14 @@ TEST_F(BATest,
     memkind_free(0, ptr);
 }
 
+TEST_F(BATest,
+       test_TC_MEMKIND_free_MEMKIND_DAX_KMEM_free_with_NULL_kind_4096_bytes)
+{
+    void *ptr = memkind_malloc(MEMKIND_DAX_KMEM, 4096);
+    ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";
+    memkind_free(0, ptr);
+}
+
 TEST_F(BATest, test_TC_MEMKIND_free_ext_MEMKIND_GBTLB_4096_bytes)
 {
     HugePageOrganizer huge_page_organizer(1000);
