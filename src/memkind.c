@@ -32,6 +32,7 @@
 #include <memkind/internal/memkind_hbw.h>
 #include <memkind/internal/memkind_regular.h>
 #include <memkind/internal/memkind_gbtlb.h>
+#include <memkind/internal/memkind_dax_kmem.h>
 #include <memkind/internal/memkind_pmem.h>
 #include <memkind/internal/memkind_interleave.h>
 #include <memkind/internal/memkind_private.h>
@@ -154,6 +155,13 @@ static struct memkind MEMKIND_HBW_INTERLEAVE_STATIC = {
     .init_once = PTHREAD_ONCE_INIT,
 };
 
+static struct memkind MEMKIND_DAX_KMEM_STATIC = {
+    .ops = &MEMKIND_DAX_KMEM_OPS,
+    .partition = MEMKIND_PARTITION_DAX_KMEM,
+    .name = "memkind_dax_kmem",
+    .init_once = PTHREAD_ONCE_INIT,
+};
+
 static struct memkind MEMKIND_REGULAR_STATIC = {
     .ops = &MEMKIND_REGULAR_OPS,
     .partition = MEMKIND_PARTITION_REGULAR,
@@ -181,6 +189,7 @@ MEMKIND_EXPORT struct memkind *MEMKIND_GBTLB = &MEMKIND_GBTLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_INTERLEAVE =
         &MEMKIND_HBW_INTERLEAVE_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_REGULAR = &MEMKIND_REGULAR_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM = &MEMKIND_DAX_KMEM_STATIC;
 
 struct memkind_registry {
     struct memkind *partition_map[MEMKIND_MAX_KIND];
@@ -204,6 +213,7 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_REGULAR] = &MEMKIND_REGULAR_STATIC,
         [MEMKIND_PARTITION_HBW_ALL] = &MEMKIND_HBW_ALL_STATIC,
         [MEMKIND_PARTITION_HBW_ALL_HUGETLB] = &MEMKIND_HBW_ALL_HUGETLB_STATIC,
+        [MEMKIND_PARTITION_DAX_KMEM] = &MEMKIND_DAX_KMEM_STATIC,
     },
     MEMKIND_NUM_BASE_KIND,
     PTHREAD_MUTEX_INITIALIZER
