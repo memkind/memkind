@@ -248,6 +248,8 @@ check_numa
 
 check_hbw_nodes
 
+export MEMKIND_DAX_KMEM_NODES=1
+
 OPTIND=1
 
 while getopts "T:c:f:l:hdmsx:p:" opt; do
