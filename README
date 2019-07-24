@@ -182,14 +182,34 @@ Without them physical memory may end up being located on incorrect NUMA node.
 To use the interfaces for obtaining 2MB pages please be sure to follow the instructions
 [here](https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt) and pay particular
 attention to the use of the procfs files:
+
     /proc/sys/vm/nr_hugepages
     /proc/sys/vm/nr_overcommit_hugepages
+
 for enabling the kernel's huge page pool.
 
 * **PMEM kind**
 
 To use the PMEM kind, please be sure that filesystem which is used for PMEM creation supports
 [FALLOC_FL_PUNCH_HOLE](http://man7.org/linux/man-pages/man2/fallocate.2.html) flag.
+
+* **DAX KMEM kind**
+
+DAX KMEM kind supports NUMA nodes created from persistent memory as an extension of DRAM.
+To use DAX KMEM kind you need at least Linux Kernel 5.1. If you have loaded
+dax_pmem_compat module instead of dax_pmem, please read [this](https://pmem.io/ndctl/daxctl-migrate-device-model.html) article and migrate device model to use alternative device dax drivers, e.g. kmem.
+Conversion from device dax to NUMA node can be performed using following commands:
+
+    echo daxX.X > /sys/bus/dax/drivers/device_dax/unbind
+    echo daxX.X > /sys/bus/dax/drivers/kmem/new_id
+
+This will migrate device from device_dax to kmem driver. Now you should be able
+to check NUMA configuration:
+
+    numactl -H
+
+Remember: You have to set MEMKIND_DAX_KMEM_NODES environment variable
+before running the application in the similar way to HBW kind.
 
 ## PMEM Kind Usage
 PMEM kind supports the traditional malloc/free interfaces on a memory mapped file.
