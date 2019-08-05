@@ -50,6 +50,31 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
     .update_memory_usage_policy = memkind_arena_update_memory_usage_policy
 };
 
+void clearextent(void *addr, struct memkind_pmem *priv)
+{
+	if (priv == NULL)
+		return;
+	for (int iextent = 0; iextent < priv->cextents; ++iextent){
+		if (priv->rgextents[iextent].addrBase == addr){
+			fallocate(priv->fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, priv->rgextents[iextent].offset, priv->rgextents[iextent].cb);
+			priv->rgextents[iextent].addrBase = NULL;
+			return;
+		}
+	}
+}
+
+MEMKIND_EXPORT void memkind_pmem_remapfd(struct memkind *kind, int fdNew)
+{
+	struct memkind_pmem *priv = kind->priv;
+	for (int iextent = 0; iextent < priv->cextents; ++iextent)
+	{
+		struct memkind_pmem_extent *extent = priv->rgextents + iextent;
+		munmap(extent->addrBase, extent->cb);
+		mmap(extent->addrBase, extent->cb, PROT_READ | PROT_WRITE, MAP_SHARED, fdNew, extent->offset);
+	}
+	priv->fd = fdNew;
+}
+
 void *pmem_extent_alloc(extent_hooks_t *extent_hooks,
                         void *new_addr,
                         size_t size,
@@ -106,6 +131,9 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
         if (munmap(addr, size) == -1) {
             log_err("munmap failed!");
         }
+	struct memkind *kind = get_kind_by_arena(arena_ind);
+	if (kind != NULL)
+		clearextent(addr, kind->priv);
     }
     return true;
 }
@@ -175,6 +203,11 @@ void pmem_extent_destroy(extent_hooks_t *extent_hooks,
 {
     if (munmap(addr, size) == -1) {
         log_err("munmap failed!");
+    } 
+    else{
+	struct memkind *kind = get_kind_by_arena(arena_ind);
+	if (kind != NULL)
+		clearextent(addr, kind->priv);
     }
 }
 
@@ -189,15 +222,21 @@ static extent_hooks_t pmem_extent_hooks = {
     .destroy = pmem_extent_destroy
 };
 
+MEMKIND_EXPORT int memkind_fd(struct memkind *kind)
+{
+	struct memkind_pmem *priv = kind->priv;
+	return priv->fd;
+}
+
 MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
                                        struct memkind_ops *ops, const char *name)
 {
     struct memkind_pmem *priv;
     int err;
 
-    priv = (struct memkind_pmem *)jemk_malloc(sizeof(struct memkind_pmem));
+    priv = (struct memkind_pmem *)jemk_calloc(sizeof(struct memkind_pmem), 1);
     if (!priv) {
-        log_err("jemk_malloc() failed.");
+        log_err("cemk_malloc() failed.");
         return MEMKIND_ERROR_MALLOC;
     }
 
@@ -263,6 +302,18 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr,
 
     if ((result = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, priv->fd,
                        priv->offset)) != MAP_FAILED) {
+        
+	if (priv->cextentsAlloc <= priv->cextents){
+        	if (priv->cextentsAlloc == 0)
+			priv->cextentsAlloc = 64;
+		else
+			priv->cextentsAlloc *= 2;
+		priv->rgextents = jemk_realloc(priv->rgextents, priv->cextentsAlloc * sizeof(struct memkind_pmem_extent));
+	}
+	priv->rgextents[priv->cextents].addrBase = result;
+	priv->rgextents[priv->cextents].cb = size;
+	priv->rgextents[priv->cextents].offset = priv->offset;
+	priv->cextents++;
         priv->offset += size;
     }
 

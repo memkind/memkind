@@ -697,7 +697,7 @@ MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
 #endif
 }
 
-static int memkind_tmpfile(const char *dir, int *fd)
+MEMKIND_EXPORT int memkind_tmpfile(const char *dir, int *fd)
 {
     static char template[] = "/memkind.XXXXXX";
     int err = 0;

@@ -53,11 +53,19 @@ int memkind_pmem_destroy(struct memkind *kind);
 void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size);
 int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags);
 
+struct memkind_pmem_extent {
+    void *addrBase;
+    size_t cb;
+    off_t offset;
+};
 struct memkind_pmem {
     int fd;
     off_t offset;
     size_t max_size;
     pthread_mutex_t pmem_lock;
+    int cextents;
+    int cextentsAlloc;
+    struct memkind_pmem_extent *rgextents;
 };
 
 extern struct memkind_ops MEMKIND_PMEM_OPS;
