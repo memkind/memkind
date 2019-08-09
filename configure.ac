@@ -41,6 +41,7 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_OPENMP
 AC_CHECK_LIB(numa, numa_available, [], [AC_MSG_ERROR([libnuma is required dependency])])
+
 AX_PTHREAD([LIBS="$PTHREAD_LIBS $LIBS" CFLAGS="$CFLAGS $PTHREAD_CFLAGS" CC="$PTHREAD_CC"],
            [AC_MSG_ERROR([pthreads are required dependency])])
 
@@ -160,6 +161,23 @@ if test "$ARENA_LIMIT" != "" ; then
 fi
 
 AC_DEFINE_UNQUOTED([ARENA_LIMIT_PER_KIND], $arena_limit, [Upper bound for number of arenas per kind])
+
+#===============================daxctl=========================================
+AC_ARG_ENABLE([daxctl],
+  [AS_HELP_STRING([--enable-daxctl], [Build library with daxctl support])],
+[if test "x$enable_daxctl" = "xno" ; then
+  enable_daxctl="0"
+else
+  enable_daxctl="1"
+fi
+],
+[enable_daxctl="1"]
+)
+if test "x$enable_daxctl" = "x1" ; then
+    AC_CHECK_LIB(daxctl, daxctl_dev_enable_ram, [], [AC_MSG_ERROR([libdaxctl is required dependency])])
+fi
+
+AC_SUBST([enable_daxctl])
 
 #============================cxx11=============================================
 
