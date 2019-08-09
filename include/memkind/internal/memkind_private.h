@@ -101,6 +101,8 @@ struct memkind_ops {
     size_t (* malloc_usable_size)(struct memkind *kind, void *ptr);
     int (* update_memory_usage_policy)(struct memkind *kind,
                                        memkind_mem_usage_policy policy);
+    int (* update_background_thread)(struct memkind *kind,
+                                     memkind_background_thread background_thread);
 };
 
 struct memkind {
@@ -121,6 +123,8 @@ struct memkind_config {
     const char *pmem_dir;            //PMEM kind path
     size_t pmem_size;                //PMEM kind size
     memkind_mem_usage_policy policy; //kind memory usage policy
+    memkind_background_thread
+    background_thread;    //enable/disable background worker thread
 };
 
 void memkind_init(memkind_t kind, bool check_numa);

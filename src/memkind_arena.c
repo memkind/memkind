@@ -605,6 +605,31 @@ MEMKIND_EXPORT int memkind_arena_update_memory_usage_policy(
     return err;
 }
 
+MEMKIND_EXPORT int memkind_arena_update_background_thread(
+    struct memkind *kind, memkind_background_thread background_thread)
+{
+    int err = MEMKIND_SUCCESS;
+    bool background_thread_val = 0;
+    switch ( background_thread ) {
+        case MEMKIND_BACKGROUND_THREAD_DEFAULT:
+            background_thread_val = 0;
+            break;
+        case MEMKIND_BACKGROUND_THREAD_ENABLED:
+            background_thread_val = 1;
+            break;
+    }
+
+    char cmd[64];
+    snprintf(cmd, sizeof(cmd), "background_thread");
+    err = jemk_mallctl(cmd, NULL, NULL, &background_thread_val, sizeof(bool));
+    if ( err ) {
+        log_err("Error on setting background thread");
+        return MEMKIND_ERROR_INVALID;
+    }
+
+    return err;
+}
+
 // TODO: function is workaround for PR#1302 in jemalloc upstream
 // and it should be removed/replaced with memkind_arena_calloc()
 // after PR will be merged

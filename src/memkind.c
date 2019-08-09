@@ -769,6 +769,12 @@ MEMKIND_EXPORT void memkind_config_set_memory_usage_policy(
     cfg->policy = policy;
 }
 
+MEMKIND_EXPORT void memkind_config_set_background_thread(
+    struct memkind_config *cfg, memkind_background_thread background_thread)
+{
+    cfg->background_thread = background_thread;
+}
+
 MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
                                        struct memkind **kind)
 {
@@ -825,6 +831,9 @@ MEMKIND_EXPORT int memkind_create_pmem_with_config(struct memkind_config *cfg,
         status = (*kind)->ops->update_memory_usage_policy(*kind, cfg->policy);
     }
 
+    if (MEMKIND_LIKELY(!status)) {
+        status = (*kind)->ops->update_background_thread(*kind, cfg->background_thread);
+    }
     return status;
 }
 

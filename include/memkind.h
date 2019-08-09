@@ -155,6 +155,11 @@ typedef enum memkind_mem_usage_policy {
     MEMKIND_MEM_USAGE_POLICY_MAX_VALUE
 } memkind_mem_usage_policy;
 
+typedef enum memkind_background_thread {
+    MEMKIND_BACKGROUND_THREAD_DEFAULT   = 0,        /** <  Default background thread is disabled  */
+    MEMKIND_BACKGROUND_THREAD_ENABLED   = 1,        /** <  Enable background thread */
+} memkind_background_thread;
+
 /// \brief Forward declaration of memkind configuration
 struct memkind_config;
 
@@ -196,6 +201,15 @@ void memkind_config_set_size(struct memkind_config *cfg, size_t pmem_size);
 ///
 void memkind_config_set_memory_usage_policy(struct memkind_config *cfg,
                                             memkind_mem_usage_policy policy);
+
+///
+/// \brief Update memkind configuration with background thread parameter
+/// \note STANDARD API
+/// \param cfg memkind configuration
+/// \param background_thread memkind background thread
+///
+void memkind_config_set_background_thread(struct memkind_config *cfg,
+                                          memkind_background_thread background_thread);
 
 ///
 /// \brief Create kind that allocates memory with specific memory type, memory binding policy and flags.
