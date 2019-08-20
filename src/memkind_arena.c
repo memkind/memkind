@@ -605,27 +605,6 @@ MEMKIND_EXPORT int memkind_arena_update_memory_usage_policy(
     return err;
 }
 
-// TODO: function is workaround for PR#1302 in jemalloc upstream
-// and it should be removed/replaced with memkind_arena_calloc()
-// after PR will be merged
-MEMKIND_EXPORT void *memkind_arena_pmem_calloc(struct memkind *kind, size_t num,
-                                               size_t size)
-{
-    void *result = NULL;
-    int err = 0;
-    unsigned int arena;
-
-    err = kind->ops->get_arena(kind, &arena, size);
-    if (MEMKIND_LIKELY(!err)) {
-        result = jemk_mallocx_check(num * size,
-                                    MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
-        if (MEMKIND_LIKELY(result)) {
-            memset(result, 0, size);
-        }
-    }
-    return result;
-}
-
 MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num,
                                           size_t size)
 {
