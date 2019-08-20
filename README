@@ -98,7 +98,7 @@ See the output of:
 for more information about either the memkind or the jemalloc configuration options.
 
 ## jemalloc
-The jemalloc source was forked from jemalloc version 5.0.  This source tree
+The jemalloc source was forked from jemalloc version 5.2.1.  This source tree
 is located within the jemalloc subdirectory of the memkind source.  The jemalloc
 source code has been kept close to the original form, and in particular
 the build system has been lightly modified.
@@ -115,7 +115,8 @@ To configure and build jemalloc, you can follow this step-by-step instruction:
     mkdir obj
     cd obj
     ../configure --enable-autogen --with-jemalloc-prefix=jemk_ --without-export \
-                 --with-version=5.0.0-0-g0 --disable-fill --disable-initial-exec-tls \
+                 --with-version5.2.1-0-gea6b3e973b477b8061e0076bb257dbd7f3faa756 \
+                 --disable-fill --disable-initial-exec-tls \
                  --with-malloc-conf="narenas:256,lg_tcache_max:12"
     make
     cd ../..
