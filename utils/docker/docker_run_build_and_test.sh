@@ -32,6 +32,11 @@ if [ -n "$CODECOV_TOKEN" ]; then
     GCOV_OPTION="--enable-gcov"
 fi
 
+# if ndctl library version is specified install library
+if [ -n "$NDCTL_LIBRARY_VERSION" ]; then
+    utils/docker/docker_install_ndctl.sh "$NDCTL_LIBRARY_VERSION"
+fi
+
 # building jemalloc and memkind
 ./build.sh --prefix=/usr $GCOV_OPTION
 

@@ -46,5 +46,6 @@ docker run --rm \
            --env https_proxy=$https_proxy \
            --env CODECOV_TOKEN="$CODECOV_TOKEN" \
            --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
+           --env NDCTL_LIBRARY_VERSION="$NDCTL_LIBRARY_VERSION" \
            --mount type=bind,source="$MEMKIND_HOST_WORKDIR",target="$MEMKIND_CONTAINTER_WORKDIR" \
            memkind_cont utils/docker/docker_run_build_and_test.sh

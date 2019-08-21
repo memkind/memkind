@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 #  Copyright (C) 2019 Intel Corporation.
 #  All rights reserved.
 #
@@ -20,51 +22,43 @@
 #  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Pull base image
-FROM ubuntu:18.04
+# docker_install_ndctl.sh - is called inside a Docker container;
+# installs ndctl library
+#
+# Parameters:
+# -ndctl library version (e.g. "v66")
 
-LABEL maintainer="katarzyna.wasiuta@intel.com"
+set -e
 
-# Update the Apt cache and install basic tools
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    asciidoctor \
-    automake \
-    bash-completion \
-    ca-certificates \
-    curl \
-    devscripts \
-    g++ \
-    git \
-    libjson-c-dev \
-    libkeyutils-dev \
-    libkmod-dev \
-    libnuma-dev \
-    libtool \
-    libudev-dev \
-    numactl \
-    pkg-config \
-    python-pip \
-    sudo \
-    systemd \
-    uuid-dev \
-    whois \
- && rm -rf /var/lib/apt/lists/*
+NDCTL_VERSION="$1"
+NDCTL_RELEASE_URL=https://github.com/pmem/ndctl/releases/tag/"$NDCTL_VERSION"
+NDCTL_TAR_GZ="$NDCTL_VERSION".tar.gz
+NDCTL_TARBALL_URL=https://github.com/pmem/ndctl/archive/"$NDCTL_TAR_GZ"
 
-# Install pytest
-RUN pip install setuptools==3.4.1 && \
-    pytest==3.9.2
+# check if specified ndctl release exists
+if curl --output /dev/null --silent --head --fail "$NDCTL_RELEASE_URL"; then
+  echo "ndctl version ${NDCTL_VERSION} exist."
+else
+  echo "ndctl url: ${NDCTL_RELEASE_URL} is not valid. ndctl version: ${NDCTL_VERSION} doesn't exist."
+  exit 1
+fi
 
-# Add user
-ENV USER memkinduser
-ENV USERPASS memkindpass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+NDCTL_LOCAL_DIR="$HOME"/ndctl/"$NDCTL_VERSION"
+NDCTL_LOCAL_TAR_GZ="$NDCTL_LOCAL_DIR"/"$NDCTL_TAR_GZ"
 
-# Create directory for memkind repository
-WORKDIR /home/$USER/memkind
+# create ndctl directory in home directory
+mkdir -p "$NDCTL_LOCAL_DIR"
 
-# Allow user to create files in the home directory
-RUN chown -R $USER:sudo /home/$USER
+# download and untar ndctl library to ndctl directory
+curl -L "$NDCTL_TARBALL_URL" -o "$NDCTL_LOCAL_TAR_GZ"
+tar -xzf "$NDCTL_LOCAL_TAR_GZ" -C "$NDCTL_LOCAL_DIR" --strip-components=1
 
-# Change user to $USER
-USER $USER
+# go to ndctl directory and build ndctl library
+cd "$NDCTL_LOCAL_DIR"
+./autogen.sh
+./configure --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib
+make -j "$(nproc --all)"
+sudo make -j "$(nproc --all)" install
+
+# return to previous directory
+cd -
