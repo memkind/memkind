@@ -12,6 +12,10 @@ to build, test and optionally measure test coverage of any pull request to memki
 
 * **CODECOV_TOKEN** - Codecov token for memkind repository to upload the coverage results.
 
+* **NDCTL_LIBRARY_VERSION** - ndctl library version.
+For fully testing MEMKIND_DAX_KMEM, ndctl library version tag must be passed as parameter,
+See https://github.com/pmem/ndctl/tags.
+
 * **TBB_LIBRARY_VERSION** - Intel Threading Building Blocks library version.
 For testing Threading Building Blocks, TBB library version tag must be passed as parameter,
 See https://github.com/01org/tbb/tags.
@@ -20,6 +24,8 @@ See https://github.com/01org/tbb/tags.
 *'docker_run_build_and_test.sh'*  is used to build and run tests of memkind.
 
 *'docker_run_coverage.sh'*  is used for uploading coverage report on [Codecov.io](Codecov.io)
+
+*'docker_install_ndctl.sh'*  is used to install ndctl library.
 
 *'docker_install_tbb.sh'*  is used to install Intel Threading Building Blocks library.
 
