@@ -766,18 +766,29 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullKindSizeZero)
  * This test will stress pmem kind with malloc-free loop
  * with various sizes for malloc
  */
-TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSize)
+TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSizeConservative)
 {
     const int malloc_limit = 1000000;
     const int loop_limit = 10;
     int first_limit_of_allocations = 0;
     int temp_limit_of_allocations = 0;
     void *test[malloc_limit] = {nullptr};
-    int i = 0, j = 0;
+    int i = 0, j = 0, err;
+    memkind_t kind = nullptr;
+
+    memkind_config *test_cfg = memkind_config_new();
+    ASSERT_NE(nullptr, test_cfg);
+
+    memkind_config_set_path(test_cfg, PMEM_DIR);
+    memkind_config_set_size(test_cfg, PMEM_PART_SIZE);
+    memkind_config_set_memory_usage_policy(test_cfg,
+                                           MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
+    err =  memkind_create_pmem_with_config(test_cfg, &kind);
+    ASSERT_EQ(err, 0);
 
     //check maximum number of allocations right after create the kind
     for (i = 0; i < malloc_limit; i++) {
-        test[i] = memkind_malloc(pmem_kind, GetParam());
+        test[i] = memkind_malloc(kind, GetParam());
         if(test[i] == nullptr)
             break;
     }
@@ -786,14 +797,14 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSize)
     first_limit_of_allocations = i;
 
     for (i = 0; i < first_limit_of_allocations; i++) {
-        memkind_free(pmem_kind, test[i]);
+        memkind_free(kind, test[i]);
         test[i] = nullptr;
     }
 
     //check number of allocations in consecutive iterations of malloc-free loop
     for (i = 0; i < loop_limit; i++) {
         for (j = 0; j < malloc_limit; j++) {
-            test[j] = memkind_malloc(pmem_kind, GetParam());
+            test[j] = memkind_malloc(kind, GetParam());
             if(test[j] == nullptr)
                 break;
         }
@@ -803,12 +814,17 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSize)
         temp_limit_of_allocations = j;
 
         for (j = 0; j < temp_limit_of_allocations; j++) {
-            memkind_free(pmem_kind, test[j]);
+            memkind_free(kind, test[j]);
             test[j] = nullptr;
         }
 
         ASSERT_GE(temp_limit_of_allocations, 0.98 * first_limit_of_allocations);
     }
+
+    memkind_config_delete(test_cfg);
+
+    err = memkind_destroy_kind(kind);
+    ASSERT_EQ(0, err);
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -818,7 +834,7 @@ INSTANTIATE_TEST_CASE_P(
                       96 * KB, 112 * KB, 128 * KB, 160 * KB, 192 * KB, 500000,
                       2 * MB, 5 * MB));
 
-TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFill)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFillConservative)
 {
     const size_t small_size[] = {8, 16, 32, 48, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384,
                                  448, 512, 640, 768, 896, 1 * KB, 1280, 1536, 1792, 2 * KB, 2560,
@@ -830,14 +846,25 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFill)
     int first_limit_of_allocations = 0;
     int temp_limit_of_allocations = 0;
     void *test[malloc_limit][ARRAY_SIZE(small_size)] = {{nullptr}};
-    int i = 0, j = 0, k = 0;
+    int i = 0, j = 0, k = 0, err;
+    memkind_t kind = nullptr;
+
+    memkind_config *test_cfg = memkind_config_new();
+    ASSERT_NE(nullptr, test_cfg);
+
+    memkind_config_set_path(test_cfg, PMEM_DIR);
+    memkind_config_set_size(test_cfg, PMEM_PART_SIZE);
+    memkind_config_set_memory_usage_policy(test_cfg,
+                                           MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
+    err =  memkind_create_pmem_with_config(test_cfg, &kind);
+    ASSERT_EQ(err, 0);
 
     //check maximum number of allocations right after create the kind
     [&] {
         for (i = 0; i < malloc_limit; i++)
         {
             for (j = 0; j < (int)ARRAY_SIZE(small_size); j++) {
-                test[i][j] = memkind_malloc(pmem_kind, small_size[j]);
+                test[i][j] = memkind_malloc(kind, small_size[j]);
                 if (test[i][j] == nullptr)
                     return;
             }
@@ -849,7 +876,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFill)
 
     for(; i >= 0; i--) {
         for(j--; j >= 0; j--) {
-            memkind_free(pmem_kind, test[i][j]);
+            memkind_free(kind, test[i][j]);
             test[i][j] = nullptr;
         }
         j = ARRAY_SIZE(small_size);
@@ -861,7 +888,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFill)
             for (j = 0; j < malloc_limit; j++)
             {
                 for (k = 0; k < (int)ARRAY_SIZE(small_size); k++) {
-                    test[j][k] = memkind_malloc(pmem_kind, small_size[k]);
+                    test[j][k] = memkind_malloc(kind, small_size[k]);
                     if(test[j][k] == nullptr)
                         return;
                 }
@@ -873,7 +900,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFill)
 
         for(; j >= 0; j--) {
             for(k--; k >= 0; k--) {
-                memkind_free(pmem_kind, test[j][k]);
+                memkind_free(kind, test[j][k]);
                 test[j][k] = nullptr;
             }
             k = ARRAY_SIZE(small_size);
@@ -881,6 +908,11 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFill)
 
         ASSERT_GE(temp_limit_of_allocations, 0.98 * first_limit_of_allocations);
     }
+
+    memkind_config_delete(test_cfg);
+
+    err = memkind_destroy_kind(kind);
+    ASSERT_EQ(0, err);
 }
 
 TEST_F(MemkindPmemTests,
