@@ -14,7 +14,7 @@ to build, test and optionally measure test coverage of any pull request to memki
 
 * **TBB_LIBRARY_VERSION** - Intel Threading Building Blocks library version.
 For testing Threading Building Blocks, TBB library version tag must be passed as parameter,
-See https://github.com/01org/tbb/tags.
+see https://github.com/01org/tbb/tags.
 
 # Files
 *'docker_run_build_and_test.sh'*  is used to build and run tests of memkind.

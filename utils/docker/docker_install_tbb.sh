@@ -36,7 +36,7 @@ TBB_TAR_GZ="$TBB_VERSION".tar.gz
 TBB_TARBALL_URL=https://github.com/01org/tbb/archive/"$TBB_TAR_GZ"
 TBB_VARS_SH="tbbvars.sh"
 
-# check if specified TBB release exist
+# check if specified TBB release exists
 if curl --output /dev/null --silent --head --fail "$TBB_RELEASE_URL"; then
   echo "TBB version ${TBB_VERSION} exist."
 else
@@ -44,15 +44,15 @@ else
   exit 1
 fi
 
-TBB_LOCAL_DIR="$HOME"/"$TBB_VERSION"
+TBB_LOCAL_DIR="$HOME"/tbb/"$TBB_VERSION"
 TBB_LOCAL_TAR_GZ="$TBB_LOCAL_DIR"/"$TBB_TAR_GZ"
 
 # create TBB directory in home directory
-mkdir "$TBB_LOCAL_DIR"
+mkdir -p "$TBB_LOCAL_DIR"
 
 # download and untar TBB library to TBB directory
 curl -L "$TBB_TARBALL_URL" -o "$TBB_LOCAL_TAR_GZ"
-tar -xzvf "$TBB_LOCAL_TAR_GZ" -C "$TBB_LOCAL_DIR" --strip-components=1
+tar -xzf "$TBB_LOCAL_TAR_GZ" -C "$TBB_LOCAL_DIR" --strip-components=1
 
 # build TBB library
 make -j "$(nproc --all)" --directory="$TBB_LOCAL_DIR"
