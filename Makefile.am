@@ -52,8 +52,7 @@ include_HEADERS = include/hbw_allocator.h \
                   include/pmem_allocator.h \
                   # end
 
-nonstandardincludedir = $(includedir)/memkind/internal
-nonstandardinclude_HEADERS = include/memkind/internal/heap_manager.h \
+noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_default.h \
                   include/memkind/internal/memkind_gbtlb.h \
@@ -394,10 +393,9 @@ bin_SCRIPTS =
 check_PROGRAMS =
 noinst_PROGRAMS =
 noinst_LTLIBRARIES =
-noinst_HEADERS =
 TESTS =
 
-req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DMEMKIND_INTERNAL_API -DJE_PREFIX=$(JE_PREFIX)
+req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DJE_PREFIX=$(JE_PREFIX)
 
 AM_CFLAGS = $(req_flags)
 AM_CXXFLAGS = $(req_flags)
