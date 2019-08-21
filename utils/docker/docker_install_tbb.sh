@@ -44,11 +44,11 @@ else
   exit 1
 fi
 
-TBB_LOCAL_DIR="$HOME"/"$TBB_VERSION"
+TBB_LOCAL_DIR="$HOME"/tbb/"$TBB_VERSION"
 TBB_LOCAL_TAR_GZ="$TBB_LOCAL_DIR"/"$TBB_TAR_GZ"
 
 # create TBB directory in home directory
-mkdir "$TBB_LOCAL_DIR"
+mkdir -p "$TBB_LOCAL_DIR"
 
 # download and untar TBB library to TBB directory
 curl -L "$TBB_TARBALL_URL" -o "$TBB_LOCAL_TAR_GZ"
