@@ -28,13 +28,15 @@
 #
 set -e
 
+UTILS_PREFIX=utils/docker
+
 if [ -n "$CODECOV_TOKEN" ]; then
     GCOV_OPTION="--enable-gcov"
 fi
 
 # if ndctl library version is specified install library
 if [ -n "$NDCTL_LIBRARY_VERSION" ]; then
-    utils/docker/docker_install_ndctl.sh "$NDCTL_LIBRARY_VERSION"
+    "$UTILS_PREFIX"/docker_install_ndctl.sh "$NDCTL_LIBRARY_VERSION"
 fi
 
 # building jemalloc and memkind
@@ -46,7 +48,7 @@ sudo make install
 # if TBB library version is specified install library and use it
 # as MEMKIND_HEAP_MANAGER
 if [ -n "$TBB_LIBRARY_VERSION" ]; then
-    source utils/docker/docker_install_tbb.sh "$TBB_LIBRARY_VERSION"
+    source "$UTILS_PREFIX"/docker_install_tbb.sh "$TBB_LIBRARY_VERSION"
     HEAP_MANAGER="TBB"
 fi
 
@@ -58,5 +60,5 @@ find examples/.libs -name "pmem*" -executable -type f -exec sh -c "MEMKIND_HEAP_
 
 # executing coverage script if codecov token is set
 if [ -n "$CODECOV_TOKEN" ]; then
-    utils/docker/docker_run_coverage.sh "$CODECOV_TOKEN" "$PWD"
+    "$UTILS_PREFIX"/docker_run_coverage.sh "$CODECOV_TOKEN" "$PWD"
 fi
