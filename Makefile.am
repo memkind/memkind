@@ -357,6 +357,7 @@ EXTRA_DIST = CONTRIBUTING \
              test/test.sh \
              utils/docker/Dockerfile.ubuntu-18.04 \
              utils/docker/README.md \
+             utils/docker/docker_install_ndctl.sh \
              utils/docker/docker_install_tbb.sh \
              utils/docker/docker_run_build_and_test.sh \
              utils/docker/docker_run_coverage.sh \
