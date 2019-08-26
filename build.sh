@@ -31,7 +31,7 @@ fi
 cd $(dirname $0)
 EXTRA_CONF=$@
 
-if [ ! -f ./jemalloc/obj/lib/libjemalloc_pic.a ]; then
+if [ ! -f ./jemalloc/lib/libjemalloc_pic.a ]; then
 	./build_jemalloc.sh $EXTRA_CONF
 fi
 
