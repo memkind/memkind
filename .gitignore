@@ -91,6 +91,7 @@
 /test/locality_test
 /test/mallocerr_test
 /test/memkind_allocated
+/test/performance_test
 /test/perf_tool
 /test/performance/.deps/
 /test/pmem_alignment

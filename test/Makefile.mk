@@ -32,6 +32,7 @@ check_PROGRAMS += test/all_tests \
                   test/freeing_memory_segfault_test \
                   test/gb_page_tests_bind_policy \
                   test/locality_test \
+                  test/performance_test \
                   test/trace_mechanism_test_helper \
                   # end
 
@@ -64,6 +65,7 @@ test_decorator_test_LDADD = libmemkind.la
 test_environ_err_hbw_malloc_test_LDADD = libmemkind.la
 test_freeing_memory_segfault_test_LDADD = libmemkind.la
 test_gb_page_tests_bind_policy_LDADD = libmemkind.la
+test_performance_test_LDADD = libmemkind.la
 test_trace_mechanism_test_helper_LDADD = libmemkind.la
 
 fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
@@ -90,11 +92,6 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/memkind_versioning_tests.cpp \
                          test/multithreaded_tests.cpp \
                          test/negative_tests.cpp \
-                         test/performance/framework.cpp \
-                         test/performance/framework.hpp \
-                         test/performance/operations.hpp \
-                         test/performance/perf_tests.cpp \
-                         test/performance/perf_tests.hpp \
                          test/pmem_allocator_tests.cpp \
                          test/static_kinds_list.h \
                          test/static_kinds_tests.cpp \
@@ -113,6 +110,14 @@ test_decorator_test_SOURCES = $(fused_gtest) test/decorator_test.cpp test/decora
 test_environ_err_hbw_malloc_test_SOURCES = test/environ_err_hbw_malloc_test.cpp
 test_freeing_memory_segfault_test_SOURCES = $(fused_gtest) test/freeing_memory_segfault_test.cpp
 test_gb_page_tests_bind_policy_SOURCES = $(fused_gtest) test/gb_page_tests_bind_policy.cpp test/trial_generator.cpp test/check.cpp
+test_performance_test_SOURCES = $(fused_gtest) \
+                                test/performance/framework.cpp \
+                                test/performance/framework.hpp \
+                                test/performance/operations.hpp \
+                                test/performance/perf_tests.cpp \
+                                test/performance/perf_tests.hpp \
+                                # end
+
 test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c
 
 #Tests based on Allocator Perf Tool
@@ -157,7 +162,6 @@ allocator_perf_tool_library_sources = test/allocator_perf_tool/AllocationSizes.h
                                       test/proc_stat.h \
                                       test/random_sizes_allocator.h \
                                       # end
-
 
 test_allocator_perf_tool_tests_SOURCES = $(allocator_perf_tool_library_sources) \
                                          $(fused_gtest) \

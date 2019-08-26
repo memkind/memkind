@@ -191,6 +191,7 @@ $(memkind_test_dir)/hello_memkind
 $(memkind_test_dir)/hello_memkind_debug
 $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/autohbw_candidates
+$(memkind_test_dir)/performance_test
 ${memkind_test_dir}/pmem_kinds
 ${memkind_test_dir}/pmem_malloc
 ${memkind_test_dir}/pmem_malloc_unlimited
