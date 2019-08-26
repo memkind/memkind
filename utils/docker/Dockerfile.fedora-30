@@ -1,5 +1,3 @@
-#!/bin/bash
-#
 #  Copyright (C) 2019 Intel Corporation.
 #  All rights reserved.
 #
@@ -22,41 +20,52 @@
 #  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#
-# run_local.sh - builds a container with Docker image
-# and runs docker_run_build_and_test.sh script inside it
-#
-# Parameters:
-# -name of the Docker image file
+# Pull base image
+FROM fedora:30
 
-set -e
+LABEL maintainer="katarzyna.wasiuta@intel.com"
 
-DOCKER_IMAGE_NAME="$1"
+# Update the dnf cache and install basic tools
+RUN dnf update -y && dnf install -y \
+    asciidoctor \
+    automake \
+    bash-completion \
+    ca-certificates \
+    devscripts \
+    g++ \
+    git \
+    json-c-devel \
+    keyutils-libs-devel \
+    kmod-devel \
+    libtool \
+    libudev-devel \
+    libuuid-devel \
+    numactl \
+    numactl-devel \
+    pkgconfig \
+    python-pip \
+    sudo \
+    systemd \
+    which \
+    whois \
+ && dnf clean all
 
-if [[ ! -f "$DOCKER_IMAGE_NAME" ]]; then
-    echo "Docker image "$DOCKER_IMAGE_NAME" does not exist."
-    exit 1
-fi
+# Install pytest
+RUN pip install setuptools==3.4.1 && \
+    pytest==3.9.2
 
-if [[ -z "$MEMKIND_HOST_WORKDIR" ]]; then
-    echo "MEMKIND_HOST_WORKDIR has to be set."
-    exit 1
-fi
+# Add user
+ENV USER memkinduser
+ENV USERPASS memkindpass
+RUN useradd -m $USER -p `mkpasswd $USERPASS`
+RUN gpasswd wheel -a $USER
+RUN echo '%wheel ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# need to be inline with Dockerfile WORKDIR
-MEMKIND_CONTAINTER_WORKDIR=/home/memkinduser/memkind/
+# Create directory for memkind repository
+WORKDIR /home/$USER/memkind
 
-docker build --tag memkind_cont \
-             --file "$DOCKER_IMAGE_NAME" \
-             --build-arg http_proxy=$http_proxy \
-             --build-arg https_proxy=$https_proxy \
-             .
-docker run --rm \
-           --privileged=true \
-           --env http_proxy=$http_proxy \
-           --env https_proxy=$https_proxy \
-           --env CODECOV_TOKEN="$CODECOV_TOKEN" \
-           --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
-           --env NDCTL_LIBRARY_VERSION="$NDCTL_LIBRARY_VERSION" \
-           --mount type=bind,source="$MEMKIND_HOST_WORKDIR",target="$MEMKIND_CONTAINTER_WORKDIR" \
-           memkind_cont utils/docker/docker_run_build_and_test.sh
+# Allow user to create files in the home directory
+RUN chown -R $USER:wheel /home/$USER
+
+# Change user to $USER
+USER $USER
