@@ -23,7 +23,7 @@
 #
 
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/obj/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
 
 lib_LTLIBRARIES = libmemkind.la
 
@@ -43,7 +43,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         # end
 
 
-libmemkind_la_LIBADD = jemalloc/obj/lib/libjemalloc_pic.a
+libmemkind_la_LIBADD = jemalloc/lib/libjemalloc_pic.a
 libmemkind_la_LDFLAGS = -version-info 0:1:0 -ldl
 include_HEADERS = include/hbw_allocator.h \
                   include/hbwmalloc.h \
@@ -418,12 +418,12 @@ all: static_lib
 define ar_prog
 create libmemkind.a\n\
 addlib .libs/libmemkind.a\n\
-addlib jemalloc/obj/lib/libjemalloc_pic.a\n\
+addlib jemalloc/lib/libjemalloc_pic.a\n\
 save\n\
 end
 endef
 
-static_lib: jemalloc/obj/lib/libjemalloc_pic.a libmemkind.la
+static_lib: jemalloc/lib/libjemalloc_pic.a libmemkind.la
 	bash -c "ar -M < <(echo -e '$(ar_prog)')"
 	cp libmemkind.a .libs/
 	rm libmemkind.a
