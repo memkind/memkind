@@ -16,7 +16,6 @@ autohbw/autohbw_README
 autohbw/autohbw_get_src_lines.pl
 autohbw/autohbw_test.sh
 build.sh
-build_jemalloc.sh
 configure.ac
 examples/Makefile.mk
 examples/README

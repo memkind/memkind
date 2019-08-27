@@ -161,6 +161,16 @@ fi
 
 AC_DEFINE_UNQUOTED([ARENA_LIMIT_PER_KIND], $arena_limit, [Upper bound for number of arenas per kind])
 
+#============================memkind_prefix=======================================
+memkind_prefix=jemk_;
+AC_ARG_VAR(MEMKIND_PREFIX,
+  [Prefix used for all jemalloc public API under memkind, default value jemk_]
+)
+if test "$MEMKIND_PREFIX" != "" ; then
+  memkind_prefix=$MEMKIND_PREFIX;
+fi
+
+AC_SUBST(memkind_prefix)
 #============================cxx11=============================================
 
 AX_CXX_COMPILE_STDCXX_11([noext], [optional])
@@ -172,4 +182,3 @@ LT_INIT
 AC_CONFIG_FILES([Makefile memkind.pc])
 
 AC_OUTPUT
-

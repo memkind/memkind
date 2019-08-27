@@ -72,7 +72,6 @@ EXTRA_DIST = CONTRIBUTING \
              astyle.sh \
              autogen.sh \
              build.sh \
-             build_jemalloc.sh \
              examples/README \
              jemalloc/.appveyor.yml \
              jemalloc/.autom4te.cfg \
@@ -382,8 +381,8 @@ dist_man_MANS =  man/autohbw.7 \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = memkind.pc
 
-CLEANFILES = memkind-$(VERSION).spec pkgconfig_DATA
-DISTCLEANFILES = VERSION configure
+CLEANFILES = memkind-$(VERSION).spec $(libmemkind_la_LIBADD)
+DISTCLEANFILES = VERSION configure pkgconfig_DATA
 
 bin_PROGRAMS = memkind-hbw-nodes
 
@@ -396,12 +395,19 @@ noinst_PROGRAMS =
 noinst_LTLIBRARIES =
 TESTS =
 
-req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DJE_PREFIX=$(JE_PREFIX)
+req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DJE_PREFIX=@memkind_prefix@
 
 AM_CFLAGS = $(req_flags)
 AM_CXXFLAGS = $(req_flags)
 
-.PHONY: checkprogs
+clean-local: clean-jemalloc_deps
+
+clean-jemalloc_deps:
+	cd jemalloc && $(MAKE) clean
+	cd jemalloc && rm configure
+
+.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps
+.NOTPARALLEL: static_lib
 
 # build check programs without running tests
 checkprogs: libmemkind.la $(check_PROGRAMS)
@@ -412,22 +418,30 @@ memkind-$(VERSION).spec:
 rpm: dist
 	$(MAKE) version="$(VERSION)" -f memkind.spec.mk $@
 
-all: static_lib
+all: jemalloc_deps static_lib
 
 # the script merge memkind and jemalloc libraries into one static library.
 define ar_prog
 create libmemkind.a\n\
 addlib .libs/libmemkind.a\n\
-addlib jemalloc/lib/libjemalloc_pic.a\n\
+addlib $(libmemkind_la_LIBADD)\n\
 save\n\
 end
 endef
 
-static_lib: jemalloc/lib/libjemalloc_pic.a libmemkind.la
+static_lib: libmemkind.la
 	bash -c "ar -M < <(echo -e '$(ar_prog)')"
 	cp libmemkind.a .libs/
 	rm libmemkind.a
 
+JEMALLOC_CONFIG = --enable-autogen --without-export --with-version=5.0.0-0-g0 \
+			--disable-fill --disable-initial-exec-tls --with-jemalloc-prefix=@memkind_prefix@ \
+			--with-malloc-conf="narenas:256,lg_tcache_max:12" \
+			#end
+
+jemalloc_deps:
+	[ ! -e jemalloc/configure ] && (cd jemalloc && autoconf) || exit 0
+	[ ! -e $(libmemkind_la_LIBADD) ] && (cd jemalloc && ./configure $(JEMALLOC_CONFIG) && $(MAKE)) || exit 0
 
 unit_tests: checkprogs
 	test/all_tests --gtest_filter=*free_with_NULL_kind_4096_bytes:NegativeTest.*:ErrorMessage.*:GetArenaTest.*:MemkindVersioningTests.*
