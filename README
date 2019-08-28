@@ -64,6 +64,10 @@ You will need to install required packages on the build system:
 * **numactl-devel**
 * **unzip**
 
+For using automatic recognition of PMEM NUMA in MEMKIND_DAX_KMEM:
+
+* **libdaxctl-devel (v66 or later)
+
 ## Building and Installing
 
 The memkind library has a dependency on a related fork of jemalloc.
