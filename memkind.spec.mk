@@ -158,6 +158,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %dir %{_docdir}/%{namespace}
 %{_libdir}/lib%{namespace}.so.*
 %{_libdir}/libautohbw.so.*
+%{_bindir}/%{namespace}-auto-dax-kmem-nodes
 %{_bindir}/%{namespace}-hbw-nodes
 
 %files devel
@@ -170,6 +171,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %{_libdir}/libautohbw.so
 %{_libdir}/pkgconfig/memkind.pc
 %{_includedir}/%{namespace}.h
+%{_mandir}/man1/memkind-auto-dax-kmem-nodes.1.*
 %{_mandir}/man1/memkind-hbw-nodes.1.*
 %{_mandir}/man3/hbwmalloc.3.*
 %{_mandir}/man3/hbwallocator.3.*

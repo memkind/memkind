@@ -55,6 +55,7 @@
 /m4/
 /memkind-*.spec
 /memkind-*.tar.gz
+/memkind-auto-dax-kmem-nodes
 /memkind-hbw-nodes
 /missing
 /src/memkind_defines.h.in
