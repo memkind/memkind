@@ -342,6 +342,7 @@ m4/ax_pthread.m4
 man/autohbw.7
 man/hbwallocator.3
 man/hbwmalloc.3
+man/memkind-auto-dax-kmem-nodes.1
 man/memkind-hbw-nodes.1
 man/memkind.3
 man/memkind_arena.3
@@ -356,6 +357,7 @@ memkind.spec.mk
 src/Makefile.mk
 src/hbwmalloc.c
 src/heap_manager.c
+man/memkind-auto-dax-kmem-nodes.c
 src/memkind-hbw-nodes.c
 src/memkind.c
 src/memkind_arena.c

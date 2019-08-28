@@ -30,6 +30,7 @@
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/heap_manager.h>
 
+#include "config.h"
 #include <pthread.h>
 #include <numa.h>
 #include <errno.h>
@@ -60,12 +61,62 @@ static pthread_once_t memkind_dax_kmem_closest_numanode_once_g =
 
 static void memkind_dax_kmem_closest_numanode_init(void);
 
-static int fill_kmem_bandwidth_values(int *bandwidth)
+#ifdef MEMKIND_DAXCTL_KMEM
+#include <daxctl/libdaxctl.h>
+#ifndef daxctl_region_foreach_safe
+#define daxctl_region_foreach_safe(ctx, region, _region) \
+    for (region = daxctl_region_get_first(ctx), \
+         _region = region ? daxctl_region_get_next(region) : NULL; \
+         region != NULL; \
+         region = _region, \
+        _region = _region ? daxctl_region_get_next(_region) : NULL)
+#endif
+#ifndef daxctl_dev_foreach_safe
+#define daxctl_dev_foreach_safe(region, dev, _dev) \
+    for (dev = daxctl_dev_get_first(region), \
+         _dev = dev ? daxctl_dev_get_next(dev) : NULL; \
+         dev != NULL; \
+         dev = _dev, \
+        _dev = _dev ? daxctl_dev_get_next(_dev) : NULL)
+#endif
+
+static int get_dax_kmem_nodes(struct bitmask *dax_kmem_node_mask)
 {
-// TODO(kfilipek): detect DAX KMEM nodes
-    log_err("DAX KMEM nodes cannot be automatically detected.");
-    return MEMKIND_ERROR_UNAVAILABLE;
+    struct daxctl_region *region, *_region;
+    struct daxctl_dev *dev, *_dev;
+    struct daxctl_ctx *ctx;
+
+    int rc = daxctl_new(&ctx);
+    if (rc < 0)
+        return MEMKIND_ERROR_UNAVAILABLE;
+
+    daxctl_region_foreach_safe(ctx, region, _region) {
+        daxctl_dev_foreach_safe(region, dev, _dev) {
+            struct daxctl_memory *mem = daxctl_dev_get_memory(dev);
+            if (mem) {
+                numa_bitmask_setbit(dax_kmem_node_mask,
+                                    (unsigned)daxctl_dev_get_target_node(dev));
+            }
+        }
+    }
+
+    daxctl_unref(ctx);
+
+    return (numa_bitmask_weight(dax_kmem_node_mask) != 0) ? MEMKIND_SUCCESS :
+           MEMKIND_ERROR_UNAVAILABLE;
 }
+
+static int fill_dax_kmem_values_automatic(int *bandwidth)
+{
+    return bandwidth_fill(bandwidth, get_dax_kmem_nodes);
+}
+#else
+static int fill_dax_kmem_values_automatic(int *bandwidth)
+{
+    log_err("DAX KMEM nodes cannot be automatically detected.");
+    return MEMKIND_ERROR_OPERATION_FAILED;
+}
+#endif
 
 MEMKIND_EXPORT int memkind_dax_kmem_check_available(struct memkind *kind)
 {
@@ -127,7 +178,7 @@ static void memkind_dax_kmem_closest_numanode_init(void)
         goto exit;
     }
 
-    g->init_err = bandwidth_fill_nodes(bandwidth, fill_kmem_bandwidth_values,
+    g->init_err = bandwidth_fill_nodes(bandwidth, fill_dax_kmem_values_automatic,
                                        "MEMKIND_DAX_KMEM_NODES");
     if (g->init_err)
         goto exit;

@@ -1,0 +1,56 @@
+.\"
+.\" Copyright (C) 2019 Intel Corporation.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\" 1. Redistributions of source code must retain the above copyright notice(s),
+.\"    this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright notice(s),
+.\"    this list of conditions and the following disclaimer in the documentation
+.\"    and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY EXPRESS
+.\" OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+.\" EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+.\" LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+.\" PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+.\" LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+.\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.TH "MEMKIND-AUTO-DAX-KMEM-NODES" 1 "2019-08-29" "Intel Corporation" "MEMKIND-AUTO-DAX-KMEM-NODES" \" -*- nroff -*-
+.SH "NAME"
+memkind-auto-dax-kmem-nodes - prints comma-separated list of automatically detected persistent memory NUMA nodes.
+.br
+Note: This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes), or removed.
+.SH "SYNOPSIS"
+memkind-auto-dax-kmem-nodes [-h|--help]
+.SH "DESCRIPTION"
+.BR memkind-auto-dax-kmem-nodes
+prints a comma-separated list of automatically detected persistent memory NUMA nodes that can be used with the numactl --membind option.
+.SH "OPTIONS"
+.BR " -h, --help"
+              Displays help text and exit.
+.SH "EXIT STATUS"
+.BR 0
+on success
+.br
+.BR 1
+if automatic detection is disabled (memkind wasn't build with suitable libdaxctl-devel version)
+.br
+.BR 2
+if argument is invalid
+.br
+.BR 3
+on other failure
+.SH "COPYRIGHT"
+Copyright (C) 2019 Intel Corporation. All rights reserved.
+.SH "SEE ALSO"
+.BR daxctl (3),
+.BR memkind (3),
+.BR numactl (8)
+.SH "AUTHOR"
+Michal Biesek <michal.biesek@intel.com>
