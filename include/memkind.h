@@ -234,7 +234,7 @@ int memkind_create_kind(memkind_memtype_t memtype_flags,
 int memkind_destroy_kind(memkind_t kind);
 
 ///
-/// \brief Get kind associated with allocated memory refernced by ptr
+/// \brief Get kind associated with allocated memory referenced by ptr
 /// \warning STANDARD API
 /// \note This function has non-trivial performance overhead
 /// \param ptr pointer to the allocated memory

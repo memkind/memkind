@@ -115,7 +115,7 @@ std::vector<iteration_result> StressIncreaseToMax::execute_test_iterations(
 
         results.push_back(stress_test.get_test_status());
 
-        //Log every interation of StressIncreaseToMax test.
+        //Log every iteration of StressIncreaseToMax test.
         csv::Row row;
         row.append(itr);
         row.append(convert_bytes_to_mb(stats.get_allocated()));

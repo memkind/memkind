@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,8 +58,8 @@ TEST_F(HbwAllocatorTests, test_TC_MEMKIND_DetaultAllocatorTest)
     allocator.deallocate(ptr, size);
 }
 
-//Test address convertion functionality.
-TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AddressConvertion)
+//Test address conversion functionality.
+TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AddressConversion)
 {
     const size_t size = 512;
     hbw::allocator<int> allocator;

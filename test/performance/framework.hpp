@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2014 - 2018 Intel Corporation.
+* Copyright (C) 2014 - 2019 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -222,15 +222,15 @@ namespace performance_tests
         // List of allocation sizes
         vector<size_t>              m_allocationSizes;
         // List of list of allocation operations, utlization depends on execution mode
-        vector<vector<Operation *>>  m_testOperations;
+        vector<vector<Operation *>> m_testOperations;
         // Free operation
         Operation                  *m_freeOperation;
         // List of memory kinds (for memkind allocation only)
         // distributed among threads sequentially
         vector<memkind_t>           m_kinds;
         // List of thread workers
-        vector<Worker *>             m_workers;
-        // Time measurment
+        vector<Worker *>            m_workers;
+        // Time measurement
         vector<uint64_t>            m_durations;
         // Execution mode
         ExecutionMode               m_executionMode;
