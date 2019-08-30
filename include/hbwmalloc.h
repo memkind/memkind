@@ -116,7 +116,7 @@ enum {
 
     /*
      * This option touches first byte of all pages in address range starting from "addr" to "addr" + "size"
-     * by read and write (so the content will be overwitten by the same data as it was read).
+     * by read and write (so the content will be overwritten by the same data as it was read).
      */
     HBW_TOUCH_PAGES      = (1 << 0)
 };

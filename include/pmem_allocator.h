@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Intel Corporation.
+ * Copyright (C) 2018 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@ namespace pmem
                 int err_c  = memkind_create_pmem(dir, max_size, &kind);
                 if (err_c) {
                     throw std::runtime_error(
-                        std::string("An error occured while creating pmem kind; error code: ") +
+                        std::string("An error occurred while creating pmem kind; error code: ") +
                         std::to_string(err_c));
                 }
             }

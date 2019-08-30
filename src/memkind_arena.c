@@ -473,7 +473,7 @@ MEMKIND_EXPORT struct memkind *memkind_arena_detect_kind(void *ptr)
 static inline int get_tcache_flag(unsigned partition, size_t size)
 {
 
-    // do not cache allocation larger than tcache_max nor those comming from non-static kinds
+    // do not cache allocation larger than tcache_max nor those coming from non-static kinds
     if(size > TCACHE_MAX || partition >= MEMKIND_NUM_BASE_KIND) {
         return MALLOCX_TCACHE_NONE;
     }
@@ -727,7 +727,7 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
                                             unsigned int *arena, size_t size)
 {
     unsigned int arena_idx;
-    // it's likely that each thread control block lies on diffrent page
+    // it's likely that each thread control block lies on different page
     // so we extracting page number with >> 12 to improve hashing
     arena_idx = (get_fs_base() >> 12) & kind->arena_map_mask;
     *arena = kind->arena_zero + arena_idx;

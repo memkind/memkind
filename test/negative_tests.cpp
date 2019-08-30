@@ -345,7 +345,7 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorAllocM)
     EXPECT_EQ(ret, 0);
 
     //Determine total memory size as totalram (total usable main memory size)
-    //multipled by mem_unit (memory unit size in bytes). This value is equal
+    //multiplied by mem_unit (memory unit size in bytes). This value is equal
     //to MemTotal field in /proc/meminfo.
     MemTotal = info.totalram * info.mem_unit;
 
@@ -479,7 +479,7 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_RegularReallocWithMemAllign)
 
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_SetPolicy)
 {
-    // First call should be successfull, consequent should generate a warning
+    // First call should be successful, consequent should generate a warning
     // and be ignored
     EXPECT_EQ(hbw_set_policy(HBW_POLICY_PREFERRED), 0);
     EXPECT_EQ(hbw_set_policy(HBW_POLICY_BIND), EPERM);
