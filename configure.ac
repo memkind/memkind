@@ -171,6 +171,28 @@ if test "$MEMKIND_PREFIX" != "" ; then
 fi
 
 AC_SUBST(memkind_prefix)
+
+#===============================daxctl=========================================
+AC_ARG_ENABLE([daxctl],
+  [AS_HELP_STRING([--enable-daxctl], [Build library with daxctl support])],
+[if test "x$enable_daxctl" = "xno" ; then
+  enable_daxctl="0"
+else
+  enable_daxctl="1"
+fi
+],
+[enable_daxctl="1"]
+)
+if test "x$enable_daxctl" = "x1" ; then
+    AC_CHECK_LIB(daxctl, daxctl_dev_get_memory, [daxctl_kmem=yes], [daxctl_kmem=no])
+fi
+if test $daxctl_kmem = "yes" ; then
+    AC_DEFINE([MEMKIND_DAXCTL_KMEM], [ ], [Automatic recognition of PMEM as system memory in MEMKIND_DAX_KMEM])
+else
+    AC_MSG_RESULT([libdaxctl-devel v66 or later not detected])
+fi
+AC_SUBST([enable_daxctl])
+
 #============================cxx11=============================================
 
 AX_CXX_COMPILE_STDCXX_11([noext], [optional])
@@ -182,3 +204,9 @@ LT_INIT
 AC_CONFIG_FILES([Makefile memkind.pc])
 
 AC_OUTPUT
+AC_MSG_RESULT([
+        MEMKIND $VERSION
+        =====
+        Automatic recognition of PMEM NUMA in MEMKIND_DAX_KMEM:    ${daxctl_kmem}
+        =====
+])
