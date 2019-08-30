@@ -39,8 +39,11 @@ if [ -n "$NDCTL_LIBRARY_VERSION" ]; then
     "$UTILS_PREFIX"/docker_install_ndctl.sh "$NDCTL_LIBRARY_VERSION"
 fi
 
-# building jemalloc and memkind
-./build.sh --prefix=/usr $GCOV_OPTION
+# building memkind sources and tests
+./autogen.sh
+./configure --prefix=/usr $GCOV_OPTION
+make -j "$(nproc --all)"
+make -j "$(nproc --all)" checkprogs
 
 # installing memkind
 sudo make install

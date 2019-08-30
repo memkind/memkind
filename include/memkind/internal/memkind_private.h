@@ -44,10 +44,6 @@ extern "C" {
 #   define MEMKIND_EXPORT __attribute__((visibility("default")))
 #endif
 
-#ifndef JE_PREFIX
-#error "Can't find JE_PREFIX define. Define one or use build.sh script."
-#endif
-
 // This ladder call is required due to meanders of C's preprocessor logic.
 // Without it, JE_PREFIX would be used directly (i.e. 'JE_PREFIX') and not
 // substituted with defined value.

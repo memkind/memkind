@@ -24,24 +24,11 @@
 
 set -e
 
-if [ -z "$JE_PREFIX" ]; then
-        export JE_PREFIX=jemk_
-fi
-
 cd $(dirname $0)
 EXTRA_CONF=$@
 
-if [ ! -f ./jemalloc/lib/libjemalloc_pic.a ]; then
-	./build_jemalloc.sh $EXTRA_CONF
-fi
-
-if [ ! -f ./configure ]; then
-	./autogen.sh
-fi
-
-if [ ! -f ./Makefile ]; then
-	./configure $EXTRA_CONF
-fi
+./autogen.sh
+./configure $EXTRA_CONF
 
 #use V=1 for full cmdlines of build
 make all -j`nproc`
