@@ -44,6 +44,7 @@ RUN dnf update -y && dnf install -y \
     numactl-devel \
     pkgconfig \
     python-pip \
+    rpmdevtools \
     sudo \
     systemd \
     which \

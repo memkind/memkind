@@ -45,6 +45,11 @@ fi
 make -j "$(nproc --all)"
 make -j "$(nproc --all)" checkprogs
 
+# building RPM package
+if [[ $(cat /etc/os-release) = *"Fedora"* ]]; then
+    make -j "$(nproc --all)" rpm
+fi
+
 # installing memkind
 sudo make install
 
