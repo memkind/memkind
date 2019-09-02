@@ -354,6 +354,7 @@ EXTRA_DIST = CONTRIBUTING \
              memkind.pc.in \
              memkind.spec.mk \
              test/test.sh \
+             utils/docker/Dockerfile.fedora-30 \
              utils/docker/Dockerfile.ubuntu-18.04 \
              utils/docker/README.md \
              utils/docker/docker_install_ndctl.sh \

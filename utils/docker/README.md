@@ -2,7 +2,7 @@
 
 This is utils/docker/README.
 
-Scripts in this directory let run a Docker container with Ubuntu 18.04 environment
+Scripts in this directory let run a Docker container with Ubuntu 18.04 and Fedora 30 environment
 to build, test and optionally measure test coverage of any pull request to memkind project, inside it.
 
 # Environment variables
@@ -33,9 +33,10 @@ see https://github.com/01org/tbb/tags.
 
 # Building and running the container
 
-One can use the script *run_local.sh* just to build and run tests.
+One can use the script *run_local.sh* just to build and run tests, e.g.:
+
 ```
-$ ./run_local.sh
+$ ./run_local.sh Dockerfile.ubuntu-18.04
 ```
 
 **Note:**
