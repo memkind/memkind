@@ -404,6 +404,7 @@ static int fill_bandwidth_values_heuristically(int *bandwidth,
     cpu_model_data_t cpu = get_cpu_model_data();
 
     if(!is_hbm_supported(cpu)) {
+        log_err("High Bandwidth Memory is not supported by this CPU.");
         return MEMKIND_ERROR_UNAVAILABLE;
     }
 
