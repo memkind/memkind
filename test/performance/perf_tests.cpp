@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2014 - 2018 Intel Corporation.
+* Copyright (C) 2014 - 2019 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -65,18 +65,18 @@ protected:
                     double delta, bool higherIsBetter = false)
     {
         // If higherIsBetter is true, current value should be >= (reference - delta); otherwise, it should be <= (reference + delta)
-        double treshold = higherIsBetter ? reference * (1 - delta) : reference *
-                          (1 + delta);
+        double threshold = higherIsBetter ? reference * (1 - delta) : reference *
+                           (1 + delta);
         cout <<
              "Metric: " << info << ". Reference value: " << reference << ". "
-             "Expected: " << (higherIsBetter ? ">= " : "<= ") << treshold << " (delta = " <<
+             "Expected: " << (higherIsBetter ? ">= " : "<= ") << threshold << " (delta = " <<
              delta << ")."
              "Actual: " << value << " (delta = " <<
              ((value > reference ? (value / reference) : (reference / value)) - 1.0) /
              ((higherIsBetter != (value > reference)) ? 1.0 : -1.0)
              << ")."
              << endl ;
-        if (higherIsBetter ? (value <= treshold) : (value >= treshold)) {
+        if (higherIsBetter ? (value <= threshold) : (value >= threshold)) {
             cout << "WARNING : Value of '" << info << "' outside expected bounds!" << endl;
             return false;
         }

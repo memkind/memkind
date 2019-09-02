@@ -211,7 +211,7 @@ static int set_closest_numanode(int num_unique,
 
 static int numanode_bandwidth_compare(const void *a, const void *b);
 
-// This declaration is necesarry, cause it's missing in headers from libnuma 2.0.8
+// This declaration is necessary, cause it's missing in headers from libnuma 2.0.8
 extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
 
 static void assign_arbitrary_bandwidth_values(int *bandwidth, int bandwidth_len,

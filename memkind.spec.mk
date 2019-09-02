@@ -106,7 +106,7 @@ Install header files and development aids to link memkind library into
 applications.
 
 %package tests
-Summary: Extention to libnuma for kinds of memory - validation
+Summary: Extension to libnuma for kinds of memory - validation
 Group: Validation/Libraries
 Requires: %{name} = %{version}-%{release}
 

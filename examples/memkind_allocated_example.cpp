@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ public:
     void print_message()
     {
         std::cout << message << std::endl;
-        std::cout << "Memory adress of this object is: " <<  (void *)this << std::endl
+        std::cout << "Memory address of this object is: " <<  (void *)this << std::endl
                   << std::endl;
     }
 };
@@ -83,7 +83,7 @@ int main()
     specified_kind_example->print_message();
     delete specified_kind_example;
 
-    //examples for using same aproach for allocating arrays of objects, note that objects created that way can be initialized only with default (unparameterized) constructor
+    //examples for using same approach for allocating arrays of objects, note that objects created that way can be initialized only with default (unparameterized) constructor
     memkind_allocated_example *default_kind_array_example = new
     memkind_allocated_example[5]();
     delete[] default_kind_array_example;
@@ -94,7 +94,7 @@ int main()
 
     return 0;
 }
-#else //If C++11 is not avaiable - do nothing.
+#else //If C++11 is not available - do nothing.
 int main()
 {
     std::cout << "WARNING: because your compiler does not support C++11 standard,"
