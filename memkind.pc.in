@@ -10,4 +10,4 @@ URL: http://memkind.github.io/memkind
 Version: @VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -lmemkind
-Libs.private: -ldl -lnuma -lpthread
+Libs.private: -ldl -lnuma -lpthread @DAXCTL_LIBS@

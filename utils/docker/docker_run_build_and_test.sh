@@ -45,13 +45,13 @@ fi
 make -j "$(nproc --all)"
 make -j "$(nproc --all)" checkprogs
 
+# installing memkind
+sudo make install
+
 # building RPM package
 if [[ $(cat /etc/os-release) = *"Fedora"* ]]; then
     make -j "$(nproc --all)" rpm
 fi
-
-# installing memkind
-sudo make install
 
 # if TBB library version is specified install library and use it
 # as MEMKIND_HEAP_MANAGER
