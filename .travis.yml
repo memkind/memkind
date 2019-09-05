@@ -53,7 +53,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-8
+            - llvm-toolchain-xenial-8
           packages:
             - clang-8
             - libnuma-dev
