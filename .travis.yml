@@ -1,4 +1,4 @@
-dist: xenial
+dist: bionic
 sudo: required
 language: cpp
 cache: ccache
@@ -14,9 +14,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-4.8
-      before_install:
-        - ./install_astyle.sh
+            - astyle
       script:
         - ./astyle.sh
 
@@ -53,7 +51,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-8
+            - llvm-toolchain-bionic-8
           packages:
             - clang-8
             - libnuma-dev
