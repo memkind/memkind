@@ -24,25 +24,28 @@
 
 #include <memkind.h>
 
+#include <iostream>
 #include <chrono>
 #include <cstdio>
+#include <ctime>
 #include <random>
 #include <vector>
 
 #define MB (1024 * 1024)
 #define PRINT_FREQ 100000
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#define BENCHMARK_LOG "bench_single_thread_%Y%m%d-%H%M.log"
 
 static size_t block_size [] =
 {8519680, 4325376, 8519680, 4325376, 8519680, 4325376, 8519680, 4325376, 432517, 608478};
 
-static struct memkind *pmem_kind = nullptr;
-static FILE *output_file = nullptr;
+static struct memkind *pmem_kind;
+static FILE *output_file;
 
 static void usage(char *name)
 {
     fprintf(stderr,
-            "Usage: %s pmem_kind_dir_path pmem_size test_time_limit_in_sec output_file_name\n",
+            "Usage: %s pmem_kind_dir_path pmem_size pmem_policy test_time_limit_in_sec\n",
             name);
 }
 
@@ -63,18 +66,18 @@ static int fragmentatation_test(size_t pmem_max_size, double test_time)
         print_iter++;
         int index = m_size(mt);
         size_t size = block_size[index];
-        int length = pmem_strs.size() / 2;
-        std::uniform_int_distribution<> m_index(0, length - 1);
+        size_t length = pmem_strs.size() / 2;
+        std::uniform_int_distribution<size_t> m_index(0, length - 1);
 
         while ((pmem_str = static_cast<char *>(memkind_malloc(pmem_kind,
                                                               size))) == nullptr) {
-            int to_evict = m_index(mt);
+            size_t to_evict = m_index(mt);
             char *str_to_evict = pmem_strs[to_evict];
             size_t evict_size = memkind_malloc_usable_size(pmem_kind, str_to_evict);
             total_allocated -= evict_size;
 
             if (total_allocated < total_size * 0.1) {
-                fprintf(stderr,"allocated less than 10 percent\n");
+                fprintf(stderr,"allocated less than 10 percent.\n");
                 return 1;
             }
             memkind_free(pmem_kind, str_to_evict);
@@ -95,74 +98,94 @@ static int fragmentatation_test(size_t pmem_max_size, double test_time)
     return 0;
 }
 
+static int create_pmem(const char *pmem_dir, size_t pmem_size,
+                       memkind_mem_usage_policy policy)
+{
+    int err = 0;
+    if (pmem_size == 0 ) {
+        fprintf(stderr, "Invalid size to pmem kind must be not equal zero.\n");
+        return 1;
+    }
+
+    if (policy > MEMKIND_MEM_USAGE_POLICY_MAX_VALUE) {
+        fprintf(stderr, "Invalid memory usage policy param %u.\n", policy);
+        return 1;
+    }
+
+    memkind_config *pmem_cfg = memkind_config_new();
+    if (!pmem_cfg) {
+        fprintf(stderr, "Unable to create pmem configuration.\n");
+        return 1;
+    }
+
+    memkind_config_set_path(pmem_cfg, pmem_dir);
+    memkind_config_set_size(pmem_cfg, pmem_size);
+    memkind_config_set_memory_usage_policy(pmem_cfg, policy);
+
+    err = memkind_create_pmem_with_config(pmem_cfg, &pmem_kind);
+    memkind_config_delete(pmem_cfg);
+    if (err) {
+        fprintf(stderr, "Unable to create pmem kind.\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+static int create_log_file()
+{
+    char file_name[100] = {'\0'};
+    auto result = std::time(nullptr);
+    strftime(file_name, 100, BENCHMARK_LOG, std::localtime(&result));
+
+    if ((output_file = fopen(file_name, "w+")) == nullptr) {
+        fprintf(stderr, "Cannot create output file %s.\n", file_name);
+        return 1;
+    }
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     char *pmem_dir;
-    char *output_log_path;
     size_t pmem_size;
-    unsigned long pmem_policy;
+    memkind_mem_usage_policy pmem_policy;
     double test_time_limit_in_sec;
-    int err = 0;
-    memkind_config *pmem_cfg;
     int status = 0;
+    int err = 0;
 
-    if (argc != 6) {
+    if (argc != 5) {
         usage(argv[0]);
         return 1;
     } else {
         pmem_dir = argv[1];
         pmem_size = std::stoull(argv[2]) * MB;
-        pmem_policy = std::stoul(argv[3]);
+        pmem_policy = static_cast<memkind_mem_usage_policy>(std::stoul(argv[3]));
         test_time_limit_in_sec = std::stod(argv[4]);
-        output_log_path = argv[5];
     }
 
-    if (pmem_size == 0 ) {
-        fprintf(stderr, "Invalid size to pmem kind must be not equal zero\n");
-        return 1;
-    }
-
-    if ((output_file = fopen(output_log_path, "w+")) == nullptr) {
-        fprintf(stderr, "Cannot create output file %s\n", output_log_path);
-        return 1;
-    }
-
-    if (pmem_policy > MEMKIND_MEM_USAGE_POLICY_MAX_VALUE) {
-        fprintf(stderr, "Invalid memory usage policy param %lu.\n", pmem_policy);
-        goto err_fopen;
-    }
-
-    pmem_cfg = memkind_config_new();
-    if (!pmem_cfg) {
-        fprintf(stderr, "Unable to create pmem configuration.\n");
-        goto err_fopen;
-    }
-    memkind_config_set_path(pmem_cfg, pmem_dir);
-    memkind_config_set_size(pmem_cfg, pmem_size);
-    memkind_config_set_memory_usage_policy(pmem_cfg,
-                                           static_cast<memkind_mem_usage_policy>(pmem_policy));
-
-    err = memkind_create_pmem_with_config(pmem_cfg, &pmem_kind);
+    err = create_pmem(pmem_dir, pmem_size, pmem_policy);
     if (err) {
-        fprintf(stderr, "Unable to create pmem kind.\n");
-        goto err_create_pmem;
+        fprintf(stderr, "Cannot create pmem.\n");
+        return 1;
     }
 
-    memkind_config_delete(pmem_cfg);
+    err = create_log_file();
+    if (err) {
+        memkind_destroy_kind(pmem_kind);
+        fprintf(stderr, "Cannot create log file.\n");
+        return 1;
+    }
+
     status = fragmentatation_test(pmem_size, test_time_limit_in_sec);
+
     err = memkind_destroy_kind(pmem_kind);
     if (err) {
-        fprintf(stdout, "Unable to destroy pmem kind.\n");
-        goto err_fopen;
+        fprintf(stderr, "Unable to destroy pmem kind.\n");
     }
 
     fclose(output_file);
     return status;
 
-err_create_pmem:
-    memkind_config_delete(pmem_cfg);
-
-err_fopen:
-    fclose(output_file);
-    return 1;
 }
