@@ -121,7 +121,7 @@ void cpp_allocator_test(const char *pmem_directory)
                                                                                     pmem_string;
         typedef int key_t;
         typedef pmem_string value_t;
-        typedef pmem::allocator<char> allocator_t;
+        typedef pmem::allocator<std::pair<const key_t, value_t>> allocator_t;
         typedef std::map<key_t, value_t, std::less<key_t>, std::scoped_allocator_adaptor<allocator_t>>
                 map_t;
 
