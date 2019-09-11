@@ -46,6 +46,10 @@
 #include <stdint.h>
 #include <assert.h>
 
+#define BANDWIDTH_NODE_HIGH_VAL       2
+#define BANDWIDTH_NODE_LOW_VAL        1
+#define BANDWIDTH_NODE_NOT_PRESENT    0
+
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
@@ -285,17 +289,13 @@ static void assign_arbitrary_bandwidth_values(int *bandwidth,
 {
     int i, nodes_num = numa_num_configured_nodes();
 
-    // Assigning arbitrary bandwidth values for nodes:
-    // 2 - high BW node (if bit set in hbw_nodes nodemask),
-    // 1 - low  BW node,
-    // 0 - node not present
     for (i=0; i<NUMA_NUM_NODES; i++) {
         if (i >= nodes_num) {
-            bandwidth[i] = 0;
+            bandwidth[i] = BANDWIDTH_NODE_NOT_PRESENT;
         } else if (numa_bitmask_isbitset(hbw_nodes, i)) {
-            bandwidth[i] = 2;
+            bandwidth[i] = BANDWIDTH_NODE_HIGH_VAL;
         } else {
-            bandwidth[i] = 1;
+            bandwidth[i] = BANDWIDTH_NODE_LOW_VAL;
         }
     }
 
@@ -534,7 +534,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
         /* set sorting array */
         j = 0;
         for (i = 0; i < num_bandwidth; ++i) {
-            if (bandwidth[i] != 0) {
+            if (bandwidth[i] != BANDWIDTH_NODE_NOT_PRESENT) {
                 numanode_bandwidth[j].numanode = i;
                 numanode_bandwidth[j].bandwidth = bandwidth[i];
                 ++j;
