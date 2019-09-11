@@ -214,16 +214,15 @@ static int numanode_bandwidth_compare(const void *a, const void *b);
 // This declaration is necessary, cause it's missing in headers from libnuma 2.0.8
 extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
 
-static void assign_arbitrary_bandwidth_values(int *bandwidth, int bandwidth_len,
+static void assign_arbitrary_bandwidth_values(int *bandwidth,
                                               struct bitmask *hbw_nodes);
 
-static int fill_bandwidth_values_heuristically (int *bandwidth,
-                                                int bandwidth_len);
+static int fill_bandwidth_values_heuristically (int *bandwidth);
 
 static int fill_bandwidth_values_from_enviroment(int *bandwidth,
-                                                 int bandwidth_len, char *hbw_nodes_env);
+                                                 char *hbw_nodes_env);
 
-static int fill_nodes_bandwidth(int *bandwidth, int bandwidth_len);
+static int fill_nodes_bandwidth(int *bandwidth);
 
 MEMKIND_EXPORT int memkind_hbw_check_available(struct memkind *kind)
 {
@@ -281,7 +280,7 @@ MEMKIND_EXPORT int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
     return g->init_err;
 }
 
-static void assign_arbitrary_bandwidth_values(int *bandwidth, int bandwidth_len,
+static void assign_arbitrary_bandwidth_values(int *bandwidth,
                                               struct bitmask *hbw_nodes)
 {
     int i, nodes_num = numa_num_configured_nodes();
@@ -385,12 +384,12 @@ static int get_high_bandwidth_nodes(struct bitmask *hbw_node_mask)
     return MEMKIND_ERROR_UNAVAILABLE;
 }
 
-static int fill_bandwidth(int *bandwidth, int bandwidth_len)
+static int fill_bandwidth(int *bandwidth)
 {
     struct bitmask *hbw_node_mask = numa_allocate_nodemask();
     int ret = get_high_bandwidth_nodes(hbw_node_mask);
     if(ret == 0) {
-        assign_arbitrary_bandwidth_values(bandwidth, bandwidth_len, hbw_node_mask);
+        assign_arbitrary_bandwidth_values(bandwidth, hbw_node_mask);
     }
     numa_bitmask_free(hbw_node_mask);
 
@@ -398,8 +397,7 @@ static int fill_bandwidth(int *bandwidth, int bandwidth_len)
 }
 
 ///This function tries to fill bandwidth array based on knowledge about known CPU models
-static int fill_bandwidth_values_heuristically(int *bandwidth,
-                                               int bandwidth_len)
+static int fill_bandwidth_values_heuristically(int *bandwidth)
 {
     cpu_model_data_t cpu = get_cpu_model_data();
 
@@ -411,7 +409,7 @@ static int fill_bandwidth_values_heuristically(int *bandwidth,
     switch(cpu.model) {
         case CPU_MODEL_KNL:
         case CPU_MODEL_KNM: {
-            int ret = fill_bandwidth(bandwidth, bandwidth_len);
+            int ret = fill_bandwidth(bandwidth);
             if(ret == 0) {
                 log_info("Detected High Bandwidth Memory.");
             }
@@ -423,7 +421,7 @@ static int fill_bandwidth_values_heuristically(int *bandwidth,
 }
 
 static int fill_bandwidth_values_from_enviroment(int *bandwidth,
-                                                 int bandwidth_len, char *hbw_nodes_env)
+                                                 char *hbw_nodes_env)
 {
     struct bitmask *hbw_nodes_bm = numa_parse_nodestring(hbw_nodes_env);
 
@@ -431,25 +429,24 @@ static int fill_bandwidth_values_from_enviroment(int *bandwidth,
         log_err("Wrong MEMKIND_HBW_NODES environment value.");
         return MEMKIND_ERROR_ENVIRON;
     } else {
-        assign_arbitrary_bandwidth_values(bandwidth, bandwidth_len, hbw_nodes_bm);
+        assign_arbitrary_bandwidth_values(bandwidth, hbw_nodes_bm);
         numa_bitmask_free(hbw_nodes_bm);
     }
 
     return 0;
 }
 
-static int fill_nodes_bandwidth(int *bandwidth, int bandwidth_len)
+static int fill_nodes_bandwidth(int *bandwidth)
 {
     char *hbw_nodes_env;
 
     hbw_nodes_env = getenv("MEMKIND_HBW_NODES");
     if (hbw_nodes_env) {
         log_info("Environment variable MEMKIND_HBW_NODES detected: %s.", hbw_nodes_env);
-        return fill_bandwidth_values_from_enviroment(bandwidth, bandwidth_len,
-                                                     hbw_nodes_env);
+        return fill_bandwidth_values_from_enviroment(bandwidth, hbw_nodes_env);
     }
 
-    return fill_bandwidth_values_heuristically(bandwidth, bandwidth_len);
+    return fill_bandwidth_values_heuristically(bandwidth);
 }
 
 static void memkind_hbw_closest_numanode_init(void)
@@ -473,7 +470,7 @@ static void memkind_hbw_closest_numanode_init(void)
         goto exit;
     }
 
-    g->init_err = fill_nodes_bandwidth(bandwidth, NUMA_NUM_NODES);
+    g->init_err = fill_nodes_bandwidth(bandwidth);
     if (g->init_err)
         goto exit;
 
