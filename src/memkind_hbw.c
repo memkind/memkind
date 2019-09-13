@@ -207,7 +207,7 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
 
 static int set_closest_numanode(int num_unique,
                                 const struct bandwidth_nodes_t *bandwidth_nodes,
-                                int target_bandwidth, int num_cpunode, int *closest_numanode);
+                                int num_cpunode, int *closest_numanode);
 
 static int numanode_bandwidth_compare(const void *a, const void *b);
 
@@ -455,7 +455,6 @@ static void memkind_hbw_closest_numanode_init(void)
             &memkind_hbw_closest_numanode_g;
     int *bandwidth = NULL;
     int num_unique = 0;
-    int high_bandwidth = 0;
     int i;
 
     struct bandwidth_nodes_t *bandwidth_nodes = NULL;
@@ -479,10 +478,8 @@ static void memkind_hbw_closest_numanode_init(void)
     if (g->init_err)
         goto exit;
 
-    high_bandwidth = bandwidth_nodes[num_unique-1].bandwidth;
     g->init_err = set_closest_numanode(num_unique, bandwidth_nodes,
-                                       high_bandwidth, g->num_cpu,
-                                       g->closest_numanode);
+                                       g->num_cpu, g->closest_numanode);
 
     for(i=0; i<bandwidth_nodes[num_unique-1].num_numanodes; i++) {
         log_info("NUMA node %d is high-bandwidth memory.",
@@ -600,15 +597,13 @@ static int create_bandwidth_nodes(int num_bandwidth, const int *bandwidth,
 
 static int set_closest_numanode(int num_unique,
                                 const struct bandwidth_nodes_t *bandwidth_nodes,
-                                int target_bandwidth, int num_cpunode, int *closest_numanode)
+                                int num_cpunode, int *closest_numanode)
 {
     /***************************************************************************
     *   num_unique (IN):                                                       *
     *       Length of bandwidth_nodes vector.                                  *
     *   bandwidth_nodes (IN):                                                  *
     *       Output vector from create_bandwitdth_nodes().                      *
-    *   target_bandwidth (IN):                                                 *
-    *       The bandwidth to select for comparison.                            *
     *   num_cpunode (IN):                                                      *
     *       Number of cpu's and length of closest_numanode.                    *
     *   closest_numanode (OUT):                                                *
@@ -620,6 +615,8 @@ static int set_closest_numanode(int num_unique,
     int min_distance, distance, i, j, old_errno, min_unique;
     struct bandwidth_nodes_t match;
     match.bandwidth = -1;
+    int target_bandwidth = bandwidth_nodes[num_unique-1].bandwidth;
+
     for (i = 0; i < num_cpunode; ++i) {
         closest_numanode[i] = -1;
     }
