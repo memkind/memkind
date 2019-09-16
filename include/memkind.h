@@ -235,7 +235,7 @@ int memkind_destroy_kind(memkind_t kind);
 
 ///
 /// \brief Get kind associated with allocated memory referenced by ptr
-/// \warning STANDARD API
+/// \note STANDARD API
 /// \note This function has non-trivial performance overhead
 /// \param ptr pointer to the allocated memory
 /// \return Kind associated with allocated memory, NULL on failure
