@@ -39,18 +39,20 @@ features.  Memkind interface allows to create and control file-backed memory
 13. [Disclaimer](#disclaimer)
 
 ## Interfaces
-The memkind library delivers two interfaces:
+The memkind library delivers three interfaces:
  * hbwmalloc.h - recommended for high-bandwidth memory use cases (stable)
  * memkind.h - generic interface for more complex use cases (stable)
+ * pmem_allocator.h - the C++ allocator compatible with the std::allocator concept
+   used for PMEM memory use cases (stable)
 
 For more detailed information about those interfaces see
 corresponding manpages (located in man/ subdir):
 
     man memkind
 
-or
-
     man hbwmalloc
+
+    man pmemallocator
 
 ## Dependencies
 

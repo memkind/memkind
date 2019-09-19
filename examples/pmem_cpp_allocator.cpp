@@ -58,8 +58,8 @@ void cpp_allocator_test(const char *pmem_directory)
 #ifdef STL_VECTOR_TEST
     {
         std::cout << "VECTOR OPEN" << std::endl;
-        pmem::allocator<int> alc{ pmem_directory, pmem_max_size };
-        std::vector<int, pmem::allocator<int>> vector{ alc };
+        libmemkind::pmem::allocator<int> alc{ pmem_directory, pmem_max_size };
+        std::vector<int, libmemkind::pmem::allocator<int>> vector{ alc };
 
         for (int i = 0; i < 20; ++i) {
             vector.push_back(0xDEAD + i);
@@ -73,8 +73,8 @@ void cpp_allocator_test(const char *pmem_directory)
 #ifdef STL_LIST_TEST
     {
         std::cout << "LIST OPEN" << std::endl;
-        pmem::allocator<int> alc{ pmem_directory, pmem_max_size };
-        std::list<int, pmem::allocator<int>> list{ alc };
+        libmemkind::pmem::allocator<int> alc{ pmem_directory, pmem_max_size };
+        std::list<int, libmemkind::pmem::allocator<int>> list{ alc };
 
         const int nx2 = 4;
         for (int i = 0; i < nx2; ++i) {
@@ -93,10 +93,10 @@ void cpp_allocator_test(const char *pmem_directory)
 #ifdef STL_VEC_STRING_TEST
     {
         std::cout << "STRINGED VECTOR OPEN" << std::endl;
-        typedef pmem::allocator<char> str_alloc_t;
+        typedef libmemkind::pmem::allocator<char> str_alloc_t;
         typedef std::basic_string<char, std::char_traits<char>, str_alloc_t>
         pmem_string;
-        typedef pmem::allocator<pmem_string> vec_alloc_t;
+        typedef libmemkind::pmem::allocator<pmem_string> vec_alloc_t;
 
         vec_alloc_t vec_alloc{ pmem_directory, pmem_max_size };
         str_alloc_t str_alloc{ pmem_directory, pmem_max_size };
@@ -117,11 +117,12 @@ void cpp_allocator_test(const char *pmem_directory)
 #ifdef STL_MAP_INT_STRING_TEST
     {
         std::cout << "INT_STRING MAP OPEN" << std::endl;
-        typedef std::basic_string<char, std::char_traits<char>, pmem::allocator<char>>
-                                                                                    pmem_string;
+        typedef std::basic_string<char, std::char_traits<char>, libmemkind::pmem::allocator<char>>
+                pmem_string;
         typedef int key_t;
         typedef pmem_string value_t;
-        typedef pmem::allocator<std::pair<const key_t, value_t>> allocator_t;
+        typedef libmemkind::pmem::allocator<std::pair<const key_t, value_t>>
+                                                                          allocator_t;
         typedef std::map<key_t, value_t, std::less<key_t>, std::scoped_allocator_adaptor<allocator_t>>
                 map_t;
 

@@ -23,42 +23,57 @@
 .\"
 .TH "PMEMALLOCATOR" 3 "2018-09-13" "Intel Corporation" "PMEMALLOCATOR" \" -*- nroff -*-
 .SH "NAME"
-pmem::allocator<T> \- The C++ allocator compatible with the C++ standard library allocator concepts
+libmemkind::pmem::allocator<T> \- The C++ allocator compatible with the C++ standard library allocator concepts
 .br
 .BR Note:
-This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes), or removed.
+.I pmem_allocator.h
+functionality is considered as stable API (STANDARD API).
 .SH "SYNOPSIS"
 .nf
 .B #include <pmem_allocator.h>
 .sp
 .B Link with -lmemkind
 .sp
-.BI "pmem::allocator(const char " "*dir" ", size_t " "max_size" );
+.BI "libmemkind::pmem::allocator(const char " "*dir" ", size_t " "max_size" );
 .br
-.BI "pmem::allocator(const std::string " "&dir" ", size_t " "max_size" );
+.BI "libmemkind::pmem::llocator(const char " "&dir" ", size_t " "max_size" ", libmemkind::allocation_policy " "alloc_policy" );
 .br
-.BI "template <typename U> pmem::allocator<T>::allocator(const pmem::allocator<U>&)" " "noexcept;
+.BI "libmemkind::pmem::allocator(const std::string " "&dir" ", size_t " "max_size" );
 .br
-.BI "template <typename U> pmem::allocator(const allocator<U>&& " "other" ) " "noexcept;
+.BI "libmemkind::pmem::allocator(const std::string " "&dir" ", size_t " "max_size" ", libmemkind::allocation_policy " "alloc_policy" );
 .br
-.BI "pmem::allocator<T>::~allocator();
+.BI "template <typename U> libmemkind::pmem::allocator<T>::allocator(const libmemkind::pmem::allocator<U>&)" " "noexcept;
 .br
-.BI "T *pmem::allocator<T>::allocate(std::size_t " "n" ) " "const;
+.BI "template <typename U> libmemkind::pmem::allocator(const allocator<U>&& " "other" ) " "noexcept;
 .br
-.BI "void pmem::allocator<T>::deallocate(T " "*p" ", std::size_t " "n" ) " "const;
+.BI "libmemkind::pmem::allocator<T>::~allocator();
 .br
-.BI "template <class U, class... Args> void pmem::allocator<T>::construct(U " "*p" ", Args... " "args" ) " "const;
+.BI "T *libmemkind::pmem::allocator<T>::allocate(std::size_t " "n" ) " "const;
 .br
-.BI "void pmem::allocator<T>::destroy(T " "*p" ) " "const;
+.BI "void libmemkind::pmem::allocator<T>::deallocate(T " "*p" ", std::size_t " "n" ) " "const;
+.br
+.BI "template <class U, class... Args> void libmemkind::pmem::allocator<T>::construct(U " "*p" ", Args... " "args" ) " "const;
+.br
+.BI "void libmemkind::pmem::allocator<T>::destroy(T " "*p" ) " "const;
 .fi
 .SH "DESCRIPTION"
 The
-.BR pmem::allocator<T>
+.BR libmemkind::pmem::allocator<T>
 is intended to be used with STL containers to allocate persistent memory. Memory management is based on memkind_pmem (memkind library). Refer
 .BR memkind_pmem (3)
 and
 .BR memkind (3)
 man page for more details.
+.PP
+The
+.BR libmemkind::allocation_policy
+specifies allocator memory usage policy, which allows to tune up memory utilization. The available types of allocator usage policy:
+.PP
+.B libmemkind::allocation_policy::DEFAULT
+Default allocator memory usage policy.
+.PP
+.B libmemkind::allocation_policy::CONSERVATIVE
+Conservative allocator memory usage policy - prioritize memory usage at cost of performance
 .PP
 All public member types and functions corresponds to standard library allocator concepts and definitions. The current implementation supports C++11 standard.
 .PP
@@ -72,7 +87,7 @@ is an object type.
 .PP
 .BR Note:
 .br
-.BI "T *pmem::allocator<T>::allocate(std::size_t " "n")
+.BI "T *libmemkind::pmem::allocator<T>::allocate(std::size_t " "n")
 allocates persistent memory memory using
 .BR memkind_malloc ().
 Throw
@@ -88,7 +103,7 @@ when:
 or there is not enough memory to satisfy the request.
 .RE
 .PP
-.BI "pmem::allocator<T>::deallocate(T " "*p" ", std::size_t " "n")
+.BI "libmemkind::pmem::allocator<T>::deallocate(T " "*p" ", std::size_t " "n")
 deallocates memory associated with pointer returned by
 .BR allocate ()
 using
