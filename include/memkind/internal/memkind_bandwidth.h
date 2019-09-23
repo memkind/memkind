@@ -31,6 +31,12 @@ extern "C" {
 
 struct bandwidth_nodes_t;
 
+struct bandwidth_closest_numanode_t {
+    int init_err;
+    int num_cpu;
+    int *closest_numanode;
+};
+
 typedef int (*get_node_bitmask)(struct bitmask *);
 typedef int (*fill_bandwidth_values)(int *);
 
