@@ -1,0 +1,173 @@
+.\"
+.\" Copyright (C) 2019 Intel Corporation.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\" 1. Redistributions of source code must retain the above copyright notice(s),
+.\"    this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright notice(s),
+.\"    this list of conditions and the following disclaimer in the documentation
+.\"    and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY EXPRESS
+.\" OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+.\" EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+.\" LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+.\" PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+.\" LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+.\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.TH "MEMKINDALLOCATOR" 3 "2019-09-24" "Intel Corporation" "MEMKINDALLOCATOR" \" -*- nroff -*-
+.SH "NAME"
+libmemkind::static_kind::allocator<T> \- The C++ allocator compatible with the C++ standard library allocator concepts
+.br
+.BR Note:
+.I memkind_allocator.h
+functionality is considered as stable API (STANDARD API).
+.SH "SYNOPSIS"
+.nf
+.B #include <memkind_allocator.h>
+.sp
+.B Link with -lmemkind
+.sp
+.BI "libmemkind::static_kind::allocator(libmemkind::kinds " "kind" );
+.br
+.BI "template <typename U> libmemkind::static_kind::allocator<T>::allocator(const libmemkind::static_kind::allocator<U>&)" " "noexcept;
+.br
+.BI "template <typename U> libmemkind::static_kind::allocator(const allocator<U>&& " "other" ) " "noexcept;
+.br
+.BI "libmemkind::static_kind::allocator<T>::~allocator();
+.br
+.BI "T *libmemkind::static_kind::allocator<T>::allocate(std::size_t " "n" ) " "const;
+.br
+.BI "void libmemkind::static_kind::allocator<T>::deallocate(T " "*p" ", std::size_t " "n" ) " "const;
+.br
+.BI "template <class U, class... Args> void libmemkind::static_kind::allocator<T>::construct(U " "*p" ", Args... " "args" ) " "const;
+.br
+.BI "void libmemkind::static_kind::allocator<T>::destroy(T " "*p" ) " "const;
+.fi
+.SH "DESCRIPTION"
+The
+.BR libmemkind::static_kind::allocator<T>
+is intended to be used with STL containers to allocate from static kinds memory. Memory management is based on memkind library. Refer
+.BR memkind (3)
+man page for more details.
+.PP
+The
+.BR libmemkind::kinds
+specifies allocator static kinds of memory, representing type of memory which offers different characteristics. The available types of allocator kinds of memory:
+.PP
+.B libmemkind::kinds::DEFAULT
+Default allocation using standard memory and default page size.
+.PP
+.B libmemkind::kinds::HUGETLB
+Allocate from standard memory using huge pages. Note: This kind requires huge pages configuration described in
+.B SYSTEM CONFIGURATION
+section.
+.PP
+.B libmemkind::kinds::INTERLEAVE
+Allocate pages interleaved across all NUMA nodes with transparent huge pages disabled.
+.PP
+.B libmemkind::kinds::HBW
+Allocate from the closest high bandwidth memory NUMA node at time of allocation. If there is not enough high bandwidth memory to satisfy the request errno is set to ENOMEM and the allocated pointer is set to
+.IR "NULL" .
+.PP
+.B libmemkind::kinds::HBW_ALL
+Same as
+.B libmemkind::kinds::HBW
+except decision regarding closest NUMA node is postponed until the time of first write.
+.PP
+.B libmemkind::kinds::HBW_HUGETLB
+Same as
+.B libmemkind::kinds::HBW
+except the allocation is backed by huge pages. Note: This kind requires huge pages configuration described in
+.B SYSTEM CONFIGURATION
+section.
+.PP
+.B libmemkind::kinds::HBW_ALL_HUGETLB
+Combination of
+.B libmemkind::kinds::HBW_ALL
+and
+.B libmemkind::kinds::HBW_HUGETLB
+properties. Note: This kind requires huge pages configuration described in
+.B SYSTEM CONFIGURATION
+section.
+.PP
+.B libmemkind::kinds::HBW_PREFERRED
+Same as
+.B libmemkind::kinds::MEMKIND_HBW
+except that if there is not enough high bandwidth memory to satisfy the request, the allocation will fall back on standard memory.
+.PP
+.B libmemkind::kinds::HBW_PREFERRED_HUGETLB
+Same as
+.B libmemkind::kinds::MEMKIND_HBW_PREFERRED
+except the allocation is backed by huge pages. Note: This kind requires huge pages configuration described in
+.B SYSTEM CONFIGURATION
+section.
+.PP
+.B libmemkind::kinds::HBW_INTERLEAVE
+Same as
+.B libmemkind::kinds::MEMKIND_HBW
+except that the pages that support the allocation are interleaved across all high bandwidth nodes and transparent huge pages are disabled.
+.PP
+.B libmemkind::kinds::MEMKIND_REGULAR
+Allocate from regular memory using the default page size. Regular means general purpose memory from the NUMA nodes containing CPUs.
+.PP
+.B libmemkind::kinds::MEMKIND_DAX_KMEM
+Allocate from the closest persistent memory NUMA node at time of allocation. If there is not enough memory on the closest persistent memory NUMA node to satisfy the request errno is set to ENOMEM and the allocated pointer is set to
+.IR "NULL" .
+.PP
+All public member types and functions corresponds to standard library allocator concepts and definitions. The current implementation supports C++11 standard.
+.PP
+Template arguments:
+.br
+.I T
+is an object type aliased by value_type.
+.br
+.I U
+is an object type.
+.PP
+.BR Note:
+.br
+.BI "T *libmemkind::static_kind::allocator<T>::allocate(std::size_t " "n")
+allocates memory using
+.BR memkind_malloc ().
+Throw
+.I std::bad_alloc
+when:
+.RS
+.I n
+= 0
+.RE
+.br
+.RS
+.br
+or there is not enough memory to satisfy the request.
+.RE
+.PP
+.BI "libmemkind::static_kind::allocator<T>::deallocate(T " "*p" ", std::size_t " "n")
+deallocates memory associated with pointer returned by
+.BR allocate ()
+using
+.BR memkind_free ().
+.SH "SYSTEM CONFIGURATION"
+Interfaces for obtaining 2MB (HUGETLB) need allocated
+huge pages in the kernel's huge page pool.
+.TP
+.B HUGETLB (huge pages)
+Current number of "persistent" huge pages can be read from
+.I /proc/sys/vm/nr_hugepages
+file.
+Proposed way of setting hugepages is:
+.BR "sudo sysctl vm.nr_hugepages=<number_of_hugepages>" .
+More information can be found here:
+.UR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+.UE
+.SH "COPYRIGHT"
+Copyright (C) 2019 Intel Corporation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3)

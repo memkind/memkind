@@ -42,6 +42,7 @@ noinst_PROGRAMS += examples/autohbw_candidates \
                    # end
 if HAVE_CXX11
 noinst_PROGRAMS += examples/memkind_allocated
+noinst_PROGRAMS += examples/memkind_cpp_allocator
 noinst_PROGRAMS += examples/pmem_cpp_allocator
 endif
 
@@ -65,6 +66,7 @@ examples_pmem_usable_size_LDADD = libmemkind.la
 
 if HAVE_CXX11
 examples_memkind_allocated_LDADD = libmemkind.la
+examples_memkind_cpp_allocator_LDADD  = libmemkind.la
 examples_pmem_cpp_allocator_LDADD = libmemkind.la
 endif
 
@@ -87,6 +89,7 @@ examples_pmem_multithreads_onekind_SOURCES = examples/pmem_multithreads_onekind.
 examples_pmem_usable_size_SOURCES = examples/pmem_usable_size.c
 if HAVE_CXX11
 examples_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
+examples_memkind_cpp_allocator_SOURCES = examples/memkind_cpp_allocator.cpp
 examples_pmem_cpp_allocator_SOURCES = examples/pmem_cpp_allocator.cpp
 endif
 

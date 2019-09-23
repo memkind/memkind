@@ -76,6 +76,11 @@ also an example of how to create user defined kinds.  This example
 creates kinds which isolate allocations to a single NUMA node each
 backed by a single arena.
 
+### memkind_cpp_allocator.cpp
+
+This example shows usage of C++ allocator mechanism designed for static
+kinds with different data structures like: forward list.
+
 The memkind_allocated example is simple usage of memkind in C++11 which
 shows how memkind can be used to allocate objects, and consists of two files:
 memkind_allocated.hpp - which is definition of template class that should be
