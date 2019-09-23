@@ -166,6 +166,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %{_includedir}
 %{_includedir}/hbwmalloc.h
 %{_includedir}/hbw_allocator.h
+%{_includedir}/memkind_allocator.h
 %{_includedir}/pmem_allocator.h
 %{_libdir}/lib%{namespace}.so
 %{_libdir}/libautohbw.so
@@ -191,8 +192,9 @@ $(memkind_test_dir)/filter_memkind
 $(memkind_test_dir)/hello_hbw
 $(memkind_test_dir)/hello_memkind
 $(memkind_test_dir)/hello_memkind_debug
-$(memkind_test_dir)/memkind_get_stat
 $(memkind_test_dir)/memkind_allocated
+$(memkind_test_dir)/memkind_cpp_allocator
+$(memkind_test_dir)/memkind_get_stat
 $(memkind_test_dir)/memkind_stat_test
 $(memkind_test_dir)/autohbw_candidates
 ${memkind_test_dir}/pmem_kinds
