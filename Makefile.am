@@ -50,6 +50,7 @@ libmemkind_la_LDFLAGS = -version-info 0:1:0 -ldl -lrt
 include_HEADERS = include/hbw_allocator.h \
                   include/hbwmalloc.h \
                   include/memkind.h \
+                  include/memkind_allocator.h \
                   include/memkind_deprecated.h \
                   include/pmem_allocator.h \
                   # end
@@ -382,6 +383,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind_hbw.3 \
                  man/memkind_hugetlb.3 \
                  man/memkind_pmem.3 \
+                 man/memkindallocator.3 \
                  man/pmemallocator.3 \
                  # end
 
