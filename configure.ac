@@ -187,7 +187,9 @@ if test "x$enable_daxctl" = "x1" ; then
     AC_CHECK_LIB(daxctl, daxctl_dev_get_memory, [daxctl_kmem=yes], [daxctl_kmem=no])
 fi
 if test $daxctl_kmem = "yes" ; then
-    AC_DEFINE([MEMKIND_DAXCTL_KMEM], [ ], [Automatic recognition of PMEM as system memory in MEMKIND_DAX_KMEM])
+    AC_DEFINE([MEMKIND_DAXCTL_KMEM], [1], [Automatic recognition of PMEM as system memory in MEMKIND_DAX_KMEM])
+    AC_SUBST(DAXCTL_LIBS, [-ldaxctl])
+    LDFLAGS="$LDFLAGS -ldaxctl"
 else
     AC_MSG_RESULT([libdaxctl-devel v66 or later not detected])
 fi

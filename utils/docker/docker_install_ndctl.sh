@@ -60,5 +60,7 @@ cd "$NDCTL_LOCAL_DIR"
 make -j "$(nproc --all)"
 sudo make -j "$(nproc --all)" install
 
+# update shared library cache
+sudo ldconfig
 # return to previous directory
 cd -
