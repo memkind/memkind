@@ -1,3 +1,4 @@
+examples/memkind_cpp_allocator.cpp
 examples/pmem_alignment.c
 examples/pmem_and_dax_kmem_kind.c
 examples/pmem_and_default_kind.c

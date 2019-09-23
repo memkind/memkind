@@ -32,6 +32,7 @@ include/memkind/internal/memkind_pmem.h
 include/memkind/internal/memkind_private.h
 include/memkind/internal/memkind_regular.h
 include/memkind/internal/tbb_wrapper.h
+include/memkind_allocator.h
 include/memkind_deprecated.h
 include/pmem_allocator.h
 install_astyle.sh
@@ -47,6 +48,7 @@ man/memkind_default.3
 man/memkind_hbw.3
 man/memkind_hugetlb.3
 man/memkind_pmem.3
+man/memkindallocator.3
 man/pmemallocator.3
 memkind.spec.mk
 src/Makefile.mk
@@ -137,6 +139,7 @@ test/huge_page_test.cpp
 test/load_tbbmalloc_symbols.c
 test/locality_test.cpp
 test/main.cpp
+test/memkind_allocator_tests.cpp
 test/memkind_detect_kind_tests.cpp
 test/memkind_null_kind_test.cpp
 test/memkind_pmem_config_tests.cpp
