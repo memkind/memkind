@@ -174,8 +174,6 @@ Application using memkind library supports managing a data placement:
 | PMEM           | PMEM kind                 |
 | DRAM           | e.g. MEMKIND_DEFAULT kind |
 
-Currently, the PMEM kind is supported only by the jemalloc heap manager.
-
 ## The Detection Mechanism of the Kind
 One of the notable features of the memkind is to detect the correct kind of previously allocated memory.
 

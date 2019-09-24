@@ -34,8 +34,7 @@
 #include <jemalloc/jemalloc.h>
 #include <assert.h>
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
-    .create = memkind_pmem_create,
+static struct memkind_ops MEMKIND_PMEM_OPS = {
     .destroy = memkind_pmem_destroy,
     .malloc = memkind_arena_malloc,
     .calloc = memkind_arena_pmem_calloc,
@@ -192,8 +191,7 @@ static extent_hooks_t pmem_extent_hooks = {
     .destroy = pmem_extent_destroy
 };
 
-MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
-                                       struct memkind_ops *ops, const char *name)
+MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind, const char *name)
 {
     struct memkind_pmem *priv;
     int err;
@@ -209,7 +207,7 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
         goto exit;
     }
 
-    err = memkind_default_create(kind, ops, name);
+    err = memkind_default_create(kind, &MEMKIND_PMEM_OPS, name);
     if (err) {
         goto exit;
     }

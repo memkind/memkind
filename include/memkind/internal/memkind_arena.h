@@ -57,7 +57,7 @@ int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena,
 int memkind_thread_get_arena(struct memkind *kind, unsigned int *arena,
                              size_t size);
 int memkind_arena_finalize(struct memkind *kind);
-void memkind_arena_init(struct memkind *kind);
+void memkind_arena_init(struct memkind *kind, int is_file_backed);
 void memkind_arena_free(struct memkind *kind, void *ptr);
 void memkind_arena_free_with_kind_detect(void *ptr);
 size_t memkind_arena_malloc_usable_size(void *ptr);

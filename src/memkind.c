@@ -182,6 +182,20 @@ MEMKIND_EXPORT struct memkind *MEMKIND_HBW_INTERLEAVE =
         &MEMKIND_HBW_INTERLEAVE_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_REGULAR = &MEMKIND_REGULAR_STATIC;
 
+struct memkind_pool_memory_allocator_g {
+    void *(*pm_malloc)(size_t);
+    void *(*pm_calloc)(size_t, size_t);
+    void  (*pm_free)(void *);
+    int   (*pm_create_pmem)(struct memkind *, const char *);
+};
+
+static struct memkind_pool_memory_allocator_g memkind_pm_alloc_g = {
+    .pm_malloc = jemk_malloc,
+    .pm_calloc = jemk_calloc,
+    .pm_free = jemk_free,
+    .pm_create_pmem = memkind_pmem_create
+};
+
 struct memkind_registry {
     struct memkind *partition_map[MEMKIND_MAX_KIND];
     int num_kind;
@@ -319,7 +333,7 @@ static void memkind_destroy_dynamic_kind_from_register(unsigned int i,
     if (i >= MEMKIND_NUM_BASE_KIND) {
         memkind_registry_g.partition_map[i] = NULL;
         --memkind_registry_g.num_kind;
-        jemk_free(kind);
+        memkind_pm_alloc_g.pm_free(kind);
     }
 }
 
@@ -439,7 +453,7 @@ MEMKIND_EXPORT void memkind_error_message(int err, char *msg, size_t size)
 void memkind_init(memkind_t kind, bool check_numa)
 {
     log_info("Initializing kind %s.", kind->name);
-    heap_manager_init(kind);
+    heap_manager_init(kind, MEMKIND_MEMORY_BACKED);
     if (check_numa) {
         int err = numa_available();
         if (err) {
@@ -451,8 +465,7 @@ void memkind_init(memkind_t kind, bool check_numa)
 
 static void nop(void) {}
 
-static int memkind_create(struct memkind_ops *ops, const char *name,
-                          struct memkind **kind)
+static int memkind_create(const char *name, struct memkind **kind)
 {
     int err;
     unsigned int i;
@@ -468,17 +481,7 @@ static int memkind_create(struct memkind_ops *ops, const char *name,
         err = MEMKIND_ERROR_TOOMANY;
         goto exit;
     }
-    if (ops->create == NULL ||
-        ops->destroy == NULL ||
-        ops->malloc == NULL ||
-        ops->calloc == NULL ||
-        ops->realloc == NULL ||
-        ops->posix_memalign == NULL ||
-        ops->free == NULL ||
-        ops->init_once != NULL) {
-        err = MEMKIND_ERROR_BADOPS;
-        goto exit;
-    }
+
     for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
         if (memkind_registry_g.partition_map[i] == NULL) {
             id_kind = i;
@@ -489,17 +492,28 @@ static int memkind_create(struct memkind_ops *ops, const char *name,
             goto exit;
         }
     }
-    *kind = (struct memkind *)jemk_calloc(1, sizeof(struct memkind));
+    *kind = (struct memkind *)memkind_pm_alloc_g.pm_calloc(1,
+                                                           sizeof(struct memkind));
     if (!*kind) {
         err = MEMKIND_ERROR_MALLOC;
-        log_err("jemk_calloc() failed.");
+        log_err("calloc() failed.");
         goto exit;
     }
-
     (*kind)->partition = memkind_registry_g.num_kind;
-    err = ops->create(*kind, ops, name);
+    err = memkind_pm_alloc_g.pm_create_pmem(*kind, name);
+
+    if ((*kind)->ops->destroy == NULL ||
+        (*kind)->ops->malloc == NULL ||
+        (*kind)->ops->calloc == NULL ||
+        (*kind)->ops->realloc == NULL ||
+        (*kind)->ops->posix_memalign == NULL ||
+        (*kind)->ops->free == NULL ||
+        (*kind)->ops->init_once != NULL) {
+        err = MEMKIND_ERROR_BADOPS;
+    }
+
     if (err) {
-        jemk_free(*kind);
+        memkind_pm_alloc_g.pm_free(*kind);
         goto exit;
     }
     memkind_registry_g.partition_map[id_kind] = *kind;
@@ -523,6 +537,10 @@ static void memkind_construct(void)
     const char *env = getenv("MEMKIND_HEAP_MANAGER");
     if (env && strcmp(env, "TBB") == 0) {
         load_tbb_symbols();
+        memkind_pm_alloc_g.pm_malloc = tbb_pool_manager_malloc;
+        memkind_pm_alloc_g.pm_calloc = tbb_pool_manager_calloc;
+        memkind_pm_alloc_g.pm_free = tbb_pool_manager_free;
+        memkind_pm_alloc_g.pm_create_pmem = tbb_pmem_create;
     }
 }
 
@@ -547,6 +565,11 @@ static int memkind_finalize(void)
             }
             memkind_destroy_dynamic_kind_from_register(i, kind);
         }
+    }
+
+    const char *env = getenv("MEMKIND_HEAP_MANAGER");
+    if (env && strcmp(env, "TBB") == 0) {
+        unload_tbb_symbols();
     }
     assert(memkind_registry_g.num_kind == MEMKIND_NUM_BASE_KIND);
 
@@ -741,14 +764,14 @@ exit:
 
 MEMKIND_EXPORT struct memkind_config *memkind_config_new(void)
 {
-    struct memkind_config *cfg = (struct memkind_config *)jemk_malloc(sizeof(
-                                                                          struct memkind_config));
+    struct memkind_config *cfg = (struct memkind_config *)
+                                 memkind_pm_alloc_g.pm_malloc(sizeof(struct memkind_config));
     return cfg;
 }
 
 MEMKIND_EXPORT void memkind_config_delete(struct memkind_config *cfg)
 {
-    jemk_free(cfg);
+    memkind_pm_alloc_g.pm_free(cfg);
 }
 
 MEMKIND_EXPORT void memkind_config_set_path(struct memkind_config *cfg,
@@ -795,7 +818,7 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
 
     snprintf(name, sizeof (name), "pmem%08x", fd);
 
-    err = memkind_create(&MEMKIND_PMEM_OPS, name, kind);
+    err = memkind_create(name, kind);
     if (err) {
         goto exit;
     }
@@ -805,6 +828,8 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
     priv->fd = fd;
     priv->offset = 0;
     priv->max_size = max_size;
+
+    heap_manager_init(*kind, MEMKIND_FILE_BACKED);
 
     return err;
 
