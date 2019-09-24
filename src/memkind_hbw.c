@@ -181,13 +181,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .finalize = memkind_arena_finalize
 };
 
-struct memkind_closest_numanode_t {
-    int init_err;
-    int num_cpu;
-    int *closest_numanode;
-};
-
-static struct memkind_closest_numanode_t memkind_hbw_closest_numanode_g;
+static struct bandwidth_closest_numanode_t memkind_hbw_closest_numanode_g;
 static pthread_once_t memkind_hbw_closest_numanode_once_g = PTHREAD_ONCE_INIT;
 
 static void memkind_hbw_closest_numanode_init(void);
@@ -217,8 +211,7 @@ MEMKIND_EXPORT int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
 {
     int cpu;
     struct bitmask nodemask_bm = {maxnode, nodemask};
-    struct memkind_closest_numanode_t *g =
-            &memkind_hbw_closest_numanode_g;
+    struct bandwidth_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
     pthread_once(&memkind_hbw_closest_numanode_once_g,
                  memkind_hbw_closest_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err && nodemask)) {
@@ -239,8 +232,7 @@ MEMKIND_EXPORT int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
 {
     int cpu;
     struct bitmask nodemask_bm = {maxnode, nodemask};
-    struct memkind_closest_numanode_t *g =
-            &memkind_hbw_closest_numanode_g;
+    struct bandwidth_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
     pthread_once(&memkind_hbw_closest_numanode_once_g,
                  memkind_hbw_closest_numanode_init);
 
@@ -361,8 +353,7 @@ static int fill_bandwidth_values_heuristically(int *bandwidth)
 }
 static void memkind_hbw_closest_numanode_init(void)
 {
-    struct memkind_closest_numanode_t *g =
-            &memkind_hbw_closest_numanode_g;
+    struct bandwidth_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
     int *bandwidth = NULL;
     int num_unique = 0;
 
