@@ -35,7 +35,7 @@ static struct heap_manager_ops *heap_manager_g;
 pthread_once_t heap_manager_init_once_g = PTHREAD_ONCE_INIT;
 
 struct heap_manager_ops {
-    void (*init)(struct memkind *kind);
+    void (*init)(struct memkind *kind, int is_file_backed);
     size_t (*heap_manager_malloc_usable_size)(void *ptr);
     void (*heap_manager_free)(void *ptr);
     void *(*heap_manager_realloc)(void *ptr, size_t size);
@@ -73,9 +73,9 @@ static inline struct heap_manager_ops *get_heap_manager()
     return heap_manager_g;
 }
 
-void heap_manager_init(struct memkind *kind)
+void heap_manager_init(struct memkind *kind, int is_file_backed)
 {
-    get_heap_manager()->init(kind);
+    get_heap_manager()->init(kind, is_file_backed);
 }
 
 size_t heap_manager_malloc_usable_size(void *ptr)
