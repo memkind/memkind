@@ -199,7 +199,7 @@ static int tbb_pool_posix_memalign(struct memkind *kind, void **memptr,
                                    size_t alignment, size_t size)
 {
     //Check if alignment is "at least as large as sizeof(void *)".
-    if(!alignment && (0 != (alignment & (alignment-sizeof(void *))))) return EINVAL;
+    if(alignment < sizeof(void *)) return EINVAL;
     //Check if alignment is "a power of 2".
     if(alignment & (alignment-1)) return EINVAL;
     if(size_out_of_bounds(size)) {
