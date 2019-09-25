@@ -127,7 +127,7 @@ namespace libmemkind
             explicit allocator()
             {
                 static_assert(std::is_same<V, void>::value,
-                              "pmem::allocator cannot be compiled without CXX11 ABI");
+                              "libmemkind::pmem::allocator cannot be compiled without CXX11 ABI");
             }
 #endif
 
