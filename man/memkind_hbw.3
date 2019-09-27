@@ -60,7 +60,7 @@ High bandwidth memory memkind operations.
 .BR memkind_hbw_check_available ()
 returns zero if library was able to detect heterogeneous NUMA node
 bandwidths.   Returns
-.B MEMKIND_UNAVAILABLE
+.B MEMKIND_ERROR_UNAVAILABLE
 if the detection mechanism failed.
 Detection mechanism can be also overridden by the
 environment variable
