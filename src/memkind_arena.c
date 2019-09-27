@@ -783,3 +783,17 @@ void memkind_arena_init(struct memkind *kind)
         }
     }
 }
+
+MEMKIND_EXPORT int memkind_arena_background_thread(void)
+{
+    int err = MEMKIND_SUCCESS;
+    char cmd[64];
+    bool background_thread_val = true;
+    snprintf(cmd, sizeof(cmd), "background_thread");
+    err = jemk_mallctl(cmd, NULL, NULL, &background_thread_val, sizeof(bool));
+    if (err) {
+        log_err("Error on setting background thread");
+        return MEMKIND_ERROR_INVALID;
+    }
+    return err;
+}

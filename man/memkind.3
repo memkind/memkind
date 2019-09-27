@@ -891,6 +891,11 @@ Controls logging mechanism in memkind. Setting
 to 1 enables printing messages like errors and general information about environment to
 .IR stderr .
 .TP
+.B MEMKIND_BACKGROUND_THREAD
+Enable background worker threads. Setting
+.B MEMKIND_BACKGROUND_THREAD
+to 1 enables background threads in jemalloc heap manager.
+.TP
 .B MEMKIND_HEAP_MANAGER
 Controls heap management behavior in memkind library by switching to one of the available heap managers.
 .br
