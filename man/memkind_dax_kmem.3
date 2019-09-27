@@ -48,7 +48,7 @@ DAX KMEM memory memkind operations.
 .BR memkind_dax_kmem_check_available ()
 returns zero if library was able to detect persistent memory NUMA node
 bandwidths. Returns
-.B MEMKIND_UNAVAILABLE
+.B MEMKIND_ERROR_UNAVAILABLE
 if the detection mechanism failed.
 Detection mechanism can be also overridden by the
 environment variable
