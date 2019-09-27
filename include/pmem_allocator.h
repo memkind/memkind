@@ -120,7 +120,7 @@ namespace libmemkind
             template<typename U>
             friend class allocator;
 
-#ifndef _GLIBCXX_USE_CXX11_ABI
+#if !_GLIBCXX_USE_CXX11_ABI
             /* This is a workaround for compilers (e.g GCC 4.8) that uses C++11 standard,
              * but use old - non C++11 ABI */
             template<typename V = void>
