@@ -338,7 +338,7 @@ MEMKIND_EXPORT int memkind_destroy_kind(memkind_t kind)
 {
     if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
         assert(0 && "failed to acquire mutex");
-    unsigned int i;
+    unsigned i;
     int err = kind->ops->destroy(kind);
     for (i = MEMKIND_NUM_BASE_KIND; i < MEMKIND_MAX_KIND; ++i) {
         if (memkind_registry_g.partition_map[i] &&
@@ -465,8 +465,8 @@ static int memkind_create(struct memkind_ops *ops, const char *name,
                           struct memkind **kind)
 {
     int err;
-    unsigned int i;
-    unsigned int id_kind = 0;
+    unsigned i;
+    unsigned id_kind = 0;
 
     *kind = NULL;
     if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
@@ -542,8 +542,8 @@ __attribute__((destructor))
 static int memkind_finalize(void)
 {
     struct memkind *kind;
-    unsigned int i;
-    int err = 0;
+    unsigned i;
+    int err = MEMKIND_SUCCESS;
 
     if (pthread_mutex_lock(&memkind_registry_g.lock) != 0)
         assert(0 && "failed to acquire mutex");
@@ -569,7 +569,7 @@ exit:
 
 MEMKIND_EXPORT int memkind_check_available(struct memkind *kind)
 {
-    int err = 0;
+    int err = MEMKIND_SUCCESS;
 
     if (MEMKIND_LIKELY(kind->ops->check_available)) {
         err = kind->ops->check_available(kind);
@@ -710,7 +710,7 @@ MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
 static int memkind_tmpfile(const char *dir, int *fd)
 {
     static char template[] = "/memkind.XXXXXX";
-    int err = 0;
+    int err = MEMKIND_SUCCESS;
     int oerrno;
     int dir_len = strlen(dir);
 
@@ -782,7 +782,6 @@ MEMKIND_EXPORT void memkind_config_set_memory_usage_policy(
 MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
                                        struct memkind **kind)
 {
-    int err = 0;
     int oerrno;
 
     if (max_size && max_size < MEMKIND_PMEM_MIN_SIZE) {
@@ -798,7 +797,7 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
     int fd = -1;
     char name[16];
 
-    err = memkind_tmpfile(dir, &fd);
+    int err = memkind_tmpfile(dir, &fd);
     if (err) {
         goto exit;
     }
@@ -842,7 +841,7 @@ MEMKIND_EXPORT int memkind_create_pmem_with_config(struct memkind_config *cfg,
 static int memkind_get_kind_by_partition_internal(int partition,
                                                   struct memkind **kind)
 {
-    int err = 0;
+    int err = MEMKIND_SUCCESS;
 
     if (MEMKIND_LIKELY(partition >= 0 &&
                        partition < MEMKIND_MAX_KIND &&

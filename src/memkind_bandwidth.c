@@ -49,7 +49,8 @@ struct bandwidth_nodes_t {
 static void bandwidth_assign_arbitrary_values(int *bandwidth,
                                               struct bitmask *numa_nodes_bm)
 {
-    int i, nodes_num = numa_num_configured_nodes();
+    unsigned i;
+    unsigned nodes_num = (unsigned)numa_num_configured_nodes();
 
     for (i = 0; i<NUMA_NUM_NODES; i++) {
         if (i >= nodes_num) {
@@ -135,8 +136,8 @@ int bandwidth_create_nodes(int num_bandwidth, const int *bandwidth,
     *       given bandwidth.                                                   *
     *   RETURNS zero on success, error code on failure                         *
     ***************************************************************************/
-    int err = 0;
-    int i, j, k, l, last_bandwidth;
+    int err = MEMKIND_SUCCESS;
+    int i, last_bandwidth;
     struct numanode_bandwidth_t *numanode_bandwidth = NULL;
     *bandwidth_nodes = NULL;
     /* allocate space for sorting array */
@@ -148,7 +149,7 @@ int bandwidth_create_nodes(int num_bandwidth, const int *bandwidth,
     }
     if (!err) {
         /* set sorting array */
-        j = 0;
+        int j = 0;
         for (i = 0; i < num_bandwidth; ++i) {
             if (bandwidth[i] != BANDWIDTH_NODE_NOT_PRESENT) {
                 numanode_bandwidth[j].numanode = i;
@@ -187,8 +188,8 @@ int bandwidth_create_nodes(int num_bandwidth, const int *bandwidth,
         /* populate output */
         (*bandwidth_nodes)[0].numanodes = (int *)(*bandwidth_nodes + *num_unique);
         last_bandwidth = numanode_bandwidth[0].bandwidth;
-        k = 0;
-        l = 0;
+        int k = 0;
+        int l = 0;
         for (i = 0; i < num_bandwidth; ++i, ++l) {
             (*bandwidth_nodes)[0].numanodes[i] = numanode_bandwidth[i].numanode;
             if (numanode_bandwidth[i].bandwidth != last_bandwidth) {
@@ -230,7 +231,7 @@ int bandwidth_set_closest_numanode(int num_unique,
     *       bandwidth.                                                         *
     *   RETURNS zero on success, error code on failure                         *
     ***************************************************************************/
-    int err = 0;
+    int err = MEMKIND_SUCCESS;
     int min_distance, distance, i, j, old_errno, min_unique;
     struct bandwidth_nodes_t match;
     match.bandwidth = -1;

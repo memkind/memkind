@@ -53,14 +53,14 @@ static void *jemk_mallocx_check(size_t size, int flags);
 static void *jemk_rallocx_check(void *ptr, size_t size, int flags);
 static void tcache_finalize(void *args);
 
-static unsigned int integer_log2(unsigned int v)
+static unsigned integer_log2(unsigned v)
 {
     return (sizeof(unsigned) * 8) - (__builtin_clz(v) + 1);
 }
 
-static unsigned int round_pow2_up(unsigned int v)
+static unsigned round_pow2_up(unsigned v)
 {
-    unsigned int v_log2 = integer_log2(v);
+    unsigned v_log2 = integer_log2(v);
 
     if (v != 1 << v_log2) {
         v = 1 << (v_log2 + 1);
@@ -170,17 +170,14 @@ void *arena_extent_alloc(extent_hooks_t *extent_hooks,
                          bool *commit,
                          unsigned arena_ind)
 {
-    int err;
-    void *addr = NULL;
-
     struct memkind *kind = get_kind_by_arena(arena_ind);
 
-    err = memkind_check_available(kind);
+    int err = memkind_check_available(kind);
     if (err) {
         return NULL;
     }
 
-    addr = kind_mmap(kind, new_addr, size);
+    void *addr = kind_mmap(kind, new_addr, size);
     if (addr == MAP_FAILED) {
         return NULL;
     }
@@ -255,13 +252,11 @@ bool arena_extent_purge(extent_hooks_t *extent_hooks,
                         size_t length,
                         unsigned arena_ind)
 {
-    int err;
-
     if (memkind_hog_memory) {
         return true;
     }
 
-    err = madvise(addr + offset, length, MADV_DONTNEED);
+    int err = madvise(addr + offset, length, MADV_DONTNEED);
     return (err != 0);
 }
 
@@ -322,8 +317,7 @@ extent_hooks_t *get_extent_hooks_by_kind(struct memkind *kind)
 MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
                                             extent_hooks_t *hooks)
 {
-    int err = 0;
-    size_t unsigned_size = sizeof(unsigned int);
+    int err;
 
     pthread_once(&arena_config_once, arena_config_init);
     if(arena_init_status) {
@@ -342,11 +336,12 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
 
     if (pthread_mutex_lock(&arena_registry_write_lock) != 0)
         assert(0 && "failed to acquire mutex");
-    unsigned i = 0;
+    unsigned i;
+    size_t unsigned_size = sizeof(unsigned int);
     kind->arena_zero = UINT_MAX;
     for(i = 0; i<kind->arena_map_len; i++) {
-        //create new arena with consecutive index
         unsigned arena_index;
+        //create new arena with consecutive index
         err = jemk_mallctl("arenas.create", (void *)&arena_index, &unsigned_size, NULL,
                            0);
         if(err) {
@@ -377,9 +372,7 @@ exit:
 MEMKIND_EXPORT int memkind_arena_create(struct memkind *kind,
                                         struct memkind_ops *ops, const char *name)
 {
-    int err = 0;
-
-    err = memkind_default_create(kind, ops, name);
+    int err = memkind_default_create(kind, ops, name);
     if (!err) {
         err = memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind));
     }
@@ -388,10 +381,9 @@ MEMKIND_EXPORT int memkind_arena_create(struct memkind *kind,
 
 MEMKIND_EXPORT int memkind_arena_destroy(struct memkind *kind)
 {
-    char cmd[128];
-    unsigned int i;
-
     if (kind->arena_map_len) {
+        char cmd[128];
+        unsigned i;
 
         if (pthread_mutex_lock(&arena_registry_write_lock) != 0)
             assert(0 && "failed to acquire mutex");
@@ -502,10 +494,9 @@ static inline int get_tcache_flag(unsigned partition, size_t size)
 MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
 {
     void *result = NULL;
-    int err = 0;
-    unsigned int arena;
+    unsigned arena;
 
-    err = kind->ops->get_arena(kind, &arena, size);
+    int err = kind->ops->get_arena(kind, &arena, size);
     if (MEMKIND_LIKELY(!err)) {
         result = jemk_mallocx_check(size,
                                     MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
@@ -537,14 +528,13 @@ MEMKIND_EXPORT size_t memkind_arena_malloc_usable_size(void *ptr)
 MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
                                            size_t size)
 {
-    int err = 0;
-    unsigned int arena;
+    unsigned arena;
 
     if (size == 0 && ptr != NULL) {
         memkind_arena_free(kind, ptr);
         ptr = NULL;
     } else {
-        err = kind->ops->get_arena(kind, &arena, size);
+        int err = kind->ops->get_arena(kind, &arena, size);
         if (MEMKIND_LIKELY(!err)) {
             if (ptr == NULL) {
                 ptr = jemk_mallocx_check(size,
@@ -612,10 +602,9 @@ MEMKIND_EXPORT void *memkind_arena_pmem_calloc(struct memkind *kind, size_t num,
                                                size_t size)
 {
     void *result = NULL;
-    int err = 0;
-    unsigned int arena;
+    unsigned arena;
 
-    err = kind->ops->get_arena(kind, &arena, size);
+    int err = kind->ops->get_arena(kind, &arena, size);
     if (MEMKIND_LIKELY(!err)) {
         result = jemk_mallocx_check(num * size,
                                     MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
@@ -630,10 +619,9 @@ MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num,
                                           size_t size)
 {
     void *result = NULL;
-    int err = 0;
-    unsigned int arena;
+    unsigned arena;
 
-    err = kind->ops->get_arena(kind, &arena, size);
+    int err = kind->ops->get_arena(kind, &arena, size);
     if (MEMKIND_LIKELY(!err)) {
         result = jemk_mallocx_check(num * size,
                                     MALLOCX_ARENA(arena) | MALLOCX_ZERO | get_tcache_flag(kind->partition, size));
@@ -645,9 +633,8 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
                                                 void **memptr, size_t alignment,
                                                 size_t size)
 {
-    int err = 0;
-    unsigned int arena;
-    int errno_before;
+    int err;
+    unsigned arena;
 
     *memptr = NULL;
     err = kind->ops->get_arena(kind, &arena, size);
@@ -660,7 +647,7 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
         }
         /* posix_memalign should not change errno.
            Set it to its previous value after calling jemalloc */
-        errno_before = errno;
+        int errno_before = errno;
         *memptr = jemk_mallocx_check(size,
                                      MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena) | get_tcache_flag(
                                          kind->partition, size));
@@ -774,9 +761,8 @@ static void *jemk_rallocx_check(void *ptr, size_t size, int flags)
 
 void memkind_arena_init(struct memkind *kind)
 {
-    int err = 0;
     if (kind != MEMKIND_DEFAULT) {
-        err = memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind));
+        int err = memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind));
         if (err) {
             log_fatal("[%s] Failed to create arena map (error code:%d).", kind->name, err);
             abort();
