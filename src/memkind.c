@@ -524,6 +524,14 @@ static void memkind_construct(void)
     if (env && strcmp(env, "TBB") == 0) {
         load_tbb_symbols();
     }
+    env = getenv("BACKGROUND_THREAD");
+    if (env && strcmp(env, "1") == 0) {
+        memkind_arena_background_thread();
+    } else if (env) {
+        fprintf(stderr,
+                "MEMKIND_WARNING: BACKROUND_THREAD option \"%s\" unknown; Try man memkind for available options.\n",
+                env);
+    }
 }
 
 #ifdef __GNUC__
