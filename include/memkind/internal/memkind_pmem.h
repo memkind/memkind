@@ -43,8 +43,7 @@ extern "C" {
 
 #define MEMKIND_PMEM_CHUNK_SIZE (1ull << 21ull) // 2MB
 
-int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops,
-                        const char *name);
+int memkind_pmem_create(struct memkind *kind, const char *name);
 int memkind_pmem_destroy(struct memkind *kind);
 void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size);
 int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags);
@@ -55,8 +54,6 @@ struct memkind_pmem {
     size_t max_size;
     pthread_mutex_t pmem_lock;
 };
-
-extern struct memkind_ops MEMKIND_PMEM_OPS;
 
 #ifdef __cplusplus
 }

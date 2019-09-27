@@ -26,7 +26,10 @@
 
 #include <memkind.h>
 
-void heap_manager_init(struct memkind *kind);
+#define MEMKIND_MEMORY_BACKED    0
+#define MEMKIND_FILE_BACKED      1
+
+void heap_manager_init(struct memkind *kind, int is_file_backed);
 void heap_manager_free(void *ptr);
 size_t heap_manager_malloc_usable_size(void *ptr);
 void *heap_manager_realloc(void *ptr, size_t size);

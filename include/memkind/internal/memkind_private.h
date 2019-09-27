@@ -103,7 +103,8 @@ struct memkind {
     unsigned int arena_map_len; // is power of 2
     unsigned int *arena_map; // To be deleted beyond 1.2.0+
     pthread_key_t arena_key;
-    void *priv;
+    void *priv;      // pmem private pool
+    void *memory_pool; // pool managed by allocator
     unsigned int
     arena_map_mask; // arena_map_len - 1 to optimize modulo operation on arena_map_len
     unsigned int arena_zero; // index first jemalloc arena of this kind

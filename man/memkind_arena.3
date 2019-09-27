@@ -47,7 +47,7 @@ This is EXPERIMENTAL API. The functionality and the header file itself can be ch
 .BI "struct memkind *get_kind_by_arena(unsigned " "arena_ind" );
 .BI "struct memkind *memkind_arena_detect_kind(void " "*ptr" );
 .BI "int memkind_arena_finalize(struct memkind " "*kind" );
-.BI "void memkind_arena_init(struct memkind " "*kind" );
+.BI "void memkind_arena_init(struct memkind " "*kind" ", int " "is_file_backed" );
 .BI "void memkind_arena_free(struct memkind " "*kind" ", void " "*ptr" );
 .BI "void memkind_arena_free_with_kind_detect(void " "*ptr" );
 .BI "size_t memkind_arena_malloc_usable_size(void " "*ptr" );
@@ -211,7 +211,13 @@ finishes or after calling
 function.
 .PP
 .BR memkind_arena_init ()
-creates arena map with proper hooks per specified kind.
+creates arena map with proper hooks per specified
+.IR kind .
+If
+.I is_file_backed
+is set to 1, specified
+.I kind
+is file-backed kind.
 .PP
 .BR memkind_arena_update_memory_usage_policy ()
 function changes time, which determine how fast jemalloc returns unused pages back to
