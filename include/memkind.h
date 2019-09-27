@@ -277,6 +277,9 @@ extern memkind_t MEMKIND_HBW_INTERLEAVE;
 /// \warning EXPERIMENTAL API
 extern memkind_t MEMKIND_INTERLEAVE;
 
+/// \note STANDARD API
+extern memkind_t MEMKIND_DAX_KMEM;
+
 ///
 /// \brief Get Memkind API version
 /// \note STANDARD API
