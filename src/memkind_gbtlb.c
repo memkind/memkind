@@ -97,7 +97,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
 
 static void memkind_gbtlb_ceil_size(size_t *size)
 {
-    *size = *size % ONE_GB ? ((*size / ONE_GB) + 1) * ONE_GB : *size;
+    *size = (*size % ONE_GB) ? ((*size / ONE_GB) + 1) * ONE_GB : *size;
 }
 
 static void *gbtlb_mmap(struct memkind *kind, void *addr, size_t size)

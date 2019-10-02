@@ -66,8 +66,7 @@ void *pmem_extent_alloc(extent_hooks_t *extent_hooks,
         goto exit;
     }
 
-    struct memkind *kind;
-    kind = get_kind_by_arena(arena_ind);
+    struct memkind *kind = get_kind_by_arena(arena_ind);
     if (kind == NULL) {
         return NULL;
     }
