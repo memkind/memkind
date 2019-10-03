@@ -164,7 +164,7 @@ MEMKIND_EXPORT int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind *kind,
 static void memkind_dax_kmem_closest_numanode_init(void)
 {
     struct bandwidth_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
-    int *bandwidth = (int *)jemk_malloc(sizeof(int) * NUMA_NUM_NODES);
+    int *bandwidth = (int *)jemk_calloc(NUMA_NUM_NODES, sizeof(int));
     int num_unique = 0;
 
     struct bandwidth_nodes_t *bandwidth_nodes = NULL;
