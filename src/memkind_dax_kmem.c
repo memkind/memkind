@@ -71,6 +71,7 @@ static void memkind_dax_kmem_closest_numanode_init(void);
          region = _region, \
         _region = _region ? daxctl_region_get_next(_region) : NULL)
 #endif
+
 #ifndef daxctl_dev_foreach_safe
 #define daxctl_dev_foreach_safe(region, dev, _dev) \
     for (dev = daxctl_dev_get_first(region), \
@@ -163,14 +164,13 @@ MEMKIND_EXPORT int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind *kind,
 static void memkind_dax_kmem_closest_numanode_init(void)
 {
     struct bandwidth_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
-    int *bandwidth;
+    int *bandwidth = (int *)jemk_malloc(sizeof(int) * NUMA_NUM_NODES);
     int num_unique = 0;
 
     struct bandwidth_nodes_t *bandwidth_nodes = NULL;
 
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = (int *)jemk_malloc(sizeof(int) * g->num_cpu);
-    bandwidth = (int *)jemk_malloc(sizeof(int) * NUMA_NUM_NODES);
 
     if (!(g->closest_numanode && bandwidth)) {
         g->init_err = MEMKIND_ERROR_MALLOC;
