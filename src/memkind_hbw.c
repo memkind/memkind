@@ -353,7 +353,7 @@ static int fill_bandwidth_values_heuristically(int *bandwidth)
 static void memkind_hbw_closest_numanode_init(void)
 {
     struct bandwidth_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
-    int *bandwidth = (int *)jemk_malloc(sizeof(int) * NUMA_NUM_NODES);
+    int *bandwidth = (int *)jemk_calloc(NUMA_NUM_NODES, sizeof(int));
     int num_unique = 0;
 
     struct bandwidth_nodes_t *bandwidth_nodes = NULL;
