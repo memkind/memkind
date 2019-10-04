@@ -34,7 +34,7 @@ class Test_hbw_detection(object):
     cmd_helper = CMD_helper()
 
     def get_hbw_nodes(self, nodemask=None):
-        """ This function executes memkind function 'get_mbind_nodemask' and returns its output - comma separated HBW nodes """
+        """ This function executes memkind function 'get_mbind_nodemask' and returns its output - comma-separated HBW nodes """
         command = self.binary_path
         if (nodemask):
             command = "MEMKIND_HBW_NODES={}".format(nodemask) + command

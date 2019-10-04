@@ -373,6 +373,7 @@ dist_doc_DATA = COPYING README VERSION
 dist_man_MANS =  man/autohbw.7 \
                  man/hbwallocator.3 \
                  man/hbwmalloc.3 \
+                 man/memkind-auto-dax-kmem-nodes.1 \
                  man/memkind-hbw-nodes.1 \
                  man/memkind.3 \
                  man/memkind_arena.3 \
@@ -390,7 +391,11 @@ pkgconfig_DATA = memkind.pc
 CLEANFILES = memkind-$(VERSION).spec $(libmemkind_la_LIBADD)
 DISTCLEANFILES = VERSION configure pkgconfig_DATA
 
-bin_PROGRAMS = memkind-hbw-nodes
+bin_PROGRAMS = memkind-auto-dax-kmem-nodes memkind-hbw-nodes
+
+memkind_auto_dax_kmem_nodes_SOURCES = src/memkind-auto-dax-kmem-nodes.c
+memkind_auto_dax_kmem_nodes_LDADD = libmemkind.la
+memkind_auto_dax_kmem_nodes_LDFLAGS = $(DAXCTL_LIBS)
 
 memkind_hbw_nodes_SOURCES = src/memkind-hbw-nodes.c
 memkind_hbw_nodes_LDADD = libmemkind.la

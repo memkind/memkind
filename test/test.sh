@@ -242,14 +242,30 @@ function check_hbw_nodes()
     fi
 }
 
+#Check automatic support for persistent memory NUMA node - simulate one if no one was found
+function check_auto_dax_kmem_nodes()
+{
+    if [ ! -f /usr/bin/memkind-auto-dax-kmem-nodes ]; then
+        if [ -x ./memkind-auto-dax-kmem-nodes ]; then
+            export PATH=$PATH:$PWD
+        else
+            echo "Cannot find 'memkind-auto-dax-kmem-nodes' in $PWD. Did you run 'make'?"
+            exit 1
+        fi
+    fi
+
+    ret=$(memkind-auto-dax-kmem-nodes)
+    if [[ $ret == "" ]]; then
+        export MEMKIND_DAX_KMEM_NODES=1
+    fi
+}
+
 #begin of main script
 
 check_numa
 
 check_hbw_nodes
-
-#TODO(kfilipek): Update when /usr/bin/memkind-dax-kmem-nodes binary will be added
-export MEMKIND_DAX_KMEM_NODES=1
+check_auto_dax_kmem_nodes
 
 OPTIND=1
 

@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2018 - 2019 Intel Corporation.
+.\" Copyright (C) 2019 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -21,27 +21,36 @@
 .\" OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "MEMKIND-HBW_NODES" 1 "2018-03-12" "Intel Corporation" "MEMKIND-HBW_NODES" \" -*- nroff -*-
+.TH "MEMKIND-AUTO-DAX-KMEM-NODES" 1 "2019-08-29" "Intel Corporation" "MEMKIND-AUTO-DAX-KMEM-NODES" \" -*- nroff -*-
 .SH "NAME"
-memkind-hbw-nodes - print comma-separated list of high bandwidth nodes.
+memkind-auto-dax-kmem-nodes - prints comma-separated list of automatically detected persistent memory NUMA nodes.
 .br
 Note: This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes), or removed.
 .SH "SYNOPSIS"
-memkind-hbw-nodes [-h|--help]
+memkind-auto-dax-kmem-nodes [-h|--help]
 .SH "DESCRIPTION"
-.BR memkind-hbw-nodes
-prints a comma-separated list of high bandwidth NUMA nodes that can be used with the numactl --membind option.
+.BR memkind-auto-dax-kmem-nodes
+prints a comma-separated list of automatically detected persistent memory NUMA nodes that can be used with the numactl --membind option.
 .SH "OPTIONS"
 .BR " -h, --help"
               Displays help text and exit.
 .SH "EXIT STATUS"
-.BR memkind-hbw-nodes
-exits with status 0 on success, 1 on failure, 2 on invalid argument.
+.BR 0
+on success
+.br
+.BR 1
+if automatic detection is disabled (memkind wasn't build with suitable libdaxctl-devel version)
+.br
+.BR 2
+if argument is invalid
+.br
+.BR 3
+on other failure
 .SH "COPYRIGHT"
-Copyright (C) 2016 - 2019 Intel Corporation. All rights reserved.
+Copyright (C) 2019 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
-.BR hbwmalloc (3),
+.BR daxctl (3),
 .BR memkind (3),
 .BR numactl (8)
 .SH "AUTHOR"
-Krzysztof Kulakowski <krzysztof.kulakowski@intel.com>
+Michal Biesek <michal.biesek@intel.com>
