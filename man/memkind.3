@@ -859,14 +859,14 @@ Unspecified run-time error
 .SH "FILES"
 .TP
 .I /usr/bin/memkind-hbw-nodes
-Prints a comma separated list of high bandwidth nodes.
+Prints a comma-separated list of high bandwidth nodes.
 .TP
 .I /usr/bin/memkind-auto-dax-kmem-nodes
-Prints a comma separated list of persistent memory NUMA nodes, which are automatically detected.
+Prints a comma-separated list of persistent memory NUMA nodes, which are automatically detected.
 .SH "ENVIRONMENT"
 .TP
 .B MEMKIND_HBW_NODES
-This environment variable is a comma separated list of NUMA nodes that
+This environment variable is a comma-separated list of NUMA nodes that
 are treated as high bandwidth. Uses the
 .I libnuma
 routine
@@ -876,7 +876,7 @@ for parsing, so the syntax described in the
 man page for this routine applies: e.g. 1-3,5 is a valid setting.
 .TP
 .B MEMKIND_DAX_KMEM_NODES
-This environment variable is a comma separated list of NUMA nodes that
+This environment variable is a comma-separated list of NUMA nodes that
 are treated as PMEM memory. Uses the
 .I libnuma
 routine
