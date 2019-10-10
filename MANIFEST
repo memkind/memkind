@@ -28,6 +28,7 @@ examples/memkind_allocated_example.cpp
 examples/memkind_decorator_debug.c
 examples/pmem_alignment.c
 examples/pmem_and_default_kind.c
+examples/pmem_and_dax_kmem.c
 examples/pmem_config.c
 examples/pmem_cpp_allocator.cpp
 examples/pmem_detect_kind.c

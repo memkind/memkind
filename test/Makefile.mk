@@ -240,6 +240,7 @@ check_PROGRAMS += test/autohbw_candidates \
                   test/hello_memkind \
                   test/hello_memkind_debug \
                   test/pmem_alignment \
+                  test/pmem_and_dax_kmem_kind \
                   test/pmem_and_default_kind \
                   test/pmem_config \
                   test/pmem_detect_kind \
@@ -262,6 +263,7 @@ test_hello_hbw_LDADD = libmemkind.la
 test_hello_memkind_LDADD = libmemkind.la
 test_hello_memkind_debug_LDADD = libmemkind.la
 test_pmem_alignment_LDADD = libmemkind.la
+test_pmem_and_dax_kmem_kind_LDADD = libmemkind.la
 test_pmem_and_default_kind_LDADD = libmemkind.la
 test_pmem_config_LDADD = libmemkind.la
 test_pmem_detect_kind_LDADD = libmemkind.la
@@ -283,6 +285,7 @@ test_hello_hbw_SOURCES = examples/hello_hbw_example.c
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
 test_pmem_alignment_SOURCES = examples/pmem_alignment.c
+test_pmem_and_dax_kmem_kind_SOURCES = examples/pmem_and_dax_kmem_kind.c
 test_pmem_and_default_kind_SOURCES = examples/pmem_and_default_kind.c
 test_pmem_config_SOURCES = examples/pmem_config.c
 test_pmem_detect_kind_SOURCES = examples/pmem_detect_kind.c

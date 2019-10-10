@@ -198,6 +198,7 @@ ${memkind_test_dir}/pmem_malloc
 ${memkind_test_dir}/pmem_malloc_unlimited
 ${memkind_test_dir}/pmem_usable_size
 ${memkind_test_dir}/pmem_alignment
+${memkind_test_dir}/pmem_and_dax_kmem_kind
 ${memkind_test_dir}/pmem_and_default_kind
 ${memkind_test_dir}/pmem_config
 $(memkind_test_dir)/pmem_detect_kind

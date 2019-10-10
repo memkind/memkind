@@ -44,6 +44,11 @@ This example shows how to use multithreading with one main pmem kind.
 
 This example shows how to allocate in standard memory and file-backed memory (pmem kind).
 
+### pmem_and_dax_kmem_kind.c
+
+This example shows how to allocate to PMEM memory using file-backed memory (pmem kind) and
+and persistent memory NUMA node (MEMKIND_DAX_KMEM).
+
 ### pmem_detect_kind.c
 
 This example shows how to distinguish allocation from different kinds using detect kind function.

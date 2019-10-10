@@ -36,6 +36,7 @@
 /examples/hello_memkind_debug
 /examples/memkind_allocated
 /examples/pmem_alignment
+/examples/pmem_and_dax_kmem_kind
 /examples/pmem_and_default_kind
 /examples/pmem_config
 /examples/pmem_cpp_allocator
@@ -95,6 +96,7 @@
 /test/perf_tool
 /test/performance/.deps/
 /test/pmem_alignment
+/test/pmem_and_dax_kmem_kind
 /test/pmem_and_default_kind
 /test/pmem_config
 /test/pmem_cpp_allocator
