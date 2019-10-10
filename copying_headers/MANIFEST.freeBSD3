@@ -1,5 +1,5 @@
 examples/pmem_alignment.c
-examples/pmem_and_default_kind
+examples/pmem_and_default_kind.c
 examples/pmem_config.c
 examples/pmem_cpp_allocator.cpp
 examples/pmem_detect_kind.c
