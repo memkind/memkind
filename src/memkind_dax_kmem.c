@@ -183,8 +183,7 @@ static void memkind_dax_kmem_closest_numanode_init(void)
     if (g->init_err)
         goto exit;
 
-    g->init_err = bandwidth_create_nodes(NUMA_NUM_NODES, bandwidth, &num_unique,
-                                         &bandwidth_nodes);
+    g->init_err = bandwidth_create_nodes(bandwidth, &num_unique, &bandwidth_nodes);
     if (g->init_err)
         goto exit;
 

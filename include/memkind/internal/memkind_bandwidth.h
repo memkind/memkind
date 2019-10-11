@@ -40,8 +40,8 @@ struct bandwidth_closest_numanode_t {
 typedef int (*get_node_bitmask)(struct bitmask *);
 typedef int (*fill_bandwidth_values)(int *);
 
-int bandwidth_create_nodes(int num_bandwidth, const int *bandwidth,
-                           int *num_unique, struct bandwidth_nodes_t **bandwidth_nodes);
+int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
+                           struct bandwidth_nodes_t **bandwidth_nodes);
 int bandwidth_fill(int *bandwidth, get_node_bitmask get_bitmask);
 int bandwidth_fill_nodes(int *bandwidth, fill_bandwidth_values fill,
                          const char *env);
