@@ -770,7 +770,7 @@ void memkind_arena_init(struct memkind *kind)
     }
 }
 
-MEMKIND_EXPORT int memkind_arena_background_thread(void)
+int memkind_arena_background_thread(void)
 {
     bool background_thread_val = true;
     int err = jemk_mallctl("background_thread", NULL, NULL, &background_thread_val,

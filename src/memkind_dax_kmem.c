@@ -119,13 +119,13 @@ static int fill_dax_kmem_values_automatic(int *bandwidth)
 }
 #endif
 
-MEMKIND_EXPORT int memkind_dax_kmem_check_available(struct memkind *kind)
+int memkind_dax_kmem_check_available(struct memkind *kind)
 {
     return kind->ops->get_mbind_nodemask(kind, NULL, 0);
 }
 
-MEMKIND_EXPORT int memkind_dax_kmem_get_mbind_nodemask(struct memkind *kind,
-                                                       unsigned long *nodemask, unsigned long maxnode)
+int memkind_dax_kmem_get_mbind_nodemask(struct memkind *kind,
+                                        unsigned long *nodemask, unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};
     struct bandwidth_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
@@ -201,7 +201,7 @@ exit:
     }
 }
 
-MEMKIND_EXPORT void memkind_dax_kmem_init_once(void)
+void memkind_dax_kmem_init_once(void)
 {
     memkind_init(MEMKIND_DAX_KMEM, true);
 }
