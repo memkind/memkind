@@ -21,6 +21,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <errno.h>
 #include <limits.h>
 #include <stdint.h>
@@ -137,14 +138,15 @@ int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
     *       A list of length num_unique sorted by bandwidth value where        *
     *       each element gives a list of the numa nodes that have the          *
     *       given bandwidth.                                                   *
-    *   RETURNS zero on success, error code on failure                         *
+    *   RETURNS MEMKIND_SUCCESS on success, error code on failure              *
     ***************************************************************************/
     int err = MEMKIND_SUCCESS;
-    int i, last_bandwidth, found_bandwidth;
+    int i, last_bandwidth;
     *bandwidth_nodes = NULL;
     /* allocate space for sorting array */
+    int nodes_num = numa_num_configured_nodes();
     struct numanode_bandwidth_t *numanode_bandwidth = jemk_malloc(sizeof(
-                                                                      struct numanode_bandwidth_t) * NUMA_NUM_NODES);
+                                                                      struct numanode_bandwidth_t) * nodes_num);
     if (!numanode_bandwidth) {
         err = MEMKIND_ERROR_MALLOC;
         log_err("jemk_malloc() failed.");
@@ -159,19 +161,18 @@ int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
                 ++j;
             }
         }
-        /* ignore zero bandwidths */
-        found_bandwidth = j;
-        if (found_bandwidth == 0) {
+
+        if (j == 0) {
             err = MEMKIND_ERROR_UNAVAILABLE;
         }
     }
     if (!err) {
-        qsort(numanode_bandwidth, found_bandwidth,
-              sizeof(struct numanode_bandwidth_t), bandwidth_compare_numanode);
+        qsort(numanode_bandwidth, nodes_num, sizeof(struct numanode_bandwidth_t),
+              bandwidth_compare_numanode);
         /* calculate the number of unique bandwidths */
         *num_unique = 1;
         last_bandwidth = numanode_bandwidth[0].bandwidth;
-        for (i = 1; i < found_bandwidth; ++i) {
+        for (i = 1; i < nodes_num; ++i) {
             if (numanode_bandwidth[i].bandwidth != last_bandwidth) {
                 last_bandwidth = numanode_bandwidth[i].bandwidth;
                 ++*num_unique;
@@ -180,7 +181,7 @@ int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
         /* allocate output array */
         *bandwidth_nodes = (struct bandwidth_nodes_t *)jemk_malloc(
                                sizeof(struct bandwidth_nodes_t) * (*num_unique) +
-                               sizeof(int) * found_bandwidth);
+                               sizeof(int) * nodes_num);
         if (!*bandwidth_nodes) {
             err = MEMKIND_ERROR_MALLOC;
             log_err("jemk_malloc() failed.");
@@ -192,7 +193,7 @@ int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
         last_bandwidth = numanode_bandwidth[0].bandwidth;
         int k = 0;
         int l = 0;
-        for (i = 0; i < found_bandwidth; ++i, ++l) {
+        for (i = 0; i < nodes_num; ++i, ++l) {
             (*bandwidth_nodes)[0].numanodes[i] = numanode_bandwidth[i].numanode;
             if (numanode_bandwidth[i].bandwidth != last_bandwidth) {
                 (*bandwidth_nodes)[k].num_numanodes = l;
