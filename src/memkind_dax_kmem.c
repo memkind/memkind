@@ -55,7 +55,13 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
     .finalize = memkind_arena_finalize
 };
 
-static struct bandwidth_closest_numanode_t memkind_dax_kmem_closest_numanode_g;
+struct dax_closest_numanode_t {
+    int init_err;
+    int num_cpu;
+    int *closest_numanode;
+};
+
+static struct dax_closest_numanode_t memkind_dax_kmem_closest_numanode_g;
 static pthread_once_t memkind_dax_kmem_closest_numanode_once_g =
     PTHREAD_ONCE_INIT;
 
@@ -128,7 +134,7 @@ int memkind_dax_kmem_get_mbind_nodemask(struct memkind *kind,
                                         unsigned long *nodemask, unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};
-    struct bandwidth_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
+    struct dax_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
     pthread_once(&memkind_dax_kmem_closest_numanode_once_g,
                  memkind_dax_kmem_closest_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err && nodemask)) {
@@ -147,7 +153,7 @@ MEMKIND_EXPORT int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind *kind,
                                                            unsigned long *nodemask, unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};
-    struct bandwidth_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
+    struct dax_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
     pthread_once(&memkind_dax_kmem_closest_numanode_once_g,
                  memkind_dax_kmem_closest_numanode_init);
 
@@ -163,7 +169,7 @@ MEMKIND_EXPORT int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind *kind,
 
 static void memkind_dax_kmem_closest_numanode_init(void)
 {
-    struct bandwidth_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
+    struct dax_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
     int *bandwidth = (int *)jemk_calloc(NUMA_NUM_NODES, sizeof(int));
     int num_unique = 0;
 
