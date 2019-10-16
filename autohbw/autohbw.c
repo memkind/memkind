@@ -195,7 +195,7 @@ static void setEnvValues()
 {
     // STEP: Read the log level from the env variable. Do this early because
     //       printing depends on this
-    char *log_str = getenv("AUTO_HBW_LOG");
+    char *log_str = secure_getenv("AUTO_HBW_LOG");
     if (log_str && strlen(log_str)) {
         int level = atoi(log_str);
         LogLevel = level;
@@ -216,7 +216,7 @@ static void setEnvValues()
     // Set the memory type allocated by this library. By default, it is
     // MEMKIND_HBW, but we can use this library to allocate other memory
     // types
-    const char *memtype_str = getenv("AUTO_HBW_MEM_TYPE");
+    const char *memtype_str = secure_getenv("AUTO_HBW_MEM_TYPE");
     if (memtype_str && strlen(memtype_str)) {
         // Find the memkind_t using the name the user has provided in the env variable
         memkind_t mty = get_kind_by_name(memtype_str);
@@ -232,7 +232,7 @@ static void setEnvValues()
     // STEP: Set the size limits (thresholds) for HBW allocation
     //
     // Reads the environment variable
-    const char *size_str = getenv("AUTO_HBW_SIZE");
+    const char *size_str = secure_getenv("AUTO_HBW_SIZE");
     if (size_str) {
         size_t lowlim = HBWLowLimit / 1024;
         size_t highlim = HBWHighLimit / 1024;

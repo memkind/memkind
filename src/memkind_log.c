@@ -50,7 +50,7 @@ static bool log_enabled;
 static pthread_once_t init_once = PTHREAD_ONCE_INIT;
 static void log_init_once(void)
 {
-    char *memkind_debug_env= getenv("MEMKIND_DEBUG");
+    char *memkind_debug_env = secure_getenv("MEMKIND_DEBUG");
 
     if (memkind_debug_env) {
         if(strcmp(memkind_debug_env, "1") == 0) {

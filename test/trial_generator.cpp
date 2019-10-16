@@ -285,7 +285,7 @@ void TGTest :: SetUp()
     char *hbw_nodes_env, *endptr;
     tgen = std::unique_ptr<TrialGenerator>(new TrialGenerator());
 
-    hbw_nodes_env = getenv("MEMKIND_HBW_NODES");
+    hbw_nodes_env = secure_getenv("MEMKIND_HBW_NODES");
     if (hbw_nodes_env) {
         num_bandwidth = 128;
         for (node = 0; node < num_bandwidth; node++) {
