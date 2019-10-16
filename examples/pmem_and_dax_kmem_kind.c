@@ -87,9 +87,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    sprintf(ptr_dax_kmem,
-            "Hello world from persistent memory NUMA node - ptr_dax_kmem.\n");
-    sprintf(ptr_pmem, "Hello world from file-backed memory - ptr_pmem.\n");
+    snprintf(ptr_dax_kmem, size,
+             "Hello world from persistent memory NUMA node - ptr_dax_kmem.\n");
+    snprintf(ptr_pmem, size, "Hello world from file-backed memory - ptr_pmem.\n");
 
     fprintf(stdout, "%s", ptr_dax_kmem);
     fprintf(stdout, "%s", ptr_pmem);
