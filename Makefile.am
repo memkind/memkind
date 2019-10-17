@@ -414,8 +414,8 @@ AM_CXXFLAGS = $(req_flags)
 clean-local: clean-jemalloc_deps
 
 clean-jemalloc_deps:
-	cd jemalloc && $(MAKE) clean
-	cd jemalloc && rm configure
+	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
+	[ -e jemalloc/configure ] && (cd jemalloc && rm configure) || exit 0
 
 .PHONY: jemalloc_deps checkprogs clean-jemalloc_deps
 .NOTPARALLEL: static_lib
