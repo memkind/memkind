@@ -150,6 +150,21 @@ fi
 
 AC_SUBST([enable_secure])
 
+#============================tcache_max_size_class======================
+
+tcache_max_size_class=12;
+AC_DEFINE_UNQUOTED([JEMALLOC_TCACHE_CLASS], $tcache_max_size_class,
+  [Maximum size class (log base 2) to cache in jemalloc tcache])
+
+AC_SUBST(tcache_max_size_class)
+
+#============================auto_arenas================================
+auto_arenas=256;
+AC_DEFINE_UNQUOTED([ARENA_LIMIT_DEFAULT_KIND], $auto_arenas,
+  [Maximum number of automatic managed arenas by jemalloc (used by MEMKIND_DEFAULT)])
+
+AC_SUBST(auto_arenas)
+
 #============================arena_limit=======================================
 arena_limit=256;
 AC_ARG_VAR(ARENA_LIMIT,
