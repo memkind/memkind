@@ -414,8 +414,7 @@ int memkind_arena_finalize(struct memkind *kind)
 }
 
 // max allocation size to be cached by tcache mechanism
-// should be aligned with jemalloc opt.lg_tcache_max
-#define TCACHE_MAX (1<<12)
+#define TCACHE_MAX (1<<(JEMALLOC_TCACHE_CLASS))
 
 static void tcache_finalize(void *args)
 {
