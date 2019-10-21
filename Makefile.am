@@ -414,8 +414,8 @@ AM_CXXFLAGS = $(req_flags)
 clean-local: clean-jemalloc_deps
 
 clean-jemalloc_deps:
-	cd jemalloc && $(MAKE) clean
-	cd jemalloc && rm configure
+	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
+	[ -e jemalloc/configure ] && (cd jemalloc && rm configure) || exit 0
 
 .PHONY: jemalloc_deps checkprogs clean-jemalloc_deps
 .NOTPARALLEL: static_lib
@@ -447,7 +447,7 @@ static_lib: libmemkind.la
 
 JEMALLOC_CONFIG = --enable-autogen --without-export --with-version=5.0.0-0-g0 \
 			--disable-fill --disable-initial-exec-tls --with-jemalloc-prefix=@memkind_prefix@ \
-			--with-malloc-conf="narenas:256,lg_tcache_max:12" \
+			--with-malloc-conf="narenas:@auto_arenas@,lg_tcache_max:@tcache_max_size_class@" \
 			#end
 
 jemalloc_deps:
