@@ -43,8 +43,10 @@ int memkind_dax_kmem_get_mbind_nodemask(struct memkind *kind,
 int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind *kind,
                                             unsigned long *nodemask, unsigned long maxnode);
 void memkind_dax_kmem_init_once(void);
+void memkind_dax_kmem_preferred_init_once(void);
 
 extern struct memkind_ops MEMKIND_DAX_KMEM_OPS;
+extern struct memkind_ops MEMKIND_DAX_KMEM_PREFERRED_OPS;
 
 #ifdef __cplusplus
 }

@@ -41,6 +41,8 @@ This is EXPERIMENTAL API. The functionality and the header file itself can be ch
 .br
 .BI "void memkind_dax_kmem_init_once(void);"
 .br
+.BI "void memkind_dax_kmem_prefereed_init_once(void);"
+.br
 .SH DESCRIPTION
 .PP
 DAX KMEM memory memkind operations.
@@ -90,6 +92,14 @@ initializes
 kind and it should not be called more than once.
 .BR Note:
 .BR memkind_dax_kmem_init_once ()
+may reserve some extra memory.
+.PP
+.BR memkind_dax_kmem_preferred_init_once ()
+initializes
+.B MEMKIND_DAX_KMEM_PREFERRED
+kind and it should not be called more than once.
+.BR Note:
+.BR memkind_dax_kmem_preferred_init_once ()
 may reserve some extra memory.
 .SH "COPYRIGHT"
 Copyright (C) 2019 Intel Corporation. All rights reserved.
