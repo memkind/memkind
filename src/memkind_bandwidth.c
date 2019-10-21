@@ -26,8 +26,6 @@
 #include <limits.h>
 #include <stdint.h>
 
-#include <jemalloc/jemalloc.h>
-
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_bandwidth.h>
@@ -145,11 +143,11 @@ int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
     *bandwidth_nodes = NULL;
     /* allocate space for sorting array */
     int nodes_num = numa_num_configured_nodes();
-    struct numanode_bandwidth_t *numanode_bandwidth = jemk_malloc(sizeof(
-                                                                      struct numanode_bandwidth_t) * nodes_num);
+    struct numanode_bandwidth_t *numanode_bandwidth = malloc(sizeof(
+                                                                 struct numanode_bandwidth_t) * nodes_num);
     if (!numanode_bandwidth) {
         err = MEMKIND_ERROR_MALLOC;
-        log_err("jemk_malloc() failed.");
+        log_err("malloc() failed.");
     }
     if (!err) {
         /* set sorting array */
@@ -179,12 +177,11 @@ int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
             }
         }
         /* allocate output array */
-        *bandwidth_nodes = (struct bandwidth_nodes_t *)jemk_malloc(
-                               sizeof(struct bandwidth_nodes_t) * (*num_unique) +
-                               sizeof(int) * nodes_num);
+        *bandwidth_nodes = (struct bandwidth_nodes_t *)malloc(sizeof(
+                                                                  struct bandwidth_nodes_t) * (*num_unique) + sizeof(int) * nodes_num);
         if (!*bandwidth_nodes) {
             err = MEMKIND_ERROR_MALLOC;
-            log_err("jemk_malloc() failed.");
+            log_err("malloc() failed.");
         }
     }
     if (!err) {
@@ -208,11 +205,11 @@ int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
         (*bandwidth_nodes)[k].bandwidth = last_bandwidth;
     }
     if (numanode_bandwidth) {
-        jemk_free(numanode_bandwidth);
+        free(numanode_bandwidth);
     }
     if (err) {
         if (*bandwidth_nodes) {
-            jemk_free(*bandwidth_nodes);
+            free(*bandwidth_nodes);
         }
     }
     return err;
