@@ -41,12 +41,17 @@ struct dax_closest_numanode_t {
     struct vec_cpu_node *closest_numanode;
 };
 
-static struct dax_closest_numanode_t memkind_dax_kmem_closest_numanode_g;
-static pthread_once_t memkind_dax_kmem_closest_numanode_once_g =
-    PTHREAD_ONCE_INIT;
+#define NODE_VARIANT_MULTIPLE 0
+#define NODE_VARIANT_SINGLE   1
+#define NODE_VARIANT_NO       2
+
+static struct dax_closest_numanode_t
+    memkind_dax_kmem_closest_numanode_g[NODE_VARIANT_NO];
+static pthread_once_t memkind_dax_kmem_closest_numanode_once_g[NODE_VARIANT_NO]
+    = {PTHREAD_ONCE_INIT};
 
 static void memkind_dax_kmem_closest_numanode_init(void);
-
+static void memkind_dax_kmem_preferred_closest_numanode_init(void);
 #ifdef MEMKIND_DAXCTL_KMEM
 #include <daxctl/libdaxctl.h>
 #ifndef daxctl_region_foreach_safe
@@ -113,9 +118,24 @@ static int memkind_dax_kmem_check_available(struct memkind *kind)
 static int memkind_dax_kmem_get_mbind_nodemask(struct memkind *kind,
                                                unsigned long *nodemask, unsigned long maxnode)
 {
-    struct dax_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
-    pthread_once(&memkind_dax_kmem_closest_numanode_once_g,
+    struct dax_closest_numanode_t *g =
+            &memkind_dax_kmem_closest_numanode_g[NODE_VARIANT_MULTIPLE];
+    pthread_once(&memkind_dax_kmem_closest_numanode_once_g[NODE_VARIANT_MULTIPLE],
                  memkind_dax_kmem_closest_numanode_init);
+    if (MEMKIND_LIKELY(!g->init_err)) {
+        g->init_err = set_bitmask_for_current_closest_numanode(nodemask, maxnode,
+                                                               g->closest_numanode, g->num_cpu);
+    }
+    return g->init_err;
+}
+
+static int memkind_dax_kmem_get_preferred_mbind_nodemask(struct memkind *kind,
+                                                         unsigned long *nodemask, unsigned long maxnode)
+{
+    struct dax_closest_numanode_t *g =
+            &memkind_dax_kmem_closest_numanode_g[NODE_VARIANT_SINGLE];
+    pthread_once(&memkind_dax_kmem_closest_numanode_once_g[NODE_VARIANT_SINGLE],
+                 memkind_dax_kmem_preferred_closest_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err)) {
         g->init_err = set_bitmask_for_current_closest_numanode(nodemask, maxnode,
                                                                g->closest_numanode, g->num_cpu);
@@ -126,8 +146,9 @@ static int memkind_dax_kmem_get_mbind_nodemask(struct memkind *kind,
 MEMKIND_EXPORT int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind *kind,
                                                            unsigned long *nodemask, unsigned long maxnode)
 {
-    struct dax_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
-    pthread_once(&memkind_dax_kmem_closest_numanode_once_g,
+    struct dax_closest_numanode_t *g =
+            &memkind_dax_kmem_closest_numanode_g[NODE_VARIANT_MULTIPLE];
+    pthread_once(&memkind_dax_kmem_closest_numanode_once_g[NODE_VARIANT_MULTIPLE],
                  memkind_dax_kmem_closest_numanode_init);
 
     if (MEMKIND_LIKELY(!g->init_err)) {
@@ -139,16 +160,32 @@ MEMKIND_EXPORT int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind *kind,
 
 static void memkind_dax_kmem_closest_numanode_init(void)
 {
-    struct dax_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
+    struct dax_closest_numanode_t *g =
+            &memkind_dax_kmem_closest_numanode_g[NODE_VARIANT_MULTIPLE];
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(fill_dax_kmem_values_automatic,
                                        "MEMKIND_DAX_KMEM_NODES", &g->closest_numanode, g->num_cpu, false);
 }
 
+static void memkind_dax_kmem_preferred_closest_numanode_init(void)
+{
+    struct dax_closest_numanode_t *g =
+            &memkind_dax_kmem_closest_numanode_g[NODE_VARIANT_SINGLE];
+    g->num_cpu = numa_num_configured_cpus();
+    g->closest_numanode = NULL;
+    g->init_err = set_closest_numanode(fill_dax_kmem_values_automatic,
+                                       "MEMKIND_DAX_KMEM_NODES", &g->closest_numanode, g->num_cpu, true);
+}
+
 static void memkind_dax_kmem_init_once(void)
 {
     memkind_init(MEMKIND_DAX_KMEM, true);
+}
+
+static void memkind_dax_kmem_preferred_init_once(void)
+{
+    memkind_init(MEMKIND_DAX_KMEM_PREFERRED, true);
 }
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
@@ -169,4 +206,23 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat
+};
+
+MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_PREFERRED_OPS = {
+    .create = memkind_arena_create,
+    .destroy = memkind_default_destroy,
+    .malloc = memkind_arena_malloc,
+    .calloc = memkind_arena_calloc,
+    .posix_memalign = memkind_arena_posix_memalign,
+    .realloc = memkind_arena_realloc,
+    .free = memkind_arena_free,
+    .check_available = memkind_dax_kmem_check_available,
+    .mbind = memkind_default_mbind,
+    .get_mmap_flags = memkind_default_get_mmap_flags,
+    .get_mbind_mode = memkind_preferred_get_mbind_mode,
+    .get_mbind_nodemask = memkind_dax_kmem_get_preferred_mbind_nodemask,
+    .get_arena = memkind_thread_get_arena,
+    .init_once = memkind_dax_kmem_preferred_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
+    .finalize = memkind_arena_finalize
 };
