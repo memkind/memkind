@@ -152,6 +152,11 @@ static void memkind_dax_kmem_init_once(void)
     memkind_init(MEMKIND_DAX_KMEM, true);
 }
 
+static void memkind_dax_kmem_preferred_init_once(void)
+{
+    memkind_init(MEMKIND_DAX_KMEM_PREFERRED, true);
+}
+
 MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
@@ -167,6 +172,25 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
     .get_mbind_nodemask = memkind_dax_kmem_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_dax_kmem_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
+    .finalize = memkind_arena_finalize
+};
+
+MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_PREFERRED_OPS = {
+    .create = memkind_arena_create,
+    .destroy = memkind_default_destroy,
+    .malloc = memkind_arena_malloc,
+    .calloc = memkind_arena_calloc,
+    .posix_memalign = memkind_arena_posix_memalign,
+    .realloc = memkind_arena_realloc,
+    .free = memkind_arena_free,
+    .check_available = memkind_dax_kmem_check_available,
+    .mbind = memkind_default_mbind,
+    .get_mmap_flags = memkind_default_get_mmap_flags,
+    .get_mbind_mode = memkind_preferred_get_mbind_mode,
+    .get_mbind_nodemask = memkind_dax_kmem_get_mbind_nodemask,
+    .get_arena = memkind_thread_get_arena,
+    .init_once = memkind_dax_kmem_preferred_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize
 };
