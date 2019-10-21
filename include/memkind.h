@@ -280,6 +280,9 @@ extern memkind_t MEMKIND_INTERLEAVE;
 /// \note STANDARD API
 extern memkind_t MEMKIND_DAX_KMEM;
 
+/// \note STANDARD API
+extern memkind_t MEMKIND_DAX_KMEM_PREFERRED;
+
 ///
 /// \brief Get Memkind API version
 /// \note STANDARD API
