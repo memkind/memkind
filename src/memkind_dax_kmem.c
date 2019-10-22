@@ -51,7 +51,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_dax_kmem_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
-    .finalize = memkind_arena_finalize
+    .finalize = memkind_arena_finalize,
+    .get_stat = memkind_arena_get_kind_stat
 };
 
 struct dax_closest_numanode_t {

@@ -69,6 +69,10 @@ kind with different data structures like: vector, list and map.
 
 ## Other memkind examples
 
+### memkind_get_stat.c
+
+This example shows how to get information about allocator and kind statistics.
+
 The simplest example is the hello_example.c which is a hello world
 variant.  The filter_example.c shows how you would use high bandwidth
 memory to store a reduction of a larger data set stored in DDR. There is

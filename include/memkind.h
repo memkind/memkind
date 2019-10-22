@@ -150,10 +150,18 @@ enum {
 
 /// \brief Memkind memory usage policy
 typedef enum memkind_mem_usage_policy {
-    MEMKIND_MEM_USAGE_POLICY_DEFAULT      = 0,        /**<  Default  memory usage  */
+    MEMKIND_MEM_USAGE_POLICY_DEFAULT      = 0,        /**<   Default  memory usage */
     MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE = 1,        /**<  Minimize memory usage at all costs, */
     MEMKIND_MEM_USAGE_POLICY_MAX_VALUE
 } memkind_mem_usage_policy;
+
+/// \brief Memkind memory statistics type
+typedef enum memkind_stat_type {
+    MEMKIND_STAT_TYPE_RESIDENT      = 0,        /**<  Maximum number of bytes in physically resident data pages mapped */
+    MEMKIND_STAT_TYPE_ACTIVE        = 1,        /**<  Total number of bytes in active pages */
+    MEMKIND_STAT_TYPE_ALLOCATED     = 2,        /**<  Total number of allocated bytes */
+    MEMKIND_STAT_TYPE_MAX_VALUE
+} memkind_stat_type;
 
 /// \brief Forward declaration of memkind configuration
 struct memkind_config;
@@ -324,6 +332,23 @@ int memkind_create_pmem_with_config(struct memkind_config *cfg,
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
 ///
 int memkind_check_available(memkind_t kind);
+
+///
+/// \brief Update memkind cached statistics
+/// \note STANDARD API
+/// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
+///
+int memkind_update_cached_stats(void);
+
+///
+/// \brief Get memkind statistic
+/// \note STANDARD API
+/// \param kind specified memory kind
+/// \param stat specified type of memory statistic
+/// \param value reference to value of memory statistic
+/// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
+///
+int memkind_get_stat(memkind_t kind, memkind_stat_type stat, size_t *value);
 
 /* HEAP MANAGEMENT INTERFACE */
 

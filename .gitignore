@@ -34,6 +34,7 @@
 /examples/hello_hbw
 /examples/hello_memkind
 /examples/hello_memkind_debug
+/examples/memkind_get_stat
 /examples/memkind_allocated
 /examples/pmem_alignment
 /examples/pmem_and_dax_kmem_kind
@@ -93,6 +94,8 @@
 /test/locality_test
 /test/mallocerr_test
 /test/memkind_allocated
+/test/memkind_stat_test
+/test/memkind_get_stat
 /test/perf_tool
 /test/performance/.deps/
 /test/pmem_alignment
