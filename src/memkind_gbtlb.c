@@ -53,7 +53,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_gbtlb_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
-    .finalize = memkind_arena_finalize
+    .finalize = memkind_arena_finalize,
+    .get_stat = memkind_arena_get_kind_stat
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
@@ -73,7 +74,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_preferred_gbtlb_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
-    .finalize = memkind_arena_finalize
+    .finalize = memkind_arena_finalize,
+    .get_stat = memkind_arena_get_kind_stat
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
@@ -90,7 +92,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_gbtlb_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
-    .finalize = memkind_arena_finalize
+    .finalize = memkind_arena_finalize,
+    .get_stat = memkind_arena_get_kind_stat
 };
 
 #define ONE_GB 1073741824ULL

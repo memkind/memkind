@@ -64,6 +64,14 @@ size_t memkind_arena_malloc_usable_size(void *ptr);
 int memkind_arena_update_memory_usage_policy(struct memkind *kind,
                                              memkind_mem_usage_policy policy);
 int memkind_arena_background_thread(void);
+int memkind_arena_update_cached_stats(void);
+int memkind_arena_get_kind_stat(struct memkind *kind,
+                                memkind_stat_type stat_type,
+                                size_t *stat);
+int memkind_arena_get_stat_with_check_init(struct memkind *kind,
+                                           memkind_stat_type stat, bool check_init, size_t *value);
+int memkind_arena_get_global_stat(memkind_stat_type stat_type, size_t *stat);
+
 #ifdef __cplusplus
 }
 #endif

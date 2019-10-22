@@ -27,6 +27,7 @@ noinst_PROGRAMS += examples/autohbw_candidates \
                    examples/hello_hbw \
                    examples/hello_memkind \
                    examples/hello_memkind_debug \
+                   examples/memkind_get_stat \
                    examples/pmem_alignment \
                    examples/pmem_and_dax_kmem_kind \
                    examples/pmem_and_default_kind \
@@ -50,6 +51,7 @@ examples_filter_memkind_LDADD = libmemkind.la
 examples_hello_hbw_LDADD = libmemkind.la
 examples_hello_memkind_LDADD = libmemkind.la
 examples_hello_memkind_debug_LDADD = libmemkind.la
+examples_memkind_get_stat_LDADD = libmemkind.la
 examples_pmem_alignment_LDADD = libmemkind.la
 examples_pmem_and_dax_kmem_kind_LDADD = libmemkind.la
 examples_pmem_and_default_kind_LDADD = libmemkind.la
