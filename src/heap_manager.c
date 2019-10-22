@@ -40,6 +40,8 @@ struct heap_manager_ops {
     void (*heap_manager_free)(void *ptr);
     void *(*heap_manager_realloc)(void *ptr, size_t size);
     struct memkind *(*heap_manager_detect_kind)(void *ptr);
+    int (*heap_manager_update_cached_stats)(void);
+    int (*heap_manager_get_stat)(memkind_stat_type stat, size_t *value);
 };
 
 struct heap_manager_ops arena_heap_manager_g = {
@@ -47,7 +49,9 @@ struct heap_manager_ops arena_heap_manager_g = {
     .heap_manager_malloc_usable_size = memkind_arena_malloc_usable_size,
     .heap_manager_free = memkind_arena_free_with_kind_detect,
     .heap_manager_realloc = memkind_arena_realloc_with_kind_detect,
-    .heap_manager_detect_kind = memkind_arena_detect_kind
+    .heap_manager_detect_kind = memkind_arena_detect_kind,
+    .heap_manager_update_cached_stats = memkind_arena_update_cached_stats,
+    .heap_manager_get_stat = memkind_arena_get_global_stat,
 };
 
 struct heap_manager_ops tbb_heap_manager_g = {
@@ -55,7 +59,9 @@ struct heap_manager_ops tbb_heap_manager_g = {
     .heap_manager_malloc_usable_size = tbb_pool_malloc_usable_size_with_kind_detect,
     .heap_manager_free = tbb_pool_free_with_kind_detect,
     .heap_manager_realloc = tbb_pool_realloc_with_kind_detect,
-    .heap_manager_detect_kind = tbb_detect_kind
+    .heap_manager_detect_kind = tbb_detect_kind,
+    .heap_manager_update_cached_stats = tbb_update_cached_stats,
+    .heap_manager_get_stat = tbb_get_global_stat,
 };
 
 static void set_heap_manager()
@@ -96,4 +102,14 @@ void *heap_manager_realloc(void *ptr, size_t size)
 struct memkind *heap_manager_detect_kind(void *ptr)
 {
     return get_heap_manager()->heap_manager_detect_kind(ptr);
+}
+
+int heap_manager_update_cached_stats(void)
+{
+    return get_heap_manager()->heap_manager_update_cached_stats();
+}
+
+int heap_manager_get_stat(memkind_stat_type stat, size_t *value)
+{
+    return  get_heap_manager()->heap_manager_get_stat(stat, value);
 }
