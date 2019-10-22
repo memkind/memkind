@@ -15,6 +15,7 @@ examples/hello_memkind_example.c
 examples/memkind_allocated.hpp
 examples/memkind_allocated_example.cpp
 examples/memkind_decorator_debug.c
+examples/memkind_get_stat.c
 include/hbw_allocator.h
 include/hbwmalloc.h
 include/memkind.h
@@ -142,6 +143,7 @@ test/memkind_null_kind_test.cpp
 test/memkind_pmem_config_tests.cpp
 test/memkind_pmem_long_time_tests.cpp
 test/memkind_pmem_tests.cpp
+test/memkind_stat_test.cpp
 test/memkind_versioning_tests.cpp
 test/memory_footprint_test.cpp
 test/memory_manager.h

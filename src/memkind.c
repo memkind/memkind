@@ -68,6 +68,8 @@ static struct memkind MEMKIND_DEFAULT_STATIC = {
     .partition = MEMKIND_PARTITION_DEFAULT,
     .name = "memkind_default",
     .init_once = PTHREAD_ONCE_INIT,
+    .arena_zero = 0,
+    .arena_map_len = ARENA_LIMIT_DEFAULT_KIND - 1,
 };
 
 static struct memkind MEMKIND_HUGETLB_STATIC = {
@@ -865,3 +867,22 @@ MEMKIND_EXPORT int memkind_get_kind_by_partition(int partition,
     return memkind_get_kind_by_partition_internal(partition, kind);
 }
 
+MEMKIND_EXPORT int memkind_update_cached_stats(void)
+{
+    return heap_manager_update_cached_stats();
+}
+
+MEMKIND_EXPORT int memkind_get_stat(memkind_t kind, memkind_stat_type stat,
+                                    size_t *value)
+{
+    if (MEMKIND_UNLIKELY(stat >= MEMKIND_STAT_TYPE_MAX_VALUE)) {
+        log_err("Unrecognized type of memory statistic %d", stat);
+        return MEMKIND_ERROR_INVALID;
+    }
+
+    if (!kind) {
+        return heap_manager_get_stat(stat, value);
+    } else {
+        return kind->ops->get_stat(kind, stat, value);
+    }
+}

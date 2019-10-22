@@ -88,6 +88,12 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .br
 .BI "int memkind_check_available(memkind_t " "kind" );
 .sp
+.B "STATISTICS:"
+.br
+.BI "int memkind_update_cached_stats(void);"
+.br
+.BI "int memkind_get_stat(memkind_t " "kind" ", memkind_stat " "stat" ", size_t " "*value" );
+.sp
 .B "DECORATORS:"
 .br
 .BI "void memkind_malloc_pre(memkind_t " "*kind" ", size_t " "*size" );
@@ -524,6 +530,38 @@ section if it is not.
 .BR MEMKIND_PMEM_MIN_SIZE
 The minimum size which allows to limit the file-backed memory partition.
 .sp
+.B "STATISTICS:"
+.br
+The functions described in this section define a way to get specific memory allocation statistics.
+.PP
+.BR memkind_update_cached_stats ()
+is used to force an update of cached dynamic allocator statistics.
+Statistics are not updated real-time by memkind library and this method allows to force its update.
+.PP
+.BR memkind_get_stat ()
+retrieves statistic of the specified type
+and returns it in
+.IR "value".
+For more details about
+.I stat
+see the
+.B "MEMORY STATISTICS TYPE"
+section below.
+Measured statistic applies
+to specific
+.IR "kind",
+when
+.I NULL
+is given as
+.I kind
+then statistic applies to memory used by the whole memkind library.
+.BR Note:
+You need to call
+.BR memkind_update_cached_stats ()
+before calling
+.BR memkind_get_stat ()
+because statistics are cached by memkind library.
+.sp
 .B "DECORATORS:"
 .br
 The memkind library enables the user to define decorator functions that
@@ -780,6 +818,17 @@ Conservative memory usage policy - prioritize memory usage at cost of performanc
 Memory usage policies have no effect for TBB heap manager described in
 .B ENVIRONMENT
 section.
+.SH "MEMORY STATISTICS TYPE"
+The available types of memory statistics:
+.TP
+.B MEMKIND_STAT_TYPE_RESIDENT
+Maximum number of bytes in physically resident data pages mapped.
+.TP
+.B MEMKIND_STAT_TYPE_ACTIVE
+Total number of bytes in active pages.
+.TP
+.B MEMKIND_STAT_TYPE_ALLOCATED
+Total number of allocated bytes.
 .SH "ERRORS"
 .TP
 .BR memkind_posix_memalign ()
