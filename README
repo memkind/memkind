@@ -149,14 +149,59 @@ Without them physical memory may end up being located on incorrect NUMA node.
 To use the interfaces for obtaining 2MB pages please be sure to follow the instructions
 [here](https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt) and pay particular
 attention to the use of the procfs files:
+
     /proc/sys/vm/nr_hugepages
     /proc/sys/vm/nr_overcommit_hugepages
+
 for enabling the kernel's huge page pool.
 
 * **PMEM kind**
 
 To use the PMEM kind, please be sure that filesystem which is used for PMEM creation supports
 [FALLOC_FL_PUNCH_HOLE](http://man7.org/linux/man-pages/man2/fallocate.2.html) flag.
+
+* **DAX KMEM kind**
+
+DAX KMEM kind supports NUMA nodes created from persistent memory as an extension of DRAM.
+To use DAX KMEM kind you need at least Linux Kernel 5.1 (with enabled DEV_DAX_KMEM Kernel option) and created DAX device.
+If you have loaded dax_pmem_compat module instead of dax_pmem, please read
+[this](https://pmem.io/ndctl/daxctl-migrate-device-model.html) article and migrate device model
+to use alternative device dax drivers, e.g. kmem.
+
+If you want to migrate device model type:
+
+    daxctl migrate-device-model
+
+To create a new DAX device you can type:
+
+    ndctl create-namespace --mode=devdax --map=mem
+
+To display a list of created devices:
+
+    ndctl list
+
+If you have already created device in another mode, you can reconfigure the device using:
+
+    ndctl create-namespace --mode=devdax --map=mem --force -e namespaceX.Y
+
+Where namespaceX.Y means namespace you want to reconfigure.
+
+For more details about creating new namespace read [this](https://pmem.io/ndctl/ndctl-create-namespace.html).
+
+Conversion from device dax to NUMA node can be performed using following commands:
+
+    daxctl reconfigure-device daxX.Y --mode=system-ram
+
+Where daxX.Y is DAX device you want to reconfigure.
+
+This will migrate device from device_dax to kmem driver. After this step daxctl should be able to
+see devices in system-ram mode:
+
+    daxctl list
+
+Also you should be able to check new NUMA node configuration by:
+
+    numactl -H
 
 ## PMEM Kind Usage
 PMEM kind supports the traditional malloc/free interfaces on a memory mapped file.
