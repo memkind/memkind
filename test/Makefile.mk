@@ -32,6 +32,7 @@ check_PROGRAMS += test/all_tests \
                   test/freeing_memory_segfault_test \
                   test/gb_page_tests_bind_policy \
                   test/locality_test \
+                  test/memkind_stat_test \
                   test/pmem_test \
                   test/trace_mechanism_test_helper \
                   # end
@@ -65,6 +66,7 @@ test_decorator_test_LDADD = libmemkind.la
 test_environ_err_hbw_malloc_test_LDADD = libmemkind.la
 test_freeing_memory_segfault_test_LDADD = libmemkind.la
 test_gb_page_tests_bind_policy_LDADD = libmemkind.la
+test_memkind_stat_test_LDADD = libmemkind.la
 test_pmem_test_LDADD = libmemkind.la
 test_trace_mechanism_test_helper_LDADD = libmemkind.la
 
@@ -112,6 +114,7 @@ test_decorator_test_SOURCES = $(fused_gtest) test/decorator_test.cpp test/decora
 test_environ_err_hbw_malloc_test_SOURCES = test/environ_err_hbw_malloc_test.cpp
 test_freeing_memory_segfault_test_SOURCES = $(fused_gtest) test/freeing_memory_segfault_test.cpp
 test_gb_page_tests_bind_policy_SOURCES = $(fused_gtest) test/gb_page_tests_bind_policy.cpp test/trial_generator.cpp test/check.cpp
+test_memkind_stat_test_SOURCES = $(fused_gtest) test/memkind_stat_test.cpp
 test_pmem_test_SOURCES = $(fused_gtest) test/memkind_pmem_config_tests.cpp test/memkind_pmem_long_time_tests.cpp test/memkind_pmem_tests.cpp
 test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c
 
@@ -239,6 +242,7 @@ check_PROGRAMS += test/autohbw_candidates \
                   test/hello_hbw \
                   test/hello_memkind \
                   test/hello_memkind_debug \
+                  test/memkind_get_stat \
                   test/pmem_alignment \
                   test/pmem_and_dax_kmem_kind \
                   test/pmem_and_default_kind \
@@ -262,6 +266,7 @@ test_filter_memkind_LDADD = libmemkind.la
 test_hello_hbw_LDADD = libmemkind.la
 test_hello_memkind_LDADD = libmemkind.la
 test_hello_memkind_debug_LDADD = libmemkind.la
+test_memkind_get_stat_LDADD = libmemkind.la
 test_pmem_alignment_LDADD = libmemkind.la
 test_pmem_and_dax_kmem_kind_LDADD = libmemkind.la
 test_pmem_and_default_kind_LDADD = libmemkind.la
@@ -284,6 +289,7 @@ test_filter_memkind_SOURCES = examples/filter_example.c
 test_hello_hbw_SOURCES = examples/hello_hbw_example.c
 test_hello_memkind_SOURCES = examples/hello_memkind_example.c
 test_hello_memkind_debug_SOURCES = examples/hello_memkind_example.c examples/memkind_decorator_debug.c
+test_memkind_get_stat_SOURCES = examples/memkind_get_stat.c
 test_pmem_alignment_SOURCES = examples/pmem_alignment.c
 test_pmem_and_dax_kmem_kind_SOURCES = examples/pmem_and_dax_kmem_kind.c
 test_pmem_and_default_kind_SOURCES = examples/pmem_and_default_kind.c
