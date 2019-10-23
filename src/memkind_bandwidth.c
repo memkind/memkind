@@ -305,3 +305,32 @@ exit:
 
     return status;
 }
+
+void set_bitmask_for_all_closest_numanodes(unsigned long *nodemask,
+                                           unsigned long maxnode, const int *closest_numanode, int num_cpu)
+{
+    if (MEMKIND_LIKELY(nodemask)) {
+        struct bitmask nodemask_bm = {maxnode, nodemask};
+        int cpu;
+        numa_bitmask_clearall(&nodemask_bm);
+        for (cpu = 0; cpu < num_cpu; ++cpu) {
+            numa_bitmask_setbit(&nodemask_bm, closest_numanode[cpu]);
+        }
+    }
+}
+
+int set_bitmask_for_current_closest_numanode(unsigned long *nodemask,
+                                             unsigned long maxnode, const int *closest_numanode, int num_cpu)
+{
+    if (MEMKIND_LIKELY(nodemask)) {
+        struct bitmask nodemask_bm = {maxnode, nodemask};
+        numa_bitmask_clearall(&nodemask_bm);
+        int cpu = sched_getcpu();
+        if (MEMKIND_LIKELY(cpu < num_cpu)) {
+            numa_bitmask_setbit(&nodemask_bm, closest_numanode[cpu]);
+        } else {
+            return MEMKIND_ERROR_RUNTIME;
+        }
+    }
+    return MEMKIND_SUCCESS;
+}
