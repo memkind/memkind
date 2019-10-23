@@ -95,8 +95,8 @@ static int bandwidth_fill_values_from_enviroment(int *bandwidth,
     return 0;
 }
 
-int bandwidth_fill_nodes(int *bandwidth, fill_bandwidth_values fill,
-                         const char *env)
+static int bandwidth_fill_nodes(int *bandwidth, fill_bandwidth_values fill,
+                                const char *env)
 {
     char *high_value_nodes_env = secure_getenv(env);
     if (high_value_nodes_env) {
@@ -122,8 +122,8 @@ static int bandwidth_compare_numanode(const void *a, const void *b)
     return result;
 }
 
-int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
-                           struct bandwidth_nodes_t **bandwidth_nodes)
+static int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
+                                  struct bandwidth_nodes_t **bandwidth_nodes)
 {
     /***************************************************************************
     *   bandwidth (IN):                                                        *
@@ -215,9 +215,9 @@ int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
     return err;
 }
 
-int bandwidth_set_closest_numanode(int num_unique,
-                                   const struct bandwidth_nodes_t *bandwidth_nodes,
-                                   int num_cpunode, int *closest_numanode)
+static int bandwidth_set_closest_numanode(int num_unique,
+                                          const struct bandwidth_nodes_t *bandwidth_nodes,
+                                          int num_cpunode, int *closest_numanode)
 {
     /***************************************************************************
     *   num_unique (IN):                                                       *
@@ -271,4 +271,37 @@ int bandwidth_set_closest_numanode(int num_unique,
         }
     }
     return err;
+}
+
+int set_closest_numanode(fill_bandwidth_values fill_values, const char *env,
+                         int *closest_numanode, int num_cpu)
+{
+    int status;
+    int num_unique = 0;
+    struct bandwidth_nodes_t *bandwidth_nodes = NULL;
+    int *bandwidth = (int *)calloc(NUMA_NUM_NODES, sizeof(int));
+
+    if (!bandwidth) {
+        status = MEMKIND_ERROR_MALLOC;
+        log_err("calloc() failed.");
+        goto exit;
+    }
+
+    status = bandwidth_fill_nodes(bandwidth, fill_values, env);
+    if (status)
+        goto exit;
+
+    status = bandwidth_create_nodes(bandwidth, &num_unique, &bandwidth_nodes);
+    if (status)
+        goto exit;
+
+    status = bandwidth_set_closest_numanode(num_unique, bandwidth_nodes, num_cpu,
+                                            closest_numanode);
+
+exit:
+
+    free(bandwidth_nodes);
+    free(bandwidth);
+
+    return status;
 }
