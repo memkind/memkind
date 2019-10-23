@@ -31,7 +31,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <jemalloc/jemalloc.h>
 #include <assert.h>
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
@@ -197,9 +196,9 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
     struct memkind_pmem *priv;
     int err;
 
-    priv = (struct memkind_pmem *)jemk_malloc(sizeof(struct memkind_pmem));
+    priv = (struct memkind_pmem *)malloc(sizeof(struct memkind_pmem));
     if (!priv) {
-        log_err("jemk_malloc() failed.");
+        log_err("malloc() failed.");
         return MEMKIND_ERROR_MALLOC;
     }
 
@@ -224,7 +223,7 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
 exit:
     /* err is set, please don't overwrite it with result of pthread_mutex_destroy */
     pthread_mutex_destroy(&priv->pmem_lock);
-    jemk_free(priv);
+    free(priv);
     return err;
 }
 
@@ -237,7 +236,7 @@ MEMKIND_EXPORT int memkind_pmem_destroy(struct memkind *kind)
     pthread_mutex_destroy(&priv->pmem_lock);
 
     (void) close(priv->fd);
-    jemk_free(priv);
+    free(priv);
 
     return 0;
 }

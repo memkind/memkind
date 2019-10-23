@@ -41,7 +41,6 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <jemalloc/jemalloc.h>
 #include <utmpx.h>
 #include <sched.h>
 #include <stdint.h>
@@ -359,17 +358,17 @@ static int fill_bandwidth_values_heuristically(int *bandwidth)
 static void memkind_hbw_closest_numanode_init(void)
 {
     struct hbw_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
-    int *bandwidth = (int *)jemk_calloc(NUMA_NUM_NODES, sizeof(int));
+    int *bandwidth = (int *)calloc(NUMA_NUM_NODES, sizeof(int));
     int num_unique = 0;
 
     struct bandwidth_nodes_t *bandwidth_nodes = NULL;
 
     g->num_cpu = numa_num_configured_cpus();
-    g->closest_numanode = (int *)jemk_malloc(sizeof(int) * g->num_cpu);
+    g->closest_numanode = (int *)malloc(sizeof(int) * g->num_cpu);
 
     if (!(g->closest_numanode && bandwidth)) {
         g->init_err = MEMKIND_ERROR_MALLOC;
-        log_err("jemk_malloc() failed.");
+        log_err("malloc() failed.");
         goto exit;
     }
 
@@ -387,11 +386,11 @@ static void memkind_hbw_closest_numanode_init(void)
 
 exit:
 
-    jemk_free(bandwidth_nodes);
-    jemk_free(bandwidth);
+    free(bandwidth_nodes);
+    free(bandwidth);
 
     if (g->init_err) {
-        jemk_free(g->closest_numanode);
+        free(g->closest_numanode);
         g->closest_numanode = NULL;
     }
 }
