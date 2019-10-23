@@ -459,7 +459,7 @@ unit_tests: checkprogs
 	test/decorator_test
 
 unit_tests_pmem: checkprogs
-	test/all_tests --gtest_filter=*MemkindPmemTests.*:PmemAllocatorTests.*
+	test/pmem_test
 
 include autohbw/Makefile.mk
 include test/Makefile.mk
