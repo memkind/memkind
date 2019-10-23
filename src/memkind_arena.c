@@ -73,7 +73,7 @@ MEMKIND_EXPORT int memkind_set_arena_map_len(struct memkind *kind)
     if (kind->ops->get_arena == memkind_bijective_get_arena) {
         kind->arena_map_len = 1;
     } else if (kind->ops->get_arena == memkind_thread_get_arena) {
-        char *arena_num_env = getenv("MEMKIND_ARENA_NUM_PER_KIND");
+        char *arena_num_env = secure_getenv("MEMKIND_ARENA_NUM_PER_KIND");
 
         if (arena_num_env) {
             unsigned long int arena_num_value = strtoul(arena_num_env, NULL, 10);
@@ -109,7 +109,7 @@ static bool memkind_hog_memory;
 
 static void arena_config_init()
 {
-    const char *str = getenv("MEMKIND_HOG_MEMORY");
+    const char *str = secure_getenv("MEMKIND_HOG_MEMORY");
     memkind_hog_memory = str && str[0] == '1';
 
     arena_init_status = pthread_key_create(&tcache_key, tcache_finalize);

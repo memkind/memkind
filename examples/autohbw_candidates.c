@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Intel Corporation.
+ * Copyright (C) 2015 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,6 +110,7 @@ int main()
 
     free(buf);
     finish_testcase(0, "Free after realloc failed!", &err);
+    buf = NULL;
 
     // Test 4: Test posix_memalign and free
     int ret = posix_memalign(&buf,  64, size);

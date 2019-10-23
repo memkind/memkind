@@ -530,11 +530,11 @@ __attribute__((constructor))
 #endif
 static void memkind_construct(void)
 {
-    const char *env = getenv("MEMKIND_HEAP_MANAGER");
+    const char *env = secure_getenv("MEMKIND_HEAP_MANAGER");
     if (env && strcmp(env, "TBB") == 0) {
         load_tbb_symbols();
     } else {
-        env = getenv("MEMKIND_BACKGROUND_THREAD");
+        env = secure_getenv("MEMKIND_BACKGROUND_THREAD");
         if (env && strcmp(env, "1") == 0) {
             memkind_arena_background_thread();
         }
