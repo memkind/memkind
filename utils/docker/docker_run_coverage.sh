@@ -27,11 +27,13 @@
 #
 # Parameters:
 # -codecov token
+# -codecov test suite name
 # -memkind repository directory
 # Options used:
 # -p dir       Project root directory
 # -Z           Exit with 1 if not successful. Default will Exit with 0
 
 CODECOV_TOKEN=$1
-MEMKIND_REPO_PATH=$2
-bash <(curl -s https://codecov.io/bash) -t "$CODECOV_TOKEN" -p "$MEMKIND_REPO_PATH" -Z
+CODECOV_TEST_SUITE_NAME=$2
+MEMKIND_REPO_PATH=$3
+bash <(curl -s https://codecov.io/bash) -t "$CODECOV_TOKEN" -cF "$CODECOV_TEST_SUITE_NAME" -p "$MEMKIND_REPO_PATH" -Z
