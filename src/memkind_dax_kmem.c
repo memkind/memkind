@@ -169,36 +169,17 @@ MEMKIND_EXPORT int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind *kind,
 static void memkind_dax_kmem_closest_numanode_init(void)
 {
     struct dax_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
-    int *bandwidth = (int *)calloc(NUMA_NUM_NODES, sizeof(int));
-    int num_unique = 0;
-
-    struct bandwidth_nodes_t *bandwidth_nodes = NULL;
-
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = (int *)malloc(sizeof(int) * g->num_cpu);
 
-    if (!(g->closest_numanode && bandwidth)) {
+    if (!g->closest_numanode) {
         g->init_err = MEMKIND_ERROR_MALLOC;
         log_err("malloc() failed.");
-        goto exit;
+        return;
     }
 
-    g->init_err = bandwidth_fill_nodes(bandwidth, fill_dax_kmem_values_automatic,
-                                       "MEMKIND_DAX_KMEM_NODES");
-    if (g->init_err)
-        goto exit;
-
-    g->init_err = bandwidth_create_nodes(bandwidth, &num_unique, &bandwidth_nodes);
-    if (g->init_err)
-        goto exit;
-
-    g->init_err = bandwidth_set_closest_numanode(num_unique, bandwidth_nodes,
-                                                 g->num_cpu, g->closest_numanode);
-
-exit:
-
-    free(bandwidth_nodes);
-    free(bandwidth);
+    g->init_err = set_closest_numanode(fill_dax_kmem_values_automatic,
+                                       "MEMKIND_DAX_KMEM_NODES", g->closest_numanode, g->num_cpu);
 
     if (g->init_err) {
         free(g->closest_numanode);

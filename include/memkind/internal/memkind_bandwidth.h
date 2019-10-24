@@ -29,19 +29,12 @@ extern "C" {
 
 #include <numa.h>
 
-struct bandwidth_nodes_t;
-
 typedef int (*get_node_bitmask)(struct bitmask *);
 typedef int (*fill_bandwidth_values)(int *);
 
-int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
-                           struct bandwidth_nodes_t **bandwidth_nodes);
 int bandwidth_fill(int *bandwidth, get_node_bitmask get_bitmask);
-int bandwidth_fill_nodes(int *bandwidth, fill_bandwidth_values fill,
-                         const char *env);
-int bandwidth_set_closest_numanode(int num_unique,
-                                   const struct bandwidth_nodes_t *bandwidth_nodes,
-                                   int num_cpunode, int *closest_numanode);
+int set_closest_numanode(fill_bandwidth_values fill, const char *env,
+                         int *closest_numanode, int num_cpu);
 
 #ifdef __cplusplus
 }
