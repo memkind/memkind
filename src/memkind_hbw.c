@@ -349,21 +349,9 @@ static void memkind_hbw_closest_numanode_init(void)
 {
     struct hbw_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
     g->num_cpu = numa_num_configured_cpus();
-    g->closest_numanode = (int *)malloc(sizeof(int) * g->num_cpu);
-
-    if (!g->closest_numanode) {
-        g->init_err = MEMKIND_ERROR_MALLOC;
-        log_err("malloc() failed.");
-        return;
-    }
-
+    g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(fill_bandwidth_values_heuristically,
-                                       "MEMKIND_HBW_NODES", g->closest_numanode, g->num_cpu);
-
-    if (g->init_err) {
-        free(g->closest_numanode);
-        g->closest_numanode = NULL;
-    }
+                                       "MEMKIND_HBW_NODES", &g->closest_numanode, g->num_cpu);
 }
 
 MEMKIND_EXPORT void memkind_hbw_init_once(void)

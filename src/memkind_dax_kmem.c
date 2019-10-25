@@ -160,21 +160,10 @@ static void memkind_dax_kmem_closest_numanode_init(void)
 {
     struct dax_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
     g->num_cpu = numa_num_configured_cpus();
-    g->closest_numanode = (int *)malloc(sizeof(int) * g->num_cpu);
-
-    if (!g->closest_numanode) {
-        g->init_err = MEMKIND_ERROR_MALLOC;
-        log_err("malloc() failed.");
-        return;
-    }
-
+    g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(fill_dax_kmem_values_automatic,
-                                       "MEMKIND_DAX_KMEM_NODES", g->closest_numanode, g->num_cpu);
+                                       "MEMKIND_DAX_KMEM_NODES", &g->closest_numanode, g->num_cpu);
 
-    if (g->init_err) {
-        free(g->closest_numanode);
-        g->closest_numanode = NULL;
-    }
 }
 
 void memkind_dax_kmem_init_once(void)
