@@ -710,8 +710,8 @@ across all high bandwidth nodes and transparent huge pages are
 disabled.
 .TP
 .B MEMKIND_DAX_KMEM
-Allocate from the closest persistent memory NUMA node at time
-of allocation. If there is not enough PMEM memory to satisfy the request
+Allocate from the closest persistent memory NUMA node(s) at time
+of allocation. If there is not enough memory in closest persistent memory NUMA node(s) to satisfy the request
 .I errno
 is set to
 .B ENOMEM
