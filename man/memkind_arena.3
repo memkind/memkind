@@ -28,10 +28,6 @@ memkind_arena \- jemalloc arena allocation memkind operations.
 .BR Note:
 This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes) or removed.
 .SH "SYNOPSIS"
-.nf
-.B #include <memkind/internal/memkind_arena.h>
-.sp
-.B Link with -lmemkind
 .sp
 .BI "int memkind_arena_create(struct memkind " "*kind" ", struct memkind_ops " "*ops" ", const char " "*name" );
 .BI "int memkind_arena_create_map(struct memkind " "*kind" ", extent_hooks_t " "*hooks" );
