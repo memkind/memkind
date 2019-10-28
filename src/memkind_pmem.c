@@ -99,7 +99,16 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
     // and it should be unmapped to avoid space exhaustion when calling large number of
     // operations like memkind_create_pmem and memkind_destroy_kind
     errno = 0;
-    if (madvise(addr, size, MADV_REMOVE) != 0) {
+    int status = madvise(addr, size, MADV_REMOVE);
+    if (!status) {
+        struct memkind *kind = get_kind_by_arena(arena_ind);
+        struct memkind_pmem *priv = kind->priv;
+        if (pthread_mutex_lock(&priv->pmem_lock) != 0)
+            assert(0 && "failed to acquire mutex");
+        priv->current_size -= size;
+        if (pthread_mutex_unlock(&priv->pmem_lock) != 0)
+            assert(0 && "failed to release mutex");
+    } else {
         if (errno == EOPNOTSUPP) {
             log_fatal("Filesystem doesn't support FALLOC_FL_PUNCH_HOLE.");
             abort();
@@ -250,7 +259,7 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr,
     if (pthread_mutex_lock(&priv->pmem_lock) != 0)
         assert(0 && "failed to acquire mutex");
 
-    if (priv->max_size != 0 && (size_t)priv->offset + size > priv->max_size) {
+    if (priv->max_size != 0 && priv->current_size + size > priv->max_size) {
         if (pthread_mutex_unlock(&priv->pmem_lock) != 0)
             assert(0 && "failed to release mutex");
         return MAP_FAILED;
@@ -265,6 +274,7 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr,
     if ((result = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, priv->fd,
                        priv->offset)) != MAP_FAILED) {
         priv->offset += size;
+        priv->current_size += size;
     }
 
     if (pthread_mutex_unlock(&priv->pmem_lock) != 0)

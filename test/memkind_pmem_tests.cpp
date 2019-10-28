@@ -74,7 +74,7 @@ static void pmem_get_size(struct memkind *kind, size_t &total, size_t &free)
     struct memkind_pmem *priv = reinterpret_cast<struct memkind_pmem *>(kind->priv);
 
     total = priv->max_size;
-    free = priv->max_size - priv->offset; /* rough estimation */
+    free = priv->max_size - priv->current_size; /* rough estimation */
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPriv)
