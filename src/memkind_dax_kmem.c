@@ -35,25 +35,6 @@
 #include <numa.h>
 #include <errno.h>
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
-    .create = memkind_arena_create,
-    .destroy = memkind_default_destroy,
-    .malloc = memkind_arena_malloc,
-    .calloc = memkind_arena_calloc,
-    .posix_memalign = memkind_arena_posix_memalign,
-    .realloc = memkind_arena_realloc,
-    .free = memkind_arena_free,
-    .check_available = memkind_dax_kmem_check_available,
-    .mbind = memkind_default_mbind,
-    .get_mmap_flags = memkind_default_get_mmap_flags,
-    .get_mbind_mode = memkind_default_get_mbind_mode,
-    .get_mbind_nodemask = memkind_dax_kmem_get_mbind_nodemask,
-    .get_arena = memkind_thread_get_arena,
-    .init_once = memkind_dax_kmem_init_once,
-    .malloc_usable_size = memkind_default_malloc_usable_size,
-    .finalize = memkind_arena_finalize
-};
-
 struct dax_closest_numanode_t {
     int init_err;
     int num_cpu;
@@ -124,13 +105,13 @@ static int fill_dax_kmem_values_automatic(int *bandwidth)
 }
 #endif
 
-int memkind_dax_kmem_check_available(struct memkind *kind)
+static int memkind_dax_kmem_check_available(struct memkind *kind)
 {
     return kind->ops->get_mbind_nodemask(kind, NULL, 0);
 }
 
-int memkind_dax_kmem_get_mbind_nodemask(struct memkind *kind,
-                                        unsigned long *nodemask, unsigned long maxnode)
+static int memkind_dax_kmem_get_mbind_nodemask(struct memkind *kind,
+                                               unsigned long *nodemask, unsigned long maxnode)
 {
     struct dax_closest_numanode_t *g = &memkind_dax_kmem_closest_numanode_g;
     pthread_once(&memkind_dax_kmem_closest_numanode_once_g,
@@ -177,7 +158,26 @@ static void memkind_dax_kmem_closest_numanode_init(void)
     }
 }
 
-void memkind_dax_kmem_init_once(void)
+static void memkind_dax_kmem_init_once(void)
 {
     memkind_init(MEMKIND_DAX_KMEM, true);
 }
+
+MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
+    .create = memkind_arena_create,
+    .destroy = memkind_default_destroy,
+    .malloc = memkind_arena_malloc,
+    .calloc = memkind_arena_calloc,
+    .posix_memalign = memkind_arena_posix_memalign,
+    .realloc = memkind_arena_realloc,
+    .free = memkind_arena_free,
+    .check_available = memkind_dax_kmem_check_available,
+    .mbind = memkind_default_mbind,
+    .get_mmap_flags = memkind_default_get_mmap_flags,
+    .get_mbind_mode = memkind_default_get_mbind_mode,
+    .get_mbind_nodemask = memkind_dax_kmem_get_mbind_nodemask,
+    .get_arena = memkind_thread_get_arena,
+    .init_once = memkind_dax_kmem_init_once,
+    .malloc_usable_size = memkind_default_malloc_usable_size,
+    .finalize = memkind_arena_finalize
+};
