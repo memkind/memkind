@@ -12,6 +12,10 @@ to build, test and optionally measure test coverage of any pull request to memki
 
 * **CODECOV_TOKEN** - Codecov token for memkind repository to upload the coverage results.
 
+* **CODECOV_TEST_SUITE_NAME** - Name of test suite, which will be used to upload group coverage metrics.
+Used only when **CODECOV_TOKEN** is defined. Default value of **CODECOV_TEST_SUITE_NAME** is
+*'anonymous_test_suite'*.
+
 * **NDCTL_LIBRARY_VERSION** - ndctl library version.
 For fully testing MEMKIND_DAX_KMEM, ndctl library version tag must be passed as parameter,
 see https://github.com/pmem/ndctl/tags.

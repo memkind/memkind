@@ -68,5 +68,5 @@ find examples/.libs -name "pmem*" -executable -type f -exec sh -c "MEMKIND_HEAP_
 
 # executing coverage script if codecov token is set
 if [ -n "$CODECOV_TOKEN" ]; then
-    "$UTILS_PREFIX"/docker_run_coverage.sh "$CODECOV_TOKEN" "$PWD"
+    "$UTILS_PREFIX"/docker_run_coverage.sh "$CODECOV_TOKEN" "$CODECOV_TEST_SUITE_NAME" "$PWD"
 fi
