@@ -29,6 +29,8 @@ check_PROGRAMS += test/all_tests \
                   test/autohbw_test_helper \
                   test/dax_kmem_test \
                   test/decorator_test \
+                  test/environ_err_dax_kmem_malloc_test \
+                  test/environ_err_dax_kmem_malloc_positive_test \
                   test/environ_err_hbw_malloc_test \
                   test/freeing_memory_segfault_test \
                   test/gb_page_tests_bind_policy \
@@ -69,6 +71,8 @@ test_autohbw_test_helper_LDADD = libmemkind.la
 test_dax_kmem_test_LDADD = libmemkind.la
 test_decorator_test_LDADD = libmemkind.la
 test_environ_err_hbw_malloc_test_LDADD = libmemkind.la
+test_environ_err_dax_kmem_malloc_test_LDADD = libmemkind.la
+test_environ_err_dax_kmem_malloc_positive_test_LDADD = libmemkind.la
 test_freeing_memory_segfault_test_LDADD = libmemkind.la
 test_gb_page_tests_bind_policy_LDADD = libmemkind.la
 test_memkind_stat_test_LDADD = libmemkind.la
@@ -95,6 +99,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/get_arena_test.cpp \
                          test/hbw_allocator_tests.cpp \
                          test/hbw_verify_function_test.cpp \
+                         test/dax_kmem_env_var_test.py \
                          test/memkind_allocator_tests.cpp \
                          test/memkind_detect_kind_tests.cpp \
                          test/memkind_null_kind_test.cpp \
@@ -127,6 +132,8 @@ test_autohbw_test_helper_SOURCES = test/autohbw_test_helper.c
 test_decorator_test_SOURCES = $(fused_gtest) test/decorator_test.cpp test/decorator_test.h
 test_dax_kmem_test_SOURCES = $(fused_gtest) test/memkind_dax_kmem_test.cpp
 test_environ_err_hbw_malloc_test_SOURCES = test/environ_err_hbw_malloc_test.cpp
+test_environ_err_dax_kmem_malloc_test_SOURCES = test/environ_err_dax_kmem_malloc_test.cpp
+test_environ_err_dax_kmem_malloc_positive_test_SOURCES = test/environ_err_dax_kmem_malloc_positive_test.cpp
 test_freeing_memory_segfault_test_SOURCES = $(fused_gtest) test/freeing_memory_segfault_test.cpp
 test_gb_page_tests_bind_policy_SOURCES = $(fused_gtest) test/gb_page_tests_bind_policy.cpp test/trial_generator.cpp test/check.cpp
 test_memkind_stat_test_SOURCES = $(fused_gtest) test/memkind_stat_test.cpp
