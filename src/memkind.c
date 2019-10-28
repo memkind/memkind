@@ -817,6 +817,7 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
 
     priv->fd = fd;
     priv->offset = 0;
+    priv->current_size = 0;
     priv->max_size = max_size;
 
     return err;
