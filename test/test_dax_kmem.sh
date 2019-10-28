@@ -33,7 +33,7 @@ TEST_PATH="$basedir/"
 GTEST_BINARIES=(dax_kmem_test)
 
 # Pytest files
-PYTEST_FILES=()
+PYTEST_FILES=(dax_kmem_env_var_test.py)
 
 red=`tput setaf 1`
 green=`tput setaf 2`
