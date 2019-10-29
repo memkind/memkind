@@ -29,43 +29,11 @@ memkind_dax_kmem \- DAX KMEM memory memkind operations.
 This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes) or removed.
 .SH "SYNOPSIS"
 .sp
-.BI "int memkind_dax_kmem_check_available(struct memkind " "*kind" );
-.br
-.BI "int memkind_dax_kmem_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
-.br
 .BI "int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind " "*kind" ", unsigned long " "*nodemask" ", unsigned long " "maxnode" );
-.br
-.BI "void memkind_dax_kmem_init_once(void);"
 .br
 .SH DESCRIPTION
 .PP
 DAX KMEM memory memkind operations.
-.PP
-.BR memkind_dax_kmem_check_available ()
-returns zero if library was able to detect persistent memory NUMA node
-bandwidths. Returns
-.B MEMKIND_ERROR_UNAVAILABLE
-if the detection mechanism failed.
-Detection mechanism can be also overridden by the
-environment variable
-.B MEMKIND_DAX_KMEM_NODES
-as described in the
-.BR memkind (3)
-man page.
-.PP
-.BR memkind_dax_kmem_get_mbind_nodemask ()
-sets the
-.I nodemask
-bit to one that corresponds to the persistent memory NUMA node that has
-the closest NUMA distance to the CPU of the calling process.
-All other bits up to
-.I maxnode
-are set to zero.
-The
-.I nodemask
-can be used in conjunction with the
-.BR mbind (2)
-system call.
 .PP
 .BR memkind_dax_kmem_all_get_mbind_nodemask ()
 sets the
@@ -79,14 +47,6 @@ The
 can be used in conjunction with the
 .BR mbind (2)
 system call.
-.PP
-.BR memkind_dax_kmem_init_once ()
-initializes
-.B MEMKIND_DAX_KMEM
-kind and it should not be called more than once.
-.BR Note:
-.BR memkind_dax_kmem_init_once ()
-may reserve some extra memory.
 .SH "COPYRIGHT"
 Copyright (C) 2019 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
