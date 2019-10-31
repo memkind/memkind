@@ -183,7 +183,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
 struct hbw_closest_numanode_t {
     int init_err;
     int num_cpu;
-    int *closest_numanode;
+    struct vec_cpu_node *closest_numanode;
 };
 
 static struct hbw_closest_numanode_t memkind_hbw_closest_numanode_g;
@@ -351,7 +351,7 @@ static void memkind_hbw_closest_numanode_init(void)
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(fill_bandwidth_values_heuristically,
-                                       "MEMKIND_HBW_NODES", &g->closest_numanode, g->num_cpu);
+                                       "MEMKIND_HBW_NODES", &g->closest_numanode, g->num_cpu, true);
 }
 
 MEMKIND_EXPORT void memkind_hbw_init_once(void)

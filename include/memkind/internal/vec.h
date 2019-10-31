@@ -83,6 +83,9 @@ for (_vec_i = 0;\
 #define VEC_SIZE(vec)\
 ((vec)->size)
 
+#define VEC_GET(vec, id)\
+(&(vec)->buffer[id])
+
 #define VEC_CLEAR(vec) do {\
     (vec)->size = 0;\
 } while (0)

@@ -38,7 +38,7 @@
 struct dax_closest_numanode_t {
     int init_err;
     int num_cpu;
-    int *closest_numanode;
+    struct vec_cpu_node *closest_numanode;
 };
 
 static struct dax_closest_numanode_t memkind_dax_kmem_closest_numanode_g;
@@ -143,8 +143,7 @@ static void memkind_dax_kmem_closest_numanode_init(void)
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(fill_dax_kmem_values_automatic,
-                                       "MEMKIND_DAX_KMEM_NODES", &g->closest_numanode, g->num_cpu);
-
+                                       "MEMKIND_DAX_KMEM_NODES", &g->closest_numanode, g->num_cpu, false);
 }
 
 static void memkind_dax_kmem_init_once(void)
