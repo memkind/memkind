@@ -34,7 +34,7 @@ typedef int (*fill_bandwidth_values)(int *);
 
 int bandwidth_fill(int *bandwidth, get_node_bitmask get_bitmask);
 int set_closest_numanode(fill_bandwidth_values fill, const char *env,
-                         int *closest_numanode, int num_cpu);
+                         int **closest_numanode, int num_cpu);
 void set_bitmask_for_all_closest_numanodes(unsigned long *nodemask,
                                            unsigned long maxnode, const int *closest_numanode, int num_cpu);
 int set_bitmask_for_current_closest_numanode(unsigned long *nodemask,
