@@ -48,6 +48,26 @@
 #include "config.h"
 
 #define HUGE_PAGE_SIZE (1ull << MEMKIND_MASK_PAGE_SIZE_2MB)
+#define PAGE_2_BYTES(x) ((x) << 12)
+
+static const char *const global_stats[MEMKIND_STAT_TYPE_MAX_VALUE] = {
+    "stats.resident",
+    "stats.active",
+    "stats.allocated"
+};
+
+#define ARENA_STAT_MAX 2
+
+struct stats_arena {
+    const char *stats[ARENA_STAT_MAX];
+    unsigned stats_no;
+};
+
+static const struct stats_arena arena_stats [MEMKIND_STAT_TYPE_MAX_VALUE] = {
+    { .stats = {"stats.arenas.%u.resident", NULL}, .stats_no = 1},
+    { .stats = {"stats.arenas.%u.pactive", NULL}, .stats_no = 1},
+    { .stats = {"stats.arenas.%u.small.allocated", "stats.arenas.%u.large.allocated"}, .stats_no = 2},
+};
 
 static void *jemk_mallocx_check(size_t size, int flags);
 static void *jemk_rallocx_check(void *ptr, size_t size, int flags);
@@ -547,6 +567,12 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
     return ptr;
 }
 
+int memkind_arena_update_cached_stats(void)
+{
+    uint64_t epoch = 1;
+    return jemk_mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
+}
+
 MEMKIND_EXPORT void *memkind_arena_realloc_with_kind_detect(void *ptr,
                                                             size_t size)
 {
@@ -767,6 +793,82 @@ void memkind_arena_init(struct memkind *kind)
             abort();
         }
     }
+}
+
+static int memkind_arena_get_stat(struct memkind *kind, memkind_stat_type stat,
+                                  bool check_init, size_t *value)
+{
+    size_t sz = sizeof(size_t);
+    size_t temp_stat;
+    int err = MEMKIND_SUCCESS;
+    unsigned i, j;
+    char cmd[128];
+
+    *value = 0;
+    for (i = 0; i < kind->arena_map_len; ++i) {
+        if (check_init) {
+            bool is_init;
+            size_t sz_b_state = sizeof(is_init);
+            snprintf(cmd, 128, "arena.%u.initialized", kind->arena_zero + i);
+            err =  jemk_mallctl(cmd, (void *)&is_init, &sz_b_state, NULL, 0);
+            if (err) {
+                log_err("Error on getting initialized state of arena.");
+                return MEMKIND_ERROR_INVALID;
+            }
+            if (!is_init) {
+                continue;
+            }
+        }
+
+        for (j = 0; j < arena_stats[stat].stats_no; ++j) {
+            snprintf(cmd, 128, arena_stats[stat].stats[j], kind->arena_zero + i);
+            err = jemk_mallctl(cmd, &temp_stat, &sz, NULL, 0);
+            if (err) {
+                log_err("Error on getting arena statistic.");
+                return MEMKIND_ERROR_INVALID;
+            }
+            *value += temp_stat;
+        }
+    }
+    return err;
+}
+
+int memkind_arena_get_stat_with_check_init(struct memkind *kind,
+                                           memkind_stat_type stat, bool check_init, size_t *value)
+{
+    int status;
+    switch (stat) {
+        case MEMKIND_STAT_TYPE_RESIDENT:
+        case MEMKIND_STAT_TYPE_ALLOCATED:
+            status = memkind_arena_get_stat(kind, stat, check_init, value);
+            break;
+        case MEMKIND_STAT_TYPE_ACTIVE:
+            status = memkind_arena_get_stat(kind, stat, check_init, value);
+            *value = PAGE_2_BYTES(*value);
+            break;
+        default:
+            //not reached
+            return MEMKIND_ERROR_INVALID;
+            break;
+    }
+    return status;
+}
+
+int memkind_arena_get_kind_stat(struct memkind *kind, memkind_stat_type stat,
+                                size_t *value)
+{
+    return memkind_arena_get_stat_with_check_init(kind, stat, false, value);
+}
+
+int memkind_arena_get_global_stat(memkind_stat_type stat, size_t *value)
+{
+    size_t sz = sizeof(size_t);
+    int err = jemk_mallctl(global_stats[stat], value, &sz, NULL, 0);
+    if (err) {
+        log_err("Error on getting global statistic.");
+        return MEMKIND_ERROR_INVALID;
+    }
+    return err;
 }
 
 int memkind_arena_background_thread(void)

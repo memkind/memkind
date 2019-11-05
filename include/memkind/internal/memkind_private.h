@@ -87,12 +87,12 @@ struct memkind_ops {
                                unsigned long maxnode);
     int (* get_arena)(struct memkind *kind, unsigned int *arena, size_t size);
     int (* check_available)(struct memkind *kind);
-    int (* check_addr)(struct memkind *kind, void *addr);
     void (* init_once)(void);
     int (* finalize)(struct memkind *kind);
     size_t (* malloc_usable_size)(struct memkind *kind, void *ptr);
     int (* update_memory_usage_policy)(struct memkind *kind,
                                        memkind_mem_usage_policy policy);
+    int ( *get_stat)(memkind_t kind, memkind_stat_type stat, size_t *value);
 };
 
 struct memkind {
