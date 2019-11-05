@@ -41,7 +41,7 @@ struct bandwidth_nodes_t {
     int *numanodes;
 };
 
-#define NODE_NOT_PRESENT             -1
+VEC(vec_cpu_node, int);
 
 #define BANDWIDTH_NODE_HIGH_VAL       2
 #define BANDWIDTH_NODE_LOW_VAL        1
@@ -217,45 +217,36 @@ static int bandwidth_create_nodes(const int *bandwidth, int *num_unique,
     return err;
 }
 
-static int *bandwidth_init_closest_numanode(int num_cpunode)
-{
-    int i;
-    int *ptr = (int *)malloc(sizeof(int) * num_cpunode);
-    if (!ptr) {
-        log_err("malloc() failed.");
-        return NULL;
-    }
-    for (i = 0; i < num_cpunode; ++i) {
-        ptr[i] = NODE_NOT_PRESENT;
-    }
-    return ptr;
-}
-
 static int bandwidth_set_closest_numanode(int num_unique,
-                                          const struct bandwidth_nodes_t *bandwidth_nodes,
-                                          int num_cpunode, int **closest_numanode)
+                                          const struct bandwidth_nodes_t *bandwidth_nodes, bool is_single_node,
+                                          int num_cpunode, struct vec_cpu_node **closest_numanode)
 {
     /***************************************************************************
     *   num_unique (IN):                                                       *
     *       Length of bandwidth_nodes vector.                                  *
     *   bandwidth_nodes (IN):                                                  *
     *       Output vector from bandwidth_create_nodes().                       *
+    *   is_single_node (IN):                                                   *
+    *       Flag used to mark is only single closest numanode                  *
+    *       is a valid configuration                                           *
     *   num_cpunode (IN):                                                      *
     *       Number of cpu's and length of closest_numanode.                    *
     *   closest_numanode (OUT):                                                *
-    *       Vector that maps cpu index to closest numa node of the specified   *
-    *       bandwidth.                                                         *
+    *       Vector that maps cpu index to closest numa node(s)                 *
+    *       of the specified bandwidth.                                        *
     *   RETURNS zero on success, error code on failure                         *
     ***************************************************************************/
     int err = MEMKIND_SUCCESS;
-    int min_distance, distance, i, j, old_errno, min_unique;
+    int min_distance, distance, i, j, old_errno;
     struct bandwidth_nodes_t match;
     match.bandwidth = -1;
     int target_bandwidth = bandwidth_nodes[num_unique-1].bandwidth;
 
-    int *temp_arr = bandwidth_init_closest_numanode(num_cpunode);
+    struct vec_cpu_node *node_arr = (struct vec_cpu_node *) calloc(num_cpunode,
+                                                                   sizeof(struct vec_cpu_node));
 
-    if (!temp_arr) {
+    if (!node_arr) {
+        log_err("calloc() failed.");
         return MEMKIND_ERROR_MALLOC;
     }
 
@@ -270,37 +261,44 @@ static int bandwidth_set_closest_numanode(int num_unique,
     } else {
         for (i = 0; i < num_cpunode; ++i) {
             min_distance = INT_MAX;
-            min_unique = 1;
             for (j = 0; j < match.num_numanodes; ++j) {
                 old_errno = errno;
                 distance = numa_distance(numa_node_of_cpu(i), match.numanodes[j]);
                 errno = old_errno;
                 if (distance < min_distance) {
                     min_distance = distance;
-                    temp_arr[i] = match.numanodes[j];
-                    min_unique = 1;
+                    VEC_CLEAR(&node_arr[i]);
+                    VEC_PUSH_BACK(&node_arr[i], match.numanodes[j]);
                 } else if (distance == min_distance) {
-                    min_unique = 0;
+                    VEC_PUSH_BACK(&node_arr[i], match.numanodes[j]);
                 }
             }
-            if (!min_unique) {
+            if (VEC_SIZE(&node_arr[i]) > 1 && is_single_node) {
+                log_err("Invalid Numa Configuration for cpu %d", i);
+                int node = -1;
+                VEC_FOREACH(node, &node_arr[i]) {
+                    log_err("Node %d", node);
+                }
                 err = MEMKIND_ERROR_RUNTIME;
             }
         }
     }
 
     if (err) {
-        free(temp_arr);
-        temp_arr = NULL;
+        for (i = 0; i < num_cpunode; ++i) {
+            VEC_DELETE(&node_arr[i]);
+        }
+        free(node_arr);
+        node_arr = NULL;
     }
 
-    *closest_numanode = temp_arr;
+    *closest_numanode = node_arr;
 
     return err;
 }
 
 int set_closest_numanode(fill_bandwidth_values fill_values, const char *env,
-                         int **closest_numanode, int num_cpu)
+                         struct vec_cpu_node **closest_numanode, int num_cpu, bool is_single_node)
 {
     int status;
     int num_unique = 0;
@@ -320,8 +318,8 @@ int set_closest_numanode(fill_bandwidth_values fill_values, const char *env,
     if (status)
         goto exit;
 
-    status = bandwidth_set_closest_numanode(num_unique, bandwidth_nodes, num_cpu,
-                                            closest_numanode);
+    status = bandwidth_set_closest_numanode(num_unique, bandwidth_nodes,
+                                            is_single_node, num_cpu, closest_numanode);
 
 exit:
 
@@ -332,27 +330,33 @@ exit:
 }
 
 void set_bitmask_for_all_closest_numanodes(unsigned long *nodemask,
-                                           unsigned long maxnode, const int *closest_numanode, int num_cpu)
+                                           unsigned long maxnode, const struct vec_cpu_node *closest_numanode, int num_cpu)
 {
     if (MEMKIND_LIKELY(nodemask)) {
         struct bitmask nodemask_bm = {maxnode, nodemask};
         int cpu;
+        int node = -1;
         numa_bitmask_clearall(&nodemask_bm);
         for (cpu = 0; cpu < num_cpu; ++cpu) {
-            numa_bitmask_setbit(&nodemask_bm, closest_numanode[cpu]);
+            VEC_FOREACH(node, &closest_numanode[cpu]) {
+                numa_bitmask_setbit(&nodemask_bm, node);
+            }
         }
     }
 }
 
 int set_bitmask_for_current_closest_numanode(unsigned long *nodemask,
-                                             unsigned long maxnode, const int *closest_numanode, int num_cpu)
+                                             unsigned long maxnode, const struct vec_cpu_node *closest_numanode, int num_cpu)
 {
     if (MEMKIND_LIKELY(nodemask)) {
         struct bitmask nodemask_bm = {maxnode, nodemask};
         numa_bitmask_clearall(&nodemask_bm);
         int cpu = sched_getcpu();
         if (MEMKIND_LIKELY(cpu < num_cpu)) {
-            numa_bitmask_setbit(&nodemask_bm, closest_numanode[cpu]);
+            int node = -1;
+            VEC_FOREACH(node, &closest_numanode[cpu]) {
+                numa_bitmask_setbit(&nodemask_bm, node);
+            }
         } else {
             return MEMKIND_ERROR_RUNTIME;
         }
