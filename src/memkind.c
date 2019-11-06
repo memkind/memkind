@@ -555,9 +555,16 @@ static void memkind_construct(void)
     if (env && strcmp(env, "TBB") == 0) {
         load_tbb_symbols();
     } else {
-        env = secure_getenv("MEMKIND_BACKGROUND_THREAD");
-        if (env && strcmp(env, "1") == 0) {
-            memkind_arena_background_thread();
+        env = secure_getenv("MEMKIND_BACKGROUND_THREAD_LIMIT");
+        if (env) {
+            char *end;
+            errno = 0;
+            size_t thread_limit = strtoull(env, &end, 10);
+            if (*end != '\0' || errno != 0 ) {
+                log_err("Error on parsing value MEMKIND_BACKGROUND_THREAD_LIMIT");
+                return;
+            }
+            memkind_arena_enable_background_threads(thread_limit);
         }
     }
 }

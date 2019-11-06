@@ -851,13 +851,23 @@ int memkind_arena_get_global_stat(memkind_stat_type stat, size_t *value)
     return err;
 }
 
-int memkind_arena_background_thread(void)
+int memkind_arena_enable_background_threads(size_t threads_limit)
 {
     bool background_thread_val = true;
-    int err = jemk_mallctl("background_thread", NULL, NULL, &background_thread_val,
-                           sizeof(bool));
+    int err;
+
+    if (threads_limit) {
+        err = jemk_mallctl("max_background_threads", NULL, NULL, &threads_limit,
+                           sizeof(size_t));
+        if (err) {
+            log_err("Error on setting threads limit");
+            return MEMKIND_ERROR_INVALID;
+        }
+    }
+    err = jemk_mallctl("background_thread", NULL, NULL, &background_thread_val,
+                       sizeof(bool));
     if (err) {
-        log_err("Error on setting background thread");
+        log_err("Error on activating background thread");
         return MEMKIND_ERROR_INVALID;
     }
     return err;

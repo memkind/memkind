@@ -979,10 +979,13 @@ Controls logging mechanism in memkind. Setting
 to 1 enables printing messages like errors and general information about environment to
 .IR stderr .
 .TP
-.B MEMKIND_BACKGROUND_THREAD
-Enable background worker threads. Setting
-.B MEMKIND_BACKGROUND_THREAD
-to 1 enables background threads in jemalloc heap manager.
+.B MEMKIND_BACKGROUND_THREAD_LIMIT
+Enable background worker threads.
+Value should be from range 0 to maximum number of cpus.
+Setting
+.B MEMKIND_BACKGROUND_THREAD_LIMIT
+to specific value will limit maximum number of background worker threads to this value.
+0 means maximum number of background worker threads will be limited to maximum number of cpus.
 .TP
 .B MEMKIND_HEAP_MANAGER
 Controls heap management behavior in memkind library by switching to one of the available heap managers.
