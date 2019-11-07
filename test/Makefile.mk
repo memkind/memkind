@@ -33,9 +33,11 @@ check_PROGRAMS += test/all_tests \
                   test/gb_page_tests_bind_policy \
                   test/locality_test \
                   test/memkind_stat_test \
-                  test/pmem_test \
                   test/trace_mechanism_test_helper \
                   # end
+if HAVE_CXX11
+check_PROGRAMS += test/pmem_test
+endif
 
 TESTS += test/test.sh
 
@@ -67,8 +69,12 @@ test_environ_err_hbw_malloc_test_LDADD = libmemkind.la
 test_freeing_memory_segfault_test_LDADD = libmemkind.la
 test_gb_page_tests_bind_policy_LDADD = libmemkind.la
 test_memkind_stat_test_LDADD = libmemkind.la
-test_pmem_test_LDADD = libmemkind.la
 test_trace_mechanism_test_helper_LDADD = libmemkind.la
+
+if HAVE_CXX11
+test_pmem_test_SOURCES = $(fused_gtest) test/memkind_pmem_config_tests.cpp test/memkind_pmem_long_time_tests.cpp test/memkind_pmem_tests.cpp
+test_pmem_test_LDADD = libmemkind.la
+endif
 
 fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
               test/main.cpp \
@@ -115,7 +121,6 @@ test_environ_err_hbw_malloc_test_SOURCES = test/environ_err_hbw_malloc_test.cpp
 test_freeing_memory_segfault_test_SOURCES = $(fused_gtest) test/freeing_memory_segfault_test.cpp
 test_gb_page_tests_bind_policy_SOURCES = $(fused_gtest) test/gb_page_tests_bind_policy.cpp test/trial_generator.cpp test/check.cpp
 test_memkind_stat_test_SOURCES = $(fused_gtest) test/memkind_stat_test.cpp
-test_pmem_test_SOURCES = $(fused_gtest) test/memkind_pmem_config_tests.cpp test/memkind_pmem_long_time_tests.cpp test/memkind_pmem_tests.cpp
 test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c
 
 #Tests based on Allocator Perf Tool
