@@ -756,6 +756,15 @@ is set to
 and the allocated pointer is set to
 .IR "NULL" .
 .TP
+.B MEMKIND_DAX_KMEM_ALL
+Allocate from the closest persistent memory NUMA node available at the time
+of allocation. If there is not enough memory on any of persistent memory NUMA nodes to satisfy the request
+.I errno
+is set to
+.B ENOMEM
+and the allocated pointer is set to
+.IR "NULL" .
+.TP
 .B MEMKIND_DAX_KMEM_PREFERRED
 Same as
 .B MEMKIND_DAX_KMEM
