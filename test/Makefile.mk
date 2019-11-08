@@ -86,6 +86,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/get_arena_test.cpp \
                          test/hbw_allocator_tests.cpp \
                          test/hbw_verify_function_test.cpp \
+                         test/memkind_allocator_tests.cpp \
                          test/memkind_detect_kind_tests.cpp \
                          test/memkind_null_kind_test.cpp \
                          test/memkind_versioning_tests.cpp \
@@ -258,6 +259,7 @@ check_PROGRAMS += test/autohbw_candidates \
                   # end
 if HAVE_CXX11
 check_PROGRAMS += test/memkind_allocated \
+                  test/memkind_cpp_allocator \
                   test/pmem_cpp_allocator
 endif
 
@@ -281,6 +283,7 @@ test_pmem_multithreads_onekind_LDADD = libmemkind.la
 test_pmem_usable_size_LDADD = libmemkind.la
 if HAVE_CXX11
 test_memkind_allocated_LDADD = libmemkind.la
+test_memkind_cpp_allocator_LDADD = libmemkind.la
 test_pmem_cpp_allocator_LDADD = libmemkind.la
 endif
 
@@ -307,6 +310,7 @@ test_libautohbw_la_SOURCES = autohbw/autohbw.c
 noinst_LTLIBRARIES += test/libautohbw.la
 if HAVE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
+test_memkind_cpp_allocator_SOURCES = examples/memkind_cpp_allocator.cpp
 test_pmem_cpp_allocator_SOURCES = examples/pmem_cpp_allocator.cpp
 endif
 
