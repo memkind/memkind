@@ -132,6 +132,11 @@ except that if there is not enough memory in the closest persistent memory NUMA 
 .BR Note:
 Only one node ID could be marked as preferred one.
 .PP
+.B libmemkind::kinds::DAX_KMEM_INTERLEAVE
+Same as
+.B libmemkind::kinds::DAX_KMEM
+except that the pages that support the allocation are interleaved across all persistent memory NUMA nodes.
+.PP
 All public member types and functions correspond to standard library allocator concepts and definitions. The current implementation supports C++11 standard.
 .PP
 Template arguments:

@@ -764,6 +764,12 @@ the request, the allocation will fall back on other memory NUMA nodes.
 .BR Note:
 Only one node ID could be marked as preferred one.
 .TP
+.B MEMKIND_DAX_KMEM_INTERLEAVE
+Same as
+.B MEMKIND_DAX_KMEM
+except that the pages that support the allocation are interleaved
+across all persistent memory NUMA nodes.
+.TP
 .B MEMKIND_REGULAR
 Allocate from regular memory using the default page size. Regular means general purpose memory
 from the NUMA nodes containing CPUs.
