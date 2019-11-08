@@ -142,6 +142,7 @@ test/load_tbbmalloc_symbols.c
 test/locality_test.cpp
 test/main.cpp
 test/memkind_allocator_tests.cpp
+test/memkind_dax_kmem_test.cpp
 test/memkind_detect_kind_tests.cpp
 test/memkind_null_kind_test.cpp
 test/memkind_pmem_config_tests.cpp

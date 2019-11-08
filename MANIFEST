@@ -457,6 +457,7 @@ test/memkind-perf-ext.ts
 test/memkind-perf.ts
 test/memkind-pytests.ts
 test/memkind-slts.ts
+test/memkind_dax_kmem_test.cpp
 test/memkind_detect_kind_tests.cpp
 test/memkind_null_kind_test.cpp
 test/memkind_pmem_config_tests.cpp
