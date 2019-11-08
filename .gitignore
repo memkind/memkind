@@ -80,6 +80,7 @@
 /test/autohbw_test_helper
 /test/check.sh.log
 /test/check.sh.trs
+/test/dax_kmem_test
 /test/decorator_test
 /test/environ_err_hbw_malloc_test
 /test/environerr_hbw_malloc_test

@@ -462,6 +462,9 @@ unit_tests: checkprogs
 unit_tests_pmem: checkprogs
 	test/pmem_test
 
+unit_tests_dax_kmem: checkprogs
+	test/dax_kmem_test
+
 include autohbw/Makefile.mk
 include test/Makefile.mk
 include examples/Makefile.mk

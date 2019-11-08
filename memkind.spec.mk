@@ -183,6 +183,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %defattr(-,root,root,-)
 $(memkind_test_dir)/all_tests
 $(memkind_test_dir)/environ_err_hbw_malloc_test
+${memkind_test_dir}/dax_kmem_test
 $(memkind_test_dir)/decorator_test
 $(memkind_test_dir)/locality_test
 $(memkind_test_dir)/freeing_memory_segfault_test
