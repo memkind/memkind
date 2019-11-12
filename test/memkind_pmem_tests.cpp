@@ -750,7 +750,7 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSizeConservative)
     ASSERT_EQ(err, 0);
     memkind_config_delete(test_cfg);
 
-    //check maximum number of allocations right after create the kind
+    //check maximum number of allocations right after creating the kind
     while ((ptr = memkind_malloc(kind, alloc_size)) != nullptr) {
         pmem_vec.push_back(ptr);
     }
@@ -814,7 +814,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFillConservative)
     ASSERT_EQ(err, 0);
     memkind_config_delete(test_cfg);
 
-    //check maximum number of allocations right after create the kind
+    //check maximum number of allocations right after creating the kind
     j = 0;
     while ((ptr = memkind_malloc(kind, small_size[j++])) != nullptr) {
         pmem_vec.push_back(ptr);
