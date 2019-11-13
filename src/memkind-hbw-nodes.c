@@ -66,6 +66,11 @@ int print_hbw_nodes()
 
     nodemask_t nodemask;
     struct bitmask nodemask_bm = {NUMA_NUM_NODES, nodemask.n};
+
+    // ensuring functions in numa library are defined
+    if (numa_available() == -1) {
+        return 3;
+    }
     numa_bitmask_clearall(&nodemask_bm);
 
     //WARNING: code below is usage of memkind experimental API which may be changed in future
