@@ -75,7 +75,7 @@ MEMKIND_EXPORT int memkind_hugetlb_get_mmap_flags(struct memkind *kind,
 
 MEMKIND_EXPORT void memkind_hugetlb_init_once(void)
 {
-    memkind_init(MEMKIND_HUGETLB, false);
+    memkind_init(MEMKIND_HUGETLB, true);
 }
 
 MEMKIND_EXPORT int memkind_hugetlb_check_available_2mb(struct memkind *kind)
