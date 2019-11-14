@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.68)
+AC_PREREQ(2.63)
 AC_INIT([Makefile.in])
 
 AC_CONFIG_AUX_DIR([build-aux])
@@ -1650,10 +1650,14 @@ if test "x$abi" != "xpecoff" ; then
 dnl Check if we have dlsym support.
   if test "x$enable_libdl" = "x1" ; then
     have_dlsym="1"
-    AC_CHECK_HEADERS([dlfcn.h],
-      AC_CHECK_FUNC([dlsym], [],
-        [AC_CHECK_LIB([dl], [dlsym], [LIBS="$LIBS -ldl"], [have_dlsym="0"])]),
-      [have_dlsym="0"])
+    AC_CHECK_HEADERS([dlfcn.h], , [have_dlsym="0"])
+    check_dlsym_in_libdl="0"
+    if test "x$have_dlsym" = "x1" ; then
+      AC_CHECK_FUNC([dlsym], [], [check_dlsym_in_libdl="1"])
+    fi
+    if test "x$check_dlsym_in_libdl" = "x1" ; then
+      AC_CHECK_LIB([dl], [dlsym], [LIBS="$LIBS -ldl"], [have_dlsym="0"])
+    fi
     if test "x$have_dlsym" = "x1" ; then
       AC_DEFINE([JEMALLOC_HAVE_DLSYM], [ ])
     fi
