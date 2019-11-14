@@ -118,7 +118,19 @@ except that the pages that support the allocation are interleaved across all hig
 Allocate from regular memory using the default page size. Regular means general purpose memory from the NUMA nodes containing CPUs.
 .PP
 .B libmemkind::kinds::DAX_KMEM
-Allocate from the closest persistent memory NUMA node at the time of allocation. If there is not enough memory on the closest persistent memory NUMA node to satisfy the request, errno is set to ENOMEM and the allocated pointer is set to
+Allocate from the closest persistent memory NUMA node at the time of allocation. If there is not enough memory on the closest persistent memory NUMA node to satisfy the request,
+.I errno
+is set to
+.B ENOMEM
+and the allocated pointer is set to
+.IR "NULL" .
+.PP
+.B libmemkind::kinds::DAX_KMEM_ALL
+Allocate from the closest persistent memory NUMA node available at the time of allocation. If there is not enough memory on any of persistent memory NUMA nodes to satisfy the request,
+.I errno
+is set to
+.B ENOMEM
+and the allocated pointer is set to
 .IR "NULL" .
 .PP
 .B libmemkind::kinds::DAX_KMEM_PREFERRED
