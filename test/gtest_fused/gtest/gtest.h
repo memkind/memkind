@@ -9447,6 +9447,9 @@ namespace testing
 #define GTEST_SUCCESS_(message) \
   GTEST_MESSAGE_(message, ::testing::TestPartResult::kSuccess)
 
+#define GTEST_SKIP_(message) \
+  return GTEST_MESSAGE_(message, ::testing::TestPartResult::kSkip)
+
 // Suppresses MSVC warnings 4072 (unreachable code) for the code following
 // statement if it returns or throws (or doesn't return or throw in some
 // situations).
@@ -19482,7 +19485,8 @@ namespace testing
         enum Type {
             kSuccess,          // Succeeded.
             kNonFatalFailure,  // Failed but the test can continue.
-            kFatalFailure      // Failed and the test should be terminated.
+            kFatalFailure,     // Failed and the test should be terminated.
+            kSkip              // Skipped.
         };
 
         // C'tor.  TestPartResult does NOT have a default constructor.
@@ -19532,6 +19536,12 @@ namespace testing
             return message_.c_str();
         }
 
+        // Returns true if and only if the test part was skipped.
+        bool skipped() const
+        {
+            return type_ == kSkip;
+        }
+
         // Returns true iff the test part passed.
         bool passed() const
         {
@@ -19541,7 +19551,7 @@ namespace testing
         // Returns true iff the test part failed.
         bool failed() const
         {
-            return type_ != kSuccess;
+            return fatally_failed() || nonfatally_failed();
         }
 
         // Returns true iff the test part non-fatally failed.
@@ -20266,6 +20276,9 @@ namespace testing
         // Returns true iff the current test has a non-fatal failure.
         static bool HasNonfatalFailure();
 
+        // Returns true if and only if the current test was skipped.
+        static bool IsSkipped();
+
         // Returns true iff the current test has a (either fatal or
         // non-fatal) failure.
         static bool HasFailure()
@@ -20414,11 +20427,14 @@ namespace testing
         // Returns the number of the test properties.
         int test_property_count() const;
 
-        // Returns true iff the test passed (i.e. no test part failed).
+        // Returns true if the test passed (i.e. no test part failed).
         bool Passed() const
         {
-            return !Failed();
+            return !Skipped() && !Failed();
         }
+
+        // Returns true if and only if the test was skipped.
+        bool Skipped() const;
 
         // Returns true iff the test failed.
         bool Failed() const;
@@ -20428,6 +20444,9 @@ namespace testing
 
         // Returns true iff the test has a non-fatal failure.
         bool HasNonfatalFailure() const;
+
+        // Returns true if and only if the current test was skipped.
+        static bool IsSkipped();
 
         // Returns the elapsed time, in milliseconds.
         TimeInMillis elapsed_time() const
@@ -20741,6 +20760,9 @@ namespace testing
         // Gets the number of successful tests in this test case.
         int successful_test_count() const;
 
+        // Gets the number of skipped tests in this test suite.
+        int skipped_test_count() const;
+
         // Gets the number of failed tests in this test case.
         int failed_test_count() const;
 
@@ -20848,6 +20870,12 @@ namespace testing
         static bool TestPassed(const TestInfo *test_info)
         {
             return test_info->should_run() && test_info->result()->Passed();
+        }
+
+        // Returns true if and only if test skipped.
+        static bool TestSkipped(const TestInfo* test_info)
+        {
+            return test_info->should_run() && test_info->result()->Skipped();
         }
 
         // Returns true iff test failed.
@@ -21174,6 +21202,9 @@ namespace testing
 
         // Gets the number of successful tests.
         int successful_test_count() const;
+
+        // Gets the number of skipped tests.
+        int skipped_test_count() const;
 
         // Gets the number of failed tests.
         int failed_test_count() const;
@@ -21781,6 +21812,11 @@ GTEST_API_ AssertionResult CmpHelper##op_name(\
 #endif  // GTEST_HAS_PARAM_TEST
 
 // Macros for indicating success/failure in test code.
+
+// Skips test in runtime.
+// Skipping test aborts current function.
+// Skipped tests are neither successful nor failed.
+#define GTEST_SKIP() GTEST_SKIP_("")
 
 // ADD_FAILURE unconditionally adds a failure to the current test.
 // SUCCEED generates a success - it doesn't automatically make the
