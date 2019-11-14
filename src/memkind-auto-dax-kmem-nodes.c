@@ -66,6 +66,11 @@ static int print_dax_kmem_nodes()
 
     nodemask_t nodemask;
     struct bitmask nodemask_dax_kmem = {NUMA_NUM_NODES, nodemask.n};
+
+    // ensuring functions in numa library are defined
+    if (numa_available() == -1) {
+        return 3;
+    }
     numa_bitmask_clearall(&nodemask_dax_kmem);
 
     //WARNING: code below is usage of memkind experimental API which may be changed in future
