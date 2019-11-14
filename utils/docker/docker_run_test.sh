@@ -23,50 +23,26 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# docker_run_build_and_test.sh - is called inside a Docker container;
-# prepares and runs memkind unit tests for specified pull request number
+# docker_run_test.sh - is called inside a Docker container;
+# runs memkind unit tests for specified pull request number
 #
+# Parameters:
+# -test suite name
+# -heap manager
 set -e
 
-UTILS_PREFIX=utils/docker
+TEST_SUITE=$1
+HEAP_MANAGER=$2
 
-if [ -n "$CODECOV_TOKEN" ]; then
-    GCOV_OPTION="--enable-gcov"
-fi
-
-# if ndctl library version is specified install library
-if [ -n "$NDCTL_LIBRARY_VERSION" ]; then
-    "$UTILS_PREFIX"/docker_install_ndctl.sh "$NDCTL_LIBRARY_VERSION"
-fi
-
-# building memkind sources and tests
-./autogen.sh
-./configure --prefix=/usr $GCOV_OPTION
-make -j "$(nproc --all)"
-make -j "$(nproc --all)" checkprogs
-
-# building RPM package
-if [[ $(cat /etc/os-release) = *"Fedora"* ]]; then
-    make -j "$(nproc --all)" rpm
-fi
-
-# installing memkind
-sudo make install
-
-# if TBB library version is specified install library and use it
-# as MEMKIND_HEAP_MANAGER
-if [ -n "$TBB_LIBRARY_VERSION" ]; then
-    source "$UTILS_PREFIX"/docker_install_tbb.sh "$TBB_LIBRARY_VERSION"
-    HEAP_MANAGER="TBB"
-fi
-
-# running tests and display output in case of failure
-make check || { cat test-suite.log; exit 1; }
-
-# running pmem examples
-find examples/.libs -name "pmem*" -executable -type f -exec sh -c "MEMKIND_HEAP_MANAGER=$HEAP_MANAGER "{}" " \;
-
-# executing coverage script if codecov token is set
-if [ -n "$CODECOV_TOKEN" ]; then
-    "$UTILS_PREFIX"/docker_run_coverage.sh "$CODECOV_TOKEN" "$CODECOV_TEST_SUITE_NAME" "$PWD"
-fi
+if [ "$TEST_SUITE" = "HBW" ]; then
+    # running tests and display output in case of failure
+    make check || { cat test-suite.log; exit 1; }
+elif [ "$TEST_SUITE" = "PMEM" ]; then
+    make unit_tests_pmem
+    # running pmem examples
+    find examples/.libs -name "pmem*" -executable -type f -exec sh -c "MEMKIND_HEAP_MANAGER=$HEAP_MANAGER "{}" " \;
+elif [ "$TEST_SUITE" = "DAX_KMEM" ]; then
+    make unit_tests_dax_kmem
+else
+    echo "Unknown Test suite ${TEST_SUITE}"
+fi;

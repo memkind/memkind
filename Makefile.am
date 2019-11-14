@@ -409,8 +409,9 @@ EXTRA_DIST = CONTRIBUTING \
              utils/docker/README.md \
              utils/docker/docker_install_ndctl.sh \
              utils/docker/docker_install_tbb.sh \
-             utils/docker/docker_run_build_and_test.sh \
+             utils/docker/docker_run_build.sh \
              utils/docker/docker_run_coverage.sh \
+             utils/docker/docker_run_test.sh \
              utils/docker/run_local.sh \
              utils/docker/set_host_configuration.sh \
              # end

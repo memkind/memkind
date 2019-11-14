@@ -23,41 +23,47 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# run_local.sh - builds a container with Docker image
-# and runs docker_run_build.sh script inside it
+# docker_run_build.sh - is called inside a Docker container;
+# prepares and runs memkind build for specified pull request number
 #
-# Parameters:
-# -name of the Docker image file
-
 set -e
 
-DOCKER_IMAGE_NAME="$1"
+UTILS_PREFIX=utils/docker
 
-if [[ ! -f "$DOCKER_IMAGE_NAME" ]]; then
-    echo "Docker image "$DOCKER_IMAGE_NAME" does not exist."
-    exit 1
+if [ -n "$CODECOV_TOKEN" ]; then
+    GCOV_OPTION="--enable-gcov"
 fi
 
-if [[ -z "$MEMKIND_HOST_WORKDIR" ]]; then
-    echo "MEMKIND_HOST_WORKDIR has to be set."
-    exit 1
+# if ndctl library version is specified install library
+if [ -n "$NDCTL_LIBRARY_VERSION" ]; then
+    "$UTILS_PREFIX"/docker_install_ndctl.sh "$NDCTL_LIBRARY_VERSION"
 fi
 
-# need to be inline with Dockerfile WORKDIR
-MEMKIND_CONTAINTER_WORKDIR=/home/memkinduser/memkind/
+# building memkind sources and tests
+./autogen.sh
+./configure --prefix=/usr $GCOV_OPTION
+make -j "$(nproc --all)"
+make -j "$(nproc --all)" checkprogs
 
-docker build --tag memkind_cont \
-             --file "$DOCKER_IMAGE_NAME" \
-             --build-arg http_proxy=$http_proxy \
-             --build-arg https_proxy=$https_proxy \
-             .
-docker run --rm \
-           --privileged=true \
-           --env http_proxy=$http_proxy \
-           --env https_proxy=$https_proxy \
-           --env CODECOV_TOKEN="$CODECOV_TOKEN" \
-           --env TEST_SUITE_NAME="$TEST_SUITE_NAME" \
-           --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
-           --env NDCTL_LIBRARY_VERSION="$NDCTL_LIBRARY_VERSION" \
-           --mount type=bind,source="$MEMKIND_HOST_WORKDIR",target="$MEMKIND_CONTAINTER_WORKDIR" \
-           memkind_cont utils/docker/docker_run_build.sh
+# building RPM package
+if [[ $(cat /etc/os-release) = *"Fedora"* ]]; then
+    make -j "$(nproc --all)" rpm
+fi
+
+# installing memkind
+sudo make install
+
+# if TBB library version is specified install library and use it
+# as MEMKIND_HEAP_MANAGER
+if [ -n "$TBB_LIBRARY_VERSION" ]; then
+    source "$UTILS_PREFIX"/docker_install_tbb.sh "$TBB_LIBRARY_VERSION"
+    HEAP_MANAGER="TBB"
+fi
+if [ -n "$TEST_SUITE_NAME" ]; then
+    "$UTILS_PREFIX"/docker_run_test.sh "$TEST_SUITE_NAME" "$HEAP_MANAGER"
+fi
+
+# executing coverage script if codecov token is set
+if [ -n "$CODECOV_TOKEN" ]; then
+    "$UTILS_PREFIX"/docker_run_coverage.sh "$CODECOV_TOKEN" "$TEST_SUITE_NAME" "$PWD"
+fi
