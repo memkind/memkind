@@ -403,6 +403,7 @@ EXTRA_DIST = CONTRIBUTING \
              memkind.pc.in \
              memkind.spec.mk \
              test/test.sh \
+             test/test_dax_kmem.sh \
              utils/docker/Dockerfile.fedora-30 \
              utils/docker/Dockerfile.ubuntu-18.04 \
              utils/docker/README.md \
@@ -508,7 +509,7 @@ unit_tests_pmem: checkprogs
 	test/pmem_test
 
 unit_tests_dax_kmem: checkprogs
-	test/dax_kmem_test
+	test/test_dax_kmem.sh
 
 include autohbw/Makefile.mk
 include test/Makefile.mk
