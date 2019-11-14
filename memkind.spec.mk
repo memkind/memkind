@@ -223,6 +223,7 @@ $(memkind_test_dir)/memkind-perf.ts
 $(memkind_test_dir)/memkind-perf-ext.ts
 $(memkind_test_dir)/memkind-pytests.ts
 $(memkind_test_dir)/test.sh
+$(memkind_test_dir)/test_dax_kmem.sh
 $(memkind_test_dir)/hbw_detection_test.py
 $(memkind_test_dir)/autohbw_test.py
 $(memkind_test_dir)/trace_mechanism_test.py

@@ -529,6 +529,7 @@ test/static_kinds_list.h
 test/static_kinds_tests.cpp
 test/tbbmalloc.h
 test/test.sh
+test/test_dax_kmem.sh
 test/trace_mechanism_test.py
 test/trace_mechanism_test_helper.c
 test/trial_generator.cpp
