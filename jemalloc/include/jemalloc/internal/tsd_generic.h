@@ -121,6 +121,12 @@ tsd_boot(void) {
 	return false;
 }
 
+JEMALLOC_ALWAYS_INLINE void
+tsd_fini(void) {
+	pthread_key_create(tsd_tsd);
+	tsd_booted = false;
+}
+
 JEMALLOC_ALWAYS_INLINE bool
 tsd_booted_get(void) {
 	return tsd_booted;

@@ -34,6 +34,10 @@ tsd_boot(void) {
 	return tsd_boot0();
 }
 
+JEMALLOC_ALWAYS_INLINE void
+tsd_fini(void) {
+}
+
 JEMALLOC_ALWAYS_INLINE bool
 tsd_booted_get(void) {
 	return tsd_booted;

@@ -152,6 +152,7 @@ void *malloc_tsd_malloc(size_t size);
 void malloc_tsd_dalloc(void *wrapper);
 void malloc_tsd_cleanup_register(bool (*f)(void));
 tsd_t *malloc_tsd_boot0(void);
+void malloc_tsd_fini(void);
 void malloc_tsd_boot1(void);
 void tsd_cleanup(void *arg);
 tsd_t *tsd_fetch_slow(tsd_t *tsd, bool internal);
