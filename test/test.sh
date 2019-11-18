@@ -45,7 +45,7 @@ err=0
 function usage () {
    cat <<EOF
 
-Usage: $PROGNAME [-c csv_file] [-l log_file] [-f test_filter] [-T tests_dir] [-d] [-m] [-p] [-x] [-s] [-h]
+Usage: $PROGNAME [-c csv_file] [-l log_file] [-f test_filter] [-T tests_dir] [-d] [-m] [-p] [-e] [-x] [-s] [-h]
 
 OPTIONS
     -c,
@@ -62,6 +62,8 @@ OPTIONS
         skip tests that require 2MB pages configured on the machine
     -p,
         skip python tests
+    -e,
+        run only HBW performance operation tests
     -x,
         skip tests that are passed as value
     -s,
@@ -269,7 +271,7 @@ check_auto_dax_kmem_nodes
 
 OPTIND=1
 
-while getopts "T:c:f:l:hdmsx:p:" opt; do
+while getopts "T:c:f:l:hdemsx:p:" opt; do
     case "$opt" in
         T)
             TEST_PATH=$OPTARG;
@@ -305,6 +307,11 @@ while getopts "T:c:f:l:hdmsx:p:" opt; do
                 SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not hbw_detection"
             fi
             show_skipped_tests "test_TC_MEMKIND_hbw_detection"
+            ;;
+        e)
+            GTEST_BINARIES=(performance_test)
+            SKIPPED_PYTESTS=$SKIPPED_PYTESTS$PYTEST_FILES
+            break;
             ;;
         p)
             SKIPPED_PYTESTS=$SKIPPED_PYTESTS$OPTARG
