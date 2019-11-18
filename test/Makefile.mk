@@ -34,6 +34,7 @@ check_PROGRAMS += test/all_tests \
                   test/gb_page_tests_bind_policy \
                   test/locality_test \
                   test/memkind_stat_test \
+                  test/performance_test \
                   test/trace_mechanism_test_helper \
                   # end
 if HAVE_CXX11
@@ -100,17 +101,21 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/memkind_versioning_tests.cpp \
                          test/multithreaded_tests.cpp \
                          test/negative_tests.cpp \
-                         test/performance/framework.cpp \
-                         test/performance/framework.hpp \
-                         test/performance/operations.hpp \
-                         test/performance/perf_tests.cpp \
-                         test/performance/perf_tests.hpp \
                          test/pmem_allocator_tests.cpp \
                          test/static_kinds_list.h \
                          test/static_kinds_tests.cpp \
                          test/trial_generator.cpp \
                          test/trial_generator.h \
                          #end
+
+test_performance_test_SOURCES = $(fused_gtest) test/performance/perf_tests.cpp \
+                                test/performance/perf_tests.hpp \
+                                test/performance/framework.cpp \
+                                test/performance/framework.hpp \
+                                test/performance/operations.hpp \
+                                test/performance/perf_tests.hpp
+
+test_performance_test_LDADD = libmemkind.la
 
 test_locality_test_SOURCES = $(fused_gtest) test/allocator_perf_tool/Allocation_info.cpp test/locality_test.cpp
 test_locality_test_LDADD = libmemkind.la
