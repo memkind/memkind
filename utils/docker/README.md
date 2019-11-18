@@ -12,9 +12,7 @@ to build, test and optionally measure test coverage of any pull request to memki
 
 * **CODECOV_TOKEN** - Codecov token for memkind repository to upload the coverage results.
 
-* **CODECOV_TEST_SUITE_NAME** - Name of test suite, which will be used to upload group coverage metrics.
-Used only when **CODECOV_TOKEN** is defined. Default value of **CODECOV_TEST_SUITE_NAME** is
-*'anonymous_test_suite'*.
+* **TEST_SUITE_NAME** - Name of test suite (possible values are HBW/PMEM/DAX_KMEM)
 
 * **NDCTL_LIBRARY_VERSION** - ndctl library version.
 For fully testing MEMKIND_DAX_KMEM, ndctl library version tag must be passed as parameter,
@@ -25,9 +23,11 @@ For testing Threading Building Blocks, TBB library version tag must be passed as
 see https://github.com/01org/tbb/tags.
 
 # Files
-*'docker_run_build_and_test.sh'*  is used to build and run tests of memkind.
+*'docker_run_build.sh'*  is used to build of memkind.
 
 *'docker_run_coverage.sh'*  is used for uploading coverage report on [Codecov.io](Codecov.io)
+
+*'docker_run_test.sh'*  is used to run tests of memkind.
 
 *'docker_install_ndctl.sh'*  is used to install ndctl library.
 

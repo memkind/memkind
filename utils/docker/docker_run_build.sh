@@ -22,42 +22,43 @@
 #  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# docker_install_ndctl.sh - is called inside a Docker container;
-# installs ndctl library
 #
-
+# docker_run_build.sh - is called inside a Docker container;
+# prepares and runs memkind build for specified pull request number
+#
 set -e
 
-NDCTL_RELEASE_URL=https://github.com/pmem/ndctl/releases/tag/"$NDCTL_LIBRARY_VERSION"
-NDCTL_TAR_GZ="$NDCTL_LIBRARY_VERSION".tar.gz
-NDCTL_TARBALL_URL=https://github.com/pmem/ndctl/archive/"$NDCTL_TAR_GZ"
+export UTILS_PREFIX=utils/docker
 
-# check if specified ndctl release exists
-if curl --output /dev/null --silent --head --fail "$NDCTL_RELEASE_URL"; then
-  echo "ndctl version ${NDCTL_LIBRARY_VERSION} exist."
-else
-  echo "ndctl url: ${NDCTL_RELEASE_URL} is not valid. ndctl version: ${NDCTL_LIBRARY_VERSION} doesn't exist."
-  exit 1
+if [ -n "$CODECOV_TOKEN" ]; then
+    GCOV_OPTION="--enable-gcov"
 fi
 
-NDCTL_LOCAL_DIR="$HOME"/ndctl/"$NDCTL_LIBRARY_VERSION"
-NDCTL_LOCAL_TAR_GZ="$NDCTL_LOCAL_DIR"/"$NDCTL_TAR_GZ"
+# if ndctl library version is specified install library
+if [ -n "$NDCTL_LIBRARY_VERSION" ]; then
+    "$UTILS_PREFIX"/docker_install_ndctl.sh
+fi
 
-# create ndctl directory in home directory
-mkdir -p "$NDCTL_LOCAL_DIR"
-
-# download and untar ndctl library to ndctl directory
-curl -L "$NDCTL_TARBALL_URL" -o "$NDCTL_LOCAL_TAR_GZ"
-tar -xzf "$NDCTL_LOCAL_TAR_GZ" -C "$NDCTL_LOCAL_DIR" --strip-components=1
-
-# go to ndctl directory and build ndctl library
-cd "$NDCTL_LOCAL_DIR"
+# building memkind sources and tests
 ./autogen.sh
-./configure --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib
+./configure --prefix=/usr $GCOV_OPTION
 make -j "$(nproc --all)"
-sudo make -j "$(nproc --all)" install
+make -j "$(nproc --all)" checkprogs
 
-# update shared library cache
-sudo ldconfig
-# return to previous directory
-cd -
+# building RPM package
+if [[ $(cat /etc/os-release) = *"Fedora"* ]]; then
+    make -j "$(nproc --all)" rpm
+fi
+
+# installing memkind
+sudo make install
+
+# if TBB library version is specified install library and use it
+# as MEMKIND_HEAP_MANAGER
+if [ -n "$TBB_LIBRARY_VERSION" ]; then
+    source "$UTILS_PREFIX"/docker_install_tbb.sh
+    HEAP_MANAGER="TBB"
+fi
+if [ -n "$TEST_SUITE_NAME" ]; then
+    "$UTILS_PREFIX"/docker_run_test.sh "$HEAP_MANAGER"
+fi

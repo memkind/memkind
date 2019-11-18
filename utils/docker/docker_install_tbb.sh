@@ -25,26 +25,23 @@
 # docker_install_tbb.sh - is called inside a Docker container;
 # installs Threading Building Block library
 #
-# Parameters:
-# -Threading Building Block library version (e.g. "2019_U4")
 
 set -e
 
-TBB_VERSION="$1"
-TBB_RELEASE_URL=https://github.com/01org/tbb/releases/tag/"$TBB_VERSION"
-TBB_TAR_GZ="$TBB_VERSION".tar.gz
+TBB_RELEASE_URL=https://github.com/01org/tbb/releases/tag/"$TBB_LIBRARY_VERSION"
+TBB_TAR_GZ="$TBB_LIBRARY_VERSION".tar.gz
 TBB_TARBALL_URL=https://github.com/01org/tbb/archive/"$TBB_TAR_GZ"
 TBB_VARS_SH="tbbvars.sh"
 
 # check if specified TBB release exists
 if curl --output /dev/null --silent --head --fail "$TBB_RELEASE_URL"; then
-  echo "TBB version ${TBB_VERSION} exist."
+  echo "TBB version ${TBB_LIBRARY_VERSION} exist."
 else
-  echo "TBB url: ${TBB_RELEASE_URL} is not valid. TBB version: ${TBB_VERSION} doesn't exist."
+  echo "TBB url: ${TBB_RELEASE_URL} is not valid. TBB version: ${TBB_LIBRARY_VERSION} doesn't exist."
   exit 1
 fi
 
-TBB_LOCAL_DIR="$HOME"/tbb/"$TBB_VERSION"
+TBB_LOCAL_DIR="$HOME"/tbb/"$TBB_LIBRARY_VERSION"
 TBB_LOCAL_TAR_GZ="$TBB_LOCAL_DIR"/"$TBB_TAR_GZ"
 
 # create TBB directory in home directory

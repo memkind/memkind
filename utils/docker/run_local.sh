@@ -24,7 +24,7 @@
 
 #
 # run_local.sh - builds a container with Docker image
-# and runs docker_run_build_and_test.sh script inside it
+# and runs docker_run_build.sh script inside it
 #
 # Parameters:
 # -name of the Docker image file
@@ -32,7 +32,6 @@
 set -e
 
 DOCKER_IMAGE_NAME="$1"
-export CODECOV_TEST_SUITE_NAME=${CODECOV_TEST_SUITE_NAME:-anonymous_test_suite}
 
 if [[ ! -f "$DOCKER_IMAGE_NAME" ]]; then
     echo "Docker image "$DOCKER_IMAGE_NAME" does not exist."
@@ -57,8 +56,8 @@ docker run --rm \
            --env http_proxy=$http_proxy \
            --env https_proxy=$https_proxy \
            --env CODECOV_TOKEN="$CODECOV_TOKEN" \
-           --env CODECOV_TEST_SUITE_NAME="$CODECOV_TEST_SUITE_NAME" \
+           --env TEST_SUITE_NAME="$TEST_SUITE_NAME" \
            --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
            --env NDCTL_LIBRARY_VERSION="$NDCTL_LIBRARY_VERSION" \
            --mount type=bind,source="$MEMKIND_HOST_WORKDIR",target="$MEMKIND_CONTAINTER_WORKDIR" \
-           memkind_cont utils/docker/docker_run_build_and_test.sh
+           memkind_cont utils/docker/docker_run_build.sh
