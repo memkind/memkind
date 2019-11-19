@@ -78,6 +78,7 @@
 /test/alloc_benchmark_pmem
 /test/alloc_benchmark_tbb
 /test/allocator_perf_tool_tests
+/test/allocator_perf_tool_dax_kmem_tests
 /test/allocator_perf_tool_pmem_tests
 /test/autohbw_candidates
 /test/autohbw_test_helper

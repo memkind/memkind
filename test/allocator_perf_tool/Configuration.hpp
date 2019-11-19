@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2018 Intel Corporation.
+* Copyright (C) 2015 - 2019 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,9 @@ public:
         MEMKIND_HBW_PREFERRED_HUGETLB,
         MEMKIND_HBW_GBTLB,
         MEMKIND_HBW_PREFERRED_GBTLB,
+        MEMKIND_DAX_KMEM,
+        MEMKIND_DAX_KMEM_ALL,
+        MEMKIND_DAX_KMEM_PREFERRED,
         HBWMALLOC_ALLOCATOR,
         MEMKIND_PMEM,
         NUM_OF_ALLOCATOR_TYPES
@@ -68,6 +71,9 @@ public:
             "MEMKIND_HBW_PREFERRED_HUGETLB",
             "MEMKIND_HBW_GBTLB",
             "MEMKIND_HBW_PREFERRED_GBTLB",
+            "MEMKIND_DAX_KMEM",
+            "MEMKIND_DAX_KMEM_ALL",
+            "MEMKIND_DAX_KMEM_PREFERRED",
             "HBWMALLOC_ALLOCATOR",
             "MEMKIND_PMEM"
         };
