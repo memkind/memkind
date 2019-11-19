@@ -36,9 +36,9 @@ if [ "$TEST_SUITE_NAME" = "HBW" ]; then
     # running tests and display output in case of failure
     make check || { cat test-suite.log; exit 1; }
 elif [ "$TEST_SUITE_NAME" = "PMEM" ]; then
-    make unit_tests_pmem
+    make PMEM_PATH="$PMEM_PATH" unit_tests_pmem
     # running pmem examples
-    find examples/.libs -name "pmem*" -executable -type f -exec sh -c "MEMKIND_HEAP_MANAGER=$HEAP_MANAGER "{}" " \;
+    find examples/.libs -name "pmem*" -executable -type f -exec sh -c "MEMKIND_HEAP_MANAGER=$HEAP_MANAGER "{}" $PMEM_PATH" \;
 elif [ "$TEST_SUITE_NAME" = "DAX_KMEM" ]; then
     make unit_tests_dax_kmem
 else

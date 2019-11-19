@@ -14,6 +14,9 @@ to build, test and optionally measure test coverage of any pull request to memki
 
 * **TEST_SUITE_NAME** - Name of test suite (possible values are HBW/PMEM/DAX_KMEM)
 
+* **PMEM_PATH** - PMEM mount device path (useful for test PMEM configuration). Default value of **PMEM_PATH** is
+*'/tmp/'*.
+
 * **NDCTL_LIBRARY_VERSION** - ndctl library version.
 For fully testing MEMKIND_DAX_KMEM, ndctl library version tag must be passed as parameter,
 see https://github.com/pmem/ndctl/tags.
