@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015 - 2018 Intel Corporation.
+* Copyright (C) 2015 - 2019 Intel Corporation.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -84,6 +84,14 @@ public:
         memkind_allocators[AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB] =
             MemkindAllocatorWithTimer(MEMKIND_HBW_PREFERRED_GBTLB,
                                       AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB);
+        memkind_allocators[AllocatorTypes::MEMKIND_DAX_KMEM] =
+            MemkindAllocatorWithTimer(MEMKIND_DAX_KMEM, AllocatorTypes::MEMKIND_DAX_KMEM);
+        memkind_allocators[AllocatorTypes::MEMKIND_DAX_KMEM_ALL] =
+            MemkindAllocatorWithTimer(MEMKIND_DAX_KMEM_ALL,
+                                      AllocatorTypes::MEMKIND_DAX_KMEM_ALL);
+        memkind_allocators[AllocatorTypes::MEMKIND_DAX_KMEM_PREFERRED] =
+            MemkindAllocatorWithTimer(MEMKIND_DAX_KMEM_PREFERRED,
+                                      AllocatorTypes::MEMKIND_DAX_KMEM_PREFERRED);
         memkind_allocators[AllocatorTypes::MEMKIND_PMEM] = MemkindAllocatorWithTimer(
                                                                MEMKIND_PMEM_MOCKUP, AllocatorTypes::MEMKIND_PMEM);
     }

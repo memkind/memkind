@@ -472,6 +472,7 @@ test/bat_tests.cpp
 test/check.cpp
 test/check.h
 test/common.h
+test/dax_kmem_alloc_performance_tests.cpp
 test/decorator_test.cpp
 test/decorator_test.h
 test/dlopen_test.cpp

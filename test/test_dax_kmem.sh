@@ -30,7 +30,7 @@ PROGNAME=`basename $0`
 TEST_PATH="$basedir/"
 
 # Gtest binaries
-GTEST_BINARIES=(dax_kmem_test)
+GTEST_BINARIES=(dax_kmem_test allocator_perf_tool_dax_kmem_tests)
 
 # Pytest files
 PYTEST_FILES=()
