@@ -509,6 +509,7 @@ unit_tests: checkprogs
 PMEM_PATH=/tmp/
 unit_tests_pmem: checkprogs
 	test/pmem_test -d $(PMEM_PATH)
+	test/allocator_perf_tool_pmem_tests -d $(PMEM_PATH)
 
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh

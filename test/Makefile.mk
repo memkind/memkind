@@ -26,6 +26,7 @@ AM_CPPFLAGS += -Itest/gtest_fused -DMEMKIND_DEPRECATED\(x\)=x
 
 check_PROGRAMS += test/all_tests \
                   test/allocator_perf_tool_tests \
+                  test/allocator_perf_tool_pmem_tests \
                   test/autohbw_test_helper \
                   test/dax_kmem_test \
                   test/decorator_test \
@@ -65,6 +66,7 @@ EXTRA_DIST += test/autohbw_test.py \
 
 test_all_tests_LDADD = libmemkind.la
 test_allocator_perf_tool_tests_LDADD = libmemkind.la
+test_allocator_perf_tool_pmem_tests_LDADD = libmemkind.la
 test_autohbw_test_helper_LDADD = libmemkind.la
 test_dax_kmem_test_LDADD = libmemkind.la
 test_decorator_test_LDADD = libmemkind.la
@@ -184,13 +186,20 @@ test_allocator_perf_tool_tests_SOURCES = $(allocator_perf_tool_library_sources) 
                                          test/heap_manager_init_perf_test.cpp \
                                          test/huge_page_test.cpp \
                                          test/memory_footprint_test.cpp \
-                                         test/pmem_alloc_performance_tests.cpp \
                                          # end
 
+test_allocator_perf_tool_pmem_tests_SOURCES = $(allocator_perf_tool_library_sources) \
+                                         $(fused_gtest) \
+                                         test/pmem_alloc_performance_tests.cpp \
+                                         # end
 
 test_allocator_perf_tool_tests_CPPFLAGS = -Itest/allocator_perf_tool/ -O0 -Wno-error $(AM_CPPFLAGS)
 test_allocator_perf_tool_tests_CXXFLAGS = -Itest/allocator_perf_tool/ -O0 -Wno-error $(AM_CPPFLAGS)
 test_allocator_perf_tool_tests_LDFLAGS = -lpthread -lnuma
+
+test_allocator_perf_tool_pmem_tests_CPPFLAGS = -Itest/allocator_perf_tool/ -O0 -Wno-error $(AM_CPPFLAGS)
+test_allocator_perf_tool_pmem_tests_CXXFLAGS = -Itest/allocator_perf_tool/ -O0 -Wno-error $(AM_CPPFLAGS)
+test_allocator_perf_tool_pmem_tests_LDFLAGS = -lpthread -lnuma
 
 NUMAKIND_MAX = 2048
 test_all_tests_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS) -DNUMAKIND_MAX=$(NUMAKIND_MAX)

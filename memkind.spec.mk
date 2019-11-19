@@ -213,6 +213,7 @@ $(memkind_test_dir)/pmem_free_with_unknown_kind
 ${memkind_test_dir}/pmem_cpp_allocator
 ${memkind_test_dir}/pmem_test
 ${memkind_test_dir}/allocator_perf_tool_tests
+${memkind_test_dir}/allocator_perf_tool_pmem_tests
 ${memkind_test_dir}/perf_tool
 ${memkind_test_dir}/autohbw_test_helper
 ${memkind_test_dir}/trace_mechanism_test_helper
