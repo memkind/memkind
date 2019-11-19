@@ -506,8 +506,9 @@ unit_tests: checkprogs
 	test/all_tests --gtest_filter=*free_with_NULL_kind_4096_bytes:NegativeTest.*:ErrorMessage.*:GetArenaTest.*:MemkindVersioningTests.*
 	test/decorator_test
 
+PMEM_PATH=/tmp/
 unit_tests_pmem: checkprogs
-	test/pmem_test
+	test/pmem_test -d $(PMEM_PATH)
 
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh

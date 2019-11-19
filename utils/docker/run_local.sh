@@ -32,6 +32,7 @@
 set -e
 
 DOCKER_IMAGE_NAME="$1"
+export PMEM_PATH=${PMEM_PATH:-/tmp/}
 
 if [[ ! -f "$DOCKER_IMAGE_NAME" ]]; then
     echo "Docker image "$DOCKER_IMAGE_NAME" does not exist."
@@ -59,5 +60,6 @@ docker run --rm \
            --env TEST_SUITE_NAME="$TEST_SUITE_NAME" \
            --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
            --env NDCTL_LIBRARY_VERSION="$NDCTL_LIBRARY_VERSION" \
+           --env PMEM_PATH="$PMEM_PATH" \
            --mount type=bind,source="$MEMKIND_HOST_WORKDIR",target="$MEMKIND_CONTAINTER_WORKDIR" \
            memkind_cont utils/docker/docker_run_build.sh
