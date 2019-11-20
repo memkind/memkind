@@ -32,7 +32,7 @@
 set -e
 
 DOCKER_IMAGE_NAME="$1"
-export PMEM_PATH=${PMEM_PATH:-/tmp/}
+export PMEM_HOST_PATH=${PMEM_HOST_PATH:-/tmp/}
 
 if [[ ! -f "$DOCKER_IMAGE_NAME" ]]; then
     echo "Docker image "$DOCKER_IMAGE_NAME" does not exist."
@@ -45,7 +45,8 @@ if [[ -z "$MEMKIND_HOST_WORKDIR" ]]; then
 fi
 
 # need to be inline with Dockerfile WORKDIR
-MEMKIND_CONTAINTER_WORKDIR=/home/memkinduser/memkind/
+MEMKIND_CONTAINER_WORKDIR=/home/memkinduser/memkind/
+PMEM_CONTAINER_PATH=/home/memkinduser/mnt_pmem/
 
 docker build --tag memkind_cont \
              --file "$DOCKER_IMAGE_NAME" \
@@ -60,6 +61,7 @@ docker run --rm \
            --env TEST_SUITE_NAME="$TEST_SUITE_NAME" \
            --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
            --env NDCTL_LIBRARY_VERSION="$NDCTL_LIBRARY_VERSION" \
-           --env PMEM_PATH="$PMEM_PATH" \
-           --mount type=bind,source="$MEMKIND_HOST_WORKDIR",target="$MEMKIND_CONTAINTER_WORKDIR" \
+           --env PMEM_CONTAINER_PATH="$PMEM_CONTAINER_PATH" \
+           --mount type=bind,source="$MEMKIND_HOST_WORKDIR",target="$MEMKIND_CONTAINER_WORKDIR" \
+           --mount type=bind,source="$PMEM_HOST_PATH",target="$PMEM_CONTAINER_PATH" \
            memkind_cont utils/docker/docker_run_build.sh
