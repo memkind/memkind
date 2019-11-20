@@ -26,10 +26,10 @@ features.  Memkind interface allows to create and control file-backed memory
 3. [Building and Installing](#building-and-installing)
 	* [jemalloc](#jemalloc)
 4. [Run Requirements](#run-requirements)
-	* [Dependencies](#dependencies)
-	* [Kernel](#kernel)
-5. [MEMKIND_DAX_KMEM Kind Usage](#memkind_dax_kmem-kind-usage)
-6. [PMEM Kind Usage](#pmem-kind-usage)
+5. [Kind Requirements](#kind-requirements)
+6. [NVDIMM volatile usage](#nvdimm-volatile-usage)
+	* [DAX device](#dax-device)
+	* [DAX filesystem](#dax-filesystem)
 7. [The Detection Mechanism of the Kind](#the-detection-mechanism-of-the-kind)
 8. [Setting Logging Mechanism](#setting-logging-mechanism)
 9. [Setting Heap Manager](#setting-heap-manager)
@@ -120,16 +120,32 @@ source code has been kept close to the original form, and in particular
 the build system has been lightly modified.
 
 ## Run Requirements
-Applications which are using the memkind library need to satisfy
-prerequisite requirements described below.
 
-## Dependencies
 You will need to install required packages for applications,
 which are using the memkind library for dynamic linking at run time:
 
 * **libnuma**
 * **numactl**
 * **pthread**
+
+## Kind Requirements
+
+| Memory kind                   | NUMA  |  HBW Memory | Hugepages | Device DAX | Filesystem supporting hole punching |
+| ----------------------------- |:-----:|:-----------:|:---------:|:----------:|:-----------------------------------:|
+| MEMKIND_DEFAULT               |       |             |           |            |                                     |
+| MEMKIND_HUGETLB               | X     | X           | X         |            |                                     |
+| MEMKIND_HBW                   | X     | X           |           |            |                                     |
+| MEMKIND_HBW_ALL               | X     | X           |           |            |                                     |
+| MEMKIND_HBW_HUGETLB           | X     | X           | X         |            |                                     |
+| MEMKIND_HBW_ALL_HUGETLB       | X     | X           | X         |            |                                     |
+| MEMKIND_HBW_PREFERRED         | X     | X           |           |            |                                     |
+| MEMKIND_HBW_PREFERRED_HUGETLB | X     | X           | X         |            |                                     |
+| MEMKIND_HBW_INTERLEAVE        | X     | X           |           |            |                                     |
+| MEMKIND_REGULAR               | X     |             |           |            |                                     |
+| MEMKIND_DAX_KMEM              | X     |             |           | X          |                                     |
+| MEMKIND_DAX_KMEM_ALL          | X     |             |           | X          |                                     |
+| MEMKIND_DAX_KMEM_PREFERRED    | X     |             |           | X          |                                     |
+| PMEM kind                     |       |             |           |            | X                                   |
 
 ## Kernel
 To correctly control of NUMA, huge pages and file-backed memory following
@@ -162,14 +178,14 @@ attention to the use of the procfs files:
 
 for enabling the kernel's huge page pool.
 
-* **PMEM kind**
+* **Filesystem supporting hole punching**
 
 To use the PMEM kind, please be sure that filesystem which is used for PMEM creation supports
 [FALLOC_FL_PUNCH_HOLE](http://man7.org/linux/man-pages/man2/fallocate.2.html) flag.
 
-* **MEMKIND_DAX_KMEM kind**
+* **Device DAX**
 
-To use MEMKIND_DAX_KMEM kind you need at least Linux Kernel 5.1 (with enabled DEV_DAX_KMEM Kernel option) and created DAX device.
+To use MEMKIND_DAX_KMEM* kinds you need at least Linux Kernel 5.1 (with enabled DEV_DAX_KMEM Kernel option) and created DAX device.
 If you have loaded dax_pmem_compat module instead of dax_pmem, please read
 [this](https://pmem.io/ndctl/daxctl-migrate-device-model.html) article and migrate device model
 to use alternative device dax drivers, e.g. kmem.
@@ -244,18 +260,25 @@ Example output, where NUMA node 4 is NUMA node created from persistent memory:
       1:  21  10  28
       4:  17  28  10
 
-## MEMKIND_DAX_KMEM Kind Usage
+## NVDIMM volatile usage
 
-MEMKIND_DAX_KMEM kind supports NUMA nodes created from persistent memory as an extension of DRAM.
+Memkind supports using persistent memory as an extension of DRAM.
+This volatile memory solution is provided by the library with two seperate ways described below.
+
+## DAX device
+
+NVDIMM memory as DAX device is supported by MEMKIND_DAX_KMEM kinds. With this solution
+peristent memory will be seen in OS as seperate NUMA nodes.
 
 Memkind allows two ways to use this kind:
 
 - first implicitly, by allowing memkind library for automatic recognition of NUMA nodes
 created from persistent memory using [libdaxctl-devel](#dependencies)
 - secondary explicitly, by using MEMKIND_DAX_KMEM_NODES environment variable set to
-comma separated list of NUMA nodes which will be treated as NUMA nodes created from persistent memory
+comma separated list of NUMA nodes which will be treated as NUMA nodes created from persistent memory,
+this solution overrides the first one
 
-## PMEM Kind Usage
+## DAX filesystem
 PMEM kind supports the traditional malloc/free interfaces on a memory mapped file.
 This allows the use of [persistent memory](https://pmem.io/)
 as volatile memory, for cases where the region of persistent memory
