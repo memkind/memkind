@@ -50,9 +50,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     whois \
  && rm -rf /var/lib/apt/lists/*
 
-# Install pytest
-RUN pip install setuptools==3.4.1 && \
-    pytest==3.9.2
+# Install packages required by python tests
+RUN pip install setuptools==3.4.1
+RUN pip install pytest==3.9.2
 
 # Add user
 ENV USER memkinduser
