@@ -55,6 +55,7 @@ docker build --tag memkind_cont \
              .
 docker run --rm \
            --privileged=true \
+           --tty=true \
            --env http_proxy=$http_proxy \
            --env https_proxy=$https_proxy \
            --env CODECOV_TOKEN="$CODECOV_TOKEN" \
