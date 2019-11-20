@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation.
+ * Copyright (C) 2016 - 2019 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,10 @@ static memkind_t static_kinds_list[] = {
     MEMKIND_HBW_PREFERRED_GBTLB,
     MEMKIND_GBTLB,
     MEMKIND_HBW_INTERLEAVE,
-    MEMKIND_INTERLEAVE
+    MEMKIND_INTERLEAVE,
+    MEMKIND_DAX_KMEM,
+    MEMKIND_DAX_KMEM_ALL,
+    MEMKIND_DAX_KMEM_PREFERRED
 };
 
 
