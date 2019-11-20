@@ -51,9 +51,10 @@ RUN dnf update -y && dnf install -y \
     whois \
  && dnf clean all
 
-# Install pytest
-RUN pip install setuptools==3.4.1 && \
-    pytest==3.9.2
+# Install packages required by python tests
+RUN pip install wheel
+RUN pip install setuptools==3.4.1
+RUN pip install pytest==3.9.2
 
 # Add user
 ENV USER memkinduser
