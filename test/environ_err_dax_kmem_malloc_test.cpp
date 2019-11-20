@@ -73,7 +73,7 @@ int main()
 
     ret = numa_bitmask_equal(returned_nodemask, expected_nodemask);
     if (!ret) {
-        printf("Error: Memkind dax kmem and allocated pointer nodemasks are not equal, %d!=%d\n", expected_nodemask, returned_nodemask);
+        printf("Error: Memkind dax kmem and allocated pointer nodemasks are not equal\n");
     }
 
 exit:
