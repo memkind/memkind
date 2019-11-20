@@ -52,6 +52,7 @@ RUN dnf update -y && dnf install -y \
  && dnf clean all
 
 # Install packages required by python tests
+RUN pip install wheel
 RUN pip install setuptools==3.4.1
 RUN pip install pytest==3.9.2
 

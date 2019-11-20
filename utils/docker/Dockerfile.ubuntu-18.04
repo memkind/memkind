@@ -51,6 +51,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
  && rm -rf /var/lib/apt/lists/*
 
 # Install packages required by python tests
+RUN pip install wheel
 RUN pip install setuptools==3.4.1
 RUN pip install pytest==3.9.2
 
