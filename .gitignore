@@ -67,6 +67,7 @@
 /test-driver
 /test-suite.log
 /test/*.o
+/test/*.pyc
 /test/*.so
 /test/.deps/
 /test/.dirstamp
