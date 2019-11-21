@@ -185,7 +185,7 @@ To use the PMEM kind, please be sure that filesystem which is used for PMEM crea
 
 * **Device DAX**
 
-To use MEMKIND_DAX_KMEM* kinds you need at least Linux Kernel 5.1 (with enabled DEV_DAX_KMEM Kernel option) and created DAX device.
+To use MEMKIND_DAX_KMEM_* kinds you need at least Linux Kernel 5.1 (with enabled DEV_DAX_KMEM Kernel option) and created DAX device.
 If you have loaded dax_pmem_compat module instead of dax_pmem, please read
 [this](https://pmem.io/ndctl/daxctl-migrate-device-model.html) article and migrate device model
 to use alternative device dax drivers, e.g. kmem.
@@ -267,7 +267,7 @@ This volatile memory solution is provided by the library with two seperate ways 
 
 ## DAX device
 
-NVDIMM memory as DAX device is supported by MEMKIND_DAX_KMEM kinds. With this solution
+NVDIMM memory as DAX device is supported by MEMKIND_DAX_KMEM* kinds. With this solution
 peristent memory will be seen in OS as seperate NUMA nodes.
 
 Memkind allows two ways to use this kind:
