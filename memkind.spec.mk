@@ -183,6 +183,8 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %files tests
 %defattr(-,root,root,-)
 $(memkind_test_dir)/all_tests
+${memkind_test_dir}/environ_err_dax_kmem_malloc_positive_test
+${memkind_test_dir}/environ_err_dax_kmem_malloc_test
 $(memkind_test_dir)/environ_err_hbw_malloc_test
 ${memkind_test_dir}/dax_kmem_test
 $(memkind_test_dir)/decorator_test
@@ -226,6 +228,7 @@ $(memkind_test_dir)/performance_test
 $(memkind_test_dir)/test.sh
 $(memkind_test_dir)/test_dax_kmem.sh
 $(memkind_test_dir)/hbw_detection_test.py
+$(memkind_test_dir)/dax_kmem_env_var_test.py
 $(memkind_test_dir)/autohbw_test.py
 $(memkind_test_dir)/trace_mechanism_test.py
 $(memkind_test_dir)/python_framework
