@@ -220,6 +220,7 @@ function check_auto_dax_kmem_nodes()
     ret=$(memkind-auto-dax-kmem-nodes)
     if [[ $ret == "" ]]; then
         export MEMKIND_DAX_KMEM_NODES=1
+        emit "No DAX_KMEM nodes found. MEMKIND_DAX_KMEM_NODES environment variable is set to $MEMKIND_DAX_KMEM_NODES."
     fi
 }
 
