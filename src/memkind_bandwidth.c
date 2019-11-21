@@ -302,6 +302,7 @@ int set_closest_numanode(fill_bandwidth_values fill_values, const char *env,
 {
     int status;
     int num_unique = 0;
+    int i;
     struct bandwidth_nodes_t *bandwidth_nodes = NULL;
     int *bandwidth = (int *)calloc(NUMA_NUM_NODES, sizeof(int));
 
@@ -320,6 +321,11 @@ int set_closest_numanode(fill_bandwidth_values fill_values, const char *env,
 
     status = bandwidth_set_closest_numanode(num_unique, bandwidth_nodes,
                                             is_single_node, num_cpu, closest_numanode);
+
+    for(i = 0; i < bandwidth_nodes[num_unique-1].num_numanodes; ++i) {
+        log_info("NUMA node %d is high-bandwidth/dax-kmem memory.",
+                 bandwidth_nodes[num_unique-1].numanodes[i]);
+    }
 
 exit:
 
