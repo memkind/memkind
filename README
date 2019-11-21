@@ -267,7 +267,7 @@ This volatile memory solution is provided by the library with two seperate ways 
 
 ## DAX device
 
-NVDIMM memory as DAX device is supported by MEMKIND_DAX_KMEM kinds. With this solution
+NVDIMM memory as DAX device is supported by MEMKIND_DAX_KMEM* kinds. With this solution
 peristent memory will be seen in OS as seperate NUMA nodes.
 
 Memkind allows two ways to use this kind:
