@@ -4,6 +4,7 @@
 #include <memkind.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_log.h>
 #include <memkind/internal/heap_manager.h>
 
 #include <numa.h>
@@ -14,16 +15,30 @@ static void regular_nodes_init(void)
 {
     unsigned i;
     unsigned nodes_num = (unsigned)numa_num_configured_nodes();
-    struct bitmask *node_cpus = numa_allocate_cpumask();
-
     regular_nodes_mask = numa_allocate_nodemask();
 
-    for (i = 0; i < nodes_num; i++) {
-        numa_node_to_cpus(i, node_cpus);
-        if (numa_bitmask_weight(node_cpus))
-            numa_bitmask_setbit(regular_nodes_mask, i);
+    const char *regular_nodes_env = secure_getenv("MEMKIND_REGULAR_NODES");
+    if (regular_nodes_env) {
+        struct bitmask *numa_nodes_bm = numa_parse_nodestring(regular_nodes_env);
+        if (!numa_nodes_bm) {
+            log_fatal("Invalid value of MEMKIND_REGULAR_NODES environment variable.");
+            abort();
+        }
+        for (i = 0; i < nodes_num; ++i) {
+            if (numa_bitmask_isbitset(numa_nodes_bm, i)) {
+                numa_bitmask_setbit(regular_nodes_mask, i);
+            }
+        }
+        numa_bitmask_free(numa_nodes_bm);
+    } else {
+        struct bitmask *node_cpus = numa_allocate_cpumask();
+        for (i = 0; i < nodes_num; ++i) {
+            numa_node_to_cpus(i, node_cpus);
+            if (numa_bitmask_weight(node_cpus))
+                numa_bitmask_setbit(regular_nodes_mask, i);
+        }
+        numa_bitmask_free(node_cpus);
     }
-    numa_bitmask_free(node_cpus);
 }
 
 static void memkind_regular_init_once(void)
