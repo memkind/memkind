@@ -57,15 +57,12 @@ static std::set<int> get_regular_numa_nodes(void)
 {
     struct bitmask *cpu_mask = numa_allocate_cpumask();
     std::set<int> regular_nodes;
-    long long free_space;
 
     const int MAXNODE_ID = numa_num_configured_nodes();
     for (int id = 0; id < MAXNODE_ID; ++id) {
         numa_node_to_cpus(id, cpu_mask);
 
-        // Check if numa node exists and if it is CPU NUMA node
-        if (numa_node_size64(id, &free_space) > 0 &&
-            numa_bitmask_weight(cpu_mask) != 0) {
+        if (numa_bitmask_weight(cpu_mask) != 0) {
             regular_nodes.insert(id);
         }
     }
@@ -144,8 +141,8 @@ protected:
             for (auto const &node: regular_nodes) {
                 auto distances = get_closest_dax_kmem_numa_nodes(node);
                 if (distances.size() > 1)
-                    GTEST_SKIP() << "Unable to run test for MEMKIND_DAX_KMEM_PREFFERED kind. "
-                                 "More than one persistent memory NUMA node is the closest to CPU node: "
+                    GTEST_SKIP() << "Skip test for MEMKIND_DAX_KMEM_PREFFERED - "
+                                    "more than one PMEM NUMA node is closest to node: "
                                  << node << std::endl;
             }
         }
@@ -170,7 +167,6 @@ TEST_P(MemkindDaxKmemTestsParam,
     // TODO: remove four below lines, when adding more tests
     get_used_swap_space();
     get_dax_kmem_nodes();
-    get_closest_dax_kmem_numa_nodes(0);
     get_free_dax_kmem_space();
 }
 
