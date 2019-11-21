@@ -218,6 +218,7 @@ function check_auto_dax_kmem_nodes()
     fi
 
     ret=$(memkind-auto-dax-kmem-nodes)
+    emit "The binary memkind-auto-dax-kmem-nodes returned code $ret."
     if [[ $ret == "" ]]; then
         export MEMKIND_DAX_KMEM_NODES=1
     fi
