@@ -300,11 +300,12 @@ Currently, the PMEM kind is supported only by the jemalloc heap manager.
 ## The Detection Mechanism of the Kind
 One of the notable features of the memkind is to detect the correct kind of previously allocated memory.
 
-| Operations                             | Memkind API function                  |
-|----------------------------------------|---------------------------------------|
-| Freeing memory                         | memkind_free(kind, ptr)               |
-| Reallocating memory                    | memkind_realloc(kind, ptr, size)      |
-| Obtaining the size of allocated memory | memkind_malloc_usable_size(kind, ptr) |
+| Operations                                  | Memkind API function                   |
+|---------------------------------------------|----------------------------------------|
+| Freeing memory                              | memkind_free(kind, ptr)                |
+| Reallocating memory                         | memkind_realloc(kind, ptr, size)       |
+| Obtaining the size of allocated memory      | memkind_malloc_usable_size(kind, ptr)  |
+| Reallocating memory to reduce fragmentation | memkind_defrag_reallocate(kind, ptr)   |
 
 Operations above could be unified for all used memory kinds
 by passing a NULL value as a kind to the functions mentioned above.
