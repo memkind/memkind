@@ -91,7 +91,8 @@ struct memkind_ops {
     size_t (* malloc_usable_size)(struct memkind *kind, void *ptr);
     int (* update_memory_usage_policy)(struct memkind *kind,
                                        memkind_mem_usage_policy policy);
-    int ( *get_stat)(memkind_t kind, memkind_stat_type stat, size_t *value);
+    int (* get_stat)(memkind_t kind, memkind_stat_type stat, size_t *value);
+    void *(* transfer_allocation)(struct memkind *kind, void *ptr);
 };
 
 struct memkind {

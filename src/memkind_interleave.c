@@ -44,7 +44,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .init_once = memkind_interleave_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 MEMKIND_EXPORT void memkind_interleave_init_once(void)

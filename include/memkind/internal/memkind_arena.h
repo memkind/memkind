@@ -70,7 +70,8 @@ int memkind_arena_get_kind_stat(struct memkind *kind,
 int memkind_arena_get_stat_with_check_init(struct memkind *kind,
                                            memkind_stat_type stat, bool check_init, size_t *value);
 int memkind_arena_get_global_stat(memkind_stat_type stat_type, size_t *stat);
-
+void *memkind_arena_transfer_allocation(struct memkind *kind, void *ptr);
+void *memkind_arena_transfer_allocation_with_kind_detect(void *ptr);
 #ifdef __cplusplus
 }
 #endif

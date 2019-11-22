@@ -419,6 +419,15 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size);
 ///
 void memkind_free(memkind_t kind, void *ptr);
 
+///
+/// \brief Try to transfer allocation to reduce fragmentation
+/// \note STANDARD API
+/// \param kind specified memory kind
+/// \param ptr pointer to the allocated memory
+/// \return Pointer to newly trasnfered allocated memory
+///
+void *memkind_transfer_allocation(memkind_t kind, void *ptr);
+
 #ifdef __cplusplus
 }
 #endif

@@ -510,6 +510,7 @@ test/memkind_pmem_config_tests.cpp
 test/memkind_pmem_long_time_tests.cpp
 test/memkind_pmem_tests.cpp
 test/memkind_stat_test.cpp
+test/memkind_transfer_allocation.cpp
 test/memkind_versioning_tests.cpp
 test/memory_footprint_test.cpp
 test/memory_manager.h

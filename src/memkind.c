@@ -899,6 +899,15 @@ MEMKIND_EXPORT int memkind_update_cached_stats(void)
     return heap_manager_update_cached_stats();
 }
 
+MEMKIND_EXPORT void *memkind_transfer_allocation(memkind_t kind, void *ptr)
+{
+    if (!kind) {
+        return heap_manager_transfer_allocation(ptr);
+    } else {
+        return kind->ops->transfer_allocation(kind, ptr);
+    }
+}
+
 MEMKIND_EXPORT int memkind_get_stat(memkind_t kind, memkind_stat_type stat,
                                     size_t *value)
 {

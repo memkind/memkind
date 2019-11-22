@@ -155,6 +155,12 @@ int tbb_get_global_stat(memkind_stat_type stat, size_t *value)
     return MEMKIND_ERROR_OPERATION_FAILED;
 }
 
+void *tbb_pool_transfer_allocation_with_kind_detect(void *ptr)
+{
+    log_err("Transfer allocation method is not supported by TBB");
+    return NULL;
+}
+
 static int tbb_get_kind_stat()
 {
     log_err("Get kind statistic is not supported by TBB");

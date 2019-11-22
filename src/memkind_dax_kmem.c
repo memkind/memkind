@@ -210,7 +210,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
     .init_once = memkind_dax_kmem_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_ALL_OPS = {
@@ -230,7 +231,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_ALL_OPS = {
     .init_once = memkind_dax_kmem_all_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_PREFERRED_OPS = {
@@ -250,5 +252,6 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_PREFERRED_OPS = {
     .init_once = memkind_dax_kmem_preferred_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };

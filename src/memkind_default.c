@@ -59,7 +59,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .init_once = memkind_default_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_default_destroy,
-    .get_stat = memkind_default_get_kind_stat
+    .get_stat = memkind_default_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 MEMKIND_EXPORT int memkind_default_create(struct memkind *kind,

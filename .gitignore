@@ -120,6 +120,7 @@
 /test/pmem_test
 /test/pmem_usable_size
 /test/trace_mechanism_test_helper
+/test/transfer_allocation
 /vs
 autom4te.cache/
 memkind.pc

@@ -40,7 +40,8 @@ check_PROGRAMS += test/all_tests \
                   test/trace_mechanism_test_helper \
                   # end
 if HAVE_CXX11
-check_PROGRAMS += test/pmem_test
+check_PROGRAMS += test/pmem_test \
+                  test/transfer_allocation
 endif
 
 TESTS += test/test.sh
@@ -64,8 +65,6 @@ EXTRA_DIST += test/autohbw_test.py \
               test/trace_mechanism_test.py \
               # end
 
-
-
 test_all_tests_LDADD = libmemkind.la
 test_allocator_perf_tool_tests_LDADD = libmemkind.la
 test_autohbw_test_helper_LDADD = libmemkind.la
@@ -82,6 +81,8 @@ test_trace_mechanism_test_helper_LDADD = libmemkind.la
 if HAVE_CXX11
 test_pmem_test_SOURCES = $(fused_gtest) test/memkind_pmem_config_tests.cpp test/memkind_pmem_long_time_tests.cpp test/memkind_pmem_tests.cpp
 test_pmem_test_LDADD = libmemkind.la
+test_transfer_allocation_SOURCES = $(fused_gtest) test/memkind_transfer_allocation.cpp
+test_transfer_allocation_LDADD = libmemkind.la
 endif
 
 fused_gtest = test/gtest_fused/gtest/gtest-all.cc \

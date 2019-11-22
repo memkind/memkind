@@ -1647,3 +1647,49 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCheckExtentDalloc)
     err = memkind_destroy_kind(kind);
     ASSERT_EQ(0, err);
 }
+
+TEST_F(MemkindPmemTests, test_TC_MEMKINDPmemTransferAllocation_success)
+{
+    struct memkind *kind = nullptr;
+    unsigned i;
+    unsigned count_mem_transfer = 0;
+    const unsigned alloc = 50000;
+    void *nptr;
+    std::vector<void *> pmem_vec;
+    pmem_vec.reserve(alloc);
+    int err = memkind_create_pmem(PMEM_DIR, 0, &kind);
+    ASSERT_EQ(err, 0);
+
+    for (i = 0; i < alloc; ++i) {
+        void *ptr =  memkind_malloc(kind, 1 * KB);
+        ASSERT_NE(ptr, nullptr);
+        memset(ptr, 'a', 1 * KB);
+        pmem_vec.push_back(ptr);
+    }
+
+    for (i = 1; i < alloc;) {
+        memkind_free(kind, pmem_vec.at(i));
+        pmem_vec.at(i) = nullptr;
+        // Free memory with irregular pattern
+        if (i % 2 == 0)
+            i += 3;
+        else
+            i += 5;
+    }
+
+    for (i = 0; i < pmem_vec.size(); ++i) {
+        nptr = memkind_transfer_allocation(kind, pmem_vec.at(i));
+        if (nptr) {
+            pmem_vec.at(i) = nptr;
+            count_mem_transfer++;
+        }
+    }
+    ASSERT_NE(count_mem_transfer, 0U);
+
+    for(auto const &val: pmem_vec) {
+        memkind_free(kind, val);
+    }
+
+    err = memkind_destroy_kind(kind);
+    ASSERT_EQ(err, 0);
+}

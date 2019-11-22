@@ -63,7 +63,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .init_once = memkind_hbw_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
@@ -83,7 +84,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
     .init_once = memkind_hbw_all_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
@@ -103,7 +105,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .init_once = memkind_hbw_hugetlb_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
@@ -123,7 +126,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
     .init_once = memkind_hbw_all_hugetlb_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
@@ -143,7 +147,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .init_once = memkind_hbw_preferred_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
@@ -163,7 +168,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .init_once = memkind_hbw_preferred_hugetlb_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
@@ -184,7 +190,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .init_once = memkind_hbw_interleave_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
-    .get_stat = memkind_arena_get_kind_stat
+    .get_stat = memkind_arena_get_kind_stat,
+    .transfer_allocation = memkind_arena_transfer_allocation
 };
 
 struct hbw_closest_numanode_t {
