@@ -899,6 +899,15 @@ MEMKIND_EXPORT int memkind_update_cached_stats(void)
     return heap_manager_update_cached_stats();
 }
 
+MEMKIND_EXPORT void *memkind_defrag_reallocate(memkind_t kind, void *ptr)
+{
+    if (!kind) {
+        return heap_manager_defrag_reallocate(ptr);
+    } else {
+        return kind->ops->defrag_reallocate(kind, ptr);
+    }
+}
+
 MEMKIND_EXPORT int memkind_get_stat(memkind_t kind, memkind_stat_type stat,
                                     size_t *value)
 {

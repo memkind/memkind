@@ -64,6 +64,8 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .br
 .BI "size_t memkind_malloc_usable_size(memkind_t " "kind" ", void " "*ptr" );
 .br
+.BI "void *memkind_defrag_reallocate(memkind_t " "kind" ", void " "*ptr" );
+.br
 .BI "memkind_t memkind_detect_kind(void " "*ptr" );
 .sp
 .B "KIND CONFIGURATION MANAGEMENT:"
@@ -227,7 +229,8 @@ if not
 must have been returned by a previous call to
 .BR memkind_malloc (),
 .BR memkind_calloc (),
-.BR memkind_realloc ()
+.BR memkind_realloc (),
+.BR memkind_defrag_reallocate ()
 or
 .BR memkind_posix_memalign ()
 with the same
@@ -313,6 +316,36 @@ is supported by TBB heap manager described in
 .B ENVIRONMENT
 section since Intel TBB 2019 Update 4.
 .PP
+.BR memkind_defrag_reallocate ()
+reallocates the object conditonally inside specific
+.IR "kind" .
+Function determines if it's worthwhile to move allocation to reduce degree of external fragmentation of the heap.
+In case of failure function returns
+.IR "NULL" ,
+otherwise function returns a pointer to reallocated memory and memory referenced by
+.I ptr
+was released and should not be accessed.
+If
+.I ptr
+is
+.IR "NULL" ,
+then
+.BR memkind_defrag_reallocate ()
+returns
+.IR "NULL" .
+.IR "NULL" ,
+can be given as the
+.I kind
+specified to
+.BR memkind_defrag_reallocate (),
+but this will require a internal look up for correct kind.
+.BR Note:
+The look up for
+.I kind
+could result in serious performance penalty,
+which can be avoided by specifying a correct
+.IR kind .
+.PP
 .BR memkind_detect_kind ()
 returns the kind associated with allocated memory referenced by
 .IR ptr .
@@ -320,7 +353,8 @@ This pointer
 must have been returned by a previous call to
 .BR memkind_malloc (),
 .BR memkind_calloc (),
-.BR memkind_realloc ()
+.BR memkind_realloc (),
+.BR memkind_defrag_reallocate ()
 or
 .BR memkind_posix_memalign ().
 If
@@ -341,7 +375,8 @@ to be made available for future allocations. This pointer
 must have been returned by a previous call to
 .BR memkind_malloc (),
 .BR memkind_calloc (),
-.BR memkind_realloc ()
+.BR memkind_realloc (),
+.BR memkind_defrag_reallocate ()
 or
 .BR memkind_posix_memalign ().
 Otherwise, if
@@ -615,9 +650,10 @@ API standards:
 .sp
 .SH "RETURN VALUE"
 .BR memkind_calloc (),
-.BR memkind_malloc ()
-and
+.BR memkind_malloc (),
 .BR memkind_realloc ()
+and
+.BR memkind_defrag_reallocate ()
 returns the pointer to the allocated memory or
 .I NULL
 if the request fails.

@@ -168,6 +168,18 @@ int tbb_update_cached_stats(void)
     return MEMKIND_ERROR_OPERATION_FAILED;
 }
 
+void *tbb_pool_defrag_reallocate_with_kind_detect(void *ptr)
+{
+    log_err("Defrag reallocate method is not supported by TBB");
+    return NULL;
+}
+
+static void *tbb_defrag_reallocate(struct memkind *kind, void *ptr)
+{
+    log_err("Defrag reallocate method is not supported by TBB");
+    return NULL;
+}
+
 struct memkind *tbb_detect_kind(void *ptr)
 {
     if (!ptr) {
@@ -292,4 +304,5 @@ void tbb_initialize(struct memkind *kind)
     kind->ops->malloc_usable_size = tbb_pool_malloc_usable_size;
     kind->ops->update_memory_usage_policy = tbb_update_memory_usage_policy;
     kind->ops->get_stat = tbb_get_kind_stat;
+    kind->ops->defrag_reallocate = tbb_defrag_reallocate;
 }
