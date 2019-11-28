@@ -155,7 +155,8 @@ int tbb_get_global_stat(memkind_stat_type stat, size_t *value)
     return MEMKIND_ERROR_OPERATION_FAILED;
 }
 
-static int tbb_get_kind_stat()
+static int tbb_get_kind_stat(memkind_t kind, memkind_stat_type stat,
+                             size_t *value)
 {
     log_err("Get kind statistic is not supported by TBB");
     return MEMKIND_ERROR_OPERATION_FAILED;
