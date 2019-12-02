@@ -33,3 +33,4 @@ void *heap_manager_realloc(void *ptr, size_t size);
 struct memkind *heap_manager_detect_kind(void *ptr);
 int heap_manager_update_cached_stats(void);
 int heap_manager_get_stat(memkind_stat_type stat, size_t *value);
+void *heap_manager_defrag_reallocate(void *ptr);

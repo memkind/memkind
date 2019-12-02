@@ -92,6 +92,7 @@ struct memkind_ops {
     int (* update_memory_usage_policy)(struct memkind *kind,
                                        memkind_mem_usage_policy policy);
     int (* get_stat)(memkind_t kind, memkind_stat_type stat, size_t *value);
+    void *(* defrag_reallocate)(struct memkind *kind, void *ptr);
 };
 
 struct memkind {

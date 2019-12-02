@@ -59,7 +59,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .init_once = memkind_default_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_default_destroy,
-    .get_stat = memkind_default_get_kind_stat
+    .get_stat = memkind_default_get_kind_stat,
+    .defrag_reallocate = memkind_arena_defrag_reallocate
 };
 
 MEMKIND_EXPORT int memkind_default_create(struct memkind *kind,
@@ -129,13 +130,6 @@ MEMKIND_EXPORT size_t memkind_default_malloc_usable_size(struct memkind *kind,
 {
     return jemk_malloc_usable_size(ptr);
 }
-
-MEMKIND_EXPORT int memkind_default_get_defrag_hint(void *ptr, int *bin_util,
-                                                   int *run_util)
-{
-    return -1;
-}
-
 
 MEMKIND_EXPORT void *memkind_default_mmap(struct memkind *kind, void *addr,
                                           size_t size)
