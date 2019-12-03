@@ -43,3 +43,134 @@ TEST_F(MemkindDaxKmemTests,
     ASSERT_NE(nullptr, ptr);
     memkind_free(nullptr, ptr);
 }
+
+TEST_F(MemkindDaxKmemTests, test_TC_MEMKIND_MEMKIND_DAX_KMEM_alloc_zero)
+{
+    void *test1 = nullptr;
+
+    test1 = memkind_malloc(MEMKIND_DAX_KMEM, 0);
+    ASSERT_EQ(test1, nullptr);
+}
+
+TEST_F(MemkindDaxKmemTests, test_TC_MEMKIND_MEMKIND_DAX_KMEM_alloc_size_max)
+{
+    void *test1 = nullptr;
+
+    errno = 0;
+    test1 = memkind_malloc(MEMKIND_DAX_KMEM, SIZE_MAX);
+    ASSERT_EQ(test1, nullptr);
+    ASSERT_EQ(errno, ENOMEM);
+}
+
+TEST_F(MemkindDaxKmemTests, test_TC_MEMKIND_MEMKIND_DAX_KMEM_calloc_zero)
+{
+    void *test = nullptr;
+
+    test = memkind_calloc(MEMKIND_DAX_KMEM, 0, 100);
+    ASSERT_EQ(test, nullptr);
+
+    test = memkind_calloc(MEMKIND_DAX_KMEM, 100, 0);
+    ASSERT_EQ(test, nullptr);
+}
+
+TEST_F(MemkindDaxKmemTests, test_TC_MEMKIND_MEMKIND_DAX_KMEM_calloc_size_max)
+{
+    void *test = nullptr;
+    size_t size = SIZE_MAX;
+    size_t num = 1;
+    errno = 0;
+
+    test = memkind_calloc(MEMKIND_DAX_KMEM, size, num);
+    ASSERT_EQ(test, nullptr);
+    ASSERT_EQ(errno, ENOMEM);
+}
+
+TEST_F(MemkindDaxKmemTests, test_TC_MEMKIND_MEMKIND_DAX_KMEM_calloc_num_max)
+{
+    void *test = nullptr;
+    size_t size = 10;
+    size_t num = SIZE_MAX;
+    errno = 0;
+
+    test = memkind_calloc(MEMKIND_DAX_KMEM, size, num);
+    ASSERT_EQ(test, nullptr);
+    ASSERT_EQ(errno, ENOMEM);
+}
+
+TEST_F(MemkindDaxKmemTests, test_TC_MEMKIND_MEMKIND_DAX_KMEM_realloc)
+{
+    const size_t size1 = 512;
+    const size_t size2 = 1 * KB;
+    char *default_str = nullptr;
+
+    default_str = (char *)memkind_realloc(MEMKIND_DAX_KMEM, default_str, size1);
+    ASSERT_NE(nullptr, default_str);
+
+    sprintf(default_str, "memkind_realloc MEMKIND_DAX_KMEM with size %zu\n", size1);
+    printf("%s", default_str);
+
+    default_str = (char *)memkind_realloc(MEMKIND_DAX_KMEM, default_str, size2);
+    ASSERT_NE(nullptr, default_str);
+
+    sprintf(default_str, "memkind_realloc MEMKIND_DAX_KMEM with size %zu\n", size2);
+    printf("%s", default_str);
+
+    memkind_free(MEMKIND_DAX_KMEM, default_str);
+}
+
+TEST_F(MemkindDaxKmemTests, test_TC_MEMKIND_MEMKIND_DAX_KMEM_realloc_zero)
+{
+    size_t size = 1 * KB;
+    void *test = nullptr;
+    void *new_test = nullptr;
+
+    test = memkind_malloc(MEMKIND_DAX_KMEM, size);
+    ASSERT_NE(test, nullptr);
+
+    new_test = memkind_realloc(MEMKIND_DAX_KMEM, test, 0);
+    ASSERT_EQ(new_test, nullptr);
+}
+
+TEST_F(MemkindDaxKmemTests, test_TC_MEMKIND_MEMKIND_DAX_KMEM_realloc_size_max)
+{
+    size_t size = 1 * KB;
+    void *test = nullptr;
+    void *new_test = nullptr;
+
+    test = memkind_malloc(MEMKIND_DAX_KMEM, size);
+    ASSERT_NE(test, nullptr);
+    errno = 0;
+    new_test = memkind_realloc(MEMKIND_DAX_KMEM, test, SIZE_MAX);
+    ASSERT_EQ(new_test, nullptr);
+    ASSERT_EQ(errno, ENOMEM);
+
+    memkind_free(MEMKIND_DAX_KMEM, test);
+}
+
+TEST_F(MemkindDaxKmemTests, test_TC_MEMKIND_MEMKIND_DAX_KMEM_realloc_size_zero)
+{
+    size_t size = 1 * KB;
+    void *test = nullptr;
+    void *new_test = nullptr;
+    const size_t iteration = 100;
+
+    for (unsigned i = 0; i < iteration; ++i) {
+        test = memkind_malloc(MEMKIND_DAX_KMEM, size);
+        ASSERT_NE(test, nullptr);
+        errno = 0;
+        new_test = memkind_realloc(MEMKIND_DAX_KMEM, test, 0);
+        ASSERT_EQ(new_test, nullptr);
+        ASSERT_EQ(errno, 0);
+    }
+}
+
+TEST_F(MemkindDaxKmemTests, test_TC_MEMKIND_MEMKIND_DAX_KMEM_realloc_nullptr)
+{
+    size_t size = 1 * KB;
+    void *test = nullptr;
+
+    test = memkind_realloc(MEMKIND_DAX_KMEM, test, size);
+    ASSERT_NE(test, nullptr);
+
+    memkind_free(MEMKIND_DAX_KMEM, test);
+}
