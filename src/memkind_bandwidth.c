@@ -273,7 +273,8 @@ static int bandwidth_set_closest_numanode(int num_unique,
                     VEC_PUSH_BACK(&node_arr[i], match.numanodes[j]);
                 }
             }
-            if (VEC_SIZE(&node_arr[i]) > 1 && is_single_node) {
+            if (VEC_SIZE(&node_arr[i]) > 1 && is_single_node &&
+                numa_bitmask_isbitset(numa_all_cpus_ptr, i)) {
                 log_err("Invalid Numa Configuration for cpu %d", i);
                 int node = -1;
                 VEC_FOREACH(node, &node_arr[i]) {
