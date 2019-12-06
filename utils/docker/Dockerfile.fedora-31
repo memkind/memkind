@@ -21,7 +21,7 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Pull base image
-FROM fedora:30
+FROM fedora:31
 
 LABEL maintainer="katarzyna.wasiuta@intel.com"
 
@@ -33,6 +33,7 @@ RUN dnf update -y && dnf install -y \
     ca-certificates \
     daxctl-devel \
     devscripts \
+    expect \
     g++ \
     git \
     json-c-devel \
