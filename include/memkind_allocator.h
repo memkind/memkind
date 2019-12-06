@@ -141,7 +141,7 @@ namespace libmemkind
                         _kind = MEMKIND_DAX_KMEM_PREFERRED;
                         break;
                     default:
-                        throw std::runtime_error("Unkown libmemkind::kinds");
+                        throw std::runtime_error("Unknown libmemkind::kinds");
                         break;
                 }
             }
