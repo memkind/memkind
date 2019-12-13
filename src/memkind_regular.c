@@ -35,13 +35,12 @@ static void regular_nodes_init(void)
 {
     unsigned i;
     unsigned nodes_num = (unsigned)numa_num_configured_nodes();
-    int node = 0;
     struct bitmask *node_cpus = numa_allocate_cpumask();
 
     regular_nodes_mask = numa_allocate_nodemask();
 
     for (i = 0; i < nodes_num; i++) {
-        numa_node_to_cpus(node, node_cpus);
+        numa_node_to_cpus(i, node_cpus);
         if (numa_bitmask_weight(node_cpus))
             numa_bitmask_setbit(regular_nodes_mask, i);
     }
