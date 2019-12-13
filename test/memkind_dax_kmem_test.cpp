@@ -38,8 +38,8 @@ static std::set<int> get_dax_kmem_nodes(void)
     std::set<int> dax_kmem_nodes;
     long long free_space;
 
-    const int MAXNODE_ID = numa_num_configured_nodes();
-    for (int id = 0; id < MAXNODE_ID; ++id) {
+    const int numa_max_id = numa_max_node();
+    for (int id = 0; id <= numa_max_id; ++id) {
         numa_node_to_cpus(id, cpu_mask);
 
         // Check if numa node exists and if it is NUMA node created from persistent memory
@@ -58,8 +58,8 @@ static std::set<int> get_regular_numa_nodes(void)
     struct bitmask *cpu_mask = numa_allocate_cpumask();
     std::set<int> regular_nodes;
 
-    const int MAXNODE_ID = numa_num_configured_nodes();
-    for (int id = 0; id < MAXNODE_ID; ++id) {
+    const int numa_max_id = numa_max_node();
+    for (int id = 0; id <= numa_max_id; ++id) {
         numa_node_to_cpus(id, cpu_mask);
 
         if (numa_bitmask_weight(cpu_mask) != 0) {

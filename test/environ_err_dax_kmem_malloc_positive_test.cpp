@@ -47,7 +47,7 @@ int main()
     char *env_value_str = secure_getenv("MEMKIND_DAX_KMEM_NODES");
     int process_cpu = sched_getcpu();
     int process_node = numa_node_of_cpu(process_cpu);
-    unsigned numa_count = numa_num_configured_nodes();
+    unsigned numa_max_id = (unsigned) numa_max_node();
     int min_distance;
 
     if (!env_value_str) {
@@ -64,7 +64,7 @@ int main()
 
     all_dax_kmem_nodes_nodemask = numa_parse_nodestring(env_value_str);
     min_distance = INT_MAX;
-    for (unsigned i = 0; i <= numa_count; ++i) {
+    for (unsigned i = 0; i <= numa_max_id; ++i) {
         if (numa_bitmask_isbitset(all_dax_kmem_nodes_nodemask, i)) {
             int distance_to_i_node = numa_distance(process_node, i);
             if (distance_to_i_node < min_distance) {
