@@ -31,6 +31,7 @@ RUN dnf update -y && dnf install -y \
     automake \
     bash-completion \
     ca-certificates \
+    daxctl-devel \
     devscripts \
     g++ \
     git \
