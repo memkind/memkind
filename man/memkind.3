@@ -243,12 +243,12 @@ was called before, undefined behavior occurs.
 In cases where the kind is unknown in the
 context of the call to
 .BR memkind_realloc ()
-.IR "NULL" ,
+.I NULL
 can be given as the
 .I kind
 specified to
 .BR memkind_realloc (),
-but this will require a internal look up for correct kind.
+but this will require an internal look up for correct kind.
 .BR Note:
 The look up for
 .I kind
@@ -305,7 +305,7 @@ but operates on specified
 In cases where the kind is unknown in the
 context of the call to
 .BR memkind_malloc_usable_size ()
-.IR "NULL" ,
+.I NULL
 can be given as the
 .I kind
 specified to
@@ -333,12 +333,15 @@ then
 .BR memkind_defrag_reallocate ()
 returns
 .IR "NULL" .
-.IR "NULL" ,
+In cases where the kind is unknown in the
+context of the call to
+.BR memkind_defrag_reallocate ()
+.I NULL
 can be given as the
 .I kind
 specified to
 .BR memkind_defrag_reallocate (),
-but this will require a internal look up for correct kind.
+but this will require an internal look up for correct kind.
 .BR Note:
 The look up for
 .I kind
@@ -390,12 +393,12 @@ no operation is performed.
 In cases where the kind is unknown in the
 context of the call to
 .BR memkind_free ()
-.IR "NULL" ,
+.I NULL
 can be given as the
 .I kind
 specified to
 .BR memkind_free (),
-but this will require a internal look up for correct kind.
+but this will require an internal look up for correct kind.
 .BR Note:
 The look up for
 .I kind
@@ -706,7 +709,7 @@ Allocate pages interleaved across all NUMA nodes with transparent huge
 pages disabled.
 .TP
 .B MEMKIND_HBW
-Allocate from the closest high bandwidth memory NUMA node at time
+Allocate from the closest high bandwidth memory NUMA node at the time
 of allocation. If there is not enough high bandwidth memory to satisfy the request
 .I errno
 is set to
@@ -784,7 +787,7 @@ across all high bandwidth nodes and transparent huge pages are
 disabled.
 .TP
 .B MEMKIND_DAX_KMEM
-Allocate from the closest persistent memory NUMA node at time
+Allocate from the closest persistent memory NUMA node at the time
 of allocation. If there is not enough memory in the closest persistent memory NUMA node to satisfy the request
 .I errno
 is set to
@@ -1039,7 +1042,7 @@ If the
 .B MEMKIND_HEAP_MANAGER
 is not set then the jemalloc heap manager will be used by default.
 .SH "SYSTEM CONFIGURATION"
-Interfaces for obtaining 2MB (HUGETLB) need allocated
+Interfaces for obtaining 2MB (HUGETLB) memory need allocated
 huge pages in the kernel's huge page pool.
 .TP
 .B HUGETLB (huge pages)
