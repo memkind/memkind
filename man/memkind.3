@@ -808,7 +808,8 @@ except that if there is not enough memory in the closest persistent memory NUMA 
 the request, the allocation will fall back on other memory NUMA nodes.
 .BR Note:
 For this kind, the allocation will not succeed if two or more
-persistent memory NUMA nodes are in the same shortest distance to the same CPU.
+persistent memory NUMA nodes are in the same shortest distance to the same CPU on which process is eligible to run.
+Check on that eligibility is done upon starting the application.
 .TP
 .B MEMKIND_REGULAR
 Allocate from regular memory using the default page size. Regular means general purpose memory
