@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Jan 10 22:25:06 2019 -->
+<!-- CreationDate: Mon Dec 16 14:25:47 2019 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -35,12 +35,11 @@
 
 
 
-<p style="margin-left:11%; margin-top: 1em">pmem::allocator&lt;T&gt;
+<p style="margin-left:11%; margin-top: 1em">libmemkind::pmem::allocator&lt;T&gt;
 - The C++ allocator compatible with the C++ standard library
 allocator concepts <b><br>
-Note:</b> This is EXPERIMENTAL API. The functionality and
-the header file itself can be changed (including
-non-backward compatible changes), or removed.</p>
+Note:</b> <i>pmem_allocator.h</i> functionality is
+considered as stable API (STANDARD API).</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
@@ -54,27 +53,37 @@ non-backward compatible changes), or removed.</p>
 -lmemkind</b></p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>pmem::allocator(const
+<p style="margin-left:11%; margin-top: 1em"><b>libmemkind::pmem::allocator(const
 char</b> <i>*dir</i><b>, size_t</b> <i>max_size</i><b>);
 <br>
-pmem::allocator(const std::string</b> <i>&amp;dir</i><b>,
-size_t</b> <i>max_size</i><b>); <br>
+libmemkind::pmem::llocator(const char</b>
+<i>&amp;dir</i><b>, size_t</b> <i>max_size</i><b>,
+libmemkind::allocation_policy</b> <i>alloc_policy</i><b>);
+<br>
+libmemkind::pmem::allocator(const std::string</b>
+<i>&amp;dir</i><b>, size_t</b> <i>max_size</i><b>); <br>
+libmemkind::pmem::allocator(const std::string</b>
+<i>&amp;dir</i><b>, size_t</b> <i>max_size</i><b>,
+libmemkind::allocation_policy</b> <i>alloc_policy</i><b>);
+<br>
 template &lt;typename U&gt;
-pmem::allocator&lt;T&gt;::allocator(const
-pmem::allocator&lt;U&gt;&amp;) noexcept; <br>
-template &lt;typename U&gt; pmem::allocator(const
+libmemkind::pmem::allocator&lt;T&gt;::allocator(const
+libmemkind::pmem::allocator&lt;U&gt;&amp;) noexcept; <br>
+template &lt;typename U&gt;
+libmemkind::pmem::allocator(const
 allocator&lt;U&gt;&amp;&amp;</b> <i>other</i><b>) noexcept;
 <br>
-pmem::allocator&lt;T&gt;::~allocator(); <br>
-T *pmem::allocator&lt;T&gt;::allocate(std::size_t</b>
+libmemkind::pmem::allocator&lt;T&gt;::~allocator(); <br>
+T
+*libmemkind::pmem::allocator&lt;T&gt;::allocate(std::size_t</b>
 <i>n</i><b>) const; <br>
-void pmem::allocator&lt;T&gt;::deallocate(T</b>
+void libmemkind::pmem::allocator&lt;T&gt;::deallocate(T</b>
 <i>*p</i><b>, std::size_t</b> <i>n</i><b>) const; <br>
 template &lt;class U, class... Args&gt; void
-pmem::allocator&lt;T&gt;::construct(U</b> <i>*p</i><b>,
-Args...</b> <i>args</i><b>) const; <br>
-void pmem::allocator&lt;T&gt;::destroy(T</b> <i>*p</i><b>)
-const;</b></p>
+libmemkind::pmem::allocator&lt;T&gt;::construct(U</b>
+<i>*p</i><b>, Args...</b> <i>args</i><b>) const; <br>
+void libmemkind::pmem::allocator&lt;T&gt;::destroy(T</b>
+<i>*p</i><b>) const;</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -82,11 +91,26 @@ const;</b></p>
 
 
 <p style="margin-left:11%; margin-top: 1em">The
-<b>pmem::allocator&lt;T&gt;</b> is intended to be used with
-STL containers to allocate persistent memory. Memory
-management is based on memkind_pmem (memkind library). Refer
-<b>memkind_pmem</b>(3) and <b>memkind</b>(3) man page for
-more details.</p>
+<b>libmemkind::pmem::allocator&lt;T&gt;</b> is intended to
+be used with STL containers to allocate persistent memory.
+Memory management is based on memkind_pmem (memkind
+library). Refer <b>memkind_pmem</b>(3) and <b>memkind</b>(3)
+man page for more details.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The
+<b>libmemkind::allocation_policy</b> specifies allocator
+memory usage policy, which allows to tune up memory
+utilization. The available types of allocator usage
+policy:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>libmemkind::allocation_policy::DEFAULT</b>
+Default allocator memory usage policy.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>libmemkind::allocation_policy::CONSERVATIVE</b>
+Conservative allocator memory usage policy - prioritize
+memory usage at cost of performance</p>
 
 <p style="margin-left:11%; margin-top: 1em">All public
 member types and functions corresponds to standard library
@@ -99,8 +123,9 @@ T</i> is an object type aliased by value_type. <i><br>
 U</i> is an object type.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Note: <br>
-T *pmem::allocator&lt;T&gt;::allocate(std::size_t</b>
-<i>n</i><b>)</b> allocates persistent memory memory using
+T
+*libmemkind::pmem::allocator&lt;T&gt;::allocate(std::size_t</b>
+<i>n</i><b>)</b> allocates persistent memory using
 <b>memkind_malloc</b>(). Throw <i>std::bad_alloc</i>
 when:</p>
 
@@ -108,7 +133,7 @@ when:</p>
 or there is not enough memory to satisfy the request.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>pmem::allocator&lt;T&gt;::deallocate(T</b>
+<p style="margin-left:11%; margin-top: 1em"><b>libmemkind::pmem::allocator&lt;T&gt;::deallocate(T</b>
 <i>*p</i><b>, std::size_t</b> <i>n</i><b>)</b> deallocates
 memory associated with pointer returned by <b>allocate</b>()
 using <b>memkind_free</b>().</p>

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Apr  2 06:36:26 2019 -->
+<!-- CreationDate: Mon Dec 16 14:25:47 2019 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -29,6 +29,7 @@
 <a href="#MEMORY BINDING POLICY">MEMORY BINDING POLICY</a><br>
 <a href="#MEMORY FLAGS">MEMORY FLAGS</a><br>
 <a href="#MEMORY USAGE POLICY">MEMORY USAGE POLICY</a><br>
+<a href="#MEMORY STATISTICS TYPE">MEMORY STATISTICS TYPE</a><br>
 <a href="#ERRORS">ERRORS</a><br>
 <a href="#FILES">FILES</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
@@ -100,6 +101,8 @@ void memkind_free(memkind_t</b> <i>kind</i><b>, void</b>
 <i>*ptr</i><b>); <br>
 size_t memkind_malloc_usable_size(memkind_t</b>
 <i>kind</i><b>, void</b> <i>*ptr</i><b>); <br>
+void *memkind_defrag_reallocate(memkind_t</b>
+<i>kind</i><b>, void</b> <i>*ptr</i><b>); <br>
 memkind_t memkind_detect_kind(void</b>
 <i>*ptr</i><b>);</b></p>
 
@@ -127,6 +130,13 @@ memkind_config</b> <i>*cfg</i><b>, memkind_t</b>
 int memkind_destroy_kind(memkind_t</b> <i>kind</i><b>); <br>
 int memkind_check_available(memkind_t</b>
 <i>kind</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>STATISTICS:
+<br>
+int memkind_update_cached_stats(void); <br>
+int memkind_get_stat(memkind_t</b> <i>kind</i><b>,
+memkind_stat</b> <i>stat</i><b>, size_t</b>
+<i>*value</i><b>);</b></p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>DECORATORS:
 <br>
@@ -223,19 +233,20 @@ to <i>memkind_free(kind, ptr)</i> and <i>NULL</i> is
 returned. The address <i>ptr</i>, if not <i>NULL</i>, must
 have been returned by a previous call to
 <b>memkind_malloc</b>(), <b>memkind_calloc</b>(),
-<b>memkind_realloc</b>() or <b>memkind_posix_memalign</b>()
-with the same <i>kind</i> as specified to the call to
-<b>memkind_realloc</b>(). Otherwise, if
-<i>memkind_free(kind, ptr)</i> was called before, undefined
-behavior occurs. In cases where the kind is unknown in the
-context of the call to <b>memkind_realloc</b>() <i>NULL</i>,
-can be given as the <i>kind</i> specified to
-<b>memkind_realloc</b>(), but this will require a internal
-look up for correct kind. <b>Note:</b> The look up for
-<i>kind</i> could result in serious performance penalty,
-which can be avoided by specifying a correct <i>kind</i>. If
-<i>kind</i> is <i>NULL</i> and <i>ptr</i> is <i>NULL</i>,
-then <b>memkind_realloc</b>() returns <i>NULL</i> and sets
+<b>memkind_realloc</b>(), <b>memkind_defrag_reallocate</b>()
+or <b>memkind_posix_memalign</b>() with the same <i>kind</i>
+as specified to the call to <b>memkind_realloc</b>().
+Otherwise, if <i>memkind_free(kind, ptr)</i> was called
+before, undefined behavior occurs. In cases where the kind
+is unknown in the context of the call to
+<b>memkind_realloc</b>() <i>NULL</i>, can be given as the
+<i>kind</i> specified to <b>memkind_realloc</b>(), but this
+will require a internal look up for correct kind.
+<b>Note:</b> The look up for <i>kind</i> could result in
+serious performance penalty, which can be avoided by
+specifying a correct <i>kind</i>. If <i>kind</i> is
+<i>NULL</i> and <i>ptr</i> is <i>NULL</i>, then
+<b>memkind_realloc</b>() returns <i>NULL</i> and sets
 <i>errno</i> to <b>EINVAL</b>.</p>
 
 
@@ -264,11 +275,29 @@ manager described in <b>ENVIRONMENT</b> section since Intel
 TBB 2019 Update 4.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_defrag_reallocate</b>()
+reallocates the object conditonally inside specific
+<i>kind</i>. Function determines if it&rsquo;s worthwhile to
+move allocation to reduce degree of external fragmentation
+of the heap. In case of failure function returns
+<i>NULL</i>, otherwise function returns a pointer to
+reallocated memory and memory referenced by <i>ptr</i> was
+released and should not be accessed. If <i>ptr</i> is
+<i>NULL</i>, then <b>memkind_defrag_reallocate</b>() returns
+<i>NULL</i>. <i>NULL</i>, can be given as the <i>kind</i>
+specified to <b>memkind_defrag_reallocate</b>(), but this
+will require a internal look up for correct kind.
+<b>Note:</b> The look up for <i>kind</i> could result in
+serious performance penalty, which can be avoided by
+specifying a correct <i>kind</i>.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_detect_kind</b>()
 returns the kind associated with allocated memory referenced
 by <i>ptr</i>. This pointer must have been returned by a
 previous call to <b>memkind_malloc</b>(),
-<b>memkind_calloc</b>(), <b>memkind_realloc</b>() or
+<b>memkind_calloc</b>(), <b>memkind_realloc</b>(),
+<b>memkind_defrag_reallocate</b>() or
 <b>memkind_posix_memalign</b>(). If <i>ptr</i> is
 <i>NULL</i>, then <b>memkind_detect_kind</b>() returns
 <i>NULL</i>. <b>Note:</b> This function has non-trivial
@@ -280,17 +309,18 @@ causes the allocated memory referenced by <i>ptr</i> to be
 made available for future allocations. This pointer must
 have been returned by a previous call to
 <b>memkind_malloc</b>(), <b>memkind_calloc</b>(),
-<b>memkind_realloc</b>() or <b>memkind_posix_memalign</b>().
-Otherwise, if <i>memkind_free(kind, ptr)</i> was already
-called before, undefined behavior occurs. If <i>ptr</i> is
-<i>NULL</i>, no operation is performed. In cases where the
-kind is unknown in the context of the call to
-<b>memkind_free</b>() <i>NULL</i>, can be given as the
-<i>kind</i> specified to <b>memkind_free</b>(), but this
-will require a internal look up for correct kind.
-<b>Note:</b> The look up for <i>kind</i> could result in
-serious performance penalty, which can be avoided by
-specifying a correct <i>kind</i>.</p>
+<b>memkind_realloc</b>(), <b>memkind_defrag_reallocate</b>()
+or <b>memkind_posix_memalign</b>(). Otherwise, if
+<i>memkind_free(kind, ptr)</i> was already called before,
+undefined behavior occurs. If <i>ptr</i> is <i>NULL</i>, no
+operation is performed. In cases where the kind is unknown
+in the context of the call to <b>memkind_free</b>()
+<i>NULL</i>, can be given as the <i>kind</i> specified to
+<b>memkind_free</b>(), but this will require a internal look
+up for correct kind. <b>Note:</b> The look up for
+<i>kind</i> could result in serious performance penalty,
+which can be avoided by specifying a correct
+<i>kind</i>.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>KIND
 CONFIGURATION MANAGEMENT:</b> <br>
@@ -425,6 +455,30 @@ The minimum size which allows to limit the file-backed
 memory partition.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>STATISTICS:</b>
+<br>
+The functions described in this section define a way to get
+specific memory allocation statistics.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_update_cached_stats</b>()
+is used to force an update of cached dynamic allocator
+statistics. Statistics are not updated real-time by memkind
+library and this method allows to force its update.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_get_stat</b>()
+retrieves statistic of the specified type and returns it in
+<i>value</i>. For more details about <i>stat</i> see the
+<b>MEMORY STATISTICS TYPE</b> section below. Measured
+statistic applies to specific <i>kind</i>, when <i>NULL</i>
+is given as <i>kind</i> then statistic applies to memory
+used by the whole memkind library. <b>Note:</b> You need to
+call <b>memkind_update_cached_stats</b>() before calling
+<b>memkind_get_stat</b>() because statistics are cached by
+memkind library.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>DECORATORS:</b>
 <br>
 The memkind library enables the user to define decorator
@@ -508,20 +562,21 @@ subject to change</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_calloc</b>(),
-<b>memkind_malloc</b>() and <b>memkind_realloc</b>() returns
-the pointer to the allocated memory or <i>NULL</i> if the
-request fails. <b>memkind_malloc_usable_size</b>() returns
-the number of usable bytes in the block of allocated memory
-pointed to by <i>ptr</i>, a pointer to a block of memory
-allocated by <b>memkind_malloc</b>() or a related function.
-If <i>ptr</i> is <i>NULL</i>, 0 is returned.
-<b>memkind_free</b>() and <b>memkind_error_message</b>() do
-not have return values. All other memkind API&rsquo;s return
-0 upon success and an error code defined in the
-<b>ERRORS</b> section upon failure. The memkind library
-avoids setting <i>errno</i> directly, but calls to
-underlying libraries and system calls may set <i>errno</i>
-(e.g. <b>memkind_create_pmem</b>()).</p>
+<b>memkind_malloc</b>(), <b>memkind_realloc</b>() and
+<b>memkind_defrag_reallocate</b>() returns the pointer to
+the allocated memory or <i>NULL</i> if the request fails.
+<b>memkind_malloc_usable_size</b>() returns the number of
+usable bytes in the block of allocated memory pointed to by
+<i>ptr</i>, a pointer to a block of memory allocated by
+<b>memkind_malloc</b>() or a related function. If <i>ptr</i>
+is <i>NULL</i>, 0 is returned. <b>memkind_free</b>() and
+<b>memkind_error_message</b>() do not have return values.
+All other memkind API&rsquo;s return 0 upon success and an
+error code defined in the <b>ERRORS</b> section upon
+failure. The memkind library avoids setting <i>errno</i>
+directly, but calls to underlying libraries and system calls
+may set <i>errno</i> (e.g.
+<b>memkind_create_pmem</b>()).</p>
 
 <h2>KINDS
 <a name="KINDS"></a>
@@ -632,6 +687,38 @@ except that the pages that support the allocation are
 interleaved across all high bandwidth nodes and transparent
 huge pages are disabled.</p>
 
+<p style="margin-left:11%;"><b>MEMKIND_DAX_KMEM</b></p>
+
+<p style="margin-left:22%;">Allocate from the closest
+persistent memory NUMA node at time of allocation. If there
+is not enough memory in the closest persistent memory NUMA
+node to satisfy the request <i>errno</i> is set to
+<b>ENOMEM</b> and the allocated pointer is set to
+<i>NULL</i>.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_DAX_KMEM_ALL</b></p>
+
+<p style="margin-left:22%;">Allocate from the closest
+persistent memory NUMA node available at the time of
+allocation. If there is not enough memory on any of
+persistent memory NUMA nodes to satisfy the request
+<i>errno</i> is set to <b>ENOMEM</b> and the allocated
+pointer is set to <i>NULL</i>.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_DAX_KMEM_PREFERRED</b></p>
+
+<p style="margin-left:22%;">Same as <b>MEMKIND_DAX_KMEM</b>
+except that if there is not enough memory in the closest
+persistent memory NUMA node to satisfy the request, the
+allocation will fall back on other memory NUMA nodes.
+<b>Note:</b> For this kind, the allocation will not succeed
+if two or more persistent memory NUMA nodes are in the same
+shortest distance to the same CPU on which process is
+eligible to run. Check on that eligibility is done upon
+starting the application.</p>
+
 <p style="margin-left:11%;"><b>MEMKIND_REGULAR</b></p>
 
 <p style="margin-left:22%;">Allocate from regular memory
@@ -738,6 +825,30 @@ policy - prioritize memory usage at cost of performance.
 <b>Note:</b> Memory usage policies have no effect for TBB
 heap manager described in <b>ENVIRONMENT</b> section.</p>
 
+<h2>MEMORY STATISTICS TYPE
+<a name="MEMORY STATISTICS TYPE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The available
+types of memory statistics: <b><br>
+MEMKIND_STAT_TYPE_RESIDENT</b></p>
+
+<p style="margin-left:22%;">Maximum number of bytes in
+physically resident data pages mapped.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_STAT_TYPE_ACTIVE</b></p>
+
+<p style="margin-left:22%;">Total number of bytes in active
+pages.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_STAT_TYPE_ALLOCATED</b></p>
+
+<p style="margin-left:22%;">Total number of allocated
+bytes.</p>
+
 <h2>ERRORS
 <a name="ERRORS"></a>
 </h2>
@@ -842,8 +953,15 @@ failed</p>
 
 <p style="margin-left:11%; margin-top: 1em"><i>/usr/bin/memkind-hbw-nodes</i></p>
 
-<p style="margin-left:22%;">Prints a comma separated list
+<p style="margin-left:22%;">Prints a comma-separated list
 of high bandwidth nodes.</p>
+
+
+<p style="margin-left:11%;"><i>/usr/bin/memkind-auto-dax-kmem-nodes</i></p>
+
+<p style="margin-left:22%;">Prints a comma-separated list
+of persistent memory NUMA nodes, which are automatically
+detected.</p>
 
 <h2>ENVIRONMENT
 <a name="ENVIRONMENT"></a>
@@ -854,8 +972,18 @@ of high bandwidth nodes.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_HBW_NODES</b></p>
 
 <p style="margin-left:22%;">This environment variable is a
-comma separated list of NUMA nodes that are treated as high
+comma-separated list of NUMA nodes that are treated as high
 bandwidth. Uses the <i>libnuma</i> routine
+<b>numa_parse_nodestring</b>() for parsing, so the syntax
+described in the <b>numa</b>(3) man page for this routine
+applies: e.g. 1-3,5 is a valid setting.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_DAX_KMEM_NODES</b></p>
+
+<p style="margin-left:22%;">This environment variable is a
+comma-separated list of NUMA nodes that are treated as PMEM
+memory. Uses the <i>libnuma</i> routine
 <b>numa_parse_nodestring</b>() for parsing, so the syntax
 described in the <b>numa</b>(3) man page for this routine
 applies: e.g. 1-3,5 is a valid setting.</p>
@@ -877,7 +1005,7 @@ overhead. See section <b>IMPLEMENTATION NOTES</b> of
 <p style="margin-left:11%;"><b>MEMKIND_HOG_MEMORY</b></p>
 
 <p style="margin-left:22%;">Controls behavior of memkind
-with regards to returning memory to underlaying OS. Setting
+with regards to returning memory to underlying OS. Setting
 <b>MEMKIND_HOG_MEMORY</b> to 1 causes memkind to not release
 memory to OS in anticipation of memory reuse soon. This will
 improve latency of &rsquo;free&rsquo; operations but
@@ -889,6 +1017,17 @@ increase memory usage.</p>
 memkind. Setting <b>MEMKIND_DEBUG</b> to 1 enables printing
 messages like errors and general information about
 environment to <i>stderr</i>.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_BACKGROUND_THREAD_LIMIT</b></p>
+
+<p style="margin-left:22%;">Enable background worker
+threads. Value should be from range 0 to maximum number of
+cpus. Setting <b>MEMKIND_BACKGROUND_THREAD_LIMIT</b> to
+specific value will limit maximum number of background
+worker threads to this value. 0 means maximum number of
+background worker threads will be limited to maximum number
+of cpus.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_HEAP_MANAGER</b></p>
@@ -970,9 +1109,9 @@ extra huge pages (e.g. 8 huge pages).</p>
 <b>malloc_usable_size</b>(3), <b>numa</b>(3),
 <b>numactl</b>(8), <b>mbind</b>(2), <b>mmap</b>(2),
 <b>move_pages</b>(2), <b>jemalloc</b>(3),
-<b>memkind_default</b>(3), <b>memkind_arena</b>(3),
-<b>memkind_hbw</b>(3), <b>memkind_hugetlb</b>(3),
-<b>memkind_pmem</b>(3)</p>
+<b>memkind_dax_kmem</b>(3), <b>memkind_default</b>(3),
+<b>memkind_arena</b>(3), <b>memkind_hbw</b>(3),
+<b>memkind_hugetlb</b>(3), <b>memkind_pmem</b>(3)</p>
 <hr>
 </body>
 </html>
