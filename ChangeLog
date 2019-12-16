@@ -1,3 +1,13 @@
+* Mon Dec 16 2019 Michal Biesek <michal.biesek@intel.com> v1.10.0rc1
+- Provided second way to use Persistent Memory in memkind (MEMKIND_DAX_KMEM_* kinds)
+- Added C++ allocator for static kinds (including MEMKIND_DAX_KMEM_* kinds)
+- Provided interface to get memkind allocation statistics
+- Provided method to reduce fragmentation - memkind_defrag_reallocate()
+- Added support of background thread
+- Updated internally used jemalloc to upstream version 5.2.1
+- Extended hbw interface with hbw_malloc_usable_size()
+- Simplify building process
+
 * Wed Apr 3 2019 Michal Biesek <michal.biesek@intel.com> v1.9.0
 - Provided a second function to create PMEM kind memkind_create_pmem_with_config()
 - Provided the memkind_detect_kind() function to recognize a kind from memory allocation
