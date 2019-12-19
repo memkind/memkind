@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Apr  2 06:36:25 2019 -->
+<!-- CreationDate: Tue Dec 17 09:26:35 2019 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -65,6 +65,7 @@ void* hbw_calloc(size_t</b> <i>nmemb</i><b>, size_t</b>
 void* hbw_realloc (void</b> <i>*ptr</i><b>, size_t</b>
 <i>size</i><b>); <br>
 void hbw_free(void</b> <i>*ptr</i><b>); <br>
+size_t hbw_malloc_usable_size(void</b> <i>*ptr</i><b>); <br>
 int hbw_posix_memalign(void</b> <i>**memptr</i><b>,
 size_t</b> <i>alignment</i><b>, size_t</b> <i>size</i><b>);
 <br>
@@ -147,6 +148,14 @@ to <b>hbw_malloc</b>(), <b>hbw_calloc</b>(),
 <b>hbw_posix_memalign_psize</b>(). Otherwise, if
 <i>hbw_free(ptr)</i> was called before, undefined behavior
 occurs.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>hbw_malloc_usable_size</b>()
+returns the number of usable bytes in the block pointed to
+by <i>ptr</i>, a pointer to a block of memory allocated by
+<b>hbw_malloc</b>(), <b>hbw_calloc</b>(),
+<b>hbw_realloc</b>(), <b>hbw_posix_memalign</b>(), or
+<b>hbw_posix_memalign_psize</b>().</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>hbw_posix_memalign</b>()
@@ -367,7 +376,7 @@ memory numa nodes.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><i>/usr/bin/memkind-hbw-nodes</i></p>
 
-<p style="margin-left:22%;">Prints a comma separated list
+<p style="margin-left:22%;">Prints a comma-separated list
 of high bandwidth nodes.</p>
 
 <h2>ENVIRONMENT
@@ -379,7 +388,7 @@ of high bandwidth nodes.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_HBW_NODES</b></p>
 
 <p style="margin-left:22%;">This environment variable is a
-comma separated list of NUMA nodes that are treated as high
+comma-separated list of NUMA nodes that are treated as high
 bandwidth. Uses the <i>libnuma</i> routine
 <b>numa_parse_nodestring</b>() for parsing, so the syntax
 described in the <b>numa</b>(3) man page for this routine
@@ -421,8 +430,8 @@ heap manager will be used by default.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Interfaces for
-obtaining 2MB (HUGETLB) need allocated huge pages in the
-kernel&rsquo;s huge page pool. <b><br>
+obtaining 2MB (HUGETLB) memory need allocated huge pages in
+the kernel&rsquo;s huge page pool. <b><br>
 HUGETLB (huge pages)</b></p>
 
 <p style="margin-left:22%;">Current number of
