@@ -24,114 +24,16 @@
 
 #include <memkind.h>
 
+#include <algorithm>
 #include <assert.h>
 #include <climits>
-#include <numa.h>
-#include <numaif.h>
-#include <set>
+#include <string>
 #include <unistd.h>
 
-#include <algorithm>
-#include <string>
-
 #include "common.h"
+#include "dax_kmem_api.h"
 #include "sys/types.h"
 #include "sys/sysinfo.h"
-
-static std::set<int> get_dax_kmem_nodes(void)
-{
-    struct bitmask *cpu_mask = numa_allocate_cpumask();
-    std::set<int> dax_kmem_nodes;
-
-
-    const int MAXNODE_ID = numa_max_node();
-    for (int id = 0; id <= MAXNODE_ID; ++id) {
-        numa_node_to_cpus(id, cpu_mask);
-
-        // Check if numa node exists and if it is NUMA node created from persistent memory
-        if (numa_node_size64(id, NULL) > 0 &&
-            numa_bitmask_weight(cpu_mask) == 0) {
-            dax_kmem_nodes.insert(id);
-        }
-    }
-    numa_free_cpumask(cpu_mask);
-
-    return dax_kmem_nodes;
-}
-
-static std::set<int> get_regular_numa_nodes(void)
-{
-    struct bitmask *cpu_mask = numa_allocate_cpumask();
-    std::set<int> regular_nodes;
-
-    const int MAXNODE_ID = numa_max_node();
-    for (int id = 0; id <= MAXNODE_ID; ++id) {
-        numa_node_to_cpus(id, cpu_mask);
-
-        if (numa_bitmask_weight(cpu_mask) != 0) {
-            regular_nodes.insert(id);
-        }
-    }
-    numa_free_cpumask(cpu_mask);
-
-    return regular_nodes;
-}
-
-static size_t get_free_dax_kmem_space(void)
-{
-    size_t sum_of_dax_kmem_free_space = 0;
-    long long free_space;
-    std::set<int> dax_kmem_nodes = get_dax_kmem_nodes();
-
-    for(auto const &node: dax_kmem_nodes) {
-        numa_node_size64(node, &free_space);
-        sum_of_dax_kmem_free_space += free_space;
-    }
-
-    return sum_of_dax_kmem_free_space;
-}
-
-static std::set<int> get_closest_dax_kmem_numa_nodes(int regular_node)
-{
-    int min_distance = INT_MAX;
-    std::set<int> closest_numa_ids;
-    std::set<int> dax_kmem_nodes = get_dax_kmem_nodes();
-
-    for (auto const &node: dax_kmem_nodes) {
-        int distance_to_i_node = numa_distance(regular_node, node);
-
-        if (distance_to_i_node < min_distance) {
-            min_distance = distance_to_i_node;
-            closest_numa_ids.clear();
-            closest_numa_ids.insert(node);
-        } else if (distance_to_i_node == min_distance) {
-            closest_numa_ids.insert(node);
-        }
-    }
-
-    return closest_numa_ids;
-}
-
-static size_t get_used_swap_space(void)
-{
-    size_t vm_swap = 0;
-    bool status = false;
-    FILE *fp = fopen("/proc/self/status", "r");
-
-    if (fp) {
-        char buffer[BUFSIZ];
-        while (fgets(buffer, sizeof(buffer), fp)) {
-            if (sscanf(buffer, "VmSwap: %zu kB", &vm_swap) == 1) {
-                status = true;
-                break;
-            }
-        }
-        fclose(fp);
-    }
-    assert(status && "Couldn't access swap space");
-
-    return vm_swap * KB;
-}
 
 class MemkindDaxKmemFunctionalTests: public ::testing::Test
 {
@@ -140,7 +42,7 @@ protected:
 
     void SetUp()
     {
-        dax_kmem_nodes = get_dax_kmem_nodes();
+        dax_kmem_nodes = DaxKmem::get_dax_kmem_nodes();
         if (dax_kmem_nodes.size() < 1) {
             GTEST_SKIP() << "Minimum 1 PMEM NUMA required." << std::endl;
         }
@@ -156,9 +58,9 @@ protected:
     {
         kind = GetParam();
         if (kind == MEMKIND_DAX_KMEM_PREFERRED) {
-            std::set<int> regular_nodes = get_regular_numa_nodes();
+            std::set<int> regular_nodes = DaxKmem::get_regular_numa_nodes();
             for (auto const &node: regular_nodes) {
-                auto closest_dax_kmem_nodes = get_closest_dax_kmem_numa_nodes(node);
+                auto closest_dax_kmem_nodes = DaxKmem::get_closest_dax_kmem_numa_nodes(node);
                 if (closest_dax_kmem_nodes.size() > 1)
                     GTEST_SKIP() << "Skip test for MEMKIND_DAX_KMEM_PREFFERED - "
                                  "more than one PMEM NUMA node is closest to node: "
@@ -411,7 +313,7 @@ TEST_F(MemkindDaxKmemFunctionalTests,
         allocations.insert(ptr);
     }
 
-    size_t init_swap = get_used_swap_space();
+    size_t init_swap = DaxKmem::get_used_swap_space();
     for(int i = 0; i < n_swap_alloc; ++i) {
         ptr = memkind_malloc(MEMKIND_DAX_KMEM, alloc_size);
         ASSERT_NE(nullptr, ptr);
@@ -419,7 +321,7 @@ TEST_F(MemkindDaxKmemFunctionalTests,
         allocations.insert(ptr);
     }
 
-    ASSERT_GE(get_used_swap_space(), init_swap);
+    ASSERT_GE(DaxKmem::get_used_swap_space(), init_swap);
 
     for (auto const &ptr: allocations) {
         memkind_free(MEMKIND_DAX_KMEM, ptr);
@@ -435,7 +337,7 @@ TEST_F(MemkindDaxKmemFunctionalTests,
     void *ptr;
     const size_t alloc_size = 100 * MB;
     std::set<void *> allocations;
-    size_t sum_of_dax_kmem_free_space = get_free_dax_kmem_space();
+    size_t sum_of_dax_kmem_free_space = DaxKmem::get_free_dax_kmem_space();
     int numa_id = -1;
     const int n_swap_alloc = 20;
 
@@ -449,7 +351,7 @@ TEST_F(MemkindDaxKmemFunctionalTests,
         ASSERT_TRUE(dax_kmem_nodes.find(numa_id) != dax_kmem_nodes.end());
     }
 
-    size_t init_swap = get_used_swap_space();
+    size_t init_swap = DaxKmem::get_used_swap_space();
     for(int i = 0; i < n_swap_alloc; ++i) {
         ptr = memkind_malloc(MEMKIND_DAX_KMEM_ALL, alloc_size);
         ASSERT_NE(nullptr, ptr);
@@ -457,7 +359,7 @@ TEST_F(MemkindDaxKmemFunctionalTests,
         allocations.insert(ptr);
     }
 
-    ASSERT_GE(get_used_swap_space(), init_swap);
+    ASSERT_GE(DaxKmem::get_used_swap_space(), init_swap);
 
     for (auto const &ptr: allocations) {
         memkind_free(MEMKIND_DAX_KMEM_ALL, ptr);
@@ -467,9 +369,9 @@ TEST_F(MemkindDaxKmemFunctionalTests,
 TEST_F(MemkindDaxKmemFunctionalTests,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_PREFFERED_alloc_until_full_numa)
 {
-    std::set<int> regular_nodes = get_regular_numa_nodes();
+    std::set<int> regular_nodes = DaxKmem::get_regular_numa_nodes();
     for (auto const &node: regular_nodes) {
-        auto closest_dax_kmem_nodes = get_closest_dax_kmem_numa_nodes(node);
+        auto closest_dax_kmem_nodes = DaxKmem::get_closest_dax_kmem_numa_nodes(node);
         if (closest_dax_kmem_nodes.size() > 1)
             GTEST_SKIP() << "Skip test for MEMKIND_DAX_KMEM_PREFFERED - "
                          "more than one PMEM NUMA node is closest to node: "
@@ -490,7 +392,8 @@ TEST_F(MemkindDaxKmemFunctionalTests,
     get_mempolicy(&numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
     int process_cpu = sched_getcpu();
     int process_node = numa_node_of_cpu(process_cpu);
-    std::set<int> closest_numa_ids = get_closest_dax_kmem_numa_nodes(process_node);
+    std::set<int> closest_numa_ids = DaxKmem::get_closest_dax_kmem_numa_nodes(
+                                         process_node);
     numa_size = numa_node_size64(numa_id, nullptr);
 
     while (0.99 * numa_size > alloc_size * allocations.size()) {
@@ -510,7 +413,7 @@ TEST_F(MemkindDaxKmemFunctionalTests,
         allocations.insert(ptr);
     }
 
-    ASSERT_EQ(get_used_swap_space(), 0U);
+    ASSERT_EQ(DaxKmem::get_used_swap_space(), 0U);
 
     for (auto const &ptr: allocations) {
         memkind_free(MEMKIND_DAX_KMEM_ALL, ptr);
@@ -521,10 +424,10 @@ TEST_F(MemkindDaxKmemFunctionalTests,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_PREFFERED_check_prerequisities)
 {
     bool can_run = false;
-    std::set<int> regular_nodes = get_regular_numa_nodes();
+    std::set<int> regular_nodes = DaxKmem::get_regular_numa_nodes();
 
     for (auto const &node: regular_nodes) {
-        auto closest_dax_kmem_nodes = get_closest_dax_kmem_numa_nodes(node);
+        auto closest_dax_kmem_nodes = DaxKmem::get_closest_dax_kmem_numa_nodes(node);
         if (closest_dax_kmem_nodes.size() > 1)
             can_run = true;
     }
