@@ -24,6 +24,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
+MAN2HTML = groff -mandoc -Thtml
 
 lib_LTLIBRARIES = libmemkind.la
 
@@ -461,11 +462,17 @@ AM_CXXFLAGS = $(req_flags)
 
 clean-local: clean-jemalloc_deps
 
+html-local:
+	$(MAN2HTML) man/hbwmalloc.3 > man/hbwmalloc.html
+	$(MAN2HTML) man/memkind.3 > man/memkind.html
+	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
+	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
+
 clean-jemalloc_deps:
 	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
 	[ -e jemalloc/configure ] && (cd jemalloc && rm configure) || exit 0
 
-.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps
+.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps html-local
 .NOTPARALLEL: static_lib
 
 # build check programs without running tests
