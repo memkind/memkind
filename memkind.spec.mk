@@ -76,8 +76,8 @@ Provides: memkind libmemkind0
 %endif
 
 # Upstream testing of memkind is done exclusively on x86_64; other archs
-# are unsupported but may work. aarch64 is known to be broken.
-ExclusiveArch: x86_64 ppc64 ppc64le s390x
+# are unsupported but may work.
+ExclusiveArch: x86_64 ppc64 ppc64le s390x aarch64
 
 # default values if version is a tagged release on github
 %{!?commit: %define commit %{version}}
