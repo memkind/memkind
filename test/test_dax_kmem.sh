@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2019 Intel Corporation.
+#  Copyright (C) 2019 - 2020 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -141,7 +141,8 @@ function execute_gtest()
     elif [[ $OUTPUT =~ $PATFAILED ]]; then
         RESULT="$TEST,${red}FAILED${default}"
     elif [[ $OUTPUT =~ $PATSKIPPED ]]; then
-        return 0
+        RESULT="$TEST,${yellow}SKIPPED${default}"
+        ret_val=0
     else
         RESULT="$TEST,${red}CRASH${default}"
     fi
