@@ -911,7 +911,7 @@ AC_SUBST([enable_doc])
 
 dnl Enable shared libs
 AC_ARG_ENABLE([shared],
-  [AS_HELP_STRING([--enable-shared], [Build shared libaries])],
+  [AS_HELP_STRING([--enable-shared], [Build shared libraries])],
 if test "x$enable_shared" = "xno" ; then
   enable_shared="0"
 else
@@ -924,7 +924,7 @@ AC_SUBST([enable_shared])
 
 dnl Enable static libs
 AC_ARG_ENABLE([static],
-  [AS_HELP_STRING([--enable-static], [Build static libaries])],
+  [AS_HELP_STRING([--enable-static], [Build static libraries])],
 if test "x$enable_static" = "xno" ; then
   enable_static="0"
 else

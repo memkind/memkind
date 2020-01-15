@@ -31,7 +31,7 @@ mutex_pool_assert_not_held(tsdn_t *tsdn, mutex_pool_t *pool) {
 }
 
 /*
- * Note that a mutex pool doesn't work exactly the way an embdedded mutex would.
+ * Note that a mutex pool doesn't work exactly the way an embedded mutex would.
  * You're not allowed to acquire mutexes in the pool one at a time.  You have to
  * acquire all the mutexes you'll need in a single function call, and then
  * release them all in a single function call.

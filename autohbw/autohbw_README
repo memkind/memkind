@@ -23,7 +23,7 @@ before your commandline. For instance,
 executes Unix ls utility with autohbw library. You can execute the
 above command on the prompt or put it in a shell script. An example of
 the latter approach is given in ./autohbw_test.sh. Make sure that
-LD_LIBRARY_PATH enviornment variable contains the path to libautohbw.so
+LD_LIBRARY_PATH environment variable contains the path to libautohbw.so
 and libmekind.so before you exeute the above command.
 
 To use the statically linked library, insert -lautohbw -lmemkind
@@ -44,9 +44,9 @@ To use with MPI programs, you need to create a shell script to do the
 LD_PRELOAD. E.g.,
    mpirun -n 2 ./autohbw_test.sh
 
-ENVIORNMENT VARIABLES
+ENVIRONMENT VARIABLES
 ---------------------
-The following enviornment variables control the behavior of the autohbw
+The following environment variables control the behavior of the autohbw
 library:
 
   AUTO_HBW_SIZE=x[:y]
@@ -55,7 +55,7 @@ library:
   indicate the size in Kilo/Memga/Giga bytes (e.g., 4K, 3M, 2G).
   Examples:
     AUTO_HBW_SIZE=4K     # all allocation larger than 4K allocated in HBW
-    AUTO_HBW_SIZE=1M:5M  # allocations betwen 1M and 5M allocated in HBW
+    AUTO_HBW_SIZE=1M:5M  # allocations between 1M and 5M allocated in HBW
 
 
   AUTO_HBW_LOG=level

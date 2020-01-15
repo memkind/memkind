@@ -518,7 +518,7 @@ namespace cxx14
 
   }
 
-  namespace test_digit_seperators
+  namespace test_digit_separators
   {
 
     constexpr auto ten_million = 100'000'000;

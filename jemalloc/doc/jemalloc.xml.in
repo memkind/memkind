@@ -1889,7 +1889,7 @@ struct extent_hooks_s {
         An extent deallocation function conforms to the
         <type>extent_dalloc_t</type> type and deallocates an extent at given
         <parameter>addr</parameter> and <parameter>size</parameter> with
-        <parameter>committed</parameter>/decommited memory as indicated, on
+        <parameter>committed</parameter>/decommitted memory as indicated, on
         behalf of arena <parameter>arena_ind</parameter>, returning false upon
         success.  If the function returns true, this indicates opt-out from
         deallocation; the virtual memory mapping associated with the extent
@@ -1910,7 +1910,7 @@ struct extent_hooks_s {
         <type>extent_destroy_t</type> type and unconditionally destroys an
         extent at given <parameter>addr</parameter> and
         <parameter>size</parameter> with
-        <parameter>committed</parameter>/decommited memory as indicated, on
+        <parameter>committed</parameter>/decommitted memory as indicated, on
         behalf of arena <parameter>arena_ind</parameter>.  This function may be
         called to destroy retained extents during arena destruction (see <link
         linkend="arena.i.destroy"><mallctl>arena.&lt;i&gt;.destroy</mallctl></link>).</para>

@@ -93,27 +93,27 @@ TEST_BEGIN(test_stats_arenas_summary) {
 
 	sz = sizeof(size_t);
 	assert_d_eq(mallctl("stats.arenas.0.mapped", (void *)&mapped, &sz, NULL,
-	    0), expected, "Unexepected mallctl() result");
+	    0), expected, "Unexpected mallctl() result");
 
 	sz = sizeof(uint64_t);
 	assert_d_eq(mallctl("stats.arenas.0.dirty_npurge",
 	    (void *)&dirty_npurge, &sz, NULL, 0), expected,
-	    "Unexepected mallctl() result");
+	    "Unexpected mallctl() result");
 	assert_d_eq(mallctl("stats.arenas.0.dirty_nmadvise",
 	    (void *)&dirty_nmadvise, &sz, NULL, 0), expected,
-	    "Unexepected mallctl() result");
+	    "Unexpected mallctl() result");
 	assert_d_eq(mallctl("stats.arenas.0.dirty_purged",
 	    (void *)&dirty_purged, &sz, NULL, 0), expected,
-	    "Unexepected mallctl() result");
+	    "Unexpected mallctl() result");
 	assert_d_eq(mallctl("stats.arenas.0.muzzy_npurge",
 	    (void *)&muzzy_npurge, &sz, NULL, 0), expected,
-	    "Unexepected mallctl() result");
+	    "Unexpected mallctl() result");
 	assert_d_eq(mallctl("stats.arenas.0.muzzy_nmadvise",
 	    (void *)&muzzy_nmadvise, &sz, NULL, 0), expected,
-	    "Unexepected mallctl() result");
+	    "Unexpected mallctl() result");
 	assert_d_eq(mallctl("stats.arenas.0.muzzy_purged",
 	    (void *)&muzzy_purged, &sz, NULL, 0), expected,
-	    "Unexepected mallctl() result");
+	    "Unexpected mallctl() result");
 
 	if (config_stats) {
 		if (!background_thread_enabled()) {
