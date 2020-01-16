@@ -45,7 +45,7 @@ class alignas(128) memkind_allocated_example : public
     std::string message;
 
 public:
-    //Override method for returning class default kind to make objects be by default allocated on High-Bandwith Memory
+    //Override method for returning class default kind to make objects be by default allocated on High-Bandwidth Memory
     static memkind_t getClassKind()
     {
         return MEMKIND_HBW;

@@ -264,12 +264,12 @@ Example output, where NUMA node 4 is NUMA node created from persistent memory:
 ## NVDIMM volatile usage
 
 Memkind supports using persistent memory as an extension of DRAM.
-This volatile memory solution is provided by the library with two seperate ways described below.
+This volatile memory solution is provided by the library with two separate ways described below.
 
 ## DAX device
 
 NVDIMM memory as DAX device is supported by MEMKIND_DAX_KMEM_* kinds. With this solution
-peristent memory will be seen in OS as seperate NUMA nodes.
+persistent memory will be seen in OS as separate NUMA nodes.
 
 Memkind allows two ways to use this kind:
 
