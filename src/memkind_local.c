@@ -273,7 +273,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_hi_cap_loc_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_OPS
@@ -295,7 +296,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_OPS
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_hi_cap_loc_preferred_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_OPS = {
@@ -316,7 +318,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_low_lat_loc_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_OPS = {
@@ -337,7 +340,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_low_lat_loc_preferred_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_BANDWIDTH_LOCAL_OPS = {
@@ -358,7 +362,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_BANDWIDTH_LOCAL_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_hi_bw_loc_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_OPS
@@ -380,5 +385,6 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_OPS
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_hi_bw_loc_preferred_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };

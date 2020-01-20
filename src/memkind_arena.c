@@ -800,6 +800,50 @@ static int memkind_arena_get_stat(struct memkind *kind, memkind_stat_type stat,
     return err;
 }
 
+int memkind_default_purge(struct memkind *kind)
+{
+    unsigned i;
+    int err = MEMKIND_SUCCESS;
+    char cmd[128];
+    bool is_init;
+
+    for (i = 0; i < kind->arena_map_len; ++i) {
+        size_t sz_b_state = sizeof(bool);
+        snprintf(cmd, 128, "arena.%u.initialized", kind->arena_zero + i);
+        err =  jemk_mallctl(cmd, (void *)&is_init, &sz_b_state, NULL, 0);
+        if (err) {
+            log_err("Error on getting initialized state of arena.");
+            return MEMKIND_ERROR_INVALID;
+        }
+        if (!is_init) {
+            continue;
+        }
+        snprintf(cmd, 128, "arena.%u.purge", kind->arena_zero + i);
+        err = jemk_mallctl(cmd, NULL, NULL, NULL, 0);
+        if (err) {
+            log_err("Error on purging arena.");
+            return MEMKIND_ERROR_INVALID;
+        }
+    }
+    return err;
+}
+
+int memkind_arena_purge(struct memkind *kind)
+{
+    unsigned i;
+    int err = MEMKIND_SUCCESS;
+    char cmd[128];
+    for (i = 0; i < kind->arena_map_len; ++i) {
+        snprintf(cmd, 128, "arena.%u.purge", kind->arena_zero + i);
+        err = jemk_mallctl(cmd, NULL, NULL, NULL, 0);
+        if (err) {
+            log_err("Error on purging arena.");
+            return MEMKIND_ERROR_INVALID;
+        }
+    }
+    return err;
+}
+
 int memkind_arena_get_stat_with_check_init(struct memkind *kind,
                                            memkind_stat_type stat, bool check_init, size_t *value)
 {

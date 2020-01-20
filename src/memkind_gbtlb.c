@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include <memkind/internal/memkind_gbtlb.h>
 #include <memkind/internal/memkind_hugetlb.h>
@@ -34,7 +34,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
@@ -56,7 +57,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
@@ -75,7 +77,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 #define ONE_GB 1073741824ULL

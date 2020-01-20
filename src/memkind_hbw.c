@@ -43,7 +43,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
@@ -64,7 +65,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
@@ -85,7 +87,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
@@ -106,7 +109,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
@@ -127,7 +131,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
@@ -148,7 +153,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
@@ -170,7 +176,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 struct hbw_numanode_t {

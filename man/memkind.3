@@ -71,6 +71,8 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .BI "int memkind_check_available(memkind_t " "kind" );
 .br
 .BI "int memkind_check_dax_path(const char " "*pmem_dir" );
+.br
+.BI "int memkind_purge_kind(memkind_t " "kind" );
 .sp
 .B "STATISTICS:"
 .br
@@ -559,6 +561,8 @@ returns zero if file-backed kind memory is in the specified directory path
 can be created with the DAX attribute or an error code from the
 .B ERRORS
 section if it is not.
+.BR memkind_purge_kind ()
+purge kind object.
 .PP
 .BR MEMKIND_PMEM_MIN_SIZE
 The minimum size which allows to limit the file-backed memory partition.
