@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Intel Corporation.
+ * Copyright (C) 2016 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,10 @@
 #define FREE_FN hbw_free
 #elif defined (TBBMALLOC)
 #include "tbbmalloc.h"
+void *(*scalable_malloc)(size_t);
+void *(*scalable_realloc)(void *, size_t);
+void *(*scalable_calloc)(size_t, size_t);
+void  (*scalable_free)(void *);
 #define MALLOC_FN scalable_malloc
 #define FREE_FN scalable_free
 #elif defined (PMEMMALLOC)
