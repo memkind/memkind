@@ -30,6 +30,7 @@
 #include <type_traits>
 #include <atomic>
 #include <cstddef>
+#include <stdexcept>
 
 #include "memkind.h"
 

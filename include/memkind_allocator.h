@@ -31,6 +31,7 @@
 #include <exception>
 #include <type_traits>
 #include <cstddef>
+#include <stdexcept>
 
 #include "memkind.h"
 
