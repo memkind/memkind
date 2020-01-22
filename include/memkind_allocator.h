@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Intel Corporation.
+ * Copyright (C) 2019 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 #include <exception>
 #include <type_traits>
 #include <cstddef>
+#include <stdexcept>
 
 #include "memkind.h"
 
