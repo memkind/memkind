@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2019 Intel Corporation.
+ * Copyright (C) 2015 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,14 +97,16 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
                         bool committed,
                         unsigned arena_ind)
 {
+    bool result = true;
     // if madvise fail, it means that addr isn't mapped shared (doesn't come from pmem)
-    // and it should be unmapped to avoid space exhaustion when calling large number of
+    // and it should be also unmapped to avoid space exhaustion when calling large number of
     // operations like memkind_create_pmem and memkind_destroy_kind
     errno = 0;
     int status = madvise(addr, size, MADV_REMOVE);
     if (!status) {
         struct memkind *kind = get_kind_by_arena(arena_ind);
         struct memkind_pmem *priv = kind->priv;
+        assert(priv->current_size >= size);
         if (pthread_mutex_lock(&priv->pmem_lock) != 0)
             assert(0 && "failed to acquire mutex");
         priv->current_size -= size;
@@ -115,11 +117,13 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
             log_fatal("Filesystem doesn't support FALLOC_FL_PUNCH_HOLE.");
             abort();
         }
-        if (munmap(addr, size) == -1) {
-            log_err("munmap failed!");
-        }
     }
-    return true;
+    if (munmap(addr, size) == -1) {
+        log_err("munmap failed!");
+    } else {
+        result = false;
+    }
+    return result;
 }
 
 bool pmem_extent_commit(extent_hooks_t *extent_hooks,
