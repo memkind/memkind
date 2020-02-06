@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Intel Corporation.
+ * Copyright (C) 2014 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,9 @@
 
 #include "common.h"
 #include "check.h"
-#include "omp.h"
 #include "trial_generator.h"
+#ifdef _OPENMP
+#include <omp.h>
 
 #define NTHREADS 2
 
@@ -85,3 +86,4 @@ TEST_F(MultithreadedTest,
                   bandwidth);
     }
 }
+#endif

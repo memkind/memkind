@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2019 Intel Corporation.
+ * Copyright (C) 2014 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,9 @@
 
 #include "common.h"
 #include "check.h"
-#include "omp.h"
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 #include "trial_generator.h"
 #include "allocator_perf_tool/HugePageOrganizer.hpp"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2019 Intel Corporation.
+ * Copyright (C) 2014 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,9 @@
 #include <algorithm>
 #include <vector>
 #include <gtest/gtest.h>
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 #include <pthread.h>
 
 class GetArenaTest: public :: testing::Test
