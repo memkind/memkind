@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2019 Intel Corporation.
+ * Copyright (C) 2014 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -271,8 +271,8 @@ static int validate_flags_bits(memkind_bits_t flags)
 
 static int validate_policy(memkind_policy_t policy)
 {
-    if((policy >= 0) && (policy < MEMKIND_POLICY_MAX_VALUE)) return 0;
-    return -1;
+    if (policy >= MEMKIND_POLICY_MAX_VALUE) return -1;
+    return 0;
 }
 
 struct create_args {

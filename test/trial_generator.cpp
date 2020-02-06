@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2019 Intel Corporation.
+ * Copyright (C) 2014 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -296,7 +296,7 @@ void TGTest :: SetUp()
         while (*endptr == ':') {
             hbw_nodes_env = endptr + 1;
             node = strtol(hbw_nodes_env, &endptr, 10);
-            if (endptr != hbw_nodes_env && node >= 0 && node < num_bandwidth) {
+            if (endptr != hbw_nodes_env && node < num_bandwidth) {
                 bandwidth.push_back(2);
             }
         }
