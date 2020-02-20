@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2019 Intel Corporation.
+ * Copyright (C) 2015 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,10 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
                         bool committed,
                         unsigned arena_ind)
 {
-    // if madvise fail, it means that addr isn't mapped shared (doesn't come from pmem)
+    // pmem_extent_dalloc return true in case memory mapping associated with the extent
+    // remains mapped and is available for future use - it will be automatically retained
+    // for later reuse, false in case extent will be unmapped
+    // if madvise fail, it means that addr isn't mapped shared (MAP_SHARED is currently used only for pmem mapping)
     // and it should be unmapped to avoid space exhaustion when calling large number of
     // operations like memkind_create_pmem and memkind_destroy_kind
     errno = 0;
@@ -109,6 +112,7 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
         if (munmap(addr, size) == -1) {
             log_err("munmap failed!");
         }
+        return false;
     }
     return true;
 }
