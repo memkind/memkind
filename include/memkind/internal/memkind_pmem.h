@@ -54,7 +54,6 @@ struct memkind_pmem {
     off_t offset;
     size_t max_size;
     pthread_mutex_t pmem_lock;
-    size_t current_size;
 };
 
 extern struct memkind_ops MEMKIND_PMEM_OPS;
