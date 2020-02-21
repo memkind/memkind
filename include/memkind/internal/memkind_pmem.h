@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2019 Intel Corporation.
+ * Copyright (C) 2015 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@ int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops,
 int memkind_pmem_destroy(struct memkind *kind);
 void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size);
 int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags);
+int memkind_pmem_create_tmpfile(const char *dir, int *fd);
 
 struct memkind_pmem {
     int fd;
@@ -55,6 +56,7 @@ struct memkind_pmem {
     size_t max_size;
     pthread_mutex_t pmem_lock;
     size_t current_size;
+    char *dir;
 };
 
 extern struct memkind_ops MEMKIND_PMEM_OPS;
