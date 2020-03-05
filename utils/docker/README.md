@@ -25,6 +25,9 @@ see https://github.com/pmem/ndctl/tags.
 For testing Threading Building Blocks, TBB library version tag must be passed as parameter,
 see https://github.com/01org/tbb/tags.
 
+* **HOG_MEMORY** - Controls behavior of memkind with regards to returning memory to underlying OS. Setting **HOG_MEMORY** to 1 causes
+memkind to not release memory to OS in anticipation of memory reuse soon
+
 # Files
 *'docker_run_build.sh'*  is used to build of memkind.
 

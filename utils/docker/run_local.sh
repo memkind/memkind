@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2019 Intel Corporation.
+#  Copyright (C) 2019 - 2020 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,7 @@ docker run --rm \
            --env CODECOV_TOKEN="$CODECOV_TOKEN" \
            --env TEST_SUITE_NAME="$TEST_SUITE_NAME" \
            --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
+           --env HOG_MEMORY="$HOG_MEMORY" \
            --env NDCTL_LIBRARY_VERSION="$NDCTL_LIBRARY_VERSION" \
            --env PMEM_CONTAINER_PATH="$PMEM_CONTAINER_PATH" \
            --mount type=bind,source="$MEMKIND_HOST_WORKDIR",target="$MEMKIND_CONTAINER_WORKDIR" \
