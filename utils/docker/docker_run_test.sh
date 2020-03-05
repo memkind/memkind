@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) 2019 Intel Corporation.
+#  Copyright (C) 2019 -2020 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ if [ "$TEST_SUITE_NAME" = "HBW" ]; then
     # running tests and display output in case of failure
     make check || { cat test-suite.log; exit 1; }
 elif [ "$TEST_SUITE_NAME" = "PMEM" ]; then
-    make PMEM_PATH="$PMEM_CONTAINER_PATH" unit_tests_pmem
+    MEMKIND_HOG_MEMORY=$HOG_MEMORY make PMEM_PATH="$PMEM_CONTAINER_PATH" unit_tests_pmem
     # running pmem examples
     find examples/.libs -name "pmem*" -executable -type f -exec sh -c "MEMKIND_HEAP_MANAGER=$HEAP_MANAGER "{}" $PMEM_CONTAINER_PATH" \;
 elif [ "$TEST_SUITE_NAME" = "DAX_KMEM" ]; then

@@ -1611,6 +1611,12 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCheckExtentDalloc)
     struct stat st;
     double initialBlocks;
 
+    const char *str = secure_getenv("MEMKIND_HOG_MEMORY");
+    int skip_test = str && str[0] == '1';
+    if (skip_test) {
+        GTEST_SKIP();
+    }
+
     int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &kind);
     ASSERT_EQ(err, 0);
 

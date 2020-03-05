@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (C) 2014 - 2019 Intel Corporation.
+.\" Copyright (C) 2014 - 2020 Intel Corporation.
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -1013,6 +1013,13 @@ Controls behavior of memkind with regards to returning memory to underlying OS. 
 .B MEMKIND_HOG_MEMORY
 to 1 causes memkind to not release memory to OS in anticipation of memory reuse soon. This will
 improve latency of 'free' operations but increase memory usage.
+.BR Note:
+For file-backed kind memory will be released to OS only after calling
+.BR memkind_destroy_kind(),
+not after 'free' operations. In context of
+.B MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE
+memory usage policy - it will also impact memory coalescing and results that
+blocks pages will be often reused (better memory usage at cost of performance).
 .TP
 .B MEMKIND_DEBUG
 Controls logging mechanism in memkind. Setting
@@ -1074,7 +1081,7 @@ can be reached on GitHub:
 There might be some overhead in huge pages consumption caused by heap management.
 If your allocation fails because of OOM, please try to allocate extra huge pages (e.g. 8 huge pages).
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2019 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2020 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR malloc (3),
 .BR malloc_usable_size (3),
