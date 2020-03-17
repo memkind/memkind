@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2014 - 2019 Intel Corporation.
+#  Copyright (C) 2014 - 2020 Intel Corporation.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -186,6 +186,17 @@ if test "$MEMKIND_PREFIX" != "" ; then
 fi
 
 AC_SUBST(memkind_prefix)
+
+#============================min_log_alignment=====================================
+min_lg_align_opt="";
+AC_ARG_VAR(MIN_LG_ALIGN,
+  [minimum allocation alignment (base 2 log) used in jemalloc, default value is architecture specific]
+)
+if test "$MIN_LG_ALIGN" != "" ; then
+  min_lg_align_opt=-with-lg-quantum=$MIN_LG_ALIGN;
+fi
+
+AC_SUBST(min_lg_align_opt)
 
 #===============================daxctl=========================================
 AC_ARG_ENABLE([daxctl],
