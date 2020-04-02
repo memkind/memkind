@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2019 Intel Corporation.
+ * Copyright (C) 2015 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
-
+#include <signal.h>
+#include <string.h>
 MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
     .create = memkind_pmem_create,
     .destroy = memkind_pmem_destroy,
@@ -97,14 +98,20 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
                         bool committed,
                         unsigned arena_ind)
 {
+    bool result = true;
+    if (memkind_get_hog_memory()) {
+        return result;
+    }
+
     // if madvise fail, it means that addr isn't mapped shared (doesn't come from pmem)
-    // and it should be unmapped to avoid space exhaustion when calling large number of
+    // and it should be also unmapped to avoid space exhaustion when calling large number of
     // operations like memkind_create_pmem and memkind_destroy_kind
     errno = 0;
     int status = madvise(addr, size, MADV_REMOVE);
     if (!status) {
         struct memkind *kind = get_kind_by_arena(arena_ind);
         struct memkind_pmem *priv = kind->priv;
+        assert(priv->current_size >= size);
         if (pthread_mutex_lock(&priv->pmem_lock) != 0)
             assert(0 && "failed to acquire mutex");
         priv->current_size -= size;
@@ -115,11 +122,13 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
             log_fatal("Filesystem doesn't support FALLOC_FL_PUNCH_HOLE.");
             abort();
         }
-        if (munmap(addr, size) == -1) {
-            log_err("munmap failed!");
-        }
     }
-    return true;
+    if (munmap(addr, size) == -1) {
+        log_err("munmap failed!");
+    } else {
+        result = false;
+    }
+    return result;
 }
 
 bool pmem_extent_commit(extent_hooks_t *extent_hooks,
@@ -185,6 +194,7 @@ void pmem_extent_destroy(extent_hooks_t *extent_hooks,
                          bool committed,
                          unsigned arena_ind)
 {
+    madvise(addr, size, MADV_REMOVE);
     if (munmap(addr, size) == -1) {
         log_err("munmap failed!");
     }
@@ -200,6 +210,48 @@ static extent_hooks_t pmem_extent_hooks = {
     .merge = pmem_extent_merge,
     .destroy = pmem_extent_destroy
 };
+
+int memkind_pmem_create_tmpfile(const char *dir, int *fd)
+{
+    static char template[] = "/memkind.XXXXXX";
+    int err = MEMKIND_SUCCESS;
+    int oerrno;
+    int dir_len = strlen(dir);
+
+    if (dir_len > PATH_MAX) {
+        log_err("Could not create temporary file: too long path.");
+        return MEMKIND_ERROR_INVALID;
+    }
+
+    char fullname[dir_len + sizeof (template)];
+    (void) strcpy(fullname, dir);
+    (void) strcat(fullname, template);
+
+    sigset_t set, oldset;
+    sigfillset(&set);
+    (void) sigprocmask(SIG_BLOCK, &set, &oldset);
+
+    if ((*fd = mkstemp(fullname)) < 0) {
+        log_err("Could not create temporary file: errno=%d.", errno);
+        err = MEMKIND_ERROR_INVALID;
+        goto exit;
+    }
+
+    (void) unlink(fullname);
+    (void) sigprocmask(SIG_SETMASK, &oldset, NULL);
+
+    return err;
+
+exit:
+    oerrno = errno;
+    (void) sigprocmask(SIG_SETMASK, &oldset, NULL);
+    if (*fd != -1) {
+        (void) close(*fd);
+    }
+    *fd = -1;
+    errno = oerrno;
+    return err;
+}
 
 MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
                                        struct memkind_ops *ops, const char *name)
@@ -247,9 +299,29 @@ MEMKIND_EXPORT int memkind_pmem_destroy(struct memkind *kind)
     pthread_mutex_destroy(&priv->pmem_lock);
 
     (void) close(priv->fd);
+    free(priv->dir);
     free(priv);
 
     return 0;
+}
+
+static int memkind_pmem_recreate_file(struct memkind_pmem *priv, size_t size)
+{
+    int status = -1;
+    int fd = -1;
+    int err = memkind_pmem_create_tmpfile(priv->dir, &fd);
+    if (err) {
+        goto exit;
+    }
+    if ((errno = posix_fallocate(fd, 0, (off_t)size)) != 0) {
+        goto exit;
+    }
+    close(priv->fd);
+    priv->fd = fd;
+    priv->offset = 0;
+    status = 0;
+exit:
+    return status;
 }
 
 MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr,
@@ -268,9 +340,17 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr,
     }
 
     if ((errno = posix_fallocate(priv->fd, priv->offset, (off_t)size)) != 0) {
-        if (pthread_mutex_unlock(&priv->pmem_lock) != 0)
-            assert(0 && "failed to release mutex");
-        return MAP_FAILED;
+        if (errno == EFBIG) {
+            if (memkind_pmem_recreate_file(priv, size) != 0) {
+                if (pthread_mutex_unlock(&priv->pmem_lock) != 0)
+                    assert(0 && "failed to release mutex");
+                return MAP_FAILED;
+            }
+        } else {
+            if (pthread_mutex_unlock(&priv->pmem_lock) != 0)
+                assert(0 && "failed to release mutex");
+            return MAP_FAILED;
+        }
     }
 
     if ((result = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, priv->fd,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Intel Corporation.
+ * Copyright (C) 2019 -2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -143,7 +143,11 @@ TEST_F(MemkindConfigTests,
     struct memkind_pmem *priv = nullptr;
     void *temp_ptr = nullptr;
     struct stat st;
-
+    const char *str = secure_getenv("MEMKIND_HOG_MEMORY");
+    int skip_test = str && str[0] == '1';
+    if (skip_test) {
+        GTEST_SKIP();
+    }
     memkind_config_set_path(global_test_cfg, PMEM_DIR);
     memkind_config_set_size(global_test_cfg, 0U);
     memkind_config_set_memory_usage_policy(global_test_cfg,

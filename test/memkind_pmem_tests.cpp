@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2019 Intel Corporation.
+ * Copyright (C) 2015 - 2020 Intel Corporation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -780,7 +780,7 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSizeConservative)
     memkind_config *test_cfg = memkind_config_new();
     ASSERT_NE(nullptr, test_cfg);
     memkind_config_set_path(test_cfg, PMEM_DIR);
-    memkind_config_set_size(test_cfg, PMEM_PART_SIZE);
+    memkind_config_set_size(test_cfg, 5*PMEM_PART_SIZE);
     memkind_config_set_memory_usage_policy(test_cfg,
                                            MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
     err =  memkind_create_pmem_with_config(test_cfg, &kind);
@@ -811,8 +811,8 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSizeConservative)
             memkind_free(kind, val);
         }
         pmem_vec.clear();
-
-        ASSERT_GE(temp_limit_of_allocations, 0.98 * initial_alloc_limit);
+        ASSERT_GE(temp_limit_of_allocations,
+                  static_cast<int>(0.75 * initial_alloc_limit));
     }
     err = memkind_destroy_kind(kind);
     ASSERT_EQ(0, err);
@@ -1064,7 +1064,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemDestroyKind)
 {
     const size_t pmem_array_size = 10;
     struct memkind *pmem_kind_array[pmem_array_size] = {nullptr};
-
+    char pmem_middle_name[MEMKIND_NAME_LENGTH_PRIV];
     int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE,
                                   &pmem_kind_array[0]);
     ASSERT_EQ(err, 0);
@@ -1077,7 +1077,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemDestroyKind)
         ASSERT_EQ(err, 0);
     }
 
-    char *pmem_middle_name = pmem_kind_array[5]->name;
+    memcpy(pmem_middle_name, pmem_kind_array[5]->name, MEMKIND_NAME_LENGTH_PRIV);
     err = memkind_destroy_kind(pmem_kind_array[5]);
     ASSERT_EQ(err, 0);
 
@@ -1610,6 +1610,12 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCheckExtentDalloc)
     void *ptr[mallocLimit] = { nullptr };
     struct stat st;
     double initialBlocks;
+
+    const char *str = secure_getenv("MEMKIND_HOG_MEMORY");
+    int skip_test = str && str[0] == '1';
+    if (skip_test) {
+        GTEST_SKIP();
+    }
 
     int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &kind);
     ASSERT_EQ(err, 0);
