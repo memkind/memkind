@@ -894,6 +894,7 @@ int memkind_arena_enable_background_threads(size_t threads_limit)
 }
 
 #define DEST_SLAB_END(begin, size) ((uintptr_t)begin+ (uintptr_t)size)
+#define UTIL(free, total) (((total)-(free))/(total))
 
 struct mem_util_stats {
     void *target_slab;      // address of the slab of a potential realloaction would go to ( NULL in case of large/huge allocation)
@@ -924,13 +925,17 @@ void *memkind_arena_defrag_reallocate(struct memkind *kind, void *ptr)
         return NULL;
     }
 
+    if (out.nregs == 0 || out.bin_nregs == 0) {
+        return NULL;
+    }
+
     // Check if input pointer resides outside of potential reallocation slab
     // Check if occupied regions inside the slab are below average occupied regions inside bin
     // Check if there are some free regions in the destination slab
     if (out.target_slab &&
         ((ptr < out.target_slab) ||
          (uintptr_t)ptr > DEST_SLAB_END(out.target_slab, out.slab_size)) &&
-        out.nfree * out.bin_nregs >= out.nregs * out.bin_nfree &&
+        UTIL(out.nfree, out.nregs) <= UTIL(out.bin_nfree, out.bin_nregs) &&
         out.nfree != 0) {
         size_t size = memkind_malloc_usable_size(kind, ptr);
         void *ptr_new = memkind_arena_malloc_no_tcache(kind, size);
