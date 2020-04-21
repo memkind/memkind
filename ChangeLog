@@ -1,3 +1,9 @@
+* Tue Apr 21 2020 Michal Biesek <michal.biesek@intel.com> v1.10.1-rc1
+- Fix calculation size for pmem kind
+- Add support for MEMKIND_HOG_MEMORY in pmem kind
+- Fixed memkind_defrag_reallocate
+- Extend configure mechanism by MIN_LG_ALIGN parameter
+
 * Mon Dec 16 2019 Michal Biesek <michal.biesek@intel.com> v1.10.0
 - Provided another way to use Persistent Memory in memkind (MEMKIND_DAX_KMEM_* kinds)
 - Added C++ allocator for static kinds (including MEMKIND_DAX_KMEM_* kinds)
