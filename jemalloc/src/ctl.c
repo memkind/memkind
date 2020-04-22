@@ -257,7 +257,7 @@ CTL_PROTO(stats_mutexes_reset)
 /******************************************************************************/
 /* mallctl tree. */
 
-#define NAME(n)	{true},	n
+#define NAME(n)	{true},	n, (sizeof(n)-1)
 #define CHILD(t, c)							\
 	sizeof(c##_node) / sizeof(ctl_##t##_node_t),			\
 	(ctl_node_t *)c##_node,						\
@@ -1217,7 +1217,7 @@ ctl_lookup(tsdn_t *tsdn, const char *name, ctl_node_t const **nodesp,
 			for (j = 0; j < node->nchildren; j++) {
 				const ctl_named_node_t *child =
 				    ctl_named_children(node, j);
-				if (strlen(child->name) == elen &&
+				if (child->name_len == elen &&
 				    strncmp(elm, child->name, elen) == 0) {
 					node = child;
 					if (nodesp != NULL) {

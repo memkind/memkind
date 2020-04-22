@@ -18,6 +18,7 @@ typedef struct ctl_node_s {
 typedef struct ctl_named_node_s {
 	ctl_node_t node;
 	const char *name;
+	size_t name_len;
 	/* If (nchildren == 0), this is a terminal node. */
 	size_t nchildren;
 	const ctl_node_t *children;
