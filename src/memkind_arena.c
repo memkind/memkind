@@ -453,31 +453,16 @@ static void tcache_finalize(void *args)
     }
 }
 
-static inline int memkind_lookup_arena(void *ptr, unsigned int *arena)
-{
-    size_t sz = sizeof(unsigned);
-    unsigned temp_arena;
-    int err = jemk_mallctl("arenas.lookup", &temp_arena, &sz, &ptr, sizeof(ptr));
-
-    if (err) {
-        log_err("Could not found arena, err=%d", err);
-        return 1;
-    }
-
-    *arena = temp_arena;
-    return 0;
-}
-
 MEMKIND_EXPORT struct memkind *memkind_arena_detect_kind(void *ptr)
 {
     if (!ptr) {
         return NULL;
     }
     struct memkind *kind = NULL;
-    unsigned arena;
-    int err = memkind_lookup_arena(ptr, &arena);
-    if (MEMKIND_LIKELY(!err)) {
-        kind = get_kind_by_arena(arena);
+
+    int result = jemk_arenalookupx(ptr);
+    if (result >= 0) {
+        kind = get_kind_by_arena((unsigned)result);
     }
 
     /* if no kind was associated with arena it means that allocation doesn't come from
