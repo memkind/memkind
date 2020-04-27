@@ -53,6 +53,9 @@ JEMALLOC_EXPORT void JEMALLOC_NOTHROW	@je_@malloc_stats_print(
 JEMALLOC_EXPORT size_t JEMALLOC_NOTHROW	@je_@malloc_usable_size(
     JEMALLOC_USABLE_SIZE_CONST void *ptr) JEMALLOC_CXX_THROW;
 
+JEMALLOC_EXPORT int JEMALLOC_NOTHROW	@je_@arenalookupx(
+    const void *ptr) JEMALLOC_CXX_THROW;
+
 #ifdef JEMALLOC_OVERRIDE_MEMALIGN
 JEMALLOC_EXPORT JEMALLOC_ALLOCATOR JEMALLOC_RESTRICT_RETURN
     void JEMALLOC_NOTHROW	*@je_@memalign(size_t alignment, size_t size)
