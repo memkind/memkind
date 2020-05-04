@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 Intel Corporation. */
+/* Copyright (C) 2019 - 2020 Intel Corporation. */
 
 #include "memkind_allocator.h"
 #include "common.h"

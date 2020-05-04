@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2018 - 2019 Intel Corporation.
+# Copyright (C) 2018 - 2020 Intel Corporation.
 
 ASTYLE_MIN_VER="3.1"
 ASTYLE_OPT="--style=linux --indent=spaces=4 -S -r --max-continuation-indent=80 "

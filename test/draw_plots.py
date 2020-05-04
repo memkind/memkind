@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2016 - 2019 Intel Corporation.
+# Copyright (C) 2016 - 2020 Intel Corporation.
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
