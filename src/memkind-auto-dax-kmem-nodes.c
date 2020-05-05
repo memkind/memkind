@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 Intel Corporation. */
+/* Copyright (C) 2019 - 2020 Intel Corporation. */
 
 #include <memkind/internal/memkind_dax_kmem.h>
 #include <memkind.h>
@@ -29,7 +29,7 @@ static const char *const help_message =
     "        3 on other failure\n"
     "\n"
     "COPYRIGHT\n"
-    "    Copyright 2019 Intel Corporation All Rights Reserved.\n"
+    "    Copyright 2019 - 2020 Intel Corporation All Rights Reserved.\n"
     "\n"
     "AUTHORS\n"
     "    Michal Biesek\n"

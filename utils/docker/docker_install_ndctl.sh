@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2019 Intel Corporation.
+# Copyright (C) 2019- 2020 Intel Corporation.
 
 # docker_install_ndctl.sh - is called inside a Docker container;
 # installs ndctl library

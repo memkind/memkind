@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2016 - 2019 Intel Corporation. */
+/* Copyright (C) 2016 - 2020 Intel Corporation. */
 
 #include <memkind/internal/memkind_hbw.h>
 
@@ -28,7 +28,7 @@ const char *help_message =
     "        2 on invalid argument\n"
     "\n"
     "COPYRIGHT\n"
-    "    Copyright 2016 Intel Corporation All Rights Reserved.\n"
+    "    Copyright 2016 - 2020 Intel Corporation All Rights Reserved.\n"
     "\n"
     "AUTHORS\n"
     "    Krzysztof Kulakowski\n"

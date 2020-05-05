@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2015 - 2016 Intel Corporation. */
+/* Copyright (C) 2015 - 2020 Intel Corporation. */
 
 ///////////////////////////////////////////////////////////////////////////
 // File   : autohbw_api.h

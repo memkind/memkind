@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2018 - 2019 Intel Corporation. */
+/* Copyright (C) 2018 - 2020 Intel Corporation. */
 
 #include <memkind.h>
 #include "allocator_perf_tool/TimerSysTime.hpp"

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2016 - 2018 Intel Corporation. */
+/* Copyright (C) 2016 - 2020 Intel Corporation. */
 #include "memkind.h"
 #include "memkind/internal/memkind_hbw.h"
 #include "allocator_perf_tool/HugePageOrganizer.hpp"

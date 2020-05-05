@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2019 Intel Corporation. */
+/* Copyright (C) 2014 - 2020 Intel Corporation. */
 
 #ifndef check_include_h
 #define check_include_h

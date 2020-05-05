@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2016 - 2019 Intel Corporation.
+# Copyright (C) 2016 - 2020 Intel Corporation.
 
 set -e
 

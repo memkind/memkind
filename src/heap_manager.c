@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2017 - 2019 Intel Corporation. */
+/* Copyright (C) 2017 - 2020 Intel Corporation. */
 
 #include <memkind/internal/heap_manager.h>
 #include <memkind/internal/tbb_wrapper.h>

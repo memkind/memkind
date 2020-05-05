@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2017 - 2018 Intel Corporation. */
+/* Copyright (C) 2017 - 2020 Intel Corporation. */
 
 #pragma once
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2016 - 2018 Intel Corporation. */
+/* Copyright (C) 2016 - 2020 Intel Corporation. */
 
 #include "common.h"
 #include "allocator_perf_tool/HugePageUnmap.hpp"
