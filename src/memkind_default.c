@@ -240,5 +240,7 @@ MEMKIND_EXPORT int memkind_posix_check_alignment(struct memkind *kind,
 
 MEMKIND_EXPORT void memkind_default_init_once(void)
 {
+#ifdef MEMKIND_ENABLE_HEAP_MANAGER
     heap_manager_init(MEMKIND_DEFAULT);
+#endif
 }
