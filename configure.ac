@@ -198,6 +198,22 @@ if test $daxctl_kmem = "yes" ; then
 fi
 AC_SUBST([enable_daxctl])
 
+#===============================heap manager=========================================
+AC_ARG_ENABLE([heap_manager],
+  [AS_HELP_STRING([--disable-heap-manager], [Use only default allocator: jemalloc])],
+[if test "x$enable_heap_manager" = "xno" ; then
+  enable_heap_manager="0"
+else
+  enable_heap_manager="1"
+fi
+],
+[enable_heap_manager="1"]
+)
+if test "x$enable_heap_manager" = "x1" ; then
+  AC_DEFINE([MEMKIND_ENABLE_HEAP_MANAGER], [], [Enable heap manager])
+fi
+AC_SUBST([enable_heap_manager])
+
 #============================cxx11=============================================
 
 AX_CXX_COMPILE_STDCXX_11([noext], [optional])

@@ -36,6 +36,26 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#ifdef MEMKIND_ENABLE_HEAP_MANAGER
+#define m_detect_kind(ptr)             heap_manager_detect_kind(ptr)
+#define m_free(ptr)                    heap_manager_free(ptr)
+#define m_realloc(ptr, size)           heap_manager_realloc(ptr, size)
+#define m_usable_size(ptr)             heap_manager_malloc_usable_size(ptr)
+#define m_defrag_reallocate(ptr)       heap_manager_defrag_reallocate(ptr)
+#define m_get_global_stat(stat, value) heap_manager_get_stat(stat, value)
+#define m_update_cached_stats          heap_manager_update_cached_stats
+#define m_init                         heap_manager_init
+#else
+#define m_detect_kind(ptr)             memkind_arena_detect_kind(ptr)
+#define m_free(ptr)                    memkind_arena_free_with_kind_detect(ptr)
+#define m_realloc(ptr, size)           memkind_arena_realloc_with_kind_detect(ptr, size)
+#define m_usable_size(ptr)             memkind_default_malloc_usable_size(NULL, ptr)
+#define m_defrag_reallocate(ptr)       memkind_arena_defrag_reallocate_with_kind_detect(ptr)
+#define m_get_global_stat(stat, value) memkind_arena_get_global_stat(stat, value)
+#define m_update_cached_stats          memkind_arena_update_cached_stats
+#define m_init                         memkind_arena_init
+#endif
+
 /* Clear bits in x, but only this specified in mask. */
 #define CLEAR_BIT(x, mask) ((x) &= (~(mask)))
 
@@ -355,7 +375,7 @@ MEMKIND_EXPORT int memkind_destroy_kind(memkind_t kind)
 
 MEMKIND_EXPORT memkind_t memkind_detect_kind(void *ptr)
 {
-    return heap_manager_detect_kind(ptr);
+    return m_detect_kind(ptr);
 }
 
 /* Declare weak symbols for allocator decorators */
@@ -450,7 +470,7 @@ MEMKIND_EXPORT void memkind_error_message(int err, char *msg, size_t size)
 void memkind_init(memkind_t kind, bool check_numa)
 {
     log_info("Initializing kind %s.", kind->name);
-    heap_manager_init(kind);
+    m_init(kind);
     if (check_numa) {
         int err = numa_available();
         if (err) {
@@ -526,16 +546,25 @@ exit:
     return err;
 }
 
+static int memkind_use_other_heap_manager(void)
+{
+#ifdef MEMKIND_ENABLE_HEAP_MANAGER
+    const char *env = secure_getenv("MEMKIND_HEAP_MANAGER");
+    if (env && strcmp(env, "TBB") == 0) {
+        load_tbb_symbols();
+        return 1;
+    }
+#endif
+    return 0;
+}
+
 #ifdef __GNUC__
 __attribute__((constructor))
 #endif
 static void memkind_construct(void)
 {
-    const char *env = secure_getenv("MEMKIND_HEAP_MANAGER");
-    if (env && strcmp(env, "TBB") == 0) {
-        load_tbb_symbols();
-    } else {
-        env = secure_getenv("MEMKIND_BACKGROUND_THREAD_LIMIT");
+    if (!memkind_use_other_heap_manager()) {
+        const char *env = secure_getenv("MEMKIND_BACKGROUND_THREAD_LIMIT");
         if (env) {
             char *end;
             errno = 0;
@@ -594,7 +623,7 @@ MEMKIND_EXPORT size_t memkind_malloc_usable_size(struct memkind *kind,
                                                  void *ptr)
 {
     if (!kind) {
-        return heap_manager_malloc_usable_size(ptr);
+        return m_usable_size(ptr);
     } else {
         return kind->ops->malloc_usable_size(kind, ptr);
     }
@@ -684,7 +713,7 @@ MEMKIND_EXPORT void *memkind_realloc(struct memkind *kind, void *ptr,
 #endif
 
     if (!kind) {
-        result = heap_manager_realloc(ptr, size);
+        result = m_realloc(ptr, size);
     } else {
         pthread_once(&kind->init_once, kind->ops->init_once);
         result = kind->ops->realloc(kind, ptr, size);
@@ -707,7 +736,7 @@ MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
     }
 #endif
     if (!kind) {
-        heap_manager_free(ptr);
+        m_free(ptr);
     } else {
         pthread_once(&kind->init_once, kind->ops->init_once);
         kind->ops->free(kind, ptr);
@@ -839,13 +868,13 @@ MEMKIND_EXPORT int memkind_get_kind_by_partition(int partition,
 
 MEMKIND_EXPORT int memkind_update_cached_stats(void)
 {
-    return heap_manager_update_cached_stats();
+    return m_update_cached_stats();
 }
 
 MEMKIND_EXPORT void *memkind_defrag_reallocate(memkind_t kind, void *ptr)
 {
     if (!kind) {
-        return heap_manager_defrag_reallocate(ptr);
+        return m_defrag_reallocate(ptr);
     } else {
         return kind->ops->defrag_reallocate(kind, ptr);
     }
@@ -860,7 +889,7 @@ MEMKIND_EXPORT int memkind_get_stat(memkind_t kind, memkind_stat_type stat,
     }
 
     if (!kind) {
-        return heap_manager_get_stat(stat, value);
+        return m_get_global_stat(stat, value);
     } else {
         return kind->ops->get_stat(kind, stat, value);
     }
