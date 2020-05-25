@@ -118,7 +118,7 @@ for more information about either the memkind or the jemalloc configuration opti
 The jemalloc source was forked from jemalloc version 5.2.1.  This source tree
 is located within the jemalloc subdirectory of the memkind source.  The jemalloc
 source code has been kept close to the original form, except for the following items:
-- extend jemalloc API with "arenalookupx" function
+- extend jemalloc API with "arenalookupx" and "check_reallocatex" functions
 - optimization for searching commands in mallctl
 - the build system has been lightly modified.
 
