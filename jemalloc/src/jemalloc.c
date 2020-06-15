@@ -3780,7 +3780,7 @@ JEMALLOC_EXPORT int JEMALLOC_NOTHROW
 je_check_reallocatex(const void *ptr) {
 	int ret;
 	tsdn_t *tsdn;
-	size_t nfree, nregs, size, bin_nfree, bin_nregs;
+	size_t nfree, nregs, size, bin_slabs, bin_regs;
 	void *slabcur_addr;
 
 	LOG("core.check_reallocatex.entry", "ptr: %p", ptr);
@@ -3812,9 +3812,8 @@ je_check_reallocatex(const void *ptr) {
 	bin_t *bin = &arena->bins[szind].bin_shards[binshard];
 
 	malloc_mutex_lock(tsdn, &bin->lock);
-	bin_nregs = nregs * bin->stats.curslabs;
-	assert(bin_nregs >= bin->stats.curregs);
-	bin_nfree = bin_nregs - bin->stats.curregs;
+	bin_slabs = bin->stats.curslabs;
+	bin_regs = bin->stats.curregs;
 	extent_t *slab;
 	if (bin->slabcur != NULL) {
 		slab = bin->slabcur;
@@ -3826,7 +3825,7 @@ je_check_reallocatex(const void *ptr) {
 	if (slabcur_addr &&
 		((ptr < slabcur_addr) ||
 		(uintptr_t)ptr > ((uintptr_t)slabcur_addr) + (uintptr_t)size) &&
-		nfree * bin_nregs >= nregs * bin_nfree &&
+		bin_regs >= (nregs - nfree) * bin_slabs &&
 		nfree != 0) {
 		ret = 0;
 	} else {
