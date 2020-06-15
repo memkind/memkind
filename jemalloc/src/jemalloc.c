@@ -3811,13 +3811,17 @@ je_check_reallocatex(const void *ptr) {
 	bin_t *bin = &arena->bins[szind].bin_shards[binshard];
 
 	malloc_mutex_lock(tsdn, &bin->lock);
-	bin_slabs = bin->stats.curslabs;
-	bin_regs = bin->stats.curregs;
 	extent_t *slab;
 	if (bin->slabcur != NULL) {
 		slab = bin->slabcur;
+		assert(bin->stats.curslabs);
+		bin_slabs = bin->stats.curslabs - 1;
+		assert(bin->stats.curregs + extent_nfree_get(slab) >= nregs);
+		bin_regs = bin->stats.curregs + extent_nfree_get(slab) - nregs;
 	} else {
 		slab = extent_heap_first(&bin->slabs_nonfull);
+		bin_slabs = bin->stats.curslabs;
+		bin_regs = bin->stats.curregs;
 	}
 	slabcur_addr = slab != NULL ? extent_addr_get(slab) : NULL;
 	malloc_mutex_unlock(tsdn, &bin->lock);
