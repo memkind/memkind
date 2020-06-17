@@ -32,6 +32,7 @@ fi
 
 # installing memkind
 sudo make install
+sudo ldconfig
 
 # if TBB library version is specified install library and use it
 # as MEMKIND_HEAP_MANAGER
