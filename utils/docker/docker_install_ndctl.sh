@@ -8,36 +8,44 @@
 
 set -e
 
-NDCTL_RELEASE_URL=https://github.com/pmem/ndctl/releases/tag/"$NDCTL_LIBRARY_VERSION"
-NDCTL_TAR_GZ="$NDCTL_LIBRARY_VERSION".tar.gz
-NDCTL_TARBALL_URL=https://github.com/pmem/ndctl/archive/"$NDCTL_TAR_GZ"
+git clone --branch="$NDCTL_LIBRARY_VERSION" https://github.com/pmem/ndctl.git $HOME/ndctl/
+cd $HOME/ndctl/
 
-# check if specified ndctl release exists
-if curl --output /dev/null --silent --head --fail "$NDCTL_RELEASE_URL"; then
-  echo "ndctl version ${NDCTL_LIBRARY_VERSION} exist."
+if [[ $(cat /etc/os-release) = *"fedora"* ]]; then
+
+  #reverting ldconfig_scriplets changes for centos 7
+  git config user.name "someone"
+  git config user.email "someone@someplace.com"
+  git revert 27e8d272b88bf03b1e931202f58094771c27ebef --no-edit
+
+  rpmdev-setuptree
+
+  SPEC=./rhel/ndctl.spec
+  VERSION=$(./git-version)
+  RPMDIR=$HOME/rpmbuild/
+
+  git archive --format=tar --prefix="ndctl-${VERSION}/" HEAD | gzip > "$RPMDIR/SOURCES/ndctl-${VERSION}.tar.gz"
+
+  ./autogen.sh
+  ./configure --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib64 --disable-docs --disable-asciidoctor
+  make -j "$(nproc)"
+
+  ./rpmbuild.sh
+
+  RPM_ARCH=$(uname -m)
+  sudo rpm -i $RPMDIR/RPMS/$RPM_ARCH/*.rpm
+
 else
-  echo "ndctl url: ${NDCTL_RELEASE_URL} is not valid. ndctl version: ${NDCTL_LIBRARY_VERSION} doesn't exist."
-  exit 1
+
+  ./autogen.sh
+  ./configure --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib
+  make -j "$(nproc)"
+
+  sudo make -j "$(nproc)" install
+
 fi
-
-NDCTL_LOCAL_DIR="$HOME"/ndctl/"$NDCTL_LIBRARY_VERSION"
-NDCTL_LOCAL_TAR_GZ="$NDCTL_LOCAL_DIR"/"$NDCTL_TAR_GZ"
-
-# create ndctl directory in home directory
-mkdir -p "$NDCTL_LOCAL_DIR"
-
-# download and untar ndctl library to ndctl directory
-curl -L "$NDCTL_TARBALL_URL" -o "$NDCTL_LOCAL_TAR_GZ"
-tar -xzf "$NDCTL_LOCAL_TAR_GZ" -C "$NDCTL_LOCAL_DIR" --strip-components=1
-
-# go to ndctl directory and build ndctl library
-cd "$NDCTL_LOCAL_DIR"
-./autogen.sh
-./configure --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib
-make -j "$(nproc)"
-sudo make -j "$(nproc)" install
-
 # update shared library cache
 sudo ldconfig
 # return to previous directory
 cd -
+rm -rf $HOME/ndctl

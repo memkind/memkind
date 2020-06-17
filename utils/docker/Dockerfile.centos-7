@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (C) 2020 Intel Corporation.
+
+# Pull base image
+FROM centos:7
+
+LABEL maintainer="katarzyna.wasiuta@intel.com"
+
+# Update the yum cache and install basic tools
+RUN yum install -y epel-release
+RUN yum update -y && yum install -y \
+    autoconf \
+    automake \
+    bash-completion \
+    ca-certificates \
+    expect \
+    gcc-c++ \
+    git \
+    glibc \
+    json-c-devel \
+    keyutils-libs-devel \
+    kmod-devel \
+    libtool \
+    libudev-devel \
+    libuuid-devel \
+    make \
+    numactl \
+    numactl-devel \
+    pkgconfig \
+    python-pip \
+    rpmdevtools \
+    rpm-build \
+    rubygem-asciidoctor \
+    sudo \
+    systemd \
+    which \
+    whois \
+    xmlto \
+ && yum clean all
+
+# Install pytest
+RUN pip install --upgrade pip
+RUN pip install wheel
+RUN pip install pytest==3.9.2
+
+# Add user
+ENV USER memkinduser
+ENV USERPASS memkindpass
+RUN useradd -m $USER -p $USERPASS
+RUN gpasswd wheel -a $USER
+RUN echo '%wheel ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Create directory for memkind repository
+WORKDIR /home/$USER/memkind
+
+# Allow user to create files in the home directory
+RUN chown -R $USER:wheel /home/$USER
+
+# Change user to $USER
+USER $USER
