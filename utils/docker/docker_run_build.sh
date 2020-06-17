@@ -26,7 +26,7 @@ make -j "$(nproc --all)"
 make -j "$(nproc --all)" checkprogs
 
 # building RPM package
-if [[ $(cat /etc/os-release) = *"Fedora"* ]]; then
+if [[ $(cat /etc/os-release) = *"fedora"* ]]; then
     make -j "$(nproc --all)" rpm
 fi
 

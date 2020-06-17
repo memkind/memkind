@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (C) 2020 Intel Corporation.
+
+# Pull base image
+FROM centos:7
+
+LABEL maintainer="katarzyna.wasiuta@intel.com"
+
+# Update the dnf cache and install basic tools
+RUN yum update -y && yum install -y \
+    autoconf \
+    automake \
+    epel-release \
+    expect \
+    gcc-c++ \
+    git \
+    libtool \
+    make \
+    numactl \
+    numactl-devel \
+    pkgconfig \
+    python-pip \
+    rpm-build \
+    sudo \
+    systemd \
+    which \
+    whois \
+ && yum clean all
+
+# Install daxctl 67
+ENV DAXCTL_LIBS_URL="http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/daxctl-libs-67-2.el8.x86_64.rpm"
+ENV DAXCTL_DEV_URL="http://mirror.centos.org/centos/8/AppStream/x86_64/os/Packages/daxctl-devel-67-2.el8.x86_64.rpm"
+RUN rpm -i --nosignature $DAXCTL_LIBS_URL $DAXCTL_DEV_URL
+
+# Add user
+ENV USER memkinduser
+ENV USERPASS memkindpass
+RUN useradd -m $USER
+RUN gpasswd wheel -a $USER
+RUN echo '%wheel ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Create directory for memkind repository
+WORKDIR /home/$USER/memkind
+
+# Allow user to create files in the home directory
+RUN chown -R $USER:wheel /home/$USER
+
+# Change user to $USER
+USER $USER

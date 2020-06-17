@@ -540,6 +540,7 @@ test/trace_mechanism_test.py
 test/trace_mechanism_test_helper.c
 test/trial_generator.cpp
 test/trial_generator.h
+utils/docker/Dockerfile.centos-7
 utils/docker/Dockerfile.fedora-31
 utils/docker/Dockerfile.ubuntu-18.04
 utils/docker/README.md
