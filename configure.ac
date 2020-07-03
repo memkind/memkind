@@ -183,7 +183,7 @@ AC_ARG_ENABLE([daxctl],
 [if test "x$enable_daxctl" = "xno" ; then
   enable_daxctl="0"
 else
-  enable_daxctl="1"
+  enable_daxctl="2"
 fi
 ],
 [enable_daxctl="1"]
@@ -191,6 +191,10 @@ fi
 if test "x$enable_daxctl" = "x1" ; then
     AC_CHECK_LIB(daxctl, daxctl_dev_get_memory, [daxctl_kmem=yes], [daxctl_kmem=no])
 fi
+if test "x$enable_daxctl" = "x2" ; then
+    AC_CHECK_LIB(daxctl, daxctl_dev_get_memory, [daxctl_kmem=yes], [AC_MSG_ERROR([libdaxctl-devel v66 or later is required dependency])])
+fi
+
 if test $daxctl_kmem = "yes" ; then
     AC_DEFINE([MEMKIND_DAXCTL_KMEM], [1], [Automatic recognition of PMEM as system memory in MEMKIND_DAX_KMEM])
     AC_SUBST(DAXCTL_LIBS, [-ldaxctl])
