@@ -857,17 +857,6 @@ int memkind_arena_enable_background_threads(size_t threads_limit)
     return err;
 }
 
-#define DEST_SLAB_END(begin, size) ((uintptr_t)begin+ (uintptr_t)size)
-
-struct mem_util_stats {
-    void *target_slab;      // address of the slab of a potential realloaction would go to ( NULL in case of large/huge allocation)
-    size_t nfree;           // number of free regions in the slab
-    size_t nregs;           // number of regions in the slab
-    size_t slab_size;       // size of the slab in bytes
-    size_t bin_nfree;       // total number of free regions in the bin the slab belongs to
-    size_t bin_nregs;       // total number of regions in the bin the slab belongs to
-};
-
 void *memkind_arena_defrag_reallocate_with_kind_detect (void *ptr)
 {
     return memkind_arena_defrag_reallocate(memkind_detect_kind(ptr), ptr);
@@ -879,23 +868,7 @@ void *memkind_arena_defrag_reallocate(struct memkind *kind, void *ptr)
         return NULL;
     }
 
-    size_t out_sz = sizeof(struct mem_util_stats);
-    struct mem_util_stats out;
-    int err = jemk_mallctl("experimental.utilization.query", &out, &out_sz, &ptr,
-                           sizeof(ptr));
-    if (err) {
-        log_err("Error on get utilization query");
-        return NULL;
-    }
-
-    // Check if input pointer resides outside of potential reallocation slab
-    // Check if occupied regions inside the slab are below average occupied regions inside bin
-    // Check if there are some free regions in the destination slab
-    if (out.target_slab &&
-        ((ptr < out.target_slab) ||
-         (uintptr_t)ptr > DEST_SLAB_END(out.target_slab, out.slab_size)) &&
-        out.nfree * out.bin_nregs >= out.nregs * out.bin_nfree &&
-        out.nfree != 0) {
+    if (!jemk_check_reallocatex(ptr)) {
         size_t size = memkind_malloc_usable_size(kind, ptr);
         void *ptr_new = memkind_arena_malloc_no_tcache(kind, size);
         if (MEMKIND_UNLIKELY(!ptr_new)) return NULL;

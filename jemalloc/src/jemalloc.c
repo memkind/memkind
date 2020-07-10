@@ -3776,6 +3776,71 @@ label_return:
 	return ret;
 }
 
+JEMALLOC_EXPORT int JEMALLOC_NOTHROW
+je_check_reallocatex(const void *ptr) {
+	int ret;
+	tsdn_t *tsdn;
+	size_t nfree, nregs, size, bin_slabs, bin_regs;
+	void *slabcur_addr;
+
+	LOG("core.check_reallocatex.entry", "ptr: %p", ptr);
+
+	tsdn = tsdn_fetch();
+	check_entry_exit_locking(tsdn);
+	const extent_t *extent = iealloc(tsdn, ptr);
+	if (unlikely(extent == NULL)) {
+		ret = 1;
+		goto label_return;
+	}
+
+	if (!extent_slab_get(extent)) {
+		ret = 1;
+		goto label_return;
+	}
+
+	size = extent_size_get(extent);
+	nfree = extent_nfree_get(extent);
+	const szind_t szind = extent_szind_get(extent);
+	nregs = bin_infos[szind].nregs;
+	assert(nfree <= nregs);
+	assert(nfree * extent_usize_get(extent) <= size);
+
+	const arena_t *arena = extent_arena_get(extent);
+	assert(arena != NULL);
+	const unsigned binshard = extent_binshard_get(extent);
+	bin_t *bin = &arena->bins[szind].bin_shards[binshard];
+
+	malloc_mutex_lock(tsdn, &bin->lock);
+	extent_t *slab;
+	if (bin->slabcur != NULL) {
+		slab = bin->slabcur;
+		assert(bin->stats.curslabs);
+		bin_slabs = bin->stats.curslabs - 1;
+		assert(bin->stats.curregs + extent_nfree_get(slab) >= nregs);
+		bin_regs = bin->stats.curregs + extent_nfree_get(slab) - nregs;
+	} else {
+		slab = extent_heap_first(&bin->slabs_nonfull);
+		bin_slabs = bin->stats.curslabs;
+		bin_regs = bin->stats.curregs;
+	}
+	slabcur_addr = slab != NULL ? extent_addr_get(slab) : NULL;
+	malloc_mutex_unlock(tsdn, &bin->lock);
+	if (slabcur_addr &&
+		((ptr < slabcur_addr) ||
+		(uintptr_t)ptr > ((uintptr_t)slabcur_addr) + (uintptr_t)size) &&
+		bin_regs >= (nregs - nfree) * bin_slabs &&
+		nfree != 0) {
+		ret = 0;
+	} else {
+		ret = 1;
+	}
+
+label_return:
+	check_entry_exit_locking(tsdn);
+	LOG("core.check_reallocatex.exit", "result: %d", ret);
+	return ret;
+}
+
 /*
  * End non-standard functions.
  */
