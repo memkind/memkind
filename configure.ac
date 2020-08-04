@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
@@ -204,6 +204,23 @@ if test "$MIN_LG_ALIGN" != "" ; then
 fi
 
 AC_SUBST(min_lg_align_opt)
+
+#============================memkind-initial-exec-tls=====================================
+AC_ARG_ENABLE([memkind-initial-exec-tls],
+  [AS_HELP_STRING([--enable-memkind-initial-exec-tls], [Build library with initial-exec-tls support])],
+[if test "x$enable_memkind_initial_exec_tls" = "xno" ; then
+  enable_memkind_initial_exec_tls="0"
+else
+  enable_memkind_initial_exec_tls="1"
+fi
+],
+[enable_memkind_initial_exec_tls="0"]
+)
+if test "x$enable_memkind_initial_exec_tls" = "x0" ; then
+  memkind_initial_exec_tls=--disable-initial-exec-tls;
+fi
+
+AC_SUBST(memkind_initial_exec_tls)
 
 #===============================daxctl=========================================
 AC_ARG_ENABLE([daxctl],
