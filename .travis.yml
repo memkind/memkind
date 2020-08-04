@@ -45,17 +45,17 @@ matrix:
       script:
         - ./build.sh
 
-    - name: "Clang 8"
+    - name: "Clang 10"
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-bionic-8
+            - llvm-toolchain-bionic-10
           packages:
-            - clang-8
+            - clang-10
             - libnuma-dev
       env:
-        - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
+        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
       install:
       script:
         - ./build.sh
