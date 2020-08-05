@@ -31,31 +31,31 @@ matrix:
       script:
         - ./build.sh
 
-    - name: "GCC 8.0"
+    - name: "GCC 9.0"
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-8
+            - g++-9
             - libnuma-dev
       env:
-         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+         - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
       install:
       script:
         - ./build.sh
 
-    - name: "Clang 8"
+    - name: "Clang 10"
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-bionic-8
+            - llvm-toolchain-bionic-10
           packages:
-            - clang-8
+            - clang-10
             - libnuma-dev
       env:
-        - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
+        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
       install:
       script:
         - ./build.sh
