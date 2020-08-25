@@ -173,7 +173,6 @@ void pmem_extent_destroy(extent_hooks_t *extent_hooks,
                          bool committed,
                          unsigned arena_ind)
 {
-    madvise(addr, size, MADV_REMOVE);
     if (munmap(addr, size) == -1) {
         log_err("munmap failed!");
     }
