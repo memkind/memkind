@@ -384,7 +384,7 @@ EXTRA_DIST = CONTRIBUTING \
              memkind.spec.mk \
              test/test.sh \
              test/test_dax_kmem.sh \
-             utils/docker/Dockerfile.fedora-31 \
+             utils/docker/Dockerfile.fedora-32 \
              utils/docker/Dockerfile.ubuntu-20.04 \
              utils/docker/README.md \
              utils/docker/docker_install_ndctl.sh \
