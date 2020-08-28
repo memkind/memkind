@@ -9,6 +9,7 @@
 #include <vector>
 #include <numa.h>
 #include <numaif.h>
+#include <unistd.h>
 
 trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
                                              size_t size,
@@ -72,7 +73,7 @@ void TrialGenerator :: generate_size_2bytes_2KB_2MB(alloc_api_t api)
             create_trial_tuple(
                 api,size[i],
                 32,
-                4096,
+                sysconf(_SC_PAGESIZE),
                 MEMKIND_HBW,
                 -1
             )
@@ -180,7 +181,7 @@ void TrialGenerator :: run(int num_bandwidth, std::vector<int> &bandwidth)
                 fprintf (stdout,"Allocating %zd bytes using hbw_memalign_psize\n",
                          trial_vec[i].size);
                 hbw_pagesize_t psize;
-                if (trial_vec[i].page_size == 4096)
+                if (trial_vec[i].page_size == (size_t)sysconf(_SC_PAGESIZE))
                     psize = HBW_PAGESIZE_4KB;
                 else if (trial_vec[i].page_size == 2097152)
                     psize = HBW_PAGESIZE_2MB;
