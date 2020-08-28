@@ -11,10 +11,8 @@ class DlopenTest: public :: testing::Test
 protected:
     DlopenTest()
     {
-        const char *path = "/usr/lib64/libmemkind.so";
-        if (!pathExists(path)) {
-            path = "/usr/lib/libmemkind.so";
-        }
+        const char *path = "libmemkind.so";
+
         dlerror();
         handle = dlopen(path, RTLD_LAZY);
         assert((handle != NULL && dlerror() == NULL) && "Couldn't open libmemkind.so");
