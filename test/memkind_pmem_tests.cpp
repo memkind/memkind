@@ -271,14 +271,14 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeMemoryAfterDestroyLargeClass)
 {
     memkind_t pmem_kind_test;
     struct statfs st;
-    double blocksAvailable;
+    double blocksInitial, blocksBeforeDestroy, blocksAfterDestroy;
 
     int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_test);
     ASSERT_EQ(0, err);
     ASSERT_NE(nullptr, pmem_kind_test);
 
     ASSERT_EQ(0, statfs(PMEM_DIR, &st));
-    blocksAvailable = st.f_bfree;
+    blocksInitial = st.f_bfree;
 
     while(1) {
         if (memkind_malloc(pmem_kind_test, 16 * KB) == nullptr)
@@ -286,40 +286,44 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeMemoryAfterDestroyLargeClass)
     }
 
     ASSERT_EQ(0, statfs(PMEM_DIR, &st));
-    ASSERT_GT(blocksAvailable, st.f_bfree);
+    blocksBeforeDestroy = st.f_bfree;
+    ASSERT_GT(blocksInitial, blocksBeforeDestroy);
 
     err = memkind_destroy_kind(pmem_kind_test);
     ASSERT_EQ(0, err);
 
     ASSERT_EQ(0, statfs(PMEM_DIR, &st));
-    ASSERT_NEAR(blocksAvailable, st.f_bfree, 1);
+    blocksAfterDestroy = st.f_bfree;
+    ASSERT_GT(blocksAfterDestroy, blocksBeforeDestroy);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeMemoryAfterDestroySmallClass)
 {
     memkind_t pmem_kind_test;
     struct statfs st;
-    double blocksAvailable;
+    double blocksInitial, blocksBeforeDestroy, blocksAfterDestroy;
 
     int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_test);
     ASSERT_EQ(0, err);
     ASSERT_NE(nullptr, pmem_kind_test);
 
     ASSERT_EQ(0, statfs(PMEM_DIR, &st));
-    blocksAvailable = st.f_bfree;
+    blocksInitial = st.f_bfree;
 
     for(int i = 0; i < 100; ++i) {
         ASSERT_NE(memkind_malloc(pmem_kind_test, 32), nullptr);
     }
 
     ASSERT_EQ(0, statfs(PMEM_DIR, &st));
-    ASSERT_GT(blocksAvailable, st.f_bfree);
+    blocksBeforeDestroy = st.f_bfree;
+    ASSERT_GT(blocksInitial, blocksBeforeDestroy);
 
     err = memkind_destroy_kind(pmem_kind_test);
     ASSERT_EQ(0, err);
 
     ASSERT_EQ(0, statfs(PMEM_DIR, &st));
-    ASSERT_NEAR(blocksAvailable, st.f_bfree, 1);
+    blocksAfterDestroy = st.f_bfree;
+    ASSERT_GT(blocksAfterDestroy, blocksBeforeDestroy);
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemRealloc)
