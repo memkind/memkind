@@ -262,6 +262,7 @@ inline static void cpuid_asm(int leaf, int subleaf, registers_t *registers)
 #define CPU_MODEL_KNM           (0x85)
 #define CPU_FAMILY_INTEL        (0x06)
 
+#ifdef __x86_64__
 typedef struct {
     uint32_t model;
     uint32_t family;
@@ -286,12 +287,18 @@ static bool is_hbm_supported(cpu_model_data_t cpu)
     return cpu.family == CPU_FAMILY_INTEL &&
            (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
 }
+#endif // __x86_64__
 
 static int get_high_bandwidth_nodes(struct bitmask *hbw_node_mask)
 {
     int nodes_num = numa_num_configured_nodes();
     // Check if NUMA configuration is supported.
+
+#ifdef __x86_64__
     if(nodes_num == 2 || nodes_num == 4 || nodes_num == 8) {
+#elif defined(__aarch64__)
+    if(nodes_num >= 2) {
+#endif
         struct bitmask *node_cpus = numa_allocate_cpumask();
 
         assert(hbw_node_mask->size >= nodes_num);
@@ -318,6 +325,7 @@ static int get_high_bandwidth_nodes(struct bitmask *hbw_node_mask)
 ///This function tries to fill bandwidth array based on knowledge about known CPU models
 static int fill_bandwidth_values_heuristically(int *bandwidth)
 {
+#ifdef __x86_64__
     cpu_model_data_t cpu = get_cpu_model_data();
 
     if(!is_hbm_supported(cpu)) {
@@ -337,7 +345,19 @@ static int fill_bandwidth_values_heuristically(int *bandwidth)
         default:
             return MEMKIND_ERROR_UNAVAILABLE;
     }
+
+#elif defined(__aarch64__)
+    int ret = bandwidth_fill(bandwidth, get_high_bandwidth_nodes);
+
+    if(ret == 0) {
+        log_info("Detected High Bandwidth Memory.");
+    }
+    return ret;
+#else
+    return MEMKIND_ERROR_UNAVAILABLE;
+#endif
 }
+
 static void memkind_hbw_closest_numanode_init(void)
 {
     struct hbw_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
