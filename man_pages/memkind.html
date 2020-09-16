@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Dec 17 09:26:36 2019 -->
+<!-- CreationDate: Wed Sep 16 10:45:04 2020 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -276,7 +276,7 @@ TBB 2019 Update 4.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_defrag_reallocate</b>()
-reallocates the object conditonally inside specific
+reallocates the object conditionally inside specific
 <i>kind</i>. Function determines if it&rsquo;s worthwhile to
 move allocation to reduce degree of external fragmentation
 of the heap. In case of failure function returns
@@ -1011,7 +1011,14 @@ with regards to returning memory to underlying OS. Setting
 <b>MEMKIND_HOG_MEMORY</b> to 1 causes memkind to not release
 memory to OS in anticipation of memory reuse soon. This will
 improve latency of &rsquo;free&rsquo; operations but
-increase memory usage.</p>
+increase memory usage. <b>Note:</b> For file-backed kind
+memory will be released to OS only after calling
+<b>memkind_destroy_kind(),</b> not after &rsquo;free&rsquo;
+operations. In context of
+<b>MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE</b> memory usage
+policy - it will also impact memory coalescing and results
+that blocks pages will be often reused (better memory usage
+at cost of performance).</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_DEBUG</b></p>
 
@@ -1099,7 +1106,7 @@ extra huge pages (e.g. 8 huge pages).</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright (C)
-2014 - 2019 Intel Corporation. All rights reserved.</p>
+2014 - 2020 Intel Corporation. All rights reserved.</p>
 
 <h2>SEE ALSO
 <a name="SEE ALSO"></a>
