@@ -21,7 +21,7 @@ class Test_hbw_detection(object):
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         assert retcode == 0, self.fail_msg.format("\nError: Execution of \'{0}\' returns {1}, \noutput: {2}".format(command, retcode, output))
         print("\nExecution of {} returns output {}".format(command, output))
-        return output
+        return output.decode("utf-8")
 
     def test_TC_MEMKIND_hbw_detection_compare_nodemask_default_and_env_variable(self):
         """ This test checks whether hbw_nodemask_default and hbw_nodemask_env_variable has the same value """
@@ -36,5 +36,5 @@ class Test_hbw_detection(object):
         command = "MEMKIND_HBW_NODES=-1 " + self.cmd_helper.get_command_path(self.environ_err_test)
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         assert retcode != 0, self.fail_msg.format("\nError: Execution of: \'{0}\' returns: {1} \noutput: {2}".format(command, retcode, output))
-        assert self.expected_libnuma_warning == output, self.fail_msg.format("Error: expected libnuma warning ({0}) " \
+        assert self.expected_libnuma_warning == output.decode("utf-8"), self.fail_msg.format("Error: expected libnuma warning ({0}) " \
                "was not found (output: {1})").format(self.expected_libnuma_warning, output)

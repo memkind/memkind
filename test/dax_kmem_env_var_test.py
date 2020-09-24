@@ -22,7 +22,7 @@ class Test_dax_kmem_env_var(object):
         output, retcode = self.cmd_helper.execute_cmd(command)
         assert retcode == 0, self.fail_msg.format("\nError: Execution of \'{0}\' returns {1}, \noutput: {2}".format(command, retcode, output))
         print("\nExecution of {} returns output {}".format(command, output))
-        return output
+        return output.decode("utf-8")
 
     def test_TC_MEMKIND_dax_kmem_env_var_compare_nodemask_default_and_env_variable(self):
         """ This test checks whether dax_kmem_nodemask_default and dax_kmem_nodemask_env_variable have the same value """
@@ -36,7 +36,7 @@ class Test_dax_kmem_env_var(object):
         command = "MEMKIND_DAX_KMEM_NODES=-1 " + self.cmd_helper.get_command_path(self.environ_err_test)
         output, retcode = self.cmd_helper.execute_cmd(command)
         assert retcode != 0, self.fail_msg.format("\nError: Execution of: \'{0}\' returns: {1} \noutput: {2}".format(command, retcode, output))
-        assert self.expected_libnuma_warning == output, self.fail_msg.format("Error: expected libnuma warning ({0}) " \
+        assert self.expected_libnuma_warning == output.decode("utf-8"), self.fail_msg.format("Error: expected libnuma warning ({0}) " \
                "was not found (output: {1})").format(self.expected_libnuma_warning, output)
 
     def test_TC_MEMKIND_dax_kmem_env_var_proper_memkind_malloc(self):
