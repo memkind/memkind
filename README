@@ -188,80 +188,17 @@ To use the PMEM kind, please be sure that filesystem which is used for PMEM crea
 
 * **Device DAX**
 
-To use MEMKIND_DAX_KMEM_* kinds you need at least Linux Kernel 5.1 (with enabled DEV_DAX_KMEM Kernel option) and created DAX device.
-If you have loaded dax_pmem_compat module instead of dax_pmem, please read
-[this](https://pmem.io/ndctl/daxctl-migrate-device-model.html) article and migrate device model
-to use alternative device dax drivers, e.g. kmem.
+To use MEMKIND_DAX_KMEM_* kinds, you need at least Linux Kernel 5.1 (with enabled DEV_DAX_KMEM Kernel option), which contains
+following changes:
+* [patch1](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b926b7f3baecb2a855db629e6822e1a85212e91c)
+* [patch2](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2794129e902d8eb69413d884dc6404b8716ed9ed)
+* [patch3](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2b539aefe9e48e3908cff02699aa63a8b9bd268e)
+* [patch4](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c221c0b0308fd01d9fb33a16f64d2fd95f8830a4)
+* [patch5](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=31e4ca92a7dd4cdebd7fe1456b3b0b6ace9a816f)
+* [patch6](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=9f960da72b25054163cf555e622dcdc3b8ccc488)
 
-If you want to migrate device model type:
+and created DAX device. See [article](https://pmem.io/2020/01/20/memkind-dax-kmem.html) for details.
 
-    daxctl migrate-device-model
-
-To create a new DAX device you can type:
-
-    ndctl create-namespace --mode=devdax --map=mem
-
-To display a list of created devices:
-
-    ndctl list
-
-If you have already created device in another mode, you can reconfigure the device using:
-
-    ndctl create-namespace --mode=devdax --map=mem --force -e namespaceX.Y
-
-Where namespaceX.Y means namespace you want to reconfigure.
-
-For more details about creating new namespace read [this](https://pmem.io/ndctl/ndctl-create-namespace.html).
-
-Conversion from device dax to NUMA node can be performed using following commands:
-
-    daxctl reconfigure-device daxX.Y --mode=system-ram
-
-Where daxX.Y is DAX device you want to reconfigure.
-
-This will migrate device from device_dax to kmem driver. After this step daxctl should be able to
-see devices in system-ram mode:
-
-    daxctl list
-
-Example output after reconfigure dax2.0 as system-ram:
-
-    [
-      {
-        "chardev":"dax1.0",
-        "size":263182090240,
-        "target_node":3,
-        "mode":"devdax"
-      },
-      {
-        "chardev":"dax2.0",
-        "size":263182090240,
-        "target_node":4,
-        "mode":"system-ram"
-      }
-    ]
-
-Also you should be able to check new NUMA node configuration by:
-
-    numactl -H
-
-Example output, where NUMA node 4 is NUMA node created from persistent memory:
-
-    available: 3 nodes (0-1,4)
-    node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83
-    node 0 size: 192112 MB
-    node 0 free: 185575 MB
-    node 1 cpus: 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111
-    node 1 size: 193522 MB
-    node 1 free: 193107 MB
-    node 4 cpus:
-    node 4 size: 250880 MB
-    node 4 free: 250879 MB
-    node distances:
-    node   0   1   4
-      0:  10  21  17
-      1:  21  10  28
-      4:  17  28  10
 
 ## NVDIMM volatile usage
 
