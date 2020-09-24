@@ -26,8 +26,8 @@ class Test_dax_kmem_env_var(object):
 
     def test_TC_MEMKIND_dax_kmem_env_var_compare_nodemask_default_and_env_variable(self):
         """ This test checks whether dax_kmem_nodemask_default and dax_kmem_nodemask_env_variable have the same value """
-        dax_kmem_nodemask_default = self.get_dax_kmem_nodes()
-        dax_kmem_nodemask_env_variable = self.get_dax_kmem_nodes(dax_kmem_nodemask_default)
+        dax_kmem_nodemask_default = self.get_dax_kmem_nodes().decode("utf-8")
+        dax_kmem_nodemask_env_variable = self.get_dax_kmem_nodes(dax_kmem_nodemask_default).decode("utf-8")
         assert dax_kmem_nodemask_default == dax_kmem_nodemask_env_variable, self.fail_msg.format("Error: Nodemask dax_kmem_nodemask_default ({0}) " \
                "is not the same as nodemask dax_kmem_nodemask_env_variable ({1})".format(dax_kmem_nodemask_default, dax_kmem_nodemask_env_variable))
 
@@ -36,12 +36,12 @@ class Test_dax_kmem_env_var(object):
         command = "MEMKIND_DAX_KMEM_NODES=-1 " + self.cmd_helper.get_command_path(self.environ_err_test)
         output, retcode = self.cmd_helper.execute_cmd(command)
         assert retcode != 0, self.fail_msg.format("\nError: Execution of: \'{0}\' returns: {1} \noutput: {2}".format(command, retcode, output))
-        assert self.expected_libnuma_warning == output, self.fail_msg.format("Error: expected libnuma warning ({0}) " \
+        assert self.expected_libnuma_warning == output.decode("utf-8"), self.fail_msg.format("Error: expected libnuma warning ({0}) " \
                "was not found (output: {1})").format(self.expected_libnuma_warning, output)
 
     def test_TC_MEMKIND_dax_kmem_env_var_proper_memkind_malloc(self):
         """ This test checks if allocation is performed on persistent memory correctly """
-        dax_kmem_nodemask_default = self.get_dax_kmem_nodes().strip()
+        dax_kmem_nodemask_default = self.get_dax_kmem_nodes().strip().decode("utf-8")
         command = "MEMKIND_DAX_KMEM_NODES={} ".format(dax_kmem_nodemask_default) + self.cmd_helper.get_command_path(self.environ_err_positive_test)
         output, retcode = self.cmd_helper.execute_cmd(command)
         assert retcode == 0, self.fail_msg.format("\nError: Execution of: \'{0}\' returns: {1} \noutput: {2}".format(command, retcode, output))
