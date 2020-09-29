@@ -31,16 +31,16 @@ matrix:
       script:
         - ./build.sh
 
-    - name: "GCC 9.0"
+    - name: "GCC 10.0"
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-9
+            - g++-10
             - libnuma-dev
       env:
-         - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+         - MATRIX_EVAL="CC=gcc-10 && CXX=g++-10"
       install:
       script:
         - ./build.sh
