@@ -26,7 +26,7 @@ class CMD_helper(object):
             #Make sure the file is closed
             outfile.close()
         retcode = p.returncode
-        return stdout, retcode
+        return stdout.decode("utf-8"), retcode
 
     def get_command_path(self, binary):
         """Get the path to the binary."""
