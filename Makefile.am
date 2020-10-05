@@ -394,6 +394,9 @@ EXTRA_DIST = CONTRIBUTING \
              utils/docker/docker_run_test.sh \
              utils/docker/run_local.sh \
              utils/docker/set_host_configuration.sh \
+            utils/memkind_malloc_wrapper/README.md \
+            utils/memkind_malloc_wrapper/memkind_malloc_wrapper_test.c \
+            utils/memkind_malloc_wrapper/memkind_malloc_wrapper_test.sh
              # end
 
 dist_doc_DATA = COPYING README VERSION
@@ -503,3 +506,4 @@ include autohbw/Makefile.mk
 include test/Makefile.mk
 include examples/Makefile.mk
 include src/Makefile.mk
+include utils/memkind_malloc_wrapper/Makefile.mk
