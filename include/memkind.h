@@ -407,6 +407,14 @@ void memkind_free(memkind_t kind, void *ptr);
 ///
 void *memkind_defrag_reallocate(memkind_t kind, void *ptr);
 
+///
+/// \brief Verify if path points to DAX-enabled file system
+/// \note STANDARD API
+/// \param path path to specified directory for PMEM kind
+/// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
+///
+int memkind_path_is_pmem(const char *pmem_dir);
+
 #ifdef __cplusplus
 }
 #endif

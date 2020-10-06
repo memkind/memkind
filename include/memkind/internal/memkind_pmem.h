@@ -28,6 +28,7 @@ int memkind_pmem_destroy(struct memkind *kind);
 void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size);
 int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags);
 int memkind_pmem_create_tmpfile(const char *dir, int *fd);
+int memkind_pmem_validate_dir(const char *dir);
 
 struct memkind_pmem {
     int fd;
