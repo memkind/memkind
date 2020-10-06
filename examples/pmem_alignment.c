@@ -35,6 +35,13 @@ int main(int argc, char *argv[])
             "This example shows how to use memkind alignment and how it affects allocations.\nPMEM kind directory: %s\n",
             path);
 
+    int status = memkind_path_is_pmem(path);
+    if (!status) {
+        fprintf(stdout, "PMEM kind %s is on DAX-enabled File system.\n", path);
+    } else {
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled File system.\n", path);
+    }
+
     err = memkind_create_pmem(path, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
         print_err_message(err);

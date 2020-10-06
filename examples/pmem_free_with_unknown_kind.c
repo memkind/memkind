@@ -37,6 +37,13 @@ int main(int argc, char **argv)
     fprintf(stdout,
             "This example shows how to use memkind_free with unknown kind as a parameter.\n");
 
+    int status = memkind_path_is_pmem(path);
+    if (!status) {
+        fprintf(stdout, "PMEM kind %s is on DAX-enabled File system.\n", path);
+    } else {
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled File system.\n", path);
+    }
+
     err = memkind_create_pmem(path, PMEM_PART_SIZE, &pmem_kind);
     if (err) {
         print_err_message(err);
