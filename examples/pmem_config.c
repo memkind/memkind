@@ -46,6 +46,12 @@ int main(int argc, char *argv[])
     memkind_config_set_memory_usage_policy(test_cfg,
                                            MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
 
+    int status = memkind_path_is_dax(path);
+    if (!status) {
+        fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
+    } else {
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+    }
 
     // Create PMEM partition with specific configuration
     err =  memkind_create_pmem_with_config(test_cfg, &pmem_kind);

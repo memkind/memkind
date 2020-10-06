@@ -86,6 +86,13 @@ void *thread_ind(void *arg)
         return NULL;
     }
 
+    int status = memkind_path_is_dax(path);
+    if (!status) {
+        fprintf(stdout, "PMEM kind %s is on DAX-enabled File system.\n", path);
+    } else {
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled File system.\n", path);
+    }
+
     int err = memkind_create_pmem(path, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {
         print_err_message(err);

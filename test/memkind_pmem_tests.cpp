@@ -86,6 +86,32 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreatePmemFailNonExistingDirectory)
     ASSERT_EQ(ENOENT, errno);
 }
 
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemIsDaxNonExistingPath)
+{
+    const char *non_existing_directory = "/temp/non_exisitng_directory";
+    errno = 0;
+    int err = memkind_path_is_dax(non_existing_directory);
+    ASSERT_EQ(MEMKIND_ERROR_RUNTIME, err);
+    ASSERT_EQ(ENOENT, errno);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemIsDaxFailNonDaxPath)
+{
+    const char *non_dax_directory = "/tmp/";
+    errno = 0;
+    int err = memkind_path_is_dax(non_dax_directory);
+    ASSERT_EQ(MEMKIND_ERROR_MMAP, err);
+    ASSERT_EQ(EOPNOTSUPP, errno);
+}
+
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemIsDaxSuccess)
+{
+    errno = 0;
+    int err = memkind_path_is_dax(PMEM_DIR);
+    ASSERT_EQ(MEMKIND_SUCCESS, err);
+    ASSERT_EQ(0, errno);
+}
+
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocFragmentation)
 {
     const size_t size_array[] = {

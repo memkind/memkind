@@ -40,6 +40,13 @@ int main(int argc, char *argv[])
             "and persistent memory NUMA node (MEMKIND_DAX_KMEM).\nPMEM kind directory: %s\n",
             path);
 
+    int status = memkind_path_is_dax(path);
+    if (!status) {
+        fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
+    } else {
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+    }
+
     err = memkind_create_pmem(path, 0, &pmem_kind);
     if (err) {
         print_err_message(err);
