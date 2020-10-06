@@ -894,3 +894,8 @@ MEMKIND_EXPORT int memkind_get_stat(memkind_t kind, memkind_stat_type stat,
         return kind->ops->get_stat(kind, stat, value);
     }
 }
+
+MEMKIND_EXPORT int memkind_check_dax_path(const char *pmem_dir)
+{
+    return memkind_pmem_validate_dir(pmem_dir);
+}

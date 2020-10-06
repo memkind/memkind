@@ -35,6 +35,13 @@ int main(int argc, char *argv[])
             "This example shows how to allocate memory and possibility to exceed pmem kind size."
             "\nPMEM kind directory: %s\n", path);
 
+    int status = memkind_check_dax_path(path);
+    if (!status) {
+        fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
+    } else {
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+    }
+
     // Create PMEM partition with specific size
     err = memkind_create_pmem(path, PMEM_MAX_SIZE, &pmem_kind);
     if (err) {

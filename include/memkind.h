@@ -407,6 +407,14 @@ void memkind_free(memkind_t kind, void *ptr);
 ///
 void *memkind_defrag_reallocate(memkind_t kind, void *ptr);
 
+///
+/// \brief Verifies if file-backed memory kind in the specified directory can be created with the DAX attribute
+/// \note STANDARD API
+/// \param path path to specified directory for PMEM kind
+/// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
+///
+int memkind_check_dax_path(const char *pmem_dir);
+
 #ifdef __cplusplus
 }
 #endif
