@@ -129,6 +129,12 @@ int main(int argc, char *argv[])
             fprintf(stderr,"%s : Invalid path to pmem kind directory\n", argv[1]);
             return 1;
         }
+        int status = memkind_path_is_pmem(argv[1]);
+        if (!status) {
+            std::cout << "PMEM kind %s is on DAX-enabled File system.\n" << std::endl;
+        } else {
+            std::cout << "PMEM kind %s is not on DAX-enabled File system.\n" << std::endl;
+        }
         pmem_directory = argv[1];
     }
 

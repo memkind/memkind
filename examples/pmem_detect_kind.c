@@ -93,6 +93,13 @@ int main(int argc, char *argv[])
             "This example shows how to distinguish allocation from different kinds using detect kind function"
             "\nPMEM kind directory: %s\n", path);
 
+    int status = memkind_path_is_pmem(path);
+    if (!status) {
+        fprintf(stdout, "PMEM kind %s is on DAX-enabled File system.\n", path);
+    } else {
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled File system.\n", path);
+    }
+
     err = memkind_create_pmem(path, 0, &pmem_kind);
     if (err) {
         print_err_message(err);

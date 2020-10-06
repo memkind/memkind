@@ -13,6 +13,15 @@
 #include <assert.h>
 #include <signal.h>
 #include <string.h>
+
+#ifndef MAP_SYNC
+#define MAP_SYNC 0x80000
+#endif
+
+#ifndef MAP_SHARED_VALIDATE
+#define MAP_SHARED_VALIDATE 0x03
+#endif
+
 MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
     .create = memkind_pmem_create,
     .destroy = memkind_pmem_destroy,
@@ -197,7 +206,7 @@ int memkind_pmem_create_tmpfile(const char *dir, int *fd)
     int dir_len = strlen(dir);
 
     if (dir_len > PATH_MAX) {
-        log_err("Could not create temporary file: too long path.");
+        log_err("Could not create temporary file: too long pmem_dir.");
         return MEMKIND_ERROR_INVALID;
     }
 
@@ -347,4 +356,34 @@ MEMKIND_EXPORT int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_SHARED;
     return 0;
+}
+
+int memkind_pmem_validate_dir(const char *dir)
+{
+    int ret = MEMKIND_SUCCESS;
+    int fd = -1;
+    const size_t size = sysconf(_SC_PAGESIZE);
+
+    int err = memkind_pmem_create_tmpfile(dir, &fd);
+
+    if (err) {
+        return MEMKIND_ERROR_RUNTIME;
+    }
+
+    if (ftruncate(fd, size) != 0) {
+        ret = MEMKIND_ERROR_RUNTIME;
+        goto end;
+    }
+
+    void *addr = mmap(NULL, size, PROT_READ | PROT_WRITE,
+                      MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
+    if (addr == MAP_FAILED) {
+        ret = MEMKIND_ERROR_MMAP;
+        goto end;
+    }
+    munmap(addr, size);
+
+end:
+    (void)close(fd);
+    return ret;
 }
