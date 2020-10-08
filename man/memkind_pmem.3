@@ -17,6 +17,8 @@ This is EXPERIMENTAL API. The functionality and the header file itself can be ch
 .br
 .BI "int memkind_pmem_get_mmap_flags(struct memkind " "*kind" ", int " "*flags" );
 .br
+.BI "int memkind_pmem_validate_dir(const char " "*dir" );
+.br
 .SH DESCRIPTION
 .PP
 The pmem memory memkind operations enable memory kinds built on memory-mapped
@@ -31,14 +33,12 @@ attributes, depending on the file system containing the memory-mapped files.
 (See also
 .IR http://pmem.io/pmdk/libvmem ).
 .PP
-The pmem memkinds are most useful when used with
-.I Direct Access
-storage (DAX), which is memory-addressable persistent storage
-that supports load/store access without being paged via the system page cache.
+The pmem kinds are most useful when used with DAX (direct mapping of persistent memory), which is memory-addressable
+persistent storage that supports load/store access without being paged via the system page cache.
 A Persistent Memory-aware file system is typically used to provide this
 type of access.
 .PP
-The most convenient way to create pmem memkinds is to use
+The most convenient way to create pmem kinds is to use
 .BR memkind_create_pmem ()
 or
 .BR memkind_create_pmem_with_config ()
@@ -77,6 +77,14 @@ to
 See
 .BR mmap (2)
 for more information about these flags.
+.PP
+.BR memkind_pmem_validate_dir ()
+returns zero if file created in specified
+.I pmem_dir
+supports DAX (direct mapping of persistent memory) or an error code from the
+.B ERRORS
+if
+not.
 .TP
 .B MEMKIND_PMEM_CHUNK_SIZE
 The size of the PMEM chunk size.

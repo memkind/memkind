@@ -69,6 +69,8 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .BI "int memkind_destroy_kind(memkind_t " "kind" );
 .br
 .BI "int memkind_check_available(memkind_t " "kind" );
+.br
+.BI "int memkind_check_dax_path(const char " "*pmem_dir" );
 .sp
 .B "STATISTICS:"
 .br
@@ -542,6 +544,13 @@ all allocated memory will be freed after kind will be destroyed.
 returns zero if the specified
 .I kind
 is available or an error code from the
+.B ERRORS
+section if it is not.
+.PP
+.BR memkind_check_dax_path ()
+retruns zero if file-backed kind memory in the specified directory path
+.I pmem_dir
+can be created with the DAX attribute or an error code from the
 .B ERRORS
 section if it is not.
 .PP
