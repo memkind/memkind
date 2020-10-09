@@ -460,7 +460,7 @@ static inline int get_tcache_flag(unsigned partition, size_t size)
 
     unsigned *tcache_map = pthread_getspecific(tcache_key);
     if(tcache_map == NULL) {
-        tcache_map = calloc(MEMKIND_NUM_BASE_KIND, sizeof(unsigned));
+        tcache_map = jemk_calloc(MEMKIND_NUM_BASE_KIND, sizeof(unsigned));
         if(tcache_map == NULL) {
             return MALLOCX_TCACHE_NONE;
         }
@@ -662,7 +662,7 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
     arena_tsd = pthread_getspecific(kind->arena_key);
 
     if (MEMKIND_UNLIKELY(arena_tsd == NULL)) {
-        arena_tsd = malloc(sizeof(unsigned int));
+        arena_tsd = jemk_malloc(sizeof(unsigned int));
         if (arena_tsd == NULL) {
             err = MEMKIND_ERROR_MALLOC;
             log_err("malloc() failed.");
