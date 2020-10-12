@@ -5,16 +5,16 @@ import pytest
 import os
 from python_framework import CMD_helper
 
-def _get_lib_path():
-    for p in ["/usr/lib64", "/usr/lib"]:
-        if os.path.isdir(p):
+def _get_libautohbw_path():
+    for p in ["/usr/lib64/libautohbw.so.0", "/usr/lib/libautohbw.so.0"]:
+        if os.path.isfile(p):
             return p
     raise Exception("Cannot find library path in OS")
 
 class Test_autohbw(object):
     binary = "../autohbw_test_helper"
     fail_msg = "Test failed with:\n {0}"
-    test_prefix = "AUTO_HBW_LOG=2 LD_PRELOAD=%s/libautohbw.so.0 " % _get_lib_path()
+    test_prefix = "AUTO_HBW_LOG=2 LD_PRELOAD=%s " % _get_libautohbw_path()
     memkind_malloc_log = "In my memkind malloc"
     memkind_calloc_log = "In my memkind calloc"
     memkind_realloc_log = "In my memkind realloc"
