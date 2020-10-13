@@ -246,7 +246,7 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
     struct memkind_pmem *priv;
     int err;
 
-    priv = (struct memkind_pmem *)malloc(sizeof(struct memkind_pmem));
+    priv = (struct memkind_pmem *)jemk_malloc(sizeof(struct memkind_pmem));
     if (!priv) {
         log_err("malloc() failed.");
         return MEMKIND_ERROR_MALLOC;
@@ -273,7 +273,7 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
 exit:
     /* err is set, please don't overwrite it with result of pthread_mutex_destroy */
     pthread_mutex_destroy(&priv->pmem_lock);
-    free(priv);
+    jemk_free(priv);
     return err;
 }
 
@@ -286,8 +286,8 @@ MEMKIND_EXPORT int memkind_pmem_destroy(struct memkind *kind)
     pthread_mutex_destroy(&priv->pmem_lock);
 
     (void) close(priv->fd);
-    free(priv->dir);
-    free(priv);
+    jemk_free(priv->dir);
+    jemk_free(priv);
 
     return 0;
 }
