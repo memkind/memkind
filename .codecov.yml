@@ -3,7 +3,13 @@ ignore:
   - "examples/autohbw*"
   - "examples/*example*"
   - "examples/memkind*"
+  - "src/tbb_wrapper.c"
   - "test/.*"
+  - "utils/.*"
+
+coverage:
+  range: "60...100"
+
 comment:
   layout: "diff"
   behaviour: default
