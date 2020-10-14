@@ -350,7 +350,7 @@ static void memkind_destroy_dynamic_kind_from_register(unsigned int i,
     if (i >= MEMKIND_NUM_BASE_KIND) {
         memkind_registry_g.partition_map[i] = NULL;
         --memkind_registry_g.num_kind;
-        free(kind);
+        jemk_free(kind);
     }
 }
 
@@ -520,7 +520,7 @@ static int memkind_create(struct memkind_ops *ops, const char *name,
             goto exit;
         }
     }
-    *kind = (struct memkind *)calloc(1, sizeof(struct memkind));
+    *kind = (struct memkind *)jemk_calloc(1, sizeof(struct memkind));
     if (!*kind) {
         err = MEMKIND_ERROR_MALLOC;
         log_err("calloc() failed.");
@@ -530,7 +530,7 @@ static int memkind_create(struct memkind_ops *ops, const char *name,
     (*kind)->partition = memkind_registry_g.num_kind;
     err = ops->create(*kind, ops, name);
     if (err) {
-        free(*kind);
+        jemk_free(*kind);
         goto exit;
     }
     memkind_registry_g.partition_map[id_kind] = *kind;
@@ -815,7 +815,7 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
     priv->offset = 0;
     priv->current_size = 0;
     priv->max_size = max_size;
-    priv->dir = malloc(strlen(dir)+1);
+    priv->dir = jemk_malloc(strlen(dir)+1);
     if (!priv->dir) {
         goto exit;
     }
