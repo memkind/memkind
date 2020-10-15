@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (C) 2019 - 2020 Intel Corporation.
+
+# Pull base image
+FROM fedora:32
+
+LABEL maintainer="katarzyna.wasiuta@intel.com"
+
+# Update the dnf cache and install basic tools
+RUN dnf update -y && dnf install -y \
+    asciidoctor \
+    automake \
+    bash-completion \
+    ca-certificates \
+    daxctl-devel \
+    devscripts \
+    g++ \
+    git \
+    json-c-devel \
+    keyutils-libs-devel \
+    kmod-devel \
+    libtool \
+    libudev-devel \
+    libuuid-devel \
+    mkpasswd \
+    numactl \
+    numactl-devel \
+    pkgconfig \
+    python-pip \
+    rpmdevtools \
+    sudo \
+    systemd \
+    which \
+    whois \
+ && dnf clean all
+
+# Install pytest
+RUN pip install wheel
+RUN pip install pytest==3.9.2
+
+# Add user
+ENV USER memkinduser
+ENV USERPASS memkindpass
+RUN useradd -m $USER -p `mkpasswd $USERPASS`
+RUN gpasswd wheel -a $USER
+RUN echo '%wheel ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Create directory for memkind repository
+WORKDIR /home/$USER/memkind
+
+# Allow user to create files in the home directory
+RUN chown -R $USER:wheel /home/$USER
+
+# Change user to $USER
+USER $USER
