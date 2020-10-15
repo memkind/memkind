@@ -540,7 +540,7 @@ test/trace_mechanism_test.py
 test/trace_mechanism_test_helper.c
 test/trial_generator.cpp
 test/trial_generator.h
-utils/docker/Dockerfile.fedora-31
+utils/docker/Dockerfile.fedora-32
 utils/docker/Dockerfile.ubuntu-20.04
 utils/docker/README.md
 utils/docker/docker_install_ndctl.sh
