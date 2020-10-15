@@ -2,7 +2,7 @@
 
 This is utils/docker/README.
 
-Scripts in this directory let run a Docker container with Ubuntu 20.04 and Fedora 31 environment
+Scripts in this directory let run a Docker container with Ubuntu 20.04 and Fedora 32 environment
 to build, test and optionally measure test coverage of any pull request to memkind project, inside it.
 
 # Environment variables
