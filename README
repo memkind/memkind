@@ -74,6 +74,10 @@ You will need to install required packages on the build system:
 * **numactl-devel**
 * **unzip**
 
+For using HMAT features in memkind:
+
+* **hwloc-devel** (v2.3 or later)
+
 For using automatic recognition of PMEM NUMA in MEMKIND_DAX_KMEM:
 
 * **libdaxctl-devel** (v66 or later)

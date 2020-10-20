@@ -19,6 +19,8 @@ if [ -n "$NDCTL_LIBRARY_VERSION" ]; then
     "$UTILS_PREFIX"/docker_install_ndctl.sh
 fi
 
+"$UTILS_PREFIX"/docker_install_hwloc.sh
+
 # building memkind sources and tests
 ./autogen.sh
 ./configure --prefix=/usr $GCOV_OPTION
