@@ -5,7 +5,7 @@ ignore:
   - "examples/memkind*"
   - "src/tbb_wrapper.c"
   - "test/.*"
-  - "utils/.*"
+  - "utils/**/*"
 
 coverage:
   range: "60...100"
