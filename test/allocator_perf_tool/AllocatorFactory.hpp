@@ -65,8 +65,9 @@ public:
                                       AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB);
         memkind_allocators[AllocatorTypes::MEMKIND_PMEM] = MemkindAllocatorWithTimer(
                                                                MEMKIND_PMEM_MOCKUP, AllocatorTypes::MEMKIND_PMEM);
-        memkind_allocators[AllocatorTypes::MEMKIND_DAX_KMEM] = MemkindAllocatorWithTimer(
-                                                               MEMKIND_DAX_KMEM, AllocatorTypes::MEMKIND_DAX_KMEM);
+        memkind_allocators[AllocatorTypes::MEMKIND_DAX_KMEM] =
+            MemkindAllocatorWithTimer(
+                MEMKIND_DAX_KMEM, AllocatorTypes::MEMKIND_DAX_KMEM);
     }
 
     //Get existing allocator without creating new.
