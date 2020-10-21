@@ -15,6 +15,7 @@
 #include <random>
 #include <thread>
 
+extern const char *PMEM_DIR;
 class Worker
 {
 public:
@@ -255,6 +256,18 @@ TEST_F(MemoryFootprintTest,
 }
 
 TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_medium_allocations_10_thread)
+{
+    run_test(MEMKIND_DEFAULT, 16 * KB, 1 * MB, 10, 0.8);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_large_allocations_1_thread)
+{
+    run_test(MEMKIND_DEFAULT, 2 * MB, 10 * MB, 1, 0.8, 100);
+}
+
+TEST_F(MemoryFootprintTest,
        test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_large_allocations_10_thread)
 {
     run_test(MEMKIND_DEFAULT, 2 * MB, 10 * MB,  10, 0.8, 100);
@@ -330,4 +343,184 @@ TEST_F(MemoryFootprintTest,
        test_TC_MEMKIND_HBW_random_malloc80_free20_random_large_allocations_10_thread)
 {
     run_test(MEMKIND_HBW, 2 * MB, 10 * MB, 10, 0.8, 100);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_only_malloc_small_allocations_1_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 128, 15 * KB, 1);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_only_malloc_small_allocations_10_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 128, 15 * KB, 10);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_only_malloc_medium_allocations_1_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 16 * KB, 1 * MB, 1);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_only_malloc_medium_allocations_10_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 16 * KB, 1 * MB, 10);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_only_malloc_large_allocations_1_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 2 * MB, 10 * MB, 1, 100);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_only_malloc_large_allocations_10_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 2 * MB, 10 * MB, 10, 100);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_small_allocations_1_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 128, 15 * KB, 1, 0.8);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_small_allocations_10_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 128, 15 * KB, 10, 0.8);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_medium_allocations_1_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 16 * KB, 1 * MB, 1, 0.8);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_medium_allocations_10_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 16 * KB, 1 * MB, 10, 0.8);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_large_allocations_1_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 2 * MB, 10 * MB, 1, 0.8, 100);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_large_allocations_10_thread)
+{
+    run_test(MEMKIND_DAX_KMEM, 2 * MB, 10 * MB, 10, 0.8, 100);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_only_malloc_small_allocations_1_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 128, 15 * KB, 1);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_only_malloc_small_allocations_10_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 128, 15 * KB, 10);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_only_malloc_medium_allocations_1_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 16 * KB, 1 * MB, 1);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_only_malloc_medium_allocations_10_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 16 * KB, 1 * MB, 10);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_only_malloc_large_allocations_1_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 2 * MB, 10 * MB, 1, 100);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_only_malloc_large_allocations_10_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 2 * MB, 10 * MB, 10, 100);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_small_allocations_1_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 128, 15 * KB, 1, 0.8);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_small_allocations_10_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 128, 15 * KB, 10, 0.8);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_medium_allocations_1_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 16 * KB, 1 * MB, 1, 0.8);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_medium_allocations_10_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 16 * KB, 1 * MB, 10, 0.8);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_large_allocations_1_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 2 * MB, 10 * MB, 1, 0.8, 100);
+    memkind_destroy_kind(kind);
+}
+
+TEST_F(MemoryFootprintTest,
+       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_large_allocations_10_thread)
+{
+    struct memkind *kind = nullptr;
+    memkind_create_pmem(PMEM_DIR, 0, &kind);
+    run_test(kind, 2 * MB, 10 * MB, 10, 0.8, 100);
+    memkind_destroy_kind(kind);
 }
