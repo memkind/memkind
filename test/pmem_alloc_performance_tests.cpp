@@ -196,7 +196,7 @@ TEST_F(PmemAllocPerformanceTest,
        test_TC_MEMKIND_MEMKIND_PMEM_malloc_72_thread_1572864_bytes)
 {
     run_test(AllocatorTypes::MEMKIND_PMEM, FunctionCalls::MALLOC, 72, 1572864,
-             1000);
+             10000);
 }
 
 TEST_F(PmemAllocPerformanceTest,
@@ -300,7 +300,7 @@ TEST_F(PmemAllocPerformanceTest,
        test_TC_MEMKIND_MEMKIND_PMEM_calloc_72_thread_1572864_bytes)
 {
     run_test(AllocatorTypes::MEMKIND_PMEM, FunctionCalls::CALLOC, 72, 1572864,
-             1000);
+             10000);
 }
 
 TEST_F(PmemAllocPerformanceTest,
@@ -405,5 +405,5 @@ TEST_F(PmemAllocPerformanceTest,
        test_TC_MEMKIND_MEMKIND_PMEM_realloc_72_thread_1572864_bytes)
 {
     run_test(AllocatorTypes::MEMKIND_PMEM, FunctionCalls::REALLOC, 72, 1572864,
-             1000);
+             10000);
 }
