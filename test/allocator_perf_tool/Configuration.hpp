@@ -27,6 +27,7 @@ public:
         MEMKIND_HBW_PREFERRED_GBTLB,
         HBWMALLOC_ALLOCATOR,
         MEMKIND_PMEM,
+        MEMKIND_DAX_KMEM,
         NUM_OF_ALLOCATOR_TYPES
     };
 
@@ -48,7 +49,8 @@ public:
             "MEMKIND_HBW_GBTLB",
             "MEMKIND_HBW_PREFERRED_GBTLB",
             "HBWMALLOC_ALLOCATOR",
-            "MEMKIND_PMEM"
+            "MEMKIND_PMEM",
+            "DAX_KMEM"
         };
 
         if(type >= NUM_OF_ALLOCATOR_TYPES) assert(!"Invalid input argument!");
