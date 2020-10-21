@@ -167,6 +167,7 @@ test_allocator_perf_tool_tests_SOURCES = $(allocator_perf_tool_library_sources) 
                                          $(fused_gtest) \
                                          test/alloc_performance_tests.cpp \
                                          test/allocate_to_max_stress_test.cpp \
+                                         test/dax_kmem_alloc_performance_tests.cpp \
                                          test/hbw_allocator_performance_tests.cpp \
                                          test/heap_manager_init_perf_test.cpp \
                                          test/huge_page_test.cpp \

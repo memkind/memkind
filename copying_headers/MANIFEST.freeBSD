@@ -125,6 +125,7 @@ test/common.h
 test/dax_kmem_nodes.cpp
 test/dax_kmem_nodes.h
 test/dax_kmem_env_var_test.py
+test/dax_kmem_performance_tests.cpp
 test/decorator_test.cpp
 test/decorator_test.h
 test/dlopen_test.cpp
