@@ -7,7 +7,8 @@ matrix:
   fast_finish: true
   include:
 
-    - name: "Astyle"
+    - &Astyle_
+      name: "Astyle"
       addons:
         apt:
           sources:
@@ -17,7 +18,12 @@ matrix:
       script:
         - ./astyle.sh
 
-    - name: "GCC 4.8"
+    - <<: *Astyle_
+      name: "Astyle PPC"
+      arch: ppc64le
+
+    - &GCC_4_8
+      name: "GCC 4.8"
       addons:
         apt:
           sources:
@@ -30,8 +36,12 @@ matrix:
       install:
       script:
         - ./build.sh
+    - <<: *GCC_4_8
+      name: "GCC 4.8 PPC"
+      arch: ppc64le
 
-    - name: "GCC 10.0"
+    - &GCC_10
+      name: "GCC 10.0"
       addons:
         apt:
           sources:
@@ -44,8 +54,12 @@ matrix:
       install:
       script:
         - ./build.sh
+    - <<: *GCC_10
+      name: "GCC 10.0 PPC"
+      arch: ppc64le
 
-    - name: "Clang 10"
+    - &Clang_10
+      name: "Clang 10"
       addons:
         apt:
           sources:
@@ -59,6 +73,10 @@ matrix:
       install:
       script:
         - ./build.sh
+    - <<: *Clang_10
+      name: "Clang 10 PPC"
+      arch: ppc64le
 
 before_install:
   - eval "${MATRIX_EVAL}"
+  
