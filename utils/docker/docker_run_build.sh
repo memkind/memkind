@@ -22,12 +22,12 @@ fi
 # building memkind sources and tests
 ./autogen.sh
 ./configure --prefix=/usr $GCOV_OPTION
-make -j "$(nproc --all)"
-make -j "$(nproc --all)" checkprogs
+make -j "$(nproc)"
+make -j "$(nproc)" checkprogs
 
 # building RPM package
 if [[ $(cat /etc/os-release) = *"Fedora"* ]]; then
-    make -j "$(nproc --all)" rpm
+    make -j "$(nproc)" rpm
 fi
 
 # installing memkind
