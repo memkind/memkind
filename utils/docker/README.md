@@ -35,6 +35,8 @@ memkind to not release memory to OS in anticipation of memory reuse soon. For PM
 
 *'docker_run_test.sh'*  is used to run tests of memkind.
 
+*'docker_install_hwloc.sh'*  is used to install hwloc library.
+
 *'docker_install_ndctl.sh'*  is used to install ndctl library.
 
 *'docker_install_tbb.sh'*  is used to install Intel Threading Building Blocks library.
