@@ -39,6 +39,14 @@ BuildRequires: libdaxctl-devel >= %{daxctl_min_version}
 BuildRequires: daxctl-devel >= %{daxctl_min_version}
 %endif
 
+# TODO add hwloc support when rpm will be available
+# %define hwloc_min_version 2.3.0
+# %if %{defined suse_version}
+# BuildRequires: libhwloc-devel >= %{hwloc_min_version}
+# %else
+# BuildRequires: hwloc-devel >= %{hwloc_min_version}
+# %endif
+
 Prefix: %{_prefix}
 Prefix: %{_unitdir}
 %if %{undefined suse_version}
