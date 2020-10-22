@@ -32,7 +32,7 @@ curl -L "$TBB_TARBALL_URL" -o "$TBB_LOCAL_TAR_GZ"
 tar -xzf "$TBB_LOCAL_TAR_GZ" -C "$TBB_LOCAL_DIR" --strip-components=1
 
 # build TBB library
-make -j "$(nproc --all)" --directory="$TBB_LOCAL_DIR"
+make -j "$(nproc)" --directory="$TBB_LOCAL_DIR"
 TBB_RELEASE_DIR=$(ls -d "$TBB_LOCAL_DIR"/build/*release)
 
 # set environment variables regarding TBB package

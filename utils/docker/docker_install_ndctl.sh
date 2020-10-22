@@ -34,8 +34,8 @@ tar -xzf "$NDCTL_LOCAL_TAR_GZ" -C "$NDCTL_LOCAL_DIR" --strip-components=1
 cd "$NDCTL_LOCAL_DIR"
 ./autogen.sh
 ./configure --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib
-make -j "$(nproc --all)"
-sudo make -j "$(nproc --all)" install
+make -j "$(nproc)"
+sudo make -j "$(nproc)" install
 
 # update shared library cache
 sudo ldconfig
