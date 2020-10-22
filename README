@@ -78,6 +78,10 @@ For using automatic recognition of PMEM NUMA in MEMKIND_DAX_KMEM:
 
 * **libdaxctl-devel** (v66 or later)
 
+For using HMAT features in memkind:
+
+* **hwloc-devel** (v2.3.0 or later)
+
 ## Building and Installing
 
 The memkind library has a dependency on a related fork of jemalloc.
@@ -133,22 +137,24 @@ which are using the memkind library for dynamic linking at run time:
 
 ## Kind Requirements
 
-| Memory kind                   | NUMA  |  HBW Memory | Hugepages | Device DAX | Filesystem supporting hole punching |
-| ----------------------------- |:-----:|:-----------:|:---------:|:----------:|:-----------------------------------:|
-| MEMKIND_DEFAULT               |       |             |           |            |                                     |
-| MEMKIND_HUGETLB               | X     |             | X         |            |                                     |
-| MEMKIND_HBW                   | X     | X           |           |            |                                     |
-| MEMKIND_HBW_ALL               | X     | X           |           |            |                                     |
-| MEMKIND_HBW_HUGETLB           | X     | X           | X         |            |                                     |
-| MEMKIND_HBW_ALL_HUGETLB       | X     | X           | X         |            |                                     |
-| MEMKIND_HBW_PREFERRED         | X     | X           |           |            |                                     |
-| MEMKIND_HBW_PREFERRED_HUGETLB | X     | X           | X         |            |                                     |
-| MEMKIND_HBW_INTERLEAVE        | X     | X           |           |            |                                     |
-| MEMKIND_REGULAR               | X     |             |           |            |                                     |
-| MEMKIND_DAX_KMEM              | X     |             |           | X          |                                     |
-| MEMKIND_DAX_KMEM_ALL          | X     |             |           | X          |                                     |
-| MEMKIND_DAX_KMEM_PREFERRED    | X     |             |           | X          |                                     |
-| PMEM kind                     |       |             |           |            | X                                   |
+| Memory kind                   | NUMA  |  HBW Memory | Hugepages | Device DAX | Filesystem supporting hole punching | HMAT |
+| ----------------------------- |:-----:|:-----------:|:---------:|:----------:|:-----------------------------------:|:-----:
+| MEMKIND_DEFAULT               |       |             |           |            |                                     |      |
+| MEMKIND_HUGETLB               | X     |             | X         |            |                                     |      |
+| MEMKIND_HBW                   | X     | X           |           |            |                                     | X*   |
+| MEMKIND_HBW_ALL               | X     | X           |           |            |                                     | X*   |
+| MEMKIND_HBW_HUGETLB           | X     | X           | X         |            |                                     | X*   |
+| MEMKIND_HBW_ALL_HUGETLB       | X     | X           | X         |            |                                     | X*   |
+| MEMKIND_HBW_PREFERRED         | X     | X           |           |            |                                     | X*   |
+| MEMKIND_HBW_PREFERRED_HUGETLB | X     | X           | X         |            |                                     | X*   |
+| MEMKIND_HBW_INTERLEAVE        | X     | X           |           |            |                                     | X*   |
+| MEMKIND_REGULAR               | X     |             |           |            |                                     |      |
+| MEMKIND_DAX_KMEM              | X     |             |           | X          |                                     |      |
+| MEMKIND_DAX_KMEM_ALL          | X     |             |           | X          |                                     |      |
+| MEMKIND_DAX_KMEM_PREFERRED    | X     |             |           | X          |                                     |      |
+| PMEM kind                     |       |             |           |            | X                                   |      |
+
+*not needed for Intel's 2nd generation Intel(R) Xeon Phi(TM)
 
 ## Kernel
 To correctly control of NUMA, huge pages and file-backed memory following
@@ -199,6 +205,12 @@ following changes:
 
 and created DAX device. See [article](https://pmem.io/2020/01/20/memkind-dax-kmem.html) for details.
 
+
+* **HMAT**
+
+To utilize memory performance characteristics (latency and bandwidth),
+beside [platform](https://uefi.org/sites/default/files/resources/ACPI_6_3_final_Jan30.pdf)
+support you need at least Linux Kernel 5.5 (with enabled CONFIG_ACPI_HMAT Kernel option).
 
 ## NVDIMM volatile usage
 
