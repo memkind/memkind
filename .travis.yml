@@ -1,4 +1,4 @@
-dist: bionic
+dist: focal
 language: cpp
 cache: ccache
 git:
@@ -59,7 +59,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-bionic-10
+            - llvm-toolchain-focal-10
           packages:
             - clang-10
             - libnuma-dev
