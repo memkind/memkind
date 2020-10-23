@@ -304,7 +304,7 @@ bandwidth allocations will be local to the process CPU.
 ## Projects
 The following software use memkind library:
 
-* [Example-project](https://example-project)
+* [MemKeyDB](https://github.com/memKeyDB/memKeyDB)
 
 ## Testing
 All existing tests pass. For more information on how to execute tests
