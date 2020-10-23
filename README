@@ -34,10 +34,10 @@ features.  Memkind interface allows to create and control file-backed memory
 8. [The Detection Mechanism of the Kind](#the-detection-mechanism-of-the-kind)
 9. [Setting Logging Mechanism](#setting-logging-mechanism)
 10. [Setting Heap Manager](#setting-heap-manager)
-11. [Testing](#testing)
-12. [Simulating High Bandwidth Memory](#simulating-high-bandwidth-memory)
-13. [Notes](#notes)
-14. [Status](#status)
+11. [Simulating High Bandwidth Memory](#simulating-high-bandwidth-memory)
+12. [Projects](#projects)
+13. [Testing](#testing)
+14. [Notes](#notes)
 15. [Disclaimer](#disclaimer)
 
 ## Interfaces
@@ -273,17 +273,6 @@ Intel Threading Building Blocks library.
 
 If the MEMKIND_HEAP_MANAGER is not set then the jemalloc heap manager will be used by default.
 
-## Testing
-All existing tests pass. For more information on how to execute tests
-see the [CONTRIBUTING](CONTRIBUTING) file.
-
-When tests are run on a NUMA platform without high bandwidth memory
-the MEMKIND_HBW_NODES environment variable is used in conjunction with
-"numactl --membind" to force standard allocations to one NUMA node and
-high bandwidth allocations through a different NUMA node.  See next
-section for more details.
-
-
 ## Simulating High Bandwidth Memory
 A method for testing for the benefit of high bandwidth memory on a
 dual socket Intel(R) Xeon(TM) system is to use the QPI bus to simulate
@@ -312,15 +301,28 @@ threads to CPUs associated with NUMA node 0.  With this configuration
 standard allocations will be fetched across the QPI bus, and high
 bandwidth allocations will be local to the process CPU.
 
+## Projects
+The following software use memkind library:
+
+* [Example-project](https://example-project)
+
+## Testing
+All existing tests pass. For more information on how to execute tests
+see the [CONTRIBUTING](CONTRIBUTING) file.
+
+When tests are run on a NUMA platform without high bandwidth memory
+the MEMKIND_HBW_NODES environment variable is used in conjunction with
+"numactl --membind" to force standard allocations to one NUMA node and
+high bandwidth allocations through a different NUMA node.  See next
+section for more details.
+
 ## Notes
 * Using memkind with Transparent Huge Pages enabled may result in
  undesirably high memory footprint. To avoid that disable THP using following
  [instruction](https://www.kernel.org/doc/Documentation/vm/transhuge.txt)
-
-## Status
-Different interfaces can represent different maturity level
-(as described in corresponding man pages).
-Feedback on design and implementation is greatly appreciated.
+* Different interfaces can represent different maturity level
+ (as described in corresponding man pages).
+* Feedback on design and implementation is greatly appreciated.
 
 ## Disclaimer
 SEE [COPYING](COPYING) FILE FOR LICENSE INFORMATION.
