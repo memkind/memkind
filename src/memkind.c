@@ -480,6 +480,15 @@ void memkind_init(memkind_t kind, bool check_numa)
     }
 }
 
+char *memkind_get_env(const char *name)
+{
+#ifdef MEMKIND_HAVE_SECURE_GETENV
+    return secure_getenv(name);
+#else
+    return getenv(name);
+#endif
+}
+
 static void nop(void) {}
 
 static int memkind_create(struct memkind_ops *ops, const char *name,
@@ -549,7 +558,7 @@ exit:
 static int memkind_use_other_heap_manager(void)
 {
 #ifdef MEMKIND_ENABLE_HEAP_MANAGER
-    const char *env = secure_getenv("MEMKIND_HEAP_MANAGER");
+    const char *env = memkind_get_env("MEMKIND_HEAP_MANAGER");
     if (env && strcmp(env, "TBB") == 0) {
         load_tbb_symbols();
         return 1;
@@ -564,7 +573,7 @@ __attribute__((constructor))
 static void memkind_construct(void)
 {
     if (!memkind_use_other_heap_manager()) {
-        const char *env = secure_getenv("MEMKIND_BACKGROUND_THREAD_LIMIT");
+        const char *env = memkind_get_env("MEMKIND_BACKGROUND_THREAD_LIMIT");
         if (env) {
             char *end;
             errno = 0;

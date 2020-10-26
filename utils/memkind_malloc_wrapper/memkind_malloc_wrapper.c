@@ -81,8 +81,8 @@ static int is_dax_kmem_enabled(const char *env)
 
 static void MEMKIND_WRAPPER_INIT init_memkind_function(void)
 {
-    const char *pmem_path = secure_getenv("PMEM_KIND_PATH");
-    const char *dax_option = secure_getenv("MEMKIND_DAX_KMEM_ON");
+    const char *pmem_path = getenv("PMEM_KIND_PATH");
+    const char *dax_option = getenv("MEMKIND_DAX_KMEM_ON");
     if (pmem_path && dax_option) {
         fprintf(stderr,
                 "PMEM_KIND_PATH and MEMKIND_DAX_KMEM_ON are mutually exclusive options.\n");
@@ -117,7 +117,7 @@ static void MEMKIND_WRAPPER_INIT init_memkind_function(void)
 static void MEMKIND_WRAPPER_FINI fini_memkind_function(void)
 {
     LOG("Finalize called\n");
-    const char *pmem_path = secure_getenv("PMEM_KIND_PATH");
+    const char *pmem_path = getenv("PMEM_KIND_PATH");
     if (pmem_path) {
         if(!memkind_destroy_kind(current_kind)) {
             LOG("Destroy PMEM kind\n");

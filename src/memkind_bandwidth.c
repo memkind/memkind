@@ -79,7 +79,7 @@ static int bandwidth_fill_values_from_enviroment(int *bandwidth,
 static int bandwidth_fill_nodes(int *bandwidth, fill_bandwidth_values fill,
                                 const char *env)
 {
-    char *high_value_nodes_env = secure_getenv(env);
+    char *high_value_nodes_env = memkind_get_env(env);
     if (high_value_nodes_env) {
         log_info("Environment variable %s detected: %s.", env, high_value_nodes_env);
         return bandwidth_fill_values_from_enviroment(bandwidth, high_value_nodes_env);

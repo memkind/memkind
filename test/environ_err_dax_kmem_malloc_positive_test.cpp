@@ -23,7 +23,7 @@ int main()
     std::vector<int> closest_numa_ids;
     int expected_numa_id = -1;
     int returned_numa_id = -1;
-    char *env_value_str = secure_getenv("MEMKIND_DAX_KMEM_NODES");
+    char *env_value_str = getenv("MEMKIND_DAX_KMEM_NODES");
     int process_cpu = sched_getcpu();
     int process_node = numa_node_of_cpu(process_cpu);
     unsigned numa_max_id = (unsigned) numa_max_node();

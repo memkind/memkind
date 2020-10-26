@@ -2,6 +2,7 @@
 /* Copyright (C) 2016 - 2020 Intel Corporation. */
 
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_private.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -29,7 +30,7 @@ static bool log_enabled;
 static pthread_once_t init_once = PTHREAD_ONCE_INIT;
 static void log_init_once(void)
 {
-    char *memkind_debug_env = secure_getenv("MEMKIND_DEBUG");
+    char *memkind_debug_env = memkind_get_env("MEMKIND_DEBUG");
 
     if (memkind_debug_env) {
         if(strcmp(memkind_debug_env, "1") == 0) {

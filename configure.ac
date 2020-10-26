@@ -129,6 +129,15 @@ fi
 
 AC_SUBST([enable_secure])
 
+#============================secure_getenv===============================
+AC_CHECK_FUNC([secure_getenv],
+              [have_secure_getenv="1"],
+              [have_secure_getenv="0"]
+             )
+if test "x$have_secure_getenv" = "x1" ; then
+  AC_DEFINE([MEMKIND_HAVE_SECURE_GETENV], [], [Detect secure_getenv])
+fi
+
 #============================tcache_max_size_class======================
 
 tcache_max_size_class=12;
