@@ -49,7 +49,7 @@ static struct heap_manager_ops tbb_heap_manager_g = {
 static void set_heap_manager()
 {
     heap_manager_g = &arena_heap_manager_g;
-    const char *env = secure_getenv("MEMKIND_HEAP_MANAGER");
+    const char *env = memkind_get_env("MEMKIND_HEAP_MANAGER");
     if(env && strcmp(env, "TBB") == 0) {
         heap_manager_g = &tbb_heap_manager_g;
     }
