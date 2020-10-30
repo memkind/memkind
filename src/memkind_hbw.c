@@ -24,6 +24,10 @@
 #include <sched.h>
 #include <stdint.h>
 #include <assert.h>
+#include "config.h"
+#ifdef MEMKIND_HWLOC
+#include <hwloc.h>
+#endif
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
@@ -187,7 +191,9 @@ static void memkind_hbw_closest_numanode_init(void);
 // This declaration is necessary, cause it's missing in headers from libnuma 2.0.8
 extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
 
+#ifndef MEMKIND_HWLOC
 static int fill_bandwidth_values_heuristically (int *bandwidth);
+#endif
 
 MEMKIND_EXPORT int memkind_hbw_check_available(struct memkind *kind)
 {
@@ -232,6 +238,7 @@ MEMKIND_EXPORT int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
     return g->init_err;
 }
 
+#ifndef MEMKIND_HWLOC
 typedef struct registers_t {
     uint32_t eax;
     uint32_t ebx;
@@ -338,13 +345,88 @@ static int fill_bandwidth_values_heuristically(int *bandwidth)
             return MEMKIND_ERROR_UNAVAILABLE;
     }
 }
+
+#else   // MEMKIND_HWLOC
+static int get_high_bandwidth_nodes_by_hwloc(struct bitmask *hbw_node_mask)
+{
+    char *env = "MEMKIND_HBW_THRESHOLD";
+    char *hbw_threshold_env = secure_getenv(env);
+    size_t hbw_threshold;
+    int nodes_num = numa_num_configured_nodes();
+    int node;
+    int err;
+    hwloc_topology_t topology;
+
+    if (hbw_threshold_env) {
+        log_info("Environment valiable %s detected: %s.", env, hbw_threshold_env);
+        int ret = sscanf(hbw_threshold_env, "%zud", &hbw_threshold);
+        if (ret == 0) {
+            log_err("Environment valiable %s is invalid value.", env);
+            return MEMKIND_ERROR_UNAVAILABLE;
+        }
+    } else {
+        hbw_threshold = 200 * 1024; // Default threshold is 200 GB/s
+    }
+
+    err = hwloc_topology_init(&topology);
+    if (err) {
+        log_err("hwloc initialize failed");
+        return MEMKIND_ERROR_UNAVAILABLE;
+    }
+
+    err = hwloc_topology_load(topology);
+    if (err) {
+        log_err("hwloc topology load failed");
+        return MEMKIND_ERROR_UNAVAILABLE;
+    }
+
+    for (node = 0; node < nodes_num; node++) {
+        hwloc_uint64_t bandwidth;
+        struct hwloc_location initiator;
+        hwloc_obj_t target = hwloc_get_numanode_obj_by_os_index(topology, node);
+        err = hwloc_memattr_get_best_initiator(topology, HWLOC_MEMATTR_ID_BANDWIDTH,
+                                               target, 0, &initiator, &bandwidth);
+        if (err) {
+            log_err("hwloc_memattr_get_best_initiator failed");
+            return MEMKIND_ERROR_UNAVAILABLE;
+	}
+
+        if (bandwidth >= hbw_threshold) {
+            numa_bitmask_setbit(hbw_node_mask, node);
+        }
+    }
+
+    if (numa_bitmask_weight(hbw_node_mask) == 0) {
+        return MEMKIND_ERROR_UNAVAILABLE;
+    }
+
+    return 0;
+}
+
+static int fill_bandwidth_values_by_hwloc(int *bandwidth)
+{
+    int ret = bandwidth_fill(bandwidth, get_high_bandwidth_nodes_by_hwloc);
+
+    if(ret == 0) {
+        log_info("Detected High Bandwidth Memory.");
+    }
+
+    return ret;
+}
+#endif  // MEMKIND_HWLOC
+
 static void memkind_hbw_closest_numanode_init(void)
 {
     struct hbw_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
-    g->init_err = set_closest_numanode(fill_bandwidth_values_heuristically,
-                                       "MEMKIND_HBW_NODES", &g->closest_numanode, g->num_cpu, true);
+#ifdef MEMKIND_HWLOC
+        g->init_err = set_closest_numanode(fill_bandwidth_values_by_hwloc,
+                                           "MEMKIND_HBW_NODES", &g->closest_numanode, g->num_cpu, false);
+#else
+        g->init_err = set_closest_numanode(fill_bandwidth_values_heuristically,
+                                           "MEMKIND_HBW_NODES", &g->closest_numanode, g->num_cpu, true);
+#endif
 }
 
 MEMKIND_EXPORT void memkind_hbw_init_once(void)
