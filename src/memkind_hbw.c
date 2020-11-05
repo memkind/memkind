@@ -24,6 +24,12 @@
 #include <sched.h>
 #include <stdint.h>
 #include <assert.h>
+#include "config.h"
+#ifdef MEMKIND_HWLOC
+#include <hwloc.h>
+
+#define MEMKIND_HBW_THRESHOLD_DEFAULT (200 * 1024) // Default threshold is 200 GB/s
+#endif
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
@@ -281,7 +287,7 @@ static cpu_model_data_t get_cpu_model_data()
     return data;
 }
 
-static bool is_hbm_supported(cpu_model_data_t cpu)
+static bool is_hbm_legacy_supported(cpu_model_data_t cpu)
 {
     return cpu.family == CPU_FAMILY_INTEL &&
            (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
@@ -315,29 +321,109 @@ static int get_high_bandwidth_nodes(struct bitmask *hbw_node_mask)
     return MEMKIND_ERROR_UNAVAILABLE;
 }
 
-///This function tries to fill bandwidth array based on knowledge about known CPU models
-static int fill_bandwidth_values_heuristically(int *bandwidth)
+static int get_high_bandwidth_nodes_hmat(struct bitmask *hbw_node_mask)
 {
-    cpu_model_data_t cpu = get_cpu_model_data();
+#ifdef MEMKIND_HWLOC
+    const char *hbw_threshold_env = secure_getenv("MEMKIND_HBW_THRESHOLD"); // replace secure_getenv with memkind_get_env
+    size_t hbw_threshold;
+    int err;
+    hwloc_topology_t topology;
+    hwloc_cpuset_t visited;
+    hwloc_obj_t pu_node = NULL;
 
-    if(!is_hbm_supported(cpu)) {
-        log_err("High Bandwidth Memory is not supported by this CPU.");
+    if (hbw_threshold_env) {
+        log_info("Environment variable MEMKIND_HBW_THRESHOLD detected: %s.",
+                 hbw_threshold_env);
+        int ret = sscanf(hbw_threshold_env, "%zud", &hbw_threshold);
+        if (ret == 0) {
+            log_err("Environment variable MEMKIND_HBW_THRESHOLD is invalid value.");
+            return MEMKIND_ERROR_ENVIRON;
+        }
+    } else {
+        hbw_threshold = MEMKIND_HBW_THRESHOLD_DEFAULT;
+    }
+
+    err = hwloc_topology_init(&topology);
+    if (err) {
+        log_err("hwloc initialize failed");
         return MEMKIND_ERROR_UNAVAILABLE;
     }
 
-    switch(cpu.model) {
-        case CPU_MODEL_KNL:
-        case CPU_MODEL_KNM: {
-            int ret = bandwidth_fill(bandwidth, get_high_bandwidth_nodes);
-            if(ret == 0) {
-                log_info("Detected High Bandwidth Memory.");
-            }
-            return ret;
-        }
-        default:
-            return MEMKIND_ERROR_UNAVAILABLE;
+    err = hwloc_topology_load(topology);
+    if (err) {
+        log_err("hwloc topology load failed");
+        hwloc_topology_destroy(topology);
+        return MEMKIND_ERROR_UNAVAILABLE;
     }
+
+    visited = hwloc_bitmap_alloc();
+    if (visited == NULL) {
+        log_err("hwloc_bitmap_alloc failed");
+        hwloc_topology_destroy(topology);
+        return MEMKIND_ERROR_MALLOC;
+    }
+
+    while ((pu_node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE,
+                                                 pu_node)) != NULL) {
+        struct hwloc_location initiator;
+        hwloc_obj_t target = NULL;
+
+        if (hwloc_bitmap_isincluded(pu_node->cpuset, visited)) {
+            continue;
+        }
+        hwloc_bitmap_or(visited, visited, pu_node->cpuset);
+
+        initiator.type = HWLOC_LOCATION_TYPE_CPUSET;
+        initiator.location.cpuset = pu_node->cpuset;
+
+        while ((target = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE,
+                                                    target)) != NULL) {
+            hwloc_uint64_t bandwidth;
+            err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH, target,
+                                          &initiator, 0, &bandwidth);
+            if (err) {
+                continue;
+            }
+
+            if (bandwidth >= hbw_threshold) {
+                numa_bitmask_setbit(hbw_node_mask, target->os_index);
+            }
+        }
+    }
+
+    hwloc_bitmap_free(visited);
+    hwloc_topology_destroy(topology);
+    if (numa_bitmask_weight(hbw_node_mask) == 0) {
+        return MEMKIND_ERROR_UNAVAILABLE;
+    }
+
+    return 0;
+#else
+    log_err("High Bandwith NUMA nodes cannot be automatically detected.");
+    return MEMKIND_ERROR_OPERATION_FAILED;
+#endif
 }
+
+///This function tries to fill bandwidth array based on knowledge about known CPU models
+static int fill_bandwidth_values_heuristically(int *bandwidth)
+{
+    int ret;
+    cpu_model_data_t cpu = get_cpu_model_data();
+
+    if(is_hbm_legacy_supported(cpu)) {
+        ret = bandwidth_fill(bandwidth, get_high_bandwidth_nodes);
+    } else {
+        ret = bandwidth_fill(bandwidth, get_high_bandwidth_nodes_hmat);
+    }
+
+    if(ret != 0) {
+        return MEMKIND_ERROR_UNAVAILABLE;
+    }
+
+    log_info("Detected High Bandwidth Memory.");
+    return ret;
+}
+
 static void memkind_hbw_closest_numanode_init(void)
 {
     struct hbw_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
