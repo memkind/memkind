@@ -971,6 +971,11 @@ for parsing, so the syntax described in the
 .BR numa (3)
 man page for this routine applies: e.g. 1-3,5 is a valid setting.
 .TP
+.B MEMKIND_HBW_THRESHOLD
+This environment variable is bandwidth in MB/s that is the threshold for
+identifying high bandwidth memory. The default threshold is 204800 (200 GB/s),
+which is used if this environment is not set.
+.TP
 .B MEMKIND_DAX_KMEM_NODES
 This environment variable is a comma-separated list of NUMA nodes that
 are treated as PMEM memory. Uses the
