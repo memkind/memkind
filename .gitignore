@@ -96,6 +96,7 @@
 /test/hello_hbw
 /test/hello_memkind
 /test/hello_memkind_debug
+/test/hmat_test
 /test/locality_test
 /test/mallocerr_test
 /test/memkind_allocated
