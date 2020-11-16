@@ -511,6 +511,7 @@ test/memkind-slts.ts
 test/memkind_dax_kmem_test.cpp
 test/memkind_detect_kind_tests.cpp
 test/memkind_highcapacity_test.cpp
+test/memkind_hmat_tests.cpp
 test/memkind_null_kind_test.cpp
 test/memkind_pmem_config_tests.cpp
 test/memkind_pmem_long_time_tests.cpp
@@ -561,4 +562,8 @@ utils/memkind_malloc_wrapper/memkind_malloc_wrapper_test.c
 utils/memkind_malloc_wrapper/memkind_malloc_wrapper_test.sh
 utils/qemu/README.md
 utils/qemu/http/preseed.cfg
+utils/qemu/main.py
+utils/qemu/requirements.txt
+utils/qemu/topology/single_hbw_node.xml
+utils/qemu/topology/single_memory_node.xml
 utils/qemu/ubuntu-packer.json
