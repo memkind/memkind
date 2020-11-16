@@ -273,6 +273,9 @@ extern memkind_t MEMKIND_DAX_KMEM_ALL;
 /// \note STANDARD API
 extern memkind_t MEMKIND_DAX_KMEM_PREFERRED;
 
+/// \note STANDARD API
+extern memkind_t MEMKIND_DAX_KMEM_INTERLEAVE;
+
 ///
 /// \brief Get Memkind API version
 /// \note STANDARD API
