@@ -40,6 +40,7 @@ namespace libmemkind
         DAX_KMEM = 11,
         DAX_KMEM_ALL = 12,
         DAX_KMEM_PREFERRED = 13,
+        DAX_KMEM_INTERLEAVE = 14,
     };
 
     namespace static_kind
@@ -119,6 +120,9 @@ namespace libmemkind
                         break;
                     case libmemkind::kinds::DAX_KMEM_PREFERRED:
                         _kind = MEMKIND_DAX_KMEM_PREFERRED;
+                        break;
+                    case libmemkind::kinds::DAX_KMEM_INTERLEAVE:
+                        _kind = MEMKIND_DAX_KMEM_INTERLEAVE;
                         break;
                     default:
                         throw std::runtime_error("Unknown libmemkind::kinds");

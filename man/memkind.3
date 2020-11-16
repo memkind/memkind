@@ -803,6 +803,12 @@ For this kind, the allocation will not succeed if two or more
 persistent memory NUMA nodes are in the same shortest distance to the same CPU on which process is eligible to run.
 Check on that eligibility is done upon starting the application.
 .TP
+.B MEMKIND_DAX_KMEM_INTERLEAVE
+Same as
+.B MEMKIND_DAX_KMEM
+except that the pages that support the allocation are interleaved
+across all persistent memory NUMA nodes.
+.TP
 .B MEMKIND_REGULAR
 Allocate from regular memory using the default page size. Regular means general purpose memory
 from the NUMA nodes containing CPUs.

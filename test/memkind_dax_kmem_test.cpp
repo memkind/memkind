@@ -53,7 +53,7 @@ protected:
 INSTANTIATE_TEST_CASE_P(
     KindParam, MemkindDaxKmemTestsParam,
     ::testing::Values(MEMKIND_DAX_KMEM, MEMKIND_DAX_KMEM_ALL,
-                      MEMKIND_DAX_KMEM_PREFERRED));
+                      MEMKIND_DAX_KMEM_PREFERRED, MEMKIND_DAX_KMEM_INTERLEAVE));
 
 TEST_P(MemkindDaxKmemTestsParam,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_free_with_NULL_kind_4096_bytes)
