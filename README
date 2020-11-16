@@ -35,10 +35,11 @@ features.  Memkind interface allows to create and control file-backed memory
 9. [Setting Logging Mechanism](#setting-logging-mechanism)
 10. [Setting Heap Manager](#setting-heap-manager)
 11. [Simulating High Bandwidth Memory](#simulating-high-bandwidth-memory)
-12. [Projects](#projects)
-13. [Testing](#testing)
-14. [Notes](#notes)
-15. [Disclaimer](#disclaimer)
+12. [Identification of High Bandwidth Memory](#identification-of-high-bandwidth-memory)
+13. [Projects](#projects)
+14. [Testing](#testing)
+15. [Notes](#notes)
+16. [Disclaimer](#disclaimer)
 
 ## Interfaces
 The memkind library delivers four interfaces:
@@ -312,6 +313,15 @@ node 1.  The --cpunodebind=0 option to numactl will bind the process
 threads to CPUs associated with NUMA node 0.  With this configuration
 standard allocations will be fetched across the QPI bus, and high
 bandwidth allocations will be local to the process CPU.
+
+## Identification of High Bandwidth Memory
+High bandwidth memory are identified using hwloc if available. The default
+threshold for identifying high bandwidth memory is 200 GB/s, you can change the
+threshold using the MEMKIND_HBW_THRESHOLD environment variable.
+
+MEMKIND_HBW_THRESHOLD is in MB/s. For example, to set to 100 GB/s:
+
+    export MEMKIND_HBW_THRESHOLD=102400.
 
 ## Projects
 The following software use memkind library:
