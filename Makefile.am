@@ -395,6 +395,11 @@ EXTRA_DIST = CONTRIBUTING \
              utils/docker/docker_run_test.sh \
              utils/docker/run_local.sh \
              utils/docker/set_host_configuration.sh \
+             utils/qemu/README.md \
+             utils/qemu/main.py \
+             utils/qemu/requirements.txt \
+             utils/qemu/topology/single_hbw_node.xml \
+             utils/qemu/topology/single_memory_node.xml \
              # end
 
 dist_doc_DATA = COPYING README VERSION
@@ -496,6 +501,9 @@ unit_tests: checkprogs
 PMEM_PATH=/tmp/
 unit_tests_pmem: checkprogs
 	test/pmem_test -d $(PMEM_PATH)
+
+unit_tests_hmat: checkprogs
+	test/hmat_test
 
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
