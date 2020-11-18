@@ -88,6 +88,25 @@ if test "x$enable_debug" = "x1" ; then
 fi
 AC_SUBST([enable_debug])
 
+#=======================jemalloc_debug=========================================
+AC_ARG_ENABLE([debug-jemalloc],
+  [AS_HELP_STRING([--enable-debug-jemalloc], [Build debugging code and compile with -O0 -g])],
+[if test "x$enable_debug_jemalloc" = "xno" ; then
+  enable_debug_jemalloc="0"
+else
+  enable_debug_jemalloc="1"
+fi
+],
+[enable_debug_jemalloc="0"]
+)
+if test "x$enable_debug_jemalloc" = "x1" ; then
+  AC_DEFINE([JEMALLOC_DEBUG], [ ], [Enables jemalloc code for debugging])
+  CFLAGS="$CFLAGS -O0 -g"
+  CXXFLAGS="$CXXFLAGS -O0 -g"
+fi
+AC_SUBST([enable_debug_jemalloc])
+AM_CONDITIONAL([JEMALLOC_DEBUG], [test x$enable_debug_jemalloc = x1])
+
 #============================gcov==============================================
 AC_ARG_ENABLE([gcov],
   [AS_HELP_STRING([--enable-gcov], [Build code with gcov instructions])],
