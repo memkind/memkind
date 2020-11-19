@@ -88,6 +88,29 @@ if test "x$enable_debug" = "x1" ; then
 fi
 AC_SUBST([enable_debug])
 
+#=======================jemalloc_debug=========================================
+AC_ARG_ENABLE([debug-jemalloc],
+  [AS_HELP_STRING([--enable-debug-jemalloc], [Build debugging jemalloc code])],
+[if test "x$enable_debug_jemalloc" = "xno" ; then
+  enable_debug_jemalloc="0"
+else
+  enable_debug_jemalloc="1"
+fi
+],
+[enable_debug_jemalloc="0"]
+)
+
+if test "x$enable_debug_jemalloc" = "x1" ; then
+  disable_fill_opt=
+  enable_debug_opt=--enable-debug
+else
+  disable_fill_opt=--disable-fill
+  enable_debug_opt=
+fi
+
+AC_SUBST([disable_fill_opt])
+AC_SUBST([enable_debug_opt])
+
 #============================gcov==============================================
 AC_ARG_ENABLE([gcov],
   [AS_HELP_STRING([--enable-gcov], [Build code with gcov instructions])],
