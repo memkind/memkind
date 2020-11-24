@@ -324,7 +324,8 @@ static int get_high_bandwidth_nodes(struct bitmask *hbw_node_mask)
 static int get_high_bandwidth_nodes_hmat(struct bitmask *hbw_node_mask)
 {
 #ifdef MEMKIND_HWLOC
-    const char *hbw_threshold_env = secure_getenv("MEMKIND_HBW_THRESHOLD"); // replace secure_getenv with memkind_get_env
+    // replace secure_getenv with memkind_get_env
+    const char *hbw_threshold_env = secure_getenv("MEMKIND_HBW_THRESHOLD");
     size_t hbw_threshold;
     int err;
     hwloc_topology_t topology;
