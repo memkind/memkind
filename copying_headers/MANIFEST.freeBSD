@@ -196,3 +196,6 @@ utils/docker/set_host_configuration.sh
 utils/memkind_malloc_wrapper/Makefile.mk
 utils/memkind_malloc_wrapper/memkind_malloc_wrapper_test.c
 utils/memkind_malloc_wrapper/memkind_malloc_wrapper_test.sh
+utils/qemu/http/preseed.cfg
+utils/qemu/README.md
+utils/qemu/ubuntu-packer.json

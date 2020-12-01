@@ -395,6 +395,9 @@ EXTRA_DIST = CONTRIBUTING \
              utils/docker/docker_run_test.sh \
              utils/docker/run_local.sh \
              utils/docker/set_host_configuration.sh \
+             utils/qemu/http/preseed.cfg
+             utils/qemu/README.md
+             utils/qemu/ubuntu-packer.json
              # end
 
 dist_doc_DATA = COPYING README VERSION
