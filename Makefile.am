@@ -396,6 +396,7 @@ EXTRA_DIST = CONTRIBUTING \
              utils/docker/run_local.sh \
              utils/docker/set_host_configuration.sh \
              utils/qemu/http/preseed.cfg
+             utils/qemu/README.md
              utils/qemu/ubuntu-packer.json
              # end
 
