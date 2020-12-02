@@ -345,5 +345,6 @@ test/memkind-perf.ts
 test/memkind-pytests.ts
 test/memkind-slts.ts
 utils/docker/README.md
+utils/qemu/README.md
 utils/qemu/http/preseed.cfg
 utils/qemu/ubuntu-packer.json
