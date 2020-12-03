@@ -389,6 +389,7 @@ EXTRA_DIST = CONTRIBUTING \
              utils/docker/Dockerfile.ubuntu-20.04 \
              utils/docker/README.md \
              utils/docker/docker_install_hwloc.sh \
+             utils/docker/docker_install_libvirt.sh \
              utils/docker/docker_install_ndctl.sh \
              utils/docker/docker_install_tbb.sh \
              utils/docker/docker_run_build.sh \
