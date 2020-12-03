@@ -16,24 +16,35 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     devscripts \
     g++ \
     git \
+    libglib2.0-dev \
+    libgnutls28-dev \
     libjson-c-dev \
     libkeyutils-dev \
     libkmod-dev \
     libnuma-dev \
+    libpciaccess-dev \
+    libtirpc-dev \
     libtool \
     libudev-dev \
+    libxml2-dev \
+    libxml2-utils \
     numactl \
+    ninja-build \
     pkg-config \
+    python-docutils \
     python3-pip \
+    python3.8-dev \
     sudo \
     systemd \
     uuid-dev \
+    xsltproc \
     whois \
  && rm -rf /var/lib/apt/lists/*
 
 # Install packages required by python tests
 RUN pip3 install wheel
 RUN pip3 install pytest==3.9.2
+RUN pip3 install meson
 
 # Add user
 ENV USER memkinduser
