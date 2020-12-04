@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.so
+*.in~
 .cproject
 .deps/
 .dirstamp
@@ -119,8 +120,12 @@
 /test/pmem_multithreads_onekind
 /test/pmem_test
 /test/pmem_usable_size
+/test/hmat_test
 /test/trace_mechanism_test_helper
 /test/defrag_reallocate
 /vs
 autom4te.cache/
 memkind.pc
+launch.json
+settings.json
+tasks.json

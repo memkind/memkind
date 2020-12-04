@@ -17,6 +17,7 @@
 #include <memkind/internal/memkind_interleave.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_hmat.h>
 #include <memkind/internal/tbb_wrapper.h>
 #include <memkind/internal/heap_manager.h>
 
@@ -184,6 +185,13 @@ static struct memkind MEMKIND_DAX_KMEM_PREFERRED_STATIC = {
     .init_once = PTHREAD_ONCE_INIT,
 };
 
+static struct memkind MEMKIND_HIGHEST_CAPACITY_STATIC = {
+    .ops = &MEMKIND_HIGHEST_CAPACITY_OPS,
+    .partition = MEMKIND_PARTITION_HIGHEST_CAPACITY,
+    .name = "memkind_highest_capacity",
+    .init_once = PTHREAD_ONCE_INIT,
+};
+
 MEMKIND_EXPORT struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HUGETLB = &MEMKIND_HUGETLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_INTERLEAVE = &MEMKIND_INTERLEAVE_STATIC;
@@ -209,6 +217,8 @@ MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_ALL =
         &MEMKIND_DAX_KMEM_ALL_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_PREFERRED =
         &MEMKIND_DAX_KMEM_PREFERRED_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_CAPACITY =
+        &MEMKIND_HIGHEST_CAPACITY_STATIC;
 
 struct memkind_registry {
     struct memkind *partition_map[MEMKIND_MAX_KIND];
@@ -235,6 +245,7 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_DAX_KMEM] = &MEMKIND_DAX_KMEM_STATIC,
         [MEMKIND_PARTITION_DAX_KMEM_ALL] = &MEMKIND_DAX_KMEM_ALL_STATIC,
         [MEMKIND_PARTITION_DAX_KMEM_PREFERRED] = &MEMKIND_DAX_KMEM_PREFERRED_STATIC,
+        [MEMKIND_PARTITION_HIGHEST_CAPACITY] = &MEMKIND_HIGHEST_CAPACITY_STATIC,
     },
     MEMKIND_NUM_BASE_KIND,
     PTHREAD_MUTEX_INITIALIZER
@@ -294,6 +305,8 @@ static struct create_args supported_args[] = {
     {&MEMKIND_DEFAULT_STATIC,                MEMKIND_POLICY_PREFERRED_LOCAL, 0,                          MEMKIND_MEMTYPE_DEFAULT},
     {&MEMKIND_HUGETLB_STATIC,                MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_DEFAULT},
     {&MEMKIND_INTERLEAVE_STATIC,             MEMKIND_POLICY_INTERLEAVE_ALL,  0,                          MEMKIND_MEMTYPE_HIGH_BANDWIDTH | MEMKIND_MEMTYPE_DEFAULT},
+    // TODO - ??
+    {&MEMKIND_HIGHEST_CAPACITY_STATIC,       MEMKIND_POLICY_BIND_LOCAL,     0,                           MEMKIND_MEMTYPE_DEFAULT},
 };
 
 /* Kind creation */

@@ -264,6 +264,9 @@ extern memkind_t MEMKIND_HBW_INTERLEAVE;
 /// \warning EXPERIMENTAL API
 extern memkind_t MEMKIND_INTERLEAVE;
 
+/// \warning EXPERIMENTAL API
+extern memkind_t MEMKIND_HIGHEST_CAPACITY;
+
 /// \note STANDARD API
 extern memkind_t MEMKIND_DAX_KMEM;
 
