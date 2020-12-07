@@ -16,6 +16,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_default.c \
                         src/memkind_gbtlb.c \
                         src/memkind_hbw.c \
+                        src/memkind_hmat.c \
                         src/memkind_hugetlb.c \
                         src/memkind_interleave.c \
                         src/memkind_log.c \
