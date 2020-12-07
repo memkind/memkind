@@ -20,6 +20,7 @@ check_PROGRAMS += test/all_tests \
                   # end
 if HAVE_CXX11
 check_PROGRAMS += test/pmem_test \
+                  test/memkind_highcapacity_test \
                   test/defrag_reallocate
 endif
 
@@ -60,6 +61,8 @@ test_trace_mechanism_test_helper_LDADD = libmemkind.la
 if HAVE_CXX11
 test_pmem_test_SOURCES = $(fused_gtest) test/memkind_pmem_config_tests.cpp test/memkind_pmem_long_time_tests.cpp test/memkind_pmem_tests.cpp
 test_pmem_test_LDADD = libmemkind.la
+test_memkind_highcapacity_test_SOURCES = $(fused_gtest) test/memkind_highcapacity_tests.cpp
+test_memkind_highcapacity_test_LDADD = libmemkind.la
 test_defrag_reallocate_SOURCES = $(fused_gtest) test/memkind_defrag_reallocate.cpp
 test_defrag_reallocate_LDADD = libmemkind.la
 endif
