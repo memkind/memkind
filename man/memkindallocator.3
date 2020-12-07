@@ -44,6 +44,9 @@ specifies allocator static kinds of memory, representing type of memory which of
 .B libmemkind::kinds::DEFAULT
 Default allocation using standard memory and default page size.
 .PP
+.B libmemkind::kinds::HIGHEST_CAPACITY
+Allocate from a NUMA node(s) that has the highest capacity among nodes in the system. Note: there could be more than one node that satifies this condition.
+.PP
 .B libmemkind::kinds::HUGETLB
 Allocate from standard memory using huge pages. Note: This kind requires huge pages configuration described in
 .B SYSTEM CONFIGURATION

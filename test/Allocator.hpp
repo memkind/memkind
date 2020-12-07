@@ -83,7 +83,8 @@ public:
             std::make_pair(MEMKIND_DEFAULT, MPOL_DEFAULT),
             std::make_pair(MEMKIND_HUGETLB, MPOL_DEFAULT),
             std::make_pair(MEMKIND_HBW_ALL_HUGETLB, MPOL_BIND),
-            std::make_pair(MEMKIND_HBW_ALL, MPOL_BIND)
+            std::make_pair(MEMKIND_HBW_ALL, MPOL_BIND),
+            std::make_pair(MEMKIND_HIGHEST_CAPACITY, MPOL_BIND)
         };
         auto it = kind_policy.find(kind);
 

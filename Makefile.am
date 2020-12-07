@@ -21,6 +21,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_log.c \
                         src/memkind_pmem.c \
                         src/memkind_regular.c \
+                        src/memkind_hmat.c \
                         src/tbb_wrapper.c \
                         # end
 
@@ -499,6 +500,9 @@ unit_tests_pmem: checkprogs
 
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
+
+unit_tests_highcapacity: checkprogs
+	test/test_highcapacity.sh
 
 include autohbw/Makefile.mk
 include test/Makefile.mk

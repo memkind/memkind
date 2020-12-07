@@ -140,6 +140,7 @@ TEST_F(AllocateToMaxStressTests,
     kinds.enable_type(AllocatorTypes::MEMKIND_INTERLEAVE);
     kinds.enable_type(AllocatorTypes::MEMKIND_HBW_INTERLEAVE);
     kinds.enable_type(AllocatorTypes::MEMKIND_REGULAR);
+    kinds.enable_type(AllocatorTypes::MEMKIND_HIGHEST_CAPACITY);
     run(kinds, TypesConf(FunctionCalls::MALLOC), 2048, MB, MB, 2*GB, true);
 }
 

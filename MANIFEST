@@ -51,6 +51,7 @@ include/memkind/internal/memkind_dax_kmem.h
 include/memkind/internal/memkind_default.h
 include/memkind/internal/memkind_gbtlb.h
 include/memkind/internal/memkind_hbw.h
+include/memkind/internal/memkind_hmat.h
 include/memkind/internal/memkind_hugetlb.h
 include/memkind/internal/memkind_interleave.h
 include/memkind/internal/memkind_log.h
@@ -420,6 +421,7 @@ src/memkind_interleave.c
 src/memkind_log.c
 src/memkind_pmem.c
 src/memkind_regular.c
+src/memkind_hmat.c
 src/tbb_wrapper.c
 test/Allocator.hpp
 test/Makefile.mk
@@ -508,6 +510,7 @@ test/memkind-pytests.ts
 test/memkind-slts.ts
 test/memkind_dax_kmem_test.cpp
 test/memkind_detect_kind_tests.cpp
+test/memkind_highcapacity_test.cpp
 test/memkind_null_kind_test.cpp
 test/memkind_pmem_config_tests.cpp
 test/memkind_pmem_long_time_tests.cpp
