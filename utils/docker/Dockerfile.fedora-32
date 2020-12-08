@@ -21,6 +21,8 @@ RUN dnf update -y && dnf install -y \
     json-c-devel \
     keyutils-libs-devel \
     kmod-devel \
+    libattr-devel \
+    libcap-ng-devel \
     libpciaccess-devel \
     libtirpc-devel \
     libtool \
@@ -32,6 +34,7 @@ RUN dnf update -y && dnf install -y \
     ninja-build \
     numactl \
     numactl-devel \
+    pixman-devel \
     pkgconfig \
     python-docutils \
     python-pip \
