@@ -141,6 +141,7 @@ which are using the memkind library for dynamic linking at run time:
 | Memory kind                   | NUMA  |  HBW Memory | Hugepages | Device DAX | Filesystem supporting hole punching | HMAT |
 | ----------------------------- |:-----:|:-----------:|:---------:|:----------:|:-----------------------------------:|:-----:
 | MEMKIND_DEFAULT               |       |             |           |            |                                     |      |
+| MEMKIND_HIGHEST_CAPACITY      |       |             |           |            |                                     |      |
 | MEMKIND_HUGETLB               | X     |             | X         |            |                                     |      |
 | MEMKIND_HBW                   | X     | X           |           |            |                                     | X*   |
 | MEMKIND_HBW_ALL               | X     | X           |           |            |                                     | X*   |

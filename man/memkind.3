@@ -679,6 +679,13 @@ The available kinds of memory:
 .B MEMKIND_DEFAULT
 Default allocation using standard memory and default page size.
 .TP
+.B MEMKIND_HIGHEST_CAPACITY
+Allocate from a NUMA node(s) that has the highest capacity among nodes in the system.
+.BR Note:
+If there is more than one node that satisfies this condition, e.g. there are two
+nodes that have the same capacity and it is the highest capacity in the system,
+allocation will be done from both of them.
+.TP
 .B MEMKIND_HUGETLB
 Allocate from standard memory using huge pages.
 .BR Note:

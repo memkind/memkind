@@ -101,6 +101,7 @@
 /test/memkind_allocated
 /test/memkind_cpp_allocator
 /test/memkind_get_stat
+/test/memkind_highcapacity_test
 /test/memkind_stat_test
 /test/perf_tool
 /test/performance_test
