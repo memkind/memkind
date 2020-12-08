@@ -16,6 +16,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     devscripts \
     g++ \
     git \
+    libattr1-dev \
+    libcap-ng-dev \
     libglib2.0-dev \
     libgnutls28-dev \
     libjson-c-dev \
@@ -23,6 +25,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     libkmod-dev \
     libnuma-dev \
     libpciaccess-dev \
+    libpixman-1-dev \
     libtirpc-dev \
     libtool \
     libudev-dev \

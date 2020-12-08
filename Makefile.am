@@ -391,6 +391,7 @@ EXTRA_DIST = CONTRIBUTING \
              utils/docker/docker_install_hwloc.sh \
              utils/docker/docker_install_libvirt.sh \
              utils/docker/docker_install_ndctl.sh \
+             utils/docker/docker_install_qemu.sh \
              utils/docker/docker_install_tbb.sh \
              utils/docker/docker_run_build.sh \
              utils/docker/docker_run_coverage.sh \
