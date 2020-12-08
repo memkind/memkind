@@ -47,6 +47,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
 # Install packages required by python tests
 RUN pip3 install wheel
 RUN pip3 install pytest==3.9.2
+RUN pip3 install fabric
+RUN pip3 install psutil
 RUN pip3 install meson
 
 # Add user
