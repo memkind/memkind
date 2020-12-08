@@ -38,6 +38,7 @@ RUN dnf update -y && dnf install -y \
     pkgconfig \
     python-docutils \
     python-pip \
+    python3-devel \
     rpcgen \
     rpmdevtools \
     sudo \
@@ -49,6 +50,8 @@ RUN dnf update -y && dnf install -y \
 # Install pytest
 RUN pip install wheel
 RUN pip install pytest==3.9.2
+RUN pip3 install fabric
+RUN pip3 install psutil
 RUN pip3 install meson
 
 # Add user

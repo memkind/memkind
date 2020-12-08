@@ -28,6 +28,8 @@ see https://github.com/01org/tbb/tags.
 * **HOG_MEMORY** - Controls behavior of memkind with regards to returning memory to underlying OS. Setting **HOG_MEMORY** to 1 causes
 memkind to not release memory to OS in anticipation of memory reuse soon. For PMEM memory will be released only after calling memkind_destroy_kind()
 
+* **QEMU_TEST** - Setting **QEMU_TEST** results in the execution of tests designated for the QEMU environment.
+
 # Files
 *'docker_run_build.sh'*  is used to build of memkind.
 
@@ -40,6 +42,8 @@ memkind to not release memory to OS in anticipation of memory reuse soon. For PM
 *'docker_install_libvirt.sh'*  is used to install libvirt library.
 
 *'docker_install_ndctl.sh'*  is used to install ndctl library.
+
+*'docker_install_qemu.sh'*  is used to install QEMU library.
 
 *'docker_install_tbb.sh'*  is used to install Intel Threading Building Blocks library.
 
