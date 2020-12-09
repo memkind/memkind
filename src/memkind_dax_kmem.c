@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2019 - 2020 Intel Corporation. */
 
-#include <memkind/internal/memkind_bandwidth.h>
+#include <memkind/internal/memkind_bitmask.h>
 #include <memkind/internal/memkind_dax_kmem.h>
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
@@ -17,7 +17,7 @@
 struct dax_closest_numanode_t {
     int init_err;
     int num_cpu;
-    struct vec_cpu_node *closest_numanode;
+    void *closest_numanode;
 };
 
 #define NODE_VARIANT_MULTIPLE 0
@@ -51,21 +51,28 @@ static void memkind_dax_kmem_preferred_closest_numanode_init(void);
         _dev = _dev ? daxctl_dev_get_next(_dev) : NULL)
 #endif
 
-static int get_dax_kmem_nodes(struct bitmask *dax_kmem_node_mask)
+static int get_dax_kmem_nodemask(struct bitmask **dax_kmem_node_mask)
 {
     struct daxctl_region *region, *_region;
     struct daxctl_dev *dev, *_dev;
     struct daxctl_ctx *ctx;
+    // NUMA Nodes could not be always in arithmetic progression
+    int nodes_num = numa_max_node() + 1;
+    *dax_kmem_node_mask = numa_bitmask_alloc(nodes_num);
+    if (*dax_kmem_node_mask == NULL) {
+        log_err("numa_bitmask_alloc() failed.");
+        return MEMKIND_ERROR_UNAVAILABLE;
+    }
 
     int rc = daxctl_new(&ctx);
     if (rc < 0)
-        return MEMKIND_ERROR_UNAVAILABLE;
+        goto free_mask;
 
     daxctl_region_foreach_safe(ctx, region, _region) {
         daxctl_dev_foreach_safe(region, dev, _dev) {
             struct daxctl_memory *mem = daxctl_dev_get_memory(dev);
             if (mem) {
-                numa_bitmask_setbit(dax_kmem_node_mask,
+                numa_bitmask_setbit(*dax_kmem_node_mask,
                                     (unsigned)daxctl_dev_get_target_node(dev));
             }
         }
@@ -73,21 +80,31 @@ static int get_dax_kmem_nodes(struct bitmask *dax_kmem_node_mask)
 
     daxctl_unref(ctx);
 
-    return (numa_bitmask_weight(dax_kmem_node_mask) != 0) ? MEMKIND_SUCCESS :
-           MEMKIND_ERROR_UNAVAILABLE;
-}
+    if (numa_bitmask_weight(*dax_kmem_node_mask) != 0) {
+        return MEMKIND_SUCCESS;
+    }
 
-static int fill_dax_kmem_values_automatic(int *bandwidth)
-{
-    return bandwidth_fill(bandwidth, get_dax_kmem_nodes);
+free_mask:
+    numa_bitmask_free(*dax_kmem_node_mask);
+    return MEMKIND_ERROR_UNAVAILABLE;
 }
 #else
-static int fill_dax_kmem_values_automatic(int *bandwidth)
+static int get_dax_kmem_nodemask(struct bitmask **bm)
 {
     log_err("DAX KMEM nodes cannot be automatically detected.");
     return MEMKIND_ERROR_OPERATION_FAILED;
 }
 #endif
+
+static int memkind_dax_kmem_get_nodemask(struct bitmask **bm)
+{
+    char *nodes_env = memkind_get_env("MEMKIND_DAX_KMEM_NODES");
+    if (nodes_env) {
+        return memkind_env_get_nodemask(nodes_env, bm);
+    } else {
+        return get_dax_kmem_nodemask(bm);
+    }
+}
 
 static int memkind_dax_kmem_check_available(struct memkind *kind)
 {
@@ -117,7 +134,8 @@ static int memkind_dax_kmem_get_preferred_mbind_nodemask(struct memkind *kind,
                  memkind_dax_kmem_preferred_closest_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err)) {
         g->init_err = set_bitmask_for_current_closest_numanode(nodemask, maxnode,
-                                                               g->closest_numanode, g->num_cpu);
+                                                               g->closest_numanode,
+                                                               g->num_cpu);
     }
     return g->init_err;
 }
@@ -143,8 +161,8 @@ static void memkind_dax_kmem_closest_numanode_init(void)
             &memkind_dax_kmem_closest_numanode_g[NODE_VARIANT_MULTIPLE];
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
-    g->init_err = set_closest_numanode(fill_dax_kmem_values_automatic,
-                                       "MEMKIND_DAX_KMEM_NODES", &g->closest_numanode, g->num_cpu, false);
+    g->init_err = set_closest_numanode(memkind_dax_kmem_get_nodemask,
+                                       &g->closest_numanode, g->num_cpu, false);
 }
 
 static void memkind_dax_kmem_preferred_closest_numanode_init(void)
@@ -153,8 +171,8 @@ static void memkind_dax_kmem_preferred_closest_numanode_init(void)
             &memkind_dax_kmem_closest_numanode_g[NODE_VARIANT_SINGLE];
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
-    g->init_err = set_closest_numanode(fill_dax_kmem_values_automatic,
-                                       "MEMKIND_DAX_KMEM_NODES", &g->closest_numanode, g->num_cpu, true);
+    g->init_err = set_closest_numanode(memkind_dax_kmem_get_nodemask,
+                                       &g->closest_numanode, g->num_cpu, true);
 }
 
 static void memkind_dax_kmem_init_once(void)
