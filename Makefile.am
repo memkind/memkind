@@ -11,7 +11,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/heap_manager.c \
                         src/memkind.c \
                         src/memkind_arena.c \
-                        src/memkind_bandwidth.c \
+                        src/memkind_bitmask.c \
                         src/memkind_dax_kmem.c \
                         src/memkind_default.c \
                         src/memkind_gbtlb.c \
@@ -37,7 +37,7 @@ include_HEADERS = include/hbw_allocator.h \
 
 noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_arena.h \
-                  include/memkind/internal/memkind_bandwidth.h \
+                  include/memkind/internal/memkind_bitmask.h \
                   include/memkind/internal/memkind_dax_kmem.h \
                   include/memkind/internal/memkind_default.h \
                   include/memkind/internal/memkind_gbtlb.h \

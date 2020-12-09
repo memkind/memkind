@@ -4,7 +4,7 @@
 #include <memkind/internal/memkind_hbw.h>
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_hugetlb.h>
-#include <memkind/internal/memkind_bandwidth.h>
+#include <memkind/internal/memkind_bitmask.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
@@ -176,7 +176,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
 struct hbw_closest_numanode_t {
     int init_err;
     int num_cpu;
-    struct vec_cpu_node *closest_numanode;
+    void *closest_numanode;
 };
 
 static struct hbw_closest_numanode_t memkind_hbw_closest_numanode_g;
@@ -186,8 +186,6 @@ static void memkind_hbw_closest_numanode_init(void);
 
 // This declaration is necessary, cause it's missing in headers from libnuma 2.0.8
 extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
-
-static int fill_bandwidth_values_heuristically (int *bandwidth);
 
 MEMKIND_EXPORT int memkind_hbw_check_available(struct memkind *kind)
 {
@@ -287,64 +285,74 @@ static bool is_hbm_supported(cpu_model_data_t cpu)
            (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
 }
 
-static int get_high_bandwidth_nodes(struct bitmask *hbw_node_mask)
+static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
 {
-    int nodes_num = numa_num_configured_nodes();
-    // Check if NUMA configuration is supported.
-    if(nodes_num == 2 || nodes_num == 4 || nodes_num == 8) {
-        struct bitmask *node_cpus = numa_allocate_cpumask();
+    struct bitmask *node_cpumask;
 
-        assert(hbw_node_mask->size >= nodes_num);
-        assert(node_cpus->size >= nodes_num);
-        int i;
-        for(i=0; i<nodes_num; i++) {
-            numa_node_to_cpus(i, node_cpus);
-            if(numa_bitmask_weight(node_cpus) == 0) {
-                //NUMA nodes without CPU are HBW nodes.
-                numa_bitmask_setbit(hbw_node_mask, i);
-            }
-        }
-
-        numa_bitmask_free(node_cpus);
-
-        if(2*numa_bitmask_weight(hbw_node_mask) == nodes_num) {
-            return 0;
-        }
-    }
-
-    return MEMKIND_ERROR_UNAVAILABLE;
-}
-
-///This function tries to fill bandwidth array based on knowledge about known CPU models
-static int fill_bandwidth_values_heuristically(int *bandwidth)
-{
     cpu_model_data_t cpu = get_cpu_model_data();
-
     if(!is_hbm_supported(cpu)) {
         log_err("High Bandwidth Memory is not supported by this CPU.");
         return MEMKIND_ERROR_UNAVAILABLE;
     }
-
-    switch(cpu.model) {
-        case CPU_MODEL_KNL:
-        case CPU_MODEL_KNM: {
-            int ret = bandwidth_fill(bandwidth, get_high_bandwidth_nodes);
-            if(ret == 0) {
-                log_info("Detected High Bandwidth Memory.");
-            }
-            return ret;
+    int nodes_num = numa_num_configured_nodes();
+    // Check if NUMA configuration is supported.
+    if(nodes_num == 2 || nodes_num == 4 || nodes_num == 8) {
+        node_cpumask = numa_allocate_cpumask();
+        if (!node_cpumask) {
+            log_err("malloc() failed.");
+            goto free_cpu_mask;
         }
-        default:
-            return MEMKIND_ERROR_UNAVAILABLE;
+        *hbw_node_mask = numa_bitmask_alloc(nodes_num);
+        if (*hbw_node_mask == NULL) {
+            log_err("malloc() failed.");
+            goto free_nodes_mask;
+        }
+        assert(node_cpumask->size >= nodes_num);
+        int i;
+        for(i=0; i<nodes_num; ++i) {
+            numa_node_to_cpus(i, node_cpumask);
+            if(numa_bitmask_weight(node_cpumask) == 0) {
+                //NUMA nodes without CPU are HBW nodes.
+                numa_bitmask_setbit(*hbw_node_mask, i);
+            }
+        }
+    } else {
+        log_err("High Bandwidth Memory is not supported by this NUMA configuration.");
+        return MEMKIND_ERROR_UNAVAILABLE;
+    }
+
+    if(2*numa_bitmask_weight(*hbw_node_mask) == nodes_num) {
+        numa_bitmask_free(node_cpumask);
+        log_info("Detected High Bandwidth Memory.");
+        return MEMKIND_SUCCESS;
+    }
+
+free_nodes_mask:
+    numa_bitmask_free(*hbw_node_mask);
+
+free_cpu_mask:
+    numa_bitmask_free(node_cpumask);
+
+    return MEMKIND_ERROR_UNAVAILABLE;
+}
+
+static int memkind_hbw_get_nodemask(struct bitmask **bm)
+{
+    char *nodes_env = memkind_get_env("MEMKIND_HBW_NODES");
+    if (nodes_env) {
+        return memkind_env_get_nodemask(nodes_env, bm);
+    } else {
+        return get_legacy_hbw_nodes_mask(bm);
     }
 }
+
 static void memkind_hbw_closest_numanode_init(void)
 {
     struct hbw_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
-    g->init_err = set_closest_numanode(fill_bandwidth_values_heuristically,
-                                       "MEMKIND_HBW_NODES", &g->closest_numanode, g->num_cpu, true);
+    g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
+                                       &g->closest_numanode, g->num_cpu, true);
 }
 
 MEMKIND_EXPORT void memkind_hbw_init_once(void)

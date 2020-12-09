@@ -20,7 +20,7 @@ class Test_trace_mechanism(object):
         print("Executing command: {0}".format(command))
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         assert retcode == 0, self.fail_msg.format("\nError: trace_mechanism_test_helper returned {0} \noutput: {1}".format(retcode,output))
-        assert "MEMKIND_INFO: NUMA node" in output, self.fail_msg.format("\nError: trace mechanism in memkind doesn't show MEMKIND_INFO message \noutput: {0}").format(output)
+        assert "MEMKIND_INFO: Initializing kind memkind_hbw." in output, self.fail_msg.format("\nError: trace mechanism in memkind doesn't show MEMKIND_INFO message \noutput: {0}").format(output)
 
     def test_TC_MEMKIND_2MBPages_logging_MEMKIND_HUGETLB(self):
         huge_page_organizer = Huge_page_organizer(8)
