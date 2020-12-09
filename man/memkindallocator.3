@@ -122,6 +122,11 @@ For this kind, the allocation will not succeed if two or more
 persistent memory NUMA nodes are in the same shortest distance to the same CPU on which process is eligible to run.
 Check on that eligibility is done upon starting the application.
 .PP
+.B libmemkind::kinds::DAX_KMEM_INTERLEAVE
+Same as
+.B libmemkind::kinds::DAX_KMEM
+except that the pages that support the allocation are interleaved across all persistent memory NUMA nodes.
+.PP
 All public member types and functions correspond to standard library allocator concepts and definitions. The current implementation supports C++11 standard.
 .PP
 Template arguments:
