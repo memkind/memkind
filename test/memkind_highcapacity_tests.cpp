@@ -48,7 +48,7 @@ TEST_F(MemkindHiCapacityFunctionalTests, test_TC_HiCapacity_correct_numa)
     long long numa_capacity = numa_node_size64(numa_id, NULL);
 
     // get capacity of NUMA node that has the highest capacity in the system
-    int num_nodes = numa_num_configured_nodes();
+    int num_nodes = numa_num_possible_nodes();
     long long max_capacity = 0;
     for (int i = 0; i < num_nodes; ++i) {
         max_capacity = std::max(max_capacity, numa_node_size64(i, NULL));
@@ -70,7 +70,7 @@ TEST_F(MemkindHiCapacityFunctionalTests,
     std::set<void *> allocations;
 
     // get highest NUMA node capacity in the system
-    int num_nodes = numa_num_configured_nodes();
+    int num_nodes = numa_num_possible_nodes();
     long long max_capacity = 0;
     for (int i = 0; i < num_nodes; ++i) {
         long long cur_capacity = numa_node_size64(i, NULL);

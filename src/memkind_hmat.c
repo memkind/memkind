@@ -19,7 +19,7 @@ static pthread_once_t memkind_hi_cap_numanodes_once_g = PTHREAD_ONCE_INIT;
 static void memkind_hi_cap_numanodes_init(void)
 {
     long long best = 0;
-    int max_node = numa_num_configured_nodes();
+    int max_node = numa_max_node() + 1;
     int node;
 
     struct hi_cap_numanodes_t *g = &memkind_hi_cap_numanodes_g;
