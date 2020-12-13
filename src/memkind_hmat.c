@@ -19,11 +19,11 @@ static pthread_once_t memkind_hi_cap_numanodes_once_g = PTHREAD_ONCE_INIT;
 static void memkind_hi_cap_numanodes_init(void)
 {
     long long best = 0;
-    int max_node = numa_num_configured_nodes();
+    int max_node_id = numa_max_node();
     int node;
 
     struct hi_cap_numanodes_t *g = &memkind_hi_cap_numanodes_g;
-    g->numa_nodes = numa_bitmask_alloc(max_node);
+    g->numa_nodes = numa_bitmask_alloc(max_node_id + 1);
 
     if (MEMKIND_UNLIKELY(g->numa_nodes == NULL)) {
         g->init_err = MEMKIND_ERROR_MALLOC;
@@ -31,7 +31,7 @@ static void memkind_hi_cap_numanodes_init(void)
         return;
     }
 
-    for (node = 0; node < max_node; ++node) {
+    for (node = 0; node <= max_node_id; ++node) {
         long long current = numa_node_size64(node, NULL);
 
         if (current == -1) {

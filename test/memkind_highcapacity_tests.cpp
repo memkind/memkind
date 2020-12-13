@@ -48,9 +48,9 @@ TEST_F(MemkindHiCapacityFunctionalTests, test_TC_HiCapacity_correct_numa)
     long long numa_capacity = numa_node_size64(numa_id, NULL);
 
     // get capacity of NUMA node that has the highest capacity in the system
-    int num_nodes = numa_num_configured_nodes();
+    int max_node_id = numa_max_node();
     long long max_capacity = 0;
-    for (int i = 0; i < num_nodes; ++i) {
+    for (int i = 0; i <= max_node_id; ++i) {
         max_capacity = std::max(max_capacity, numa_node_size64(i, NULL));
     }
 
@@ -70,9 +70,9 @@ TEST_F(MemkindHiCapacityFunctionalTests,
     std::set<void *> allocations;
 
     // get highest NUMA node capacity in the system
-    int num_nodes = numa_num_configured_nodes();
+    int max_node_id = numa_max_node();
     long long max_capacity = 0;
-    for (int i = 0; i < num_nodes; ++i) {
+    for (int i = 0; i <= max_node_id; ++i) {
         long long cur_capacity = numa_node_size64(i, NULL);
         if (cur_capacity > max_capacity) {
             max_capacity = cur_capacity;
@@ -81,9 +81,9 @@ TEST_F(MemkindHiCapacityFunctionalTests,
 
     // create a bitmask with nodes that has highest capacity
     // and sum their free space
-    struct bitmask *highest_nodes = numa_bitmask_alloc(num_nodes);
+    struct bitmask *highest_nodes = numa_bitmask_alloc(max_node_id + 1);
     size_t sum_of_free_space = 0;
-    for (int i = 0; i < num_nodes; ++i) {
+    for (int i = 0; i <= max_node_id; ++i) {
         long long numa_free;
         long long cur_capacity = numa_node_size64(i, &numa_free);
         if (cur_capacity == max_capacity) {
