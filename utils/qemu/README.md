@@ -11,7 +11,7 @@ Scripts in this directory are useful for HMAT emulation
 - Restart libvritd service after the installation
 - [Packer](https://learn.hashicorp.com/tutorials/packer/getting-started-install?in=packer/getting-started) (v1.6.5 or later)
 - Python3.5 and dependencies listed in [requirements.txt](https://github.com/memkind/memkind/blob/master/utils/qemu/requirements.txt)
-- TODO: docker support, add instruction for topologies how to add new
+- TODO: add instruction for topologies how to add new
 
 ## Files
 
