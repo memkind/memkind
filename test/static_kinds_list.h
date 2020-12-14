@@ -21,7 +21,9 @@ static memkind_t static_kinds_list[] = {
     MEMKIND_DAX_KMEM,
     MEMKIND_DAX_KMEM_ALL,
     MEMKIND_DAX_KMEM_PREFERRED,
+    MEMKIND_DAX_KMEM_INTERLEAVE,
     MEMKIND_HIGHEST_CAPACITY
+
 };
 
 

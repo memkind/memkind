@@ -385,6 +385,7 @@ EXTRA_DIST = CONTRIBUTING \
              memkind.spec.mk \
              test/test.sh \
              test/test_dax_kmem.sh \
+             utils/docker/Dockerfile.centos-7 \
              utils/docker/Dockerfile.fedora-32 \
              utils/docker/Dockerfile.ubuntu-20.04 \
              utils/docker/README.md \
@@ -491,7 +492,7 @@ static_lib: libmemkind.la
 	rm libmemkind.a
 
 JEMALLOC_CONFIG = --enable-autogen @min_lg_align_opt@ --without-export --with-version=5.2.1-0-gea6b3e973b477b8061e0076bb257dbd7f3faa756 \
-			--disable-fill --disable-initial-exec-tls --with-jemalloc-prefix=@memkind_prefix@ \
+			@jemalloc_build_type_flags@ --disable-initial-exec-tls --with-jemalloc-prefix=@memkind_prefix@ \
 			--with-malloc-conf="narenas:@auto_arenas@,lg_tcache_max:@tcache_max_size_class@" \
 			#end
 
