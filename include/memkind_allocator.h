@@ -40,7 +40,8 @@ namespace libmemkind
         DAX_KMEM = 11,
         DAX_KMEM_ALL = 12,
         DAX_KMEM_PREFERRED = 13,
-        HIGHEST_CAPACITY = 14,
+        DAX_KMEM_INTERLEAVE = 14,
+        HIGHEST_CAPACITY = 15,
     };
 
     namespace static_kind
@@ -120,6 +121,9 @@ namespace libmemkind
                         break;
                     case libmemkind::kinds::DAX_KMEM_PREFERRED:
                         _kind = MEMKIND_DAX_KMEM_PREFERRED;
+                        break;
+                    case libmemkind::kinds::DAX_KMEM_INTERLEAVE:
+                        _kind = MEMKIND_DAX_KMEM_INTERLEAVE;
                         break;
                     case libmemkind::kinds::HIGHEST_CAPACITY:
                         _kind = MEMKIND_HIGHEST_CAPACITY;

@@ -192,6 +192,13 @@ static struct memkind MEMKIND_HIGHEST_CAPACITY_STATIC = {
     .init_once = PTHREAD_ONCE_INIT,
 };
 
+static struct memkind MEMKIND_DAX_KMEM_INTERLEAVE_STATIC = {
+    .ops = &MEMKIND_DAX_KMEM_INTERLEAVE_OPS,
+    .partition = MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE,
+    .name = "memkind_dax_kmem_interleave",
+    .init_once = PTHREAD_ONCE_INIT,
+};
+
 MEMKIND_EXPORT struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HUGETLB = &MEMKIND_HUGETLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_INTERLEAVE = &MEMKIND_INTERLEAVE_STATIC;
@@ -217,6 +224,8 @@ MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_ALL =
         &MEMKIND_DAX_KMEM_ALL_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_PREFERRED =
         &MEMKIND_DAX_KMEM_PREFERRED_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_INTERLEAVE =
+        &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_CAPACITY =
         &MEMKIND_HIGHEST_CAPACITY_STATIC;
 
@@ -245,6 +254,7 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_DAX_KMEM] = &MEMKIND_DAX_KMEM_STATIC,
         [MEMKIND_PARTITION_DAX_KMEM_ALL] = &MEMKIND_DAX_KMEM_ALL_STATIC,
         [MEMKIND_PARTITION_DAX_KMEM_PREFERRED] = &MEMKIND_DAX_KMEM_PREFERRED_STATIC,
+        [MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE] = &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC,
         [MEMKIND_PARTITION_HIGHEST_CAPACITY] = &MEMKIND_HIGHEST_CAPACITY_STATIC,
     },
     MEMKIND_NUM_BASE_KIND,
@@ -491,6 +501,15 @@ void memkind_init(memkind_t kind, bool check_numa)
     }
 }
 
+char *memkind_get_env(const char *name)
+{
+#ifdef MEMKIND_HAVE_SECURE_GETENV
+    return secure_getenv(name);
+#else
+    return getenv(name);
+#endif
+}
+
 static void nop(void) {}
 
 static int memkind_create(struct memkind_ops *ops, const char *name,
@@ -560,7 +579,7 @@ exit:
 static int memkind_use_other_heap_manager(void)
 {
 #ifdef MEMKIND_ENABLE_HEAP_MANAGER
-    const char *env = secure_getenv("MEMKIND_HEAP_MANAGER");
+    const char *env = memkind_get_env("MEMKIND_HEAP_MANAGER");
     if (env && strcmp(env, "TBB") == 0) {
         load_tbb_symbols();
         return 1;
@@ -575,7 +594,7 @@ __attribute__((constructor))
 static void memkind_construct(void)
 {
     if (!memkind_use_other_heap_manager()) {
-        const char *env = secure_getenv("MEMKIND_BACKGROUND_THREAD_LIMIT");
+        const char *env = memkind_get_env("MEMKIND_BACKGROUND_THREAD_LIMIT");
         if (env) {
             char *end;
             errno = 0;

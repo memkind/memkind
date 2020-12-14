@@ -88,6 +88,25 @@ if test "x$enable_debug" = "x1" ; then
 fi
 AC_SUBST([enable_debug])
 
+#=======================jemalloc_debug=========================================
+AC_ARG_ENABLE([debug-jemalloc],
+  [AS_HELP_STRING([--enable-debug-jemalloc], [Build debugging jemalloc code])],
+[if test "x$enable_debug_jemalloc" = "xno" ; then
+  enable_debug_jemalloc="0"
+else
+  enable_debug_jemalloc="1"
+fi
+],
+[enable_debug_jemalloc="0"]
+)
+
+if test "x$enable_debug_jemalloc" = "x1" ; then
+  jemalloc_build_type_flags=--enable-debug
+else
+  jemalloc_build_type_flags=--disable-fill
+fi
+AC_SUBST([jemalloc_build_type_flags])
+
 #============================gcov==============================================
 AC_ARG_ENABLE([gcov],
   [AS_HELP_STRING([--enable-gcov], [Build code with gcov instructions])],
@@ -128,6 +147,15 @@ if test "x$enable_secure" = "x1" ; then
 fi
 
 AC_SUBST([enable_secure])
+
+#============================secure_getenv===============================
+AC_CHECK_FUNC([secure_getenv],
+              [have_secure_getenv="1"],
+              [have_secure_getenv="0"]
+             )
+if test "x$have_secure_getenv" = "x1" ; then
+  AC_DEFINE([MEMKIND_HAVE_SECURE_GETENV], [], [Detect secure_getenv])
+fi
 
 #============================tcache_max_size_class======================
 
