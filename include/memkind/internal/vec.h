@@ -19,6 +19,8 @@ struct name {\
     size_t capacity;\
 }
 
+#define VEC_INITIALIZER {NULL, 0, 0}
+
 static inline int
 vec_reserve(void *vec, size_t ncapacity, size_t s)
 {
@@ -61,6 +63,9 @@ for (_vec_i = 0;\
 
 #define VEC_SIZE(vec)\
 ((vec)->size)
+
+#define VEC_CAPACITY(vec)\
+((vec)->capacity)
 
 #define VEC_GET(vec, id)\
 (&(vec)->buffer[id])
