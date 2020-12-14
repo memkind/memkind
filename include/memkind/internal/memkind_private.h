@@ -100,6 +100,8 @@ void memkind_init(memkind_t kind, bool check_numa);
 
 void *kind_mmap(struct memkind *kind, void *addr, size_t size);
 
+char *memkind_get_env(const char *name);
+
 #ifdef __cplusplus
 }
 #endif

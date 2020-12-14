@@ -122,7 +122,7 @@ TEST_F(MemkindConfigTests,
     struct memkind_pmem *priv = nullptr;
     void *temp_ptr = nullptr;
     struct stat st;
-    const char *str = secure_getenv("MEMKIND_HOG_MEMORY");
+    const char *str = getenv("MEMKIND_HOG_MEMORY");
     int skip_test = str && str[0] == '1';
     if (skip_test) {
         GTEST_SKIP();
