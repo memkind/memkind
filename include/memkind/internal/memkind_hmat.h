@@ -9,6 +9,7 @@ extern "C" {
 #include <memkind.h>
 
 extern struct memkind_ops MEMKIND_HIGHEST_CAPACITY_OPS;
+extern struct memkind_ops MEMKIND_HIGHEST_CAPACITY_PREFERRED_OPS;
 
 #ifdef __cplusplus
 }
