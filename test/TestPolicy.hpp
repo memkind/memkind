@@ -153,4 +153,42 @@ namespace TestPolicy
 
         return regular_nodes;
     }
+
+    std::set<int> get_highest_capacity_nodes(void)
+    {
+        std::set<int> highest_capacity_nodes;
+        long long max_capacity = 0;
+
+        const int MAXNODE_ID = numa_max_node();
+        for (int i = 0; i <= MAXNODE_ID; ++i) {
+            long long capacity = numa_node_size64(i, NULL);
+            if (capacity == -1) {
+                continue;
+            }
+            if (capacity > max_capacity) {
+                highest_capacity_nodes.clear();
+                highest_capacity_nodes.insert(i);
+                max_capacity = capacity;
+            } else if (capacity == max_capacity) {
+                highest_capacity_nodes.insert(i);
+            }
+        }
+        return highest_capacity_nodes;
+    }
+
+    //TODO unify this with dax_kmem_tests.cpp
+    size_t get_free_space(std::set<int> nodes)
+    {
+        size_t sum_of_free_space = 0;
+        long long free_space;
+
+        for(auto const &node: nodes) {
+            int result = numa_node_size64(node, &free_space);
+            if (result == -1)
+                continue;
+            sum_of_free_space += free_space;
+        }
+
+        return sum_of_free_space;
+    }
 }
