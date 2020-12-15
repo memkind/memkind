@@ -10,11 +10,12 @@ ignore:
 coverage:
   range: "60...100"
   status:
-    project: off
+    project:
+      default:
+        informational: true
     patch:
       default:
         informational: true
-    changes: off
 
 comment:
   layout: "diff"
