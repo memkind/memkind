@@ -24,7 +24,6 @@ MEMKIND_MOUNT_TAG = 'memkind_host'
 MEMKIND_QEMU_PREFIX = 'utils/qemu'
 TOPOLOGY_ENV_VAR = 'MEMKIND_TEST_TOPOLOGY'
 TOPOLOGY_DIR = 'topology'
-# TODO fix interactive option
 # TODO update ccache links in original image
 # TODO handling fsdax??
 # TODO handling specific guest CPU - KNL ?
