@@ -406,7 +406,7 @@ static int get_hmat_hbw_nodes_mask(struct bitmask **hbw_node_mask)
             }
 
             if (bandwidth >= hbw_threshold) {
-                numa_bitmask_setbit(hbw_node_mask, target->os_index);
+                numa_bitmask_setbit(*hbw_node_mask, target->os_index);
             }
         }
     }
