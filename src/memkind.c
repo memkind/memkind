@@ -185,17 +185,17 @@ static struct memkind MEMKIND_DAX_KMEM_PREFERRED_STATIC = {
     .init_once = PTHREAD_ONCE_INIT,
 };
 
-static struct memkind MEMKIND_HIGHEST_CAPACITY_STATIC = {
-    .ops = &MEMKIND_HIGHEST_CAPACITY_OPS,
-    .partition = MEMKIND_PARTITION_HIGHEST_CAPACITY,
-    .name = "memkind_highest_capacity",
-    .init_once = PTHREAD_ONCE_INIT,
-};
-
 static struct memkind MEMKIND_DAX_KMEM_INTERLEAVE_STATIC = {
     .ops = &MEMKIND_DAX_KMEM_INTERLEAVE_OPS,
     .partition = MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE,
     .name = "memkind_dax_kmem_interleave",
+    .init_once = PTHREAD_ONCE_INIT,
+};
+
+static struct memkind MEMKIND_HIGHEST_CAPACITY_STATIC = {
+    .ops = &MEMKIND_HIGHEST_CAPACITY_OPS,
+    .partition = MEMKIND_PARTITION_HIGHEST_CAPACITY,
+    .name = "memkind_highest_capacity",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
