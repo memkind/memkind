@@ -640,6 +640,15 @@ MEMKIND_EXPORT int memkind_bijective_get_arena(struct memkind *kind,
     return 0;
 }
 
+// SplitMix64 hash
+static uint64_t hash64(uint64_t x)
+{
+    x += 0x9e3779b97f4a7c15;
+    x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+    x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+    return x ^ (x >> 31);
+}
+
 #ifdef MEMKIND_TLS
 MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
                                             unsigned int *arena, size_t size)
@@ -655,11 +664,7 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
             log_err("malloc() failed.");
         }
         if (!err) {
-            // On glibc pthread_self() is incremented by 0x801000 for every
-            // thread (no matter the arch's word width).  This might change
-            // in the future, but even in the worst case the hash will
-            // degenerate to a single bucket with no loss of correctness.
-            *arena_tsd = ((uint64_t)pthread_self() >> 12) % kind->arena_map_len;
+            *arena_tsd = hash64((uint64_t)pthread_self()) % kind->arena_map_len;
             err = pthread_setspecific(kind->arena_key, arena_tsd)
                 ? MEMKIND_ERROR_RUNTIME
                 : 0;
@@ -690,9 +695,7 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
                                             unsigned int *arena, size_t size)
 {
     unsigned int arena_idx;
-    // it's likely that each thread control block lies on different page
-    // so we extracting page number with >> 12 to improve hashing
-    arena_idx = (get_fs_base() >> 12) & kind->arena_map_mask;
+    arena_idx = hash64(get_fs_base()) & kind->arena_map_mask;
     *arena = kind->arena_zero + arena_idx;
     return 0;
 }
