@@ -403,8 +403,10 @@ EXTRA_DIST = CONTRIBUTING \
              utils/qemu/http/preseed.cfg \
              utils/qemu/main.py \
              utils/qemu/requirements.txt \
-             utils/qemu/topology/single_hbw_node.xml \
-             utils/qemu/topology/single_memory_node.xml \
+             utils/qemu/topology/README.md \
+             utils/qemu/topology/knm_all2all.xml \
+             utils/qemu/topology/knm_snc2.xml \
+             utils/qemu/topology/knm_snc4.xml \
              utils/qemu/ubuntu-packer.json \
              # end
 

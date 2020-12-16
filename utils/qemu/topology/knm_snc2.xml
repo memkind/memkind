@@ -1,0 +1,47 @@
+<!-- SPDX-License-Identifier: BSD-2-Clause
+# Copyright (C) 2020 Intel Corporation.
+-->
+<domain type='qemu'>
+  <name>KnightsMillSNC2</name>
+  <os>
+    <type arch='x86_64' machine='pc'>hvm</type>
+  </os>
+  <vcpu placement='static'>16</vcpu>
+  <cpu>
+    <topology sockets='1' dies='1' cores='16' threads='1'/>
+    <numa>
+      <cell id='0' cpus='0-7' memory='2560' unit='MiB'>
+        <distances>
+          <sibling id='0' value='10'/>
+          <sibling id='1' value='21'/>
+          <sibling id='2' value='31'/>
+          <sibling id='3' value='41'/>
+        </distances>
+      </cell>
+      <cell id='1' cpus='8-15' memory='2560' unit='MiB'>
+        <distances>
+          <sibling id='0' value='21'/>
+          <sibling id='1' value='10'/>
+          <sibling id='2' value='41'/>
+          <sibling id='3' value='31'/>
+        </distances>
+      </cell>
+      <cell id='2' memory='256' unit='MiB'>
+        <distances>
+          <sibling id='0' value='31'/>
+          <sibling id='1' value='41'/>
+          <sibling id='2' value='10'/>
+          <sibling id='3' value='41'/>
+        </distances>
+      </cell>
+      <cell id='3' memory='256' unit='MiB'>
+        <distances>
+          <sibling id='0' value='41'/>
+          <sibling id='1' value='31'/>
+          <sibling id='2' value='41'/>
+          <sibling id='3' value='10'/>
+        </distances>
+      </cell>
+    </numa>
+  </cpu>
+</domain>
