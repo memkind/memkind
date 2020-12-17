@@ -18,6 +18,7 @@ int main(int argc, char **argv)
     char *hbw_preferred_hugetlb_str = NULL;
     char *hbw_interleave_str = NULL;
     char *highest_capacity_str = NULL;
+    char *local_highest_capacity_str = NULL;
 
     default_str = (char *)memkind_malloc(MEMKIND_DEFAULT, size);
     if (default_str == NULL) {
@@ -68,6 +69,13 @@ int main(int argc, char **argv)
         fprintf(stderr,"Unable to allocate highest_capacity string\n");
         return errno ? -errno : 1;
     }
+    local_highest_capacity_str = (char *)memkind_malloc(
+                                     MEMKIND_LOCAL_HIGHEST_CAPACITY, size);
+    if (local_highest_capacity_str == NULL) {
+        perror("memkind_malloc()");
+        fprintf(stderr,"Unable to allocate local_highest_capacity string\n");
+        return errno ? -errno : 1;
+    }
 
     sprintf(default_str, "Hello world from standard memory\n");
     sprintf(hugetlb_str, "Hello world from standard memory with 2 MB pages\n");
@@ -81,6 +89,8 @@ int main(int argc, char **argv)
             "Hello world from high bandwidth interleaved memory\n");
     sprintf(highest_capacity_str,
             "Hello world from highest capacity memory\n");
+    sprintf(local_highest_capacity_str,
+            "Hello world from highest capacity memory\n");
 
     fprintf(stdout, "%s", default_str);
     fprintf(stdout, "%s", hugetlb_str);
@@ -90,6 +100,7 @@ int main(int argc, char **argv)
     fprintf(stdout, "%s", hbw_preferred_hugetlb_str);
     fprintf(stdout, "%s", hbw_interleave_str);
     fprintf(stdout, "%s", highest_capacity_str);
+    fprintf(stdout, "%s", local_highest_capacity_str);
 
     memkind_free(MEMKIND_HBW_INTERLEAVE, hbw_interleave_str);
     memkind_free(MEMKIND_HBW_PREFERRED_HUGETLB, hbw_preferred_hugetlb_str);
@@ -99,6 +110,7 @@ int main(int argc, char **argv)
     memkind_free(MEMKIND_HUGETLB, hugetlb_str);
     memkind_free(MEMKIND_DEFAULT, default_str);
     memkind_free(MEMKIND_HIGHEST_CAPACITY, highest_capacity_str);
+    memkind_free(MEMKIND_LOCAL_HIGHEST_CAPACITY, local_highest_capacity_str);
 
     return 0;
 }
