@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include "config.h"
 #include <memkind.h>
-
 
 static memkind_t static_kinds_list[] = {
     MEMKIND_DEFAULT,
@@ -22,8 +22,10 @@ static memkind_t static_kinds_list[] = {
     MEMKIND_DAX_KMEM_ALL,
     MEMKIND_DAX_KMEM_PREFERRED,
     MEMKIND_DAX_KMEM_INTERLEAVE,
-    MEMKIND_HIGHEST_CAPACITY
-
+    MEMKIND_HIGHEST_CAPACITY,
+#ifdef MEMKIND_HWLOC
+    MEMKIND_LOCAL_HIGHEST_CAPACITY
+#endif // MEMKIND_HWLOC
 };
 
 

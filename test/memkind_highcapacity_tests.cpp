@@ -5,8 +5,8 @@
 #include <numa.h>
 #include <numaif.h>
 #include <math.h>
-#include <string>
 #include <unistd.h>
+#include <limits.h>
 
 #include "proc_stat.h"
 #include "sys/types.h"
@@ -14,6 +14,10 @@
 #include "TestPolicy.hpp"
 
 #include "common.h"
+#include "config.h"
+#ifdef MEMKIND_HWLOC
+#include <hwloc.h>
+#endif
 
 class MemkindHiCapacityFunctionalTests:
     public ::testing::Test
@@ -32,6 +36,17 @@ TEST_F(MemkindHiCapacityFunctionalTests,
     ASSERT_EQ(test1, nullptr);
     ASSERT_EQ(errno, ENOMEM);
 }
+
+#ifdef MEMKIND_HWLOC
+TEST_F(MemkindHiCapacityFunctionalTests,
+       test_TC_LocalHiCapacity_alloc_size_max)
+{
+    errno = 0;
+    void *test1 = memkind_malloc(MEMKIND_LOCAL_HIGHEST_CAPACITY, SIZE_MAX);
+    ASSERT_EQ(test1, nullptr);
+    ASSERT_EQ(errno, ENOMEM);
+}
+#endif
 
 TEST_F(MemkindHiCapacityFunctionalTests, test_TC_HiCapacity_correct_numa)
 {
@@ -80,6 +95,7 @@ TEST_F(MemkindHiCapacityFunctionalTests,
         GTEST_SKIP() <<
                      "This test requires only 1 highest capacity NUMA Node in the OS ";
     }
+
     ProcStat stat;
     void *ptr;
     const size_t alloc_size = 100 * MB;
