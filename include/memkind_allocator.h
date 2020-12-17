@@ -13,6 +13,7 @@
 #include <stdexcept>
 
 #include "memkind.h"
+#include "config.h"
 
 /*
  * Header file for the C++ allocator compatible with the C++ standard library allocator concepts.
@@ -42,7 +43,10 @@ namespace libmemkind
         DAX_KMEM_PREFERRED = 13,
         DAX_KMEM_INTERLEAVE = 14,
         HIGHEST_CAPACITY = 15,
-        HIGHEST_CAPACITY_PREFERRED = 16
+        HIGHEST_CAPACITY_PREFERRED = 16,
+#ifdef MEMKIND_HWLOC
+        LOCAL_HIGHEST_CAPACITY = 17,
+#endif // MEMKIND_HWLOC
     };
 
     namespace static_kind
@@ -129,6 +133,11 @@ namespace libmemkind
                     case libmemkind::kinds::HIGHEST_CAPACITY:
                         _kind = MEMKIND_HIGHEST_CAPACITY;
                         break;
+#ifdef MEMKIND_HWLOC
+                    case libmemkind::kinds::LOCAL_HIGHEST_CAPACITY:
+                        _kind = MEMKIND_HIGHEST_CAPACITY_LOCAL;
+                        break;
+#endif
                     case libmemkind::kinds::HIGHEST_CAPACITY_PREFERRED:
                         _kind = MEMKIND_HIGHEST_CAPACITY_PREFERRED;
                         break;
