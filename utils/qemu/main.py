@@ -31,7 +31,7 @@ TOPOLOGY_DIR = 'topology'
 # TODO handling verbosity of this script
 
 QemuCfg = collections.namedtuple('QemuCfg', ['workdir', 'image', 'interactive', 'force_reinstall', 'run_test', 'topologies'])
-TopologyCfg = collections.namedtuple('TopologyCfg', ['name', 'hmat', 'cpu_options', 'mem_options'])
+TopologyCfg = collections.namedtuple('TopologyCfg', ['name', 'hmat', 'cpu_model', 'cpu_options', 'mem_options'])
 
 
 def _logger(func):
@@ -189,11 +189,16 @@ class QEMU:
         """
         return '-enable-kvm'
 
-    def _cpu_model(self, tpg_name: str) -> str:
+    def _cpu_model(self, tpg: TopologyCfg) -> str:
         """
         CPU Model
         """
-        return '-cpu KnightsMill' if 'KnightsMill' in tpg_name else '-cpu host'
+        # virsh doesn't support model KnightsMill
+        if "KnightsMill" in tpg.name:
+            cpu_model = 'KnightsMill'
+        else:
+            cpu_model = 'host' if tpg.cpu_model == 'qemu64' else tpg.cpu_model
+        return f'-cpu {cpu_model}'
 
     @property
     def _connect_option(self) -> str:
@@ -272,7 +277,7 @@ class QEMU:
         cmd_str = ' '.join([self._qemu_exec,
                             self._hda_option,
                             self._optim_option,
-                            self._cpu_model(tpg.name),
+                            self._cpu_model(tpg),
                             self._connect_option,
                             self._boot_option,
                             self._memory_option(tpg),
@@ -349,6 +354,7 @@ def parse_topology_xml(tpg_file_name: str) -> TopologyCfg:
         libvirt_args = result.stdout.decode('utf-8').strip()
         tpg_cfg = {'name': re.search(r'guest=(\w+)', libvirt_args).group(1),
                    'hmat': 'hmat=on' in libvirt_args,
+                   'cpu_model': re.search(r'cpu (\S+)', libvirt_args).group(1),
                    'cpu_options': re.search('(?=-smp)(.*)threads=[0-9]+', libvirt_args).group(0),
                    'mem_options': re.search('(?=-object memory)(.*)(?=-uuid)', libvirt_args).group(1)}
 
