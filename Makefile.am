@@ -404,6 +404,8 @@ EXTRA_DIST = CONTRIBUTING \
              utils/qemu/main.py \
              utils/qemu/requirements.txt \
              utils/qemu/topology/README.md \
+             utils/qemu/topology/csl_2_var1.xml \
+             utils/qemu/topology/csl_4_var1.xml \
              utils/qemu/topology/knm_all2all.xml \
              utils/qemu/topology/knm_snc2.xml \
              utils/qemu/topology/knm_snc4.xml \
