@@ -25,7 +25,6 @@ MEMKIND_QEMU_PREFIX = 'utils/qemu'
 TOPOLOGY_ENV_VAR = 'MEMKIND_TEST_TOPOLOGY'
 TOPOLOGY_DIR = 'topology'
 # TODO handling fsdax??
-# TODO handling specific guest CPU - KNL ?
 # TODO handling codecov in this script
 # TODO handling scaling the memory in xml
 # TODO provide also build with disabled hwloc
@@ -188,7 +187,13 @@ class QEMU:
         Optimization options:
         - Use kernel based virtual machine
         """
-        return '-enable-kvm -cpu host'
+        return '-enable-kvm'
+
+    def _cpu_model(self, tpg_name: str) -> str:
+        """
+        CPU Model
+        """
+        return '-cpu KnightsMill' if 'KnightsMill' in tpg_name else '-cpu host'
 
     @property
     def _connect_option(self) -> str:
@@ -267,6 +272,7 @@ class QEMU:
         cmd_str = ' '.join([self._qemu_exec,
                             self._hda_option,
                             self._optim_option,
+                            self._cpu_model(tpg.name),
                             self._connect_option,
                             self._boot_option,
                             self._memory_option(tpg),
