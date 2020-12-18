@@ -379,6 +379,15 @@ def parse_topology(cfg: dict) -> typing.List[TopologyCfg]:
     return tpg_list
 
 
+def parse_image_path(image_path: str) -> str:
+    """
+    Parse QEMU image file path
+    """
+    if not os.path.exists(image_path):
+        sys.exit(f"\n Image file: {image_path} doesn't exist")
+    return image_path
+
+
 def parse_arguments() -> QemuCfg:
     """
     Parse command line arguments
@@ -395,7 +404,7 @@ def parse_arguments() -> QemuCfg:
     if cli_cfg['interactive'] and cli_cfg['mode'] == 'test':
         parser.error("interactive is supported only by dev mode")
 
-    qemu_cfg['image'] = cli_cfg['image']
+    qemu_cfg['image'] = parse_image_path(cli_cfg['image'])
     qemu_cfg['interactive'] = cli_cfg['interactive']
     qemu_cfg['force_reinstall'] = cli_cfg['force_reinstall']
     qemu_cfg['topologies'] = parse_topology(cli_cfg)
