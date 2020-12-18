@@ -12,14 +12,15 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind.c \
                         src/memkind_arena.c \
                         src/memkind_bitmask.c \
+                        src/memkind_capacity.c \
                         src/memkind_dax_kmem.c \
                         src/memkind_default.c \
                         src/memkind_gbtlb.c \
                         src/memkind_hbw.c \
-                        src/memkind_hmat.c \
                         src/memkind_hugetlb.c \
                         src/memkind_interleave.c \
                         src/memkind_log.c \
+                        src/memkind_mem_attributes.c \
                         src/memkind_pmem.c \
                         src/memkind_regular.c \
                         src/tbb_wrapper.c \
