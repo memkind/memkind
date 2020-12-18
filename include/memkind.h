@@ -282,6 +282,9 @@ extern memkind_t MEMKIND_HIGHEST_CAPACITY;
 /// \note STANDARD API
 extern memkind_t MEMKIND_HIGHEST_CAPACITY_PREFERRED;
 
+/// \note STANDARD API
+extern memkind_t MEMKIND_HIGHEST_CAPACITY_LOCAL;
+
 ///
 /// \brief Get Memkind API version
 /// \note STANDARD API
