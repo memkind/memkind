@@ -685,6 +685,16 @@ Allocate from a NUMA node(s) that has the highest capacity among nodes in the sy
 If there is more than one node that satisfies this condition, e.g. there are two
 nodes that have the same capacity and it is the highest capacity in the system,
 allocation will be done from both of them.
+.B MEMKIND_HIGHEST_CAPACITY_LOCAL
+Allocate from a NUMA node(s) that has the highest capacity among local nodes
+(placed in the same package) in the system.
+.BR Note:
+There could be a situation, when allocations from MEMKIND_HIGHEST_CAPACITY nodes
+would do alloactions from nodes that are very far from CPU that requested
+allocation, causing latency problem. In this case user may want to allocate on
+highest capacity nodes but only those, that are local to CPU that requested
+allocation. If so, a MEMKIND_HIGHEST_CAPACITY_LOCAL kind should be used to
+address that problem.
 .TP
 .B MEMKIND_HIGHEST_CAPACITY_PREFERRED
 Same as
