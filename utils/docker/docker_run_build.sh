@@ -25,6 +25,11 @@ else
         "$UTILS_PREFIX"/docker_install_ndctl.sh
     fi
 
+    # if hwloc library version is specified install library
+    if [ -n "$HWLOC_LIBRARY_VERSION" ]; then
+        "$UTILS_PREFIX"/docker_install_hwloc.sh
+    fi
+
     # building memkind sources and tests
     ./autogen.sh
     ./configure --prefix=/usr $GCOV_OPTION
@@ -32,7 +37,7 @@ else
     make -j "$(nproc)" checkprogs
 
     # building RPM package
-    if [[ $(cat /etc/os-release) = *"fedora"* ]]; then
+    if [[ ($(cat /etc/os-release) = *"fedora"*) && (-n "$HWLOC_LIBRARY_VERSION") ]]; then
         make -j "$(nproc)" rpm
     fi
 

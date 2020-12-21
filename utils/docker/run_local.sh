@@ -45,6 +45,7 @@ docker run --rm \
            --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
            --env HOG_MEMORY="$HOG_MEMORY" \
            --env NDCTL_LIBRARY_VERSION="$NDCTL_LIBRARY_VERSION" \
+           --env HWLOC_LIBRARY_VERSION="$HWLOC_LIBRARY_VERSION" \
            --env PMEM_CONTAINER_PATH="$PMEM_CONTAINER_PATH" \
            --env QEMU_TEST="$QEMU_TEST" \
            $qemu_enable \

@@ -64,7 +64,7 @@
         "sudo apt update && sudo apt install -y asciidoctor automake ccache curl g++ git libnuma-dev libtool libjson-c-dev libkmod-dev libkeyutils-dev libudev-dev numactl pkg-config uuid-dev",
         "sudo /usr/sbin/update-ccache-symlinks",
         "echo 'export PATH=\"/usr/lib/ccache:$PATH\"' >> .bashrc",
-        "sudo bash docker_install_hwloc.sh",
+        "sudo HWLOC_LIBRARY_VERSION=v2.3 bash docker_install_hwloc.sh",
         "sudo NDCTL_LIBRARY_VERSION=v70.1 bash docker_install_ndctl.sh"
       ]
     }

@@ -7,8 +7,9 @@
 #
 
 set -e
-HWLOC_LIBRARY_VERSION=v2.3
-HWLOC_TAR_GZ=hwloc-2.3.0.tar.gz
+
+HWLOC_FILTER_VERSION="${HWLOC_LIBRARY_VERSION:1}"
+HWLOC_TAR_GZ=hwloc-"$HWLOC_FILTER_VERSION".0.tar.gz
 
 HWLOC_TARBALL_URL=https://download.open-mpi.org/release/hwloc/"$HWLOC_LIBRARY_VERSION"/"$HWLOC_TAR_GZ"
 

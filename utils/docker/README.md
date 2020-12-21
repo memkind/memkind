@@ -21,6 +21,10 @@ to build, test and optionally measure test coverage of any pull request to memki
 For fully testing MEMKIND_DAX_KMEM, ndctl library version tag must be passed as parameter,
 see https://github.com/pmem/ndctl/tags.
 
+* **HWLOC_LIBRARY_VERSION** - hwloc library version.
+For fully testing MEMKIND_HIGHEST_CAPACITY_LOCALITY, MEMKIND_HIGHEST_BANDWIDTH, MEMKIND_LOWEST_LATENCY, hwloc library version tag must be passed as parameter,
+see https://github.com/open-mpi/hwloc/tags.
+
 * **TBB_LIBRARY_VERSION** - Intel Threading Building Blocks library version.
 For testing Threading Building Blocks, TBB library version tag must be passed as parameter,
 see https://github.com/01org/tbb/tags.
