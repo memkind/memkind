@@ -10,8 +10,11 @@ Scripts in this directory are useful for HMAT emulation
 - [Libvirt](https://libvirt.org/sources/) (v6.10.0 or later)
 - Restart libvritd service after the installation
 - [Packer](https://learn.hashicorp.com/tutorials/packer/getting-started-install?in=packer/getting-started) (v1.6.5 or later)
-- Python3.5 and dependencies listed in [requirements.txt](https://github.com/memkind/memkind/blob/master/utils/qemu/requirements.txt)
 - TODO: add instruction for topologies how to add new
+
+## Python Dependencies
+- Python3.5
+- fabric, psutil
 
 ## Files
 

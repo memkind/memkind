@@ -403,7 +403,6 @@ EXTRA_DIST = CONTRIBUTING \
              utils/qemu/README.md \
              utils/qemu/http/preseed.cfg \
              utils/qemu/main.py \
-             utils/qemu/requirements.txt \
              utils/qemu/topology/README.md \
              utils/qemu/topology/clx_2_var1.xml \
              utils/qemu/topology/clx_4_var1.xml \
