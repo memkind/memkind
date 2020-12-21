@@ -3,6 +3,7 @@
 
 #include <memkind/internal/memkind_mem_attributes.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_private.h>
 
 #include "config.h"
 #ifdef MEMKIND_HWLOC
