@@ -21,4 +21,4 @@ CODECOV_DIR=codecov-bash
 mkdir "$CODECOV_DIR"
 curl -L "$CODECOV_RELEASE" | tar xz -C "$CODECOV_DIR" --strip-components=1
 
-"$CODECOV_DIR"/codecov -t "$CODECOV_TOKEN" -cF "$TEST_SUITE_NAME" -p "$MEMKIND_REPO_PATH" -Z
+"$CODECOV_DIR"/codecov -t "$CODECOV_TOKEN" -cF "$TEST_SUITE_NAME" -p "$MEMKIND_REPO_PATH" -Z -v
