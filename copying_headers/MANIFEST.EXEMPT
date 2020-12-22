@@ -1,4 +1,3 @@
-.codecov.yml
 .gitignore
 .travis.yml
 AUTHORS
@@ -10,6 +9,7 @@ PULL_REQUEST_TEMPLATE.md
 README
 VERSION
 autohbw/autohbw_README
+codecov.yml
 examples/README
 include/memkind/internal/tbb_mem_pool_policy.h
 jemalloc/.appveyor.yml
