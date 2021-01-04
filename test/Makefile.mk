@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 AM_CPPFLAGS += -Itest/gtest_fused -DMEMKIND_DEPRECATED\(x\)=x
 
@@ -64,10 +64,11 @@ test_pmem_test_SOURCES = $(fused_gtest) test/memkind_pmem_config_tests.cpp test/
 test_pmem_test_LDADD = libmemkind.la
 test_memkind_highcapacity_test_SOURCES = $(fused_gtest) test/memkind_highcapacity_tests.cpp
 test_memkind_highcapacity_test_LDADD = libmemkind.la
-test_hmat_test_SOURCES = $(fused_gtest) test/memkind_hmat_tests.cpp
+test_hmat_test_SOURCES = $(fused_gtest) test/memkind_hmat_tests.cpp test/memory_topology.h
 test_hmat_test_LDADD = libmemkind.la
 test_defrag_reallocate_SOURCES = $(fused_gtest) test/memkind_defrag_reallocate.cpp
 test_defrag_reallocate_LDADD = libmemkind.la
+test_hmat_test_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS)
 endif
 
 fused_gtest = test/gtest_fused/gtest/gtest-all.cc \

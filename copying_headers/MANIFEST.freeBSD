@@ -165,6 +165,7 @@ test/memkind_stat_test.cpp
 test/memkind_versioning_tests.cpp
 test/memory_footprint_test.cpp
 test/memory_manager.h
+test/memory_topology.h
 test/multithreaded_tests.cpp
 test/negative_tests.cpp
 test/performance/framework.cpp
