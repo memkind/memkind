@@ -60,6 +60,7 @@
 /memkind-*.tar.gz
 /memkind-auto-dax-kmem-nodes
 /memkind-hbw-nodes
+/memkind-memory-matrix
 /missing
 /src/memkind_defines.h.in
 /stamp-h1
