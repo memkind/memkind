@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include <memkind.h>
 
@@ -290,6 +290,22 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_HiCapacitySizeZero)
 
     errno = 0;
     ret = memkind_posix_memalign(MEMKIND_HIGHEST_CAPACITY,
+                                 &ptr,
+                                 16,
+                                 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+    ASSERT_TRUE(ptr == NULL);
+}
+
+TEST_F(NegativeTest, test_TC_MEMKIND_Negative_LocalHiCapacitySizeZero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_HIGHEST_CAPACITY_LOCAL,
                                  &ptr,
                                  16,
                                  0);
