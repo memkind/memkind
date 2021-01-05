@@ -1,5 +1,5 @@
 .\" SPDX-License-Identifier: BSD-2-Clause
-.\" Copyright (C) 2014 - 2020 Intel Corporation.
+.\" Copyright (C) 2014 - 2021 Intel Corporation.
 .\"
 .TH "MEMKIND" 3 "2015-03-31" "Intel Corporation" "MEMKIND" \" -*- nroff -*-
 .SH "NAME"
@@ -714,7 +714,7 @@ Allocate pages interleaved across all NUMA nodes with transparent huge
 pages disabled.
 .TP
 .B MEMKIND_HBW
-Allocate from the closest high bandwidth memory NUMA node at the time
+Allocate from the closest high bandwidth memory NUMA node(s) at the time
 of allocation. If there is not enough high bandwidth memory to satisfy the request
 .I errno
 is set to
@@ -725,7 +725,7 @@ and the allocated pointer is set to
 .B MEMKIND_HBW_ALL
 Same as
 .B MEMKIND_HBW
-except decision regarding closest NUMA node is postponed until the time of first write.
+except decision regarding closest NUMA node(s) is postponed until the time of first write.
 .TP
 .B MEMKIND_HBW_HUGETLB
 Same as
@@ -753,6 +753,10 @@ Same as
 .B MEMKIND_HBW
 except that if there is not enough high bandwidth memory to satisfy
 the request, the allocation will fall back on standard memory.
+.BR Note:
+For this kind, the allocation will not succeed if two or more
+high bandwidth memory NUMA nodes are in the same shortest distance to the same CPU on which process is eligible to run.
+Check on that eligibility is done upon starting the application.
 .TP
 .B MEMKIND_HBW_PREFERRED_HUGETLB
 Same as
@@ -783,6 +787,9 @@ the request, the allocation will fall back on standard memory.
 This kind requires huge pages configuration described in
 .B SYSTEM CONFIGURATION
 section.
+For this kind, the allocation will not succeed if two or more
+high bandwidth memory NUMA nodes are in the same shortest distance to the same CPU on which process is eligible to run.
+Check on that eligibility is done upon starting the application.
 .TP
 .B MEMKIND_HBW_INTERLEAVE
 Same as
@@ -1097,7 +1104,7 @@ can be reached on GitHub:
 There might be some overhead in huge pages consumption caused by heap management.
 If your allocation fails because of OOM, please try to allocate extra huge pages (e.g. 8 huge pages).
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2020 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2021 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR malloc (3),
 .BR malloc_usable_size (3),

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include <memkind/internal/memkind_hbw.h>
 #include <memkind/internal/memkind_default.h>
@@ -122,7 +122,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .mbind = memkind_default_mbind,
     .get_mmap_flags = memkind_default_get_mmap_flags,
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
-    .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
+    .get_mbind_nodemask = memkind_hbw_get_preferred_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_preferred_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
@@ -143,7 +143,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .mbind = memkind_default_mbind,
     .get_mmap_flags = memkind_hugetlb_get_mmap_flags,
     .get_mbind_mode = memkind_preferred_get_mbind_mode,
-    .get_mbind_nodemask = memkind_hbw_get_mbind_nodemask,
+    .get_mbind_nodemask = memkind_hbw_get_preferred_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_hbw_preferred_hugetlb_init_once,
     .malloc_usable_size = memkind_default_malloc_usable_size,
@@ -180,10 +180,17 @@ struct hbw_closest_numanode_t {
     void *closest_numanode;
 };
 
-static struct hbw_closest_numanode_t memkind_hbw_closest_numanode_g;
-static pthread_once_t memkind_hbw_closest_numanode_once_g = PTHREAD_ONCE_INIT;
+#define NODE_VARIANT_MULTIPLE 0
+#define NODE_VARIANT_SINGLE   1
+#define NODE_VARIANT_MAX      2
+
+static struct hbw_closest_numanode_t
+    memkind_hbw_closest_numanode_g[NODE_VARIANT_MAX];
+static pthread_once_t memkind_hbw_closest_numanode_once_g[NODE_VARIANT_MAX]
+    = {PTHREAD_ONCE_INIT};
 
 static void memkind_hbw_closest_numanode_init(void);
+static void memkind_hbw_closest_preferred_numanode_init(void);
 
 // This declaration is necessary, cause it's missing in headers from libnuma 2.0.8
 extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
@@ -206,9 +213,25 @@ MEMKIND_EXPORT int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
                                                   unsigned long *nodemask,
                                                   unsigned long maxnode)
 {
-    struct hbw_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
-    pthread_once(&memkind_hbw_closest_numanode_once_g,
+    struct hbw_closest_numanode_t *g =
+            &memkind_hbw_closest_numanode_g[NODE_VARIANT_MULTIPLE];
+    pthread_once(&memkind_hbw_closest_numanode_once_g[NODE_VARIANT_MULTIPLE],
                  memkind_hbw_closest_numanode_init);
+    if (MEMKIND_LIKELY(!g->init_err)) {
+        g->init_err = set_bitmask_for_current_closest_numanode(nodemask, maxnode,
+                                                               g->closest_numanode, g->num_cpu);
+    }
+    return g->init_err;
+}
+
+int memkind_hbw_get_preferred_mbind_nodemask(struct memkind *kind,
+                                             unsigned long *nodemask,
+                                             unsigned long maxnode)
+{
+    struct hbw_closest_numanode_t *g =
+            &memkind_hbw_closest_numanode_g[NODE_VARIANT_SINGLE];
+    pthread_once(&memkind_hbw_closest_numanode_once_g[NODE_VARIANT_SINGLE],
+                 memkind_hbw_closest_preferred_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err)) {
         g->init_err = set_bitmask_for_current_closest_numanode(nodemask, maxnode,
                                                                g->closest_numanode, g->num_cpu);
@@ -220,8 +243,9 @@ MEMKIND_EXPORT int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
                                                       unsigned long *nodemask,
                                                       unsigned long maxnode)
 {
-    struct hbw_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
-    pthread_once(&memkind_hbw_closest_numanode_once_g,
+    struct hbw_closest_numanode_t *g =
+            &memkind_hbw_closest_numanode_g[NODE_VARIANT_MULTIPLE];
+    pthread_once(&memkind_hbw_closest_numanode_once_g[NODE_VARIANT_MULTIPLE],
                  memkind_hbw_closest_numanode_init);
 
     if (MEMKIND_LIKELY(!g->init_err)) {
@@ -345,7 +369,18 @@ static int memkind_hbw_get_nodemask(struct bitmask **bm)
 
 static void memkind_hbw_closest_numanode_init(void)
 {
-    struct hbw_closest_numanode_t *g = &memkind_hbw_closest_numanode_g;
+    struct hbw_closest_numanode_t *g =
+            &memkind_hbw_closest_numanode_g[NODE_VARIANT_MULTIPLE];
+    g->num_cpu = numa_num_configured_cpus();
+    g->closest_numanode = NULL;
+    g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
+                                       &g->closest_numanode, g->num_cpu, false);
+}
+
+static void memkind_hbw_closest_preferred_numanode_init(void)
+{
+    struct hbw_closest_numanode_t *g =
+            &memkind_hbw_closest_numanode_g[NODE_VARIANT_SINGLE];
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
