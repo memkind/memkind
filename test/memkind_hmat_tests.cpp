@@ -11,6 +11,7 @@
 
 #include "common.h"
 #include "memory_topology.h"
+#include "proc_stat.h"
 
 using TpgPtr = std::unique_ptr<AbstractTopology>;
 using MemoryTpg = std::pair<std::string, TpgPtr>;
@@ -35,12 +36,17 @@ protected:
         // TODO try use Setup for whole Suite
         if (TopologyMap.size() == 0) {
             //TODO find better way to lookup for number of classes
-            TopologyMap.reserve(5);
+            TopologyMap.reserve(9);
             TopologyMap.emplace(MemoryTpg("KnightsMillAll2All", TpgPtr(new KNM_All2All)));
             TopologyMap.emplace(MemoryTpg("KnightsMillSNC2", TpgPtr(new KNM_SNC2)));
             TopologyMap.emplace(MemoryTpg("KnightsMillSNC4", TpgPtr(new KNM_SNC4)));
             TopologyMap.emplace(MemoryTpg("CascadeLake2Var1", TpgPtr(new CLX_2_var1)));
+            TopologyMap.emplace(MemoryTpg("CascadeLake2Var2", TpgPtr(new CLX_2_var2)));
             TopologyMap.emplace(MemoryTpg("CascadeLake4Var1", TpgPtr(new CLX_4_var1)));
+            TopologyMap.emplace(MemoryTpg("CascadeLake4Var2", TpgPtr(new CLX_4_var2)));
+            TopologyMap.emplace(MemoryTpg("CascadeLake4Var3", TpgPtr(new CLX_4_var3)));
+            TopologyMap.emplace(MemoryTpg("CascadeLake4Var4", TpgPtr(new CLX_4_var4)));
+
             std::cout << "MEMKIND_TEST_TOPOLOGY is: " << memory_tpg << std::endl;
         }
     }
@@ -51,7 +57,7 @@ protected:
 
 INSTANTIATE_TEST_CASE_P(
     KindParam, MemkindHMATFunctionalTestsParam,
-    ::testing::Values(MEMKIND_HBW));
+    ::testing::Values(MEMKIND_HBW, MEMKIND_HIGHEST_CAPACITY_LOCAL));
 
 TEST_P(MemkindHMATFunctionalTestsParam,
        test_tc_memkind_HMAT_verify_InitTargetNode)
@@ -85,5 +91,66 @@ TEST_P(MemkindHMATFunctionalTestsParam,
         } else {
             EXPECT_TRUE(ptr == nullptr);
         }
+    }
+}
+
+TEST_P(MemkindHMATFunctionalTestsParam,
+       test_tc_memkind_HMAT_alloc_until_full_numa)
+{
+    int status = numa_available();
+    ASSERT_EQ(status, 0);
+
+    auto &topology = TopologyMap.at(memory_tpg);
+    if (topology->is_kind_supported(memory_kind) == false) {
+        return;
+    }
+
+    ProcStat stat;
+    void *ptr;
+    const size_t alloc_size = 100 * MB;
+    std::set<void *> allocations;
+
+    int cpu = sched_getcpu();
+    ASSERT_GE(cpu, -1);
+    int init_node = numa_node_of_cpu(cpu);
+    ASSERT_GE(init_node, -1);
+
+    auto target_nodes = topology->get_target_nodes(memory_kind, init_node);
+    ASSERT_GT(target_nodes.size(), size_t(0));
+
+    size_t sum_of_free_space = 0;
+    for (auto &&i : target_nodes) {
+        long long numa_free = 0;
+        numa_node_size64(i, &numa_free);
+        sum_of_free_space += numa_free;
+    }
+
+    int target_node = -1;
+    while (sum_of_free_space > alloc_size * allocations.size()) {
+        ptr = memkind_malloc(memory_kind, alloc_size);
+        ASSERT_NE(nullptr, ptr);
+        memset(ptr, 'a', alloc_size);
+        allocations.insert(ptr);
+
+        int ret = get_mempolicy(&target_node, nullptr, 0, ptr,
+                                MPOL_F_NODE | MPOL_F_ADDR);
+        ASSERT_EQ(ret, 0);
+
+        auto res = topology->verify_kind(memory_kind, {init_node, target_node});
+        EXPECT_EQ(res, true);
+    }
+
+    const int n_swap_alloc = 5;
+    size_t init_swap = stat.get_used_swap_space_size_bytes();
+    for(int i = 0; i < n_swap_alloc; ++i) {
+        ptr = memkind_malloc(memory_kind, alloc_size);
+        ASSERT_NE(nullptr, ptr);
+        memset(ptr, 'a', alloc_size);
+        allocations.insert(ptr);
+    }
+    ASSERT_GE(stat.get_used_swap_space_size_bytes(), init_swap);
+
+    for (auto const &ptr: allocations) {
+        memkind_free(memory_kind, ptr);
     }
 }
