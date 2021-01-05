@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
@@ -524,3 +524,4 @@ include test/Makefile.mk
 include examples/Makefile.mk
 include src/Makefile.mk
 include utils/memkind_malloc_wrapper/Makefile.mk
+include utils/memkind_matrix/Makefile.mk
