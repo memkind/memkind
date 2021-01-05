@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -21,6 +21,9 @@ int memkind_hbw_hugetlb_check_available(struct memkind *kind);
 int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
                                    unsigned long *nodemask,
                                    unsigned long maxnode);
+int memkind_hbw_get_preferred_mbind_nodemask(struct memkind *kind,
+                                             unsigned long *nodemask,
+                                             unsigned long maxnode);
 int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
                                        unsigned long *nodemask,
                                        unsigned long maxnode);
