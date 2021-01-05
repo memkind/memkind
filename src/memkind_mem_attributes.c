@@ -98,6 +98,14 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
     return MEMKIND_SUCCESS;
 }
 #else
+static void memkind_hi_cap_loc_numanodes_init(void)
+{
+    struct memkind_hi_cap_loc_numanodes_t *g = &memkind_hi_cap_loc_numanodes_g;
+
+    log_err("Can't automatically detect NUMA nodes locality info.");
+    g->init_err = MEMKIND_ERROR_OPERATION_FAILED;
+}
+
 int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
 {
     log_err("High Bandwidth NUMA nodes cannot be automatically detected.");

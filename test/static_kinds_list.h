@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2016 - 2020 Intel Corporation. */
+/* Copyright (C) 2016 - 2021 Intel Corporation. */
 
 #pragma once
 
@@ -22,8 +22,8 @@ static memkind_t static_kinds_list[] = {
     MEMKIND_DAX_KMEM_ALL,
     MEMKIND_DAX_KMEM_PREFERRED,
     MEMKIND_DAX_KMEM_INTERLEAVE,
-    MEMKIND_HIGHEST_CAPACITY
-
+    MEMKIND_HIGHEST_CAPACITY,
+    MEMKIND_HIGHEST_CAPACITY_LOCAL
 };
 
 
