@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -281,6 +281,9 @@ extern memkind_t MEMKIND_HIGHEST_CAPACITY;
 
 /// \note STANDARD API
 extern memkind_t MEMKIND_HIGHEST_CAPACITY_PREFERRED;
+
+/// \note STANDARD API
+extern memkind_t MEMKIND_HIGHEST_CAPACITY_LOCAL;
 
 ///
 /// \brief Get Memkind API version

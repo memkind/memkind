@@ -680,11 +680,10 @@ The available kinds of memory:
 Default allocation using standard memory and default page size.
 .TP
 .B MEMKIND_HIGHEST_CAPACITY
-Allocate from a NUMA node(s) that has the highest capacity among nodes in the system.
-.BR Note:
-If there is more than one node that satisfies this condition, e.g. there are two
-nodes that have the same capacity and it is the highest capacity in the system,
-allocation will be done from both of them.
+Allocate from a NUMA node(s) that has the highest capacity among all nodes in the system.
+.B MEMKIND_HIGHEST_CAPACITY_LOCAL
+Allocate from a NUMA node(s) that has the highest capacity among all NUMA Nodes from the local domain.
+NUMA Nodes have the same local domain for a set of CPUs associated with them, e.g. socket or sub-NUMA cluster.
 .TP
 .B MEMKIND_HIGHEST_CAPACITY_PREFERRED
 Same as
