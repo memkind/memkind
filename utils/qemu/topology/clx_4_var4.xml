@@ -1,0 +1,76 @@
+<!-- SPDX-License-Identifier: BSD-2-Clause
+# Copyright (C) 2021 Intel Corporation.
+-->
+<domain type='qemu'>
+  <name>CascadeLake4Var4</name>
+  <os>
+    <type arch='x86_64' machine='pc'>hvm</type>
+  </os>
+  <vcpu placement='static'>32</vcpu>
+  <cpu>
+    <model>Cascadelake-Server</model>
+    <topology sockets='4' dies='1' cores='8' threads='1'/>
+    <numa>
+      <cell id='0' cpus='0-7' memory='256' unit='MiB'>
+        <distances>
+          <sibling id='0' value='10'/>
+          <sibling id='1' value='21'/>
+          <sibling id='2' value='31'/>
+          <sibling id='3' value='21'/>
+          <sibling id='4' value='17'/>
+          <sibling id='5' value='28'/>
+        </distances>
+      </cell>
+      <cell id='1' cpus='8-15' memory='256' unit='MiB'>
+        <distances>
+          <sibling id='0' value='21'/>
+          <sibling id='1' value='10'/>
+          <sibling id='2' value='21'/>
+          <sibling id='3' value='31'/>
+          <sibling id='4' value='28'/>
+          <sibling id='5' value='28'/>
+        </distances>
+      </cell>
+      <cell id='2' cpus='16-23' memory='256' unit='MiB'>
+        <distances>
+          <sibling id='0' value='31'/>
+          <sibling id='1' value='21'/>
+          <sibling id='2' value='10'/>
+          <sibling id='3' value='21'/>
+          <sibling id='4' value='28'/>
+          <sibling id='5' value='28'/>
+        </distances>
+      </cell>
+      <cell id='3' cpus='24-31' memory='256' unit='MiB'>
+        <distances>
+          <sibling id='0' value='21'/>
+          <sibling id='1' value='31'/>
+          <sibling id='2' value='21'/>
+          <sibling id='3' value='10'/>
+          <sibling id='4' value='28'/>
+          <sibling id='5' value='17'/>
+        </distances>
+      </cell>
+      <cell id='4' memory='1536' unit='MiB'>
+        <distances>
+          <sibling id='0' value='17'/>
+          <sibling id='1' value='28'/>
+          <sibling id='2' value='28'/>
+          <sibling id='3' value='28'/>
+          <sibling id='4' value='10'/>
+          <sibling id='5' value='28'/>
+        </distances>
+      </cell>
+      <cell id='5' memory='1536' unit='MiB'>
+        <distances>
+          <sibling id='0' value='28'/>
+          <sibling id='1' value='28'/>
+          <sibling id='2' value='28'/>
+          <sibling id='3' value='17'/>
+          <sibling id='4' value='28'/>
+          <sibling id='5' value='10'/>
+        </distances>
+      </cell>
+    </numa>
+  </cpu>
+</domain>
