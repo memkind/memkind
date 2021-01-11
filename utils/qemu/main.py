@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2020 Intel Corporation.
+# Copyright (C) 2020 - 2021 Intel Corporation.
 
 import argparse
 import collections
@@ -321,7 +321,8 @@ class QEMU:
                 self._start_qemu_proc(qemu_cmd)
             else:
                 self._start_qemu_proc(qemu_cmd)
-                time.sleep(10)
+                # TODO: Handle ssh timeout in paramiko/fabric to wait for qemu to fully start
+                time.sleep(30)
                 con = GuestConnection(self.cfg, topology.name, self.pid)
                 if self.cfg.run_test:
                     con.run_connection_test(reinstall_opt)
