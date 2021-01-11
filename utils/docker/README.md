@@ -21,6 +21,9 @@ to build, test and optionally measure test coverage of any pull request to memki
 For fully testing MEMKIND_DAX_KMEM, ndctl library version tag must be passed as parameter,
 see https://github.com/pmem/ndctl/tags.
 
+* **ENABLE_HWLOC** - controls install hwloc library.
+For fully testing MEMKIND_HBW*, MEMKIND_HIGHEST_BANDWIDTH, MEMKIND_LOWEST_LATENCY, MEMKIND_*LOCAL hwloc library version must be installed as Setting **ENABLE_HWLOC** to 1 causes install hwloc library
+
 * **TBB_LIBRARY_VERSION** - Intel Threading Building Blocks library version.
 For testing Threading Building Blocks, TBB library version tag must be passed as parameter,
 see https://github.com/01org/tbb/tags.
