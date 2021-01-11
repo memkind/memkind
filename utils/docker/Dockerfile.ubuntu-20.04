@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2019 - 2020 Intel Corporation.
+# Copyright (C) 2019 - 2021 Intel Corporation.
 
 # Pull base image
 FROM ubuntu:20.04
 
-LABEL maintainer="katarzyna.wasiuta@intel.com"
+LABEL maintainer="michal.biesek@intel.com"
 
 # Update the Apt cache and install basic tools
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
