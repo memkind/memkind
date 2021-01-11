@@ -116,7 +116,7 @@ class GuestConnection:
         c.run(f'sudo mkdir -p {MEMKIND_GUEST_PATH}', echo=True)
         c.run(f'sudo mount {MEMKIND_MOUNT_TAG} {MEMKIND_GUEST_PATH} -t 9p -o trans=virtio', echo=True)
 
-    def _set_test_env_name(self, c: fabric.Connection):
+    def _set_test_env_name(self, c: fabric.Connection) -> None:
         """
         Set environment variable for topology
         """
