@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2019 - 2020 Intel Corporation.
+# Copyright (C) 2019 - 2021 Intel Corporation.
 
 #
 # docker_run_build.sh - is called inside a Docker container;
@@ -25,6 +25,11 @@ else
         "$UTILS_PREFIX"/docker_install_ndctl.sh
     fi
 
+    # if hwloc library is enabled install library
+    if [ -n "$ENABLE_HWLOC" ]; then
+        "$UTILS_PREFIX"/docker_install_hwloc.sh "$PWD"/"$UTILS_PREFIX"
+    fi
+
     # building memkind sources and tests
     ./autogen.sh
     ./configure --prefix=/usr $GCOV_OPTION
@@ -32,7 +37,7 @@ else
     make -j "$(nproc)" checkprogs
 
     # building RPM package
-    if [[ $(cat /etc/os-release) = *"fedora"* ]]; then
+    if [[ ($(cat /etc/os-release) = *"fedora"*) && (-n "$ENABLE_HWLOC") ]]; then
         make -j "$(nproc)" rpm
     fi
 

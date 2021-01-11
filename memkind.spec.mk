@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 # targets for building rpm
 version ?= 0.0.0
@@ -39,13 +39,12 @@ BuildRequires: libdaxctl-devel >= %{daxctl_min_version}
 BuildRequires: daxctl-devel >= %{daxctl_min_version}
 %endif
 
-# TODO add hwloc support when rpm will be available
-# %define hwloc_min_version 2.3.0
-# %if %{defined suse_version}
-# BuildRequires: libhwloc-devel >= %{hwloc_min_version}
-# %else
-# BuildRequires: hwloc-devel >= %{hwloc_min_version}
-# %endif
+%define hwloc_min_version 2.3.0
+%if %{defined suse_version}
+BuildRequires: libhwloc-devel >= %{hwloc_min_version}
+%else
+BuildRequires: hwloc-devel >= %{hwloc_min_version}
+%endif
 
 Prefix: %{_prefix}
 Prefix: %{_unitdir}

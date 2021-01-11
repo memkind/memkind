@@ -400,6 +400,7 @@ EXTRA_DIST = CONTRIBUTING \
              utils/docker/docker_run_build.sh \
              utils/docker/docker_run_coverage.sh \
              utils/docker/docker_run_test.sh \
+             utils/docker/hwloc.spec.mk \
              utils/docker/run_local.sh \
              utils/docker/set_host_configuration.sh \
              utils/qemu/README.md \

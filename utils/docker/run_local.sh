@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2019 - 2020 Intel Corporation.
+# Copyright (C) 2019 - 2021 Intel Corporation.
 
 #
 # run_local.sh - builds a container with Docker image
@@ -45,6 +45,7 @@ docker run --rm \
            --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
            --env HOG_MEMORY="$HOG_MEMORY" \
            --env NDCTL_LIBRARY_VERSION="$NDCTL_LIBRARY_VERSION" \
+           --env ENABLE_HWLOC="$ENABLE_HWLOC" \
            --env PMEM_CONTAINER_PATH="$PMEM_CONTAINER_PATH" \
            --env QEMU_TEST="$QEMU_TEST" \
            $qemu_enable \
