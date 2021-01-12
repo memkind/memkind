@@ -1,0 +1,17 @@
+name: memkind
+on: [push, pull_request]
+
+jobs:
+  linting:
+    name: Code Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the git repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+          packages:
+            - astyle
+
+      - name: Run Astyle
+        run: ./astyle.sh

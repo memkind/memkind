@@ -1,4 +1,4 @@
-.travis.yml
+.github/workflows/gha.yml
 AUTHORS
 CONTRIBUTING
 COPYING

@@ -1,5 +1,5 @@
+.github/workflows/gha.yml
 .gitignore
-.travis.yml
 AUTHORS
 CONTRIBUTING
 COPYING
