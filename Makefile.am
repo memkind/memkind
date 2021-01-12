@@ -40,6 +40,7 @@ include_HEADERS = include/hbw_allocator.h \
 noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_bitmask.h \
+                  include/memkind/internal/memkind_capacity.h \
                   include/memkind/internal/memkind_dax_kmem.h \
                   include/memkind/internal/memkind_default.h \
                   include/memkind/internal/memkind_gbtlb.h \
@@ -47,6 +48,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_hugetlb.h \
                   include/memkind/internal/memkind_interleave.h \
                   include/memkind/internal/memkind_log.h \
+                  include/memkind/internal/memkind_mem_attributes.h \
                   include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
                   include/memkind/internal/memkind_regular.h \
@@ -398,12 +400,12 @@ EXTRA_DIST = CONTRIBUTING \
              utils/docker/docker_run_build.sh \
              utils/docker/docker_run_coverage.sh \
              utils/docker/docker_run_test.sh \
+             utils/docker/hwloc.spec.mk \
              utils/docker/run_local.sh \
              utils/docker/set_host_configuration.sh \
              utils/qemu/README.md \
              utils/qemu/http/preseed.cfg \
              utils/qemu/main.py \
-             utils/qemu/requirements.txt \
              utils/qemu/topology/README.md \
              utils/qemu/topology/clx_2_var1.xml \
              utils/qemu/topology/clx_4_var1.xml \
