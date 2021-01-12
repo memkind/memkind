@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2020 Intel Corporation. */
+/* Copyright (C) 2020 - 2021 Intel Corporation. */
 
 #include <memkind.h>
 #include <numa.h>
@@ -32,6 +32,18 @@ TEST_F(MemkindHiCapacityFunctionalTests,
     ASSERT_EQ(test1, nullptr);
     ASSERT_EQ(errno, ENOMEM);
 }
+
+// TODO move HWLOC check to some API and call it inside this function
+#ifdef MEMKIND_HWLOC
+TEST_F(MemkindHiCapacityFunctionalTests,
+       test_TC_HiCapacityLocal_alloc_size_max)
+{
+    errno = 0;
+    void *test1 = memkind_malloc(MEMKIND_HIGHEST_CAPACITY_LOCAL, SIZE_MAX);
+    ASSERT_EQ(test1, nullptr);
+    ASSERT_EQ(errno, ENOMEM);
+}
+#endif
 
 TEST_F(MemkindHiCapacityFunctionalTests, test_TC_HiCapacity_correct_numa)
 {
