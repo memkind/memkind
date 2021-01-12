@@ -23,15 +23,15 @@ GUEST_PASS = 'memkindpass'
 MEMKIND_GUEST_PATH = '/mnt/memkind/'
 MEMKIND_MOUNT_TAG = 'memkind_host'
 MEMKIND_QEMU_PREFIX = 'utils/qemu'
+MEMKIND_DOCKER_PREFIX = 'utils/docker'
 TOPOLOGY_ENV_VAR = 'MEMKIND_TEST_TOPOLOGY'
 TOPOLOGY_DIR = 'topology'
 # TODO handling fsdax??
-# TODO handling codecov in this script
 # TODO handling scaling the memory in xml
 # TODO provide also build with disabled hwloc
 # TODO handling verbosity of this script
 
-QemuCfg = collections.namedtuple('QemuCfg', ['workdir', 'image', 'interactive', 'force_reinstall', 'run_test', 'topologies'])
+QemuCfg = collections.namedtuple('QemuCfg', ['workdir', 'image', 'interactive', 'force_reinstall', 'run_test', 'topologies', 'codecov'])
 TopologyCfg = collections.namedtuple('TopologyCfg', ['name', 'hmat', 'cpu_model', 'cpu_options', 'mem_options'])
 
 
@@ -66,6 +66,7 @@ class GuestConnection:
     def __init__(self, cfg: QemuCfg, topology_name: str, qemu_pid: int) -> None:
         self.run_test = cfg.run_test
         self.force_reinstall = cfg.force_reinstall
+        self.codecov = cfg.codecov
         self.topology_name = topology_name
         self.qemu_pid = qemu_pid
 
@@ -81,6 +82,16 @@ class GuestConnection:
                 'port': f'{TCP_PORT}'
                 }
 
+    @property
+    def _memkind_configure_params(self) -> str:
+        """
+        Memkind configure parameters
+        """
+        config_params = '--prefix=/usr'
+        if self.codecov:
+            config_params += ' --enable-gcov'
+        return config_params
+
     @_logger
     def _build_and_reinstall_memkind(self, c: fabric.Connection) -> None:
         """
@@ -90,7 +101,7 @@ class GuestConnection:
         nproc = int(result.stdout.strip())
         c.run('make distclean', echo=True, warn=True)
         c.run('./autogen.sh', echo=True)
-        c.run('./configure --prefix=/usr', echo=True)
+        c.run(f'./configure {self._memkind_configure_params}', echo=True)
         c.run(f'make -j {nproc}', echo=True)
         c.run(f'make checkprogs -j {nproc}', echo=True)
         c.run('sudo make uninstall', echo=True)
@@ -105,7 +116,7 @@ class GuestConnection:
         c.run(f'sudo mkdir -p {MEMKIND_GUEST_PATH}', echo=True)
         c.run(f'sudo mount {MEMKIND_MOUNT_TAG} {MEMKIND_GUEST_PATH} -t 9p -o trans=virtio', echo=True)
 
-    def _set_test_env_name(self, c: fabric.Connection):
+    def _set_test_env_name(self, c: fabric.Connection) -> None:
         """
         Set environment variable for topology
         """
@@ -113,11 +124,23 @@ class GuestConnection:
             c.config.run.env = {f'{TOPOLOGY_ENV_VAR}': f'{self.topology_name}'}
 
     @_logger
+    def _run_codecov_script(self, c: fabric.Connection) -> None:
+        """
+        Run code coverage script
+        """
+        codecov_script = pathlib.Path(MEMKIND_GUEST_PATH, MEMKIND_DOCKER_PREFIX, 'docker_run_coverage.sh')
+        c.config.run.env['TEST_SUITE_NAME'] = self.topology_name
+        c.config.run.env['CODECOV_TOKEN'] = self.codecov
+        c.run(f'{codecov_script} {MEMKIND_GUEST_PATH}', echo=True)
+
+    @_logger
     def _run_memkind_test(self, c: fabric.Connection) -> None:
         """
         Run memkind test
         """
         c.run('make unit_tests_hmat', echo=True)
+        if self.codecov:
+            self._run_codecov_script(c)
 
     @_logger
     def _shutdown(self, c: fabric.Connection) -> None:
@@ -419,6 +442,7 @@ def parse_arguments() -> QemuCfg:
     parser.add_argument('--image', help='QEMU image', required=True)
     parser.add_argument('--mode', choices=['dev', 'test'], help='execution mode', default='dev')
     parser.add_argument('--topology', help='memory topology XML file')
+    parser.add_argument('--codecov', help='upload token for Codecov')
     parser.add_argument('--interactive', action="store_true", help='execute an interactive bash shell', default=False)
     parser.add_argument('--force_reinstall', action="store_true", help='force rebuild and install memkind', default=False)
     cli_cfg = vars(parser.parse_args())
@@ -426,11 +450,15 @@ def parse_arguments() -> QemuCfg:
     if cli_cfg['interactive'] and cli_cfg['mode'] == 'test':
         parser.error("interactive is supported only by dev mode")
 
+    if cli_cfg['codecov'] and cli_cfg['mode'] == 'dev':
+        parser.error("codecov is supported only by test mode")
+
     qemu_cfg['image'] = validate_image_path(cli_cfg['image'])
     qemu_cfg['interactive'] = cli_cfg['interactive']
     qemu_cfg['force_reinstall'] = cli_cfg['force_reinstall']
     qemu_cfg['topologies'] = parse_topology(cli_cfg)
     qemu_cfg['run_test'] = cli_cfg['mode'] == 'test'
+    qemu_cfg['codecov'] = cli_cfg['codecov']
     return QemuCfg(**qemu_cfg)
 
 
