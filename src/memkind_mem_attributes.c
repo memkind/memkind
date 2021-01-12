@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2020 Intel Corporation. */
+/* Copyright (C) 2020 - 2021 Intel Corporation. */
 
 #include <memkind/internal/memkind_mem_attributes.h>
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_private.h>
 
 #include "config.h"
+
 #ifdef MEMKIND_HWLOC
 #include <hwloc.h>
 #define MEMKIND_HBW_THRESHOLD_DEFAULT (200 * 1024) // Default threshold is 200 GB/s
-#endif
 
-#ifdef MEMKIND_HWLOC
 int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
 {
     const char *hbw_threshold_env = memkind_get_env("MEMKIND_HBW_THRESHOLD");
