@@ -88,7 +88,7 @@ int set_closest_numanode(get_node_bitmask get_bitmask,
             goto free_node_arr;
         }
 
-        //fill mapping CPU destnation memory Node(s)
+        //fill mapping CPU destination memory Node(s)
         for (cpu_id = 0; cpu_id < num_cpu; ++cpu_id) {
             if(numa_bitmask_isbitset(node_cpu_mask, cpu_id)) {
                 int node = -1;
