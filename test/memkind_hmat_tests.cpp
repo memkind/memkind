@@ -65,7 +65,7 @@ TEST_P(MemkindHMATFunctionalTestsParam,
 {
     int status = numa_available();
     ASSERT_EQ(status, 0);
-    const size_t size = 4099;
+    const size_t size = 11*MB-5;
     int threads_num = get_nprocs();
     auto &topology = TopologyMap.at(memory_tpg);
     #pragma omp parallel for num_threads(threads_num)
