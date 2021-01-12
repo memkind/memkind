@@ -6,6 +6,7 @@ import collections
 import fabric
 import functools
 import os
+import paramiko
 import pathlib
 import psutil
 import re
@@ -58,10 +59,9 @@ class MemoryHostException(Exception):
         return (f'Memory on host) {self.total_memory} bytes are not enough '
                 f'for memory required by {self.tpg} : {self.tpg_memory} bytes.')
 
-
 class GuestConnection:
 
-    CONNECT_TIMEOUT = 10
+    CONNECT_TIMEOUT = 30
 
     def __init__(self, cfg: QemuCfg, topology_name: str, qemu_pid: int) -> None:
         self.run_test = cfg.run_test
@@ -127,6 +127,22 @@ class GuestConnection:
         c.run('sudo shutdown now', echo=True, warn=True)
         psutil.wait_procs([psutil.Process(self.qemu_pid)], timeout=10)
 
+    @_logger
+    def verify_connection(self) -> None:
+        """
+        Verify if connection is available
+        """
+        for sec in range(self.CONNECT_TIMEOUT):
+            try:
+                with fabric.Connection(**self._connection_params) as c:
+                    c.run('whoami', hide='both')
+            except paramiko.SSHException:
+                print(f'FAILURE: SSH connection to guest after {sec} sec - retrying.')
+                time.sleep(1)
+            else:
+                print(f'SUCCESS: SSH connection to guest after {sec} sec.')
+                return
+        sys.exit(f'SSH connection to guest fails after {self.CONNECT_TIMEOUT} sec.')
 
     @_logger
     def run_connection_test(self, force_reinstall: bool) -> None:
@@ -321,9 +337,8 @@ class QEMU:
                 self._start_qemu_proc(qemu_cmd)
             else:
                 self._start_qemu_proc(qemu_cmd)
-                # TODO: Handle ssh timeout in paramiko/fabric to wait for qemu to fully start
-                time.sleep(30)
                 con = GuestConnection(self.cfg, topology.name, self.pid)
+                con.verify_connection()
                 if self.cfg.run_test:
                     con.run_connection_test(reinstall_opt)
                 else:
