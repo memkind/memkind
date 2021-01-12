@@ -1,5 +1,5 @@
 .\" SPDX-License-Identifier: BSD-2-Clause
-.\" Copyright (C) 2019 - 2020 Intel Corporation.
+.\" Copyright (C) 2019 - 2021 Intel Corporation.
 .\"
 .TH "MEMKINDALLOCATOR" 3 "2019-09-24" "Intel Corporation" "MEMKINDALLOCATOR" \" -*- nroff -*-
 .SH "NAME"
@@ -45,7 +45,7 @@ specifies allocator static kinds of memory, representing type of memory which of
 Default allocation using standard memory and default page size.
 .PP
 .B libmemkind::kinds::HIGHEST_CAPACITY
-Allocate from a NUMA node(s) that has the highest capacity among nodes in the system. Note: there could be more than one node that satisfies this condition.
+Allocate from a NUMA node(s) that has the highest capacity among all nodes in the system.
 .PP
 .B libmemkind::kinds::MEMKIND_HIGHEST_CAPACITY_PREFERRED
 Same as
@@ -55,8 +55,10 @@ to satisfy the request, the allocation will fall back on other memory NUMA nodes
 .BR Note:
 For this kind, the allocation will not succeed if there are two or more NUMA nodes
 that have the highest capacity.
-.B libmemkind::kinds::HIGHEST_CAPACITY
-Allocate from a NUMA node(s) that has the highest capacity among nodes in the system. Note: there could be more than one node that satisfies this condition.
+.PP
+.B libmemkind::kinds::HIGHEST_CAPACITY_LOCAL
+Allocate from a NUMA node(s) that has the highest capacity among all NUMA Nodes from the local domain.
+NUMA Nodes have the same local domain for a set of CPUs associated with them, e.g. socket or sub-NUMA cluster.
 .PP
 .B libmemkind::kinds::HUGETLB
 Allocate from standard memory using huge pages. Note: This kind requires huge pages configuration described in
@@ -188,6 +190,6 @@ More information can be found here:
 .UR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
 .UE
 .SH "COPYRIGHT"
-Copyright (C) 2019 - 2020 Intel Corporation. All rights reserved.
+Copyright (C) 2019 - 2021 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3)
