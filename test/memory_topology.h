@@ -66,6 +66,14 @@ public:
             return (HBW_nodes().size() > 0);
         else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL)
             return (Capacity_local_nodes().size() > 0);
+        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED) {
+            auto local_nodes = Capacity_local_nodes();
+            bool any_larger_than_one = std::count_if( local_nodes.begin(),
+            local_nodes.end(), [](const NodeSet& ns) {
+                return ns.second.size() > 1;
+            }) > 0;
+            return any_larger_than_one == false;
+        }
         return false;
     }
 
@@ -73,7 +81,8 @@ public:
     {
         if (memory_kind == MEMKIND_HBW)
             return test_node_set(nodes, HBW_nodes());
-        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL)
+        else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
+                 (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
             return test_node_set(nodes, Capacity_local_nodes());
         return false;
     }
@@ -82,7 +91,8 @@ public:
     {
         if (memory_kind == MEMKIND_HBW)
             return get_target_nodes(init, HBW_nodes());
-        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL)
+        else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
+                 (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
             return get_target_nodes(init, Capacity_local_nodes());
         return {};
     }
