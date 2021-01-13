@@ -92,20 +92,19 @@ int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask)
         }
 
         // find highest capacity nodes among nodes in "local_nodes" array
-        long long best_capacity = 0;
+        hwloc_uint64_t best_capacity = 0;
         numa_bitmask_clearall(hi_cap_loc_mask);
         for (i = 0; i < num_local_nodes; ++i) {
-            long long current_capacity = numa_node_size64(local_nodes[i]->os_index, NULL);
-            if (current_capacity == -1) {
+            if (local_nodes[i]->attr->numanode.local_memory == 0) {
                 continue;
             }
 
-            if (current_capacity > best_capacity) {
-                best_capacity = current_capacity;
+            if (local_nodes[i]->attr->numanode.local_memory > best_capacity) {
+                best_capacity = local_nodes[i]->attr->numanode.local_memory;
                 numa_bitmask_clearall(hi_cap_loc_mask);
             }
 
-            if (current_capacity == best_capacity) {
+            if (local_nodes[i]->attr->numanode.local_memory == best_capacity) {
                 numa_bitmask_setbit(hi_cap_loc_mask, local_nodes[i]->os_index);
             }
         }
