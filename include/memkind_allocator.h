@@ -43,7 +43,8 @@ namespace libmemkind
         DAX_KMEM_INTERLEAVE = 14,
         HIGHEST_CAPACITY = 15,
         HIGHEST_CAPACITY_PREFERRED = 16,
-        HIGHEST_CAPACITY_LOCAL = 17
+        HIGHEST_CAPACITY_LOCAL = 17,
+        HIGHEST_CAPACITY_LOCAL_PREFERRED = 18
     };
 
     namespace static_kind
@@ -135,6 +136,9 @@ namespace libmemkind
                         break;
                     case libmemkind::kinds::HIGHEST_CAPACITY_PREFERRED:
                         _kind = MEMKIND_HIGHEST_CAPACITY_PREFERRED;
+                        break;
+                    case libmemkind::kinds::HIGHEST_CAPACITY_LOCAL_PREFERRED:
+                        _kind = MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED;
                         break;
                     default:
                         throw std::runtime_error("Unknown libmemkind::kinds");

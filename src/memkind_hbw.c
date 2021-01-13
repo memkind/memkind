@@ -180,10 +180,6 @@ struct hbw_closest_numanode_t {
     void *closest_numanode;
 };
 
-#define NODE_VARIANT_MULTIPLE 0
-#define NODE_VARIANT_SINGLE   1
-#define NODE_VARIANT_MAX      2
-
 static struct hbw_closest_numanode_t
     memkind_hbw_closest_numanode_g[NODE_VARIANT_MAX];
 static pthread_once_t memkind_hbw_closest_numanode_once_g[NODE_VARIANT_MAX]

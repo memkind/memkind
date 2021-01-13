@@ -9,7 +9,12 @@ extern "C" {
 #include <memkind.h>
 #include <numa.h>
 
-int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask);
+#define NODE_VARIANT_MULTIPLE 0
+#define NODE_VARIANT_SINGLE   1
+#define NODE_VARIANT_MAX      2
+
+int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask,
+                                        int node_variant);
 int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask);
 
 #ifdef __cplusplus

@@ -11,7 +11,8 @@
 #include <hwloc.h>
 #define MEMKIND_HBW_THRESHOLD_DEFAULT (200 * 1024) // Default threshold is 200 GB/s
 
-int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask)
+int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask,
+                                        int node_variant)
 {
     int num_nodes = numa_num_configured_nodes();
     int max_node_id = numa_max_node();
@@ -108,6 +109,13 @@ int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask)
             if (current_capacity == best_capacity) {
                 numa_bitmask_setbit(hi_cap_loc_mask, local_nodes[i]->os_index);
             }
+        }
+
+        if (node_variant == NODE_VARIANT_SINGLE &&
+            numa_bitmask_weight(hi_cap_loc_mask) > 1) {
+            ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
+            log_err("Multiple NUMA Nodes have the same highest capacity local.");
+            goto error;
         }
 
         // copy bitmask with Highest Local Capacty NUMA nodes
@@ -234,7 +242,8 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
     return MEMKIND_SUCCESS;
 }
 #else
-int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask)
+int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask,
+                                        int node_variant)
 {
     log_err("Highest Local Capacity NUMA nodes cannot be automatically detected.");
     return MEMKIND_ERROR_OPERATION_FAILED;

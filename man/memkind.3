@@ -695,6 +695,15 @@ to satisfy the request, the allocation will fall back on other memory NUMA nodes
 For this kind, the allocation will not succeed if there are two or more NUMA nodes
 that have the highest capacity.
 .TP
+.B MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED
+Same as
+.B MEMKIND_HIGHEST_CAPACITY_LOCAL
+except that if there is not enough memory in the NUMA node that has the highest capacity
+to satisfy the request, the allocation will fall back on other memory NUMA nodes.
+.BR Note:
+For this kind, the allocation will not succeed if there are two or more NUMA nodes
+that have the highest capacity.
+.TP
 .B MEMKIND_HUGETLB
 Allocate from standard memory using huge pages.
 .BR Note:
