@@ -138,26 +138,27 @@ which are using the memkind library for dynamic linking at run time:
 
 ## Kind Requirements
 
-| Memory kind                        | NUMA  |  HBW Memory | Hugepages | Device DAX | Filesystem supporting hole punching | HMAT | libhwloc |
-| -----------------------------------|:-----:|:-----------:|:---------:|:----------:|:-----------------------------------:|:----:|:--------:|
-| MEMKIND_DEFAULT                    |       |             |           |            |                                     |      |          |
-| MEMKIND_HIGHEST_CAPACITY           | X     |             |           |            |                                     |      |          |
-| MEMKIND_HIGHEST_CAPACITY_PREFERRED | X     |             |           |            |                                     |      |          |
-| MEMKIND_HIGHEST_CAPACITY_LOCAL     | X     |             |           |            |                                     |      | X        |
-| MEMKIND_HUGETLB                    | X     |             | X         |            |                                     |      |          |
-| MEMKIND_HBW                        | X     | X           |           |            |                                     | X*   | X*       |
-| MEMKIND_HBW_ALL                    | X     | X           |           |            |                                     | X*   | X*       |
-| MEMKIND_HBW_HUGETLB                | X     | X           | X         |            |                                     | X*   | X*       |
-| MEMKIND_HBW_ALL_HUGETLB            | X     | X           | X         |            |                                     | X*   | X*       |
-| MEMKIND_HBW_PREFERRED              | X     | X           |           |            |                                     | X*   | X*       |
-| MEMKIND_HBW_PREFERRED_HUGETLB      | X     | X           | X         |            |                                     | X*   | X*       |
-| MEMKIND_HBW_INTERLEAVE             | X     | X           |           |            |                                     | X*   | X*       |
-| MEMKIND_REGULAR                    | X     |             |           |            |                                     |      |          |
-| MEMKIND_DAX_KMEM                   | X     |             |           | X          |                                     |      |          |
-| MEMKIND_DAX_KMEM_ALL               | X     |             |           | X          |                                     |      |          |
-| MEMKIND_DAX_KMEM_PREFERRED         | X     |             |           | X          |                                     |      |          |
-| MEMKIND_DAX_KMEM_INTERLEAVE        | X     |             |           | X          |                                     |      |          |
-| PMEM kind                          |       |             |           |            | X                                   |      |          |
+| Memory kind                              | NUMA  |  HBW Memory | Hugepages | Device DAX | Filesystem supporting hole punching | HMAT | libhwloc |
+| -----------------------------------------|:-----:|:-----------:|:---------:|:----------:|:-----------------------------------:|:----:|:--------:|
+| MEMKIND_DEFAULT                          |       |             |           |            |                                     |      |          |
+| MEMKIND_HIGHEST_CAPACITY                 | X     |             |           |            |                                     |      |          |
+| MEMKIND_HIGHEST_CAPACITY_PREFERRED       | X     |             |           |            |                                     |      |          |
+| MEMKIND_HIGHEST_CAPACITY_LOCAL           | X     |             |           |            |                                     |      | X        |
+| MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED | X     |             |           |            |                                     |      | X        |
+| MEMKIND_HUGETLB                          | X     |             | X         |            |                                     |      |          |
+| MEMKIND_HBW                              | X     | X           |           |            |                                     | X*   | X*       |
+| MEMKIND_HBW_ALL                          | X     | X           |           |            |                                     | X*   | X*       |
+| MEMKIND_HBW_HUGETLB                      | X     | X           | X         |            |                                     | X*   | X*       |
+| MEMKIND_HBW_ALL_HUGETLB                  | X     | X           | X         |            |                                     | X*   | X*       |
+| MEMKIND_HBW_PREFERRED                    | X     | X           |           |            |                                     | X*   | X*       |
+| MEMKIND_HBW_PREFERRED_HUGETLB            | X     | X           | X         |            |                                     | X*   | X*       |
+| MEMKIND_HBW_INTERLEAVE                   | X     | X           |           |            |                                     | X*   | X*       |
+| MEMKIND_REGULAR                          | X     |             |           |            |                                     |      |          |
+| MEMKIND_DAX_KMEM                         | X     |             |           | X          |                                     |      |          |
+| MEMKIND_DAX_KMEM_ALL                     | X     |             |           | X          |                                     |      |          |
+| MEMKIND_DAX_KMEM_PREFERRED               | X     |             |           | X          |                                     |      |          |
+| MEMKIND_DAX_KMEM_INTERLEAVE              | X     |             |           | X          |                                     |      |          |
+| PMEM kind                                |       |             |           |            | X                                   |      |          |
 
 *not needed for Intel's 2nd generation Intel(R) Xeon Phi(TM)
 
