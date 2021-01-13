@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2020 Intel Corporation. */
+/* Copyright (C) 2019 - 2021 Intel Corporation. */
 
 #include <errno.h>
 #include <limits.h>
 #include <stdint.h>
 
 #include <memkind/internal/memkind_log.h>
-#include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_bitmask.h>
 #include <memkind/internal/vec.h>
 
@@ -23,8 +22,8 @@ int memkind_env_get_nodemask(char *nodes_env, struct bitmask **bm)
     return MEMKIND_SUCCESS;
 }
 
-int set_closest_numanode(get_node_bitmask get_bitmask,
-                         void **closest_numanode, int num_cpu, bool is_single_node)
+int set_closest_numanode(get_node_bitmask get_bitmask, void **closest_numanode,
+                         int num_cpu, memkind_node_variant_t node_variant)
 {
     struct bitmask *dest_nodes_mask = NULL;
     int status = get_bitmask(&dest_nodes_mask);
@@ -78,7 +77,8 @@ int set_closest_numanode(get_node_bitmask get_bitmask,
         }
 
         //validate single NUMA Node condition
-        if (is_single_node && (VEC_SIZE(&current_dest_nodes) > 1)) {
+        if ((node_variant == NODE_VARIANT_SINGLE) &&
+            (VEC_SIZE(&current_dest_nodes) > 1)) {
             log_err("Invalid Numa Configuration for Node %d", init_node);
             status = MEMKIND_ERROR_RUNTIME;
             for (cpu_id = 0; cpu_id < num_cpu; ++cpu_id) {
