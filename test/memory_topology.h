@@ -15,8 +15,8 @@ struct Nodes {
     int init;
     int target;
 };
-using NodeSet = std::pair<int, std::unordered_set<int>>;
-using MapNodeSet = std::unordered_map<int, std::unordered_set<int>>;
+using NodeSet = std::pair<int, std::set<int>>;
+using MapNodeSet = std::unordered_map<int, std::set<int>>;
 
 class AbstractTopology
 {
@@ -48,8 +48,7 @@ private:
         return false;
     }
 
-    std::unordered_set<int> get_target_nodes(int init,
-                                             const MapNodeSet &map_nodes) const
+    std::set<int> get_target_nodes(int init, const MapNodeSet &map_nodes) const
     {
         auto init_node_tpg = map_nodes.find(init);
         if (init_node_tpg != map_nodes.end()) {
@@ -64,7 +63,8 @@ public:
     {
         if (memory_kind == MEMKIND_HBW)
             return (HBW_nodes().size() > 0);
-        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL)
+        else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
+                 (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
             return (Capacity_local_nodes().size() > 0);
         return false;
     }
@@ -73,16 +73,18 @@ public:
     {
         if (memory_kind == MEMKIND_HBW)
             return test_node_set(nodes, HBW_nodes());
-        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL)
+        else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
+                 (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
             return test_node_set(nodes, Capacity_local_nodes());
         return false;
     }
 
-    std::unordered_set<int> get_target_nodes(memkind_t memory_kind, int init) const
+    std::set<int> get_target_nodes(memkind_t memory_kind, int init) const
     {
         if (memory_kind == MEMKIND_HBW)
             return get_target_nodes(init, HBW_nodes());
-        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL)
+        else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
+                 (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
             return get_target_nodes(init, Capacity_local_nodes());
         return {};
     }

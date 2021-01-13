@@ -13,6 +13,8 @@
 #include "memory_topology.h"
 #include "proc_stat.h"
 
+#include "TestPolicy.hpp"
+
 using TpgPtr = std::unique_ptr<AbstractTopology>;
 using MemoryTpg = std::pair<std::string, TpgPtr>;
 using MapMemoryTpg =
@@ -58,7 +60,9 @@ protected:
 
 INSTANTIATE_TEST_CASE_P(
     KindParam, MemkindHMATFunctionalTestsParam,
-    ::testing::Values(MEMKIND_HBW, MEMKIND_HIGHEST_CAPACITY_LOCAL));
+    ::testing::Values(MEMKIND_HBW,
+                      MEMKIND_HIGHEST_CAPACITY_LOCAL,
+                      MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED));
 
 TEST_P(MemkindHMATFunctionalTestsParam,
        test_tc_memkind_HMAT_verify_InitTargetNode)
@@ -110,6 +114,8 @@ TEST_P(MemkindHMATFunctionalTestsParam,
     ProcStat stat;
     void *ptr;
     const size_t alloc_size = 100 * MB;
+    const size_t alloc_size_swap = 1 * MB;
+
     std::set<void *> allocations;
 
     int cpu = sched_getcpu();
@@ -118,39 +124,46 @@ TEST_P(MemkindHMATFunctionalTestsParam,
     ASSERT_GE(init_node, -1);
 
     auto target_nodes = topology->get_target_nodes(memory_kind, init_node);
-    ASSERT_GT(target_nodes.size(), size_t(0));
+    ASSERT_GT(target_nodes.size(), 0U);
 
-    size_t sum_of_free_space = 0;
-    for (auto &&i : target_nodes) {
-        long long numa_free = 0;
-        numa_node_size64(i, &numa_free);
-        sum_of_free_space += numa_free;
-    }
+    size_t sum_of_free_space = TestPolicy::get_free_space(target_nodes);
+    ASSERT_GT(sum_of_free_space, 0U);
 
     int target_node = -1;
-    while (sum_of_free_space > alloc_size * allocations.size()) {
+    size_t sum_of_alloc = 0;
+    while (sum_of_free_space > sum_of_alloc) {
         ptr = memkind_malloc(memory_kind, alloc_size);
         ASSERT_NE(nullptr, ptr);
         memset(ptr, 'a', alloc_size);
         allocations.insert(ptr);
+        sum_of_alloc += alloc_size;
 
         int ret = get_mempolicy(&target_node, nullptr, 0, ptr,
                                 MPOL_F_NODE | MPOL_F_ADDR);
         ASSERT_EQ(ret, 0);
 
-        auto res = topology->verify_kind(memory_kind, {init_node, target_node});
-        EXPECT_EQ(res, true);
+        // signal the moment when we actually reach free space of target_nodes
+        if (topology->verify_kind(memory_kind, {init_node, target_node}) == false) {
+            ASSERT_GE(sum_of_alloc, 0.99*sum_of_free_space);
+        }
     }
 
     const int n_swap_alloc = 5;
     size_t init_swap = stat.get_used_swap_space_size_bytes();
-    for(int i = 0; i < n_swap_alloc; ++i) {
-        ptr = memkind_malloc(memory_kind, alloc_size);
+    for (int i = 0; i < n_swap_alloc; ++i) {
+        ptr = memkind_malloc(memory_kind, alloc_size_swap);
         ASSERT_NE(nullptr, ptr);
-        memset(ptr, 'a', alloc_size);
+        memset(ptr, 'a', alloc_size_swap);
         allocations.insert(ptr);
     }
-    ASSERT_GE(stat.get_used_swap_space_size_bytes(), init_swap);
+
+    // TODO add API to verify if variant is preferred
+    size_t current_swap = stat.get_used_swap_space_size_bytes();
+    if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED) {
+        ASSERT_GE(current_swap, init_swap);
+    } else {
+        ASSERT_LE(current_swap, init_swap);
+    }
 
     for (auto const &ptr: allocations) {
         memkind_free(memory_kind, ptr);
