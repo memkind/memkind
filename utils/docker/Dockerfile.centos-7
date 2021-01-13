@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2020 Intel Corporation.
+# Copyright (C) 2020 - 2021 Intel Corporation.
 
 # Pull base image
 FROM centos:7
 
-LABEL maintainer="katarzyna.wasiuta@intel.com"
+LABEL maintainer="michal.biesek@intel.com"
 
 # Update the yum cache and install basic tools
 RUN yum install -y epel-release

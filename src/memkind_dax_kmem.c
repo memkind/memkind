@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2020 Intel Corporation. */
+/* Copyright (C) 2019 - 2021 Intel Corporation. */
 
 #include <memkind/internal/memkind_bitmask.h>
 #include <memkind/internal/memkind_dax_kmem.h>
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
-#include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/heap_manager.h>
 
@@ -19,10 +18,6 @@ struct dax_closest_numanode_t {
     int num_cpu;
     void *closest_numanode;
 };
-
-#define NODE_VARIANT_MULTIPLE 0
-#define NODE_VARIANT_SINGLE   1
-#define NODE_VARIANT_MAX      2
 
 static struct dax_closest_numanode_t
     memkind_dax_kmem_closest_numanode_g[NODE_VARIANT_MAX];
@@ -162,7 +157,8 @@ static void memkind_dax_kmem_closest_numanode_init(void)
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(memkind_dax_kmem_get_nodemask,
-                                       &g->closest_numanode, g->num_cpu, false);
+                                       &g->closest_numanode,
+                                       g->num_cpu, NODE_VARIANT_MULTIPLE);
 }
 
 static void memkind_dax_kmem_preferred_closest_numanode_init(void)
@@ -172,7 +168,8 @@ static void memkind_dax_kmem_preferred_closest_numanode_init(void)
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(memkind_dax_kmem_get_nodemask,
-                                       &g->closest_numanode, g->num_cpu, true);
+                                       &g->closest_numanode,
+                                       g->num_cpu, NODE_VARIANT_SINGLE);
 }
 
 static void memkind_dax_kmem_init_once(void)

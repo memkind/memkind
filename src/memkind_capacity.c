@@ -19,10 +19,6 @@ struct hi_cap_numanodes_t {
     struct bitmask *numa_nodes;
 };
 
-#define NODE_VARIANT_MULTIPLE 0
-#define NODE_VARIANT_SINGLE   1
-#define NODE_VARIANT_MAX      2
-
 static struct hi_cap_loc_numanodes_t memkind_hi_cap_loc_numanodes_g;
 static pthread_once_t memkind_hi_cap_loc_numanodes_once_g = PTHREAD_ONCE_INIT;
 
@@ -82,7 +78,8 @@ static void memkind_hi_cap_loc_init_once(void)
     memkind_init(MEMKIND_HIGHEST_CAPACITY_LOCAL, true);
 }
 
-static void memkind_hi_cap_find(struct hi_cap_numanodes_t *g, int node_variant)
+static void memkind_hi_cap_find(struct hi_cap_numanodes_t *g,
+                                memkind_node_variant_t node_variant)
 {
     long long best = 0;
     int max_node_id = numa_max_node();
