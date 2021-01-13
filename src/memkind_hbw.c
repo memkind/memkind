@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include <memkind/internal/memkind_hbw.h>
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_hugetlb.h>
 #include <memkind/internal/memkind_bitmask.h>
 #include <memkind/internal/memkind_arena.h>
-#include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/heap_manager.h>
 
