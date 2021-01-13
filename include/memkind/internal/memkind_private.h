@@ -96,6 +96,10 @@ struct memkind_config {
     memkind_mem_usage_policy policy; //kind memory usage policy
 };
 
+#define NODE_VARIANT_MULTIPLE 0
+#define NODE_VARIANT_SINGLE   1
+#define NODE_VARIANT_MAX      2
+
 void memkind_init(memkind_t kind, bool check_numa);
 
 void *kind_mmap(struct memkind *kind, void *addr, size_t size);
