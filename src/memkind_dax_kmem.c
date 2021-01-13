@@ -20,10 +20,6 @@ struct dax_closest_numanode_t {
     void *closest_numanode;
 };
 
-#define NODE_VARIANT_MULTIPLE 0
-#define NODE_VARIANT_SINGLE   1
-#define NODE_VARIANT_MAX      2
-
 static struct dax_closest_numanode_t
     memkind_dax_kmem_closest_numanode_g[NODE_VARIANT_MAX];
 static pthread_once_t memkind_dax_kmem_closest_numanode_once_g[NODE_VARIANT_MAX]
@@ -162,7 +158,8 @@ static void memkind_dax_kmem_closest_numanode_init(void)
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(memkind_dax_kmem_get_nodemask,
-                                       &g->closest_numanode, g->num_cpu, false);
+                                       &g->closest_numanode,
+                                       g->num_cpu, NODE_VARIANT_MULTIPLE);
 }
 
 static void memkind_dax_kmem_preferred_closest_numanode_init(void)
@@ -172,7 +169,8 @@ static void memkind_dax_kmem_preferred_closest_numanode_init(void)
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(memkind_dax_kmem_get_nodemask,
-                                       &g->closest_numanode, g->num_cpu, true);
+                                       &g->closest_numanode,
+                                       g->num_cpu, NODE_VARIANT_SINGLE);
 }
 
 static void memkind_dax_kmem_init_once(void)

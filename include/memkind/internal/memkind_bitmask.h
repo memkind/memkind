@@ -6,13 +6,14 @@
 extern "C" {
 #endif
 
+#include <memkind/internal/memkind_private.h>
+
 #include <numa.h>
-#include <stdbool.h>
 
 typedef int (*get_node_bitmask)(struct bitmask **);
 
-int set_closest_numanode(get_node_bitmask get_bitmask,
-                         void **closest_numanode, int num_cpu, bool is_single_node);
+int set_closest_numanode(get_node_bitmask get_bitmask, void **closest_numanode,
+                         int num_cpu, memkind_node_variant_t node_variant);
 void set_bitmask_for_all_closest_numanodes(unsigned long *nodemask,
                                            unsigned long maxnode, const void *closest_numanode,
                                            int num_cpu);
