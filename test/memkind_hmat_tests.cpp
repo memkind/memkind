@@ -13,6 +13,8 @@
 #include "memory_topology.h"
 #include "proc_stat.h"
 
+#include "TestPolicy.hpp"
+
 using TpgPtr = std::unique_ptr<AbstractTopology>;
 using MemoryTpg = std::pair<std::string, TpgPtr>;
 using MapMemoryTpg =
@@ -58,7 +60,9 @@ protected:
 
 INSTANTIATE_TEST_CASE_P(
     KindParam, MemkindHMATFunctionalTestsParam,
-    ::testing::Values(MEMKIND_HBW, MEMKIND_HIGHEST_CAPACITY_LOCAL));
+    ::testing::Values(MEMKIND_HBW,
+                      MEMKIND_HIGHEST_CAPACITY_LOCAL,
+                      MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED));
 
 TEST_P(MemkindHMATFunctionalTestsParam,
        test_tc_memkind_HMAT_verify_InitTargetNode)
@@ -118,14 +122,10 @@ TEST_P(MemkindHMATFunctionalTestsParam,
     ASSERT_GE(init_node, -1);
 
     auto target_nodes = topology->get_target_nodes(memory_kind, init_node);
-    ASSERT_GT(target_nodes.size(), size_t(0));
+    ASSERT_GT(target_nodes.size(), 0U);
 
-    size_t sum_of_free_space = 0;
-    for (auto &&i : target_nodes) {
-        long long numa_free = 0;
-        numa_node_size64(i, &numa_free);
-        sum_of_free_space += numa_free;
-    }
+    size_t sum_of_free_space = TestPolicy::get_free_space(target_nodes);
+    ASSERT_GE(sum_of_free_space, 0U);
 
     int target_node = -1;
     while (sum_of_free_space > alloc_size * allocations.size()) {
@@ -150,7 +150,12 @@ TEST_P(MemkindHMATFunctionalTestsParam,
         memset(ptr, 'a', alloc_size);
         allocations.insert(ptr);
     }
-    ASSERT_GE(stat.get_used_swap_space_size_bytes(), init_swap);
+
+    if (memory_kind == MEMKIND_HIGHEST_CAPACITY_PREFERRED) {
+        ASSERT_GE(stat.get_used_swap_space_size_bytes(), init_swap);
+    } else {
+        ASSERT_LE(stat.get_used_swap_space_size_bytes(), init_swap);
+    }
 
     for (auto const &ptr: allocations) {
         memkind_free(memory_kind, ptr);
