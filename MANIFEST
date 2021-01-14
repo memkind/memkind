@@ -424,6 +424,7 @@ src/tbb_wrapper.c
 test/Allocator.hpp
 test/Makefile.mk
 test/TestPolicy.hpp
+test/TestPreReq.hpp
 test/alloc_benchmark.c
 test/alloc_performance_tests.cpp
 test/allocate_to_max_stress_test.cpp
