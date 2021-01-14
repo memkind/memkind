@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -41,7 +41,8 @@ void memkind_arena_free_with_kind_detect(void *ptr);
 size_t memkind_arena_malloc_usable_size(void *ptr);
 int memkind_arena_update_memory_usage_policy(struct memkind *kind,
                                              memkind_mem_usage_policy policy);
-int memkind_arena_enable_background_threads(size_t threads_limit);
+int memkind_arena_set_max_bg_threads(size_t threads_limit);
+int memkind_arena_set_bg_threads(bool state);
 int memkind_arena_update_cached_stats(void);
 int memkind_arena_get_kind_stat(struct memkind *kind,
                                 memkind_stat_type stat_type,

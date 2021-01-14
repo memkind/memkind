@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #define MEMKIND_VERSION_MAJOR 1
 #define MEMKIND_VERSION_MINOR 10
@@ -45,6 +45,7 @@
 #define m_get_global_stat(stat, value) heap_manager_get_stat(stat, value)
 #define m_update_cached_stats          heap_manager_update_cached_stats
 #define m_init                         heap_manager_init
+#define m_set_bg_threads(state)        heap_manager_set_bg_threads(state)
 #else
 #define m_detect_kind(ptr)             memkind_arena_detect_kind(ptr)
 #define m_free(ptr)                    memkind_arena_free_with_kind_detect(ptr)
@@ -54,6 +55,7 @@
 #define m_get_global_stat(stat, value) memkind_arena_get_global_stat(stat, value)
 #define m_update_cached_stats          memkind_arena_update_cached_stats
 #define m_init                         memkind_arena_init
+#define m_set_bg_threads(state)        memkind_arena_set_bg_threads(state)
 #endif
 
 /* Clear bits in x, but only this specified in mask. */
@@ -592,7 +594,7 @@ static void memkind_construct(void)
                 log_err("Error on parsing value MEMKIND_BACKGROUND_THREAD_LIMIT");
                 return;
             }
-            memkind_arena_enable_background_threads(thread_limit);
+            memkind_arena_set_max_bg_threads(thread_limit);
         }
     }
 }
@@ -917,4 +919,9 @@ MEMKIND_EXPORT int memkind_get_stat(memkind_t kind, memkind_stat_type stat,
 MEMKIND_EXPORT int memkind_check_dax_path(const char *pmem_dir)
 {
     return memkind_pmem_validate_dir(pmem_dir);
+}
+
+MEMKIND_EXPORT int memkind_set_bg_threads(bool state)
+{
+    return m_set_bg_threads(state);
 }
