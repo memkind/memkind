@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 #include <sys/types.h>
+#include <stdbool.h>
 
 /**
  * Header file for the memkind heap manager.
@@ -417,6 +418,10 @@ void *memkind_defrag_reallocate(memkind_t kind, void *ptr);
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
 ///
 int memkind_check_dax_path(const char *pmem_dir);
+
+int memkind_set_background_threads(bool enable);
+
+int set_background_threads(bool enable);
 
 #ifdef __cplusplus
 }
