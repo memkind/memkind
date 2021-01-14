@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -52,6 +52,7 @@ int memkind_arena_get_global_stat(memkind_stat_type stat_type, size_t *stat);
 void *memkind_arena_defrag_reallocate(struct memkind *kind, void *ptr);
 void *memkind_arena_defrag_reallocate_with_kind_detect(void *ptr);
 bool memkind_get_hog_memory(void);
+int memkind_arena_set_bg_threads(bool state);
 #ifdef __cplusplus
 }
 #endif
