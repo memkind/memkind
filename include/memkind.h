@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -417,6 +417,14 @@ void *memkind_defrag_reallocate(memkind_t kind, void *ptr);
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
 ///
 int memkind_check_dax_path(const char *pmem_dir);
+
+///
+/// \brief Enables/disables background threads
+/// \note STANDARD API
+/// \param enable set this flag to true if you want to enable background threads, set it to false otherwise
+/// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
+///
+int memkind_set_bg_threads(int *enable);
 
 #ifdef __cplusplus
 }

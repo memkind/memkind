@@ -1,5 +1,5 @@
 .\" SPDX-License-Identifier: BSD-2-Clause
-.\" Copyright (C) 2014 - 2020 Intel Corporation.
+.\" Copyright (C) 2014 - 2021 Intel Corporation.
 .\"
 .TH "MEMKIND" 3 "2015-03-31" "Intel Corporation" "MEMKIND" \" -*- nroff -*-
 .SH "NAME"
@@ -99,6 +99,10 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .BI "void memkind_free_pre(memkind_t " "*kind" ", void " "**ptr" );
 .br
 .BI "void memkind_free_post(memkind_t " "kind" ", void " "*ptr" );
+.sp
+.B "ENHANCEMENTS:"
+.br
+.BI "int memkind_set_bg_threads(bool " "enable" );
 .sp
 .sp
 .br
@@ -609,6 +613,11 @@ decorators that are called at the end of the allocator pass the output
 by reference. This enables the modification of the input and output
 of each heap management function by the decorators.
 .sp
+.B "ENHANCEMENTS:"
+.br
+.BR memkind_set_bg_threads()
+enables and disables internal background worker threads in jemalloc.
+.sp
 .B "LIBRARY VERSION:"
 .br
 The memkind library version scheme consist major, minor and patch numbers separated by dot. Combining those numbers, we got the following representation:
@@ -1076,7 +1085,7 @@ can be reached on GitHub:
 There might be some overhead in huge pages consumption caused by heap management.
 If your allocation fails because of OOM, please try to allocate extra huge pages (e.g. 8 huge pages).
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2020 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2021 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR malloc (3),
 .BR malloc_usable_size (3),
