@@ -13,12 +13,13 @@
 #include "proc_stat.h"
 #include "sys/types.h"
 #include "sys/sysinfo.h"
-#include "TestPolicy.hpp"
+#include "TestPrereq.hpp"
 
 class MemkindDaxKmemFunctionalTests: public ::testing::Test
 {
 protected:
     DaxKmem dax_kmem_nodes;
+    TestPrereq tp;
 
     void SetUp()
     {
@@ -32,11 +33,13 @@ class MemkindDaxKmemTestsParam: public ::Memkind_Param_Test
 {
 protected:
     DaxKmem dax_kmem_nodes;
+    TestPrereq tp;
+
     void SetUp()
     {
         Memkind_Param_Test::SetUp();
         if (memory_kind == MEMKIND_DAX_KMEM_PREFERRED) {
-            std::set<int> regular_nodes = TestPolicy::get_regular_numa_nodes();
+            std::unordered_set<int> regular_nodes = tp.get_regular_numa_nodes();
             for (auto const &node: regular_nodes) {
                 auto closest_dax_kmem_nodes = dax_kmem_nodes.get_closest_numa_nodes(node);
                 if (closest_dax_kmem_nodes.size() > 1)
@@ -349,7 +352,7 @@ TEST_F(MemkindDaxKmemFunctionalTests,
 TEST_F(MemkindDaxKmemFunctionalTests,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_PREFFERED_alloc_until_full_numa)
 {
-    std::set<int> regular_nodes = TestPolicy::get_regular_numa_nodes();
+    std::unordered_set<int> regular_nodes = tp.get_regular_numa_nodes();
     for (auto const &node: regular_nodes) {
         auto closest_dax_kmem_nodes = dax_kmem_nodes.get_closest_numa_nodes(node);
         if (closest_dax_kmem_nodes.size() > 1)
@@ -405,7 +408,7 @@ TEST_F(MemkindDaxKmemFunctionalTests,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_PREFFERED_check_prerequisities)
 {
     bool can_run = false;
-    std::set<int> regular_nodes = TestPolicy::get_regular_numa_nodes();
+    std::unordered_set<int> regular_nodes = tp.get_regular_numa_nodes();
 
     for (auto const &node: regular_nodes) {
         auto closest_dax_kmem_nodes = dax_kmem_nodes.get_closest_numa_nodes(node);
