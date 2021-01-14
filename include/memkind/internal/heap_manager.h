@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2017 - 2020 Intel Corporation. */
+/* Copyright (C) 2017 - 2021 Intel Corporation. */
 
 #pragma once
 
@@ -13,3 +13,4 @@ struct memkind *heap_manager_detect_kind(void *ptr);
 int heap_manager_update_cached_stats(void);
 int heap_manager_get_stat(memkind_stat_type stat, size_t *value);
 void *heap_manager_defrag_reallocate(void *ptr);
+int heap_manager_set_bg_threads(bool enable);

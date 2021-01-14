@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2017 - 2020 Intel Corporation. */
+/* Copyright (C) 2017 - 2021 Intel Corporation. */
 
 #pragma once
 #include <memkind.h>
@@ -35,6 +35,10 @@ int tbb_get_global_stat(memkind_stat_type stat, size_t *value);
 
 /* defrag reallocate for TBB (unsupported) */
 void *tbb_pool_defrag_reallocate_with_kind_detect(void *ptr);
+
+/* set background threads for TBB (unsupported) */
+int tbb_set_bg_threads(bool enable);
+
 #ifdef __cplusplus
 }
 #endif
