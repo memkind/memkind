@@ -7,7 +7,6 @@
 #include <memkind/internal/memkind_bitmask.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_mem_attributes.h>
-#include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/heap_manager.h>
 
@@ -180,10 +179,6 @@ struct hbw_closest_numanode_t {
     void *closest_numanode;
 };
 
-#define NODE_VARIANT_MULTIPLE 0
-#define NODE_VARIANT_SINGLE   1
-#define NODE_VARIANT_MAX      2
-
 static struct hbw_closest_numanode_t
     memkind_hbw_closest_numanode_g[NODE_VARIANT_MAX];
 static pthread_once_t memkind_hbw_closest_numanode_once_g[NODE_VARIANT_MAX]
@@ -285,6 +280,10 @@ inline static void cpuid_asm(int leaf, int subleaf, registers_t *registers)
 #define CPU_MODEL_KNM           (0x85)
 #define CPU_FAMILY_INTEL        (0x06)
 
+#define NO_NUMA_NODES_FLAT_MODE_OTHER (2)
+#define NO_NUMA_NODES_FLAT_MODE_SNC_2 (4)
+#define NO_NUMA_NODES_FLAT_MODE_SNC_4 (8)
+
 typedef struct {
     uint32_t model;
     uint32_t family;
@@ -317,7 +316,9 @@ static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
 
     // Check if NUMA configuration is supported.
     int nodes_num = numa_num_configured_nodes();
-    if(nodes_num != 2 && nodes_num != 4 && nodes_num != 8) {
+    if(nodes_num != NO_NUMA_NODES_FLAT_MODE_OTHER &&
+       nodes_num != NO_NUMA_NODES_FLAT_MODE_SNC_2 &&
+       nodes_num != NO_NUMA_NODES_FLAT_MODE_SNC_4) {
         log_err("High Bandwidth Memory is not supported by this NUMA configuration.");
         return MEMKIND_ERROR_UNAVAILABLE;
     }
@@ -374,7 +375,7 @@ static void memkind_hbw_closest_numanode_init(void)
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
-                                       &g->closest_numanode, g->num_cpu, false);
+                                       &g->closest_numanode, g->num_cpu, NODE_VARIANT_MULTIPLE);
 }
 
 static void memkind_hbw_closest_preferred_numanode_init(void)
@@ -384,7 +385,8 @@ static void memkind_hbw_closest_preferred_numanode_init(void)
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
     g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
-                                       &g->closest_numanode, g->num_cpu, true);
+                                       &g->closest_numanode,
+                                       g->num_cpu, NODE_VARIANT_SINGLE);
 }
 
 MEMKIND_EXPORT void memkind_hbw_init_once(void)
