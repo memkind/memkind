@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2017 - 2020 Intel Corporation. */
+/* Copyright (C) 2017 - 2021 Intel Corporation. */
 
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_log.h>
@@ -157,6 +157,12 @@ static void *tbb_defrag_reallocate(struct memkind *kind, void *ptr)
 {
     log_err("Defrag reallocate method is not supported by TBB");
     return NULL;
+}
+
+int tbb_set_bg_threads(int *read_state, size_t read_sz, int *enable, size_t sz)
+{
+    log_err("Setting background threads is not supported by TBB");
+    return MEMKIND_ERROR_OPERATION_FAILED;
 }
 
 struct memkind *tbb_detect_kind(void *ptr)
