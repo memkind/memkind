@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2020 Intel Corporation. */
-
-#include <memkind.h>
+/* Copyright (C) 2019 - 2021 Intel Corporation. */
 
 #include <algorithm>
 #include <numaif.h>
@@ -9,44 +7,46 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "dax_kmem_nodes.h"
 #include "proc_stat.h"
 #include "sys/types.h"
 #include "sys/sysinfo.h"
-#include "TestPolicy.hpp"
 
-class MemkindDaxKmemFunctionalTests: public ::testing::Test
+// TODO unify this
+class MemkindDaxKmemFunctionalTestsAll: public ::Memkind_Test
 {
 protected:
-    DaxKmem dax_kmem_nodes;
-
     void SetUp()
     {
-        if (dax_kmem_nodes.size() < 1) {
-            GTEST_SKIP() << "Minimum 1 PMEM NUMA required." << std::endl;
+        kind = MEMKIND_DAX_KMEM_ALL;
+        if (!prereq.is_DAX_KMEM_supported()) {
+            GTEST_SKIP() << "DAX KMEM is required." << std::endl;
         }
+        Memkind_Test::SetUp();
+    }
+};
+// TODO unify this
+class MemkindDaxKmemFunctionalTestsSINGLE: public ::Memkind_Test
+{
+protected:
+    void SetUp()
+    {
+        kind = MEMKIND_DAX_KMEM;
+        if (!prereq.is_DAX_KMEM_supported()) {
+            GTEST_SKIP() << "DAX KMEM is required." << std::endl;
+        }
+        Memkind_Test::SetUp();
     }
 };
 
-class MemkindDaxKmemTestsParam: public ::testing::Test,
-    public ::testing::WithParamInterface<memkind_t>
+class MemkindDaxKmemTestsParam: public ::Memkind_Param_Test
 {
 protected:
-    DaxKmem dax_kmem_nodes;
-    memkind_t kind;
     void SetUp()
     {
-        kind = GetParam();
-        if (kind == MEMKIND_DAX_KMEM_PREFERRED) {
-            std::set<int> regular_nodes = TestPolicy::get_regular_numa_nodes();
-            for (auto const &node: regular_nodes) {
-                auto closest_dax_kmem_nodes = dax_kmem_nodes.get_closest_numa_nodes(node);
-                if (closest_dax_kmem_nodes.size() > 1)
-                    GTEST_SKIP() << "Skip test for MEMKIND_DAX_KMEM_PREFFERED - "
-                                 "more than one PMEM NUMA node is closest to node: "
-                                 << node << std::endl;
-            }
+        if (!prereq.is_DAX_KMEM_supported()) {
+            GTEST_SKIP() << "DAX KMEM is required." << std::endl;
         }
+        Memkind_Param_Test::SetUp();
     }
 };
 
@@ -269,17 +269,18 @@ TEST_P(MemkindDaxKmemTestsParam,
     memkind_free(nullptr, test);
 }
 
-TEST_F(MemkindDaxKmemFunctionalTests,
+TEST_F(MemkindDaxKmemFunctionalTestsSINGLE,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_alloc_until_full_numa)
 {
     ProcStat stat;
     const size_t alloc_size = 100 * MB;
+    const size_t alloc_size_swap = 1 * MB;
     std::set<void *> allocations;
     size_t numa_size;
     int numa_id = -1;
     const int n_swap_alloc = 20;
 
-    void *ptr = memkind_malloc(MEMKIND_DAX_KMEM, alloc_size);
+    void *ptr = memkind_malloc(kind, alloc_size);
     ASSERT_NE(nullptr, ptr);
     memset(ptr, 'a', alloc_size);
     allocations.insert(ptr);
@@ -288,7 +289,7 @@ TEST_F(MemkindDaxKmemFunctionalTests,
     numa_size = numa_node_size64(numa_id, nullptr);
 
     while (numa_size > alloc_size * allocations.size()) {
-        ptr = memkind_malloc(MEMKIND_DAX_KMEM, alloc_size);
+        ptr = memkind_malloc(kind, alloc_size);
         ASSERT_NE(nullptr, ptr);
         memset(ptr, 'a', alloc_size);
         allocations.insert(ptr);
@@ -296,131 +297,134 @@ TEST_F(MemkindDaxKmemFunctionalTests,
 
     size_t init_swap = stat.get_used_swap_space_size_bytes();
     for(int i = 0; i < n_swap_alloc; ++i) {
-        ptr = memkind_malloc(MEMKIND_DAX_KMEM, alloc_size);
+        ptr = memkind_malloc(kind, alloc_size_swap);
         ASSERT_NE(nullptr, ptr);
-        memset(ptr, 'a', alloc_size);
+        memset(ptr, 'a', alloc_size_swap);
         allocations.insert(ptr);
     }
 
     ASSERT_GE(stat.get_used_swap_space_size_bytes(), init_swap);
 
     for (auto const &ptr: allocations) {
-        memkind_free(MEMKIND_DAX_KMEM, ptr);
+        memkind_free(kind, ptr);
     }
 }
 
-TEST_F(MemkindDaxKmemFunctionalTests,
+TEST_F(MemkindDaxKmemFunctionalTestsAll,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_ALL_alloc_until_full_numa)
 {
+    auto dax_kmem_nodes = prereq.get_memory_only_numa_nodes();
     if (dax_kmem_nodes.size() < 2)
         GTEST_SKIP() << "This test requires minimum 2 kmem dax nodes";
 
     ProcStat stat;
     void *ptr;
     const size_t alloc_size = 100 * MB;
+    const size_t alloc_size_swap = 1 * MB;
     std::set<void *> allocations;
-    size_t sum_of_dax_kmem_free_space = dax_kmem_nodes.get_free_space();
+    size_t sum_of_free_space = prereq.get_free_space(dax_kmem_nodes);
     int numa_id = -1;
     const int n_swap_alloc = 20;
+    size_t sum_of_alloc;
 
-    while (sum_of_dax_kmem_free_space > alloc_size * allocations.size()) {
-        ptr = memkind_malloc(MEMKIND_DAX_KMEM_ALL, alloc_size);
+    while (sum_of_free_space > sum_of_alloc) {
+        ptr = memkind_malloc(kind, alloc_size);
         ASSERT_NE(nullptr, ptr);
         memset(ptr, 'a', alloc_size);
-        allocations.insert(ptr);
+        allocations.emplace(ptr);
+        sum_of_alloc += alloc_size;
 
-        get_mempolicy(&numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
-        ASSERT_TRUE(dax_kmem_nodes.contains(numa_id));
+        int ret = get_mempolicy(&numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
+        ASSERT_EQ(ret, 0);
+
+        // signal the moment when we actually reach free space of DAX KMEM Nodes
+        if (dax_kmem_nodes.find(numa_id) == dax_kmem_nodes.end()) {
+            ASSERT_GE(sum_of_alloc, 0.99*sum_of_free_space);
+            break;
+        }
     }
 
     size_t init_swap = stat.get_used_swap_space_size_bytes();
     for(int i = 0; i < n_swap_alloc; ++i) {
-        ptr = memkind_malloc(MEMKIND_DAX_KMEM_ALL, alloc_size);
+        ptr = memkind_malloc(kind, alloc_size_swap);
         ASSERT_NE(nullptr, ptr);
-        memset(ptr, 'a', alloc_size);
-        allocations.insert(ptr);
+        memset(ptr, 'a', alloc_size_swap);
+        allocations.emplace(ptr);
     }
 
     ASSERT_GE(stat.get_used_swap_space_size_bytes(), init_swap);
 
     for (auto const &ptr: allocations) {
-        memkind_free(MEMKIND_DAX_KMEM_ALL, ptr);
+        memkind_free(kind, ptr);
     }
 }
 
-TEST_F(MemkindDaxKmemFunctionalTests,
+TEST_F(MemkindDaxKmemTestsParam,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_PREFFERED_alloc_until_full_numa)
 {
-    std::set<int> regular_nodes = TestPolicy::get_regular_numa_nodes();
-    for (auto const &node: regular_nodes) {
-        auto closest_dax_kmem_nodes = dax_kmem_nodes.get_closest_numa_nodes(node);
-        if (closest_dax_kmem_nodes.size() > 1)
-            GTEST_SKIP() << "Skip test for MEMKIND_DAX_KMEM_PREFFERED - "
-                         "more than one PMEM NUMA node is closest to node: "
-                         << node << std::endl;
-    }
+    if (!prereq.is_kind_preferred(kind))
+        GTEST_SKIP() << "Preferred memory kind is required."<< std::endl;
+    else if (!prereq.is_preferred_supported())
+        GTEST_SKIP() << "Only one closest PMEM NUMA nodes are required." << std::endl;
 
     ProcStat stat;
     const size_t alloc_size = 100 * MB;
+    const size_t alloc_size_swap = 1 * MB;
     std::set<void *> allocations;
     size_t numa_size;
     int numa_id = -1;
     const int n_swap_alloc = 20;
 
-    void *ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
+    void *ptr = memkind_malloc(kind, alloc_size);
     ASSERT_NE(nullptr, ptr);
     memset(ptr, 'a', alloc_size);
-    allocations.insert(ptr);
+    allocations.emplace(ptr);
 
     get_mempolicy(&numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
     int process_cpu = sched_getcpu();
     int process_node = numa_node_of_cpu(process_cpu);
-    std::set<int> closest_numa_ids = dax_kmem_nodes.get_closest_numa_nodes(
-                                         process_node);
+
+    auto dax_kmem_nodes = prereq.get_memory_only_numa_nodes();
+    auto closest_numa_ids = prereq.get_closest_numa_nodes(process_node,
+                                                          dax_kmem_nodes);
+
     numa_size = numa_node_size64(numa_id, nullptr);
 
     while (0.99 * numa_size > alloc_size * allocations.size()) {
-        ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
+        ptr = memkind_malloc(kind, alloc_size);
         ASSERT_NE(nullptr, ptr);
         memset(ptr, 'a', alloc_size);
-        allocations.insert(ptr);
+        allocations.emplace(ptr);
 
         get_mempolicy(&numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
         ASSERT_TRUE(closest_numa_ids.find(numa_id) != closest_numa_ids.end());
     }
 
     for (int i = 0; i < n_swap_alloc; ++i) {
-        ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
+        ptr = memkind_malloc(kind, alloc_size_swap);
         ASSERT_NE(nullptr, ptr);
-        memset(ptr, 'a', alloc_size);
-        allocations.insert(ptr);
+        memset(ptr, 'a', alloc_size_swap);
+        allocations.emplace(ptr);
     }
 
     ASSERT_EQ(stat.get_used_swap_space_size_bytes(), 0U);
 
     for (auto const &ptr: allocations) {
-        memkind_free(MEMKIND_DAX_KMEM_ALL, ptr);
+        memkind_free(kind, ptr);
     }
 }
 
-TEST_F(MemkindDaxKmemFunctionalTests,
+TEST_P(MemkindDaxKmemTestsParam,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_PREFFERED_check_prerequisities)
 {
-    bool can_run = false;
-    std::set<int> regular_nodes = TestPolicy::get_regular_numa_nodes();
-
-    for (auto const &node: regular_nodes) {
-        auto closest_dax_kmem_nodes = dax_kmem_nodes.get_closest_numa_nodes(node);
-        if (closest_dax_kmem_nodes.size() > 1)
-            can_run = true;
+    if (!prereq.is_kind_preferred(kind))
+        GTEST_SKIP() << "Preferred memory kind is required."<< std::endl;
+    else if (prereq.is_preferred_supported()) {
+        GTEST_SKIP() << "More than one closest PMEM NUMA nodes are required." <<
+                     std::endl;
     }
 
-    if (!can_run)
-        GTEST_SKIP() <<
-                     "Skip test for MEMKIND_DAX_KMEM_PREFFERED checking prerequisities - "
-                     "none of the nodes have more than one closest PMEM NUMA nodes";
-
     const size_t alloc_size = 100 * MB;
-    void *ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
+    void *ptr = memkind_malloc(kind, alloc_size);
     ASSERT_EQ(nullptr, ptr);
 }
