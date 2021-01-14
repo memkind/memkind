@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include <memkind.h>
 #include <memkind/internal/memkind_default.h>
@@ -835,10 +835,9 @@ int memkind_arena_get_global_stat(memkind_stat_type stat, size_t *value)
     return err;
 }
 
-int memkind_arena_enable_background_threads(size_t threads_limit)
+int memkind_arena_set_max_bg_threads(size_t threads_limit)
 {
-    bool background_thread_val = true;
-    int err;
+    int err = MEMKIND_ERROR_INVALID;
 
     if (threads_limit) {
         err = jemk_mallctl("max_background_threads", NULL, NULL, &threads_limit,
@@ -848,10 +847,14 @@ int memkind_arena_enable_background_threads(size_t threads_limit)
             return MEMKIND_ERROR_INVALID;
         }
     }
-    err = jemk_mallctl("background_thread", NULL, NULL, &background_thread_val,
-                       sizeof(bool));
+    return err;
+}
+
+int memkind_arena_set_bg_threads(bool state)
+{
+    int err = jemk_mallctl("background_thread", NULL, NULL, &state, sizeof(bool));
     if (err) {
-        log_err("Error on activating background thread");
+        log_err("Error while enabling/disabling background thread");
         return MEMKIND_ERROR_INVALID;
     }
     return err;
