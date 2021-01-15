@@ -21,7 +21,7 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
     hwloc_obj_t init_node = NULL;
     hwloc_obj_t *local_nodes = NULL;
     struct bitmask *node_cpus = NULL;
-    hwloc_uint64_t best_mem_attr;
+    hwloc_uint64_t mem_attr, best_mem_attr;
 
     hwloc_topology_t topology;
     int i;
@@ -92,10 +92,12 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
             ret = MEMKIND_ERROR_UNAVAILABLE;
             goto error;
         }
+
+        numa_bitmask_clearall(attr_loc_mask);
+
         switch(attr) {
             case MEM_ATTR_CAPACITY:
                 best_mem_attr = 0;
-                numa_bitmask_clearall(attr_loc_mask);
                 for (i = 0; i < num_local_nodes; ++i) {
                     if (local_nodes[i]->attr->numanode.local_memory == 0) {
                         continue;
@@ -110,13 +112,51 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                         numa_bitmask_setbit(attr_loc_mask, local_nodes[i]->os_index);
                     }
                 }
+                break;
 
-                if (node_variant == NODE_VARIANT_SINGLE &&
-                    numa_bitmask_weight(attr_loc_mask) > 1) {
-                    ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
-                    log_err("Multiple NUMA Nodes have the same highest local capacity for init node %d.",
-                            init_node->os_index);
-                    goto error;
+            case MEM_ATTR_BANDWIDTH:
+                best_mem_attr = 0;
+                for (i = 0; i < num_local_nodes; ++i) {
+                    err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH,
+                                                  local_nodes[i],
+                                                  &initiator, 0, &mem_attr);
+                    if (err) {
+                        log_info("Node skipped - cannot read initiator Node %d and target Node %d.",
+                                 init_node->os_index, local_nodes[i]->os_index);
+                        continue;
+                    }
+
+                    if (mem_attr > best_mem_attr) {
+                        best_mem_attr = mem_attr;
+                        numa_bitmask_clearall(attr_loc_mask);
+                    }
+
+                    if (mem_attr == best_mem_attr) {
+                        numa_bitmask_setbit(attr_loc_mask, local_nodes[i]->os_index);
+                    }
+                }
+                break;
+
+            case MEM_ATTR_LATENCY:
+                best_mem_attr = INT_MAX;
+                for (i = 0; i < num_local_nodes; ++i) {
+                    err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH,
+                                                  local_nodes[i],
+                                                  &initiator, 0, &mem_attr);
+                    if (err) {
+                        log_info("Node skipped - cannot read initiator Node %d and target Node %d.",
+                                 init_node->os_index, local_nodes[i]->os_index);
+                        continue;
+                    }
+
+                    if (mem_attr < best_mem_attr) {
+                        best_mem_attr = mem_attr;
+                        numa_bitmask_clearall(attr_loc_mask);
+                    }
+
+                    if (mem_attr == best_mem_attr) {
+                        numa_bitmask_setbit(attr_loc_mask, local_nodes[i]->os_index);
+                    }
                 }
                 break;
 
@@ -124,6 +164,14 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                 log_err("Unknown memory attribute.");
                 ret = MEMKIND_ERROR_UNAVAILABLE;
                 goto error;
+        }
+
+        if (node_variant == NODE_VARIANT_SINGLE &&
+            numa_bitmask_weight(attr_loc_mask) > 1) {
+            ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
+            log_err("Multiple NUMA Nodes have the same highest local capacity for init node %d.",
+                    init_node->os_index);
+            goto error;
         }
 
         // populate memory attribute nodemask to all CPU's from initiator NUMA node
