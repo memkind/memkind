@@ -10,6 +10,7 @@
 #include <memkind/internal/memkind_hugetlb.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_capacity.h>
+#include <memkind/internal/memkind_local.h>
 #include <memkind/internal/memkind_hbw.h>
 #include <memkind/internal/memkind_regular.h>
 #include <memkind/internal/memkind_gbtlb.h>
