@@ -6,18 +6,33 @@
 #include <memkind/internal/memkind_mem_attributes.h>
 #include <memkind/internal/memkind_private.h>
 
-struct hi_cap_loc_numanodes_t {
+struct loc_numanodes_t {
     int init_err;
     struct bitmask **per_cpu_numa_nodes;
 };
 
-static struct hi_cap_loc_numanodes_t
-    memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_MAX];
+static inline void local_kind_finalize(const struct loc_numanodes_t *g)
+{
+    if (MEMKIND_LIKELY(!g->init_err)) {
+        if (g->per_cpu_numa_nodes) {
+            int num_cpus = numa_num_configured_cpus();
+            int i;
+            for (i = 0; i < num_cpus; ++i) {
+                if (g->per_cpu_numa_nodes[i]) {
+                    numa_bitmask_free(g->per_cpu_numa_nodes[i]);
+                }
+            }
+        }
+        free(g->per_cpu_numa_nodes);
+    }
+}
+
+static struct loc_numanodes_t memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_MAX];
 static pthread_once_t memkind_hi_cap_loc_numanodes_once_g[NODE_VARIANT_MAX] = {PTHREAD_ONCE_INIT};
 
 static void memkind_hi_cap_loc_numanodes_init(void)
 {
-    struct hi_cap_loc_numanodes_t *g =
+    struct loc_numanodes_t *g =
             &memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_MULTIPLE];
     g->init_err = get_per_cpu_hi_cap_local_nodes_mask(&g->per_cpu_numa_nodes,
                                                       NODE_VARIANT_MULTIPLE);
@@ -25,7 +40,7 @@ static void memkind_hi_cap_loc_numanodes_init(void)
 
 static void memkind_hi_cap_loc_preferred_numanodes_init(void)
 {
-    struct hi_cap_loc_numanodes_t *g =
+    struct loc_numanodes_t *g =
             &memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_SINGLE];
     g->init_err = get_per_cpu_hi_cap_local_nodes_mask(&g->per_cpu_numa_nodes,
                                                       NODE_VARIANT_SINGLE);
@@ -34,7 +49,7 @@ static void memkind_hi_cap_loc_preferred_numanodes_init(void)
 static int memkind_hi_cap_loc_get_mbind_nodemask(
     struct memkind *kind, unsigned long *nodemask, unsigned long maxnode)
 {
-    struct hi_cap_loc_numanodes_t *g =
+    struct loc_numanodes_t *g =
             &memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_MULTIPLE];
     pthread_once(&memkind_hi_cap_loc_numanodes_once_g[NODE_VARIANT_MULTIPLE],
                  memkind_hi_cap_loc_numanodes_init);
@@ -51,7 +66,7 @@ static int memkind_hi_cap_loc_get_mbind_nodemask(
 static int memkind_hi_cap_loc_preferred_get_mbind_nodemask(
     struct memkind *kind, unsigned long *nodemask, unsigned long maxnode)
 {
-    struct hi_cap_loc_numanodes_t *g =
+    struct loc_numanodes_t *g =
             &memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_SINGLE];
 
     pthread_once(&memkind_hi_cap_loc_numanodes_once_g[NODE_VARIANT_SINGLE],
@@ -68,43 +83,13 @@ static int memkind_hi_cap_loc_preferred_get_mbind_nodemask(
 
 static int memkind_hi_cap_loc_finalize(memkind_t kind)
 {
-    struct hi_cap_loc_numanodes_t *g =
-            &memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_SINGLE];
-
-    if (MEMKIND_LIKELY(!g->init_err)) {
-        if (g->per_cpu_numa_nodes) {
-            int num_cpus = numa_num_configured_cpus();
-            int i;
-            for (i = 0; i < num_cpus; ++i) {
-                if (g->per_cpu_numa_nodes[i]) {
-                    numa_bitmask_free(g->per_cpu_numa_nodes[i]);
-                }
-            }
-        }
-        free(g->per_cpu_numa_nodes);
-    }
-
+    local_kind_finalize(&memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_SINGLE]);
     return memkind_arena_finalize(kind);
 }
 
 static int memkind_hi_cap_loc_preferred_finalize(memkind_t kind)
 {
-    struct hi_cap_loc_numanodes_t *g =
-            &memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_MULTIPLE];
-
-    if (MEMKIND_LIKELY(!g->init_err)) {
-        if (g->per_cpu_numa_nodes) {
-            int num_cpus = numa_num_configured_cpus();
-            int i;
-            for (i = 0; i < num_cpus; ++i) {
-                if (g->per_cpu_numa_nodes[i]) {
-                    numa_bitmask_free(g->per_cpu_numa_nodes[i]);
-                }
-            }
-            free(g->per_cpu_numa_nodes);
-        }
-    }
-
+    local_kind_finalize(&memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_MULTIPLE]);
     return memkind_arena_finalize(kind);
 }
 
