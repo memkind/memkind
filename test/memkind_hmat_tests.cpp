@@ -87,72 +87,13 @@ TEST_P(MemkindHMATFunctionalTestsParam,
             status = get_mempolicy(&target_node, nullptr, 0, ptr,
                                    MPOL_F_NODE | MPOL_F_ADDR);
             EXPECT_EQ(0, status);
-            auto res = topology->verify_kind(memory_kind, {init_node, target_node});
+            auto res = topology->verify_nodes(memory_kind, {init_node, target_node});
+            EXPECT_EQ(true, res);
+            res = topology->verify_addr(memory_kind, ptr);
             EXPECT_EQ(true, res);
             memkind_free(memory_kind, ptr);
         } else {
             EXPECT_TRUE(ptr == nullptr);
         }
-    }
-}
-
-TEST_P(MemkindHMATFunctionalTestsParam,
-       test_tc_memkind_HMAT_alloc_until_full_numa)
-{
-    int status = numa_available();
-    ASSERT_EQ(status, 0);
-
-    auto &topology = TopologyMap.at(memory_tpg);
-    if (topology->is_kind_supported(memory_kind) == false) {
-        GTEST_SKIP();
-    }
-
-    ProcStat stat;
-    void *ptr;
-    const size_t alloc_size = 100 * MB;
-    std::set<void *> allocations;
-
-    int cpu = sched_getcpu();
-    ASSERT_GE(cpu, -1);
-    int init_node = numa_node_of_cpu(cpu);
-    ASSERT_GE(init_node, -1);
-
-    auto target_nodes = topology->get_target_nodes(memory_kind, init_node);
-    ASSERT_GT(target_nodes.size(), size_t(0));
-
-    size_t sum_of_free_space = 0;
-    for (auto &&i : target_nodes) {
-        long long numa_free = 0;
-        numa_node_size64(i, &numa_free);
-        sum_of_free_space += numa_free;
-    }
-
-    int target_node = -1;
-    while (sum_of_free_space > alloc_size * allocations.size()) {
-        ptr = memkind_malloc(memory_kind, alloc_size);
-        ASSERT_NE(nullptr, ptr);
-        memset(ptr, 'a', alloc_size);
-        allocations.insert(ptr);
-
-        int ret = get_mempolicy(&target_node, nullptr, 0, ptr,
-                                MPOL_F_NODE | MPOL_F_ADDR);
-        ASSERT_EQ(ret, 0);
-
-        auto res = topology->verify_kind(memory_kind, {init_node, target_node});
-        EXPECT_EQ(res, true);
-    }
-
-    const int n_swap_alloc = 5;
-    size_t init_swap = stat.get_used_swap_space_size_bytes();
-    for(int i = 0; i < n_swap_alloc; ++i) {
-        ptr = memkind_malloc(memory_kind, alloc_size);
-        ASSERT_NE(nullptr, ptr);
-        memset(ptr, 'a', alloc_size);
-        allocations.insert(ptr);
-    }
-    ASSERT_GE(stat.get_used_swap_space_size_bytes(), init_swap);
-
-    for (auto const &ptr: allocations) {
-        memkind_free(memory_kind, ptr);
     }
 }

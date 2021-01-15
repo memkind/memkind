@@ -11,6 +11,8 @@
 #include <unordered_set>
 #include <string>
 
+#include <numaif.h>
+
 struct Nodes {
     int init;
     int target;
@@ -29,6 +31,14 @@ private:
     virtual MapNodeSet Capacity_local_nodes() const
     {
         return {};
+    }
+
+    int get_kind_mem_policy_flag(memkind_t memory_kind) const
+    {
+        if (memory_kind == MEMKIND_HBW ||
+            memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL)
+            return MPOL_BIND;
+        return -1;
     }
 
     bool test_node_set(const Nodes &nodes, const MapNodeSet &map_nodes) const
@@ -69,13 +79,23 @@ public:
         return false;
     }
 
-    bool verify_kind(memkind_t memory_kind, const Nodes &nodes) const
+    bool verify_nodes(memkind_t memory_kind, const Nodes &nodes) const
     {
         if (memory_kind == MEMKIND_HBW)
             return test_node_set(nodes, HBW_nodes());
         else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL)
             return test_node_set(nodes, Capacity_local_nodes());
         return false;
+    }
+
+    bool verify_addr(memkind_t memory_kind, void *ptr) const
+    {
+        int policy = -1;
+        int status = get_mempolicy(&policy, nullptr, 0, ptr, MPOL_F_ADDR);
+        if (status) {
+            return false;
+        }
+        return policy == get_kind_mem_policy_flag(memory_kind);
     }
 
     std::unordered_set<int> get_target_nodes(memkind_t memory_kind, int init) const
