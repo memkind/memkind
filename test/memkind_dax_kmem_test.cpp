@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2020 Intel Corporation. */
+/* Copyright (C) 2019 - 2021 Intel Corporation. */
 
 #include <memkind.h>
 
@@ -28,16 +28,14 @@ protected:
     }
 };
 
-class MemkindDaxKmemTestsParam: public ::testing::Test,
-    public ::testing::WithParamInterface<memkind_t>
+class MemkindDaxKmemTestsParam: public ::Memkind_Param_Test
 {
 protected:
     DaxKmem dax_kmem_nodes;
-    memkind_t kind;
     void SetUp()
     {
-        kind = GetParam();
-        if (kind == MEMKIND_DAX_KMEM_PREFERRED) {
+        memory_kind = GetParam();
+        if (memory_kind == MEMKIND_DAX_KMEM_PREFERRED) {
             std::set<int> regular_nodes = TestPolicy::get_regular_numa_nodes();
             for (auto const &node: regular_nodes) {
                 auto closest_dax_kmem_nodes = dax_kmem_nodes.get_closest_numa_nodes(node);
@@ -47,6 +45,7 @@ protected:
                                  << node << std::endl;
             }
         }
+        Memkind_Param_Test::SetUp();
     }
 };
 
@@ -58,14 +57,14 @@ INSTANTIATE_TEST_CASE_P(
 TEST_P(MemkindDaxKmemTestsParam,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_free_with_NULL_kind_4096_bytes)
 {
-    void *ptr = memkind_malloc(kind, 4 * KB);
+    void *ptr = memkind_malloc(memory_kind, 4 * KB);
     ASSERT_NE(nullptr, ptr);
     memkind_free(nullptr, ptr);
 }
 
 TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_alloc_zero)
 {
-    void *test1 = memkind_malloc(kind, 0);
+    void *test1 = memkind_malloc(memory_kind, 0);
     ASSERT_EQ(test1, nullptr);
 }
 
@@ -73,17 +72,17 @@ TEST_P(MemkindDaxKmemTestsParam,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_alloc_size_max)
 {
     errno = 0;
-    void *test1 = memkind_malloc(kind, SIZE_MAX);
+    void *test1 = memkind_malloc(memory_kind, SIZE_MAX);
     ASSERT_EQ(test1, nullptr);
     ASSERT_EQ(errno, ENOMEM);
 }
 
 TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_calloc_zero)
 {
-    void *test = memkind_calloc(kind, 0, 100);
+    void *test = memkind_calloc(memory_kind, 0, 100);
     ASSERT_EQ(test, nullptr);
 
-    test = memkind_calloc(kind, 100, 0);
+    test = memkind_calloc(memory_kind, 100, 0);
     ASSERT_EQ(test, nullptr);
 }
 
@@ -94,7 +93,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t num = 1;
     errno = 0;
 
-    void *test = memkind_calloc(kind, size, num);
+    void *test = memkind_calloc(memory_kind, size, num);
     ASSERT_EQ(test, nullptr);
     ASSERT_EQ(errno, ENOMEM);
 }
@@ -106,7 +105,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t num = SIZE_MAX;
     errno = 0;
 
-    void *test = memkind_calloc(kind, size, num);
+    void *test = memkind_calloc(memory_kind, size, num);
     ASSERT_EQ(test, nullptr);
     ASSERT_EQ(errno, ENOMEM);
 }
@@ -117,29 +116,29 @@ TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_realloc)
     const size_t size2 = 1 * KB;
     char *default_str = nullptr;
 
-    default_str = (char *)memkind_realloc(kind, default_str, size1);
+    default_str = (char *)memkind_realloc(memory_kind, default_str, size1);
     ASSERT_NE(nullptr, default_str);
 
     sprintf(default_str, "memkind_realloc with size %zu\n", size1);
     printf("%s", default_str);
 
-    default_str = (char *)memkind_realloc(kind, default_str, size2);
+    default_str = (char *)memkind_realloc(memory_kind, default_str, size2);
     ASSERT_NE(nullptr, default_str);
 
     sprintf(default_str, "memkind_realloc with size %zu\n", size2);
     printf("%s", default_str);
 
-    memkind_free(kind, default_str);
+    memkind_free(memory_kind, default_str);
 }
 
 TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_realloc_zero)
 {
     const size_t size = 1 * KB;
 
-    void *test = memkind_malloc(kind, size);
+    void *test = memkind_malloc(memory_kind, size);
     ASSERT_NE(test, nullptr);
 
-    void *new_test = memkind_realloc(kind, test, 0);
+    void *new_test = memkind_realloc(memory_kind, test, 0);
     ASSERT_EQ(new_test, nullptr);
 }
 
@@ -148,15 +147,15 @@ TEST_P(MemkindDaxKmemTestsParam,
 {
     const size_t size = 1 * KB;
 
-    void *test = memkind_malloc(kind, size);
+    void *test = memkind_malloc(memory_kind, size);
     ASSERT_NE(test, nullptr);
 
     errno = 0;
-    void *new_test = memkind_realloc(kind, test, SIZE_MAX);
+    void *new_test = memkind_realloc(memory_kind, test, SIZE_MAX);
     ASSERT_EQ(new_test, nullptr);
     ASSERT_EQ(errno, ENOMEM);
 
-    memkind_free(kind, test);
+    memkind_free(memory_kind, test);
 }
 
 TEST_P(MemkindDaxKmemTestsParam,
@@ -168,10 +167,10 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t iteration = 100;
 
     for (unsigned i = 0; i < iteration; ++i) {
-        test = memkind_malloc(kind, size);
+        test = memkind_malloc(memory_kind, size);
         ASSERT_NE(test, nullptr);
         errno = 0;
-        new_test = memkind_realloc(kind, test, 0);
+        new_test = memkind_realloc(memory_kind, test, 0);
         ASSERT_EQ(new_test, nullptr);
         ASSERT_EQ(errno, 0);
     }
@@ -183,10 +182,10 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t size = 1 * KB;
     void *test = nullptr;
 
-    test = memkind_realloc(kind, test, size);
+    test = memkind_realloc(memory_kind, test, size);
     ASSERT_NE(test, nullptr);
 
-    memkind_free(kind, test);
+    memkind_free(memory_kind, test);
 }
 
 TEST_P(MemkindDaxKmemTestsParam,
@@ -196,7 +195,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const char val[] = "test_TC_MEMKIND_PmemReallocIncreaseSizeNullKindVariant";
     int status;
 
-    char *test1 = (char *)memkind_malloc(kind, size);
+    char *test1 = (char *)memkind_malloc(memory_kind, size);
     ASSERT_NE(test1, nullptr);
 
     sprintf(test1, "%s", val);
@@ -213,7 +212,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     status = memcmp(val, test3, sizeof(val));
     ASSERT_EQ(status, 0);
 
-    memkind_free(kind, test3);
+    memkind_free(memory_kind, test3);
 }
 
 TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_free_nullptr)
@@ -221,7 +220,7 @@ TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_free_nullptr)
     const int n_iter = 5000;
 
     for (int i = 0; i < n_iter; ++i) {
-        memkind_free(kind, nullptr);
+        memkind_free(memory_kind, nullptr);
     }
 }
 
@@ -233,7 +232,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t wrong_alignment = 4;
 
     errno = 0;
-    int ret = memkind_posix_memalign(kind, &test, wrong_alignment, size);
+    int ret = memkind_posix_memalign(memory_kind, &test, wrong_alignment, size);
     ASSERT_EQ(errno, 0);
     ASSERT_EQ(ret, EINVAL);
     ASSERT_EQ(test, nullptr);
@@ -247,7 +246,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t wrong_alignment = sizeof(void *)+1;
 
     errno = 0;
-    int ret = memkind_posix_memalign(kind, &test, wrong_alignment, size);
+    int ret = memkind_posix_memalign(memory_kind, &test, wrong_alignment, size);
     ASSERT_EQ(errno, 0);
     ASSERT_EQ(ret, EINVAL);
     ASSERT_EQ(test, nullptr);
@@ -261,7 +260,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t alignment = sizeof(void *);
 
     errno = 0;
-    int ret = memkind_posix_memalign(kind, &test, alignment, size);
+    int ret = memkind_posix_memalign(memory_kind, &test, alignment, size);
     ASSERT_EQ(errno, 0);
     ASSERT_EQ(ret, 0);
     ASSERT_NE(test, nullptr);
