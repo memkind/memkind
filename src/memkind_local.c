@@ -34,16 +34,16 @@ static void memkind_hi_cap_loc_numanodes_init(void)
 {
     struct loc_numanodes_t *g =
             &memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_MULTIPLE];
-    g->init_err = get_per_cpu_hi_cap_local_nodes_mask(&g->per_cpu_numa_nodes,
-                                                      NODE_VARIANT_MULTIPLE);
+    g->init_err = get_per_cpu_local_nodes_mask(&g->per_cpu_numa_nodes,
+                                               NODE_VARIANT_MULTIPLE, MEM_ATTR_CAPACITY);
 }
 
 static void memkind_hi_cap_loc_preferred_numanodes_init(void)
 {
     struct loc_numanodes_t *g =
             &memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_SINGLE];
-    g->init_err = get_per_cpu_hi_cap_local_nodes_mask(&g->per_cpu_numa_nodes,
-                                                      NODE_VARIANT_SINGLE);
+    g->init_err = get_per_cpu_local_nodes_mask(&g->per_cpu_numa_nodes,
+                                               NODE_VARIANT_SINGLE, MEM_ATTR_CAPACITY);
 }
 
 static int memkind_hi_cap_loc_get_mbind_nodemask(

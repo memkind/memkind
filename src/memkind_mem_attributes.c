@@ -11,8 +11,8 @@
 #include <hwloc.h>
 #define MEMKIND_HBW_THRESHOLD_DEFAULT (200 * 1024) // Default threshold is 200 GB/s
 
-int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask,
-                                        memkind_node_variant_t node_variant)
+int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
+                                 memkind_node_variant_t node_variant, memory_attribute_t attr)
 {
     int num_nodes = numa_num_configured_nodes();
     int max_node_id = numa_max_node();
@@ -21,6 +21,7 @@ int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask,
     hwloc_obj_t init_node = NULL;
     hwloc_obj_t *local_nodes = NULL;
     struct bitmask *node_cpus = NULL;
+    hwloc_uint64_t best_mem_attr;
 
     hwloc_topology_t topology;
     int i;
@@ -60,8 +61,8 @@ int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask,
         goto error;
     }
 
-    struct bitmask *hi_cap_loc_mask = numa_bitmask_alloc(max_node_id + 1);
-    if (MEMKIND_UNLIKELY(hi_cap_loc_mask == NULL)) {
+    struct bitmask *attr_loc_mask = numa_bitmask_alloc(max_node_id + 1);
+    if (MEMKIND_UNLIKELY(attr_loc_mask == NULL)) {
         ret = MEMKIND_ERROR_MALLOC;
         log_err("numa_allocate_nodemask() failed.");
         goto error;
@@ -79,7 +80,7 @@ int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask,
             continue;
         }
 
-        // fill "local_nodes" array
+        // extract local nodes
         struct hwloc_location initiator;
         initiator.type = HWLOC_LOCATION_TYPE_OBJECT;
         initiator.location.object = init_node;
@@ -91,35 +92,41 @@ int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask,
             ret = MEMKIND_ERROR_UNAVAILABLE;
             goto error;
         }
+        switch(attr) {
+            case MEM_ATTR_CAPACITY:
+                best_mem_attr = 0;
+                numa_bitmask_clearall(attr_loc_mask);
+                for (i = 0; i < num_local_nodes; ++i) {
+                    if (local_nodes[i]->attr->numanode.local_memory == 0) {
+                        continue;
+                    }
 
-        // find highest capacity nodes among nodes in "local_nodes" array
-        hwloc_uint64_t best_capacity = 0;
-        numa_bitmask_clearall(hi_cap_loc_mask);
-        for (i = 0; i < num_local_nodes; ++i) {
-            if (local_nodes[i]->attr->numanode.local_memory == 0) {
-                continue;
-            }
+                    if (local_nodes[i]->attr->numanode.local_memory > best_mem_attr) {
+                        best_mem_attr = local_nodes[i]->attr->numanode.local_memory;
+                        numa_bitmask_clearall(attr_loc_mask);
+                    }
 
-            if (local_nodes[i]->attr->numanode.local_memory > best_capacity) {
-                best_capacity = local_nodes[i]->attr->numanode.local_memory;
-                numa_bitmask_clearall(hi_cap_loc_mask);
-            }
+                    if (local_nodes[i]->attr->numanode.local_memory == best_mem_attr) {
+                        numa_bitmask_setbit(attr_loc_mask, local_nodes[i]->os_index);
+                    }
+                }
 
-            if (local_nodes[i]->attr->numanode.local_memory == best_capacity) {
-                numa_bitmask_setbit(hi_cap_loc_mask, local_nodes[i]->os_index);
-            }
+                if (node_variant == NODE_VARIANT_SINGLE &&
+                    numa_bitmask_weight(attr_loc_mask) > 1) {
+                    ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
+                    log_err("Multiple NUMA Nodes have the same highest local capacity for init node %d.",
+                            init_node->os_index);
+                    goto error;
+                }
+                break;
+
+            default:
+                log_err("Unknown memory attribute.");
+                ret = MEMKIND_ERROR_UNAVAILABLE;
+                goto error;
         }
 
-        if (node_variant == NODE_VARIANT_SINGLE &&
-            numa_bitmask_weight(hi_cap_loc_mask) > 1) {
-            ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
-            log_err("Multiple NUMA Nodes have the same highest local capacity for init node %d.",
-                    init_node->os_index);
-            goto error;
-        }
-
-        // copy bitmask with Highest Local Capacty NUMA nodes
-        // to all CPUs from innitiator node
+        // populate memory attribute nodemask to all CPU's from initiator NUMA node
         for (i = 0; i < num_cpus; ++i) {
             if (numa_bitmask_isbitset(node_cpus, i)) {
                 (*nodes_mask)[i] = numa_bitmask_alloc(max_node_id + 1);
@@ -129,7 +136,7 @@ int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask,
                     goto error;
                 }
 
-                copy_bitmask_to_bitmask(hi_cap_loc_mask, (*nodes_mask)[i]);
+                copy_bitmask_to_bitmask(attr_loc_mask, (*nodes_mask)[i]);
             }
         }
     }
@@ -146,7 +153,7 @@ error:
     free(*nodes_mask);
 
 success:
-    numa_free_nodemask(hi_cap_loc_mask);
+    numa_free_nodemask(attr_loc_mask);
     numa_bitmask_free(node_cpus);
     free(local_nodes);
     hwloc_topology_destroy(topology);
@@ -240,8 +247,8 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
     return MEMKIND_SUCCESS;
 }
 #else
-int get_per_cpu_hi_cap_local_nodes_mask(struct bitmask ***nodes_mask,
-                                        memkind_node_variant_t node_variant)
+int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
+                                 memkind_node_variant_t node_variant, memory_attribute_t attr)
 {
     log_err("Highest Local Capacity NUMA nodes cannot be automatically detected.");
     return MEMKIND_ERROR_OPERATION_FAILED;
