@@ -58,7 +58,9 @@ protected:
 
 INSTANTIATE_TEST_CASE_P(
     KindParam, MemkindHMATFunctionalTestsParam,
-    ::testing::Values(MEMKIND_HBW, MEMKIND_HIGHEST_CAPACITY_LOCAL));
+    ::testing::Values(MEMKIND_HBW,
+                      MEMKIND_HIGHEST_CAPACITY_LOCAL,
+                      MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED));
 
 TEST_P(MemkindHMATFunctionalTestsParam,
        test_tc_memkind_HMAT_verify_InitTargetNode)

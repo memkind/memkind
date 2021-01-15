@@ -11,6 +11,7 @@ extern "C" {
 extern struct memkind_ops MEMKIND_HIGHEST_CAPACITY_OPS;
 extern struct memkind_ops MEMKIND_HIGHEST_CAPACITY_PREFERRED_OPS;
 extern struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_OPS;
+extern struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_OPS;
 
 #ifdef __cplusplus
 }

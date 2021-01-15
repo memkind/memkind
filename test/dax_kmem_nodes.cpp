@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2020 Intel Corporation. */
+/* Copyright (C) 2020 - 2021 Intel Corporation. */
 
 #include <climits>
 #include <numa.h>
@@ -25,10 +25,10 @@ size_t DaxKmem::get_free_space(void)
     return sum_of_dax_kmem_free_space;
 }
 
-std::set<int> DaxKmem::get_closest_numa_nodes(int regular_node)
+std::unordered_set<int> DaxKmem::get_closest_numa_nodes(int regular_node)
 {
     int min_distance = INT_MAX;
-    std::set<int> closest_numa_ids;
+    std::unordered_set<int> closest_numa_ids;
 
     for (auto const &node: dax_kmem_nodes) {
         int distance_to_i_node = numa_distance(regular_node, node);
@@ -45,10 +45,10 @@ std::set<int> DaxKmem::get_closest_numa_nodes(int regular_node)
     return closest_numa_ids;
 }
 
-std::set<int> DaxKmem::get_dax_kmem_nodes(void)
+std::unordered_set<int> DaxKmem::get_dax_kmem_nodes(void)
 {
     struct bitmask *cpu_mask = numa_allocate_cpumask();
-    std::set<int> dax_kmem_nodes;
+    std::unordered_set<int> dax_kmem_nodes;
 
     const int MAXNODE_ID = numa_max_node();
     for (int id = 0; id <= MAXNODE_ID; ++id) {

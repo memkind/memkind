@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2020 Intel Corporation. */
+/* Copyright (C) 2019 - 2021 Intel Corporation. */
 
 #include <memkind.h>
 
@@ -375,8 +375,8 @@ TEST_F(MemkindDaxKmemFunctionalTests,
     get_mempolicy(&numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
     int process_cpu = sched_getcpu();
     int process_node = numa_node_of_cpu(process_cpu);
-    std::set<int> closest_numa_ids = dax_kmem_nodes.get_closest_numa_nodes(
-                                         process_node);
+    std::unordered_set<int> closest_numa_ids =
+        dax_kmem_nodes.get_closest_numa_nodes(process_node);
     numa_size = numa_node_size64(numa_id, nullptr);
 
     while (0.99 * numa_size > alloc_size * allocations.size()) {
