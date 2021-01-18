@@ -246,6 +246,20 @@ if test "x$enable_heap_manager" = "x1" ; then
 fi
 AC_SUBST([enable_heap_manager])
 
+#============================tbb examples===========================================
+AC_ARG_ENABLE([tbb-examples],
+  [AS_HELP_STRING([--enable-tbb-examples], [Build examples which require tbb])],
+[if test "x$enable_tbb_examples" = "xno" ; then
+  enable_tbb_examples="0"
+else
+  enable_tbb_examples="1"
+fi
+],
+[enable_tbb_examples="0"]
+)
+AC_SUBST([enable_tbb_examples])
+AM_CONDITIONAL([ENABLE_TXX_EXAMPLES], [test "x$enable_tbb_examples" = x1])
+
 #============================cxx11=============================================
 
 AX_CXX_COMPILE_STDCXX_11([noext], [optional])

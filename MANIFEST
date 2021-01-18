@@ -26,6 +26,7 @@ examples/hello_memkind_example.c
 examples/memkind_allocated.hpp
 examples/memkind_allocated_example.cpp
 examples/memkind_cpp_allocator.cpp
+examples/memkind_cpp_concurrent_hash_map.cpp
 examples/memkind_decorator_debug.c
 examples/memkind_get_stat.c
 examples/pmem_alignment.c
