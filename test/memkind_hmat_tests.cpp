@@ -36,11 +36,13 @@ protected:
         // TODO try use Setup for whole Suite
         if (TopologyMap.size() == 0) {
             //TODO find better way to lookup for number of classes
-            TopologyMap.reserve(10);
+            TopologyMap.reserve(11);
             TopologyMap.emplace(MemoryTpg("KnightsMillAll2All", TpgPtr(new KNM_All2All)));
             TopologyMap.emplace(MemoryTpg("KnightsMillSNC2", TpgPtr(new KNM_SNC2)));
             TopologyMap.emplace(MemoryTpg("KnightsMillSNC4", TpgPtr(new KNM_SNC4)));
             TopologyMap.emplace(MemoryTpg("CascadeLake2Var1", TpgPtr(new CLX_2_var1)));
+            TopologyMap.emplace(MemoryTpg("CascadeLake2Var1HMAT",
+                                          TpgPtr(new CLX_2_var1_hmat)));
             TopologyMap.emplace(MemoryTpg("CascadeLake2Var2", TpgPtr(new CLX_2_var2)));
             TopologyMap.emplace(MemoryTpg("CascadeLake2Var3", TpgPtr(new CLX_2_var3)));
             TopologyMap.emplace(MemoryTpg("CascadeLake4Var1", TpgPtr(new CLX_4_var1)));
