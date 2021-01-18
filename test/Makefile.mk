@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 AM_CPPFLAGS += -Itest/gtest_fused -DMEMKIND_DEPRECATED\(x\)=x
 

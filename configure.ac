@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
@@ -245,6 +245,25 @@ if test "x$enable_heap_manager" = "x1" ; then
   AC_DEFINE([MEMKIND_ENABLE_HEAP_MANAGER], [], [Enable heap manager])
 fi
 AC_SUBST([enable_heap_manager])
+
+#============================tbb examples===========================================
+AC_ARG_ENABLE([tbb-examples],
+  [AS_HELP_STRING([--enable-tbb-examples], [Build examples which require tbb])],
+[if test "x$enable_tbb_examples" = "xno" ; then
+  enable_tbb_examples="0"
+else
+  enable_tbb_examples="1"
+fi
+],
+[enable_tbb_examples="0"]
+)
+
+if test "x$enable_tbb_examples" = "x1" ; then
+  AC_CHECK_LIB(tbb, main, [], [AC_MSG_ERROR([libtbb is required if enable-tbb-examples is set])])
+fi
+
+AC_SUBST([enable_tbb_examples])
+AM_CONDITIONAL([ENABLE_TXX_EXAMPLES], [test "x$enable_tbb_examples" = x1])
 
 #============================cxx11=============================================
 
