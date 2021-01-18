@@ -298,7 +298,11 @@ class QEMU:
         """
         Memory topology string
         """
-        return tpg.mem_options
+        if tpg.hmat:
+            #filter CPU options "The initiator of CPU NUMA node 1 should be itself"
+            return re.sub(r'cpus=(.+?),', '', tpg.mem_options)
+        else:
+            return tpg.mem_options
 
     @property
     def _mount_option(self) -> str:
