@@ -189,6 +189,9 @@ private:
     }
 };
 
+class CLX_2_var1_hmat : public CLX_2_var1
+{};
+
 class CLX_2_var2 : public AbstractTopology
 {
 private:
