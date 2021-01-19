@@ -189,8 +189,20 @@ private:
     }
 };
 
-class CLX_2_var1_hmat : public CLX_2_var1
+class CLX_2_var1_HMAT : public CLX_2_var1
 {};
+
+class CLX_2_var1_HBW : public AbstractTopology
+{
+private:
+    MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+};
 
 class CLX_2_var2 : public AbstractTopology
 {
@@ -204,6 +216,21 @@ private:
     }
 };
 
+class CLX_2_var2_HMAT : public CLX_2_var2
+{};
+
+class CLX_2_var2_HBW : public AbstractTopology
+{
+private:
+    MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+};
+
 class CLX_2_var3 : public AbstractTopology
 {
 private:
@@ -212,6 +239,21 @@ private:
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {2}));
         nodeset_map.emplace(NodeSet(1, {3}));
+        return nodeset_map;
+    }
+};
+
+class CLX_2_var3_HMAT : public CLX_2_var3
+{};
+
+class CLX_2_var3_HBW : public AbstractTopology
+{
+private:
+    MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
         return nodeset_map;
     }
 };
@@ -230,6 +272,23 @@ private:
     }
 };
 
+class CLX_4_var1_HMAT : public CLX_4_var1
+{};
+
+class CLX_4_var1_HBW : public AbstractTopology
+{
+private:
+    MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+};
+
 class CLX_4_var2 : public AbstractTopology
 {
 private:
@@ -238,6 +297,23 @@ private:
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
         nodeset_map.emplace(NodeSet(1, {4}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+};
+
+class CLX_4_var2_HMAT : public CLX_4_var2
+{};
+
+class CLX_4_var2_HBW : public AbstractTopology
+{
+private:
+    MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
         nodeset_map.emplace(NodeSet(2, {2}));
         nodeset_map.emplace(NodeSet(3, {3}));
         return nodeset_map;
@@ -258,6 +334,23 @@ private:
     }
 };
 
+class CLX_4_var3_HMAT : public CLX_4_var3
+{};
+
+class CLX_4_var3_HBW : public AbstractTopology
+{
+private:
+    MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+};
+
 class CLX_4_var4 : public AbstractTopology
 {
 private:
@@ -268,6 +361,23 @@ private:
         nodeset_map.emplace(NodeSet(1, {1}));
         nodeset_map.emplace(NodeSet(2, {2}));
         nodeset_map.emplace(NodeSet(3, {5}));
+        return nodeset_map;
+    }
+};
+
+class CLX_4_var4_HMAT : public CLX_4_var4
+{};
+
+class CLX_4_var4_HBW : public AbstractTopology
+{
+private:
+    MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
         return nodeset_map;
     }
 };
