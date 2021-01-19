@@ -288,6 +288,12 @@ extern memkind_t MEMKIND_HIGHEST_CAPACITY_LOCAL;
 /// \note STANDARD API
 extern memkind_t MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED;
 
+/// \note STANDARD API
+extern memkind_t MEMKIND_LOWEST_LATENCY_LOCAL;
+
+/// \note STANDARD API
+extern memkind_t MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED;
+
 ///
 /// \brief Get Memkind API version
 /// \note STANDARD API
