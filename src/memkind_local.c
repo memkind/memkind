@@ -83,13 +83,13 @@ static int memkind_hi_cap_loc_preferred_get_mbind_nodemask(
 
 static int memkind_hi_cap_loc_finalize(memkind_t kind)
 {
-    local_kind_finalize(&memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_SINGLE]);
+    local_kind_finalize(&memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_MULTIPLE]);
     return memkind_arena_finalize(kind);
 }
 
 static int memkind_hi_cap_loc_preferred_finalize(memkind_t kind)
 {
-    local_kind_finalize(&memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_MULTIPLE]);
+    local_kind_finalize(&memkind_hi_cap_loc_numanodes_g[NODE_VARIANT_SINGLE]);
     return memkind_arena_finalize(kind);
 }
 
