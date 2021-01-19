@@ -301,6 +301,9 @@ extern memkind_t MEMKIND_HIGHEST_BANDWIDTH_LOCAL;
 /// \note STANDARD API
 extern memkind_t MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED;
 
+/// \note STANDARD API
+extern memkind_t MEMKIND_CPU_LOCAL;
+
 ///
 /// \brief Get Memkind API version
 /// \note STANDARD API
