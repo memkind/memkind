@@ -48,7 +48,8 @@ namespace libmemkind
         LOWEST_LATENCY_LOCAL = 19,
         LOWEST_LATENCY_LOCAL_PREFERRED = 20,
         HIGHEST_BANDWIDTH_LOCAL = 21,
-        HIGHEST_BANDWIDTH_LOCAL_PREFERRED = 22
+        HIGHEST_BANDWIDTH_LOCAL_PREFERRED = 22,
+        CPU_LOCAL = 23,
     };
 
     namespace static_kind
@@ -119,6 +120,9 @@ namespace libmemkind
                         break;
                     case libmemkind::kinds::REGULAR:
                         _kind = MEMKIND_REGULAR;
+                        break;
+                    case libmemkind::kinds::CPU_LOCAL:
+                        _kind = MEMKIND_CPU_LOCAL;
                         break;
                     case libmemkind::kinds::DAX_KMEM:
                         _kind = MEMKIND_DAX_KMEM;
