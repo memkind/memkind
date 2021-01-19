@@ -221,3 +221,4 @@ utils/qemu/topology/clx_4_var4.xml
 utils/qemu/topology/knm_all2all.xml
 utils/qemu/topology/knm_snc2.xml
 utils/qemu/topology/knm_snc4.xml
+utils/qemu/update-kernel.sh

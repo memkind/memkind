@@ -420,6 +420,7 @@ EXTRA_DIST = CONTRIBUTING \
              utils/qemu/topology/knm_snc2.xml \
              utils/qemu/topology/knm_snc4.xml \
              utils/qemu/ubuntu-packer.json \
+             utils/qemu/update-kernel.sh \
              # end
 
 dist_doc_DATA = COPYING README VERSION
