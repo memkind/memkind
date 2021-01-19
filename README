@@ -145,6 +145,7 @@ which are using the memkind library for dynamic linking at run time:
 | MEMKIND_HBW_PREFERRED_HUGETLB | X     | X           | X         |            |                                     |
 | MEMKIND_HBW_INTERLEAVE        | X     | X           |           |            |                                     |
 | MEMKIND_REGULAR               | X     |             |           |            |                                     |
+| MEMKIND_CPU_LOCAL             | X     |             |           |            |                                     |
 | MEMKIND_DAX_KMEM              | X     |             |           | X          |                                     |
 | MEMKIND_DAX_KMEM_ALL          | X     |             |           | X          |                                     |
 | MEMKIND_DAX_KMEM_PREFERRED    | X     |             |           | X          |                                     |

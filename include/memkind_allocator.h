@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2020 Intel Corporation. */
+/* Copyright (C) 2019 - 2021 Intel Corporation. */
 
 #pragma once
 
@@ -41,6 +41,7 @@ namespace libmemkind
         DAX_KMEM_ALL = 12,
         DAX_KMEM_PREFERRED = 13,
         DAX_KMEM_INTERLEAVE = 14,
+        CPU_LOCAL = 15,
     };
 
     namespace static_kind
@@ -111,6 +112,9 @@ namespace libmemkind
                         break;
                     case libmemkind::kinds::REGULAR:
                         _kind = MEMKIND_REGULAR;
+                        break;
+                    case libmemkind::kinds::CPU_LOCAL:
+                        _kind = MEMKIND_CPU_LOCAL;
                         break;
                     case libmemkind::kinds::DAX_KMEM:
                         _kind = MEMKIND_DAX_KMEM;

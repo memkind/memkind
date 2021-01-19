@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include "memkind.h"
 
 #include <fstream>
 #include <algorithm>
 #include <numaif.h>
-#include <memkind/internal/memkind_regular.h>
+#include <memkind/internal/memkind_cpu.h>
 
 #include "common.h"
 #include "check.h"

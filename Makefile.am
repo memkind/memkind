@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
@@ -12,6 +12,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind.c \
                         src/memkind_arena.c \
                         src/memkind_bitmask.c \
+                        src/memkind_cpu.c \
                         src/memkind_dax_kmem.c \
                         src/memkind_default.c \
                         src/memkind_gbtlb.c \
@@ -20,7 +21,6 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_interleave.c \
                         src/memkind_log.c \
                         src/memkind_pmem.c \
-                        src/memkind_regular.c \
                         src/tbb_wrapper.c \
                         # end
 
@@ -38,6 +38,7 @@ include_HEADERS = include/hbw_allocator.h \
 noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_bitmask.h \
+                  include/memkind/internal/memkind_cpu.h \
                   include/memkind/internal/memkind_dax_kmem.h \
                   include/memkind/internal/memkind_default.h \
                   include/memkind/internal/memkind_gbtlb.h \
@@ -47,7 +48,6 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_log.h \
                   include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
-                  include/memkind/internal/memkind_regular.h \
                   include/memkind/internal/tbb_mem_pool_policy.h \
                   include/memkind/internal/tbb_wrapper.h \
                   include/memkind/internal/vec.h \

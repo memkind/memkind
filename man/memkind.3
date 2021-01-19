@@ -1,5 +1,5 @@
 .\" SPDX-License-Identifier: BSD-2-Clause
-.\" Copyright (C) 2014 - 2020 Intel Corporation.
+.\" Copyright (C) 2014 - 2021 Intel Corporation.
 .\"
 .TH "MEMKIND" 3 "2015-03-31" "Intel Corporation" "MEMKIND" \" -*- nroff -*-
 .SH "NAME"
@@ -812,6 +812,9 @@ across all persistent memory NUMA nodes.
 .B MEMKIND_REGULAR
 Allocate from regular memory using the default page size. Regular means general purpose memory
 from the NUMA nodes containing CPUs.
+.TP
+.B MEMKIND_CPU_LOCAL
+Allocate from the memory that has the closest NUMA distance to the CPU of the calling process.
 .SH "MEMORY TYPES"
 The available types of memory:
 .TP
@@ -1076,7 +1079,7 @@ can be reached on GitHub:
 There might be some overhead in huge pages consumption caused by heap management.
 If your allocation fails because of OOM, please try to allocate extra huge pages (e.g. 8 huge pages).
 .SH "COPYRIGHT"
-Copyright (C) 2014 - 2020 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2021 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR malloc (3),
 .BR malloc_usable_size (3),

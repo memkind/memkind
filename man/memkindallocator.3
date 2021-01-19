@@ -1,5 +1,5 @@
 .\" SPDX-License-Identifier: BSD-2-Clause
-.\" Copyright (C) 2019 - 2020 Intel Corporation.
+.\" Copyright (C) 2019 - 2021 Intel Corporation.
 .\"
 .TH "MEMKINDALLOCATOR" 3 "2019-09-24" "Intel Corporation" "MEMKINDALLOCATOR" \" -*- nroff -*-
 .SH "NAME"
@@ -97,6 +97,9 @@ except that the pages that support the allocation are interleaved across all hig
 .B libmemkind::kinds::REGULAR
 Allocate from regular memory using the default page size. Regular means general purpose memory from the NUMA nodes containing CPUs.
 .PP
+.B libmemkind::kinds::LOCAL
+Allocate from the memory that has the closest NUMA distance to the CPU of the calling process.
+.PP
 .B libmemkind::kinds::DAX_KMEM
 Allocate from the closest persistent memory NUMA node at the time of allocation. If there is not enough memory in the closest persistent memory NUMA node to satisfy the request,
 .I errno
@@ -174,6 +177,6 @@ More information can be found here:
 .UR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
 .UE
 .SH "COPYRIGHT"
-Copyright (C) 2019 - 2020 Intel Corporation. All rights reserved.
+Copyright (C) 2019 - 2021 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3)

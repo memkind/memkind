@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2016 - 2020 Intel Corporation. */
+/* Copyright (C) 2016 - 2021 Intel Corporation. */
 
 /*
  * !!!!!!!!!!!!!!!!!!!
@@ -60,6 +60,7 @@ enum memkind_base_partition {
     MEMKIND_PARTITION_DAX_KMEM_ALL = 15,
     MEMKIND_PARTITION_DAX_KMEM_PREFERRED = 16,
     MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE = 17,
+    MEMKIND_PARTITION_CPU_LOCAL = 18,
     MEMKIND_NUM_BASE_KIND
 };
 
