@@ -13,4 +13,4 @@
 
 MEMKIND_REPO_PATH=$1
 CURL_ARGS="--retry 10 --retry-delay 2 --connect-timeout 10"
-bash <(curl -s  https://codecov.io/bash) -t "$CODECOV_TOKEN" -cF "$TEST_SUITE_NAME" -p "$MEMKIND_REPO_PATH" -Z -U "$CURL_ARGS" -v
+bash <(curl -s  https://codecov.io/bash) -t "$CODECOV_TOKEN" -cF "$TEST_SUITE_NAME" -p "$MEMKIND_REPO_PATH" -Z -U "$CURL_ARGS"
