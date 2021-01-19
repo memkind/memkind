@@ -4,7 +4,6 @@
 #include <memkind.h>
 #include <memory>
 #include <numa.h>
-#include <numaif.h>
 #include <omp.h>
 #include <sys/sysinfo.h>
 #include <unordered_map>
@@ -78,7 +77,7 @@ TEST_P(MemkindHMATFunctionalTestsParam,
         cpu_set_t cpu_set;
         CPU_ZERO(&cpu_set);
         CPU_SET(thread_id, &cpu_set);
-        int status = sched_setaffinity(0, sizeof(cpu_set_t), &cpu_set);
+        status = sched_setaffinity(0, sizeof(cpu_set_t), &cpu_set);
         int cpu = sched_getcpu();
         EXPECT_EQ(thread_id, cpu);
         void *ptr = memkind_malloc(memory_kind, size);
@@ -86,14 +85,7 @@ TEST_P(MemkindHMATFunctionalTestsParam,
             EXPECT_TRUE(ptr != nullptr);
             memset(ptr, 0, size);
             int init_node = numa_node_of_cpu(cpu);
-            EXPECT_NE(-1, init_node);
-            int target_node = -1;
-            status = get_mempolicy(&target_node, nullptr, 0, ptr,
-                                   MPOL_F_NODE | MPOL_F_ADDR);
-            EXPECT_EQ(0, status);
-            auto res = topology->verify_nodes(memory_kind, {init_node, target_node});
-            EXPECT_EQ(true, res);
-            res = topology->verify_addr(memory_kind, ptr);
+            auto res = topology->verify_kind(memory_kind, init_node, ptr);
             EXPECT_EQ(true, res);
             memkind_free(memory_kind, ptr);
         } else {

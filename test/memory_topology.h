@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <string>
 
+#include <numa.h>
 #include <numaif.h>
 
 struct Nodes {
@@ -19,6 +20,8 @@ struct Nodes {
 };
 using NodeSet = std::pair<int, std::unordered_set<int>>;
 using MapNodeSet = std::unordered_map<int, std::unordered_set<int>>;
+using BitmaskPtr =
+    std::unique_ptr<struct bitmask, decltype(&numa_free_nodemask)>;
 
 class AbstractTopology
 {
@@ -41,6 +44,16 @@ private:
         else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED)
             return MPOL_PREFERRED;
         return -1;
+    }
+
+    MapNodeSet get_memory_kind_Nodes(memkind_t memory_kind) const
+    {
+        if (memory_kind == MEMKIND_HBW)
+            return HBW_nodes();
+        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
+                 memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED)
+            return Capacity_local_nodes();
+        else return {};
     }
 
     bool test_node_set(const Nodes &nodes, const MapNodeSet &map_nodes) const
@@ -71,45 +84,64 @@ private:
         return {};
     }
 
+    bool verify_nodes(memkind_t memory_kind, const Nodes &nodes) const
+    {
+        auto memory_kind_nodes = get_memory_kind_Nodes(memory_kind);
+        return test_node_set(nodes, memory_kind_nodes);
+    }
+
 public:
     bool is_kind_supported(memkind_t memory_kind) const
     {
-        if (memory_kind == MEMKIND_HBW)
-            return (HBW_nodes().size() > 0);
-        else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
-                 (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
-            return (Capacity_local_nodes().size() > 0);
-        return false;
+        return get_memory_kind_Nodes(memory_kind).size() > 0;
     }
 
-    bool verify_nodes(memkind_t memory_kind, const Nodes &nodes) const
-    {
-        if (memory_kind == MEMKIND_HBW)
-            return test_node_set(nodes, HBW_nodes());
-        else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
-                 (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
-            return test_node_set(nodes, Capacity_local_nodes());
-        return false;
-    }
-
-    bool verify_addr(memkind_t memory_kind, void *ptr) const
+    bool verify_kind(memkind_t memory_kind, int init_node, void *ptr) const
     {
         int policy = -1;
-        int status = get_mempolicy(&policy, nullptr, 0, ptr, MPOL_F_ADDR);
+        int target_node = -1;
+        int status = -1;
+
+        BitmaskPtr ptr_nodemask = BitmaskPtr(numa_allocate_nodemask(),
+                                             numa_free_nodemask);
+        BitmaskPtr target_nodemask = BitmaskPtr(numa_allocate_nodemask(),
+                                                numa_free_nodemask);
+
+        //verify Node from allocation
+        status = get_mempolicy(&target_node, nullptr, 0, ptr,
+                               MPOL_F_NODE | MPOL_F_ADDR);
         if (status) {
             return false;
         }
-        return policy == get_kind_mem_policy_flag(memory_kind);
+        if (!verify_nodes(memory_kind, {init_node, target_node})) {
+            return false;
+        }
+
+        //verify mbind mask from allocation
+        status = get_mempolicy(&policy, ptr_nodemask->maskp, ptr_nodemask->size,
+                               ptr, MPOL_F_ADDR);
+        if (status) {
+            return false;
+        }
+
+        for (auto const &node_id: get_target_nodes(memory_kind, init_node))
+            numa_bitmask_setbit(target_nodemask.get(), node_id);
+
+        if (numa_bitmask_equal(ptr_nodemask.get(), target_nodemask.get()) !=1 ) {
+            return false;
+        }
+
+        if (policy != get_kind_mem_policy_flag(memory_kind)) {
+            return false;
+        }
+
+        return true;
     }
 
     std::unordered_set<int> get_target_nodes(memkind_t memory_kind, int init) const
     {
-        if (memory_kind == MEMKIND_HBW)
-            return get_target_nodes(init, HBW_nodes());
-        else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
-                 (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
-            return get_target_nodes(init, Capacity_local_nodes());
-        return {};
+        auto memory_kind_nodes = get_memory_kind_Nodes(memory_kind);
+        return get_target_nodes(init, memory_kind_nodes);
     }
 
     virtual ~AbstractTopology() = default;
