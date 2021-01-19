@@ -21,6 +21,7 @@ Scripts in this directory are useful for HMAT emulation
 * 'ubuntu-packer.json' is used to build the Ubuntu Server 18.04 image with Packer
 * 'http/preseed.cfg' is used to provide the variables required for the quiet installation of the Ubuntu Server 18.04
 * 'main.py' is a wrapper on QEMU to provide convenient way to handle different memory architectures.
+* 'update-kernel.sh' is used to update kernel version in Ubuntu Server 18.04
 
 ## Building the QEMU image
 
