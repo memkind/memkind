@@ -2,7 +2,7 @@
 # Copyright (C) 2021 Intel Corporation.
 -->
 <domain type='qemu'>
-  <name>CascadeLake2Var1HMAT</name>
+  <name>CascadeLake2Var2HMAT</name>
   <os>
     <type arch='x86_64' machine='pc'>hvm</type>
   </os>
@@ -15,20 +15,20 @@
         <distances>
           <sibling id='0' value='10'/>
           <sibling id='1' value='20'/>
-          <sibling id='2' value='17'/>
+          <sibling id='2' value='28'/>
         </distances>
       </cell>
       <cell id='1' cpus='8-15' memory='512' unit='MiB'>
         <distances>
           <sibling id='0' value='20'/>
           <sibling id='1' value='10'/>
-          <sibling id='2' value='28'/>
+          <sibling id='2' value='17'/>
         </distances>
       </cell>
       <cell id='2' memory='2560' unit='MiB'>
         <distances>
-          <sibling id='0' value='17'/>
-          <sibling id='1' value='28'/>
+          <sibling id='0' value='28'/>
+          <sibling id='1' value='17'/>
           <sibling id='2' value='10'/>
         </distances>
       </cell>
@@ -37,12 +37,12 @@
         <bandwidth initiator='0' target='0' type='access' value='111000' unit='MiB'/>
         <latency initiator='0' target='1' type='access' value='133'/>
         <bandwidth initiator='0' target='1' type='access' value='33770' unit='MiB'/>
-        <latency initiator='0' target='2' type='access' value='176'/>
-        <bandwidth initiator='0' target='2' type='access' value='25600' unit='MiB'/>
+        <latency initiator='0' target='2' type='access' value='240'/>
+        <bandwidth initiator='0' target='2' type='access' value='840' unit='MiB'/>
         <latency initiator='1' target='1' type='access' value='72'/>
         <bandwidth initiator='1' target='1' type='access' value='111000' unit='MiB'/>
-        <latency initiator='1' target='2' type='access' value='240'/>
-        <bandwidth initiator='1' target='2' type='access' value='840' unit='MiB'/>
+        <latency initiator='1' target='2' type='access' value='176'/>
+        <bandwidth initiator='1' target='2' type='access' value='25600' unit='MiB'/>
       </interconnects>
     </numa>
   </cpu>
