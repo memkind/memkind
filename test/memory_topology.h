@@ -23,7 +23,7 @@ using MapNodeSet = std::unordered_map<int, std::unordered_set<int>>;
 class AbstractTopology
 {
 private:
-    virtual MapNodeSet HBW_nodes() const
+    virtual MapNodeSet hbm_nodes() const
     {
         return {};
     }
@@ -75,7 +75,7 @@ public:
     bool is_kind_supported(memkind_t memory_kind) const
     {
         if (memory_kind == MEMKIND_HBW)
-            return (HBW_nodes().size() > 0);
+            return (hbm_nodes().size() > 0);
         else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
                  (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
             return (Capacity_local_nodes().size() > 0);
@@ -85,7 +85,7 @@ public:
     bool verify_nodes(memkind_t memory_kind, const Nodes &nodes) const
     {
         if (memory_kind == MEMKIND_HBW)
-            return test_node_set(nodes, HBW_nodes());
+            return test_node_set(nodes, hbm_nodes());
         else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
                  (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
             return test_node_set(nodes, Capacity_local_nodes());
@@ -105,7 +105,7 @@ public:
     std::unordered_set<int> get_target_nodes(memkind_t memory_kind, int init) const
     {
         if (memory_kind == MEMKIND_HBW)
-            return get_target_nodes(init, HBW_nodes());
+            return get_target_nodes(init, hbm_nodes());
         else if ((memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL) ||
                  (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED))
             return get_target_nodes(init, Capacity_local_nodes());
@@ -118,7 +118,7 @@ public:
 class KNM_All2All : public AbstractTopology
 {
 private:
-    MapNodeSet HBW_nodes() const final
+    MapNodeSet hbm_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {1}));
@@ -136,7 +136,7 @@ private:
 class KNM_SNC2 : public AbstractTopology
 {
 private:
-    MapNodeSet HBW_nodes() const final
+    MapNodeSet hbm_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {2}));
@@ -156,7 +156,7 @@ private:
 class KNM_SNC4 : public AbstractTopology
 {
 private:
-    MapNodeSet HBW_nodes() const final
+    MapNodeSet hbm_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {4}));
@@ -192,6 +192,9 @@ private:
 class CLX_2_var1_hmat : public CLX_2_var1
 {};
 
+class CLX_2_var1_hbw : public CLX_2_var1
+{};
+
 class CLX_2_var2 : public AbstractTopology
 {
 private:
@@ -204,6 +207,12 @@ private:
     }
 };
 
+class CLX_2_var2_hmat : public CLX_2_var2
+{};
+
+class CLX_2_var2_hbw : public CLX_2_var2
+{};
+
 class CLX_2_var3 : public AbstractTopology
 {
 private:
@@ -215,6 +224,12 @@ private:
         return nodeset_map;
     }
 };
+
+class CLX_2_var3_hmat : public CLX_2_var3
+{};
+
+class CLX_2_var3_hbw : public CLX_2_var3
+{};
 
 class CLX_4_var1 : public AbstractTopology
 {
@@ -230,6 +245,12 @@ private:
     }
 };
 
+class CLX_4_var1_hmat : public CLX_4_var1
+{};
+
+class CLX_4_var1_hbw : public CLX_4_var1
+{};
+
 class CLX_4_var2 : public AbstractTopology
 {
 private:
@@ -243,6 +264,12 @@ private:
         return nodeset_map;
     }
 };
+
+class CLX_4_var2_hmat : public CLX_4_var2
+{};
+
+class CLX_4_var2_hbw : public CLX_4_var2
+{};
 
 class CLX_4_var3 : public AbstractTopology
 {
@@ -258,6 +285,12 @@ private:
     }
 };
 
+class CLX_4_var3_hmat : public CLX_4_var3
+{};
+
+class CLX_4_var3_hbw : public CLX_4_var3
+{};
+
 class CLX_4_var4 : public AbstractTopology
 {
 private:
@@ -271,3 +304,9 @@ private:
         return nodeset_map;
     }
 };
+
+class CLX_4_var4_hmat : public CLX_4_var4
+{};
+
+class CLX_4_var4_hbw : public CLX_4_var4
+{};
