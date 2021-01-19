@@ -298,7 +298,16 @@ class QEMU:
         """
         Memory topology string
         """
-        return tpg.mem_options
+        mem_tpg = tpg.mem_options
+        # workaround for QEMU - validation in machine_set_cpu_numa_node method
+        if tpg.hmat:
+            mem_tpg_parsed= re.sub(r'cpus=(\d+\-\d+,)', '', tpg.mem_options)
+            mem_tpg_list = list(mem_tpg_parsed.partition('-numa dist'))
+            for numa_id in re.findall(r'nodeid=(\d+),cpus=', tpg.mem_options):
+                cpu_tpg = f'-numa cpu,node-id={numa_id},socket-id={numa_id} '
+                mem_tpg_list.insert(1, cpu_tpg)
+            mem_tpg = ''.join(mem_tpg_list)
+        return mem_tpg
 
     @property
     def _mount_option(self) -> str:

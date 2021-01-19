@@ -410,6 +410,7 @@ EXTRA_DIST = CONTRIBUTING \
              utils/qemu/main.py \
              utils/qemu/topology/README.md \
              utils/qemu/topology/clx_2_var1.xml \
+             utils/qemu/topology/clx_2_var1_hmat.xml \
              utils/qemu/topology/clx_2_var2.xml \
              utils/qemu/topology/clx_2_var3.xml \
              utils/qemu/topology/clx_4_var1.xml \
