@@ -189,7 +189,10 @@ private:
     }
 };
 
-class CLX_2_var1_hmat : public CLX_2_var1
+class CLX_2_var1_HMAT : public CLX_2_var1
+{};
+
+class CLX_2_var1_HBW : public CLX_2_var1
 {};
 
 class CLX_2_var2 : public AbstractTopology
@@ -204,6 +207,12 @@ private:
     }
 };
 
+class CLX_2_var2_HMAT : public CLX_2_var2
+{};
+
+class CLX_2_var2_HBW : public CLX_2_var2
+{};
+
 class CLX_2_var3 : public AbstractTopology
 {
 private:
@@ -215,6 +224,12 @@ private:
         return nodeset_map;
     }
 };
+
+class CLX_2_var3_HMAT : public CLX_2_var3
+{};
+
+class CLX_2_var3_HBW : public CLX_2_var3
+{};
 
 class CLX_4_var1 : public AbstractTopology
 {
@@ -230,6 +245,12 @@ private:
     }
 };
 
+class CLX_4_var1_HMAT : public CLX_4_var1
+{};
+
+class CLX_4_var1_HBW : public CLX_4_var1
+{};
+
 class CLX_4_var2 : public AbstractTopology
 {
 private:
@@ -243,6 +264,12 @@ private:
         return nodeset_map;
     }
 };
+
+class CLX_4_var2_HMAT : public CLX_4_var2
+{};
+
+class CLX_4_var2_HBW : public CLX_4_var2
+{};
 
 class CLX_4_var3 : public AbstractTopology
 {
@@ -258,6 +285,12 @@ private:
     }
 };
 
+class CLX_4_var3_HMAT : public CLX_4_var3
+{};
+
+class CLX_4_var3_HBW : public CLX_4_var3
+{};
+
 class CLX_4_var4 : public AbstractTopology
 {
 private:
@@ -271,3 +304,9 @@ private:
         return nodeset_map;
     }
 };
+
+class CLX_4_var4_HMAT : public CLX_4_var4
+{};
+
+class CLX_4_var4_HBW : public CLX_4_var4
+{};

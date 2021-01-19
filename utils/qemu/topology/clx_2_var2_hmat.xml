@@ -1,0 +1,49 @@
+<!-- SPDX-License-Identifier: BSD-2-Clause
+# Copyright (C) 2021 Intel Corporation.
+-->
+<domain type='qemu'>
+  <name>CascadeLake2Var2HMAT</name>
+  <os>
+    <type arch='x86_64' machine='pc'>hvm</type>
+  </os>
+  <vcpu placement='static'>16</vcpu>
+  <cpu>
+    <model>Cascadelake-Server</model>
+    <topology sockets='2' dies='1' cores='8' threads='1'/>
+    <numa>
+      <cell id='0' cpus='0-7' memory='256' unit='MiB'>
+        <distances>
+          <sibling id='0' value='10'/>
+          <sibling id='1' value='20'/>
+          <sibling id='2' value='28'/>
+        </distances>
+      </cell>
+      <cell id='1' cpus='8-15' memory='512' unit='MiB'>
+        <distances>
+          <sibling id='0' value='20'/>
+          <sibling id='1' value='10'/>
+          <sibling id='2' value='17'/>
+        </distances>
+      </cell>
+      <cell id='2' memory='2560' unit='MiB'>
+        <distances>
+          <sibling id='0' value='28'/>
+          <sibling id='1' value='17'/>
+          <sibling id='2' value='10'/>
+        </distances>
+      </cell>
+      <interconnects>
+        <latency initiator='0' target='0' type='access' value='72'/>
+        <bandwidth initiator='0' target='0' type='access' value='111000' unit='MiB'/>
+        <latency initiator='0' target='1' type='access' value='133'/>
+        <bandwidth initiator='0' target='1' type='access' value='33770' unit='MiB'/>
+        <latency initiator='0' target='2' type='access' value='240'/>
+        <bandwidth initiator='0' target='2' type='access' value='840' unit='MiB'/>
+        <latency initiator='1' target='1' type='access' value='72'/>
+        <bandwidth initiator='1' target='1' type='access' value='33773' unit='MiB'/>
+        <latency initiator='1' target='2' type='access' value='176'/>
+        <bandwidth initiator='1' target='2' type='access' value='25600' unit='MiB'/>
+      </interconnects>
+    </numa>
+  </cpu>
+</domain>
