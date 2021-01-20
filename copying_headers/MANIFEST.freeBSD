@@ -118,6 +118,7 @@ test/allocator_perf_tool/WrappersMacros.hpp
 test/allocator_perf_tool/main.cpp
 test/autohbw_test.py
 test/autohbw_test_helper.c
+test/background_threads_tests.cpp
 test/bat_tests.cpp
 test/check.cpp
 test/check.h
