@@ -70,11 +70,11 @@ protected:
     void SetUp()
     {
         memory_kind = GetParam();
-        fprintf(stderr, "Testing: %s\n", kind_name(memory_kind));
+        std::cout << "Testing: is: " << kind_name(memory_kind) << std::endl;
     }
     void TearDown()
     {
-        fprintf(stderr, "Finished Testing: %s\n", kind_name(memory_kind));
+        std::cout << "Finished Testing: " << kind_name(memory_kind) << std::endl;
     }
 };
 
