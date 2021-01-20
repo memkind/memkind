@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROGNAME=`basename $0`
@@ -10,7 +10,8 @@ TEST_PATH="$basedir/"
 
 # Gtest binaries executed by Berta
 # TODO add allocator_perf_tool_tests binary to independent sh script
-GTEST_BINARIES=(all_tests decorator_test gb_page_tests_bind_policy memkind_stat_test defrag_reallocate)
+GTEST_BINARIES=(all_tests decorator_test gb_page_tests_bind_policy memkind_stat_test defrag_reallocate
+                background_threads_tests)
 
 # Pytest files executed by Berta
 PYTEST_FILES=(hbw_detection_test.py autohbw_test.py trace_mechanism_test.py)
