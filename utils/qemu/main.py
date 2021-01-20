@@ -29,9 +29,8 @@ TOPOLOGY_DIR = 'topology'
 # TODO handling fsdax??
 # TODO handling scaling the memory in xml
 # TODO provide also build with disabled hwloc
-# TODO handling verbosity of this script
 
-QemuCfg = collections.namedtuple('QemuCfg', ['workdir', 'image', 'interactive', 'force_reinstall', 'run_test', 'topologies', 'codecov'])
+QemuCfg = collections.namedtuple('QemuCfg', ['workdir', 'image', 'interactive', 'force_reinstall', 'verbose', 'run_test', 'topologies', 'codecov'])
 TopologyCfg = collections.namedtuple('TopologyCfg', ['name', 'hmat', 'cpu_model', 'cpu_options', 'mem_options'])
 
 
@@ -66,9 +65,17 @@ class GuestConnection:
     def __init__(self, cfg: QemuCfg, topology_name: str, qemu_pid: int) -> None:
         self.run_test = cfg.run_test
         self.force_reinstall = cfg.force_reinstall
+        self.verbose = cfg.verbose
         self.codecov = cfg.codecov
         self.topology_name = topology_name
         self.qemu_pid = qemu_pid
+
+    @property
+    def _verbosity_option(self) -> dict:
+        """
+        Verbosity option
+        """
+        return {'echo' : True} if self.verbose else {'hide' : True}
 
     @property
     def _connection_params(self) -> dict:
@@ -97,16 +104,16 @@ class GuestConnection:
         """
         Rebuild and reinstall memkind library
         """
-        result = c.run('nproc')
+        result = c.run('nproc', **self._verbosity_option)
         nproc = int(result.stdout.strip())
-        c.run('make distclean', echo=True, warn=True)
-        c.run('./autogen.sh', echo=True)
-        c.run(f'./configure {self._memkind_configure_params}', echo=True)
-        c.run(f'make -j {nproc}', echo=True)
-        c.run(f'make checkprogs -j {nproc}', echo=True)
-        c.run('sudo make uninstall', echo=True)
-        c.run('sudo make install', echo=True)
-        c.run('sudo ldconfig', echo=True)
+        c.run('make distclean', **self._verbosity_option, warn=True)
+        c.run('./autogen.sh', **self._verbosity_option)
+        c.run(f'./configure {self._memkind_configure_params}', **self._verbosity_option)
+        c.run(f'make -j {nproc}', **self._verbosity_option)
+        c.run(f'make checkprogs -j {nproc}', **self._verbosity_option)
+        c.run('sudo make uninstall', **self._verbosity_option)
+        c.run('sudo make install', **self._verbosity_option)
+        c.run('sudo ldconfig', **self._verbosity_option)
 
     @_logger
     def _mount_workdir(self, c: fabric.Connection) -> None:
@@ -131,7 +138,7 @@ class GuestConnection:
         codecov_script = pathlib.Path(MEMKIND_GUEST_PATH, MEMKIND_DOCKER_PREFIX, 'docker_run_coverage.sh')
         c.config.run.env['TEST_SUITE_NAME'] = self.topology_name
         c.config.run.env['CODECOV_TOKEN'] = self.codecov
-        c.run(f'{codecov_script} {MEMKIND_GUEST_PATH}', echo=True)
+        c.run(f'{codecov_script} {MEMKIND_GUEST_PATH}', **self._verbosity_option)
 
     @_logger
     def _run_memkind_test(self, c: fabric.Connection) -> None:
@@ -334,7 +341,8 @@ class QEMU:
                             self._hmat_options(tpg),
                             self._mount_option,
                             self._daemonize_option])
-        print(f'QEMU command: {cmd_str}')
+        if self.cfg.verbose:
+            print(f'QEMU command: {cmd_str}')
         return cmd_str.split()
 
     def _start_qemu_proc(self, qemu_cmd: typing.List[str]) -> None:
@@ -454,6 +462,7 @@ def parse_arguments() -> QemuCfg:
     parser.add_argument('--codecov', help='upload token for Codecov')
     parser.add_argument('--interactive', action="store_true", help='execute an interactive bash shell', default=False)
     parser.add_argument('--force_reinstall', action="store_true", help='force rebuild and install memkind', default=False)
+    parser.add_argument('--verbose', action="store_true", help='run script in verbose mode', default=False)
     cli_cfg = vars(parser.parse_args())
 
     if cli_cfg['interactive'] and cli_cfg['mode'] == 'test':
@@ -465,6 +474,7 @@ def parse_arguments() -> QemuCfg:
     qemu_cfg['image'] = validate_image_path(cli_cfg['image'])
     qemu_cfg['interactive'] = cli_cfg['interactive']
     qemu_cfg['force_reinstall'] = cli_cfg['force_reinstall']
+    qemu_cfg['verbose'] = cli_cfg['verbose']
     qemu_cfg['topologies'] = parse_topology(cli_cfg)
     qemu_cfg['run_test'] = cli_cfg['mode'] == 'test'
     qemu_cfg['codecov'] = cli_cfg['codecov']
