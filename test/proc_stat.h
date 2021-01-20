@@ -3,7 +3,9 @@
 
 #pragma once
 #include <cstring>
+#include <dirent.h>
 #include <fstream>
+#include <sys/types.h>
 
 class ProcStat
 {
@@ -24,6 +26,26 @@ public:
     {
         get_stat("VmSwap", str_value);
         return strtol(str_value, NULL, 10) * 1024;
+    }
+
+    unsigned get_threads_count()
+    {
+        DIR *proc_dir;
+        {
+            char dirname[64];
+            snprintf(dirname, sizeof dirname, "/proc/self/task");
+            proc_dir = opendir(dirname);
+        }
+
+        unsigned threads_count = 0;
+        struct dirent *direntry;
+        while ((direntry = readdir(proc_dir)) != NULL)
+        {
+            if(direntry->d_name[0] != '.')
+                threads_count++;
+        }
+        closedir(proc_dir);
+        return threads_count;
     }
 private:
     /* We are avoiding to allocate local buffers,
