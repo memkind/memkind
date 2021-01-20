@@ -140,7 +140,7 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
             case MEM_ATTR_LATENCY:
                 best_mem_attr = INT_MAX;
                 for (i = 0; i < num_local_nodes; ++i) {
-                    err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH,
+                    err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_LATENCY,
                                                   local_nodes[i],
                                                   &initiator, 0, &mem_attr);
                     if (err) {
