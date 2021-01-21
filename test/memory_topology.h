@@ -36,12 +36,19 @@ private:
         return {};
     }
 
+    virtual MapNodeSet Latency_local_nodes() const
+    {
+        return {};
+    }
+
     int get_kind_mem_policy_flag(memkind_t memory_kind) const
     {
         if (memory_kind == MEMKIND_HBW ||
-            memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL)
+            memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
+            memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL)
             return MPOL_BIND;
-        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED)
+        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED ||
+                 memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED)
             return MPOL_PREFERRED;
         return -1;
     }
@@ -53,6 +60,9 @@ private:
         else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
                  memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED)
             return Capacity_local_nodes();
+        else if (memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
+                 memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED)
+            return Latency_local_nodes();
         else return {};
     }
 
@@ -222,12 +232,29 @@ private:
 };
 
 class CLX_2_var1_HMAT : public CLX_2_var1
-{};
+{
+private:
+    MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+};
 
 class CLX_2_var1_HBW : public AbstractTopology
 {
 private:
     MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Latency_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -249,12 +276,29 @@ private:
 };
 
 class CLX_2_var2_HMAT : public CLX_2_var2
-{};
+{
+private:
+    MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+};
 
 class CLX_2_var2_HBW : public AbstractTopology
 {
 private:
     MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Latency_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -276,12 +320,29 @@ private:
 };
 
 class CLX_2_var3_HMAT : public CLX_2_var3
-{};
+{
+private:
+    MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+};
 
 class CLX_2_var3_HBW : public AbstractTopology
 {
 private:
     MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Latency_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -305,12 +366,33 @@ private:
 };
 
 class CLX_4_var1_HMAT : public CLX_4_var1
-{};
+{
+private:
+    MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+};
 
 class CLX_4_var1_HBW : public AbstractTopology
 {
 private:
     MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Latency_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -336,12 +418,33 @@ private:
 };
 
 class CLX_4_var2_HMAT : public CLX_4_var2
-{};
+{
+private:
+    MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+};
 
 class CLX_4_var2_HBW : public AbstractTopology
 {
 private:
     MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Latency_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -367,12 +470,33 @@ private:
 };
 
 class CLX_4_var3_HMAT : public CLX_4_var3
-{};
+{
+private:
+    MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+};
 
 class CLX_4_var3_HBW : public AbstractTopology
 {
 private:
     MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Latency_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -398,12 +522,33 @@ private:
 };
 
 class CLX_4_var4_HMAT : public CLX_4_var4
-{};
+{
+private:
+    MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+};
 
 class CLX_4_var4_HBW : public AbstractTopology
 {
 private:
     MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Latency_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));

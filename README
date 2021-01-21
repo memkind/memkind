@@ -145,6 +145,8 @@ which are using the memkind library for dynamic linking at run time:
 | MEMKIND_HIGHEST_CAPACITY_PREFERRED       | X     |             |           |            |                                     |      |          |
 | MEMKIND_HIGHEST_CAPACITY_LOCAL           | X     |             |           |            |                                     |      | X        |
 | MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED | X     |             |           |            |                                     |      | X        |
+| MEMKIND_LOWEST_LATENCY_LOCAL             | X     |             |           |            |                                     | X    | X        |
+| MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED   | X     |             |           |            |                                     | X    | X        |
 | MEMKIND_HUGETLB                          | X     |             | X         |            |                                     |      |          |
 | MEMKIND_HBW                              | X     | X           |           |            |                                     | X*   | X*       |
 | MEMKIND_HBW_ALL                          | X     | X           |           |            |                                     | X*   | X*       |
