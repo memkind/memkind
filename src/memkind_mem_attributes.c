@@ -302,7 +302,7 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
 int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                                  memkind_node_variant_t node_variant, memory_attribute_t attr)
 {
-    log_err("Highest Local Capacity NUMA nodes cannot be automatically detected.");
+    log_err("Memory attribute NUMA nodes cannot be automatically detected.");
     return MEMKIND_ERROR_OPERATION_FAILED;
 }
 
