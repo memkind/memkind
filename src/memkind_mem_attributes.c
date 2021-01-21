@@ -22,6 +22,7 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
     hwloc_obj_t *local_nodes = NULL;
     struct bitmask *node_cpus = NULL;
     hwloc_uint64_t mem_attr, best_mem_attr;
+    unsigned int mem_attr_nodes;
 
     hwloc_topology_t topology;
     int i;
@@ -170,11 +171,19 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                 goto error;
         }
 
+        mem_attr_nodes = numa_bitmask_weight(attr_loc_mask);
+
         if (node_variant == NODE_VARIANT_SINGLE &&
-            numa_bitmask_weight(attr_loc_mask) > 1) {
+            mem_attr_nodes > 1) {
             ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
             log_err("Multiple NUMA Nodes have the same value of memory attribute for init node %d.",
                     init_node->os_index);
+            goto error;
+        }
+
+        if (mem_attr_nodes == 0) {
+            ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
+            log_err("No memory attribute Nodes for init node %d.", init_node->os_index);
             goto error;
         }
 
