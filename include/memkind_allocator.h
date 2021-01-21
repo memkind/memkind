@@ -46,7 +46,9 @@ namespace libmemkind
         HIGHEST_CAPACITY_LOCAL = 17,
         HIGHEST_CAPACITY_LOCAL_PREFERRED = 18,
         LOWEST_LATENCY_LOCAL = 19,
-        LOWEST_LATENCY_LOCAL_PREFERRED = 20
+        LOWEST_LATENCY_LOCAL_PREFERRED = 20,
+        HIGHEST_BANDWIDTH_LOCAL = 21,
+        HIGHEST_BANDWIDTH_LOCAL_PREFERRED = 22
     };
 
     namespace static_kind
@@ -147,6 +149,12 @@ namespace libmemkind
                         break;
                     case libmemkind::kinds::LOWEST_LATENCY_LOCAL_PREFERRED:
                         _kind = MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED;
+                        break;
+                    case libmemkind::kinds::HIGHEST_BANDWIDTH_LOCAL:
+                        _kind = MEMKIND_HIGHEST_BANDWIDTH_LOCAL;
+                        break;
+                    case libmemkind::kinds::HIGHEST_BANDWIDTH_LOCAL_PREFERRED:
+                        _kind = MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED;
                         break;
                     default:
                         throw std::runtime_error("Unknown libmemkind::kinds");

@@ -41,14 +41,21 @@ private:
         return {};
     }
 
+    virtual MapNodeSet Bandwidth_local_nodes() const
+    {
+        return {};
+    }
+
     int get_kind_mem_policy_flag(memkind_t memory_kind) const
     {
         if (memory_kind == MEMKIND_HBW ||
             memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
-            memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL)
+            memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
+            memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL)
             return MPOL_BIND;
         else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED ||
-                 memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED)
+                 memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED ||
+                 memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED)
             return MPOL_PREFERRED;
         return -1;
     }
@@ -63,6 +70,9 @@ private:
         else if (memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
                  memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED)
             return Latency_local_nodes();
+        else if (memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL ||
+                 memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED)
+            return Bandwidth_local_nodes();
         else return {};
     }
 
@@ -167,6 +177,13 @@ private:
         return nodeset_map;
     }
 
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {1}));
+        return nodeset_map;
+    }
+
     MapNodeSet Capacity_local_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -179,6 +196,14 @@ class KNM_SNC2 : public AbstractTopology
 {
 private:
     MapNodeSet HBW_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {2}));
+        nodeset_map.emplace(NodeSet(1, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {2}));
@@ -199,6 +224,16 @@ class KNM_SNC4 : public AbstractTopology
 {
 private:
     MapNodeSet HBW_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {4}));
+        nodeset_map.emplace(NodeSet(1, {5}));
+        nodeset_map.emplace(NodeSet(2, {6}));
+        nodeset_map.emplace(NodeSet(3, {7}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {4}));
@@ -241,6 +276,14 @@ private:
         nodeset_map.emplace(NodeSet(1, {1}));
         return nodeset_map;
     }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
 };
 
 class CLX_2_var1_HBW : public AbstractTopology
@@ -258,6 +301,14 @@ private:
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {2}));
         nodeset_map.emplace(NodeSet(1, {1}));
         return nodeset_map;
     }
@@ -285,6 +336,14 @@ private:
         nodeset_map.emplace(NodeSet(1, {1}));
         return nodeset_map;
     }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
 };
 
 class CLX_2_var2_HBW : public AbstractTopology
@@ -303,6 +362,14 @@ private:
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
         nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {2}));
         return nodeset_map;
     }
 };
@@ -329,6 +396,14 @@ private:
         nodeset_map.emplace(NodeSet(1, {1}));
         return nodeset_map;
     }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
 };
 
 class CLX_2_var3_HBW : public AbstractTopology
@@ -347,6 +422,14 @@ private:
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
         nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {2}));
+        nodeset_map.emplace(NodeSet(1, {3}));
         return nodeset_map;
     }
 };
@@ -369,6 +452,16 @@ class CLX_4_var1_HMAT : public CLX_4_var1
 {
 private:
     MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -401,6 +494,16 @@ private:
         nodeset_map.emplace(NodeSet(3, {3}));
         return nodeset_map;
     }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {4}));
+        nodeset_map.emplace(NodeSet(1, {5}));
+        nodeset_map.emplace(NodeSet(2, {6}));
+        nodeset_map.emplace(NodeSet(3, {7}));
+        return nodeset_map;
+    }
 };
 
 class CLX_4_var2 : public AbstractTopology
@@ -421,6 +524,16 @@ class CLX_4_var2_HMAT : public CLX_4_var2
 {
 private:
     MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -453,6 +566,16 @@ private:
         nodeset_map.emplace(NodeSet(3, {3}));
         return nodeset_map;
     }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {4}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
 };
 
 class CLX_4_var3 : public AbstractTopology
@@ -473,6 +596,16 @@ class CLX_4_var3_HMAT : public CLX_4_var3
 {
 private:
     MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -505,6 +638,16 @@ private:
         nodeset_map.emplace(NodeSet(3, {3}));
         return nodeset_map;
     }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {4}));
+        nodeset_map.emplace(NodeSet(1, {5}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {6}));
+        return nodeset_map;
+    }
 };
 
 class CLX_4_var4 : public AbstractTopology
@@ -525,6 +668,16 @@ class CLX_4_var4_HMAT : public CLX_4_var4
 {
 private:
     MapNodeSet Latency_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -555,6 +708,16 @@ private:
         nodeset_map.emplace(NodeSet(1, {1}));
         nodeset_map.emplace(NodeSet(2, {2}));
         nodeset_map.emplace(NodeSet(3, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {4}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        nodeset_map.emplace(NodeSet(2, {2}));
+        nodeset_map.emplace(NodeSet(3, {5}));
         return nodeset_map;
     }
 };
