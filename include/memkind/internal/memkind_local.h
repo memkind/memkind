@@ -10,6 +10,8 @@ extern "C" {
 
 extern struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_OPS;
 extern struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_OPS;
+extern struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_OPS;
+extern struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_OPS;
 
 #ifdef __cplusplus
 }
