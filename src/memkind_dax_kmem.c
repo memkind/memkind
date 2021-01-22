@@ -91,7 +91,7 @@ static int get_dax_kmem_nodemask(struct bitmask **bm)
 }
 #endif
 
-static int memkind_dax_kmem_get_nodemask(struct bitmask **bm)
+static int memkind_dax_kmem_get_nodemask(int init_node, struct bitmask **bm)
 {
     char *nodes_env = memkind_get_env("MEMKIND_DAX_KMEM_NODES");
     if (nodes_env) {

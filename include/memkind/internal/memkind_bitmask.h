@@ -10,7 +10,7 @@ extern "C" {
 
 #include <numa.h>
 
-typedef int (*get_node_bitmask)(struct bitmask **);
+typedef int (*get_node_bitmask)(int init_node, struct bitmask **);
 
 int set_closest_numanode(get_node_bitmask get_bitmask, void **closest_numanode,
                          int num_cpu, memkind_node_variant_t node_variant);

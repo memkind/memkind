@@ -218,7 +218,7 @@ success:
     return ret;
 }
 
-int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
+int get_mem_attributes_hbw_nodes_mask(int init, struct bitmask **hbw_node_mask)
 {
     const char *hbw_threshold_env = memkind_get_env("MEMKIND_HBW_THRESHOLD");
     size_t hbw_threshold;
@@ -262,40 +262,35 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
         return MEMKIND_ERROR_UNAVAILABLE;
     }
 
-    struct bitmask *node_cpus = numa_allocate_cpumask();
-    while ((init_node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE,
-                                                   init_node)) != NULL) {
-        struct hwloc_location initiator;
-        hwloc_obj_t target = NULL;
+    init_node = hwloc_get_numanode_obj_by_os_index(topology, init);
+    if (init_node == NULL) {
+        numa_bitmask_free(*hbw_node_mask);
+        log_err("hwloc can't find NUMA node with id %d", init);
+        hwloc_topology_destroy(topology);
+        return MEMKIND_ERROR_UNAVAILABLE;
+    }
 
-        numa_node_to_cpus(init_node->os_index, node_cpus);
-        if (numa_bitmask_weight(node_cpus) == 0) {
-            log_info("Node skipped %d - no CPU detected in initiator Node.",
-                     init_node->os_index);
+    struct hwloc_location initiator;
+    initiator.type = HWLOC_LOCATION_TYPE_CPUSET;
+    initiator.location.cpuset = init_node->cpuset;
+
+    hwloc_obj_t target = NULL;
+    while ((target = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE,
+                                                target)) != NULL) {
+        hwloc_uint64_t bandwidth;
+        err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH, target,
+                                      &initiator, 0, &bandwidth);
+        if (err) {
+            log_info("Node skipped - cannot read initiator Node %d and target Node %d.",
+                     init_node->os_index, target->os_index);
             continue;
         }
 
-        initiator.type = HWLOC_LOCATION_TYPE_CPUSET;
-        initiator.location.cpuset = init_node->cpuset;
-
-        while ((target = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE,
-                                                    target)) != NULL) {
-            hwloc_uint64_t bandwidth;
-            err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH, target,
-                                          &initiator, 0, &bandwidth);
-            if (err) {
-                log_info("Node skipped - cannot read initiator Node %d and target Node %d.",
-                         init_node->os_index, target->os_index);
-                continue;
-            }
-
-            if (bandwidth >= hbw_threshold) {
-                numa_bitmask_setbit(*hbw_node_mask, target->os_index);
-            }
+        if (bandwidth >= hbw_threshold) {
+            numa_bitmask_setbit(*hbw_node_mask, target->os_index);
         }
     }
 
-    numa_bitmask_free(node_cpus);
     hwloc_topology_destroy(topology);
     if (numa_bitmask_weight(*hbw_node_mask) == 0) {
         numa_bitmask_free(*hbw_node_mask);

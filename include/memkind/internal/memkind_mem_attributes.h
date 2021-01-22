@@ -17,7 +17,8 @@ typedef enum memory_attribute_t {
 
 int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                                  memkind_node_variant_t node_variant, memory_attribute_t attr);
-int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask);
+int get_mem_attributes_hbw_nodes_mask(int init_node,
+                                      struct bitmask **hbw_node_mask);
 
 #ifdef __cplusplus
 }
