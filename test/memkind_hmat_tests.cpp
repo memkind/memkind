@@ -19,16 +19,13 @@ using MapMemoryTpg =
 
 static MapMemoryTpg TopologyMap;
 
-class MemkindHMATFunctionalTestsParam: public ::testing::Test,
-    public ::testing::WithParamInterface<memkind_t>
+class MemkindHMATFunctionalTestsParam: public ::Memkind_Param_Test
 {
 protected:
-    memkind_t memory_kind;
     const char *memory_tpg;
 
     void SetUp()
     {
-        memory_kind = GetParam();
         memory_tpg = std::getenv("MEMKIND_TEST_TOPOLOGY");
         if (memory_tpg == nullptr)
             GTEST_SKIP() << "This test requires MEMKIND_TEST_TOPOLOGY";
@@ -77,6 +74,7 @@ protected:
 
             std::cout << "MEMKIND_TEST_TOPOLOGY is: " << memory_tpg << std::endl;
         }
+        Memkind_Param_Test::SetUp();
     }
 
     void TearDown()

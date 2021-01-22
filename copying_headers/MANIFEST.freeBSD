@@ -80,6 +80,7 @@ src/tbb_wrapper.c
 test/Allocator.hpp
 test/Makefile.mk
 test/TestPolicy.hpp
+test/TestPreReq.hpp
 test/alloc_benchmark.c
 test/alloc_performance_tests.cpp
 test/allocate_to_max_stress_test.cpp
@@ -128,8 +129,6 @@ test/bat_tests.cpp
 test/check.cpp
 test/check.h
 test/common.h
-test/dax_kmem_nodes.cpp
-test/dax_kmem_nodes.h
 test/dax_kmem_env_var_test.py
 test/dax_kmem_performance_tests.cpp
 test/decorator_test.cpp
