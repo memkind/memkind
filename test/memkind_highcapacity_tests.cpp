@@ -11,7 +11,7 @@
 #include "proc_stat.h"
 #include "sys/types.h"
 #include "sys/sysinfo.h"
-#include "TestPolicy.hpp"
+#include "TestPrereq.hpp"
 
 #include "common.h"
 
@@ -19,22 +19,16 @@ class MemkindHiCapacityFunctionalTests:
     public ::testing::Test
 {
 protected:
+    TestPrereq tp;
 
     void SetUp() {}
     void TearDown() {}
 };
 
-class MemkindHiCapacityFunctionalTestsParam: public ::testing::Test,
-    public ::testing::WithParamInterface<memkind_t>
+class MemkindHiCapacityFunctionalTestsParam: public ::Memkind_Param_Test
 {
 protected:
-    memkind_t memory_kind;
-
-    void SetUp()
-    {
-        memory_kind = GetParam();
-    }
-    void TearDown() {}
+    TestPrereq tp;
 };
 
 INSTANTIATE_TEST_CASE_P(
@@ -51,24 +45,24 @@ TEST_P(MemkindHiCapacityFunctionalTestsParam,
     ASSERT_EQ(errno, ENOMEM);
 }
 
-// TODO move HWLOC check to some API and call it inside this function
-#ifdef MEMKIND_HWLOC
 TEST_F(MemkindHiCapacityFunctionalTests,
        test_TC_HiCapacityLocal_alloc_size_max)
 {
-    errno = 0;
-    void *test1 = memkind_malloc(MEMKIND_HIGHEST_CAPACITY_LOCAL, SIZE_MAX);
-    ASSERT_EQ(test1, nullptr);
-    ASSERT_EQ(errno, ENOMEM);
+    if (tp.is_libhwloc_supported()) {
+        errno = 0;
+        void *test1 = memkind_malloc(MEMKIND_HIGHEST_CAPACITY_LOCAL, SIZE_MAX);
+        ASSERT_EQ(test1, nullptr);
+        ASSERT_EQ(errno, ENOMEM);
+    } else {
+        GTEST_SKIP() << "libhwloc is required." << std::endl;
+    }
 }
-#endif
 
 TEST_P(MemkindHiCapacityFunctionalTestsParam, test_TC_HiCapacity_correct_numa)
 {
-    std::set<int> high_capacity_nodes = TestPolicy::get_highest_capacity_nodes();
+    auto high_capacity_nodes = tp.get_highest_capacity_nodes();
 
-    // TODO add API to check this in as general condition
-    if (memory_kind == MEMKIND_HIGHEST_CAPACITY_PREFERRED &&
+    if (tp.is_kind_preferred(memory_kind) &&
         high_capacity_nodes.size() != 1) {
         GTEST_SKIP() <<
                      "This test requires exactly 1 highest capacity NUMA Node in the OS.";
@@ -97,7 +91,7 @@ TEST_P(MemkindHiCapacityFunctionalTestsParam, test_TC_HiCapacity_correct_numa)
 TEST_F(MemkindHiCapacityFunctionalTests,
        test_TC_HiCapacityPreferred_TwoOrMoreNodes)
 {
-    std::set<int> high_capacity_nodes = TestPolicy::get_highest_capacity_nodes();
+    auto high_capacity_nodes = tp.get_highest_capacity_nodes();
     if (high_capacity_nodes.size() < 2) {
         GTEST_SKIP() <<
                      "This test requires minimum 2 highest capacity NUMA Nodes in the OS.";
@@ -110,7 +104,7 @@ TEST_F(MemkindHiCapacityFunctionalTests,
 TEST_P(MemkindHiCapacityFunctionalTestsParam,
        test_TC_HiCapacity_alloc_until_full_numa)
 {
-    std::set<int> high_capacity_nodes = TestPolicy::get_highest_capacity_nodes();
+    auto high_capacity_nodes = tp.get_highest_capacity_nodes();
 
     // TODO add API to check this in as general condition
     if (memory_kind == MEMKIND_HIGHEST_CAPACITY_PREFERRED &&
@@ -125,7 +119,7 @@ TEST_P(MemkindHiCapacityFunctionalTestsParam,
 
     std::vector<void *> allocations;
 
-    size_t sum_of_free_space = TestPolicy::get_free_space(high_capacity_nodes);
+    size_t sum_of_free_space = tp.get_free_space(high_capacity_nodes);
     int numa_id = -1;
     const int n_swap_alloc = 20;
     size_t sum_of_alloc = 0;
@@ -153,8 +147,7 @@ TEST_P(MemkindHiCapacityFunctionalTestsParam,
         allocations.emplace_back(ptr);
     }
 
-    // TODO add API to verify if variant is preferred
-    if (memory_kind == MEMKIND_HIGHEST_CAPACITY_PREFERRED) {
+    if (tp.is_kind_preferred(memory_kind)) {
         ASSERT_GE(stat.get_used_swap_space_size_bytes(), init_swap);
     } else {
         ASSERT_LE(stat.get_used_swap_space_size_bytes(), init_swap);
