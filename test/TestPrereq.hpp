@@ -124,13 +124,13 @@ public:
 
     bool check_cpu(memory_var variant) const
     {
-        cpu_model_data_t cpu = get_cpu_model_data();
         switch(variant) {
             case HBM:
-                return cpu.family == CPU_FAMILY_INTEL &&
-                       (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
-            case PMEM:
+                return is_KN_family_supported();
+            case PMEM: {
+                cpu_model_data_t cpu = get_cpu_model_data();
                 return cpu.family == CPU_FAMILY_INTEL && (cpu.model == CPU_MODEL_CLX);
+            }
             default:
                 return false;
         }
@@ -181,6 +181,13 @@ public:
     bool is_libhwloc_supported() const
     {
         return HWLOC_SUPPORT;
+    }
+
+    bool is_KN_family_supported() const
+    {
+        cpu_model_data_t cpu = get_cpu_model_data();
+        return cpu.family == CPU_FAMILY_INTEL &&
+               (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
     }
 
     bool is_libdaxctl_supported() const

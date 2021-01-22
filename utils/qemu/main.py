@@ -28,9 +28,8 @@ TOPOLOGY_ENV_VAR = 'MEMKIND_TEST_TOPOLOGY'
 TOPOLOGY_DIR = 'topology'
 # TODO handling fsdax??
 # TODO handling scaling the memory in xml
-# TODO provide also build with disabled hwloc
 
-QemuCfg = collections.namedtuple('QemuCfg', ['workdir', 'image', 'interactive', 'force_reinstall', 'verbose', 'run_test', 'topologies', 'codecov'])
+QemuCfg = collections.namedtuple('QemuCfg', ['workdir', 'image', 'interactive', 'hwloc', 'force_reinstall', 'verbose', 'run_test', 'topologies', 'codecov'])
 TopologyCfg = collections.namedtuple('TopologyCfg', ['name', 'hmat', 'cpu_model', 'cpu_options', 'mem_options'])
 
 
@@ -67,6 +66,7 @@ class GuestConnection:
         self.force_reinstall = cfg.force_reinstall
         self.verbose = cfg.verbose
         self.codecov = cfg.codecov
+        self.hwloc = cfg.hwloc
         self.topology_name = topology_name
         self.qemu_pid = qemu_pid
 
@@ -95,6 +95,8 @@ class GuestConnection:
         Memkind configure parameters
         """
         config_params = '--prefix=/usr'
+        if not self.hwloc:
+            config_params += ' --disable-hwloc'
         if self.codecov:
             config_params += ' --enable-gcov'
         return config_params
@@ -458,6 +460,7 @@ def parse_arguments() -> QemuCfg:
     parser = argparse.ArgumentParser()
     parser.add_argument('--image', help='QEMU image', required=True)
     parser.add_argument('--mode', choices=['dev', 'test'], help='execution mode', default='dev')
+    parser.add_argument('--hwloc', choices=['on', 'off'], help='hwloc support', default='on')
     parser.add_argument('--topology', help='memory topology XML file')
     parser.add_argument('--codecov', help='upload token for Codecov')
     parser.add_argument('--interactive', action="store_true", help='execute an interactive bash shell', default=False)
@@ -477,6 +480,7 @@ def parse_arguments() -> QemuCfg:
     qemu_cfg['verbose'] = cli_cfg['verbose']
     qemu_cfg['topologies'] = parse_topology(cli_cfg)
     qemu_cfg['run_test'] = cli_cfg['mode'] == 'test'
+    qemu_cfg['hwloc'] = cli_cfg['hwloc'] == 'on'
     qemu_cfg['codecov'] = cli_cfg['codecov']
     return QemuCfg(**qemu_cfg)
 
