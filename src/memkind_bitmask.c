@@ -26,9 +26,7 @@ int set_closest_numanode(get_node_bitmask get_bitmask, void **closest_numanode,
                          int num_cpu, memkind_node_variant_t node_variant)
 {
     struct bitmask *dest_nodes_mask = NULL;
-    int status = get_bitmask(&dest_nodes_mask);
-    if (status)
-        return status;
+    int status;
 
     struct bitmask *node_cpu_mask = numa_allocate_cpumask();
     if (!node_cpu_mask) {
@@ -53,44 +51,49 @@ int set_closest_numanode(get_node_bitmask get_bitmask, void **closest_numanode,
     for (init_node = 0; init_node <= max_node_id; ++init_node) {
 
         //skip missing node and node which could not be a initiator
-        if((numa_node_to_cpus(init_node, node_cpu_mask) != 0) ||
-           numa_bitmask_weight(node_cpu_mask) == 0) {
+        if ((numa_node_to_cpus(init_node, node_cpu_mask) != 0) ||
+            numa_bitmask_weight(node_cpu_mask) == 0) {
             continue;
         }
 
-        //find closest NUMA Node(s) from destnation NUMA Node(s)
-        int min_distance = INT_MAX;
         VEC_CLEAR(&current_dest_nodes);
-        for (dest_node = 0; dest_node <= max_node_id; ++dest_node) {
-            if(numa_bitmask_isbitset(dest_nodes_mask, dest_node)) {
-                int old_errno = errno;
-                int dist = numa_distance(init_node, dest_node);
-                errno = old_errno;
-                if (dist < min_distance) {
-                    min_distance = dist;
-                    VEC_CLEAR(&current_dest_nodes);
-                    VEC_PUSH_BACK(&current_dest_nodes, dest_node);
-                } else if (dist == min_distance) {
-                    VEC_PUSH_BACK(&current_dest_nodes, dest_node);
+        status = get_bitmask(init_node, &dest_nodes_mask);
+        if (status == MEMKIND_SUCCESS) {
+            //find closest NUMA Node(s) from destnation NUMA Node(s)
+            int min_distance = INT_MAX;
+            for (dest_node = 0; dest_node <= max_node_id; ++dest_node) {
+                if (numa_bitmask_isbitset(dest_nodes_mask, dest_node)) {
+                    int old_errno = errno;
+                    int dist = numa_distance(init_node, dest_node);
+                    errno = old_errno;
+                    if (dist < min_distance) {
+                        min_distance = dist;
+                        VEC_CLEAR(&current_dest_nodes);
+                        VEC_PUSH_BACK(&current_dest_nodes, dest_node);
+                    } else if (dist == min_distance) {
+                        VEC_PUSH_BACK(&current_dest_nodes, dest_node);
+                    }
                 }
             }
-        }
 
-        //validate single NUMA Node condition
-        if ((node_variant == NODE_VARIANT_SINGLE) &&
-            (VEC_SIZE(&current_dest_nodes) > 1)) {
-            log_err("Invalid Numa Configuration for Node %d", init_node);
-            status = MEMKIND_ERROR_RUNTIME;
-            for (cpu_id = 0; cpu_id < num_cpu; ++cpu_id) {
-                if (VEC_CAPACITY(&node_arr[cpu_id]))
-                    VEC_DELETE(&node_arr[cpu_id]);
+            //validate single NUMA Node condition
+            if ((node_variant == NODE_VARIANT_SINGLE) &&
+                (VEC_SIZE(&current_dest_nodes) > 1)) {
+                log_err("Invalid Numa Configuration for Node %d", init_node);
+                status = MEMKIND_ERROR_RUNTIME;
+                for (cpu_id = 0; cpu_id < num_cpu; ++cpu_id) {
+                    if (VEC_CAPACITY(&node_arr[cpu_id]))
+                        VEC_DELETE(&node_arr[cpu_id]);
+                }
+                goto free_node_arr;
             }
-            goto free_node_arr;
+        } else {
+            log_info("There is no nodes to allocate from innitiator node %d.", init_node);
         }
 
         //fill mapping CPU destination memory Node(s)
         for (cpu_id = 0; cpu_id < num_cpu; ++cpu_id) {
-            if(numa_bitmask_isbitset(node_cpu_mask, cpu_id)) {
+            if (numa_bitmask_isbitset(node_cpu_mask, cpu_id)) {
                 int node = -1;
                 VEC_FOREACH(node, &current_dest_nodes) {
                     VEC_PUSH_BACK(&node_arr[cpu_id], node);

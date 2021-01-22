@@ -353,7 +353,7 @@ static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
     return MEMKIND_ERROR_UNAVAILABLE;
 }
 
-static int memkind_hbw_get_nodemask(struct bitmask **bm)
+static int memkind_hbw_get_nodemask(int init_node, struct bitmask **bm)
 {
     char *nodes_env = memkind_get_env("MEMKIND_HBW_NODES");
     if (nodes_env) {
@@ -363,7 +363,7 @@ static int memkind_hbw_get_nodemask(struct bitmask **bm)
         if(is_hbm_legacy_supported(cpu)) {
             return get_legacy_hbw_nodes_mask(bm);
         } else {
-            return get_mem_attributes_hbw_nodes_mask(bm);
+            return get_mem_attributes_hbw_nodes_mask(init_node, bm);
         }
     }
 }
