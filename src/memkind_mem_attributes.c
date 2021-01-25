@@ -8,6 +8,9 @@
 #include "config.h"
 
 #ifdef MEMKIND_HWLOC
+
+#include <memkind/internal/vec.h>
+
 #include <hwloc.h>
 #include <hwloc/linux-libnuma.h>
 #define MEMKIND_HBW_THRESHOLD_DEFAULT (200 * 1024) // Default threshold is 200 GB/s
@@ -210,30 +213,25 @@ success:
     return ret;
 }
 
-int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
+//Vector of CPUs with memory NUMA Node id(s)
+VEC(vec_cpu_node, int);
+
+int set_closest_numanode_mem_attr(void **closest_numanode, int num_cpu,
+                                  memkind_node_variant_t node_variant)
 {
     const char *hbw_threshold_env = memkind_get_env("MEMKIND_HBW_THRESHOLD");
-    size_t hbw_threshold;
-    int err;
+    size_t hbw_threshold, vec_size;
+    int err, i, status;
     hwloc_topology_t topology;
     hwloc_obj_t init_node = NULL;
     hwloc_cpuset_t node_cpus = NULL;
 
-    // NUMA Nodes could be not in arithmetic progression
-    int nodes_num = numa_max_node() + 1;
-    *hbw_node_mask = numa_bitmask_alloc(nodes_num);
-    if (*hbw_node_mask == NULL) {
-        log_err("numa_bitmask_alloc() failed.");
-        return MEMKIND_ERROR_UNAVAILABLE;
-    }
-
     if (hbw_threshold_env) {
         log_info("Environment variable MEMKIND_HBW_THRESHOLD detected: %s.",
                  hbw_threshold_env);
-        int ret = sscanf(hbw_threshold_env, "%zud", &hbw_threshold);
-        if (ret == 0) {
+        err = sscanf(hbw_threshold_env, "%zud", &hbw_threshold);
+        if (err == 0) {
             log_err("Environment variable MEMKIND_HBW_THRESHOLD is invalid value.");
-            numa_bitmask_free(*hbw_node_mask);
             return MEMKIND_ERROR_ENVIRON;
         }
     } else {
@@ -242,42 +240,54 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
 
     err = hwloc_topology_init(&topology);
     if (MEMKIND_UNLIKELY(err)) {
-        numa_bitmask_free(*hbw_node_mask);
         log_err("hwloc initialize failed");
         return MEMKIND_ERROR_UNAVAILABLE;
     }
 
     err = hwloc_topology_load(topology);
     if (MEMKIND_UNLIKELY(err)) {
-        numa_bitmask_free(*hbw_node_mask);
         log_err("hwloc topology load failed");
-        hwloc_topology_destroy(topology);
-        return MEMKIND_ERROR_UNAVAILABLE;
+        status = MEMKIND_ERROR_UNAVAILABLE;
+        goto hwloc_destroy;
     }
 
     node_cpus = hwloc_bitmap_alloc();
     if (MEMKIND_UNLIKELY(node_cpus == NULL)) {
-        numa_bitmask_free(*hbw_node_mask);
         log_err("hwloc_bitmap_alloc failed");
-        hwloc_topology_destroy(topology);
-        return MEMKIND_ERROR_UNAVAILABLE;
+        status = MEMKIND_ERROR_UNAVAILABLE;
+        goto hwloc_destroy;
+    }
+
+    VEC(vec_temp, int) current_dest_nodes = VEC_INITIALIZER;
+
+    struct vec_cpu_node *node_arr = (struct vec_cpu_node *) calloc(num_cpu,
+                                                                   sizeof(struct vec_cpu_node));
+
+    if (MEMKIND_UNLIKELY(node_arr == NULL)) {
+        log_err("calloc failed");
+        status = MEMKIND_ERROR_MALLOC;
+        goto node_cpu_free;
     }
 
     while ((init_node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE,
                                                    init_node)) != NULL) {
         struct hwloc_location initiator;
         hwloc_obj_t target = NULL;
+        int min_distance = INT_MAX;
 
-        // skip this node if it doesn't contain any CPU
+        //skip node which could not be a initiator
         if (hwloc_bitmap_isincluded(init_node->cpuset, node_cpus)) {
             log_info("Node %d skipped - no CPU detected in initiator Node.",
                      init_node->os_index);
             continue;
         }
+
         hwloc_bitmap_or(node_cpus, node_cpus, init_node->cpuset);
 
         initiator.type = HWLOC_LOCATION_TYPE_CPUSET;
         initiator.location.cpuset = init_node->cpuset;
+
+        VEC_CLEAR(&current_dest_nodes);
 
         while ((target = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE,
                                                     target)) != NULL) {
@@ -291,18 +301,63 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
             }
 
             if (bandwidth >= hbw_threshold) {
-                numa_bitmask_setbit(*hbw_node_mask, target->os_index);
+                int dist = numa_distance(init_node->os_index, target->os_index);
+                if (dist < min_distance) {
+                    min_distance = dist;
+                    VEC_CLEAR(&current_dest_nodes);
+                    VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
+                } else if (dist == min_distance) {
+                    VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
+                }
             }
         }
+
+        vec_size = VEC_SIZE(&current_dest_nodes);
+
+        if (vec_size == 0) {
+            log_err("No HBW Nodes for init node %d.", init_node->os_index);
+            status = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
+            goto free_node_arr;
+        }
+
+        //validate single NUMA Node condition
+        if (node_variant == NODE_VARIANT_SINGLE &&
+            vec_size > 1) {
+            log_err("Invalid Numa Configuration for Node %d", init_node->os_index);
+            status = MEMKIND_ERROR_RUNTIME;
+            goto free_node_arr;
+        }
+
+        // populate memory attribute nodemask to all CPU's from initiator NUMA node
+        hwloc_bitmap_foreach_begin(i, init_node->cpuset)
+        int node = -1;
+        VEC_FOREACH(node, &current_dest_nodes) {
+            VEC_PUSH_BACK(&node_arr[i], node);
+        }
+        hwloc_bitmap_foreach_end();
     }
 
-    hwloc_bitmap_free(node_cpus);
-    hwloc_topology_destroy(topology);
-    if (numa_bitmask_weight(*hbw_node_mask) == 0) {
-        numa_bitmask_free(*hbw_node_mask);
-        return MEMKIND_ERROR_UNAVAILABLE;
+    *closest_numanode = node_arr;
+    status = MEMKIND_SUCCESS;
+    goto free_current_dest_nodes;
+
+free_node_arr:
+    for (i = 0; i < num_cpu; ++i) {
+        if (VEC_CAPACITY(&node_arr[i]))
+            VEC_DELETE(&node_arr[i]);
     }
-    return MEMKIND_SUCCESS;
+    free(node_arr);
+
+free_current_dest_nodes:
+    VEC_DELETE(&current_dest_nodes);
+
+node_cpu_free:
+    hwloc_bitmap_free(node_cpus);
+
+hwloc_destroy:
+    hwloc_topology_destroy(topology);
+
+    return status;
 }
 #else
 int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
@@ -312,7 +367,8 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
     return MEMKIND_ERROR_OPERATION_FAILED;
 }
 
-int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
+int set_closest_numanode_mem_attr(void **closest_numanode, int num_cpu,
+                                  memkind_node_variant_t node_variant)
 {
     log_err("High Bandwidth NUMA nodes cannot be automatically detected.");
     return MEMKIND_ERROR_OPERATION_FAILED;
