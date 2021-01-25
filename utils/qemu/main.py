@@ -151,6 +151,10 @@ class GuestConnection:
         if self.codecov:
             self._run_codecov_script(c)
 
+        c.run('py.test test/hbw_env_var_test.py', echo=True)
+        if self.codecov:
+            self._run_codecov_script(c)
+
     @_logger
     def _shutdown(self, c: fabric.Connection) -> None:
         """
