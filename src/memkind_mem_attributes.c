@@ -241,14 +241,14 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
     }
 
     err = hwloc_topology_init(&topology);
-    if (err) {
+    if (MEMKIND_UNLIKELY(err)) {
         numa_bitmask_free(*hbw_node_mask);
         log_err("hwloc initialize failed");
         return MEMKIND_ERROR_UNAVAILABLE;
     }
 
     err = hwloc_topology_load(topology);
-    if (err) {
+    if (MEMKIND_UNLIKELY(err)) {
         numa_bitmask_free(*hbw_node_mask);
         log_err("hwloc topology load failed");
         hwloc_topology_destroy(topology);
