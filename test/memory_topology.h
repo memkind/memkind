@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <string>
 #include <stdexcept>
+#include <limits.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -172,6 +173,24 @@ public:
         return get_target_nodes(init, memory_kind_nodes);
     }
 
+    // This function returns the lowest and highest value from a maximum of
+    // bandwidth attribute from all innitiator nodes. E.g. if we have a system:
+    // bw = 10 for node 0 -> node 1 connection
+    // bw = 15 for node 0 -> node 2 connection
+    // bw = 20 for node 1 -> node 2 connection
+    // then the maximum bandwidth available from node #0 = 15 and from
+    // node #1 = 20. So for this case lowest_max_bandwidth() = 15 and
+    // highest_max_bandwidth() = 20
+    virtual int lowest_max_bandwidth() const
+    {
+        return INT_MAX;
+    }
+
+    virtual int highest_max_bandwidth() const
+    {
+        return 0;
+    }
+
     virtual ~AbstractTopology() = default;
 };
 
@@ -184,7 +203,6 @@ private:
         nodeset_map.emplace(NodeSet(0, {1}));
         return nodeset_map;
     }
-
 
     MapNodeSet Bandwidth_local_nodes() const final
     {
@@ -311,6 +329,17 @@ private:
         nodeset_map.emplace(NodeSet(1, {1}));
         return nodeset_map;
     }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 111000;
+    }
 };
 
 class CLX_2_var1_HBW : public AbstractTopology
@@ -338,6 +367,17 @@ private:
         nodeset_map.emplace(NodeSet(0, {2}));
         nodeset_map.emplace(NodeSet(1, {1}));
         return nodeset_map;
+    }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 204800;
     }
 };
 
@@ -371,6 +411,17 @@ private:
         nodeset_map.emplace(NodeSet(1, {1}));
         return nodeset_map;
     }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 111000;
+    }
 };
 
 class CLX_2_var2_HBW : public AbstractTopology
@@ -398,6 +449,17 @@ private:
         nodeset_map.emplace(NodeSet(0, {0}));
         nodeset_map.emplace(NodeSet(1, {2}));
         return nodeset_map;
+    }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 204800;
     }
 };
 
@@ -431,6 +493,17 @@ private:
         nodeset_map.emplace(NodeSet(1, {1}));
         return nodeset_map;
     }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 111000;
+    }
 };
 
 class CLX_2_var3_HBW : public AbstractTopology
@@ -443,7 +516,6 @@ private:
         nodeset_map.emplace(NodeSet(1, {3}));
         return nodeset_map;
     }
-
 
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -467,6 +539,17 @@ private:
         nodeset_map.emplace(NodeSet(0, {2}));
         nodeset_map.emplace(NodeSet(1, {3}));
         return nodeset_map;
+    }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 204800;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 204800;
     }
 };
 
@@ -503,6 +586,17 @@ private:
         nodeset_map.emplace(NodeSet(0, {2}));
         nodeset_map.emplace(NodeSet(1, {3}));
         return nodeset_map;
+    }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 409600;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 409600;
     }
 };
 
@@ -541,6 +635,17 @@ private:
         nodeset_map.emplace(NodeSet(2, {2}));
         nodeset_map.emplace(NodeSet(3, {3}));
         return nodeset_map;
+    }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 111000;
     }
 };
 
@@ -586,6 +691,17 @@ private:
         nodeset_map.emplace(NodeSet(3, {7}));
         return nodeset_map;
     }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 204800;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 204800;
+    }
 };
 
 class CLX_4_var2 : public AbstractTopology
@@ -624,6 +740,17 @@ private:
         nodeset_map.emplace(NodeSet(3, {3}));
         return nodeset_map;
     }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 111000;
+    }
 };
 
 class CLX_4_var2_HBW : public AbstractTopology
@@ -657,6 +784,18 @@ private:
         nodeset_map.emplace(NodeSet(2, {2}));
         nodeset_map.emplace(NodeSet(3, {3}));
         return nodeset_map;
+    }
+
+public:
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 204800;
     }
 };
 
@@ -696,6 +835,17 @@ private:
         nodeset_map.emplace(NodeSet(3, {3}));
         return nodeset_map;
     }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 111000;
+    }
 };
 
 class CLX_4_var3_HBW : public AbstractTopology
@@ -729,6 +879,17 @@ private:
         nodeset_map.emplace(NodeSet(2, {2}));
         nodeset_map.emplace(NodeSet(3, {6}));
         return nodeset_map;
+    }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 204800;
     }
 };
 
@@ -768,6 +929,17 @@ private:
         nodeset_map.emplace(NodeSet(3, {3}));
         return nodeset_map;
     }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 111000;
+    }
 };
 
 class CLX_4_var4_HBW : public AbstractTopology
@@ -801,6 +973,17 @@ private:
         nodeset_map.emplace(NodeSet(2, {2}));
         nodeset_map.emplace(NodeSet(3, {5}));
         return nodeset_map;
+    }
+
+public:
+    int lowest_max_bandwidth() const final
+    {
+        return 111000;
+    }
+
+    int highest_max_bandwidth() const final
+    {
+        return 204800;
     }
 };
 
