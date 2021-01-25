@@ -107,10 +107,8 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
                     if (local_nodes[i]->attr->numanode.local_memory > best_mem_attr) {
                         best_mem_attr = local_nodes[i]->attr->numanode.local_memory;
-                        hwloc_bitmap_zero(attr_loc_mask);
-                    }
-
-                    if (local_nodes[i]->attr->numanode.local_memory == best_mem_attr) {
+                        hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
+                    } else if (local_nodes[i]->attr->numanode.local_memory == best_mem_attr) {
                         hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
                     }
                 }
@@ -130,10 +128,8 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
                     if (mem_attr > best_mem_attr) {
                         best_mem_attr = mem_attr;
-                        hwloc_bitmap_zero(attr_loc_mask);
-                    }
-
-                    if (mem_attr == best_mem_attr) {
+                        hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
+                    } else if (mem_attr == best_mem_attr) {
                         hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
                     }
                 }
@@ -153,10 +149,8 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
                     if (mem_attr < best_mem_attr) {
                         best_mem_attr = mem_attr;
-                        hwloc_bitmap_zero(attr_loc_mask);
-                    }
-
-                    if (mem_attr == best_mem_attr) {
+                        hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
+                    } else if (mem_attr == best_mem_attr) {
                         hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
                     }
                 }
