@@ -20,7 +20,7 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
     hwloc_obj_t init_node = NULL;
     hwloc_obj_t *local_nodes = NULL;
-    struct bitmask *node_cpus = NULL;
+    hwloc_cpuset_t node_cpus = NULL;
     hwloc_uint64_t mem_attr, best_mem_attr;
     unsigned int mem_attr_nodes;
 
@@ -55,10 +55,10 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
         goto error;
     }
 
-    node_cpus = numa_allocate_cpumask();
+    node_cpus = hwloc_bitmap_alloc();
     if (MEMKIND_UNLIKELY(node_cpus == NULL)) {
         ret = MEMKIND_ERROR_MALLOC;
-        log_err("numa_allocate_cpumask() failed.");
+        log_err("hwloc_bitmap_alloc() failed.");
         goto error;
     }
 
@@ -74,12 +74,12 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                                                    init_node)) != NULL) {
 
         // skip this node if it doesn't contain any CPU
-        numa_node_to_cpus(init_node->os_index, node_cpus);
-        if (numa_bitmask_weight(node_cpus) == 0) {
+        if (hwloc_bitmap_isincluded(init_node->cpuset, node_cpus)) {
             log_info("Node %d skipped - no CPU detected in initiator Node.",
                      init_node->os_index);
             continue;
         }
+        hwloc_bitmap_or(node_cpus, node_cpus, init_node->cpuset);
 
         // extract local nodes
         struct hwloc_location initiator;
@@ -184,18 +184,15 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
         }
 
         // populate memory attribute nodemask to all CPU's from initiator NUMA node
-        for (i = 0; i < num_cpus; ++i) {
-            if (numa_bitmask_isbitset(node_cpus, i)) {
-                (*nodes_mask)[i] = numa_bitmask_alloc(max_node_id + 1);
-                if (MEMKIND_UNLIKELY((*nodes_mask)[i] == NULL)) {
-                    ret = MEMKIND_ERROR_MALLOC;
-                    log_err("numa_bitmask_alloc() failed.");
-                    goto error;
-                }
-
-                copy_bitmask_to_bitmask(attr_loc_mask, (*nodes_mask)[i]);
+        hwloc_bitmap_foreach_begin(i, init_node->cpuset)
+            (*nodes_mask)[i] = numa_bitmask_alloc(max_node_id + 1);
+            if (MEMKIND_UNLIKELY((*nodes_mask)[i] == NULL)) {
+                ret = MEMKIND_ERROR_MALLOC;
+                log_err("numa_bitmask_alloc() failed.");
+                goto error;
             }
-        }
+            copy_bitmask_to_bitmask(attr_loc_mask, (*nodes_mask)[i]);
+        hwloc_bitmap_foreach_end();
     }
 
     ret = MEMKIND_SUCCESS;
@@ -211,7 +208,7 @@ error:
 
 success:
     numa_free_nodemask(attr_loc_mask);
-    numa_bitmask_free(node_cpus);
+    hwloc_bitmap_free(node_cpus);
     free(local_nodes);
     hwloc_topology_destroy(topology);
 
@@ -225,6 +222,7 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
     int err;
     hwloc_topology_t topology;
     hwloc_obj_t init_node = NULL;
+    hwloc_cpuset_t node_cpus = NULL;
 
     // NUMA Nodes could be not in arithmetic progression
     int nodes_num = numa_max_node() + 1;
@@ -262,18 +260,26 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
         return MEMKIND_ERROR_UNAVAILABLE;
     }
 
-    struct bitmask *node_cpus = numa_allocate_cpumask();
+    node_cpus = hwloc_bitmap_alloc();
+    if (MEMKIND_UNLIKELY(node_cpus == NULL)) {
+        numa_bitmask_free(*hbw_node_mask);
+        log_err("hwloc_bitmap_alloc failed");
+        hwloc_topology_destroy(topology);
+        return MEMKIND_ERROR_UNAVAILABLE;
+    }
+
     while ((init_node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE,
                                                    init_node)) != NULL) {
         struct hwloc_location initiator;
         hwloc_obj_t target = NULL;
 
-        numa_node_to_cpus(init_node->os_index, node_cpus);
-        if (numa_bitmask_weight(node_cpus) == 0) {
-            log_info("Node skipped %d - no CPU detected in initiator Node.",
+        // skip this node if it doesn't contain any CPU
+        if (hwloc_bitmap_isincluded(init_node->cpuset, node_cpus)) {
+            log_info("Node %d skipped - no CPU detected in initiator Node.",
                      init_node->os_index);
             continue;
         }
+        hwloc_bitmap_or(node_cpus, node_cpus, init_node->cpuset);
 
         initiator.type = HWLOC_LOCATION_TYPE_CPUSET;
         initiator.location.cpuset = init_node->cpuset;
@@ -295,7 +301,7 @@ int get_mem_attributes_hbw_nodes_mask(struct bitmask **hbw_node_mask)
         }
     }
 
-    numa_bitmask_free(node_cpus);
+    hwloc_bitmap_free(node_cpus);
     hwloc_topology_destroy(topology);
     if (numa_bitmask_weight(*hbw_node_mask) == 0) {
         numa_bitmask_free(*hbw_node_mask);
