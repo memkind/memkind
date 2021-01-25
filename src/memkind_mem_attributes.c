@@ -9,18 +9,19 @@
 
 #ifdef MEMKIND_HWLOC
 #include <hwloc.h>
+#include <hwloc/linux-libnuma.h>
 #define MEMKIND_HBW_THRESHOLD_DEFAULT (200 * 1024) // Default threshold is 200 GB/s
 
 int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                                  memkind_node_variant_t node_variant, memory_attribute_t attr)
 {
     int num_nodes = numa_num_configured_nodes();
-    int max_node_id = numa_max_node();
     int num_cpus = numa_num_configured_cpus();
 
     hwloc_obj_t init_node = NULL;
     hwloc_obj_t *local_nodes = NULL;
     hwloc_cpuset_t node_cpus = NULL;
+    hwloc_nodeset_t attr_loc_mask = NULL;
     hwloc_uint64_t mem_attr, best_mem_attr;
     unsigned int mem_attr_nodes;
 
@@ -62,10 +63,10 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
         goto error;
     }
 
-    struct bitmask *attr_loc_mask = numa_bitmask_alloc(max_node_id + 1);
+    attr_loc_mask = hwloc_bitmap_alloc();
     if (MEMKIND_UNLIKELY(attr_loc_mask == NULL)) {
         ret = MEMKIND_ERROR_MALLOC;
-        log_err("numa_allocate_nodemask() failed.");
+        log_err("hwloc_bitmap_alloc() failed.");
         goto error;
     }
 
@@ -94,23 +95,23 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
             goto error;
         }
 
-        numa_bitmask_clearall(attr_loc_mask);
-
+        hwloc_bitmap_zero(attr_loc_mask);
         switch(attr) {
             case MEM_ATTR_CAPACITY:
                 best_mem_attr = 0;
                 for (i = 0; i < num_local_nodes; ++i) {
                     if (local_nodes[i]->attr->numanode.local_memory == 0) {
+                        log_info("Node skipped - Node %d has no memory.", i);
                         continue;
                     }
 
                     if (local_nodes[i]->attr->numanode.local_memory > best_mem_attr) {
                         best_mem_attr = local_nodes[i]->attr->numanode.local_memory;
-                        numa_bitmask_clearall(attr_loc_mask);
+                        hwloc_bitmap_zero(attr_loc_mask);
                     }
 
                     if (local_nodes[i]->attr->numanode.local_memory == best_mem_attr) {
-                        numa_bitmask_setbit(attr_loc_mask, local_nodes[i]->os_index);
+                        hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
                     }
                 }
                 break;
@@ -129,11 +130,11 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
                     if (mem_attr > best_mem_attr) {
                         best_mem_attr = mem_attr;
-                        numa_bitmask_clearall(attr_loc_mask);
+                        hwloc_bitmap_zero(attr_loc_mask);
                     }
 
                     if (mem_attr == best_mem_attr) {
-                        numa_bitmask_setbit(attr_loc_mask, local_nodes[i]->os_index);
+                        hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
                     }
                 }
                 break;
@@ -152,11 +153,11 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
                     if (mem_attr < best_mem_attr) {
                         best_mem_attr = mem_attr;
-                        numa_bitmask_clearall(attr_loc_mask);
+                        hwloc_bitmap_zero(attr_loc_mask);
                     }
 
                     if (mem_attr == best_mem_attr) {
-                        numa_bitmask_setbit(attr_loc_mask, local_nodes[i]->os_index);
+                        hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
                     }
                 }
                 break;
@@ -167,7 +168,7 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                 goto error;
         }
 
-        mem_attr_nodes = numa_bitmask_weight(attr_loc_mask);
+        mem_attr_nodes = hwloc_bitmap_weight(attr_loc_mask);
 
         if (node_variant == NODE_VARIANT_SINGLE &&
             mem_attr_nodes > 1) {
@@ -185,13 +186,13 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
         // populate memory attribute nodemask to all CPU's from initiator NUMA node
         hwloc_bitmap_foreach_begin(i, init_node->cpuset)
-            (*nodes_mask)[i] = numa_bitmask_alloc(max_node_id + 1);
-            if (MEMKIND_UNLIKELY((*nodes_mask)[i] == NULL)) {
-                ret = MEMKIND_ERROR_MALLOC;
-                log_err("numa_bitmask_alloc() failed.");
-                goto error;
-            }
-            copy_bitmask_to_bitmask(attr_loc_mask, (*nodes_mask)[i]);
+        (*nodes_mask)[i] = hwloc_nodeset_to_linux_libnuma_bitmask(topology,
+                                                                  attr_loc_mask);
+        if (MEMKIND_UNLIKELY((*nodes_mask)[i] == NULL)) {
+            ret = MEMKIND_ERROR_MALLOC;
+            log_err("hwloc_nodeset_to_linux_libnuma_bitmask() failed.");
+            goto error;
+        }
         hwloc_bitmap_foreach_end();
     }
 
@@ -207,7 +208,7 @@ error:
     free(*nodes_mask);
 
 success:
-    numa_free_nodemask(attr_loc_mask);
+    hwloc_bitmap_free(attr_loc_mask);
     hwloc_bitmap_free(node_cpus);
     free(local_nodes);
     hwloc_topology_destroy(topology);
