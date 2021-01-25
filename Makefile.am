@@ -390,6 +390,7 @@ EXTRA_DIST = CONTRIBUTING \
              memkind.spec.mk \
              test/test.sh \
              test/test_dax_kmem.sh \
+             test/test_hbw_threshold.sh \
              utils/docker/Dockerfile.centos-7 \
              utils/docker/Dockerfile.fedora-32 \
              utils/docker/Dockerfile.ubuntu-20.04 \
@@ -539,6 +540,7 @@ unit_tests_pmem: checkprogs
 
 unit_tests_hmat: checkprogs
 	test/hmat_test
+	test/test_hbw_threshold.sh
 
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
