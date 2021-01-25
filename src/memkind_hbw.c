@@ -289,7 +289,7 @@ typedef struct {
     uint32_t family;
 } cpu_model_data_t;
 
-static cpu_model_data_t get_cpu_model_data(void)
+static bool is_hbm_legacy_supported(void)
 {
     registers_t registers;
     cpuid_asm(1, 0, &registers);
@@ -300,13 +300,8 @@ static cpu_model_data_t get_cpu_model_data(void)
     cpu_model_data_t data;
     data.model = model | (model_ext << 4);
     data.family = (registers.eax >> CPUID_FAMILY_SHIFT) & CPUID_FAMILY_MASK;
-    return data;
-}
-
-static bool is_hbm_legacy_supported(cpu_model_data_t cpu)
-{
-    return cpu.family == CPU_FAMILY_INTEL &&
-           (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
+    return data.family == CPU_FAMILY_INTEL &&
+           (data.model == CPU_MODEL_KNL || data.model == CPU_MODEL_KNM);
 }
 
 static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
@@ -358,13 +353,10 @@ static int memkind_hbw_get_nodemask(struct bitmask **bm)
     char *nodes_env = memkind_get_env("MEMKIND_HBW_NODES");
     if (nodes_env) {
         return memkind_env_get_nodemask(nodes_env, bm);
+    } else if (is_hbm_legacy_supported()) {
+        return get_legacy_hbw_nodes_mask(bm);
     } else {
-        cpu_model_data_t cpu = get_cpu_model_data();
-        if(is_hbm_legacy_supported(cpu)) {
-            return get_legacy_hbw_nodes_mask(bm);
-        } else {
-            return get_mem_attributes_hbw_nodes_mask(bm);
-        }
+        return get_mem_attributes_hbw_nodes_mask(bm);
     }
 }
 
