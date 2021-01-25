@@ -157,7 +157,9 @@ class GuestConnection:
         Shutdown guest
         """
         c.run('sudo shutdown now', echo=True, warn=True)
-        psutil.wait_procs([psutil.Process(self.qemu_pid)], timeout=10)
+        _, alive = psutil.wait_procs([psutil.Process(self.qemu_pid)], timeout=10)
+        for p in alive:
+            p.kill()
 
     @_logger
     def verify_connection(self) -> None:
