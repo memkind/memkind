@@ -409,6 +409,14 @@ private:
 class CLX_2_var3_HBW : public AbstractTopology
 {
 private:
+    MapNodeSet HBW_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {2}));
+        nodeset_map.emplace(NodeSet(1, {3}));
+        return nodeset_map;
+    }
+
     MapNodeSet Capacity_local_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -475,6 +483,16 @@ private:
 class CLX_4_var1_HBW : public AbstractTopology
 {
 private:
+    MapNodeSet HBW_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {4}));
+        nodeset_map.emplace(NodeSet(1, {5}));
+        nodeset_map.emplace(NodeSet(2, {6}));
+        nodeset_map.emplace(NodeSet(3, {7}));
+        return nodeset_map;
+    }
+
     MapNodeSet Capacity_local_nodes() const final
     {
         MapNodeSet nodeset_map;

@@ -289,7 +289,7 @@ typedef struct {
     uint32_t family;
 } cpu_model_data_t;
 
-static cpu_model_data_t get_cpu_model_data(void)
+static bool is_hbm_legacy_supported(void)
 {
     registers_t registers;
     cpuid_asm(1, 0, &registers);
@@ -300,13 +300,8 @@ static cpu_model_data_t get_cpu_model_data(void)
     cpu_model_data_t data;
     data.model = model | (model_ext << 4);
     data.family = (registers.eax >> CPUID_FAMILY_SHIFT) & CPUID_FAMILY_MASK;
-    return data;
-}
-
-static bool is_hbm_legacy_supported(cpu_model_data_t cpu)
-{
-    return cpu.family == CPU_FAMILY_INTEL &&
-           (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
+    return data.family == CPU_FAMILY_INTEL &&
+           (data.model == CPU_MODEL_KNL || data.model == CPU_MODEL_KNM);
 }
 
 static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
@@ -359,13 +354,15 @@ static int memkind_hbw_get_nodemask(struct bitmask **bm)
     if (nodes_env) {
         return memkind_env_get_nodemask(nodes_env, bm);
     } else {
-        cpu_model_data_t cpu = get_cpu_model_data();
-        if(is_hbm_legacy_supported(cpu)) {
-            return get_legacy_hbw_nodes_mask(bm);
-        } else {
-            return get_mem_attributes_hbw_nodes_mask(bm);
-        }
+        return get_legacy_hbw_nodes_mask(bm);
     }
+}
+
+static bool is_hmat_supported(void)
+{
+    if (memkind_get_env("MEMKIND_HBW_NODES") || is_hbm_legacy_supported())
+        return false;
+    return true;
 }
 
 static void memkind_hbw_closest_numanode_init(void)
@@ -374,8 +371,14 @@ static void memkind_hbw_closest_numanode_init(void)
             &memkind_hbw_closest_numanode_g[NODE_VARIANT_MULTIPLE];
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
-    g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
-                                       &g->closest_numanode, g->num_cpu, NODE_VARIANT_MULTIPLE);
+    if (!is_hmat_supported()) {
+        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
+                                           &g->closest_numanode,
+                                           g->num_cpu, NODE_VARIANT_MULTIPLE);
+    } else {
+        g->init_err = set_closest_numanode_mem_attr(&g->closest_numanode, g->num_cpu,
+                                                    NODE_VARIANT_MULTIPLE);
+    }
 }
 
 static void memkind_hbw_closest_preferred_numanode_init(void)
@@ -384,9 +387,14 @@ static void memkind_hbw_closest_preferred_numanode_init(void)
             &memkind_hbw_closest_numanode_g[NODE_VARIANT_SINGLE];
     g->num_cpu = numa_num_configured_cpus();
     g->closest_numanode = NULL;
-    g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
-                                       &g->closest_numanode,
-                                       g->num_cpu, NODE_VARIANT_SINGLE);
+    if (!is_hmat_supported()) {
+        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
+                                           &g->closest_numanode,
+                                           g->num_cpu, NODE_VARIANT_SINGLE);
+    } else {
+        g->init_err = set_closest_numanode_mem_attr(&g->closest_numanode, g->num_cpu,
+                                                    NODE_VARIANT_SINGLE);
+    }
 }
 
 MEMKIND_EXPORT void memkind_hbw_init_once(void)
