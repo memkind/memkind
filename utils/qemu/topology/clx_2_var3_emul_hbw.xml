@@ -47,9 +47,9 @@
         <latency initiator='0' target='0' type='access' value='72'/>
         <bandwidth initiator='0' target='0' type='access' value='111000' unit='MiB'/>
         <latency initiator='0' target='1' type='access' value='133'/>
-        <bandwidth initiator='0' target='1' type='access' value='33770' unit='MiB'/>
+        <bandwidth initiator='0' target='1' type='access' value='33000' unit='MiB'/>
         <latency initiator='0' target='2' type='access' value='170'/>
-        <bandwidth initiator='0' target='2' type='access' value='130000' unit='MiB'/>
+        <bandwidth initiator='0' target='2' type='access' value='204800' unit='MiB'/>
         <latency initiator='0' target='3' type='access' value='240'/>
         <bandwidth initiator='0' target='3' type='access' value='80000' unit='MiB'/>
         <latency initiator='1' target='1' type='access' value='72'/>
@@ -57,7 +57,7 @@
         <latency initiator='1' target='2' type='access' value='240'/>
         <bandwidth initiator='1' target='2' type='access' value='80000' unit='MiB'/>
         <latency initiator='1' target='3' type='access' value='170'/>
-        <bandwidth initiator='1' target='3' type='access' value='130000' unit='MiB'/>
+        <bandwidth initiator='1' target='3' type='access' value='204800' unit='MiB'/>
       </interconnects>
     </numa>
   </cpu>
