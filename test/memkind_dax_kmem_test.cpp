@@ -9,44 +9,65 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "dax_kmem_nodes.h"
 #include "proc_stat.h"
 #include "sys/types.h"
 #include "sys/sysinfo.h"
-#include "TestPolicy.hpp"
+#include "TestPrereq.hpp"
 
 class MemkindDaxKmemFunctionalTests: public ::testing::Test
 {
 protected:
-    DaxKmem dax_kmem_nodes;
+    TestPrereq tp;
 
     void SetUp()
     {
-        if (dax_kmem_nodes.size() < 1) {
-            GTEST_SKIP() << "Minimum 1 PMEM NUMA required." << std::endl;
+        if (!tp.is_DAX_KMEM_supported()) {
+            GTEST_SKIP() << "DAX KMEM is required." << std::endl;
         }
     }
 };
 
-class MemkindDaxKmemTestsParam: public ::testing::Test,
-    public ::testing::WithParamInterface<memkind_t>
+class MemkindDaxKmemFunctionalTestsAll: public ::testing::Test
 {
 protected:
-    DaxKmem dax_kmem_nodes;
-    memkind_t kind;
+    TestPrereq tp;
+
     void SetUp()
     {
-        kind = GetParam();
-        if (kind == MEMKIND_DAX_KMEM_PREFERRED) {
-            std::set<int> regular_nodes = TestPolicy::get_regular_numa_nodes();
-            for (auto const &node: regular_nodes) {
-                auto closest_dax_kmem_nodes = dax_kmem_nodes.get_closest_numa_nodes(node);
-                if (closest_dax_kmem_nodes.size() > 1)
-                    GTEST_SKIP() << "Skip test for MEMKIND_DAX_KMEM_PREFFERED - "
-                                 "more than one PMEM NUMA node is closest to node: "
-                                 << node << std::endl;
-            }
+        if (!tp.is_DAX_KMEM_supported()) {
+            GTEST_SKIP() << "DAX KMEM is required." << std::endl;
         }
+    }
+};
+
+class MemkindDaxKmemFunctionalTestsPreferred: public ::testing::Test
+{
+protected:
+    TestPrereq tp;
+
+    void SetUp()
+    {
+        if (!tp.is_DAX_KMEM_supported()) {
+            GTEST_SKIP() << "DAX KMEM is required." << std::endl;
+        }
+    }
+};
+
+class MemkindDaxKmemTestsParam: public ::Memkind_Param_Test
+{
+protected:
+    TestPrereq tp;
+
+    void SetUp()
+    {
+        Memkind_Param_Test::SetUp();
+        if (!tp.is_DAX_KMEM_supported()) {
+            GTEST_SKIP() << "DAX KMEM is required." << std::endl;
+        }
+        if (tp.is_kind_preferred(memory_kind) && !tp.is_preferred_supported()) {
+            GTEST_SKIP() << "Exactly one closest DAX KMEM node is required." << std::endl;
+        }
+
     }
 };
 
@@ -58,14 +79,14 @@ INSTANTIATE_TEST_CASE_P(
 TEST_P(MemkindDaxKmemTestsParam,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_free_with_NULL_kind_4096_bytes)
 {
-    void *ptr = memkind_malloc(kind, 4 * KB);
+    void *ptr = memkind_malloc(memory_kind, 4 * KB);
     ASSERT_NE(nullptr, ptr);
     memkind_free(nullptr, ptr);
 }
 
 TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_alloc_zero)
 {
-    void *test1 = memkind_malloc(kind, 0);
+    void *test1 = memkind_malloc(memory_kind, 0);
     ASSERT_EQ(test1, nullptr);
 }
 
@@ -73,17 +94,17 @@ TEST_P(MemkindDaxKmemTestsParam,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_alloc_size_max)
 {
     errno = 0;
-    void *test1 = memkind_malloc(kind, SIZE_MAX);
+    void *test1 = memkind_malloc(memory_kind, SIZE_MAX);
     ASSERT_EQ(test1, nullptr);
     ASSERT_EQ(errno, ENOMEM);
 }
 
 TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_calloc_zero)
 {
-    void *test = memkind_calloc(kind, 0, 100);
+    void *test = memkind_calloc(memory_kind, 0, 100);
     ASSERT_EQ(test, nullptr);
 
-    test = memkind_calloc(kind, 100, 0);
+    test = memkind_calloc(memory_kind, 100, 0);
     ASSERT_EQ(test, nullptr);
 }
 
@@ -94,7 +115,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t num = 1;
     errno = 0;
 
-    void *test = memkind_calloc(kind, size, num);
+    void *test = memkind_calloc(memory_kind, size, num);
     ASSERT_EQ(test, nullptr);
     ASSERT_EQ(errno, ENOMEM);
 }
@@ -106,7 +127,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t num = SIZE_MAX;
     errno = 0;
 
-    void *test = memkind_calloc(kind, size, num);
+    void *test = memkind_calloc(memory_kind, size, num);
     ASSERT_EQ(test, nullptr);
     ASSERT_EQ(errno, ENOMEM);
 }
@@ -117,29 +138,29 @@ TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_realloc)
     const size_t size2 = 1 * KB;
     char *default_str = nullptr;
 
-    default_str = (char *)memkind_realloc(kind, default_str, size1);
+    default_str = (char *)memkind_realloc(memory_kind, default_str, size1);
     ASSERT_NE(nullptr, default_str);
 
     sprintf(default_str, "memkind_realloc with size %zu\n", size1);
     printf("%s", default_str);
 
-    default_str = (char *)memkind_realloc(kind, default_str, size2);
+    default_str = (char *)memkind_realloc(memory_kind, default_str, size2);
     ASSERT_NE(nullptr, default_str);
 
     sprintf(default_str, "memkind_realloc with size %zu\n", size2);
     printf("%s", default_str);
 
-    memkind_free(kind, default_str);
+    memkind_free(memory_kind, default_str);
 }
 
 TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_realloc_zero)
 {
     const size_t size = 1 * KB;
 
-    void *test = memkind_malloc(kind, size);
+    void *test = memkind_malloc(memory_kind, size);
     ASSERT_NE(test, nullptr);
 
-    void *new_test = memkind_realloc(kind, test, 0);
+    void *new_test = memkind_realloc(memory_kind, test, 0);
     ASSERT_EQ(new_test, nullptr);
 }
 
@@ -148,15 +169,15 @@ TEST_P(MemkindDaxKmemTestsParam,
 {
     const size_t size = 1 * KB;
 
-    void *test = memkind_malloc(kind, size);
+    void *test = memkind_malloc(memory_kind, size);
     ASSERT_NE(test, nullptr);
 
     errno = 0;
-    void *new_test = memkind_realloc(kind, test, SIZE_MAX);
+    void *new_test = memkind_realloc(memory_kind, test, SIZE_MAX);
     ASSERT_EQ(new_test, nullptr);
     ASSERT_EQ(errno, ENOMEM);
 
-    memkind_free(kind, test);
+    memkind_free(memory_kind, test);
 }
 
 TEST_P(MemkindDaxKmemTestsParam,
@@ -168,10 +189,10 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t iteration = 100;
 
     for (unsigned i = 0; i < iteration; ++i) {
-        test = memkind_malloc(kind, size);
+        test = memkind_malloc(memory_kind, size);
         ASSERT_NE(test, nullptr);
         errno = 0;
-        new_test = memkind_realloc(kind, test, 0);
+        new_test = memkind_realloc(memory_kind, test, 0);
         ASSERT_EQ(new_test, nullptr);
         ASSERT_EQ(errno, 0);
     }
@@ -183,10 +204,10 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t size = 1 * KB;
     void *test = nullptr;
 
-    test = memkind_realloc(kind, test, size);
+    test = memkind_realloc(memory_kind, test, size);
     ASSERT_NE(test, nullptr);
 
-    memkind_free(kind, test);
+    memkind_free(memory_kind, test);
 }
 
 TEST_P(MemkindDaxKmemTestsParam,
@@ -196,7 +217,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const char val[] = "test_TC_MEMKIND_PmemReallocIncreaseSizeNullKindVariant";
     int status;
 
-    char *test1 = (char *)memkind_malloc(kind, size);
+    char *test1 = (char *)memkind_malloc(memory_kind, size);
     ASSERT_NE(test1, nullptr);
 
     sprintf(test1, "%s", val);
@@ -213,7 +234,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     status = memcmp(val, test3, sizeof(val));
     ASSERT_EQ(status, 0);
 
-    memkind_free(kind, test3);
+    memkind_free(memory_kind, test3);
 }
 
 TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_free_nullptr)
@@ -221,7 +242,7 @@ TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_free_nullptr)
     const int n_iter = 5000;
 
     for (int i = 0; i < n_iter; ++i) {
-        memkind_free(kind, nullptr);
+        memkind_free(memory_kind, nullptr);
     }
 }
 
@@ -233,7 +254,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t wrong_alignment = 4;
 
     errno = 0;
-    int ret = memkind_posix_memalign(kind, &test, wrong_alignment, size);
+    int ret = memkind_posix_memalign(memory_kind, &test, wrong_alignment, size);
     ASSERT_EQ(errno, 0);
     ASSERT_EQ(ret, EINVAL);
     ASSERT_EQ(test, nullptr);
@@ -247,7 +268,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t wrong_alignment = sizeof(void *)+1;
 
     errno = 0;
-    int ret = memkind_posix_memalign(kind, &test, wrong_alignment, size);
+    int ret = memkind_posix_memalign(memory_kind, &test, wrong_alignment, size);
     ASSERT_EQ(errno, 0);
     ASSERT_EQ(ret, EINVAL);
     ASSERT_EQ(test, nullptr);
@@ -261,7 +282,7 @@ TEST_P(MemkindDaxKmemTestsParam,
     const size_t alignment = sizeof(void *);
 
     errno = 0;
-    int ret = memkind_posix_memalign(kind, &test, alignment, size);
+    int ret = memkind_posix_memalign(memory_kind, &test, alignment, size);
     ASSERT_EQ(errno, 0);
     ASSERT_EQ(ret, 0);
     ASSERT_NE(test, nullptr);
@@ -309,17 +330,18 @@ TEST_F(MemkindDaxKmemFunctionalTests,
     }
 }
 
-TEST_F(MemkindDaxKmemFunctionalTests,
+TEST_F(MemkindDaxKmemFunctionalTestsAll,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_ALL_alloc_until_full_numa)
 {
+    auto dax_kmem_nodes = tp.get_memory_only_numa_nodes();
     if (dax_kmem_nodes.size() < 2)
-        GTEST_SKIP() << "This test requires minimum 2 kmem dax nodes";
+        GTEST_SKIP() << "This test requires minimum 2 DAX KMEM nodes";
 
     ProcStat stat;
     void *ptr;
     const size_t alloc_size = 100 * MB;
     std::set<void *> allocations;
-    size_t sum_of_dax_kmem_free_space = dax_kmem_nodes.get_free_space();
+    size_t sum_of_dax_kmem_free_space = tp.get_free_space(dax_kmem_nodes);
     int numa_id = -1;
     const int n_swap_alloc = 20;
 
@@ -330,7 +352,7 @@ TEST_F(MemkindDaxKmemFunctionalTests,
         allocations.insert(ptr);
 
         get_mempolicy(&numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
-        ASSERT_TRUE(dax_kmem_nodes.contains(numa_id));
+        ASSERT_TRUE(dax_kmem_nodes.find(numa_id) != dax_kmem_nodes.end());
     }
 
     size_t init_swap = stat.get_used_swap_space_size_bytes();
@@ -348,17 +370,14 @@ TEST_F(MemkindDaxKmemFunctionalTests,
     }
 }
 
-TEST_F(MemkindDaxKmemFunctionalTests,
+TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_PREFFERED_alloc_until_full_numa)
 {
-    std::set<int> regular_nodes = TestPolicy::get_regular_numa_nodes();
-    for (auto const &node: regular_nodes) {
-        auto closest_dax_kmem_nodes = dax_kmem_nodes.get_closest_numa_nodes(node);
-        if (closest_dax_kmem_nodes.size() > 1)
-            GTEST_SKIP() << "Skip test for MEMKIND_DAX_KMEM_PREFFERED - "
-                         "more than one PMEM NUMA node is closest to node: "
-                         << node << std::endl;
+    if (!tp.is_preferred_supported()) {
+        GTEST_SKIP() << "Exactly one closest DAX KMEM node is required."
+                     << std::endl;
     }
+
 
     ProcStat stat;
     const size_t alloc_size = 100 * MB;
@@ -375,8 +394,10 @@ TEST_F(MemkindDaxKmemFunctionalTests,
     get_mempolicy(&numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
     int process_cpu = sched_getcpu();
     int process_node = numa_node_of_cpu(process_cpu);
-    std::unordered_set<int> closest_numa_ids =
-        dax_kmem_nodes.get_closest_numa_nodes(process_node);
+
+    auto dax_kmem_nodes = tp.get_memory_only_numa_nodes();
+    auto closest_numa_ids = tp.get_closest_numa_nodes(process_node, dax_kmem_nodes);
+
     numa_size = numa_node_size64(numa_id, nullptr);
 
     while (0.99 * numa_size > alloc_size * allocations.size()) {
@@ -399,27 +420,17 @@ TEST_F(MemkindDaxKmemFunctionalTests,
     ASSERT_EQ(stat.get_used_swap_space_size_bytes(), 0U);
 
     for (auto const &ptr: allocations) {
-        memkind_free(MEMKIND_DAX_KMEM_ALL, ptr);
+        memkind_free(MEMKIND_DAX_KMEM_PREFERRED, ptr);
     }
 }
 
-TEST_F(MemkindDaxKmemFunctionalTests,
+TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_PREFFERED_check_prerequisities)
 {
-    bool can_run = false;
-    std::set<int> regular_nodes = TestPolicy::get_regular_numa_nodes();
-
-    for (auto const &node: regular_nodes) {
-        auto closest_dax_kmem_nodes = dax_kmem_nodes.get_closest_numa_nodes(node);
-        if (closest_dax_kmem_nodes.size() > 1)
-            can_run = true;
+    if (tp.is_preferred_supported()) {
+        GTEST_SKIP() << "More than one closest DAX KMEM nodes are required." <<
+                     std::endl;
     }
-
-    if (!can_run)
-        GTEST_SKIP() <<
-                     "Skip test for MEMKIND_DAX_KMEM_PREFFERED checking prerequisities - "
-                     "none of the nodes have more than one closest PMEM NUMA nodes";
-
     const size_t alloc_size = 100 * MB;
     void *ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
     ASSERT_EQ(nullptr, ptr);
