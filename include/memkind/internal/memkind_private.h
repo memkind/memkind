@@ -99,7 +99,9 @@ struct memkind_config {
 typedef enum memkind_node_variant_t {
     NODE_VARIANT_MULTIPLE = 0,
     NODE_VARIANT_SINGLE = 1,
-    NODE_VARIANT_MAX = 2
+    NODE_VARIANT_MAX = 2,
+    NODE_VARIANT_ALL = 2,
+    NODE_VARIANT_MAX_EXT = 3
 } memkind_node_variant_t;
 
 void memkind_init(memkind_t kind, bool check_numa);
