@@ -12,14 +12,12 @@ extern "C" {
 
 typedef int (*get_node_bitmask)(struct bitmask **);
 
-int set_closest_numanode(get_node_bitmask get_bitmask, void **closest_numanode,
-                         int num_cpu, memkind_node_variant_t node_variant);
+int set_closest_numanode(get_node_bitmask get_bitmask, void **numanode,
+                         memkind_node_variant_t node_variant);
 void set_bitmask_for_all_closest_numanodes(unsigned long *nodemask,
-                                           unsigned long maxnode, const void *closest_numanode,
-                                           int num_cpu);
+                                           unsigned long maxnode, const void *numanode);
 int set_bitmask_for_current_closest_numanode(unsigned long *nodemask,
-                                             unsigned long maxnode, const void *closest_numanode,
-                                             int num_cpu);
+                                             unsigned long maxnode, const void *numanode);
 int memkind_env_get_nodemask(char *nodes_env, struct bitmask **bm);
 
 

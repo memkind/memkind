@@ -17,7 +17,7 @@ typedef enum memory_attribute_t {
 
 int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                                  memkind_node_variant_t node_variant, memory_attribute_t attr);
-int set_closest_numanode_mem_attr(void **closest_numanode, int num_cpu,
+int set_closest_numanode_mem_attr(void **numanode,
                                   memkind_node_variant_t node_variant);
 
 #ifdef __cplusplus
