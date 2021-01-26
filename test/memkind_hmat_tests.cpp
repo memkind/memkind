@@ -31,6 +31,7 @@ protected:
 INSTANTIATE_TEST_CASE_P(
     KindParam, MemkindHMATFunctionalTestsParam,
     ::testing::Values(MEMKIND_HBW,
+                      MEMKIND_HBW_ALL,
                       MEMKIND_HIGHEST_CAPACITY_LOCAL,
                       MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED,
                       MEMKIND_LOWEST_LATENCY_LOCAL,
@@ -78,7 +79,8 @@ TEST_P(MemkindHMATFunctionalTestsParam, test_tc_memkind_HMAT_without_hwloc)
     if (!tp.is_libhwloc_supported()) {
         const size_t size = 512;
         void *ptr = memkind_malloc(memory_kind, size);
-        if (tp.is_KN_family_supported() && memory_kind == MEMKIND_HBW) {
+        if (tp.is_KN_family_supported() && (memory_kind == MEMKIND_HBW ||
+                                            memory_kind == MEMKIND_HBW_ALL)) {
             EXPECT_TRUE(ptr != nullptr);
             memkind_free(MEMKIND_HBW, ptr);
         } else
