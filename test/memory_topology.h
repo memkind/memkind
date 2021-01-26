@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
+#include <stdexcept>
 
 #include <numa.h>
 #include <numaif.h>
@@ -22,7 +23,6 @@ using NodeSet = std::pair<int, std::unordered_set<int>>;
 using MapNodeSet = std::unordered_map<int, std::unordered_set<int>>;
 using BitmaskPtr =
     std::unique_ptr<struct bitmask, decltype(&numa_free_nodemask)>;
-
 class AbstractTopology
 {
 private:
@@ -739,3 +739,59 @@ private:
         return nodeset_map;
     }
 };
+
+using TpgPtr = std::unique_ptr<AbstractTopology>;
+
+TpgPtr TopologyFactory(std::string tpg_name)
+{
+    if (tpg_name.compare("KnightsMillAll2All") == 0)
+        return TpgPtr(new KNM_All2All);
+    else if (tpg_name.compare("KnightsMillSNC2") == 0)
+        return TpgPtr(new KNM_SNC2);
+    else if (tpg_name.compare("KnightsMillSNC4") == 0)
+        return TpgPtr(new KNM_SNC4);
+    else if (tpg_name.compare("CascadeLake2Var1") == 0)
+        return TpgPtr(new CLX_2_var1);
+    else if (tpg_name.compare("CascadeLake2Var1HMAT") == 0)
+        return TpgPtr(new CLX_2_var1_HMAT);
+    else if (tpg_name.compare("CascadeLake2Var1HBW") == 0)
+        return TpgPtr(new CLX_2_var1_HBW);
+    else if (tpg_name.compare("CascadeLake2Var2") == 0)
+        return TpgPtr(new CLX_2_var2);
+    else if (tpg_name.compare("CascadeLake2Var2HMAT") == 0)
+        return TpgPtr(new CLX_2_var2_HMAT);
+    else if (tpg_name.compare("CascadeLake2Var2HBW") == 0)
+        return TpgPtr(new CLX_2_var2_HBW);
+    else if (tpg_name.compare("CascadeLake2Var3") == 0)
+        return TpgPtr(new CLX_2_var3);
+    else if (tpg_name.compare("CascadeLake2Var3HMAT") == 0)
+        return TpgPtr(new CLX_2_var3_HMAT);
+    else if (tpg_name.compare("CascadeLake2Var3HBW") == 0)
+        return TpgPtr(new CLX_2_var3_HBW);
+    else if (tpg_name.compare("CascadeLake4Var1") == 0)
+        return TpgPtr(new CLX_4_var1);
+    else if (tpg_name.compare("CascadeLake4Var1HMAT") == 0)
+        return TpgPtr(new CLX_4_var1_HMAT);
+    else if (tpg_name.compare("CascadeLake4Var1HBW") == 0)
+        return TpgPtr(new CLX_4_var1_HBW);
+    else if (tpg_name.compare("CascadeLake4Var2") == 0)
+        return TpgPtr(new CLX_4_var2);
+    else if (tpg_name.compare("CascadeLake4Var2HMAT") == 0)
+        return TpgPtr(new CLX_4_var2_HMAT);
+    else if (tpg_name.compare("CascadeLake4Var2HBW") == 0)
+        return TpgPtr(new CLX_4_var2_HBW);
+    else if (tpg_name.compare("CascadeLake4Var3") == 0)
+        return TpgPtr(new CLX_4_var3);
+    else if (tpg_name.compare("CascadeLake4Var3HMAT") == 0)
+        return TpgPtr(new CLX_4_var3_HMAT);
+    else if (tpg_name.compare("CascadeLake4Var3HBW") == 0)
+        return TpgPtr(new CLX_4_var3_HBW);
+    else if (tpg_name.compare("CascadeLake4Var4") == 0)
+        return TpgPtr(new CLX_4_var4);
+    else if (tpg_name.compare("CascadeLake4Var4HMAT") == 0)
+        return TpgPtr(new CLX_4_var4_HMAT);
+    else if (tpg_name.compare("CascadeLake4Var4HBW") == 0)
+        return TpgPtr(new CLX_4_var4_HBW);
+    else
+        throw std::runtime_error("Unknown topology");
+}
