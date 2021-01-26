@@ -301,13 +301,17 @@ int set_closest_numanode_mem_attr(void **numanode,
             }
 
             if (bandwidth >= hbw_threshold) {
-                int dist = numa_distance(init_node->os_index, target->os_index);
-                if (dist < min_distance) {
-                    min_distance = dist;
-                    VEC_CLEAR(&current_dest_nodes);
+                if (node_variant == NODE_VARIANT_ALL) {
                     VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
-                } else if (dist == min_distance) {
-                    VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
+                } else {
+                    int dist = numa_distance(init_node->os_index, target->os_index);
+                    if (dist < min_distance) {
+                        min_distance = dist;
+                        VEC_CLEAR(&current_dest_nodes);
+                        VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
+                    } else if (dist == min_distance) {
+                        VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
+                    }
                 }
             }
         }

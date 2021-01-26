@@ -64,15 +64,19 @@ int set_closest_numanode(get_node_bitmask get_bitmask, void **numanode,
         VEC_CLEAR(&current_dest_nodes);
         for (dest_node = 0; dest_node <= max_node_id; ++dest_node) {
             if(numa_bitmask_isbitset(dest_nodes_mask, dest_node)) {
-                int old_errno = errno;
-                int dist = numa_distance(init_node, dest_node);
-                errno = old_errno;
-                if (dist < min_distance) {
-                    min_distance = dist;
-                    VEC_CLEAR(&current_dest_nodes);
+                if (node_variant == NODE_VARIANT_ALL) {
                     VEC_PUSH_BACK(&current_dest_nodes, dest_node);
-                } else if (dist == min_distance) {
-                    VEC_PUSH_BACK(&current_dest_nodes, dest_node);
+                } else {
+                    int old_errno = errno;
+                    int dist = numa_distance(init_node, dest_node);
+                    errno = old_errno;
+                    if (dist < min_distance) {
+                        min_distance = dist;
+                        VEC_CLEAR(&current_dest_nodes);
+                        VEC_PUSH_BACK(&current_dest_nodes, dest_node);
+                    } else if (dist == min_distance) {
+                        VEC_PUSH_BACK(&current_dest_nodes, dest_node);
+                    }
                 }
             }
         }
@@ -119,42 +123,18 @@ free_dest_nodemask:
     return status;
 }
 
-void set_bitmask_for_all_closest_numanodes(unsigned long *nodemask,
-                                           unsigned long maxnode, const void *numanode)
+int set_bitmask_for_current_numanode(unsigned long *nodemask,
+                                     unsigned long maxnode, const void *numanode)
 {
-    if (MEMKIND_LIKELY(nodemask)) {
-        int num_cpu = numa_num_configured_cpus();
-        struct bitmask nodemask_bm = {maxnode, nodemask};
-        int cpu;
-        int node = -1;
-        const struct vec_cpu_node *closest_numanode_vec = (const struct vec_cpu_node *)
-                                                          numanode;
-        numa_bitmask_clearall(&nodemask_bm);
-        for (cpu = 0; cpu < num_cpu; ++cpu) {
-            VEC_FOREACH(node, &closest_numanode_vec[cpu]) {
-                numa_bitmask_setbit(&nodemask_bm, node);
-            }
-        }
-    }
-}
-
-int set_bitmask_for_current_closest_numanode(unsigned long *nodemask,
-                                             unsigned long maxnode, const void *numanode)
-{
-    int num_cpu = numa_num_configured_cpus();
     if (MEMKIND_LIKELY(nodemask)) {
         struct bitmask nodemask_bm = {maxnode, nodemask};
         numa_bitmask_clearall(&nodemask_bm);
         int cpu = sched_getcpu();
-        if (MEMKIND_LIKELY(cpu < num_cpu)) {
-            int node = -1;
-            const struct vec_cpu_node *closest_numanode_vec = (const struct vec_cpu_node *)
-                                                              numanode;
-            VEC_FOREACH(node, &closest_numanode_vec[cpu]) {
-                numa_bitmask_setbit(&nodemask_bm, node);
-            }
-        } else {
-            return MEMKIND_ERROR_RUNTIME;
+        int node = -1;
+        const struct vec_cpu_node *closest_numanode_vec = (const struct vec_cpu_node *)
+                                                          numanode;
+        VEC_FOREACH(node, &closest_numanode_vec[cpu]) {
+            numa_bitmask_setbit(&nodemask_bm, node);
         }
     }
     return MEMKIND_SUCCESS;
