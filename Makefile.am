@@ -418,6 +418,7 @@ EXTRA_DIST = CONTRIBUTING \
              utils/qemu/topology/clx_2_var3.xml \
              utils/qemu/topology/clx_2_var3_emul_hbw.xml \
              utils/qemu/topology/clx_2_var3_hmat.xml \
+             utils/qemu/topology/clx_2_var4_emul_hbw.xml \
              utils/qemu/topology/clx_4_var1.xml \
              utils/qemu/topology/clx_4_var1_emul_hbw.xml \
              utils/qemu/topology/clx_4_var1_hmat.xml \

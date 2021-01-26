@@ -19,6 +19,7 @@ Note that systems marked with (*) are "emulated" and not based on real products.
 | clx_2_var3.xml          | Cascade Lake 2 sockets  | DRAM + PMEM   |              | PMEM on both sockets       |
 | clx_2_var3_emul_hbw.xml | Cascade Lake 2 sockets* | DRAM + HBM    | X            | HBM on both sockets        |
 | clx_2_var3_hmat.xml     | Cascade Lake 2 sockets  | DRAM + PMEM   | X            | PMEM on both sockets       |
+| clx_2_var4_emul_hbw.xml | Cascade Lake 2 sockets* | HBM           | X            | HBM on all Nodes           |
 | clx_4_var1.xml          | Cascade Lake 4 sockets  | DRAM + PMEM   |              | PMEM on all 4 sockets      |
 | clx_4_var1_emul_hbw.xml | Cascade Lake 4 sockets* | DRAM + HBM    | X            | HBM on all 4 sockets       |
 | clx_4_var1_hmat.xml     | Cascade Lake 4 sockets  | DRAM + PMEM   | X            | PMEM on all 4 sockets      |
