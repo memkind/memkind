@@ -50,7 +50,7 @@ int print_hbw_nodes()
 
     // ensuring functions in numa library are defined
     if (numa_available() == -1) {
-        return 3;
+        return 1;
     }
 
     max_node_id = numa_max_node();
