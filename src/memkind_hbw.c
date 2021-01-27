@@ -173,19 +173,17 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate
 };
 
-struct hbw_closest_numanode_t {
+struct hbw_numanode_t {
     int init_err;
-    int num_cpu;
-    void *closest_numanode;
+    void *numanode;
 };
 
-static struct hbw_closest_numanode_t
-    memkind_hbw_closest_numanode_g[NODE_VARIANT_MAX];
-static pthread_once_t memkind_hbw_closest_numanode_once_g[NODE_VARIANT_MAX]
-    = {PTHREAD_ONCE_INIT};
+static struct hbw_numanode_t memkind_hbw_numanode_g[NODE_VARIANT_MAX_EXT];
+static pthread_once_t memkind_hbw_numanode_once_g[NODE_VARIANT_MAX_EXT] = {PTHREAD_ONCE_INIT};
 
 static void memkind_hbw_closest_numanode_init(void);
 static void memkind_hbw_closest_preferred_numanode_init(void);
+static void memkind_hbw_all_numanode_init(void);
 
 // This declaration is necessary, cause it's missing in headers from libnuma 2.0.8
 extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
@@ -208,13 +206,12 @@ MEMKIND_EXPORT int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
                                                   unsigned long *nodemask,
                                                   unsigned long maxnode)
 {
-    struct hbw_closest_numanode_t *g =
-            &memkind_hbw_closest_numanode_g[NODE_VARIANT_MULTIPLE];
-    pthread_once(&memkind_hbw_closest_numanode_once_g[NODE_VARIANT_MULTIPLE],
+    struct hbw_numanode_t *g = &memkind_hbw_numanode_g[NODE_VARIANT_MULTIPLE];
+    pthread_once(&memkind_hbw_numanode_once_g[NODE_VARIANT_MULTIPLE],
                  memkind_hbw_closest_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err)) {
-        g->init_err = set_bitmask_for_current_closest_numanode(nodemask, maxnode,
-                                                               g->closest_numanode, g->num_cpu);
+        g->init_err = set_bitmask_for_current_numanode(nodemask, maxnode,
+                                                       g->numanode);
     }
     return g->init_err;
 }
@@ -223,13 +220,12 @@ int memkind_hbw_get_preferred_mbind_nodemask(struct memkind *kind,
                                              unsigned long *nodemask,
                                              unsigned long maxnode)
 {
-    struct hbw_closest_numanode_t *g =
-            &memkind_hbw_closest_numanode_g[NODE_VARIANT_SINGLE];
-    pthread_once(&memkind_hbw_closest_numanode_once_g[NODE_VARIANT_SINGLE],
+    struct hbw_numanode_t *g = &memkind_hbw_numanode_g[NODE_VARIANT_SINGLE];
+    pthread_once(&memkind_hbw_numanode_once_g[NODE_VARIANT_SINGLE],
                  memkind_hbw_closest_preferred_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err)) {
-        g->init_err = set_bitmask_for_current_closest_numanode(nodemask, maxnode,
-                                                               g->closest_numanode, g->num_cpu);
+        g->init_err = set_bitmask_for_current_numanode(nodemask, maxnode,
+                                                       g->numanode);
     }
     return g->init_err;
 }
@@ -238,14 +234,12 @@ MEMKIND_EXPORT int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
                                                       unsigned long *nodemask,
                                                       unsigned long maxnode)
 {
-    struct hbw_closest_numanode_t *g =
-            &memkind_hbw_closest_numanode_g[NODE_VARIANT_MULTIPLE];
-    pthread_once(&memkind_hbw_closest_numanode_once_g[NODE_VARIANT_MULTIPLE],
-                 memkind_hbw_closest_numanode_init);
-
+    struct hbw_numanode_t *g = &memkind_hbw_numanode_g[NODE_VARIANT_ALL];
+    pthread_once(&memkind_hbw_numanode_once_g[NODE_VARIANT_ALL],
+                 memkind_hbw_all_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err)) {
-        set_bitmask_for_all_closest_numanodes(nodemask, maxnode, g->closest_numanode,
-                                              g->num_cpu);
+        g->init_err = set_bitmask_for_current_numanode(nodemask, maxnode,
+                                                       g->numanode);
     }
     return g->init_err;
 }
@@ -367,33 +361,38 @@ static bool is_hmat_supported(void)
 
 static void memkind_hbw_closest_numanode_init(void)
 {
-    struct hbw_closest_numanode_t *g =
-            &memkind_hbw_closest_numanode_g[NODE_VARIANT_MULTIPLE];
-    g->num_cpu = numa_num_configured_cpus();
-    g->closest_numanode = NULL;
+    struct hbw_numanode_t *g = &memkind_hbw_numanode_g[NODE_VARIANT_MULTIPLE];
+    g->numanode = NULL;
     if (!is_hmat_supported()) {
-        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
-                                           &g->closest_numanode,
-                                           g->num_cpu, NODE_VARIANT_MULTIPLE);
+        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask, &g->numanode,
+                                           NODE_VARIANT_MULTIPLE);
     } else {
-        g->init_err = set_closest_numanode_mem_attr(&g->closest_numanode, g->num_cpu,
+        g->init_err = set_closest_numanode_mem_attr(&g->numanode,
                                                     NODE_VARIANT_MULTIPLE);
     }
 }
 
 static void memkind_hbw_closest_preferred_numanode_init(void)
 {
-    struct hbw_closest_numanode_t *g =
-            &memkind_hbw_closest_numanode_g[NODE_VARIANT_SINGLE];
-    g->num_cpu = numa_num_configured_cpus();
-    g->closest_numanode = NULL;
+    struct hbw_numanode_t *g = &memkind_hbw_numanode_g[NODE_VARIANT_SINGLE];
+    g->numanode = NULL;
     if (!is_hmat_supported()) {
-        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
-                                           &g->closest_numanode,
-                                           g->num_cpu, NODE_VARIANT_SINGLE);
+        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask, &g->numanode,
+                                           NODE_VARIANT_SINGLE);
     } else {
-        g->init_err = set_closest_numanode_mem_attr(&g->closest_numanode, g->num_cpu,
-                                                    NODE_VARIANT_SINGLE);
+        g->init_err = set_closest_numanode_mem_attr(&g->numanode, NODE_VARIANT_SINGLE);
+    }
+}
+
+static void memkind_hbw_all_numanode_init(void)
+{
+    struct hbw_numanode_t *g = &memkind_hbw_numanode_g[NODE_VARIANT_ALL];
+    g->numanode = NULL;
+    if (!is_hmat_supported()) {
+        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask, &g->numanode,
+                                           NODE_VARIANT_ALL);
+    } else {
+        g->init_err = set_closest_numanode_mem_attr(&g->numanode, NODE_VARIANT_ALL);
     }
 }
 

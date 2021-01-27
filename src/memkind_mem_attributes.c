@@ -215,10 +215,11 @@ success:
 //Vector of CPUs with memory NUMA Node id(s)
 VEC(vec_cpu_node, int);
 
-int set_closest_numanode_mem_attr(void **closest_numanode, int num_cpu,
+int set_closest_numanode_mem_attr(void **numanode,
                                   memkind_node_variant_t node_variant)
 {
     const char *hbw_threshold_env = memkind_get_env("MEMKIND_HBW_THRESHOLD");
+    int num_cpu = numa_num_configured_cpus();
     size_t hbw_threshold, vec_size;
     int err, i, status;
     hwloc_topology_t topology;
@@ -300,13 +301,17 @@ int set_closest_numanode_mem_attr(void **closest_numanode, int num_cpu,
             }
 
             if (bandwidth >= hbw_threshold) {
-                int dist = numa_distance(init_node->os_index, target->os_index);
-                if (dist < min_distance) {
-                    min_distance = dist;
-                    VEC_CLEAR(&current_dest_nodes);
+                if (node_variant == NODE_VARIANT_ALL) {
                     VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
-                } else if (dist == min_distance) {
-                    VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
+                } else {
+                    int dist = numa_distance(init_node->os_index, target->os_index);
+                    if (dist < min_distance) {
+                        min_distance = dist;
+                        VEC_CLEAR(&current_dest_nodes);
+                        VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
+                    } else if (dist == min_distance) {
+                        VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
+                    }
                 }
             }
         }
@@ -335,7 +340,7 @@ int set_closest_numanode_mem_attr(void **closest_numanode, int num_cpu,
         hwloc_bitmap_foreach_end();
     }
 
-    *closest_numanode = node_arr;
+    *numanode = node_arr;
     status = MEMKIND_SUCCESS;
     goto free_current_dest_nodes;
 
@@ -365,7 +370,7 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
     return MEMKIND_ERROR_OPERATION_FAILED;
 }
 
-int set_closest_numanode_mem_attr(void **closest_numanode, int num_cpu,
+int set_closest_numanode_mem_attr(void **numanode,
                                   memkind_node_variant_t node_variant)
 {
     log_err("High Bandwidth NUMA nodes cannot be automatically detected.");

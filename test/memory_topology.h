@@ -31,6 +31,11 @@ private:
         return {};
     }
 
+    virtual MapNodeSet HBW_all_nodes() const
+    {
+        return {};
+    }
+
     virtual MapNodeSet Capacity_local_nodes() const
     {
         return {};
@@ -49,6 +54,7 @@ private:
     int get_kind_mem_policy_flag(memkind_t memory_kind) const
     {
         if (memory_kind == MEMKIND_HBW ||
+            memory_kind == MEMKIND_HBW_ALL ||
             memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
             memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
             memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL)
@@ -64,6 +70,8 @@ private:
     {
         if (memory_kind == MEMKIND_HBW)
             return HBW_nodes();
+        else if (memory_kind == MEMKIND_HBW_ALL)
+            return HBW_all_nodes();
         else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
                  memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED)
             return Capacity_local_nodes();
@@ -177,6 +185,13 @@ private:
         return nodeset_map;
     }
 
+    MapNodeSet HBW_all_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {1}));
+        return nodeset_map;
+    }
+
     MapNodeSet Bandwidth_local_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -200,6 +215,14 @@ private:
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {2}));
         nodeset_map.emplace(NodeSet(1, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet HBW_all_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {2, 3}));
+        nodeset_map.emplace(NodeSet(1, {2, 3}));
         return nodeset_map;
     }
 
@@ -230,6 +253,16 @@ private:
         nodeset_map.emplace(NodeSet(1, {5}));
         nodeset_map.emplace(NodeSet(2, {6}));
         nodeset_map.emplace(NodeSet(3, {7}));
+        return nodeset_map;
+    }
+
+    MapNodeSet HBW_all_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {4, 5, 6, 7}));
+        nodeset_map.emplace(NodeSet(1, {4, 5, 6, 7}));
+        nodeset_map.emplace(NodeSet(2, {4, 5, 6, 7}));
+        nodeset_map.emplace(NodeSet(3, {4, 5, 6, 7}));
         return nodeset_map;
     }
 
@@ -417,6 +450,14 @@ private:
         return nodeset_map;
     }
 
+    MapNodeSet HBW_all_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {2}));
+        nodeset_map.emplace(NodeSet(1, {3}));
+        return nodeset_map;
+    }
+
     MapNodeSet Capacity_local_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -450,6 +491,14 @@ private:
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
         nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+
+    MapNodeSet HBW_all_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0, 2}));
+        nodeset_map.emplace(NodeSet(1, {1, 3}));
         return nodeset_map;
     }
 
@@ -512,6 +561,16 @@ class CLX_4_var1_HBW : public AbstractTopology
 {
 private:
     MapNodeSet HBW_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {4}));
+        nodeset_map.emplace(NodeSet(1, {5}));
+        nodeset_map.emplace(NodeSet(2, {6}));
+        nodeset_map.emplace(NodeSet(3, {7}));
+        return nodeset_map;
+    }
+
+    MapNodeSet HBW_all_nodes() const final
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {4}));
