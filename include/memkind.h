@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -413,7 +413,7 @@ void *memkind_defrag_reallocate(memkind_t kind, void *ptr);
 ///
 /// \brief Verifies if file-backed memory kind in the specified directory can be created with the DAX attribute
 /// \note STANDARD API
-/// \param path path to specified directory for PMEM kind
+/// \param pmem_dir path to specified directory for PMEM kind
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
 ///
 int memkind_check_dax_path(const char *pmem_dir);
