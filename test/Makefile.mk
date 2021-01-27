@@ -12,6 +12,7 @@ check_PROGRAMS += test/all_tests \
                   test/environ_err_dax_kmem_malloc_test \
                   test/environ_err_dax_kmem_malloc_positive_test \
                   test/environ_err_hbw_malloc_test \
+                  test/environ_max_bg_threads_test \
                   test/freeing_memory_segfault_test \
                   test/gb_page_tests_bind_policy \
                   test/locality_test \
@@ -53,6 +54,7 @@ test_decorator_test_LDADD = libmemkind.la
 test_environ_err_hbw_malloc_test_LDADD = libmemkind.la
 test_environ_err_dax_kmem_malloc_test_LDADD = libmemkind.la
 test_environ_err_dax_kmem_malloc_positive_test_LDADD = libmemkind.la
+test_environ_max_bg_threads_test_LDADD = libmemkind.la
 test_freeing_memory_segfault_test_LDADD = libmemkind.la
 test_gb_page_tests_bind_policy_LDADD = libmemkind.la
 test_memkind_stat_test_LDADD = libmemkind.la
@@ -117,6 +119,7 @@ test_dax_kmem_test_SOURCES = $(fused_gtest) test/dax_kmem_nodes.h test/dax_kmem_
 test_environ_err_hbw_malloc_test_SOURCES = test/environ_err_hbw_malloc_test.cpp
 test_environ_err_dax_kmem_malloc_test_SOURCES = test/environ_err_dax_kmem_malloc_test.cpp
 test_environ_err_dax_kmem_malloc_positive_test_SOURCES = test/environ_err_dax_kmem_malloc_positive_test.cpp
+test_environ_max_bg_threads_test_SOURCES = test/environ_max_bg_threads_test.cpp
 test_freeing_memory_segfault_test_SOURCES = $(fused_gtest) test/freeing_memory_segfault_test.cpp
 test_gb_page_tests_bind_policy_SOURCES = $(fused_gtest) test/gb_page_tests_bind_policy.cpp test/trial_generator.cpp test/check.cpp
 test_memkind_stat_test_SOURCES = $(fused_gtest) test/memkind_stat_test.cpp
