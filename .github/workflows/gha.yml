@@ -1,0 +1,62 @@
+name: MEMKIND
+on: [push, pull_request]
+
+jobs:
+
+  linting:
+    runs-on: ubuntu-20.04
+    name: Code Linting - Astyle
+    steps:
+
+    - name: Install astyle
+      run: sudo apt install astyle
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Run Astyle
+      run: ./astyle.sh
+
+  building:
+    runs-on: ${{ matrix.os }}
+    name: Building memkind daxctl ${{ matrix.daxctl }} | hwloc ${{ matrix.hwloc }} | ${{ matrix.os }} | ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        compiler_version: [10]
+        env:
+          - { cc: gcc, cxx: g++}
+          - { cc: clang, cxx: clang++}
+        daxctl: [false, true]
+        hwloc: [false]
+    env:
+        CC: ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
+        CXX: ${{ matrix.env.cxx }}-${{ matrix.compiler_version }}
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install basic dependencies
+      run: sudo apt install autoconf libnuma-dev
+
+    - name: Install daxctl dependency
+      run: |
+          if [ "${{ matrix.daxctl }}" == true ]; then
+              sudo apt install libdaxctl-dev
+          else
+            echo "Skipping daxctl installation"
+          fi
+
+    - name: Install hwloc dependency
+      run: |
+          if [ "${{ matrix.hwloc }}" == true ]; then
+            ./utils/docker/docker_install_hwloc.sh
+          else
+            echo "Skipping hwloc installation"
+          fi
+
+    - name: Build memkind
+      run: ./build.sh

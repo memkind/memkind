@@ -1,11 +1,11 @@
-.travis.yml
+.github/workflows/gha.yml
+.github/pull_request_template.md
 AUTHORS
 CONTRIBUTING
 COPYING
 ChangeLog
 Makefile.am
 NEWS
-PULL_REQUEST_TEMPLATE.md
 README
 astyle.sh
 autogen.sh
