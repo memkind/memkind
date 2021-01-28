@@ -32,6 +32,9 @@ jobs:
     env:
         CC: ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
         CXX: ${{ matrix.env.cxx }}-${{ matrix.compiler_version }}
+        CCACHE_COMPRESS: 1
+        CCACHE_TEMPDIR: /tmp/.ccache-temp
+        CC_BUILD_ID: ${{ matrix.os }}-${{ matrix.env.cc }}-${{ matrix.compiler_version }}-d${{ matrix.daxctl }}-h${{ matrix.hwloc }}
     steps:
 
     - name: Checkout
@@ -39,8 +42,15 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Ccache setup
+      uses: actions/cache@v2.1.3
+      with:
+        path: ~/.ccache
+        key: ccache-${{ env.CC_BUILD_ID }}-static-build-${{ github.sha }}
+        restore-keys: ccache-${{ env.CC_BUILD_ID }}-static-build-
+
     - name: Install basic dependencies
-      run: sudo apt install autoconf libnuma-dev
+      run: sudo apt install autoconf ccache libnuma-dev
 
     - name: Install daxctl dependency
       run: |
@@ -59,4 +69,6 @@ jobs:
           fi
 
     - name: Build memkind
-      run: ./build.sh
+      run: |
+          ccache --max-size=150M
+          ./build.sh
