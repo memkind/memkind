@@ -82,7 +82,7 @@ TEST_P(MemkindHMATFunctionalTestsParam, test_tc_memkind_HMAT_without_hwloc)
         if (tp.is_KN_family_supported() && (memory_kind == MEMKIND_HBW ||
                                             memory_kind == MEMKIND_HBW_ALL)) {
             EXPECT_TRUE(ptr != nullptr);
-            memkind_free(MEMKIND_HBW, ptr);
+            memkind_free(memory_kind, ptr);
         } else
             EXPECT_TRUE(ptr == nullptr);
     } else {
