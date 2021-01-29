@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 # targets for building rpm
 version ?= 0.0.0
@@ -169,6 +169,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %files tests
 %defattr(-,root,root,-)
 $(memkind_test_dir)/all_tests
+$(memkind_test_dir)/background_threads_test
 ${memkind_test_dir}/environ_err_dax_kmem_malloc_positive_test
 ${memkind_test_dir}/environ_err_dax_kmem_malloc_test
 $(memkind_test_dir)/environ_err_hbw_malloc_test
