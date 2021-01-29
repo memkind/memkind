@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 #include <assert.h>
 #include <pthread.h>
 #include <errno.h>
@@ -589,10 +590,10 @@ static void memkind_construct(void)
         if (env) {
             char *end;
             errno = 0;
-            size_t thread_limit = strtoull(env, &end, 10);
-            if (*end != '\0' || errno != 0 ) {
+            size_t thread_limit = strtoul(env, &end, 10);
+            if (thread_limit > UINT_MAX || *end != '\0' || errno != 0) {
                 log_err("Error on parsing value MEMKIND_BACKGROUND_THREAD_LIMIT");
-                return;
+                exit(-1);
             }
             memkind_arena_set_max_bg_threads(thread_limit);
         }
