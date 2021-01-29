@@ -1,11 +1,11 @@
+.github/workflows/gha.yml
+.github/pull_request_template.md
 .gitignore
-.travis.yml
 AUTHORS
 CONTRIBUTING
 COPYING
 ChangeLog
 NEWS
-PULL_REQUEST_TEMPLATE.md
 README
 VERSION
 autohbw/autohbw_README

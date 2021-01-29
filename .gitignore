@@ -81,6 +81,7 @@
 /test/allocator_perf_tool_tests
 /test/autohbw_candidates
 /test/autohbw_test_helper
+/test/background_threads_test
 /test/check.sh.log
 /test/check.sh.trs
 /test/dax_kmem_test
