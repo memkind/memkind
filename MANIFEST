@@ -1,11 +1,11 @@
-.travis.yml
+.github/workflows/gha.yml
+.github/pull_request_template.md
 AUTHORS
 CONTRIBUTING
 COPYING
 ChangeLog
 Makefile.am
 NEWS
-PULL_REQUEST_TEMPLATE.md
 README
 astyle.sh
 autogen.sh
@@ -475,6 +475,7 @@ test/allocator_perf_tool/WrappersMacros.hpp
 test/allocator_perf_tool/main.cpp
 test/autohbw_test.py
 test/autohbw_test_helper.c
+test/background_threads_test.cpp
 test/bat_tests.cpp
 test/check.cpp
 test/check.h

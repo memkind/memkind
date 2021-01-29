@@ -100,6 +100,10 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .br
 .BI "void memkind_free_post(memkind_t " "kind" ", void " "*ptr" );
 .sp
+.B "ENHANCEMENTS:"
+.br
+.BI "int memkind_set_bg_threads(bool " "state" );
+.sp
 .sp
 .br
 .SH "DESCRIPTION"
@@ -608,6 +612,11 @@ the beginning of the allocator pass all inputs by reference and the
 decorators that are called at the end of the allocator pass the output
 by reference. This enables the modification of the input and output
 of each heap management function by the decorators.
+.sp
+.B "ENHANCEMENTS:"
+.br
+.BR memkind_set_bg_threads()
+enables/disables internal background worker threads in jemalloc.
 .sp
 .B "LIBRARY VERSION:"
 .br

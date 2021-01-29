@@ -176,6 +176,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %files tests
 %defattr(-,root,root,-)
 $(memkind_test_dir)/all_tests
+$(memkind_test_dir)/background_threads_test
 ${memkind_test_dir}/environ_err_dax_kmem_malloc_positive_test
 ${memkind_test_dir}/environ_err_dax_kmem_malloc_test
 $(memkind_test_dir)/environ_err_hbw_malloc_test

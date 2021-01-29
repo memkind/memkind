@@ -6,6 +6,7 @@ AM_CPPFLAGS += -Itest/gtest_fused -DMEMKIND_DEPRECATED\(x\)=x
 check_PROGRAMS += test/all_tests \
                   test/allocator_perf_tool_tests \
                   test/autohbw_test_helper \
+                  test/background_threads_test \
                   test/dax_kmem_test \
                   test/decorator_test \
                   test/environ_err_dax_kmem_malloc_test \
@@ -69,6 +70,8 @@ test_hmat_test_LDADD = libmemkind.la
 test_defrag_reallocate_SOURCES = $(fused_gtest) test/memkind_defrag_reallocate.cpp
 test_defrag_reallocate_LDADD = libmemkind.la
 test_hmat_test_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS)
+test_background_threads_test_SOURCES = $(fused_gtest) test/background_threads_test.cpp
+test_background_threads_test_LDADD = libmemkind.la
 endif
 
 fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
