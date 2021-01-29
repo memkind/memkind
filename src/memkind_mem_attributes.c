@@ -12,6 +12,7 @@
 #include <memkind/internal/vec.h>
 
 #include <hwloc.h>
+#include <hwloc/linux.h>
 #include <hwloc/linux-libnuma.h>
 #define MEMKIND_HBW_THRESHOLD_DEFAULT (200 * 1024) // Default threshold is 200 GB/s
 
@@ -225,6 +226,7 @@ int set_closest_numanode_mem_attr(void **numanode,
     hwloc_topology_t topology;
     hwloc_obj_t init_node = NULL;
     hwloc_cpuset_t node_cpus = NULL;
+    hwloc_cpuset_t affinity_cpus = NULL;
 
     if (hbw_threshold_env) {
         log_info("Environment variable MEMKIND_HBW_THRESHOLD detected: %s.",
@@ -251,11 +253,25 @@ int set_closest_numanode_mem_attr(void **numanode,
         goto hwloc_destroy;
     }
 
+    affinity_cpus = hwloc_bitmap_alloc();
+    if (MEMKIND_UNLIKELY(affinity_cpus == NULL)) {
+        log_err("hwloc_bitmap_alloc failed");
+        status = MEMKIND_ERROR_UNAVAILABLE;
+        goto hwloc_destroy;
+    }
+
+    err = hwloc_linux_get_tid_cpubind(topology, 0, affinity_cpus);
+    if (MEMKIND_UNLIKELY(err)) {
+        log_err("hwloc_linux_get_tid_cpubind");
+        status = MEMKIND_ERROR_RUNTIME;
+        goto node_affinity_cpu_free;
+    }
+
     node_cpus = hwloc_bitmap_alloc();
     if (MEMKIND_UNLIKELY(node_cpus == NULL)) {
         log_err("hwloc_bitmap_alloc failed");
         status = MEMKIND_ERROR_UNAVAILABLE;
-        goto hwloc_destroy;
+        goto node_affinity_cpu_free;
     }
 
     VEC(vec_temp, int) current_dest_nodes = VEC_INITIALIZER;
@@ -275,7 +291,7 @@ int set_closest_numanode_mem_attr(void **numanode,
         hwloc_obj_t target = NULL;
         int min_distance = INT_MAX;
 
-        //skip node which could not be a initiator
+        // skip node which could not be a initiator
         if (hwloc_bitmap_isincluded(init_node->cpuset, node_cpus)) {
             log_info("Node %d skipped - no CPU detected in initiator Node.",
                      init_node->os_index);
@@ -283,6 +299,13 @@ int set_closest_numanode_mem_attr(void **numanode,
         }
 
         hwloc_bitmap_or(node_cpus, node_cpus, init_node->cpuset);
+
+        // skip  node if all CPU's from node are excluded from process
+        if (!hwloc_bitmap_isincluded(init_node->cpuset, affinity_cpus)) {
+            log_info("Node %d skipped - CPU's from Node exclude from affinity mask.",
+                     init_node->os_index);
+            continue;
+        }
 
         initiator.type = HWLOC_LOCATION_TYPE_CPUSET;
         initiator.location.cpuset = init_node->cpuset;
@@ -353,6 +376,9 @@ free_node_arr:
 
 free_current_dest_nodes:
     VEC_DELETE(&current_dest_nodes);
+
+node_affinity_cpu_free:
+    hwloc_bitmap_free(affinity_cpus);
 
 node_cpu_free:
     hwloc_bitmap_free(node_cpus);
