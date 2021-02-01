@@ -148,6 +148,7 @@ test/huge_page_test.cpp
 test/load_tbbmalloc_symbols.c
 test/locality_test.cpp
 test/main.cpp
+test/malloc_stats_print_test_helper.c
 test/memkind_allocator_tests.cpp
 test/memkind_dax_kmem_test.cpp
 test/memkind_detect_kind_tests.cpp

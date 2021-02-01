@@ -99,6 +99,7 @@
 /test/hello_memkind
 /test/hello_memkind_debug
 /test/locality_test
+/test/malloc_stats_print_test_helper
 /test/mallocerr_test
 /test/memkind_allocated
 /test/memkind_cpp_allocator
