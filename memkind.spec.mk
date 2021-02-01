@@ -192,6 +192,7 @@ $(memkind_test_dir)/hello_hbw
 $(memkind_test_dir)/hello_memkind
 $(memkind_test_dir)/hello_memkind_debug
 ${memkind_test_dir}/hmat_test
+$(memkind_test_dir)/malloc_stats_print_test_helper
 $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/memkind_cpp_allocator
 $(memkind_test_dir)/memkind_get_stat
