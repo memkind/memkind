@@ -40,25 +40,27 @@
 #include <unistd.h>
 
 #ifdef MEMKIND_ENABLE_HEAP_MANAGER
-#define m_detect_kind(ptr)             heap_manager_detect_kind(ptr)
-#define m_free(ptr)                    heap_manager_free(ptr)
-#define m_realloc(ptr, size)           heap_manager_realloc(ptr, size)
-#define m_usable_size(ptr)             heap_manager_malloc_usable_size(ptr)
-#define m_defrag_reallocate(ptr)       heap_manager_defrag_reallocate(ptr)
-#define m_get_global_stat(stat, value) heap_manager_get_stat(stat, value)
-#define m_update_cached_stats          heap_manager_update_cached_stats
-#define m_init                         heap_manager_init
-#define m_set_bg_threads(state)        heap_manager_set_bg_threads(state)
+#define m_detect_kind(ptr)                      heap_manager_detect_kind(ptr)
+#define m_free(ptr)                             heap_manager_free(ptr)
+#define m_realloc(ptr, size)                    heap_manager_realloc(ptr, size)
+#define m_usable_size(ptr)                      heap_manager_malloc_usable_size(ptr)
+#define m_defrag_reallocate(ptr)                heap_manager_defrag_reallocate(ptr)
+#define m_get_global_stat(stat, value)          heap_manager_get_stat(stat, value)
+#define m_update_cached_stats                   heap_manager_update_cached_stats
+#define m_init                                  heap_manager_init
+#define m_set_bg_threads(state)                 heap_manager_set_bg_threads(state)
+#define m_stats_print(write_cb, cbopaque, opts) heap_manager_stats_print(write_cb, cbopaque, opts)
 #else
-#define m_detect_kind(ptr)             memkind_arena_detect_kind(ptr)
-#define m_free(ptr)                    memkind_arena_free_with_kind_detect(ptr)
-#define m_realloc(ptr, size)           memkind_arena_realloc_with_kind_detect(ptr, size)
-#define m_usable_size(ptr)             memkind_default_malloc_usable_size(NULL, ptr)
-#define m_defrag_reallocate(ptr)       memkind_arena_defrag_reallocate_with_kind_detect(ptr)
-#define m_get_global_stat(stat, value) memkind_arena_get_global_stat(stat, value)
-#define m_update_cached_stats          memkind_arena_update_cached_stats
-#define m_init                         memkind_arena_init
-#define m_set_bg_threads(state)        memkind_arena_set_bg_threads(state)
+#define m_detect_kind(ptr)                      memkind_arena_detect_kind(ptr)
+#define m_free(ptr)                             memkind_arena_free_with_kind_detect(ptr)
+#define m_realloc(ptr, size)                    memkind_arena_realloc_with_kind_detect(ptr, size)
+#define m_usable_size(ptr)                      memkind_default_malloc_usable_size(NULL, ptr)
+#define m_defrag_reallocate(ptr)                memkind_arena_defrag_reallocate_with_kind_detect(ptr)
+#define m_get_global_stat(stat, value)          memkind_arena_get_global_stat(stat, value)
+#define m_update_cached_stats                   memkind_arena_update_cached_stats
+#define m_init                                  memkind_arena_init
+#define m_set_bg_threads(state)                 memkind_arena_set_bg_threads(state)
+#define m_stats_print(write_cb, cbopaque, opts) memkind_arena_stats_print(write_cb, cbopaque, opts)
 #endif
 
 /* Clear bits in x, but only this specified in mask. */
@@ -1007,4 +1009,10 @@ MEMKIND_EXPORT int memkind_check_dax_path(const char *pmem_dir)
 MEMKIND_EXPORT int memkind_set_bg_threads(bool state)
 {
     return m_set_bg_threads(state);
+}
+
+MEMKIND_EXPORT void memkind_stats_print(void (*write_cb) (void *, const char *),
+                                        void *cbopaque, const char *opts)
+{
+    m_stats_print(write_cb, cbopaque, opts);
 }
