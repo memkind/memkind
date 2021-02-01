@@ -44,6 +44,7 @@ extern "C" {
 #define jemk_malloc_usable_size     JE_SYMBOL(malloc_usable_size)
 #define jemk_arenalookupx           JE_SYMBOL(arenalookupx)
 #define jemk_check_reallocatex      JE_SYMBOL(check_reallocatex)
+#define jemk_malloc_stats_print     JE_SYMBOL(malloc_stats_print)
 
 enum memkind_const_private {
     MEMKIND_NAME_LENGTH_PRIV = 64
