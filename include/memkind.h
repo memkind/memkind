@@ -339,6 +339,14 @@ int memkind_update_cached_stats(void);
 ///
 int memkind_get_stat(memkind_t kind, memkind_stat_type stat, size_t *value);
 
+///
+/// \brief Print memkind stats
+/// \note STANDARD API
+/// \param write_cb callback function pointer
+/// \param cbopaque data passed to write_cb
+///
+void memkind_stats_print(void (*write_cb) (void *, const char *), void *cbopaque);
+
 /* HEAP MANAGEMENT INTERFACE */
 
 ///

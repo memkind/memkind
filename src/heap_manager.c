@@ -21,6 +21,7 @@ struct heap_manager_ops {
     struct memkind *(*heap_manager_detect_kind)(void *ptr);
     int (*heap_manager_update_cached_stats)(void);
     int (*heap_manager_get_stat)(memkind_stat_type stat, size_t *value);
+    void (*heap_manager_stats_print)(void (*write_cb) (void *, const char *), void *cbopaque);
     void *(*heap_manager_defrag_reallocate)(void *ptr);
     int (*heap_manager_set_bg_threads)(bool state);
 };
@@ -33,6 +34,7 @@ static struct heap_manager_ops arena_heap_manager_g = {
     .heap_manager_detect_kind = memkind_arena_detect_kind,
     .heap_manager_update_cached_stats = memkind_arena_update_cached_stats,
     .heap_manager_get_stat = memkind_arena_get_global_stat,
+    .heap_manager_stats_print = memkind_arena_stats_print,
     .heap_manager_defrag_reallocate = memkind_arena_defrag_reallocate_with_kind_detect,
     .heap_manager_set_bg_threads = memkind_arena_set_bg_threads
 };
@@ -45,6 +47,7 @@ static struct heap_manager_ops tbb_heap_manager_g = {
     .heap_manager_detect_kind = tbb_detect_kind,
     .heap_manager_update_cached_stats = tbb_update_cached_stats,
     .heap_manager_get_stat = tbb_get_global_stat,
+    .heap_manager_stats_print = NULL,
     .heap_manager_defrag_reallocate = tbb_pool_defrag_reallocate_with_kind_detect,
     .heap_manager_set_bg_threads = tbb_set_bg_threads
 };
@@ -97,6 +100,11 @@ int heap_manager_update_cached_stats(void)
 int heap_manager_get_stat(memkind_stat_type stat, size_t *value)
 {
     return get_heap_manager()->heap_manager_get_stat(stat, value);
+}
+
+void heap_manager_stats_print(void (*write_cb) (void *, const char *), void *cbopaque)
+{
+    get_heap_manager()->heap_manager_stats_print(write_cb, cbopaque);
 }
 
 void *heap_manager_defrag_reallocate(void *ptr)
