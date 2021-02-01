@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <string>
 #include <stdexcept>
+#include "TestPrereq.hpp"
 
 #include <numa.h>
 #include <numaif.h>
@@ -51,35 +52,35 @@ private:
         return {};
     }
 
-    int get_kind_mem_policy_flag(memkind_t memory_kind) const
+    int get_kind_mem_policy_flag() const
     {
-        if (memory_kind == MEMKIND_HBW ||
-            memory_kind == MEMKIND_HBW_ALL ||
-            memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
-            memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
-            memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL)
+        if (m_memory_kind == MEMKIND_HBW ||
+            m_memory_kind == MEMKIND_HBW_ALL ||
+            m_memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
+            m_memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
+            m_memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL)
             return MPOL_BIND;
-        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED ||
-                 memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED ||
-                 memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED)
+        else if (m_memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED ||
+                 m_memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED ||
+                 m_memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED)
             return MPOL_PREFERRED;
         return -1;
     }
 
-    MapNodeSet get_memory_kind_Nodes(memkind_t memory_kind) const
+    MapNodeSet get_memory_kind_Nodes() const
     {
-        if (memory_kind == MEMKIND_HBW)
+        if (m_memory_kind == MEMKIND_HBW)
             return HBW_nodes();
-        else if (memory_kind == MEMKIND_HBW_ALL)
+        else if (m_memory_kind == MEMKIND_HBW_ALL)
             return HBW_all_nodes();
-        else if (memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
-                 memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED)
+        else if (m_memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
+                 m_memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED)
             return Capacity_local_nodes();
-        else if (memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
-                 memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED)
+        else if (m_memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
+                 m_memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED)
             return Latency_local_nodes();
-        else if (memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL ||
-                 memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED)
+        else if (m_memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL ||
+                 m_memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED)
             return Bandwidth_local_nodes();
         else return {};
     }
@@ -100,6 +101,10 @@ private:
                   << std::endl;
         return false;
     }
+    TestPrereq m_tp;
+
+protected:
+    memkind_t m_memory_kind;
 
     std::unordered_set<int> get_target_nodes(int init,
                                              const MapNodeSet &map_nodes) const
@@ -112,19 +117,36 @@ private:
         return {};
     }
 
-    bool verify_nodes(memkind_t memory_kind, const Nodes &nodes) const
+    bool verify_nodes(const Nodes &nodes) const
     {
-        auto memory_kind_nodes = get_memory_kind_Nodes(memory_kind);
+        auto memory_kind_nodes = get_memory_kind_Nodes();
         return test_node_set(nodes, memory_kind_nodes);
     }
 
 public:
-    bool is_kind_supported(memkind_t memory_kind) const
+    bool is_kind_supported() const
     {
-        return get_memory_kind_Nodes(memory_kind).size() > 0;
+        if (!m_tp.is_HMAT_supported() && m_tp.is_kind_required_HMAT(m_memory_kind)) {
+            return false;
+        }
+        if (!m_tp.is_libhwloc_supported() &&
+            m_tp.is_kind_required_libhwloc(m_memory_kind)) {
+            return false;
+        }
+        return get_memory_kind_Nodes().size() > 0;
     }
 
-    bool verify_kind(memkind_t memory_kind, int init_node, void *ptr) const
+    void *allocate(size_t size) const
+    {
+        return memkind_malloc(m_memory_kind, size);
+    }
+
+    void deallocate(void *ptr) const
+    {
+        return memkind_free(m_memory_kind, ptr);
+    }
+
+    bool verify_kind(int init_node, void *ptr) const
     {
         int policy = -1;
         int target_node = -1;
@@ -141,7 +163,7 @@ public:
         if (status) {
             return false;
         }
-        if (!verify_nodes(memory_kind, {init_node, target_node})) {
+        if (!verify_nodes({init_node, target_node})) {
             return false;
         }
 
@@ -152,32 +174,36 @@ public:
             return false;
         }
 
-        for (auto const &node_id: get_target_nodes(memory_kind, init_node))
+        for (auto const &node_id: get_target_nodes(init_node))
             numa_bitmask_setbit(target_nodemask.get(), node_id);
 
         if (numa_bitmask_equal(ptr_nodemask.get(), target_nodemask.get()) !=1 ) {
             return false;
         }
 
-        if (policy != get_kind_mem_policy_flag(memory_kind)) {
+        if (policy != get_kind_mem_policy_flag()) {
             return false;
         }
 
         return true;
     }
 
-    std::unordered_set<int> get_target_nodes(memkind_t memory_kind, int init) const
+    std::unordered_set<int> get_target_nodes(int init) const
     {
-        auto memory_kind_nodes = get_memory_kind_Nodes(memory_kind);
+        auto memory_kind_nodes = get_memory_kind_Nodes();
         return get_target_nodes(init, memory_kind_nodes);
     }
-
+    AbstractTopology(memkind_t kind) : m_memory_kind(kind) {}
+    AbstractTopology() = delete;
     virtual ~AbstractTopology() = default;
 };
 
 class KNM_All2All : public AbstractTopology
 {
-private:
+public:
+    KNM_All2All(memkind_t kind) : AbstractTopology(kind) {};
+
+protected:
     MapNodeSet HBW_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -185,7 +211,7 @@ private:
         return nodeset_map;
     }
 
-
+private:
     MapNodeSet Bandwidth_local_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -203,7 +229,10 @@ private:
 
 class KNM_SNC2 : public AbstractTopology
 {
-private:
+public:
+    KNM_SNC2(memkind_t kind) : AbstractTopology(kind) {};
+
+protected:
     MapNodeSet HBW_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -220,6 +249,7 @@ private:
         return nodeset_map;
     }
 
+private:
     MapNodeSet Bandwidth_local_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -239,7 +269,10 @@ private:
 
 class KNM_SNC4 : public AbstractTopology
 {
-private:
+public:
+    KNM_SNC4(memkind_t kind) : AbstractTopology(kind) {};
+
+protected:
     MapNodeSet HBW_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -260,6 +293,7 @@ private:
         return nodeset_map;
     }
 
+private:
     MapNodeSet Bandwidth_local_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -283,6 +317,9 @@ private:
 
 class CLX_2_var1 : public AbstractTopology
 {
+public:
+    CLX_2_var1(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -295,6 +332,9 @@ private:
 
 class CLX_2_var1_HMAT : public CLX_2_var1
 {
+public:
+    CLX_2_var1_HMAT(memkind_t kind) : CLX_2_var1(kind) {};
+
 private:
     MapNodeSet Latency_local_nodes() const final
     {
@@ -315,6 +355,9 @@ private:
 
 class CLX_2_var1_HBW : public AbstractTopology
 {
+public:
+    CLX_2_var1_HBW(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -343,6 +386,9 @@ private:
 
 class CLX_2_var2 : public AbstractTopology
 {
+public:
+    CLX_2_var2(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -355,6 +401,9 @@ private:
 
 class CLX_2_var2_HMAT : public CLX_2_var2
 {
+public:
+    CLX_2_var2_HMAT(memkind_t kind) : CLX_2_var2(kind) {};
+
 private:
     MapNodeSet Latency_local_nodes() const final
     {
@@ -375,6 +424,9 @@ private:
 
 class CLX_2_var2_HBW : public AbstractTopology
 {
+public:
+    CLX_2_var2_HBW(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -403,6 +455,9 @@ private:
 
 class CLX_2_var3 : public AbstractTopology
 {
+public:
+    CLX_2_var3(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -415,6 +470,9 @@ private:
 
 class CLX_2_var3_HMAT : public CLX_2_var3
 {
+public:
+    CLX_2_var3_HMAT(memkind_t kind) : CLX_2_var3(kind) {};
+
 private:
     MapNodeSet Latency_local_nodes() const final
     {
@@ -435,6 +493,9 @@ private:
 
 class CLX_2_var3_HBW : public AbstractTopology
 {
+public:
+    CLX_2_var3_HBW(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet HBW_nodes() const final
     {
@@ -472,6 +533,9 @@ private:
 
 class CLX_2_var4_HBW : public AbstractTopology
 {
+public:
+    CLX_2_var4_HBW(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet HBW_nodes() const final
     {
@@ -508,6 +572,9 @@ private:
 
 class CLX_4_var1 : public AbstractTopology
 {
+public:
+    CLX_4_var1(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -522,6 +589,9 @@ private:
 
 class CLX_4_var1_HMAT : public CLX_4_var1
 {
+public:
+    CLX_4_var1_HMAT(memkind_t kind) : CLX_4_var1(kind) {};
+
 private:
     MapNodeSet Latency_local_nodes() const final
     {
@@ -546,6 +616,9 @@ private:
 
 class CLX_4_var1_HBW : public AbstractTopology
 {
+public:
+    CLX_4_var1_HBW(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet HBW_nodes() const final
     {
@@ -590,6 +663,9 @@ private:
 
 class CLX_4_var2 : public AbstractTopology
 {
+public:
+    CLX_4_var2(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -604,6 +680,9 @@ private:
 
 class CLX_4_var2_HMAT : public CLX_4_var2
 {
+public:
+    CLX_4_var2_HMAT(memkind_t kind) : CLX_4_var2(kind) {};
+
 private:
     MapNodeSet Latency_local_nodes() const final
     {
@@ -628,6 +707,9 @@ private:
 
 class CLX_4_var2_HBW : public AbstractTopology
 {
+public:
+    CLX_4_var2_HBW(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -662,6 +744,9 @@ private:
 
 class CLX_4_var3 : public AbstractTopology
 {
+public:
+    CLX_4_var3(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -676,6 +761,9 @@ private:
 
 class CLX_4_var3_HMAT : public CLX_4_var3
 {
+public:
+    CLX_4_var3_HMAT(memkind_t kind) : CLX_4_var3(kind) {};
+
 private:
     MapNodeSet Latency_local_nodes() const final
     {
@@ -700,6 +788,9 @@ private:
 
 class CLX_4_var3_HBW : public AbstractTopology
 {
+public:
+    CLX_4_var3_HBW(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -734,6 +825,9 @@ private:
 
 class CLX_4_var4 : public AbstractTopology
 {
+public:
+    CLX_4_var4(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -748,6 +842,9 @@ private:
 
 class CLX_4_var4_HMAT : public CLX_4_var4
 {
+public:
+    CLX_4_var4_HMAT(memkind_t kind) : CLX_4_var4(kind) {};
+
 private:
     MapNodeSet Latency_local_nodes() const final
     {
@@ -772,6 +869,9 @@ private:
 
 class CLX_4_var4_HBW : public AbstractTopology
 {
+public:
+    CLX_4_var4_HBW(memkind_t kind) : AbstractTopology(kind) {};
+
 private:
     MapNodeSet Capacity_local_nodes() const final
     {
@@ -806,58 +906,58 @@ private:
 
 using TpgPtr = std::unique_ptr<AbstractTopology>;
 
-TpgPtr TopologyFactory(std::string tpg_name)
+TpgPtr TopologyFactory(std::string tpg_name, memkind_t kind)
 {
     if (tpg_name.compare("KnightsMillAll2All") == 0)
-        return TpgPtr(new KNM_All2All);
+        return TpgPtr(new KNM_All2All(kind));
     else if (tpg_name.compare("KnightsMillSNC2") == 0)
-        return TpgPtr(new KNM_SNC2);
+        return TpgPtr(new KNM_SNC2(kind));
     else if (tpg_name.compare("KnightsMillSNC4") == 0)
-        return TpgPtr(new KNM_SNC4);
+        return TpgPtr(new KNM_SNC4(kind));
     else if (tpg_name.compare("CascadeLake2Var1") == 0)
-        return TpgPtr(new CLX_2_var1);
+        return TpgPtr(new CLX_2_var1(kind));
     else if (tpg_name.compare("CascadeLake2Var1HMAT") == 0)
-        return TpgPtr(new CLX_2_var1_HMAT);
+        return TpgPtr(new CLX_2_var1_HMAT(kind));
     else if (tpg_name.compare("CascadeLake2Var1HBW") == 0)
-        return TpgPtr(new CLX_2_var1_HBW);
+        return TpgPtr(new CLX_2_var1_HBW(kind));
     else if (tpg_name.compare("CascadeLake2Var2") == 0)
-        return TpgPtr(new CLX_2_var2);
+        return TpgPtr(new CLX_2_var2(kind));
     else if (tpg_name.compare("CascadeLake2Var2HMAT") == 0)
-        return TpgPtr(new CLX_2_var2_HMAT);
+        return TpgPtr(new CLX_2_var2_HMAT(kind));
     else if (tpg_name.compare("CascadeLake2Var2HBW") == 0)
-        return TpgPtr(new CLX_2_var2_HBW);
+        return TpgPtr(new CLX_2_var2_HBW(kind));
     else if (tpg_name.compare("CascadeLake2Var3") == 0)
-        return TpgPtr(new CLX_2_var3);
+        return TpgPtr(new CLX_2_var3(kind));
     else if (tpg_name.compare("CascadeLake2Var3HMAT") == 0)
-        return TpgPtr(new CLX_2_var3_HMAT);
+        return TpgPtr(new CLX_2_var3_HMAT(kind));
     else if (tpg_name.compare("CascadeLake2Var3HBW") == 0)
-        return TpgPtr(new CLX_2_var3_HBW);
+        return TpgPtr(new CLX_2_var3_HBW(kind));
     else if (tpg_name.compare("CascadeLake2Var4HBW") == 0)
-        return TpgPtr(new CLX_2_var4_HBW);
+        return TpgPtr(new CLX_2_var4_HBW(kind));
     else if (tpg_name.compare("CascadeLake4Var1") == 0)
-        return TpgPtr(new CLX_4_var1);
+        return TpgPtr(new CLX_4_var1(kind));
     else if (tpg_name.compare("CascadeLake4Var1HMAT") == 0)
-        return TpgPtr(new CLX_4_var1_HMAT);
+        return TpgPtr(new CLX_4_var1_HMAT(kind));
     else if (tpg_name.compare("CascadeLake4Var1HBW") == 0)
-        return TpgPtr(new CLX_4_var1_HBW);
+        return TpgPtr(new CLX_4_var1_HBW(kind));
     else if (tpg_name.compare("CascadeLake4Var2") == 0)
-        return TpgPtr(new CLX_4_var2);
+        return TpgPtr(new CLX_4_var2(kind));
     else if (tpg_name.compare("CascadeLake4Var2HMAT") == 0)
-        return TpgPtr(new CLX_4_var2_HMAT);
+        return TpgPtr(new CLX_4_var2_HMAT(kind));
     else if (tpg_name.compare("CascadeLake4Var2HBW") == 0)
-        return TpgPtr(new CLX_4_var2_HBW);
+        return TpgPtr(new CLX_4_var2_HBW(kind));
     else if (tpg_name.compare("CascadeLake4Var3") == 0)
-        return TpgPtr(new CLX_4_var3);
+        return TpgPtr(new CLX_4_var3(kind));
     else if (tpg_name.compare("CascadeLake4Var3HMAT") == 0)
-        return TpgPtr(new CLX_4_var3_HMAT);
+        return TpgPtr(new CLX_4_var3_HMAT(kind));
     else if (tpg_name.compare("CascadeLake4Var3HBW") == 0)
-        return TpgPtr(new CLX_4_var3_HBW);
+        return TpgPtr(new CLX_4_var3_HBW(kind));
     else if (tpg_name.compare("CascadeLake4Var4") == 0)
-        return TpgPtr(new CLX_4_var4);
+        return TpgPtr(new CLX_4_var4(kind));
     else if (tpg_name.compare("CascadeLake4Var4HMAT") == 0)
-        return TpgPtr(new CLX_4_var4_HMAT);
+        return TpgPtr(new CLX_4_var4_HMAT(kind));
     else if (tpg_name.compare("CascadeLake4Var4HBW") == 0)
-        return TpgPtr(new CLX_4_var4_HBW);
+        return TpgPtr(new CLX_4_var4_HBW(kind));
     else
         throw std::runtime_error("Unknown topology");
 }

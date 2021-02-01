@@ -42,50 +42,30 @@ INSTANTIATE_TEST_CASE_P(
 TEST_P(MemkindHMATFunctionalTestsParam,
        test_tc_memkind_HMAT_verify_InitTargetNode)
 {
-    if (tp.is_libhwloc_supported()) {
-        int status = numa_available();
-        ASSERT_EQ(status, 0);
-        // use big size to ensure that we call jemalloc extent
-        const size_t size = 11*MB-5;
-        int threads_num = get_nprocs();
-        auto topology = TopologyFactory(memory_tpg);
-        #pragma omp parallel for num_threads(threads_num)
-        for(int thread_id=0; thread_id<threads_num; ++thread_id) {
-            cpu_set_t cpu_set;
-            CPU_ZERO(&cpu_set);
-            CPU_SET(thread_id, &cpu_set);
-            status = sched_setaffinity(0, sizeof(cpu_set_t), &cpu_set);
-            int cpu = sched_getcpu();
-            EXPECT_EQ(thread_id, cpu);
-            void *ptr = memkind_malloc(memory_kind, size);
-            if (topology->is_kind_supported(memory_kind)) {
-                EXPECT_TRUE(ptr != nullptr);
-                memset(ptr, 0, size);
-                int init_node = numa_node_of_cpu(cpu);
-                auto res = topology->verify_kind(memory_kind, init_node, ptr);
-                EXPECT_EQ(true, res);
-                memkind_free(memory_kind, ptr);
-            } else {
-                EXPECT_TRUE(ptr == nullptr);
-            }
-        }
-    } else {
-        GTEST_SKIP() << "libhwloc is required." << std::endl;
-    }
-}
-
-TEST_P(MemkindHMATFunctionalTestsParam, test_tc_memkind_HMAT_without_hwloc)
-{
-    if (!tp.is_libhwloc_supported()) {
-        const size_t size = 512;
-        void *ptr = memkind_malloc(memory_kind, size);
-        if (tp.is_KN_family_supported() && (memory_kind == MEMKIND_HBW ||
-                                            memory_kind == MEMKIND_HBW_ALL)) {
+    int status = numa_available();
+    ASSERT_EQ(status, 0);
+    // use big size to ensure that we call jemalloc extent
+    const size_t size = 11*MB-5;
+    int threads_num = get_nprocs();
+    auto topology = TopologyFactory(memory_tpg, memory_kind);
+    #pragma omp parallel for num_threads(threads_num)
+    for(int thread_id=0; thread_id<threads_num; ++thread_id) {
+        cpu_set_t cpu_set;
+        CPU_ZERO(&cpu_set);
+        CPU_SET(thread_id, &cpu_set);
+        status = sched_setaffinity(0, sizeof(cpu_set_t), &cpu_set);
+        int cpu = sched_getcpu();
+        EXPECT_EQ(thread_id, cpu);
+        void *ptr = topology->allocate(size);
+        if (topology->is_kind_supported()) {
             EXPECT_TRUE(ptr != nullptr);
-            memkind_free(memory_kind, ptr);
-        } else
+            memset(ptr, 0, size);
+            int init_node = numa_node_of_cpu(cpu);
+            auto res = topology->verify_kind(init_node, ptr);
+            EXPECT_EQ(true, res);
+            topology->deallocate(ptr);
+        } else {
             EXPECT_TRUE(ptr == nullptr);
-    } else {
-        GTEST_SKIP() << "Lack of libhwloc is required." << std::endl;
+        }
     }
 }
