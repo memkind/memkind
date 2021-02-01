@@ -703,6 +703,10 @@ that have the highest capacity.
 .B MEMKIND_HIGHEST_CAPACITY_LOCAL
 Allocate from a NUMA node(s) that has the highest capacity among all NUMA Nodes from the local domain.
 NUMA Nodes have the same local domain for a set of CPUs associated with them, e.g. socket or sub-NUMA cluster.
+.BR Note:
+This kind requires locality information described in
+.B SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED
 Same as
@@ -716,6 +720,10 @@ in the same local domain that have the highest capacity.
 .B MEMKIND_LOWEST_LATENCY_LOCAL
 Allocate from a NUMA node(s) that has the lowest latency among all NUMA Nodes from the local domain.
 NUMA Nodes have the same local domain for a set of CPUs associated with them, e.g. socket or sub-NUMA cluster.
+.BR Note:
+This kind requires locality and memory performance characteristics information described in
+.B SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED
 Same as
@@ -729,6 +737,10 @@ in the same local domain that have the lowest latency.
 .B MEMKIND_HIGHEST_BANDWIDTH_LOCAL
 Allocate from a NUMA node(s) that has the highest bandwidth among all NUMA Nodes from the local domain.
 NUMA Nodes have the same local domain for a set of CPUs associated with them, e.g. socket or sub-NUMA cluster.
+.BR Note:
+This kind requires locality and memory performance characteristics information described in
+.B SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED
 Same as
@@ -765,6 +777,10 @@ is set to
 .B ENOMEM
 and the allocated pointer is set to
 .IR "NULL" .
+.BR Note:
+This kind requires memory performance characteristics information described in
+.B SYSTEM CONFIGURATION
+section.
 .TP
 .B MEMKIND_HBW_ALL
 Same as
@@ -1128,6 +1144,28 @@ Proposed way of setting hugepages is:
 More information can be found here:
 .UR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
 .UE
+.PP
+Interfaces for obtaining locality information are provided by
+.I libhwloc
+dependency.
+Functionality based on locality requires that memkind library is configured and built with the support of
+.I libhwloc
+(./configure --enable-hwloc).
+.PP
+Interfaces for obtaining memory performance characteristics information are based on
+.I HMAT
+(Heterogeneous Memory Attribute Table)
+.UR https://uefi.org/sites/default/files/resources/ACPI_6_3_final_Jan30.pdf
+.UE
+Functionality based on memory performance characteristics requires that platform configuration
+fully supports HMAT and memkind library is configured and built with the support of
+.I libhwloc
+(./configure --enable-hwloc).
+.PP
+.I libhwloc
+can be reached on:
+.UR https://www.open-mpi.org/projects/hwloc
+.UE
 .SH "STATIC LINKING"
 When linking statically against memkind,
 .I libmemkind.a
@@ -1153,6 +1191,7 @@ Copyright (C) 2014 - 2021 Intel Corporation. All rights reserved.
 .BR malloc (3),
 .BR malloc_usable_size (3),
 .BR numa (3),
+.BR hwloc (3),
 .BR numactl (8),
 .BR mbind (2),
 .BR mmap (2),
