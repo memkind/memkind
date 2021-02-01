@@ -188,6 +188,7 @@ test/random_sizes_allocator.h
 test/run_alloc_benchmark.sh
 test/static_kinds_list.h
 test/static_kinds_tests.cpp
+test/stats_print_test_helper.c
 test/tbbmalloc.h
 test/test.sh
 test/test_dax_kmem.sh
