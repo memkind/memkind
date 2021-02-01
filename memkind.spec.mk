@@ -215,6 +215,7 @@ ${memkind_test_dir}/pmem_test
 ${memkind_test_dir}/allocator_perf_tool_tests
 ${memkind_test_dir}/perf_tool
 ${memkind_test_dir}/autohbw_test_helper
+$(memkind_test_dir)/stats_print_test_helper
 ${memkind_test_dir}/trace_mechanism_test_helper
 $(memkind_test_dir)/memkind-afts.ts
 $(memkind_test_dir)/memkind-afts-ext.ts
