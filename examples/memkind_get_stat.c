@@ -20,6 +20,10 @@ int main()
     fprintf(stdout,
             "This example shows how to use memkind API to retrieve information about allocation stats.\n");
 
+    printf("\nmalloc statistics from memkind_stats_print() function:\n\n");
+    memkind_stats_print(NULL, NULL);
+    printf("End of malloc statistics from memkind_stats_print() function.\n");
+
     snprintf(ptr_regular, size,
              "Hello world from regular kind memory - ptr_regular.\n");
 

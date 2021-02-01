@@ -29,6 +29,7 @@ This is EXPERIMENTAL API. The functionality and the header file itself can be ch
 .BI "int memkind_arena_update_memory_usage_policy(struct memkind " "*kind" ", memkind_mem_usage_policy " "policy" );
 .BI "int memkind_arena_set_max_bg_threads(size_t " "threads_limit" );
 .BI "int memkind_arena_set_bg_threads(bool " "state" );
+.BI "void memkind_arena_stats_print(void " "(*write_cb) (void *, const char *)" ", void " "*cbopaque" );
 .br
 .SH DESCRIPTION
 This header file is a collection of functions can be used to populate
@@ -192,6 +193,9 @@ specify limit of background threads which can be enabled ( 0 means no limit).
 .PP
 .BR memkind_arena_set_bg_threads ()
 enables/disables internal background worker threads in jemalloc.
+.PP
+.BR memkind_arena_stats_print ()
+prints memkind malloc statistics.
 .PP
 .SH "COPYRIGHT"
 Copyright (C) 2014 - 2021 Intel Corporation. All rights reserved.

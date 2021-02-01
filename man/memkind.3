@@ -74,9 +74,11 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .sp
 .B "STATISTICS:"
 .br
-.BI "int memkind_update_cached_stats(void);"
+.BI "int memkind_update_cached_stats(void);
 .br
 .BI "int memkind_get_stat(memkind_t " "kind" ", memkind_stat " "stat" ", size_t " "*value" );
+.br
+.BI "void memkind_stats_print(void " "(*write_cb) (void *, const char *)" ", void " "*cbopaque" );
 .sp
 .B "DECORATORS:"
 .br
@@ -573,6 +575,9 @@ Statistics are not updated real-time by memkind library and this method allows t
 retrieves statistic of the specified type
 and returns it in
 .IR "value".
+.PP
+.BR memkind_stats_print ()
+prints memkind malloc statistics.
 For more details about
 .I stat
 see the

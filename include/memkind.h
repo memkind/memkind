@@ -363,6 +363,16 @@ int memkind_update_cached_stats(void);
 ///
 int memkind_get_stat(memkind_t kind, memkind_stat_type stat, size_t *value);
 
+///
+/// \brief Print human-readable memkind summary statistics
+/// \note STANDARD API
+/// \param write_cb pointer to a callback function to which statisitcs are printed, pass NULL to use the default one
+///                 which prints to the STDERR_FILENO file descriptor
+/// \param cbopaque data passed to write_cb, pass NULL to use the STDERR_FILENO file descriptor
+///
+void memkind_stats_print(void (*write_cb) (void *, const char *),
+                         void *cbopaque);
+
 /* HEAP MANAGEMENT INTERFACE */
 
 ///

@@ -881,3 +881,9 @@ void *memkind_arena_defrag_reallocate(struct memkind *kind, void *ptr)
     }
     return NULL;
 }
+
+void memkind_arena_stats_print(void (*write_cb) (void *, const char *),
+                               void *cbopaque)
+{
+    jemk_malloc_stats_print(write_cb, cbopaque, NULL);
+}
