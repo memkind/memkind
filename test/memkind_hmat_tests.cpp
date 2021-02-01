@@ -48,7 +48,7 @@ TEST_P(MemkindHMATFunctionalTestsParam,
         // use big size to ensure that we call jemalloc extent
         const size_t size = 11*MB-5;
         int threads_num = get_nprocs();
-        auto topology = TopologyFactory(memory_tpg);
+        auto topology = TopologyFactory(memory_tpg, memory_kind);
         #pragma omp parallel for num_threads(threads_num)
         for(int thread_id=0; thread_id<threads_num; ++thread_id) {
             cpu_set_t cpu_set;
@@ -57,14 +57,14 @@ TEST_P(MemkindHMATFunctionalTestsParam,
             status = sched_setaffinity(0, sizeof(cpu_set_t), &cpu_set);
             int cpu = sched_getcpu();
             EXPECT_EQ(thread_id, cpu);
-            void *ptr = memkind_malloc(memory_kind, size);
-            if (topology->is_kind_supported(memory_kind)) {
+            void *ptr = topology->allocate(size);
+            if (topology->is_kind_supported()) {
                 EXPECT_TRUE(ptr != nullptr);
                 memset(ptr, 0, size);
                 int init_node = numa_node_of_cpu(cpu);
-                auto res = topology->verify_kind(memory_kind, init_node, ptr);
+                auto res = topology->verify_kind(init_node, ptr);
                 EXPECT_EQ(true, res);
-                memkind_free(memory_kind, ptr);
+                topology->deallocate(ptr);
             } else {
                 EXPECT_TRUE(ptr == nullptr);
             }
@@ -79,8 +79,7 @@ TEST_P(MemkindHMATFunctionalTestsParam, test_tc_memkind_HMAT_without_hwloc)
     if (!tp.is_libhwloc_supported()) {
         const size_t size = 512;
         void *ptr = memkind_malloc(memory_kind, size);
-        if (tp.is_KN_family_supported() && (memory_kind == MEMKIND_HBW ||
-                                            memory_kind == MEMKIND_HBW_ALL)) {
+        if (tp.is_KN_family_supported() && tp.is_kind_HighBandwidth(memory_kind)) {
             EXPECT_TRUE(ptr != nullptr);
             memkind_free(memory_kind, ptr);
         } else
