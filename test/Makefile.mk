@@ -18,6 +18,7 @@ check_PROGRAMS += test/all_tests \
                   test/locality_test \
                   test/memkind_stat_test \
                   test/performance_test \
+                  test/stats_print_test_helper \
                   test/trace_mechanism_test_helper \
                   # end
 if HAVE_CXX11
@@ -62,6 +63,7 @@ test_environ_max_bg_threads_test_LDADD = libmemkind.la
 test_freeing_memory_segfault_test_LDADD = libmemkind.la
 test_gb_page_tests_bind_policy_LDADD = libmemkind.la
 test_memkind_stat_test_LDADD = libmemkind.la
+test_stats_print_test_helper_LDADD = libmemkind.la
 test_trace_mechanism_test_helper_LDADD = libmemkind.la
 
 if HAVE_CXX11
@@ -135,6 +137,7 @@ test_environ_max_bg_threads_test_SOURCES = test/environ_max_bg_threads_test.cpp
 test_freeing_memory_segfault_test_SOURCES = $(fused_gtest) test/freeing_memory_segfault_test.cpp
 test_gb_page_tests_bind_policy_SOURCES = $(fused_gtest) test/gb_page_tests_bind_policy.cpp test/trial_generator.cpp test/check.cpp
 test_memkind_stat_test_SOURCES = $(fused_gtest) test/memkind_stat_test.cpp
+test_stats_print_test_helper_SOURCES = test/stats_print_test_helper.c
 test_trace_mechanism_test_helper_SOURCES = test/trace_mechanism_test_helper.c
 
 #Tests based on Allocator Perf Tool
