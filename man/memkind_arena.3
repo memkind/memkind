@@ -29,6 +29,7 @@ This is EXPERIMENTAL API. The functionality and the header file itself can be ch
 .BI "int memkind_arena_update_memory_usage_policy(struct memkind " "*kind" ", memkind_mem_usage_policy " "policy" );
 .BI "int memkind_arena_set_max_bg_threads(size_t " "threads_limit" );
 .BI "int memkind_arena_set_bg_threads(bool " "state" );
+.BI "int memkind_arena_stats_print(void " "(*write_cb) (void *, const char *)" ", void " "*cbopaque" ", memkind_stat_print_opt "opts" );
 .br
 .SH DESCRIPTION
 This header file is a collection of functions can be used to populate
@@ -193,6 +194,62 @@ specify limit of background threads which can be enabled ( 0 means no limit).
 .BR memkind_arena_set_bg_threads ()
 enables/disables internal background worker threads in jemalloc.
 .PP
+.BR memkind_arena_stats_print ()
+prints summary statistics. This function wraps jemalloc's function
+.BR je_malloc_stats_print ().
+Uses
+.I write_cb
+function to print the output. While providing custom writer function, use
+.BR syscall(2)
+rather than
+.BR write(2)
+Pass
+.IR NULL
+in order to use the default write_cb function which prints the output to the stderr. Use
+.I cbopaque
+parameter in order to pass some data to your
+.I write_cb
+function. Pass additional options using
+.I opts.
+For more details on
+.I opts
+see the
+.B "MEMORY STATISTICS PRINT OPTIONS"
+section below.
+Returns MEMKIND_ERROR_INVALID when failed to parse options string, MEMKIND_SUCCESS on success.
+.SH "MEMORY STATISTICS PRINT OPTIONS"
+The available options for printing statistics:
+.TP
+.B MEMKIND_STAT_PRINT_ALL
+Print all statistics.
+.TP
+.B MEMKIND_STAT_PRINT_JSON_FORMAT
+Print statistics in JSON format.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_GENERAL
+Omit general information that never changes during execution.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_MERGED_ARENA
+Omit merged arena statistics.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_DESTROYED_MERGED_ARENA
+Omit destroyed merged arena statistics.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_PER_ARENA
+Omit per arena statistics.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_PER_SIZE_CLASS_BINS
+Omit per size class statistics for bins.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_PER_SIZE_CLASS_LARGE
+Omit per size class statistics for large objects.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_MUTEX
+Omit all mutex statistics.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_EXTENT
+Omit extent statistics.
+.PP
 .SH "COPYRIGHT"
 Copyright (C) 2014 - 2021 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
@@ -203,4 +260,6 @@ Copyright (C) 2014 - 2021 Intel Corporation. All rights reserved.
 .BR memkind_pmem (3),
 .BR jemalloc (3),
 .BR mbind (2),
-.BR mmap (2)
+.BR mmap (2),
+.BR syscall(2),
+.BR write(2)

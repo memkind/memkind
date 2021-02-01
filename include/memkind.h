@@ -143,6 +143,60 @@ typedef enum memkind_stat_type {
     MEMKIND_STAT_TYPE_MAX_VALUE
 } memkind_stat_type;
 
+/// \brief Memory statistics print options
+typedef enum memkind_stat_print_opt {
+
+    /**
+     * Print all stats
+     */
+    MEMKIND_STAT_PRINT_ALL                        = 0,
+
+    /**
+     * Print stats in JSON format
+     */
+    MEMKIND_STAT_PRINT_JSON_FORMAT                 = 1U << 0,
+
+    /**
+     * Omit general information that never changes during execution
+     */
+    MEMKIND_STAT_PRINT_OMIT_GENERAL                = 1U << 1,
+
+    /**
+     * Omit merged arena statistics
+     */
+    MEMKIND_STAT_PRINT_OMIT_MERGED_ARENA           = 1U << 2,
+
+    /**
+     * Omit destroyed merged arena statistics
+     */
+    MEMKIND_STAT_PRINT_OMIT_DESTROYED_MERGED_ARENA = 1U << 3,
+
+    /**
+     * Omit per arena statistics
+     */
+    MEMKIND_STAT_PRINT_OMIT_PER_ARENA              = 1U << 4,
+
+    /**
+     * Omit per size class statistics for bins
+     */
+    MEMKIND_STAT_PRINT_OMIT_PER_SIZE_CLASS_BINS    = 1U << 5,
+
+    /**
+     * Omit per size class statistics for large objects
+     */
+    MEMKIND_STAT_PRINT_OMIT_PER_SIZE_CLASS_LARGE   = 1U << 6,
+
+    /**
+     * Omit all mutex statistics
+     */
+    MEMKIND_STAT_PRINT_OMIT_MUTEX                  = 1U << 7,
+
+    /**
+     * Omit extent statistics
+     */
+    MEMKIND_STAT_PRINT_OMIT_EXTENT                 = 1U << 8,
+} memkind_stat_print_opt;
+
 /// \brief Forward declaration of memkind configuration
 struct memkind_config;
 
@@ -362,6 +416,17 @@ int memkind_update_cached_stats(void);
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
 ///
 int memkind_get_stat(memkind_t kind, memkind_stat_type stat, size_t *value);
+
+///
+/// \brief Print human-readable malloc statistics
+/// \note STANDARD API
+/// \param write_cb pointer to a callback function which prints the statistics, pass NULL to use the default one
+/// \param cbopaque data passed to write_cb function
+/// \param opts additional options altering the contents of statistics output
+/// \return Memkind operation status, MEMKIND_SUCCESS on success, MEMKIND_ERROR_INVALID on failure
+///
+int memkind_stats_print(void (*write_cb) (void *, const char *),
+                        void *cbopaque, memkind_stat_print_opt opts);
 
 /* HEAP MANAGEMENT INTERFACE */
 
