@@ -74,9 +74,11 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .sp
 .B "STATISTICS:"
 .br
-.BI "int memkind_update_cached_stats(void);"
+.BI "int memkind_update_cached_stats(void);
 .br
 .BI "int memkind_get_stat(memkind_t " "kind" ", memkind_stat " "stat" ", size_t " "*value" );
+.br
+.BI "int memkind_stats_print(void " "(*write_cb) (void *, const char *)" ", void " "*cbopaque" ", memkind_stat_print_opt "opts" );
 .sp
 .B "DECORATORS:"
 .br
@@ -573,6 +575,30 @@ Statistics are not updated real-time by memkind library and this method allows t
 retrieves statistic of the specified type
 and returns it in
 .IR "value".
+.PP
+.BR memkind_stats_print ()
+prints summary statistics. This is a wrapper to the jemalloc's function
+.BR je_malloc_stats_print ().
+Uses
+.I write_cb
+function to print the output. While providing custom writer function, use
+.BR syscall(2)
+rather than
+.BR write(2).
+Pass
+.IR NULL
+in order to use the default write_cb function which prints the output to the stderr. Use
+.I cbopaque
+parameter in order to pass some data to your
+.I write_cb
+function. Pass additional options using the
+.I opts
+string. Accepted options are described in enum
+.I memkind_stat_print_opt
+in the
+.I memkind.h
+header file. Returns MEMKIND_ERROR_INVALID when failed to parse options string, MEMKIND_SUCCESS on success.
+.PP
 For more details about
 .I stat
 see the
@@ -1202,4 +1228,6 @@ Copyright (C) 2014 - 2021 Intel Corporation. All rights reserved.
 .BR memkind_arena (3),
 .BR memkind_hbw (3),
 .BR memkind_hugetlb (3),
-.BR memkind_pmem (3)
+.BR memkind_pmem (3),
+.BR syscall(2),
+.BR write(2)

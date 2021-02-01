@@ -147,6 +147,13 @@ int tbb_update_cached_stats(void)
     return MEMKIND_ERROR_OPERATION_FAILED;
 }
 
+int tbb_stats_print(void (*write_cb) (void *, const char *), void *cbopaque,
+                    memkind_stat_print_opt opts)
+{
+    log_err("Malloc stats print is not supported in TBB");
+    return MEMKIND_ERROR_OPERATION_FAILED;
+}
+
 void *tbb_pool_defrag_reallocate_with_kind_detect(void *ptr)
 {
     log_err("Defrag reallocate method is not supported by TBB");
