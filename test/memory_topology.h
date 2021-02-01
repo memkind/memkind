@@ -5,6 +5,7 @@
 
 #include <memkind.h>
 
+#include <bitset>
 #include <iostream>
 #include <memory>
 #include <unordered_map>
@@ -26,7 +27,7 @@ using BitmaskPtr =
     std::unique_ptr<struct bitmask, decltype(&numa_free_nodemask)>;
 class AbstractTopology
 {
-private:
+protected:
     virtual MapNodeSet HBW_nodes() const
     {
         return {};
@@ -52,6 +53,7 @@ private:
         return {};
     }
 
+private:
     int get_kind_mem_policy_flag() const
     {
         if (m_memory_kind == MEMKIND_HBW ||
@@ -176,6 +178,10 @@ public:
             numa_bitmask_setbit(target_nodemask.get(), node_id);
 
         if (numa_bitmask_equal(ptr_nodemask.get(), target_nodemask.get()) !=1 ) {
+            std::bitset<64> ptr_bits(*ptr_nodemask.get()->maskp);
+            std::bitset<64> target_bits(*target_nodemask.get()->maskp);
+            std::cout << "Failed for, Init mask: " << ptr_bits
+                      << " Target mask: " << target_bits << std::endl;
             return false;
         }
 
@@ -202,7 +208,7 @@ public:
     KNM_All2All(memkind_t kind) : AbstractTopology(kind) {};
 
 protected:
-    MapNodeSet HBW_nodes() const final
+    MapNodeSet HBW_nodes() const
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {1}));
@@ -231,7 +237,7 @@ public:
     KNM_SNC2(memkind_t kind) : AbstractTopology(kind) {};
 
 protected:
-    MapNodeSet HBW_nodes() const final
+    MapNodeSet HBW_nodes() const
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {2}));
@@ -239,7 +245,7 @@ protected:
         return nodeset_map;
     }
 
-    MapNodeSet HBW_all_nodes() const final
+    MapNodeSet HBW_all_nodes() const
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {2, 3}));
@@ -271,7 +277,7 @@ public:
     KNM_SNC4(memkind_t kind) : AbstractTopology(kind) {};
 
 protected:
-    MapNodeSet HBW_nodes() const final
+    MapNodeSet HBW_nodes() const
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {4}));
@@ -281,7 +287,7 @@ protected:
         return nodeset_map;
     }
 
-    MapNodeSet HBW_all_nodes() const final
+    MapNodeSet HBW_all_nodes() const
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {4, 5, 6, 7}));
@@ -494,8 +500,8 @@ class CLX_2_var3_HBW : public AbstractTopology
 public:
     CLX_2_var3_HBW(memkind_t kind) : AbstractTopology(kind) {};
 
-private:
-    MapNodeSet HBW_nodes() const final
+protected:
+    MapNodeSet HBW_nodes() const
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {2}));
@@ -503,7 +509,7 @@ private:
         return nodeset_map;
     }
 
-
+private:
     MapNodeSet Capacity_local_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -534,8 +540,8 @@ class CLX_2_var4_HBW : public AbstractTopology
 public:
     CLX_2_var4_HBW(memkind_t kind) : AbstractTopology(kind) {};
 
-private:
-    MapNodeSet HBW_nodes() const final
+protected:
+    MapNodeSet HBW_nodes() const
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0}));
@@ -543,7 +549,7 @@ private:
         return nodeset_map;
     }
 
-    MapNodeSet HBW_all_nodes() const final
+    MapNodeSet HBW_all_nodes() const
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {0, 2}));
@@ -551,6 +557,7 @@ private:
         return nodeset_map;
     }
 
+private:
     MapNodeSet Capacity_local_nodes() const final
     {
         MapNodeSet nodeset_map;
@@ -617,8 +624,8 @@ class CLX_4_var1_HBW : public AbstractTopology
 public:
     CLX_4_var1_HBW(memkind_t kind) : AbstractTopology(kind) {};
 
-private:
-    MapNodeSet HBW_nodes() const final
+protected:
+    MapNodeSet HBW_nodes() const
     {
         MapNodeSet nodeset_map;
         nodeset_map.emplace(NodeSet(0, {4}));
@@ -628,6 +635,7 @@ private:
         return nodeset_map;
     }
 
+private:
     MapNodeSet Capacity_local_nodes() const final
     {
         MapNodeSet nodeset_map;
