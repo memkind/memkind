@@ -28,6 +28,7 @@
 
 #define HUGE_PAGE_SIZE (1ull << MEMKIND_MASK_PAGE_SIZE_2MB)
 #define PAGE_2_BYTES(x) ((x) << 12)
+#define CHECK_BIT(var,pos) ((var) & (1 << (pos)))
 
 static const char *const global_stats[MEMKIND_STAT_TYPE_MAX_VALUE] = {
     "stats.resident",
@@ -880,4 +881,46 @@ void *memkind_arena_defrag_reallocate(struct memkind *kind, void *ptr)
         return ptr_new;
     }
     return NULL;
+}
+
+void memkind_arena_stats_print(void (*write_cb) (void *, const char *),
+                               void *cbopaque, memkind_stat_print_opt opts)
+{
+    char temp[12] = "";
+    char *char_opts;
+    if (opts == NONE) {
+        char_opts = NULL;
+    } else {
+        if (CHECK_BIT(opts, 0)) {
+            strcat(temp, "J");
+        }
+        if (CHECK_BIT(opts, 1)) {
+            strcat(temp, "g");
+        }
+        if (CHECK_BIT(opts, 2)) {
+            strcat(temp, "m");
+        }
+        if (CHECK_BIT(opts, 3)) {
+            strcat(temp, "d");
+        }
+        if (CHECK_BIT(opts, 4)) {
+            strcat(temp, "a");
+        }
+        if (CHECK_BIT(opts, 5)) {
+            strcat(temp, "b");
+        }
+        if (CHECK_BIT(opts, 6)) {
+            strcat(temp, "l");
+        }
+        if (CHECK_BIT(opts, 7)) {
+            strcat(temp, "x");
+        }
+        if (CHECK_BIT(opts, 8)) {
+            strcat(temp, "e");
+        }
+    }
+    if (strcmp(temp, "\0")) {
+        char_opts = temp;
+    }
+    jemk_malloc_stats_print(write_cb, cbopaque, char_opts);
 }

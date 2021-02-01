@@ -143,6 +143,20 @@ typedef enum memkind_stat_type {
     MEMKIND_STAT_TYPE_MAX_VALUE
 } memkind_stat_type;
 
+/// \brief Memory statistics print options
+typedef enum memkind_stat_print_opt {
+    NONE                        = 0,
+    JSON_FORMAT                 = 1,        /**< Print stats in JSON format */
+    OMIT_GENERAL                = 2,        /**< Omit general information that never changes during execution */
+    OMIT_MERGED_ARENA           = 4,        /**< Omit merged arena statistics */
+    OMIT_DESTROYED_MERGED_ARENA = 8,        /**< Omit destroyed merged arena statistics */
+    OMIT_PER_ARENA              = 16,       /**< Omit per arena statistics */
+    OMIT_PER_SIZE_CLASS_BINS    = 32,       /**< Omit per size class statistics for bins */
+    OMIT_PER_SIZE_CLASS_LARGE   = 64,       /**< Omit per size class statistics for large objects */
+    OMIT_MUTEX                  = 128,      /**< Omit all mutex statistics */
+    OMIT_EXTENT                 = 256,      /**< Omit extent statistics */
+} memkind_stat_print_opt;
+
 /// \brief Forward declaration of memkind configuration
 struct memkind_config;
 
@@ -362,6 +376,17 @@ int memkind_update_cached_stats(void);
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
 ///
 int memkind_get_stat(memkind_t kind, memkind_stat_type stat, size_t *value);
+
+///
+/// \brief Print human-readable malloc statistics
+/// \note STANDARD API
+/// \param write_cb pointer to a callback function which prints the statisitcs, pass NULL to use the default one
+///                 which prints to the STDERR_FILENO file descriptor
+/// \param cbopaque data passed to write_cb function
+/// \param opts additional options altering the contents of statistics output
+///
+void memkind_stats_print(void (*write_cb) (void *, const char *),
+                         void *cbopaque, memkind_stat_print_opt opts);
 
 /* HEAP MANAGEMENT INTERFACE */
 

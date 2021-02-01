@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2020 Intel Corporation. */
+/* Copyright (C) 2019 - 2021 Intel Corporation. */
 
 #include <memkind.h>
 #include <stdio.h>
@@ -19,6 +19,12 @@ int main()
 
     fprintf(stdout,
             "This example shows how to use memkind API to retrieve information about allocation stats.\n");
+
+    fprintf(stdout,
+            "Summary statistics from memkind_stats_print() function:\n");
+    memkind_stats_print(NULL, NULL, NONE);
+    fprintf(stdout,
+            "End of summary statistics from memkind_stats_print() function.\n");
 
     snprintf(ptr_regular, size,
              "Hello world from regular kind memory - ptr_regular.\n");
