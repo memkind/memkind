@@ -328,7 +328,7 @@ standard allocations will be fetched across the QPI bus, and high
 bandwidth allocations will be local to the process CPU.
 
 ## Identification of High Bandwidth Memory
-High bandwidth memory are identified using hwloc if available. The default
+High bandwidth memory is identified using hwloc, if available. The default
 threshold for identifying high bandwidth memory is 200 GB/s, you can change the
 threshold using the MEMKIND_HBW_THRESHOLD environment variable.
 

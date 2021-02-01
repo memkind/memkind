@@ -552,7 +552,7 @@ is available or an error code from the
 section if it is not.
 .PP
 .BR memkind_check_dax_path ()
-returns zero if file-backed kind memory in the specified directory path
+returns zero if file-backed kind memory is in the specified directory path
 .I pmem_dir
 can be created with the DAX attribute or an error code from the
 .B ERRORS
@@ -1063,7 +1063,7 @@ man page for this routine applies: e.g. 1-3,5 is a valid setting.
 .B MEMKIND_HBW_THRESHOLD
 This environment variable is bandwidth in MB/s that is the threshold for
 identifying high bandwidth memory. The default threshold is 204800 (200 GB/s),
-which is used if this environment is not set.
+which is used if this variable is not set.
 .TP
 .B MEMKIND_DAX_KMEM_NODES
 This environment variable is a comma-separated list of NUMA nodes that
