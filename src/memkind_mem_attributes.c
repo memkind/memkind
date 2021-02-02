@@ -229,8 +229,10 @@ int set_closest_numanode_mem_attr(void **numanode,
     if (hbw_threshold_env) {
         log_info("Environment variable MEMKIND_HBW_THRESHOLD detected: %s.",
                  hbw_threshold_env);
-        err = sscanf(hbw_threshold_env, "%zud", &hbw_threshold);
-        if (err == 0) {
+        char *end;
+        errno = 0;
+        size_t hbw_threshold = strtoull(hbw_threshold_env, &end, 10);
+        if (hbw_threshold > UINT_MAX || *end != '\0' || errno != 0) {
             log_err("Environment variable MEMKIND_HBW_THRESHOLD is invalid value.");
             return MEMKIND_ERROR_ENVIRON;
         }
