@@ -31,7 +31,7 @@ class Test_hbw_detection(object):
                "is not the same as nodemask hbw_nodemask_env_variable ({1})".format(hbw_nodemask_default, hbw_nodemask_env_variable))
 
     def test_TC_MEMKIND_hbw_detection_negative_hbw_malloc(self):
-        """ This test sets usupported value of MEMKIND_HBW_NODES, then try to perform a successful allocation from DRAM using hbw_malloc()
+        """ This test sets unsupported value of MEMKIND_HBW_NODES, then try to perform a successful allocation from DRAM using hbw_malloc()
         thanks to default HBW_POLICY_PREFERRED policy """
         command = "MEMKIND_HBW_NODES=-1 " + self.cmd_helper.get_command_path(self.environ_err_test)
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)

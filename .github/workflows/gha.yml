@@ -28,7 +28,7 @@ jobs:
           - { cc: gcc, cxx: g++}
           - { cc: clang, cxx: clang++}
         daxctl: [false, true]
-        hwloc: [false]
+        hwloc: [false, true]
     env:
         CC: ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
         CXX: ${{ matrix.env.cxx }}-${{ matrix.compiler_version }}

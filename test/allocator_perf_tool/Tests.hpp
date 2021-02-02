@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2015 - 2020 Intel Corporation. */
+/* Copyright (C) 2015 - 2021 Intel Corporation. */
 
 /*
 This file contain self-tests for Allocator Perf Tool.
@@ -73,7 +73,7 @@ void test_timer()
 template<class T>
 void test_iterator(Iterator<T> &it, const int N)
 {
-    printf("\n================= Iteartor test ==================== \n");
+    printf("\n================= Iterator test ==================== \n");
 
     assert(it.size() == N);
     int i;

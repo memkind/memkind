@@ -35,10 +35,11 @@ features.  Memkind interface allows to create and control file-backed memory
 9. [Setting Logging Mechanism](#setting-logging-mechanism)
 10. [Setting Heap Manager](#setting-heap-manager)
 11. [Simulating High Bandwidth Memory](#simulating-high-bandwidth-memory)
-12. [Projects](#projects)
-13. [Testing](#testing)
-14. [Notes](#notes)
-15. [Disclaimer](#disclaimer)
+12. [Identification of High Bandwidth Memory](#identification-of-high-bandwidth-memory)
+13. [Projects](#projects)
+14. [Testing](#testing)
+15. [Notes](#notes)
+16. [Disclaimer](#disclaimer)
 
 ## Interfaces
 The memkind library delivers four interfaces:
@@ -77,6 +78,10 @@ You will need to install required packages on the build system:
 For using automatic recognition of PMEM NUMA in MEMKIND_DAX_KMEM:
 
 * **libdaxctl-devel** (v66 or later)
+
+For using HMAT features in memkind:
+
+* **hwloc-devel** (v2.3.0 or later)
 
 ## Building and Installing
 
@@ -133,23 +138,33 @@ which are using the memkind library for dynamic linking at run time:
 
 ## Kind Requirements
 
-| Memory kind                   | NUMA  |  HBW Memory | Hugepages | Device DAX | Filesystem supporting hole punching |
-| ----------------------------- |:-----:|:-----------:|:---------:|:----------:|:-----------------------------------:|
-| MEMKIND_DEFAULT               |       |             |           |            |                                     |
-| MEMKIND_HUGETLB               | X     |             | X         |            |                                     |
-| MEMKIND_HBW                   | X     | X           |           |            |                                     |
-| MEMKIND_HBW_ALL               | X     | X           |           |            |                                     |
-| MEMKIND_HBW_HUGETLB           | X     | X           | X         |            |                                     |
-| MEMKIND_HBW_ALL_HUGETLB       | X     | X           | X         |            |                                     |
-| MEMKIND_HBW_PREFERRED         | X     | X           |           |            |                                     |
-| MEMKIND_HBW_PREFERRED_HUGETLB | X     | X           | X         |            |                                     |
-| MEMKIND_HBW_INTERLEAVE        | X     | X           |           |            |                                     |
-| MEMKIND_REGULAR               | X     |             |           |            |                                     |
-| MEMKIND_DAX_KMEM              | X     |             |           | X          |                                     |
-| MEMKIND_DAX_KMEM_ALL          | X     |             |           | X          |                                     |
-| MEMKIND_DAX_KMEM_PREFERRED    | X     |             |           | X          |                                     |
-| MEMKIND_DAX_KMEM_INTERLEAVE   | X     |             |           | X          |                                     |
-| PMEM kind                     |       |             |           |            | X                                   |
+| Memory kind                               | NUMA  |  HBW Memory | Hugepages | Device DAX | Filesystem supporting hole punching | HMAT | libhwloc |
+| ------------------------------------------|:-----:|:-----------:|:---------:|:----------:|:-----------------------------------:|:----:|:--------:|
+| MEMKIND_DEFAULT                           |       |             |           |            |                                     |      |          |
+| MEMKIND_HIGHEST_CAPACITY                  | X     |             |           |            |                                     |      |          |
+| MEMKIND_HIGHEST_CAPACITY_PREFERRED        | X     |             |           |            |                                     |      |          |
+| MEMKIND_HIGHEST_CAPACITY_LOCAL            | X     |             |           |            |                                     |      | X        |
+| MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED  | X     |             |           |            |                                     |      | X        |
+| MEMKIND_LOWEST_LATENCY_LOCAL              | X     |             |           |            |                                     | X    | X        |
+| MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED    | X     |             |           |            |                                     | X    | X        |
+| MEMKIND_HIGHEST_BANDWIDTH_LOCAL           | X     |             |           |            |                                     | X*   | X        |
+| MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED | X     |             |           |            |                                     | X*   | X        |
+| MEMKIND_HUGETLB                           | X     |             | X         |            |                                     |      |          |
+| MEMKIND_HBW                               | X     | X           |           |            |                                     | X*   | X*       |
+| MEMKIND_HBW_ALL                           | X     | X           |           |            |                                     | X*   | X*       |
+| MEMKIND_HBW_HUGETLB                       | X     | X           | X         |            |                                     | X*   | X*       |
+| MEMKIND_HBW_ALL_HUGETLB                   | X     | X           | X         |            |                                     | X*   | X*       |
+| MEMKIND_HBW_PREFERRED                     | X     | X           |           |            |                                     | X*   | X*       |
+| MEMKIND_HBW_PREFERRED_HUGETLB             | X     | X           | X         |            |                                     | X*   | X*       |
+| MEMKIND_HBW_INTERLEAVE                    | X     | X           |           |            |                                     | X*   | X*       |
+| MEMKIND_REGULAR                           | X     |             |           |            |                                     |      |          |
+| MEMKIND_DAX_KMEM                          | X     |             |           | X          |                                     |      |          |
+| MEMKIND_DAX_KMEM_ALL                      | X     |             |           | X          |                                     |      |          |
+| MEMKIND_DAX_KMEM_PREFERRED                | X     |             |           | X          |                                     |      |          |
+| MEMKIND_DAX_KMEM_INTERLEAVE               | X     |             |           | X          |                                     |      |          |
+| PMEM kind                                 |       |             |           |            | X                                   |      |          |
+
+*not needed for Intel's 2nd generation Intel(R) Xeon Phi(TM)
 
 ## Kernel
 To correctly control of NUMA, huge pages and file-backed memory following
@@ -200,6 +215,16 @@ following changes:
 
 and created DAX device. See [article](https://pmem.io/2020/01/20/memkind-dax-kmem.html) for details.
 
+
+* **HMAT**
+
+To utilize memory performance characteristics (latency and bandwidth),
+beside [platform](https://uefi.org/sites/default/files/resources/ACPI_6_3_final_Jan30.pdf)
+support you need at least Linux Kernel 5.5 (with enabled CONFIG_ACPI_HMAT Kernel option).
+
+* **libhwloc**
+
+To get locality characteristics of NUMA nodes in the system you need hwloc-devel v2.3.0 (or later).
 
 ## NVDIMM volatile usage
 
@@ -301,6 +326,15 @@ node 1.  The --cpunodebind=0 option to numactl will bind the process
 threads to CPUs associated with NUMA node 0.  With this configuration
 standard allocations will be fetched across the QPI bus, and high
 bandwidth allocations will be local to the process CPU.
+
+## Identification of High Bandwidth Memory
+High bandwidth memory is identified using hwloc, if available. The default
+threshold for identifying high bandwidth memory is 200 GB/s, you can change the
+threshold using the MEMKIND_HBW_THRESHOLD environment variable.
+
+MEMKIND_HBW_THRESHOLD is in MB/s. For example, to set to 100 GB/s:
+
+    export MEMKIND_HBW_THRESHOLD=102400.
 
 ## Projects
 The following software use memkind library:

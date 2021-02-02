@@ -18,8 +18,12 @@ to build, test and optionally measure test coverage of any pull request to memki
 *'/tmp/'*.
 
 * **NDCTL_LIBRARY_VERSION** - ndctl library version.
-For fully testing MEMKIND_DAX_KMEM, ndctl library version tag must be passed as parameter,
+To fully test MEMKIND_DAX_KMEM, ndctl library version tag must be passed as parameter,
 see https://github.com/pmem/ndctl/tags.
+
+* **ENABLE_HWLOC** - install hwloc library.
+To fully test MEMKIND_HBW*, MEMKIND_*LOCAL hwloc library (v2.3.0 or later) must be installed.
+Setting **ENABLE_HWLOC** to 1 runs the installation of hwloc library v2.3.0.
 
 * **TBB_LIBRARY_VERSION** - Intel Threading Building Blocks library version.
 For testing Threading Building Blocks, TBB library version tag must be passed as parameter,
@@ -28,6 +32,8 @@ see https://github.com/01org/tbb/tags.
 * **HOG_MEMORY** - Controls behavior of memkind with regards to returning memory to underlying OS. Setting **HOG_MEMORY** to 1 causes
 memkind to not release memory to OS in anticipation of memory reuse soon. For PMEM memory will be released only after calling memkind_destroy_kind()
 
+* **QEMU_TEST** - Setting **QEMU_TEST** results in the execution of tests designated for the QEMU environment.
+
 # Files
 *'docker_run_build.sh'*  is used to build of memkind.
 
@@ -35,7 +41,13 @@ memkind to not release memory to OS in anticipation of memory reuse soon. For PM
 
 *'docker_run_test.sh'*  is used to run tests of memkind.
 
+*'docker_install_hwloc.sh'*  is used to install hwloc library.
+
+*'docker_install_libvirt.sh'*  is used to install libvirt library.
+
 *'docker_install_ndctl.sh'*  is used to install ndctl library.
+
+*'docker_install_qemu.sh'*  is used to install QEMU library.
 
 *'docker_install_tbb.sh'*  is used to install Intel Threading Building Blocks library.
 

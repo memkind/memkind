@@ -1,0 +1,83 @@
+{
+  "builders": [
+    {
+      "type": "qemu",
+
+      "memory": 2048,
+      "disk_size": "30G",
+      "accelerator": "kvm",
+      "vm_name": "ubuntu-1804.img",
+      "iso_url": "http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/ubuntu-18.04.5-server-amd64.iso",
+      "iso_checksum": "file:http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/SHA256SUMS",
+
+      "http_directory": "http",
+      "output_directory": "qemu-image",
+
+      "boot_wait": "1s",
+      "boot_command": [
+        "<enter>><f6><esc><wait> ",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs>",
+        "/install/vmlinuz noapic ",
+        "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+        "debian-installer=en_US auto locale=en_US ",
+        "kbd-chooser/method=us ",
+        "console-setup/ask_detect=false keyboard-configuration/layout=USA keyboard-configuration/variant=USA ",
+        "hostname={{ user `hostname` }} ",
+        "initrd=/install/initrd.gz -- ",
+        "<enter><wait>"
+      ],
+      "shutdown_command": "echo '{{ user `ssh_password` }}' | sudo -S shutdown -P now",
+
+      "ssh_username": "{{ user `ssh_username` }}",
+      "ssh_password": "{{ user `ssh_password` }}",
+      "ssh_timeout": "10m",
+
+      "headless": true,
+      "ssh_pty": true
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "file",
+      "sources": ["../docker/docker_install_hwloc.sh", "../docker/docker_install_ndctl.sh", "update-kernel.sh"],
+      "destination": "/home/{{ user `ssh_username` }}/"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo '{{user `ssh_password`}}' | sudo -S sh '{{ .Path }}'",
+      "inline": [
+        "echo '%sudo    ALL=(ALL)  NOPASSWD:ALL' >> /etc/sudoers",
+        "echo 'GRUB_HIDDEN_TIMEOUT=0 GRUB_HIDDEN_TIMEOUT_QUIET=true' >> /etc/default/grub",
+        "echo 'GRUB_CMDLINE_LINUX=\"console=tty0 console=ttyS0\"' >> /etc/default/grub",
+        "sudo update-grub",
+        "echo 'http_proxy={{ user `http_proxy` }}' >> /etc/environment",
+        "echo 'https_proxy={{ user `https_proxy` }}' >> /etc/environment",
+        "sudo apt update && sudo apt install -y asciidoctor automake ccache curl g++ git libnuma-dev libtool libjson-c-dev libkmod-dev libkeyutils-dev libudev-dev numactl pkg-config python3-pip uuid-dev",
+        "sudo pip3 install pytest==3.9.2",
+        "sudo /usr/sbin/update-ccache-symlinks",
+        "echo 'export PATH=\"/usr/lib/ccache:$PATH\"' >> .bashrc",
+        "sudo bash docker_install_hwloc.sh",
+        "sudo NDCTL_LIBRARY_VERSION=v70.1 bash docker_install_ndctl.sh",
+        "sudo bash update-kernel.sh"
+      ]
+    }
+  ],
+
+  "variables": {
+    "hostname": "memkindhost",
+    "ssh_fullname": "memkinduser",
+    "ssh_password": "memkindpass",
+    "ssh_username": "memkinduser",
+    "http_proxy": "{{ env `http_proxy` }}",
+    "https_proxy": "{{ env `https_proxy` }}"
+  }
+}

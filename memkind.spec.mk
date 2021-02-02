@@ -39,6 +39,13 @@ BuildRequires: libdaxctl-devel >= %{daxctl_min_version}
 BuildRequires: daxctl-devel >= %{daxctl_min_version}
 %endif
 
+%define hwloc_min_version 2.3.0
+%if %{defined suse_version}
+BuildRequires: libhwloc-devel >= %{hwloc_min_version}
+%else
+BuildRequires: hwloc-devel >= %{hwloc_min_version}
+%endif
+
 Prefix: %{_prefix}
 Prefix: %{_unitdir}
 %if %{undefined suse_version}
@@ -173,6 +180,7 @@ $(memkind_test_dir)/background_threads_test
 ${memkind_test_dir}/environ_err_dax_kmem_malloc_positive_test
 ${memkind_test_dir}/environ_err_dax_kmem_malloc_test
 $(memkind_test_dir)/environ_err_hbw_malloc_test
+$(memkind_test_dir)/environ_err_hbw_threshold_test
 $(memkind_test_dir)/environ_max_bg_threads_test
 ${memkind_test_dir}/dax_kmem_test
 $(memkind_test_dir)/decorator_test
@@ -183,9 +191,11 @@ $(memkind_test_dir)/filter_memkind
 $(memkind_test_dir)/hello_hbw
 $(memkind_test_dir)/hello_memkind
 $(memkind_test_dir)/hello_memkind_debug
+${memkind_test_dir}/hmat_test
 $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/memkind_cpp_allocator
 $(memkind_test_dir)/memkind_get_stat
+${memkind_test_dir}/memkind_highcapacity_test
 $(memkind_test_dir)/memkind_stat_test
 $(memkind_test_dir)/autohbw_candidates
 ${memkind_test_dir}/pmem_kinds
@@ -216,6 +226,7 @@ $(memkind_test_dir)/performance_test
 $(memkind_test_dir)/test.sh
 $(memkind_test_dir)/test_dax_kmem.sh
 $(memkind_test_dir)/hbw_detection_test.py
+$(memkind_test_dir)/hbw_env_var_test.py
 $(memkind_test_dir)/dax_kmem_env_var_test.py
 $(memkind_test_dir)/autohbw_test.py
 $(memkind_test_dir)/trace_mechanism_test.py

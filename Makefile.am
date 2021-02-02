@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
@@ -12,13 +12,16 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind.c \
                         src/memkind_arena.c \
                         src/memkind_bitmask.c \
+                        src/memkind_capacity.c \
                         src/memkind_dax_kmem.c \
                         src/memkind_default.c \
                         src/memkind_gbtlb.c \
                         src/memkind_hbw.c \
                         src/memkind_hugetlb.c \
                         src/memkind_interleave.c \
+                        src/memkind_local.c \
                         src/memkind_log.c \
+                        src/memkind_mem_attributes.c \
                         src/memkind_pmem.c \
                         src/memkind_regular.c \
                         src/tbb_wrapper.c \
@@ -38,13 +41,16 @@ include_HEADERS = include/hbw_allocator.h \
 noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_bitmask.h \
+                  include/memkind/internal/memkind_capacity.h \
                   include/memkind/internal/memkind_dax_kmem.h \
                   include/memkind/internal/memkind_default.h \
                   include/memkind/internal/memkind_gbtlb.h \
                   include/memkind/internal/memkind_hbw.h \
                   include/memkind/internal/memkind_hugetlb.h \
                   include/memkind/internal/memkind_interleave.h \
+                  include/memkind/internal/memkind_local.h \
                   include/memkind/internal/memkind_log.h \
+                  include/memkind/internal/memkind_mem_attributes.h \
                   include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
                   include/memkind/internal/memkind_regular.h \
@@ -388,13 +394,48 @@ EXTRA_DIST = CONTRIBUTING \
              utils/docker/Dockerfile.fedora-32 \
              utils/docker/Dockerfile.ubuntu-20.04 \
              utils/docker/README.md \
+             utils/docker/docker_install_hwloc.sh \
+             utils/docker/docker_install_libvirt.sh \
              utils/docker/docker_install_ndctl.sh \
+             utils/docker/docker_install_qemu.sh \
              utils/docker/docker_install_tbb.sh \
              utils/docker/docker_run_build.sh \
              utils/docker/docker_run_coverage.sh \
              utils/docker/docker_run_test.sh \
+             utils/docker/hwloc.spec.mk \
              utils/docker/run_local.sh \
              utils/docker/set_host_configuration.sh \
+             utils/qemu/README.md \
+             utils/qemu/http/preseed.cfg \
+             utils/qemu/main.py \
+             utils/qemu/topology/README.md \
+             utils/qemu/topology/clx_2_var1.xml \
+             utils/qemu/topology/clx_2_var1_emul_hbw.xml \
+             utils/qemu/topology/clx_2_var1_hmat.xml \
+             utils/qemu/topology/clx_2_var2.xml \
+             utils/qemu/topology/clx_2_var2_emul_hbw.xml \
+             utils/qemu/topology/clx_2_var2_hmat.xml \
+             utils/qemu/topology/clx_2_var3.xml \
+             utils/qemu/topology/clx_2_var3_emul_hbw.xml \
+             utils/qemu/topology/clx_2_var3_hmat.xml \
+             utils/qemu/topology/clx_2_var4_emul_hbw.xml \
+             utils/qemu/topology/clx_4_var1.xml \
+             utils/qemu/topology/clx_4_var1_emul_hbw.xml \
+             utils/qemu/topology/clx_4_var1_hmat.xml \
+             utils/qemu/topology/clx_4_var2.xml \
+             utils/qemu/topology/clx_4_var2_emul_hbw.xml \
+             utils/qemu/topology/clx_4_var2_hmat.xml \
+             utils/qemu/topology/clx_4_var3.xml \
+             utils/qemu/topology/clx_4_var3_emul_hbw.xml \
+             utils/qemu/topology/clx_4_var3_hmat.xml \
+             utils/qemu/topology/clx_4_var4.xml \
+             utils/qemu/topology/clx_4_var4_emul_hbw.xml \
+             utils/qemu/topology/clx_4_var4_hmat.xml \
+             utils/qemu/topology/knm_all2all.xml \
+             utils/qemu/topology/knm_snc2.xml \
+             utils/qemu/topology/knm_snc4.xml \
+             utils/qemu/ubuntu-packer.json \
+             utils/qemu/update-kernel.sh \
              # end
 
 dist_doc_DATA = COPYING README VERSION
@@ -497,6 +538,10 @@ PMEM_PATH=/tmp/
 unit_tests_pmem: checkprogs
 	test/pmem_test -d $(PMEM_PATH)
 
+unit_tests_hmat: checkprogs
+	test/hmat_test
+	pytest -s test/hbw_env_var_test.py
+
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
 
@@ -505,3 +550,4 @@ include test/Makefile.mk
 include examples/Makefile.mk
 include src/Makefile.mk
 include utils/memkind_malloc_wrapper/Makefile.mk
+include utils/memory_matrix/Makefile.mk

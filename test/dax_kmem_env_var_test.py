@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2019 - 2020 Intel Corporation.
+# Copyright (C) 2019 - 2021 Intel Corporation.
 
 from distutils.spawn import find_executable
 from python_framework import CMD_helper
@@ -32,7 +32,7 @@ class Test_dax_kmem_env_var(object):
                "is not the same as nodemask dax_kmem_nodemask_env_variable ({1})".format(dax_kmem_nodemask_default, dax_kmem_nodemask_env_variable))
 
     def test_TC_MEMKIND_dax_kmem_env_var_negative_memkind_malloc(self):
-        """ This test sets usupported value of MEMKIND_DAX_KMEM_NODES, then tries to perform a successful allocation from DRAM using memkind_malloc() """
+        """ This test sets unsupported value of MEMKIND_DAX_KMEM_NODES, then tries to perform a successful allocation from DRAM using memkind_malloc() """
         command = "MEMKIND_DAX_KMEM_NODES=-1 " + self.cmd_helper.get_command_path(self.environ_err_test)
         output, retcode = self.cmd_helper.execute_cmd(command)
         assert retcode != 0, self.fail_msg.format("\nError: Execution of: \'{0}\' returns: {1} \noutput: {2}".format(command, retcode, output))

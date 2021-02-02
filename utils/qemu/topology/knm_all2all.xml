@@ -1,0 +1,27 @@
+<!-- SPDX-License-Identifier: BSD-2-Clause
+# Copyright (C) 2020 Intel Corporation.
+-->
+<domain type='qemu'>
+  <name>KnightsMillAll2All</name>
+  <os>
+    <type arch='x86_64' machine='pc'>hvm</type>
+  </os>
+  <vcpu placement='static'>16</vcpu>
+  <cpu>
+    <topology sockets='1' dies='1' cores='16' threads='1'/>
+    <numa>
+      <cell id='0' cpus='0-15' memory='5120' unit='MiB'>
+        <distances>
+          <sibling id='0' value='10'/>
+          <sibling id='1' value='31'/>
+        </distances>
+      </cell>
+      <cell id='1' memory='512' unit='MiB'>
+        <distances>
+          <sibling id='0' value='31'/>
+          <sibling id='1' value='10'/>
+        </distances>
+      </cell>
+    </numa>
+  </cpu>
+</domain>

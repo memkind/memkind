@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2020 Intel Corporation. */
+/* Copyright (C) 2019 - 2021 Intel Corporation. */
 
 #pragma once
 
@@ -41,6 +41,14 @@ namespace libmemkind
         DAX_KMEM_ALL = 12,
         DAX_KMEM_PREFERRED = 13,
         DAX_KMEM_INTERLEAVE = 14,
+        HIGHEST_CAPACITY = 15,
+        HIGHEST_CAPACITY_PREFERRED = 16,
+        HIGHEST_CAPACITY_LOCAL = 17,
+        HIGHEST_CAPACITY_LOCAL_PREFERRED = 18,
+        LOWEST_LATENCY_LOCAL = 19,
+        LOWEST_LATENCY_LOCAL_PREFERRED = 20,
+        HIGHEST_BANDWIDTH_LOCAL = 21,
+        HIGHEST_BANDWIDTH_LOCAL_PREFERRED = 22
     };
 
     namespace static_kind
@@ -123,6 +131,30 @@ namespace libmemkind
                         break;
                     case libmemkind::kinds::DAX_KMEM_INTERLEAVE:
                         _kind = MEMKIND_DAX_KMEM_INTERLEAVE;
+                        break;
+                    case libmemkind::kinds::HIGHEST_CAPACITY:
+                        _kind = MEMKIND_HIGHEST_CAPACITY;
+                        break;
+                    case libmemkind::kinds::HIGHEST_CAPACITY_PREFERRED:
+                        _kind = MEMKIND_HIGHEST_CAPACITY_PREFERRED;
+                        break;
+                    case libmemkind::kinds::HIGHEST_CAPACITY_LOCAL:
+                        _kind = MEMKIND_HIGHEST_CAPACITY_LOCAL;
+                        break;
+                    case libmemkind::kinds::HIGHEST_CAPACITY_LOCAL_PREFERRED:
+                        _kind = MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED;
+                        break;
+                    case libmemkind::kinds::LOWEST_LATENCY_LOCAL:
+                        _kind = MEMKIND_LOWEST_LATENCY_LOCAL;
+                        break;
+                    case libmemkind::kinds::LOWEST_LATENCY_LOCAL_PREFERRED:
+                        _kind = MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED;
+                        break;
+                    case libmemkind::kinds::HIGHEST_BANDWIDTH_LOCAL:
+                        _kind = MEMKIND_HIGHEST_BANDWIDTH_LOCAL;
+                        break;
+                    case libmemkind::kinds::HIGHEST_BANDWIDTH_LOCAL_PREFERRED:
+                        _kind = MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED;
                         break;
                     default:
                         throw std::runtime_error("Unknown libmemkind::kinds");

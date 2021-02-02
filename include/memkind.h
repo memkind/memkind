@@ -277,6 +277,30 @@ extern memkind_t MEMKIND_DAX_KMEM_PREFERRED;
 /// \note STANDARD API
 extern memkind_t MEMKIND_DAX_KMEM_INTERLEAVE;
 
+/// \note STANDARD API
+extern memkind_t MEMKIND_HIGHEST_CAPACITY;
+
+/// \note STANDARD API
+extern memkind_t MEMKIND_HIGHEST_CAPACITY_PREFERRED;
+
+/// \note STANDARD API
+extern memkind_t MEMKIND_HIGHEST_CAPACITY_LOCAL;
+
+/// \note STANDARD API
+extern memkind_t MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED;
+
+/// \note STANDARD API
+extern memkind_t MEMKIND_LOWEST_LATENCY_LOCAL;
+
+/// \note STANDARD API
+extern memkind_t MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED;
+
+/// \note STANDARD API
+extern memkind_t MEMKIND_HIGHEST_BANDWIDTH_LOCAL;
+
+/// \note STANDARD API
+extern memkind_t MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED;
+
 ///
 /// \brief Get Memkind API version
 /// \note STANDARD API

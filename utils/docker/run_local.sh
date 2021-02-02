@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2019 - 2020 Intel Corporation.
+# Copyright (C) 2019 - 2021 Intel Corporation.
 
 #
 # run_local.sh - builds a container with Docker image
@@ -24,6 +24,8 @@ if [[ -z "$MEMKIND_HOST_WORKDIR" ]]; then
     exit 1
 fi
 
+if [ -z "$QEMU_TEST" ]; then qemu_enable=; else qemu_enable="--device=/dev/kvm -v /var/run/libvirt/libvirt-sock:/var/run/libvirt/libvirt-sock"; fi
+
 # need to be inline with Dockerfile WORKDIR
 MEMKIND_CONTAINER_WORKDIR=/home/memkinduser/memkind/
 PMEM_CONTAINER_PATH=/home/memkinduser/mnt_pmem/
@@ -43,7 +45,10 @@ docker run --rm \
            --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \
            --env HOG_MEMORY="$HOG_MEMORY" \
            --env NDCTL_LIBRARY_VERSION="$NDCTL_LIBRARY_VERSION" \
+           --env ENABLE_HWLOC="$ENABLE_HWLOC" \
            --env PMEM_CONTAINER_PATH="$PMEM_CONTAINER_PATH" \
+           --env QEMU_TEST="$QEMU_TEST" \
+           $qemu_enable \
            --mount type=bind,source="$MEMKIND_HOST_WORKDIR",target="$MEMKIND_CONTAINER_WORKDIR" \
            --mount type=bind,source="$PMEM_HOST_PATH",target="$PMEM_CONTAINER_PATH" \
            memkind_cont utils/docker/docker_run_build.sh

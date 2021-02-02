@@ -22,6 +22,9 @@ check_PROGRAMS += test/all_tests \
                   # end
 if HAVE_CXX11
 check_PROGRAMS += test/pmem_test \
+                  test/memkind_highcapacity_test \
+                  test/hmat_test \
+                  test/environ_err_hbw_threshold_test \
                   test/defrag_reallocate
 endif
 
@@ -33,6 +36,7 @@ EXTRA_DIST += test/autohbw_test.py \
               test/gtest_fused/gtest/gtest.h \
               test/hbw_detection_test.py \
               test/dax_kmem_env_var_test.py \
+              test/hbw_env_var_test.py \
               test/memkind-afts-ext.ts \
               test/memkind-afts.ts \
               test/memkind-perf-ext.ts \
@@ -63,8 +67,16 @@ test_trace_mechanism_test_helper_LDADD = libmemkind.la
 if HAVE_CXX11
 test_pmem_test_SOURCES = $(fused_gtest) test/memkind_pmem_config_tests.cpp test/memkind_pmem_long_time_tests.cpp test/memkind_pmem_tests.cpp
 test_pmem_test_LDADD = libmemkind.la
+test_memkind_highcapacity_test_SOURCES = $(fused_gtest) test/memkind_highcapacity_tests.cpp
+test_memkind_highcapacity_test_LDADD = libmemkind.la
+test_hmat_test_SOURCES = $(fused_gtest) test/memkind_hmat_tests.cpp test/memory_topology.h
+test_hmat_test_LDADD = libmemkind.la
+test_environ_err_hbw_threshold_test_CXXFLAGS = $(CXXFLAGS) $(OPENMP_CFLAGS)
+test_environ_err_hbw_threshold_test_SOURCES = test/environ_err_hbw_threshold_test.cpp
+test_environ_err_hbw_threshold_test_LDADD = libmemkind.la
 test_defrag_reallocate_SOURCES = $(fused_gtest) test/memkind_defrag_reallocate.cpp
 test_defrag_reallocate_LDADD = libmemkind.la
+test_hmat_test_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS)
 test_background_threads_test_SOURCES = $(fused_gtest) test/background_threads_test.cpp
 test_background_threads_test_LDADD = libmemkind.la
 endif

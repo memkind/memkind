@@ -59,6 +59,22 @@ static const char *kind_name(memkind_t kind)
         return "MEMKIND_DAX_KMEM_PREFERRED";
     else if (kind == MEMKIND_DAX_KMEM_INTERLEAVE)
         return "MEMKIND_DAX_KMEM_INTERLEAVE";
+    else if (kind == MEMKIND_HIGHEST_CAPACITY)
+        return "MEMKIND_HIGHEST_CAPACITY";
+    else if (kind == MEMKIND_HIGHEST_CAPACITY_PREFERRED)
+        return "MEMKIND_HIGHEST_CAPACITY_PREFERRED";
+    else if (kind == MEMKIND_HIGHEST_CAPACITY_LOCAL)
+        return "MEMKIND_HIGHEST_CAPACITY_LOCAL";
+    else if (kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED)
+        return "MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED";
+    else if (kind == MEMKIND_LOWEST_LATENCY_LOCAL)
+        return "MEMKIND_LOWEST_LATENCY_LOCAL";
+    else if (kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED)
+        return "MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED";
+    else if (kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL)
+        return "MEMKIND_HIGHEST_BANDWIDTH_LOCAL";
+    else if (kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED)
+        return "MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED";
     else return "Unknown memory kind";
 }
 

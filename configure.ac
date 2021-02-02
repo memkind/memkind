@@ -230,6 +230,31 @@ if test $daxctl_kmem = "yes" ; then
 fi
 AC_SUBST([enable_daxctl])
 
+#===============================hwloc=========================================
+AC_ARG_ENABLE([hwloc],
+  [AS_HELP_STRING([--enable-hwloc], [Build library with hwloc support])],
+[if test "x$enable_hwloc" = "xno" ; then
+  enable_hwloc="0"
+else
+  enable_hwloc="2"
+fi
+],
+[enable_hwloc="1"]
+)
+if test "x$enable_hwloc" = "x1" ; then
+    AC_CHECK_LIB(hwloc, hwloc_memattr_get_best_target, [hwloc_hmat=yes], [hwloc_hmat=no])
+fi
+if test "x$enable_hwloc" = "x2" ; then
+    AC_CHECK_LIB(hwloc, hwloc_memattr_get_best_target, [hwloc_hmat=yes], [AC_MSG_ERROR([libhwloc-devel v2.3.0 or later is required dependency by --enable-hwloc option])])
+fi
+
+if test $hwloc_hmat = "yes" ; then
+    AC_DEFINE([MEMKIND_HWLOC], [1], [Support for hwloc library])
+    AC_SUBST(HWLOC_LIBS, [-lhwloc])
+    LDFLAGS="$LDFLAGS -lhwloc"
+fi
+AC_SUBST([enable_hwloc])
+
 #===============================heap manager=========================================
 AC_ARG_ENABLE([heap_manager],
   [AS_HELP_STRING([--disable-heap-manager], [Use only default allocator: jemalloc])],
@@ -267,6 +292,15 @@ else
 AC_MSG_RESULT([
                Automatic recognition of PMEM NUMA in MEMKIND_DAX_KMEM is disabled
                To enable this feature please install libdaxctl-devel v66 or later
+               and run configure again])
+fi
+if test $hwloc_hmat = "yes" ; then
+AC_MSG_RESULT([
+               Utilization of information about memory performance characteristics is enabled])
+else
+AC_MSG_RESULT([
+               Utilization of information about memory performance characteristics is disabled
+               To enable this feature please install libhwloc-devel v2.3.0 or later
                and run configure again])
 fi
 AC_MSG_RESULT([=================================================================================])

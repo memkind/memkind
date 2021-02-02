@@ -60,6 +60,7 @@
 /memkind-*.tar.gz
 /memkind-auto-dax-kmem-nodes
 /memkind-hbw-nodes
+/memkind-memory-matrix
 /missing
 /src/memkind_defines.h.in
 /stamp-h1
@@ -88,8 +89,7 @@
 /test/environ_err_dax_kmem_malloc_positive_test
 /test/environ_err_dax_kmem_malloc_test
 /test/environ_err_hbw_malloc_test
-/test/environerr_hbw_malloc_test
-/test/environerr_test
+/test/environ_err_hbw_threshold_test
 /test/environ_max_bg_threads_test
 /test/filter_memkind
 /test/fragmentation_benchmark_pmem
@@ -98,11 +98,13 @@
 /test/hello_hbw
 /test/hello_memkind
 /test/hello_memkind_debug
+/test/hmat_test
 /test/locality_test
 /test/mallocerr_test
 /test/memkind_allocated
 /test/memkind_cpp_allocator
 /test/memkind_get_stat
+/test/memkind_highcapacity_test
 /test/memkind_stat_test
 /test/perf_tool
 /test/performance_test
