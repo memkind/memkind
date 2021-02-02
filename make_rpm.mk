@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 package_prefix ?=
 name = $(package_prefix)memkind
@@ -29,6 +29,7 @@ test/python_framework/cmd_helper.py \
 test/python_framework/huge_page_organizer.py \
 test/python_framework/__init__.py \
 test/hbw_detection_test.py \
+test/hbw_env_var_test.py \
 test/dax_kmem_env_var_test.py \
 test/autohbw_test.py \
 test/trace_mechanism_test.py \
