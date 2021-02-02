@@ -14,7 +14,7 @@ GTEST_BINARIES=(all_tests decorator_test gb_page_tests_bind_policy \
                 memkind_stat_test defrag_reallocate background_threads_test memkind_highcapacity_test)
 
 # Pytest files executed by Berta
-PYTEST_FILES=(hbw_detection_test.py autohbw_test.py trace_mechanism_test.py)
+PYTEST_FILES=(hbw_detection_test.py autohbw_test.py trace_mechanism_test.py max_bg_threads_env_var_test.py)
 
 red=`tput setaf 1`
 green=`tput setaf 2`

@@ -90,6 +90,7 @@
 /test/environ_err_dax_kmem_malloc_test
 /test/environ_err_hbw_malloc_test
 /test/environ_err_hbw_threshold_test
+/test/environ_max_bg_threads_test
 /test/filter_memkind
 /test/fragmentation_benchmark_pmem
 /test/freeing_memory_segfault_test
