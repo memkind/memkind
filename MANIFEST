@@ -489,6 +489,7 @@ test/draw_plots.py
 test/environ_err_dax_kmem_malloc_positive_test.cpp
 test/environ_err_dax_kmem_malloc_test.cpp
 test/environ_err_hbw_malloc_test.cpp
+test/environ_err_hbw_threshold_test.cpp
 test/error_message_tests.cpp
 test/fragmentation_benchmark_pmem.cpp
 test/freeing_memory_segfault_test.cpp
@@ -499,6 +500,7 @@ test/gtest_fused/gtest/gtest.h
 test/hbw_allocator_performance_tests.cpp
 test/hbw_allocator_tests.cpp
 test/hbw_detection_test.py
+test/hbw_env_var_test.py
 test/hbw_verify_function_test.cpp
 test/heap_manager_init_perf_test.cpp
 test/huge_page_test.cpp
