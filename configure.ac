@@ -296,10 +296,10 @@ AC_MSG_RESULT([
 fi
 if test $hwloc_hmat = "yes" ; then
 AC_MSG_RESULT([
-               Utilize information about memory performance characteristics is enabled])
+               Utilization of information about memory performance characteristics is enabled])
 else
 AC_MSG_RESULT([
-               Utilize information about memory performance characteristics is disabled
+               Utilization of information about memory performance characteristics is disabled
                To enable this feature please install libhwloc-devel v2.3.0 or later
                and run configure again])
 fi

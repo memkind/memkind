@@ -59,6 +59,10 @@ that have the highest capacity.
 .B libmemkind::kinds::HIGHEST_CAPACITY_LOCAL
 Allocate from a NUMA node(s) that has the highest capacity among all NUMA Nodes from the local domain.
 NUMA Nodes have the same local domain for a set of CPUs associated with them, e.g. socket or sub-NUMA cluster.
+.BR Note:
+This kind requires locality information described in
+.B SYSTEM CONFIGURATION
+section.
 .PP
 .B libmemkind::kinds::HIGHEST_CAPACITY_LOCAL_PREFERRED
 Same as
@@ -72,6 +76,10 @@ in the same local domain that have the highest capacity.
 .B libmemkind::kinds::LOWEST_LATENCY_LOCAL
 Allocate from a NUMA node(s) that has the lowest latency among all NUMA Nodes from the local domain.
 NUMA Nodes have the same local domain for a set of CPUs associated with them, e.g. socket or sub-NUMA cluster.
+.BR Note:
+This kind requires locality and memory performance characteristics information described in
+.B SYSTEM CONFIGURATION
+section.
 .PP
 .B libmemkind::kinds::LOWEST_LATENCY_LOCAL_PREFERRED
 Same as
@@ -85,6 +93,10 @@ in the same local domain that have the lowest latency.
 .B libmemkind::kinds::HIGHEST_BANDWIDTH_LOCAL
 Allocate from a NUMA node(s) that has the highest bandwidth among all NUMA Nodes from the local domain.
 NUMA Nodes have the same local domain for a set of CPUs associated with them, e.g. socket or sub-NUMA cluster.
+.BR Note:
+This kind requires locality and memory performance characteristics information described in
+.B SYSTEM CONFIGURATION
+section.
 .PP
 .B libmemkind::kinds::HIGHEST_BANDWIDTH_LOCAL_PREFERRED
 Same as
@@ -106,6 +118,9 @@ Allocate pages interleaved across all NUMA nodes with transparent huge pages dis
 .B libmemkind::kinds::HBW
 Allocate from the closest high bandwidth memory NUMA node at the time of allocation. If there is not enough high bandwidth memory to satisfy the request, errno is set to ENOMEM and the allocated pointer is set to
 .IR "NULL" .
+Note: This kind requires memory performance characteristics information described in
+.B SYSTEM CONFIGURATION
+section.
 .PP
 .B libmemkind::kinds::HBW_ALL
 Same as
@@ -223,6 +238,28 @@ Proposed way of setting hugepages is:
 .BR "sudo sysctl vm.nr_hugepages=<number_of_hugepages>" .
 More information can be found here:
 .UR https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+.UE
+.PP
+Interfaces for obtaining locality information are provided by
+.I libhwloc
+dependency.
+Functionality based on locality requires that memkind library is configured and built with the support of
+.I libhwloc
+(./configure --enable-hwloc).
+.PP
+Interfaces for obtaining memory performance characteristics information are based on
+.I HMAT
+(Heterogeneous Memory Attribute Table)
+.UR https://uefi.org/sites/default/files/resources/ACPI_6_3_final_Jan30.pdf
+.UE
+Functionality based on memory performance characteristics requires that platform configuration
+fully supports HMAT and memkind library is configured and built with the support of
+.I libhwloc
+(./configure --enable-hwloc).
+.PP
+.I libhwloc
+can be reached on:
+.UR https://www.open-mpi.org/projects/hwloc
 .UE
 .SH "COPYRIGHT"
 Copyright (C) 2019 - 2021 Intel Corporation. All rights reserved.
