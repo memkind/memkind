@@ -537,6 +537,7 @@ unit_tests: checkprogs
 PMEM_PATH=/tmp/
 unit_tests_pmem: checkprogs
 	test/pmem_test -d $(PMEM_PATH)
+	pytest -s test/hbw_env_var_test.py
 
 unit_tests_hmat: checkprogs
 	test/hmat_test
