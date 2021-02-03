@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Sep 16 10:45:04 2020 -->
+<!-- CreationDate: Wed Feb  3 11:22:41 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -128,8 +128,10 @@ int memkind_create_pmem_with_config(struct
 memkind_config</b> <i>*cfg</i><b>, memkind_t</b>
 <i>*kind</i><b>); <br>
 int memkind_destroy_kind(memkind_t</b> <i>kind</i><b>); <br>
-int memkind_check_available(memkind_t</b>
-<i>kind</i><b>);</b></p>
+int memkind_check_available(memkind_t</b> <i>kind</i><b>);
+<br>
+int memkind_check_dax_path(const char</b>
+<i>*pmem_dir</i><b>);</b></p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>STATISTICS:
 <br>
@@ -167,6 +169,12 @@ void memkind_free_pre(memkind_t</b> <i>*kind</i><b>,
 void</b> <i>**ptr</i><b>); <br>
 void memkind_free_post(memkind_t</b> <i>kind</i><b>,
 void</b> <i>*ptr</i><b>);</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>ENHANCEMENTS:
+<br>
+int memkind_set_bg_threads(bool</b>
+<i>state</i><b>);</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -452,6 +460,13 @@ returns zero if the specified <i>kind</i> is available or an
 error code from the <b>ERRORS</b> section if it is not.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_check_dax_path</b>()
+returns zero if file-backed kind memory is in the specified
+directory path <i>pmem_dir</i> can be created with the DAX
+attribute or an error code from the <b>ERRORS</b> section if
+it is not.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_PMEM_MIN_SIZE</b>
 The minimum size which allows to limit the file-backed
 memory partition.</p>
@@ -500,6 +515,12 @@ reference and the decorators that are called at the end of
 the allocator pass the output by reference. This enables the
 modification of the input and output of each heap management
 function by the decorators.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>ENHANCEMENTS:
+<br>
+memkind_set_bg_threads()</b> enables/disables internal
+background worker threads in jemalloc.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>LIBRARY
 VERSION:</b> <br>
@@ -592,6 +613,93 @@ MEMKIND_DEFAULT</b></p>
 <p style="margin-left:22%;">Default allocation using
 standard memory and default page size.</p>
 
+
+<p style="margin-left:11%;"><b>MEMKIND_HIGHEST_CAPACITY</b></p>
+
+<p style="margin-left:22%;">Allocate from a NUMA node(s)
+that has the highest capacity among all nodes in the
+system.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_HIGHEST_CAPACITY_PREFERRED</b></p>
+
+<p style="margin-left:22%;">Same as
+<b>MEMKIND_HIGHEST_CAPACITY</b> except that if there is not
+enough memory in the NUMA node that has the highest capacity
+in the local domain to satisfy the request, the allocation
+will fall back on other memory NUMA nodes. <b>Note:</b> For
+this kind, the allocation will not succeed if there are two
+or more NUMA nodes that have the highest capacity.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_HIGHEST_CAPACITY_LOCAL</b></p>
+
+<p style="margin-left:22%;">Allocate from a NUMA node(s)
+that has the highest capacity among all NUMA Nodes from the
+local domain. NUMA Nodes have the same local domain for a
+set of CPUs associated with them, e.g. socket or sub-NUMA
+cluster. <b>Note:</b> This kind requires locality
+information described in <b>SYSTEM CONFIGURATION</b>
+section.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED</b></p>
+
+<p style="margin-left:22%;">Same as
+<b>MEMKIND_HIGHEST_CAPACITY_LOCAL</b> except that if there
+is not enough memory in the NUMA node that has the highest
+capacity to satisfy the request, the allocation will fall
+back on other memory NUMA nodes. <b>Note:</b> For this kind,
+the allocation will not succeed if there are two or more
+NUMA nodes in the same local domain that have the highest
+capacity.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_LOWEST_LATENCY_LOCAL</b></p>
+
+<p style="margin-left:22%;">Allocate from a NUMA node(s)
+that has the lowest latency among all NUMA Nodes from the
+local domain. NUMA Nodes have the same local domain for a
+set of CPUs associated with them, e.g. socket or sub-NUMA
+cluster. <b>Note:</b> This kind requires locality and memory
+performance characteristics information described in
+<b>SYSTEM CONFIGURATION</b> section.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED</b></p>
+
+<p style="margin-left:22%;">Same as
+<b>MEMKIND_LOWEST_LATENCY_LOCAL</b> except that if there is
+not enough memory in the NUMA node that has the lowest
+latency to satisfy the request, the allocation will fall
+back on other memory NUMA nodes. <b>Note:</b> For this kind,
+the allocation will not succeed if there are two or more
+NUMA nodes in the same local domain that have the lowest
+latency.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_HIGHEST_BANDWIDTH_LOCAL</b></p>
+
+<p style="margin-left:22%;">Allocate from a NUMA node(s)
+that has the highest bandwidth among all NUMA Nodes from the
+local domain. NUMA Nodes have the same local domain for a
+set of CPUs associated with them, e.g. socket or sub-NUMA
+cluster. <b>Note:</b> This kind requires locality and memory
+performance characteristics information described in
+<b>SYSTEM CONFIGURATION</b> section.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED</b></p>
+
+<p style="margin-left:22%;">Same as
+<b>MEMKIND_HIGHEST_BANDWIDTH_LOCAL</b> except that if there
+is not enough memory in the NUMA node that has the highest
+bandwidth to satisfy the request, the allocation will fall
+back on other memory NUMA nodes. <b>Note:</b> For this kind,
+the allocation will not succeed if there are two or more
+NUMA nodes in the same local domain that have the highest
+bandwidth.</p>
+
 <p style="margin-left:11%;"><b>MEMKIND_HUGETLB</b></p>
 
 <p style="margin-left:22%;">Allocate from standard memory
@@ -616,15 +724,17 @@ disabled.</p>
 <p style="margin-left:11%;"><b>MEMKIND_HBW</b></p>
 
 <p style="margin-left:22%;">Allocate from the closest high
-bandwidth memory NUMA node at the time of allocation. If
+bandwidth memory NUMA node(s) at the time of allocation. If
 there is not enough high bandwidth memory to satisfy the
 request <i>errno</i> is set to <b>ENOMEM</b> and the
-allocated pointer is set to <i>NULL</i>.</p>
+allocated pointer is set to <i>NULL</i>. <b>Note:</b> This
+kind requires memory performance characteristics information
+described in <b>SYSTEM CONFIGURATION</b> section.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_ALL</b></p>
 
 <p style="margin-left:22%;">Same as <b>MEMKIND_HBW</b>
-except decision regarding closest NUMA node is postponed
+except decision regarding closest NUMA node(s) is postponed
 until the time of first write.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_HUGETLB</b></p>
@@ -649,7 +759,11 @@ section.</p>
 <p style="margin-left:22%;">Same as <b>MEMKIND_HBW</b>
 except that if there is not enough high bandwidth memory to
 satisfy the request, the allocation will fall back on
-standard memory.</p>
+standard memory. <b>Note:</b> For this kind, the allocation
+will not succeed if two or more high bandwidth memory NUMA
+nodes are in the same shortest distance to the same CPU on
+which process is eligible to run. Check on that eligibility
+is done upon starting the application.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_PREFERRED_HUGETLB</b></p>
@@ -679,7 +793,11 @@ section.</p>
 high bandwidth memory to satisfy the request, the allocation
 will fall back on standard memory. <b>Note:</b> This kind
 requires huge pages configuration described in <b>SYSTEM
-CONFIGURATION</b> section.</p>
+CONFIGURATION</b> section. For this kind, the allocation
+will not succeed if two or more high bandwidth memory NUMA
+nodes are in the same shortest distance to the same CPU on
+which process is eligible to run. Check on that eligibility
+is done upon starting the application.</p>
 
 
 <p style="margin-left:11%;"><b>MEMKIND_HBW_INTERLEAVE</b></p>
@@ -720,6 +838,13 @@ if two or more persistent memory NUMA nodes are in the same
 shortest distance to the same CPU on which process is
 eligible to run. Check on that eligibility is done upon
 starting the application.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_DAX_KMEM_INTERLEAVE</b></p>
+
+<p style="margin-left:22%;">Same as <b>MEMKIND_DAX_KMEM</b>
+except that the pages that support the allocation are
+interleaved across all persistent memory NUMA nodes.</p>
 
 <p style="margin-left:11%;"><b>MEMKIND_REGULAR</b></p>
 
@@ -981,6 +1106,15 @@ described in the <b>numa</b>(3) man page for this routine
 applies: e.g. 1-3,5 is a valid setting.</p>
 
 
+<p style="margin-left:11%;"><b>MEMKIND_HBW_THRESHOLD</b></p>
+
+<p style="margin-left:22%;">This environment variable is
+bandwidth in MB/s that is the threshold for identifying high
+bandwidth memory. The default threshold is 204800 (200
+GB/s), which is used if this variable is not set. When set,
+it must be greater than or equal to 0.</p>
+
+
 <p style="margin-left:11%;"><b>MEMKIND_DAX_KMEM_NODES</b></p>
 
 <p style="margin-left:22%;">This environment variable is a
@@ -1072,6 +1206,27 @@ vm.nr_hugepages=&lt;number_of_hugepages&gt;</b>. More
 information can be found here:
 <a href="https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt">https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</a></p>
 
+<p style="margin-left:11%; margin-top: 1em">Interfaces for
+obtaining locality information are provided by
+<i>libhwloc</i> dependency. Functionality based on locality
+requires that memkind library is configured and built with
+the support of <i>libhwloc</i> (./configure
+--enable-hwloc).</p>
+
+<p style="margin-left:11%; margin-top: 1em">Interfaces for
+obtaining memory performance characteristics information are
+based on <i>HMAT</i> (Heterogeneous Memory Attribute Table)
+<a href="https://uefi.org/sites/default/files/resources/ACPI_6_3_final_Jan30.pdf">https://uefi.org/sites/default/files/resources/ACPI_6_3_final_Jan30.pdf</a>
+Functionality based on memory performance characteristics
+requires that platform configuration fully supports HMAT and
+memkind library is configured and built with the support of
+<i>libhwloc</i> (./configure --enable-hwloc).</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><i>libhwloc</i>
+can be reached on:
+<a href="https://www.open-mpi.org/projects/hwloc">https://www.open-mpi.org/projects/hwloc</a></p>
+
 <h2>STATIC LINKING
 <a name="STATIC LINKING"></a>
 </h2>
@@ -1106,7 +1261,7 @@ extra huge pages (e.g. 8 huge pages).</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright (C)
-2014 - 2020 Intel Corporation. All rights reserved.</p>
+2014 - 2021 Intel Corporation. All rights reserved.</p>
 
 <h2>SEE ALSO
 <a name="SEE ALSO"></a>
@@ -1116,8 +1271,8 @@ extra huge pages (e.g. 8 huge pages).</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>malloc</b>(3),
 <b>malloc_usable_size</b>(3), <b>numa</b>(3),
-<b>numactl</b>(8), <b>mbind</b>(2), <b>mmap</b>(2),
-<b>move_pages</b>(2), <b>jemalloc</b>(3),
+<b>hwloc</b>(3), <b>numactl</b>(8), <b>mbind</b>(2),
+<b>mmap</b>(2), <b>move_pages</b>(2), <b>jemalloc</b>(3),
 <b>memkind_dax_kmem</b>(3), <b>memkind_default</b>(3),
 <b>memkind_arena</b>(3), <b>memkind_hbw</b>(3),
 <b>memkind_hugetlb</b>(3), <b>memkind_pmem</b>(3)</p>
