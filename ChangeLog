@@ -1,7 +1,9 @@
-* Wed Feb 3 2021 Michal Biesek <michal.biesek@intel.com> v1.11.0-rc1
+* Fri Feb 26 2021 Michal Biesek <michal.biesek@intel.com> v1.11.0
 - Provided a function to verify if path supports DAX - memkind_check_dax_path()
 - Provided a NUMA node interleave variant for MEMKIND_DAX_KMEM (MEMKIND_DAX_KMEM_INTERLEAVE)
-- Provided a function to enable/disable - memkind_set_bg_threads()
+- Provided a function to enable/disable background threads - memkind_set_bg_threads()
+- Provided a function to printing statistics - memkind_stats_print()
+- Extended configure mechanism by enable-memkind-initial-exec-tls option
 - Extended memkind to support HMAT (libhwloc required)
 - Provided memory property abstraction (MEMKIND_HIGHEST_CAPACITY*,
   MEMKIND_LOWEST_LATENCY_LOCAL*, MEMKIND_HIGHEST_BANDWIDTH_LOCAL*)
