@@ -2,27 +2,26 @@
 /* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include <memkind.h>
-#include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
-#include <memkind/internal/memkind_private.h>
+#include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_private.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <pthread.h>
+#include <assert.h>
 #include <errno.h>
+#include <jemalloc/jemalloc.h>
+#include <limits.h>
 #include <numa.h>
 #include <numaif.h>
-#include <jemalloc/jemalloc.h>
-#include <utmpx.h>
+#include <pthread.h>
 #include <sched.h>
-#include <limits.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/param.h>
-#include <assert.h>
+#include <unistd.h>
+#include <utmpx.h>
 
 #include "config.h"
 
@@ -30,10 +29,7 @@
 #define PAGE_2_BYTES(x) ((x) << 12)
 
 static const char *const global_stats[MEMKIND_STAT_TYPE_MAX_VALUE] = {
-    "stats.resident",
-    "stats.active",
-    "stats.allocated"
-};
+    "stats.resident", "stats.active", "stats.allocated"};
 
 #define ARENA_STAT_MAX 2
 
@@ -42,10 +38,12 @@ struct stats_arena {
     unsigned stats_no;
 };
 
-static const struct stats_arena arena_stats [MEMKIND_STAT_TYPE_MAX_VALUE] = {
-    { .stats = {"stats.arenas.%u.resident", NULL}, .stats_no = 1},
-    { .stats = {"stats.arenas.%u.pactive", NULL}, .stats_no = 1},
-    { .stats = {"stats.arenas.%u.small.allocated", "stats.arenas.%u.large.allocated"}, .stats_no = 2},
+static const struct stats_arena arena_stats[MEMKIND_STAT_TYPE_MAX_VALUE] = {
+    {.stats = {"stats.arenas.%u.resident", NULL}, .stats_no = 1},
+    {.stats = {"stats.arenas.%u.pactive", NULL}, .stats_no = 1},
+    {.stats = {"stats.arenas.%u.small.allocated",
+               "stats.arenas.%u.large.allocated"},
+     .stats_no = 2},
 };
 
 static void *jemk_mallocx_check(size_t size, int flags);
@@ -75,11 +73,13 @@ MEMKIND_EXPORT int memkind_set_arena_map_len(struct memkind *kind)
         char *arena_num_env = memkind_get_env("MEMKIND_ARENA_NUM_PER_KIND");
 
         if (arena_num_env) {
-            unsigned long int arena_num_value = strtoul(arena_num_env, NULL, 10);
+            unsigned long int arena_num_value =
+                strtoul(arena_num_env, NULL, 10);
 
             if ((arena_num_value == 0) || (arena_num_value > INT_MAX)) {
-                log_err("Wrong MEMKIND_ARENA_NUM_PER_KIND environment value: %lu.",
-                        arena_num_value);
+                log_err(
+                    "Wrong MEMKIND_ARENA_NUM_PER_KIND environment value: %lu.",
+                    arena_num_value);
                 return MEMKIND_ERROR_ENVIRON;
             }
 
@@ -88,7 +88,8 @@ MEMKIND_EXPORT int memkind_set_arena_map_len(struct memkind *kind)
             int calculated_arena_num = numa_num_configured_cpus() * 4;
 
 #if ARENA_LIMIT_PER_KIND != 0
-            calculated_arena_num = MIN((ARENA_LIMIT_PER_KIND), calculated_arena_num);
+            calculated_arena_num =
+                MIN((ARENA_LIMIT_PER_KIND), calculated_arena_num);
 #endif
             kind->arena_map_len = calculated_arena_num;
         }
@@ -119,9 +120,12 @@ static void arena_config_init()
     arena_init_status = pthread_key_create(&tcache_key, tcache_finalize);
 }
 
-#define MALLOCX_ARENA_MAX           0xffe        // copy-pasted from jemalloc/internal/jemalloc_internal.h
-#define DIRTY_DECAY_MS_DEFAULT      10000        // copy-pasted from jemalloc/internal/arena_types.h DIRTY_DECAY_MS_DEFAULT
-#define DIRTY_DECAY_MS_CONSERVATIVE     0
+#define MALLOCX_ARENA_MAX                                                      \
+    0xffe // copy-pasted from jemalloc/internal/jemalloc_internal.h
+#define DIRTY_DECAY_MS_DEFAULT                                                 \
+    10000 // copy-pasted from jemalloc/internal/arena_types.h
+          // DIRTY_DECAY_MS_DEFAULT
+#define DIRTY_DECAY_MS_CONSERVATIVE 0
 
 static struct memkind *arena_registry_g[MALLOCX_ARENA_MAX];
 static pthread_mutex_t arena_registry_write_lock;
@@ -142,9 +146,9 @@ static void *alloc_aligned_slow(size_t size, size_t alignment,
     size_t extended_size = size + alignment;
     void *ptr;
 
-    ptr = kind_mmap(kind,  NULL, extended_size);
+    ptr = kind_mmap(kind, NULL, extended_size);
 
-    if(ptr == MAP_FAILED) {
+    if (ptr == MAP_FAILED) {
         return NULL;
     }
 
@@ -165,14 +169,9 @@ static void *alloc_aligned_slow(size_t size, size_t alignment,
     return (void *)aligned_addr;
 }
 
-
-void *arena_extent_alloc(extent_hooks_t *extent_hooks,
-                         void *new_addr,
-                         size_t size,
-                         size_t alignment,
-                         bool *zero,
-                         bool *commit,
-                         unsigned arena_ind)
+void *arena_extent_alloc(extent_hooks_t *extent_hooks, void *new_addr,
+                         size_t size, size_t alignment, bool *zero,
+                         bool *commit, unsigned arena_ind)
 {
     struct memkind *kind = get_kind_by_arena(arena_ind);
 
@@ -192,10 +191,10 @@ void *arena_extent_alloc(extent_hooks_t *extent_hooks,
         return NULL;
     }
 
-    if ((uintptr_t)addr & (alignment-1)) {
+    if ((uintptr_t)addr & (alignment - 1)) {
         munmap(addr, size);
         addr = alloc_aligned_slow(size, alignment, kind);
-        if(addr == NULL) {
+        if (addr == NULL) {
             return NULL;
         }
     }
@@ -206,55 +205,37 @@ void *arena_extent_alloc(extent_hooks_t *extent_hooks,
     return addr;
 }
 
-void *arena_extent_alloc_hugetlb(extent_hooks_t *extent_hooks,
-                                 void *new_addr,
-                                 size_t size,
-                                 size_t alignment,
-                                 bool *zero,
-                                 bool *commit,
-                                 unsigned arena_ind)
+void *arena_extent_alloc_hugetlb(extent_hooks_t *extent_hooks, void *new_addr,
+                                 size_t size, size_t alignment, bool *zero,
+                                 bool *commit, unsigned arena_ind)
 {
-    //round up to huge page size
+    // round up to huge page size
     size = (size + (HUGE_PAGE_SIZE - 1)) & ~(HUGE_PAGE_SIZE - 1);
-    return arena_extent_alloc(extent_hooks, new_addr, size, alignment, zero, commit,
-                              arena_ind);
+    return arena_extent_alloc(extent_hooks, new_addr, size, alignment, zero,
+                              commit, arena_ind);
 }
 
-bool arena_extent_dalloc(extent_hooks_t *extent_hooks,
-                         void *addr,
-                         size_t size,
-                         bool committed,
-                         unsigned arena_ind)
+bool arena_extent_dalloc(extent_hooks_t *extent_hooks, void *addr, size_t size,
+                         bool committed, unsigned arena_ind)
 {
     return true;
 }
 
-bool arena_extent_commit(extent_hooks_t *extent_hooks,
-                         void *addr,
-                         size_t size,
-                         size_t offset,
-                         size_t length,
-                         unsigned arena_ind)
+bool arena_extent_commit(extent_hooks_t *extent_hooks, void *addr, size_t size,
+                         size_t offset, size_t length, unsigned arena_ind)
 {
     return false;
 }
 
-bool arena_extent_decommit(extent_hooks_t *extent_hooks,
-                           void *addr,
-                           size_t size,
-                           size_t offset,
-                           size_t length,
+bool arena_extent_decommit(extent_hooks_t *extent_hooks, void *addr,
+                           size_t size, size_t offset, size_t length,
                            unsigned arena_ind)
 {
     return true;
 }
 
-bool arena_extent_purge(extent_hooks_t *extent_hooks,
-                        void *addr,
-                        size_t size,
-                        size_t offset,
-                        size_t length,
-                        unsigned arena_ind)
+bool arena_extent_purge(extent_hooks_t *extent_hooks, void *addr, size_t size,
+                        size_t offset, size_t length, unsigned arena_ind)
 {
     if (memkind_get_hog_memory()) {
         return true;
@@ -264,54 +245,42 @@ bool arena_extent_purge(extent_hooks_t *extent_hooks,
     return (err != 0);
 }
 
-bool arena_extent_split(extent_hooks_t *extent_hooks,
-                        void *addr,
-                        size_t size,
-                        size_t size_a,
-                        size_t size_b,
-                        bool committed,
+bool arena_extent_split(extent_hooks_t *extent_hooks, void *addr, size_t size,
+                        size_t size_a, size_t size_b, bool committed,
                         unsigned arena_ind)
 {
     return false;
 }
 
-bool arena_extent_merge(extent_hooks_t *extent_hooks,
-                        void *addr_a,
-                        size_t size_a,
-                        void *addr_b,
-                        size_t size_b,
-                        bool committed,
-                        unsigned arena_ind)
+bool arena_extent_merge(extent_hooks_t *extent_hooks, void *addr_a,
+                        size_t size_a, void *addr_b, size_t size_b,
+                        bool committed, unsigned arena_ind)
 {
     return false;
 }
 
-extent_hooks_t arena_extent_hooks = {
-    .alloc = arena_extent_alloc,
-    .dalloc = arena_extent_dalloc,
-    .commit = arena_extent_commit,
-    .decommit = arena_extent_decommit,
-    .purge_lazy = arena_extent_purge,
-    .split = arena_extent_split,
-    .merge = arena_extent_merge
-};
+extent_hooks_t arena_extent_hooks = {.alloc = arena_extent_alloc,
+                                     .dalloc = arena_extent_dalloc,
+                                     .commit = arena_extent_commit,
+                                     .decommit = arena_extent_decommit,
+                                     .purge_lazy = arena_extent_purge,
+                                     .split = arena_extent_split,
+                                     .merge = arena_extent_merge};
 
-extent_hooks_t arena_extent_hooks_hugetlb = {
-    .alloc = arena_extent_alloc_hugetlb,
-    .dalloc = arena_extent_dalloc,
-    .commit = arena_extent_commit,
-    .decommit = arena_extent_decommit,
-    .purge_lazy = arena_extent_purge,
-    .split = arena_extent_split,
-    .merge = arena_extent_merge
-};
+extent_hooks_t arena_extent_hooks_hugetlb = {.alloc =
+                                                 arena_extent_alloc_hugetlb,
+                                             .dalloc = arena_extent_dalloc,
+                                             .commit = arena_extent_commit,
+                                             .decommit = arena_extent_decommit,
+                                             .purge_lazy = arena_extent_purge,
+                                             .split = arena_extent_split,
+                                             .merge = arena_extent_merge};
 
 extent_hooks_t *get_extent_hooks_by_kind(struct memkind *kind)
 {
-    if (kind == MEMKIND_HUGETLB
-        || kind == MEMKIND_HBW_HUGETLB
-        || kind == MEMKIND_HBW_ALL_HUGETLB
-        || kind == MEMKIND_HBW_PREFERRED_HUGETLB) {
+    if (kind == MEMKIND_HUGETLB || kind == MEMKIND_HBW_HUGETLB ||
+        kind == MEMKIND_HBW_ALL_HUGETLB ||
+        kind == MEMKIND_HBW_PREFERRED_HUGETLB) {
         return &arena_extent_hooks_hugetlb;
     } else {
         return &arena_extent_hooks;
@@ -324,12 +293,12 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
     int err;
 
     pthread_once(&arena_config_once, arena_config_init);
-    if(arena_init_status) {
+    if (arena_init_status) {
         return arena_init_status;
     }
 
     err = memkind_set_arena_map_len(kind);
-    if(err) {
+    if (err) {
         return err;
     }
 #ifdef MEMKIND_TLS
@@ -343,25 +312,27 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
     unsigned i;
     size_t unsigned_size = sizeof(unsigned int);
     kind->arena_zero = UINT_MAX;
-    for(i = 0; i<kind->arena_map_len; i++) {
+    for (i = 0; i < kind->arena_map_len; i++) {
         unsigned arena_index;
-        //create new arena with consecutive index
-        err = jemk_mallctl("arenas.create", (void *)&arena_index, &unsigned_size, NULL,
-                           0);
-        if(err) {
+        // create new arena with consecutive index
+        err = jemk_mallctl("arenas.create", (void *)&arena_index,
+                           &unsigned_size, NULL, 0);
+        if (err) {
             log_err("Could not create arena.");
             err = MEMKIND_ERROR_ARENAS_CREATE;
             goto exit;
         }
-        //store arena with lowest index (arenas could be created in descending/ascending order)
-        if(kind->arena_zero > arena_index) {
+        // store arena with lowest index (arenas could be created in
+        // descending/ascending order)
+        if (kind->arena_zero > arena_index) {
             kind->arena_zero = arena_index;
         }
-        //setup extent_hooks for newly created arena
+        // setup extent_hooks for newly created arena
         char cmd[64];
         snprintf(cmd, sizeof(cmd), "arena.%u.extent_hooks", arena_index);
-        err = jemk_mallctl(cmd, NULL, NULL, (void *)&hooks, sizeof(extent_hooks_t *));
-        if(err) {
+        err = jemk_mallctl(cmd, NULL, NULL, (void *)&hooks,
+                           sizeof(extent_hooks_t *));
+        if (err) {
             goto exit;
         }
         arena_registry_g[arena_index] = kind;
@@ -374,7 +345,8 @@ exit:
 }
 
 MEMKIND_EXPORT int memkind_arena_create(struct memkind *kind,
-                                        struct memkind_ops *ops, const char *name)
+                                        struct memkind_ops *ops,
+                                        const char *name)
 {
     int err = memkind_default_create(kind, ops, name);
     if (!err) {
@@ -418,14 +390,14 @@ int memkind_arena_finalize(struct memkind *kind)
 }
 
 // max allocation size to be cached by tcache mechanism
-#define TCACHE_MAX (1<<(JEMALLOC_TCACHE_CLASS))
+#define TCACHE_MAX (1 << (JEMALLOC_TCACHE_CLASS))
 
 static void tcache_finalize(void *args)
 {
     int i;
     unsigned *tcache_map = args;
-    for(i = 0; i<MEMKIND_NUM_BASE_KIND; i++) {
-        if(tcache_map[i] != 0) {
+    for (i = 0; i < MEMKIND_NUM_BASE_KIND; i++) {
+        if (tcache_map[i] != 0) {
             jemk_mallctl("tcache.destroy", NULL, NULL, (void *)&tcache_map[i],
                          sizeof(unsigned));
         }
@@ -444,8 +416,8 @@ MEMKIND_EXPORT struct memkind *memkind_arena_detect_kind(void *ptr)
         kind = get_kind_by_arena((unsigned)result);
     }
 
-    /* if no kind was associated with arena it means that allocation doesn't come from
-       jemk_*allocx API - it is jemk_*alloc API (MEMKIND_DEFAULT) */
+    /* if no kind was associated with arena it means that allocation doesn't
+       come from jemk_*allocx API - it is jemk_*alloc API (MEMKIND_DEFAULT) */
 
     return (kind) ? kind : MEMKIND_DEFAULT;
 }
@@ -453,25 +425,26 @@ MEMKIND_EXPORT struct memkind *memkind_arena_detect_kind(void *ptr)
 static inline int get_tcache_flag(unsigned partition, size_t size)
 {
 
-    // do not cache allocation larger than tcache_max nor those coming from non-static kinds
-    if(size > TCACHE_MAX || partition >= MEMKIND_NUM_BASE_KIND) {
+    // do not cache allocation larger than tcache_max nor those coming from
+    // non-static kinds
+    if (size > TCACHE_MAX || partition >= MEMKIND_NUM_BASE_KIND) {
         return MALLOCX_TCACHE_NONE;
     }
 
     unsigned *tcache_map = pthread_getspecific(tcache_key);
-    if(tcache_map == NULL) {
+    if (tcache_map == NULL) {
         tcache_map = jemk_calloc(MEMKIND_NUM_BASE_KIND, sizeof(unsigned));
-        if(tcache_map == NULL) {
+        if (tcache_map == NULL) {
             return MALLOCX_TCACHE_NONE;
         }
         pthread_setspecific(tcache_key, (void *)tcache_map);
     }
 
-    if(MEMKIND_UNLIKELY(tcache_map[partition] == 0)) {
+    if (MEMKIND_UNLIKELY(tcache_map[partition] == 0)) {
         size_t unsigned_size = sizeof(unsigned);
         int err = jemk_mallctl("tcache.create", (void *)&tcache_map[partition],
                                &unsigned_size, NULL, 0);
-        if(err) {
+        if (err) {
             log_err("Could not acquire tcache, err=%d", err);
             return MALLOCX_TCACHE_NONE;
         }
@@ -487,7 +460,8 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
     int err = kind->ops->get_arena(kind, &arena, size);
     if (MEMKIND_LIKELY(!err)) {
         result = jemk_mallocx_check(size,
-                                    MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
+                                    MALLOCX_ARENA(arena) |
+                                        get_tcache_flag(kind->partition, size));
     }
     return result;
 }
@@ -501,7 +475,8 @@ static void *memkind_arena_malloc_no_tcache(struct memkind *kind, size_t size)
         unsigned arena;
         int err = kind->ops->get_arena(kind, &arena, size);
         if (MEMKIND_LIKELY(!err)) {
-            result = jemk_mallocx_check(size, MALLOCX_ARENA(arena) | MALLOCX_TCACHE_NONE);
+            result = jemk_mallocx_check(
+                size, MALLOCX_ARENA(arena) | MALLOCX_TCACHE_NONE);
         }
     }
     return result;
@@ -540,11 +515,15 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
         int err = kind->ops->get_arena(kind, &arena, size);
         if (MEMKIND_LIKELY(!err)) {
             if (ptr == NULL) {
-                ptr = jemk_mallocx_check(size,
-                                         MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
+                ptr = jemk_mallocx_check(
+                    size,
+                    MALLOCX_ARENA(arena) |
+                        get_tcache_flag(kind->partition, size));
             } else {
-                ptr = jemk_rallocx_check(ptr, size,
-                                         MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
+                ptr = jemk_rallocx_check(
+                    ptr, size,
+                    MALLOCX_ARENA(arena) |
+                        get_tcache_flag(kind->partition, size));
             }
         }
     }
@@ -572,13 +551,14 @@ MEMKIND_EXPORT void *memkind_arena_realloc_with_kind_detect(void *ptr,
     }
 }
 
-MEMKIND_EXPORT int memkind_arena_update_memory_usage_policy(
-    struct memkind *kind, memkind_mem_usage_policy policy)
+MEMKIND_EXPORT int
+memkind_arena_update_memory_usage_policy(struct memkind *kind,
+                                         memkind_mem_usage_policy policy)
 {
     int err = MEMKIND_SUCCESS;
     unsigned i;
     ssize_t dirty_decay_val = 0;
-    switch ( policy ) {
+    switch (policy) {
         case MEMKIND_MEM_USAGE_POLICY_DEFAULT:
             dirty_decay_val = DIRTY_DECAY_MS_DEFAULT;
             break;
@@ -593,9 +573,11 @@ MEMKIND_EXPORT int memkind_arena_update_memory_usage_policy(
     for (i = 0; i < kind->arena_map_len; ++i) {
         char cmd[64];
 
-        snprintf(cmd, sizeof(cmd), "arena.%u.dirty_decay_ms", kind->arena_zero + i);
-        err = jemk_mallctl(cmd, NULL, NULL, (void *)&dirty_decay_val, sizeof(ssize_t));
-        if ( err ) {
+        snprintf(cmd, sizeof(cmd), "arena.%u.dirty_decay_ms",
+                 kind->arena_zero + i);
+        err = jemk_mallctl(cmd, NULL, NULL, (void *)&dirty_decay_val,
+                           sizeof(ssize_t));
+        if (err) {
             log_err("Incorrect dirty_decay_ms value %zu", dirty_decay_val);
             return MEMKIND_ERROR_INVALID;
         }
@@ -613,7 +595,8 @@ MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num,
     int err = kind->ops->get_arena(kind, &arena, size);
     if (MEMKIND_LIKELY(!err)) {
         result = jemk_mallocx_check(num * size,
-                                    MALLOCX_ARENA(arena) | MALLOCX_ZERO | get_tcache_flag(kind->partition, size));
+                                    MALLOCX_ARENA(arena) | MALLOCX_ZERO |
+                                        get_tcache_flag(kind->partition, size));
     }
     return result;
 }
@@ -637,9 +620,10 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
         /* posix_memalign should not change errno.
            Set it to its previous value after calling jemalloc */
         int errno_before = errno;
-        *memptr = jemk_mallocx_check(size,
-                                     MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena) | get_tcache_flag(
-                                         kind->partition, size));
+        *memptr =
+            jemk_mallocx_check(size,
+                               MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena) |
+                                   get_tcache_flag(kind->partition, size));
         errno = errno_before;
         err = *memptr ? 0 : ENOMEM;
     }
@@ -672,10 +656,10 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
             // thread (no matter the arch's word width).  This might change
             // in the future, but even in the worst case the hash will
             // degenerate to a single bucket with no loss of correctness.
-            *arena_tsd = ((uint64_t)pthread_self() >> 12) %
-                         kind->arena_map_len;
-            err = pthread_setspecific(kind->arena_key, arena_tsd) ?
-                  MEMKIND_ERROR_RUNTIME : 0;
+            *arena_tsd = ((uint64_t)pthread_self() >> 12) % kind->arena_map_len;
+            err = pthread_setspecific(kind->arena_key, arena_tsd)
+                ? MEMKIND_ERROR_RUNTIME
+                : 0;
         }
     }
     *arena = kind->arena_zero + *arena_tsd;
@@ -709,7 +693,7 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
     *arena = kind->arena_zero + arena_idx;
     return 0;
 }
-#endif //MEMKIND_TLS
+#endif // MEMKIND_TLS
 
 static void *jemk_mallocx_check(size_t size, int flags)
 {
@@ -745,15 +729,16 @@ static void *jemk_rallocx_check(void *ptr, size_t size, int flags)
         result = jemk_rallocx(ptr, size, flags);
     }
     return result;
-
 }
 
 void memkind_arena_init(struct memkind *kind)
 {
     if (kind != MEMKIND_DEFAULT) {
-        int err = memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind));
+        int err =
+            memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind));
         if (err) {
-            log_fatal("[%s] Failed to create arena map (error code:%d).", kind->name, err);
+            log_fatal("[%s] Failed to create arena map (error code:%d).",
+                      kind->name, err);
             abort();
         }
     }
@@ -774,7 +759,7 @@ static int memkind_arena_get_stat(struct memkind *kind, memkind_stat_type stat,
             bool is_init;
             size_t sz_b_state = sizeof(is_init);
             snprintf(cmd, 128, "arena.%u.initialized", kind->arena_zero + i);
-            err =  jemk_mallctl(cmd, (void *)&is_init, &sz_b_state, NULL, 0);
+            err = jemk_mallctl(cmd, (void *)&is_init, &sz_b_state, NULL, 0);
             if (err) {
                 log_err("Error on getting initialized state of arena.");
                 return MEMKIND_ERROR_INVALID;
@@ -785,7 +770,8 @@ static int memkind_arena_get_stat(struct memkind *kind, memkind_stat_type stat,
         }
 
         for (j = 0; j < arena_stats[stat].stats_no; ++j) {
-            snprintf(cmd, 128, arena_stats[stat].stats[j], kind->arena_zero + i);
+            snprintf(cmd, 128, arena_stats[stat].stats[j],
+                     kind->arena_zero + i);
             err = jemk_mallctl(cmd, &temp_stat, &sz, NULL, 0);
             if (err) {
                 log_err("Error on getting arena statistic.");
@@ -798,7 +784,8 @@ static int memkind_arena_get_stat(struct memkind *kind, memkind_stat_type stat,
 }
 
 int memkind_arena_get_stat_with_check_init(struct memkind *kind,
-                                           memkind_stat_type stat, bool check_init, size_t *value)
+                                           memkind_stat_type stat,
+                                           bool check_init, size_t *value)
 {
     int status;
     switch (stat) {
@@ -811,7 +798,7 @@ int memkind_arena_get_stat_with_check_init(struct memkind *kind,
             *value = PAGE_2_BYTES(*value);
             break;
         default:
-            //not reached
+            // not reached
             return MEMKIND_ERROR_INVALID;
             break;
     }
@@ -852,7 +839,8 @@ int memkind_arena_set_max_bg_threads(size_t threads_limit)
 
 int memkind_arena_set_bg_threads(bool state)
 {
-    int err = jemk_mallctl("background_thread", NULL, NULL, &state, sizeof(bool));
+    int err =
+        jemk_mallctl("background_thread", NULL, NULL, &state, sizeof(bool));
     if (err) {
         log_err("Error while enabling/disabling background thread");
         return MEMKIND_ERROR_INVALID;
@@ -860,7 +848,7 @@ int memkind_arena_set_bg_threads(bool state)
     return err;
 }
 
-void *memkind_arena_defrag_reallocate_with_kind_detect (void *ptr)
+void *memkind_arena_defrag_reallocate_with_kind_detect(void *ptr)
 {
     return memkind_arena_defrag_reallocate(memkind_detect_kind(ptr), ptr);
 }
@@ -874,7 +862,8 @@ void *memkind_arena_defrag_reallocate(struct memkind *kind, void *ptr)
     if (!jemk_check_reallocatex(ptr)) {
         size_t size = memkind_malloc_usable_size(kind, ptr);
         void *ptr_new = memkind_arena_malloc_no_tcache(kind, size);
-        if (MEMKIND_UNLIKELY(!ptr_new)) return NULL;
+        if (MEMKIND_UNLIKELY(!ptr_new))
+            return NULL;
         memcpy(ptr_new, ptr, size);
         jemk_dallocx(ptr, MALLOCX_TCACHE_NONE);
         return ptr_new;

@@ -2,23 +2,27 @@
 /* Copyright (C) 2021 Intel Corporation. */
 #pragma once
 
+#include "config.h"
+#include "numa.h"
+#include "numaif.h"
 #include <climits>
 #include <iostream>
 #include <stdexcept>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unordered_map>
 #include <unordered_set>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "numa.h"
-#include "numaif.h"
-#include "config.h"
 #ifdef MEMKIND_HWLOC
 #include "hwloc.h"
 #endif
 class TestPrereq
 {
 private:
-    enum memory_var {HBM, PMEM};
+    enum memory_var
+    {
+        HBM,
+        PMEM
+    };
 
 #ifdef MEMKIND_HWLOC
     hwloc_topology_t topology;
@@ -31,17 +35,17 @@ private:
             if (mem == PMEM &&
                 hwloc_obj_get_info_by_name(node, "DAXDevice") != nullptr) {
                 return true;
-            } else if (mem == HBM &&
-                       node->subtype && !strcmp(node->subtype, "MCDRAM")) {
+            } else if (mem == HBM && node->subtype &&
+                       !strcmp(node->subtype, "MCDRAM")) {
                 return true;
             }
         }
         return false;
     }
-#define HWLOC_SUPPORT           (true)
+#define HWLOC_SUPPORT (true)
 #else
-#define find_type(memory_var)   (false)
-#define HWLOC_SUPPORT           (false)
+#define find_type(memory_var) (false)
+#define HWLOC_SUPPORT (false)
 #endif
 
 #ifdef MEMKIND_DAX_KMEM
@@ -50,16 +54,16 @@ private:
 #define DAXCTL_SUPPORT (false)
 #endif
 
-#define CPUID_MODEL_SHIFT       (4)
-#define CPUID_MODEL_MASK        (0xf)
-#define CPUID_EXT_MODEL_MASK    (0xf)
-#define CPUID_EXT_MODEL_SHIFT   (16)
-#define CPUID_FAMILY_MASK       (0xf)
-#define CPUID_FAMILY_SHIFT      (8)
-#define CPU_MODEL_KNL           (0x57)
-#define CPU_MODEL_KNM           (0x85)
-#define CPU_MODEL_CLX           (0x55)
-#define CPU_FAMILY_INTEL        (0x06)
+#define CPUID_MODEL_SHIFT (4)
+#define CPUID_MODEL_MASK (0xf)
+#define CPUID_EXT_MODEL_MASK (0xf)
+#define CPUID_EXT_MODEL_SHIFT (16)
+#define CPUID_FAMILY_MASK (0xf)
+#define CPUID_FAMILY_SHIFT (8)
+#define CPU_MODEL_KNL (0x57)
+#define CPU_MODEL_KNM (0x85)
+#define CPU_MODEL_CLX (0x55)
+#define CPU_FAMILY_INTEL (0x06)
 
     typedef struct {
         uint32_t model;
@@ -76,10 +80,10 @@ private:
     inline void cpuid_asm(int leaf, int subleaf, registers_t *registers) const
     {
 #ifdef __x86_64__
-        asm volatile("cpuid":"=a"(registers->eax),
-                     "=b"(registers->ebx),
-                     "=c"(registers->ecx),
-                     "=d"(registers->edx):"0"(leaf), "2"(subleaf));
+        asm volatile("cpuid"
+                     : "=a"(registers->eax), "=b"(registers->ebx),
+                       "=c"(registers->ecx), "=d"(registers->edx)
+                     : "0"(leaf), "2"(subleaf));
 #else
         registers->eax = 0;
 #endif
@@ -89,9 +93,10 @@ private:
     {
         registers_t registers;
         cpuid_asm(1, 0, &registers);
-        uint32_t model = (registers.eax >> CPUID_MODEL_SHIFT) & CPUID_MODEL_MASK;
-        uint32_t model_ext = (registers.eax >> CPUID_EXT_MODEL_SHIFT) &
-                             CPUID_EXT_MODEL_MASK;
+        uint32_t model =
+            (registers.eax >> CPUID_MODEL_SHIFT) & CPUID_MODEL_MASK;
+        uint32_t model_ext =
+            (registers.eax >> CPUID_EXT_MODEL_SHIFT) & CPUID_EXT_MODEL_MASK;
 
         cpu_model_data_t data;
         data.model = model | (model_ext << 4);
@@ -113,12 +118,12 @@ private:
 
     bool is_kind_HBW(memkind_t kind) const
     {
-        return (kind == MEMKIND_HBW ||
-                kind == MEMKIND_HBW_ALL ||
+        return (kind == MEMKIND_HBW || kind == MEMKIND_HBW_ALL ||
                 kind == MEMKIND_HBW_PREFERRED ||
                 kind == MEMKIND_HBW_PREFERRED_HUGETLB ||
                 kind == MEMKIND_HBW_PREFERRED_GBTLB);
     }
+
 public:
     TestPrereq()
     {
@@ -140,25 +145,26 @@ public:
 
     bool check_cpu(memory_var variant) const
     {
-        switch(variant) {
+        switch (variant) {
             case HBM:
                 return is_KN_family_supported();
             case PMEM: {
                 cpu_model_data_t cpu = get_cpu_model_data();
-                return cpu.family == CPU_FAMILY_INTEL && (cpu.model == CPU_MODEL_CLX);
+                return cpu.family == CPU_FAMILY_INTEL &&
+                    (cpu.model == CPU_MODEL_CLX);
             }
             default:
                 return false;
         }
     }
 
-    std::unordered_set<int> get_closest_numa_nodes(int first_node,
-                                                   std::unordered_set<int> nodes) const
+    std::unordered_set<int>
+    get_closest_numa_nodes(int first_node, std::unordered_set<int> nodes) const
     {
         int min_distance = INT_MAX;
         std::unordered_set<int> closest_numa_ids;
 
-        for (auto const &node: nodes) {
+        for (auto const &node : nodes) {
             int distance_to_i_node = numa_distance(first_node, node);
 
             if (distance_to_i_node < min_distance) {
@@ -206,8 +212,9 @@ public:
         for (int node_id = 0; node_id <= MAXNODE_ID; ++node_id) {
             if (numa_bitmask_isbitset(numa_nodes_ptr, node_id)) {
                 char access_path[256];
-                sprintf(access_path, "/sys/devices/system/node/node%d/access0/", node_id);
-                if(!stat(access_path, &info)) {
+                sprintf(access_path, "/sys/devices/system/node/node%d/access0/",
+                        node_id);
+                if (!stat(access_path, &info)) {
                     return true;
                 }
             }
@@ -219,7 +226,7 @@ public:
     {
         cpu_model_data_t cpu = get_cpu_model_data();
         return cpu.family == CPU_FAMILY_INTEL &&
-               (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
+            (cpu.model == CPU_MODEL_KNL || cpu.model == CPU_MODEL_KNM);
     }
 
     bool is_libdaxctl_supported() const
@@ -274,7 +281,7 @@ public:
         size_t sum_of_free_space = 0;
         long long free_space;
 
-        for(auto const &node: nodes) {
+        for (auto const &node : nodes) {
             int result = numa_node_size64(node, &free_space);
             if (result == -1)
                 continue;
@@ -306,13 +313,18 @@ public:
             {"MEMKIND_DAX_KMEM_PREFERRED", MEMKIND_DAX_KMEM_PREFERRED},
             {"MEMKIND_DAX_KMEM_INTERLEAVE", MEMKIND_DAX_KMEM_INTERLEAVE},
             {"MEMKIND_HIGHEST_CAPACITY", MEMKIND_HIGHEST_CAPACITY},
-            {"MEMKIND_HIGHEST_CAPACITY_PREFERRED", MEMKIND_HIGHEST_CAPACITY_PREFERRED},
+            {"MEMKIND_HIGHEST_CAPACITY_PREFERRED",
+             MEMKIND_HIGHEST_CAPACITY_PREFERRED},
             {"MEMKIND_HIGHEST_CAPACITY_LOCAL", MEMKIND_HIGHEST_CAPACITY_LOCAL},
-            {"MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED", MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED},
+            {"MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED",
+             MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED},
             {"MEMKIND_LOWEST_LATENCY_LOCAL", MEMKIND_LOWEST_LATENCY_LOCAL},
-            {"MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED", MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED},
-            {"MEMKIND_HIGHEST_BANDWIDTH_LOCAL", MEMKIND_HIGHEST_BANDWIDTH_LOCAL},
-            {"MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED", MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED},
+            {"MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED",
+             MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED},
+            {"MEMKIND_HIGHEST_BANDWIDTH_LOCAL",
+             MEMKIND_HIGHEST_BANDWIDTH_LOCAL},
+            {"MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED",
+             MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED},
         };
         return kind_translate.at(kind_name);
     }
@@ -331,12 +343,12 @@ public:
 
     bool is_kind_required_HMAT(memkind_t kind) const
     {
-        return (kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
-                kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED ||
-                ((is_kind_HBW(kind) ||
-                  kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL ||
-                  kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED) &&
-                 !is_KN_family_supported()));
+        return (
+            kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
+            kind == MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED ||
+            ((is_kind_HBW(kind) || kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL ||
+              kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED) &&
+             !is_KN_family_supported()));
     }
 
     bool is_kind_required_libhwloc(memkind_t kind) const
@@ -354,11 +366,13 @@ public:
     {
         auto regular_nodes = get_regular_numa_nodes();
         auto mem_only_nodes = get_memory_only_numa_nodes();
-        for (auto const &node: regular_nodes) {
-            auto closest_mem_only_nodes = get_closest_numa_nodes(node, mem_only_nodes);
+        for (auto const &node : regular_nodes) {
+            auto closest_mem_only_nodes =
+                get_closest_numa_nodes(node, mem_only_nodes);
             if (closest_mem_only_nodes.size() > 1) {
-                std::cout << "More than one NUMA Node are in the same distance to: " << node <<
-                          std::endl;
+                std::cout
+                    << "More than one NUMA Node are in the same distance to: "
+                    << node << std::endl;
                 return false;
             }
         }

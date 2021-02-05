@@ -6,8 +6,8 @@
 extern "C" {
 #endif
 
-#include <memkind.h>
 #include <jemalloc/jemalloc.h>
+#include <memkind.h>
 #include <memkind/internal/memkind_private.h>
 
 /*
@@ -45,10 +45,10 @@ int memkind_arena_set_max_bg_threads(size_t threads_limit);
 int memkind_arena_set_bg_threads(bool state);
 int memkind_arena_update_cached_stats(void);
 int memkind_arena_get_kind_stat(struct memkind *kind,
-                                memkind_stat_type stat_type,
-                                size_t *stat);
+                                memkind_stat_type stat_type, size_t *stat);
 int memkind_arena_get_stat_with_check_init(struct memkind *kind,
-                                           memkind_stat_type stat, bool check_init, size_t *value);
+                                           memkind_stat_type stat,
+                                           bool check_init, size_t *value);
 int memkind_arena_get_global_stat(memkind_stat_type stat_type, size_t *stat);
 void *memkind_arena_defrag_reallocate(struct memkind *kind, void *ptr);
 void *memkind_arena_defrag_reallocate_with_kind_detect(void *ptr);

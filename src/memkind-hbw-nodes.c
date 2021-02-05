@@ -37,7 +37,7 @@ const char *help_message =
     "    hbwmalloc(3), memkind(3)\n"
     "\n";
 
-extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
+extern unsigned int numa_bitmask_weight(const struct bitmask *bmp);
 
 int print_hbw_nodes()
 {
@@ -63,14 +63,15 @@ int print_hbw_nodes()
     nodemask_all_bm = numa_allocate_nodemask();
     if (!nodemask_all_bm) {
         status = 1;
-        goto free_cpumask;;
+        goto free_cpumask;
+        ;
     }
 
-    for(i=0; i<=max_node_id; ++i) {
+    for (i = 0; i <= max_node_id; ++i) {
         numa_bitmask_clearall(&nodemask_bm);
 
-        if((numa_node_to_cpus(i, node_cpumask) != 0) ||
-           numa_bitmask_weight(node_cpumask) == 0) {
+        if ((numa_node_to_cpus(i, node_cpumask) != 0) ||
+            numa_bitmask_weight(node_cpumask) == 0) {
             continue;
         }
         int ret = numa_run_on_node(i);
@@ -78,13 +79,15 @@ int print_hbw_nodes()
             status = 1;
             goto free_all_bm;
         }
-        //WARNING: code below is usage of memkind experimental API which may be changed in future
-        if(memkind_hbw_all_get_mbind_nodemask(NULL, nodemask.n, NUMA_NUM_NODES) != 0) {
+        // WARNING: code below is usage of memkind experimental API which may be
+        // changed in future
+        if (memkind_hbw_all_get_mbind_nodemask(NULL, nodemask.n,
+                                               NUMA_NUM_NODES) != 0) {
             status = 1;
             goto free_all_bm;
         }
-        for(j=0; j<=max_node_id; ++j) {
-            if(numa_bitmask_isbitset(&nodemask_bm, j)) {
+        for (j = 0; j <= max_node_id; ++j) {
+            if (numa_bitmask_isbitset(&nodemask_bm, j)) {
                 numa_bitmask_setbit(nodemask_all_bm, j);
             }
         }
@@ -92,9 +95,10 @@ int print_hbw_nodes()
 
     j = 0;
 
-    for(i=0; i<NUMA_NUM_NODES; ++i) {
-        if(numa_bitmask_isbitset(nodemask_all_bm, i)) {
-            printf("%d%s", i, (++j == numa_bitmask_weight(nodemask_all_bm)) ? "" : ",");
+    for (i = 0; i < NUMA_NUM_NODES; ++i) {
+        if (numa_bitmask_isbitset(nodemask_all_bm, i)) {
+            printf("%d%s", i,
+                   (++j == numa_bitmask_weight(nodemask_all_bm)) ? "" : ",");
         }
     }
     printf("\n");
@@ -110,10 +114,11 @@ free_cpumask:
 
 int main(int argc, char *argv[])
 {
-    if(argc == 1) {
+    if (argc == 1) {
         return print_hbw_nodes();
-    } else if ((argc == 2) && (strncmp(argv[1], "-h", MAX_ARG_LEN) == 0 ||
-                               strncmp(argv[1], "--help", MAX_ARG_LEN) == 0)) {
+    } else if ((argc == 2) &&
+               (strncmp(argv[1], "-h", MAX_ARG_LEN) == 0 ||
+                strncmp(argv[1], "--help", MAX_ARG_LEN) == 0)) {
         printf("%s", help_message);
         return 2;
     }
