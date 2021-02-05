@@ -61,9 +61,9 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
 
 EXTRA_DIST = CONTRIBUTING \
              VERSION \
-             astyle.sh \
              autogen.sh \
              build.sh \
+             clang-format.sh \
              examples/README \
              jemalloc/.appveyor.yml \
              jemalloc/.autom4te.cfg \
@@ -493,7 +493,9 @@ clean-jemalloc_deps:
 	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
 	[ -e jemalloc/configure ] && (cd jemalloc && rm configure) || exit 0
 
-.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps html-local
+.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps html-local \
+	code-style-check code-style-apply
+
 .NOTPARALLEL: static_lib
 
 # build check programs without running tests
@@ -544,6 +546,12 @@ unit_tests_hmat: checkprogs
 
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
+
+code-style-check:
+	@CLANG_FORMAT_BIN=@clang_format@ CLANG_FORMAT_ACTION=check ./clang-format.sh
+
+code-style-apply:
+	@CLANG_FORMAT_BIN=@clang_format@ CLANG_FORMAT_ACTION=apply ./clang-format.sh
 
 include autohbw/Makefile.mk
 include test/Makefile.mk

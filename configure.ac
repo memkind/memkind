@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
@@ -271,6 +271,15 @@ if test "x$enable_heap_manager" = "x1" ; then
 fi
 AC_SUBST([enable_heap_manager])
 
+#===============================clang-format====================================
+AC_CHECK_PROGS(CLANG_FORMAT, [clang-format-11 clang-format-10 clang-format], [error])
+if test "$CLANG_FORMAT" != "error"; then
+  CLANG_FORMAT_VERSION=$($CLANG_FORMAT --version)
+  AX_COMPARE_VERSION([$CLANG_FORMAT_VERSION], [ge], [10.0.0],,
+    AC_MSG_NOTICE([$CLANG_FORMAT version: $CLANG_FORMAT_VERSION too low]))
+fi
+AC_SUBST([clang_format], $CLANG_FORMAT)
+
 #============================cxx11=============================================
 
 AX_CXX_COMPILE_STDCXX_11([noext], [optional])
@@ -282,7 +291,8 @@ LT_INIT
 AC_CONFIG_FILES([Makefile memkind.pc])
 
 AC_OUTPUT
-AC_MSG_RESULT([=================================================================================])
+AC_MSG_RESULT([
+               =================================================================================])
 AC_MSG_RESULT([
                Memkind version $VERSION])
 if test $daxctl_kmem = "yes" ; then
@@ -303,4 +313,15 @@ AC_MSG_RESULT([
                To enable this feature please install libhwloc-devel v2.3.0 or later
                and run configure again])
 fi
-AC_MSG_RESULT([=================================================================================])
+if test "$CLANG_FORMAT" != "error" ; then
+AC_MSG_RESULT([
+               Automatic code style formatting is supported
+               Calling 'make code-style-check' will print suggested style changes
+               Calling 'make code-style-apply' will apply suggested style changes to code])
+else
+AC_MSG_RESULT([
+               Automatic code style formatting is disabled. It requires clang-format version
+               10.0.0 or above.])
+fi
+AC_MSG_RESULT([
+               =================================================================================])
