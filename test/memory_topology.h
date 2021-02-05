@@ -5,14 +5,14 @@
 
 #include <memkind.h>
 
+#include "TestPrereq.hpp"
 #include <bitset>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <string>
-#include <stdexcept>
-#include "TestPrereq.hpp"
 
 #include <numa.h>
 #include <numaif.h>
@@ -56,8 +56,7 @@ protected:
 private:
     int get_kind_mem_policy_flag() const
     {
-        if (m_memory_kind == MEMKIND_HBW ||
-            m_memory_kind == MEMKIND_HBW_ALL ||
+        if (m_memory_kind == MEMKIND_HBW || m_memory_kind == MEMKIND_HBW_ALL ||
             m_memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
             m_memory_kind == MEMKIND_LOWEST_LATENCY_LOCAL ||
             m_memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL)
@@ -84,7 +83,8 @@ private:
         else if (m_memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL ||
                  m_memory_kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED)
             return Bandwidth_local_nodes();
-        else return {};
+        else
+            return {};
     }
 
     bool test_node_set(const Nodes &nodes, const MapNodeSet &map_nodes) const
@@ -99,8 +99,8 @@ private:
                 return true;
             }
         }
-        std::cout << "Failed for, Init: " << nodes.init << " Target: " << nodes.target
-                  << std::endl;
+        std::cout << "Failed for, Init: " << nodes.init
+                  << " Target: " << nodes.target << std::endl;
         return false;
     }
     TestPrereq m_tp;
@@ -128,7 +128,8 @@ protected:
 public:
     bool is_kind_supported() const
     {
-        if (!m_tp.is_HMAT_supported() && m_tp.is_kind_required_HMAT(m_memory_kind)) {
+        if (!m_tp.is_HMAT_supported() &&
+            m_tp.is_kind_required_HMAT(m_memory_kind)) {
             return false;
         }
         if (!m_tp.is_libhwloc_supported() &&
@@ -154,12 +155,12 @@ public:
         int target_node = -1;
         int status = -1;
 
-        BitmaskPtr ptr_nodemask = BitmaskPtr(numa_allocate_nodemask(),
-                                             numa_free_nodemask);
-        BitmaskPtr target_nodemask = BitmaskPtr(numa_allocate_nodemask(),
-                                                numa_free_nodemask);
+        BitmaskPtr ptr_nodemask =
+            BitmaskPtr(numa_allocate_nodemask(), numa_free_nodemask);
+        BitmaskPtr target_nodemask =
+            BitmaskPtr(numa_allocate_nodemask(), numa_free_nodemask);
 
-        //verify Node from allocation
+        // verify Node from allocation
         status = get_mempolicy(&target_node, nullptr, 0, ptr,
                                MPOL_F_NODE | MPOL_F_ADDR);
         if (status) {
@@ -169,17 +170,18 @@ public:
             return false;
         }
 
-        //verify mbind mask from allocation
+        // verify mbind mask from allocation
         status = get_mempolicy(&policy, ptr_nodemask->maskp, ptr_nodemask->size,
                                ptr, MPOL_F_ADDR);
         if (status) {
             return false;
         }
 
-        for (auto const &node_id: get_target_nodes(init_node))
+        for (auto const &node_id : get_target_nodes(init_node))
             numa_bitmask_setbit(target_nodemask.get(), node_id);
 
-        if (numa_bitmask_equal(ptr_nodemask.get(), target_nodemask.get()) !=1 ) {
+        if (numa_bitmask_equal(ptr_nodemask.get(), target_nodemask.get()) !=
+            1) {
             std::bitset<64> ptr_bits(*ptr_nodemask.get()->maskp);
             std::bitset<64> target_bits(*target_nodemask.get()->maskp);
             std::cout << "Failed for, Init mask: " << ptr_bits
@@ -199,15 +201,16 @@ public:
         auto memory_kind_nodes = get_memory_kind_Nodes();
         return get_target_nodes(init, memory_kind_nodes);
     }
-    AbstractTopology(memkind_t kind) : m_memory_kind(kind) {}
+    AbstractTopology(memkind_t kind) : m_memory_kind(kind)
+    {}
     AbstractTopology() = delete;
     virtual ~AbstractTopology() = default;
 };
 
-class KNM_All2All : public AbstractTopology
+class KNM_All2All: public AbstractTopology
 {
 public:
-    KNM_All2All(memkind_t kind) : AbstractTopology(kind) {};
+    KNM_All2All(memkind_t kind) : AbstractTopology(kind){};
 
 protected:
     MapNodeSet HBW_nodes() const final
@@ -233,10 +236,10 @@ private:
     }
 };
 
-class KNM_SNC2 : public AbstractTopology
+class KNM_SNC2: public AbstractTopology
 {
 public:
-    KNM_SNC2(memkind_t kind) : AbstractTopology(kind) {};
+    KNM_SNC2(memkind_t kind) : AbstractTopology(kind){};
 
 protected:
     MapNodeSet HBW_nodes() const final
@@ -273,10 +276,10 @@ private:
     }
 };
 
-class KNM_SNC4 : public AbstractTopology
+class KNM_SNC4: public AbstractTopology
 {
 public:
-    KNM_SNC4(memkind_t kind) : AbstractTopology(kind) {};
+    KNM_SNC4(memkind_t kind) : AbstractTopology(kind){};
 
 protected:
     MapNodeSet HBW_nodes() const final
@@ -321,10 +324,10 @@ private:
     }
 };
 
-class CLX_2_var1 : public AbstractTopology
+class CLX_2_var1: public AbstractTopology
 {
 public:
-    CLX_2_var1(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_2_var1(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -336,10 +339,10 @@ private:
     }
 };
 
-class CLX_2_var1_HMAT : public CLX_2_var1
+class CLX_2_var1_HMAT: public CLX_2_var1
 {
 public:
-    CLX_2_var1_HMAT(memkind_t kind) : CLX_2_var1(kind) {};
+    CLX_2_var1_HMAT(memkind_t kind) : CLX_2_var1(kind){};
 
 private:
     MapNodeSet Latency_local_nodes() const final
@@ -359,10 +362,10 @@ private:
     }
 };
 
-class CLX_2_var1_HBW : public AbstractTopology
+class CLX_2_var1_HBW: public AbstractTopology
 {
 public:
-    CLX_2_var1_HBW(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_2_var1_HBW(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -390,10 +393,10 @@ private:
     }
 };
 
-class CLX_2_var2 : public AbstractTopology
+class CLX_2_var2: public AbstractTopology
 {
 public:
-    CLX_2_var2(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_2_var2(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -405,10 +408,10 @@ private:
     }
 };
 
-class CLX_2_var2_HMAT : public CLX_2_var2
+class CLX_2_var2_HMAT: public CLX_2_var2
 {
 public:
-    CLX_2_var2_HMAT(memkind_t kind) : CLX_2_var2(kind) {};
+    CLX_2_var2_HMAT(memkind_t kind) : CLX_2_var2(kind){};
 
 private:
     MapNodeSet Latency_local_nodes() const final
@@ -428,10 +431,10 @@ private:
     }
 };
 
-class CLX_2_var2_HBW : public AbstractTopology
+class CLX_2_var2_HBW: public AbstractTopology
 {
 public:
-    CLX_2_var2_HBW(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_2_var2_HBW(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -459,10 +462,10 @@ private:
     }
 };
 
-class CLX_2_var3 : public AbstractTopology
+class CLX_2_var3: public AbstractTopology
 {
 public:
-    CLX_2_var3(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_2_var3(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -474,10 +477,10 @@ private:
     }
 };
 
-class CLX_2_var3_HMAT : public CLX_2_var3
+class CLX_2_var3_HMAT: public CLX_2_var3
 {
 public:
-    CLX_2_var3_HMAT(memkind_t kind) : CLX_2_var3(kind) {};
+    CLX_2_var3_HMAT(memkind_t kind) : CLX_2_var3(kind){};
 
 private:
     MapNodeSet Latency_local_nodes() const final
@@ -497,10 +500,10 @@ private:
     }
 };
 
-class CLX_2_var3_HBW : public AbstractTopology
+class CLX_2_var3_HBW: public AbstractTopology
 {
 public:
-    CLX_2_var3_HBW(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_2_var3_HBW(memkind_t kind) : AbstractTopology(kind){};
 
 protected:
     MapNodeSet HBW_nodes() const
@@ -537,10 +540,10 @@ private:
     }
 };
 
-class CLX_2_var4_HBW : public AbstractTopology
+class CLX_2_var4_HBW: public AbstractTopology
 {
 public:
-    CLX_2_var4_HBW(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_2_var4_HBW(memkind_t kind) : AbstractTopology(kind){};
 
 protected:
     MapNodeSet HBW_nodes() const
@@ -577,10 +580,10 @@ private:
     }
 };
 
-class CLX_4_var1 : public AbstractTopology
+class CLX_4_var1: public AbstractTopology
 {
 public:
-    CLX_4_var1(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_4_var1(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -594,10 +597,10 @@ private:
     }
 };
 
-class CLX_4_var1_HMAT : public CLX_4_var1
+class CLX_4_var1_HMAT: public CLX_4_var1
 {
 public:
-    CLX_4_var1_HMAT(memkind_t kind) : CLX_4_var1(kind) {};
+    CLX_4_var1_HMAT(memkind_t kind) : CLX_4_var1(kind){};
 
 private:
     MapNodeSet Latency_local_nodes() const final
@@ -621,10 +624,10 @@ private:
     }
 };
 
-class CLX_4_var1_HBW : public AbstractTopology
+class CLX_4_var1_HBW: public AbstractTopology
 {
 public:
-    CLX_4_var1_HBW(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_4_var1_HBW(memkind_t kind) : AbstractTopology(kind){};
 
 protected:
     MapNodeSet HBW_nodes() const
@@ -669,10 +672,10 @@ private:
     }
 };
 
-class CLX_4_var2 : public AbstractTopology
+class CLX_4_var2: public AbstractTopology
 {
 public:
-    CLX_4_var2(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_4_var2(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -686,10 +689,10 @@ private:
     }
 };
 
-class CLX_4_var2_HMAT : public CLX_4_var2
+class CLX_4_var2_HMAT: public CLX_4_var2
 {
 public:
-    CLX_4_var2_HMAT(memkind_t kind) : CLX_4_var2(kind) {};
+    CLX_4_var2_HMAT(memkind_t kind) : CLX_4_var2(kind){};
 
 private:
     MapNodeSet Latency_local_nodes() const final
@@ -713,10 +716,10 @@ private:
     }
 };
 
-class CLX_4_var2_HBW : public AbstractTopology
+class CLX_4_var2_HBW: public AbstractTopology
 {
 public:
-    CLX_4_var2_HBW(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_4_var2_HBW(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -750,10 +753,10 @@ private:
     }
 };
 
-class CLX_4_var3 : public AbstractTopology
+class CLX_4_var3: public AbstractTopology
 {
 public:
-    CLX_4_var3(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_4_var3(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -767,10 +770,10 @@ private:
     }
 };
 
-class CLX_4_var3_HMAT : public CLX_4_var3
+class CLX_4_var3_HMAT: public CLX_4_var3
 {
 public:
-    CLX_4_var3_HMAT(memkind_t kind) : CLX_4_var3(kind) {};
+    CLX_4_var3_HMAT(memkind_t kind) : CLX_4_var3(kind){};
 
 private:
     MapNodeSet Latency_local_nodes() const final
@@ -794,10 +797,10 @@ private:
     }
 };
 
-class CLX_4_var3_HBW : public AbstractTopology
+class CLX_4_var3_HBW: public AbstractTopology
 {
 public:
-    CLX_4_var3_HBW(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_4_var3_HBW(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -831,10 +834,10 @@ private:
     }
 };
 
-class CLX_4_var4 : public AbstractTopology
+class CLX_4_var4: public AbstractTopology
 {
 public:
-    CLX_4_var4(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_4_var4(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final
@@ -848,10 +851,10 @@ private:
     }
 };
 
-class CLX_4_var4_HMAT : public CLX_4_var4
+class CLX_4_var4_HMAT: public CLX_4_var4
 {
 public:
-    CLX_4_var4_HMAT(memkind_t kind) : CLX_4_var4(kind) {};
+    CLX_4_var4_HMAT(memkind_t kind) : CLX_4_var4(kind){};
 
 private:
     MapNodeSet Latency_local_nodes() const final
@@ -875,10 +878,10 @@ private:
     }
 };
 
-class CLX_4_var4_HBW : public AbstractTopology
+class CLX_4_var4_HBW: public AbstractTopology
 {
 public:
-    CLX_4_var4_HBW(memkind_t kind) : AbstractTopology(kind) {};
+    CLX_4_var4_HBW(memkind_t kind) : AbstractTopology(kind){};
 
 private:
     MapNodeSet Capacity_local_nodes() const final

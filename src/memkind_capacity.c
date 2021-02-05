@@ -3,8 +3,8 @@
 
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_private.h>
 
 #include <numa.h>
 
@@ -14,7 +14,8 @@ struct hi_cap_numanodes_t {
 };
 
 static struct hi_cap_numanodes_t memkind_hi_cap_numanodes_g[NODE_VARIANT_MAX];
-static pthread_once_t memkind_hi_cap_numanodes_once_g[NODE_VARIANT_MAX] = {PTHREAD_ONCE_INIT};
+static pthread_once_t memkind_hi_cap_numanodes_once_g[NODE_VARIANT_MAX] = {
+    PTHREAD_ONCE_INIT};
 
 static void memkind_hi_cap_find(struct hi_cap_numanodes_t *g,
                                 memkind_node_variant_t node_variant)
@@ -77,10 +78,11 @@ static void memkind_hi_cap_preferred_numanodes_init(void)
 }
 
 static int memkind_hi_cap_get_mbind_nodemask(struct memkind *kind,
-                                             unsigned long *nodemask, unsigned long maxnode)
+                                             unsigned long *nodemask,
+                                             unsigned long maxnode)
 {
     struct hi_cap_numanodes_t *g =
-            &memkind_hi_cap_numanodes_g[NODE_VARIANT_MULTIPLE];
+        &memkind_hi_cap_numanodes_g[NODE_VARIANT_MULTIPLE];
     pthread_once(&memkind_hi_cap_numanodes_once_g[NODE_VARIANT_MULTIPLE],
                  memkind_hi_cap_numanodes_init);
 
@@ -92,10 +94,12 @@ static int memkind_hi_cap_get_mbind_nodemask(struct memkind *kind,
     return g->init_err;
 }
 
-static int memkind_hi_cap_preferred_get_mbind_nodemask(
-    struct memkind *kind, unsigned long *nodemask, unsigned long maxnode)
+static int memkind_hi_cap_preferred_get_mbind_nodemask(struct memkind *kind,
+                                                       unsigned long *nodemask,
+                                                       unsigned long maxnode)
 {
-    struct hi_cap_numanodes_t *g = &memkind_hi_cap_numanodes_g[NODE_VARIANT_SINGLE];
+    struct hi_cap_numanodes_t *g =
+        &memkind_hi_cap_numanodes_g[NODE_VARIANT_SINGLE];
     pthread_once(&memkind_hi_cap_numanodes_once_g[NODE_VARIANT_SINGLE],
                  memkind_hi_cap_preferred_numanodes_init);
 
@@ -124,8 +128,9 @@ static void memkind_hi_cap_preferred_init_once(void)
 
 static int memkind_hi_cap_finalize(memkind_t kind)
 {
-    struct hi_cap_numanodes_t *g = &memkind_hi_cap_numanodes_g[NODE_VARIANT_SINGLE];
-    if(g->numa_nodes)
+    struct hi_cap_numanodes_t *g =
+        &memkind_hi_cap_numanodes_g[NODE_VARIANT_SINGLE];
+    if (g->numa_nodes)
         numa_bitmask_free(g->numa_nodes);
 
     return memkind_arena_finalize(kind);
@@ -134,8 +139,8 @@ static int memkind_hi_cap_finalize(memkind_t kind)
 static int memkind_hi_cap_preferred_finalize(memkind_t kind)
 {
     struct hi_cap_numanodes_t *g =
-            &memkind_hi_cap_numanodes_g[NODE_VARIANT_MULTIPLE];
-    if(g->numa_nodes)
+        &memkind_hi_cap_numanodes_g[NODE_VARIANT_MULTIPLE];
+    if (g->numa_nodes)
         numa_bitmask_free(g->numa_nodes);
 
     return memkind_arena_finalize(kind);
@@ -159,8 +164,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_hi_cap_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_PREFERRED_OPS = {
     .create = memkind_arena_create,
@@ -180,5 +184,4 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_PREFERRED_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_hi_cap_preferred_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};

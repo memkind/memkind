@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include "memkind.h"
 
 #include "common.h"
-#include "decorator_test.h"
 #include "config.h"
+#include "decorator_test.h"
 
 size_t size = 16;
 memkind_t kind = MEMKIND_DEFAULT;
 
-class DecoratorTest: public :: testing::Test
+class DecoratorTest: public ::testing::Test
 {
 
 protected:

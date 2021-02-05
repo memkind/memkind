@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include <memkind.h>
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /* This is an example that enables debug printing on every alloction call */
 
 static void memkind_debug(const char *func, memkind_t kind, size_t size,
                           void *ptr)
 {
-    fprintf(stderr, "[ DEBUG ] func=%s kind=%p size=%zu ptr=0x%lx\n", func, kind,
-            size, (size_t)ptr);
+    fprintf(stderr, "[ DEBUG ] func=%s kind=%p size=%zu ptr=0x%lx\n", func,
+            kind, size, (size_t)ptr);
 }
 
 void memkind_malloc_post(memkind_t kind, size_t size, void **result)
