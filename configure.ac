@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
@@ -270,6 +270,17 @@ if test "x$enable_heap_manager" = "x1" ; then
   AC_DEFINE([MEMKIND_ENABLE_HEAP_MANAGER], [], [Enable heap manager])
 fi
 AC_SUBST([enable_heap_manager])
+
+#===============================clang-format====================================
+AC_CHECK_PROGS(CLANG_FORMAT, [clang-format-10 clang-format], [error])
+if test "$CLANG_FORMAT" == "error"; then
+  AC_MSG_NOTICE([clang-format is required for code style checking])
+else
+  CLANG_FORMAT_VERSION=$($CLANG_FORMAT --version)
+  AX_COMPARE_VERSION([$CLANG_FORMAT_VERSION], [ge], [10.0.0],,
+    AC_MSG_NOTICE([$CLANG_FORMAT version: $CLANG_FORMAT_VERSION too low]))
+fi
+AC_SUBST([clang_format], $CLANG_FORMAT)
 
 #============================cxx11=============================================
 
