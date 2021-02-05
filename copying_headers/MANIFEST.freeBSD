@@ -1,5 +1,4 @@
 Makefile.am
-astyle.sh
 autogen.sh
 autohbw/Makefile.mk
 autohbw/autohbw.c
@@ -7,6 +6,7 @@ autohbw/autohbw_get_src_lines.pl
 autohbw/autohbw_test.sh
 build.sh
 configure.ac
+clang-format.sh
 examples/Makefile.mk
 examples/autohbw_candidates.c
 examples/filter_example.c
@@ -40,7 +40,7 @@ include/memkind/internal/vec.h
 include/memkind_allocator.h
 include/memkind_deprecated.h
 include/pmem_allocator.h
-install_astyle.sh
+install_clang-format.sh
 man/autohbw.7
 man/hbwallocator.3
 man/hbwmalloc.3

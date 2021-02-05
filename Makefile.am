@@ -61,9 +61,9 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
 
 EXTRA_DIST = CONTRIBUTING \
              VERSION \
-             astyle.sh \
              autogen.sh \
              build.sh \
+             clang-format.sh \
              examples/README \
              jemalloc/.appveyor.yml \
              jemalloc/.autom4te.cfg \
@@ -544,6 +544,9 @@ unit_tests_hmat: checkprogs
 
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
+
+format:
+	./clang-format.sh
 
 include autohbw/Makefile.mk
 include test/Makefile.mk
