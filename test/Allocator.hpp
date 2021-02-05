@@ -2,15 +2,14 @@
 /* Copyright (C) 2017 - 2020 Intel Corporation. */
 #pragma once
 
-#include <stdio.h>
 #include <assert.h>
-#include <map>
 #include <iterator>
+#include <map>
+#include <stdio.h>
 
 class Allocator
 {
 public:
-
     virtual void *malloc(size_t size) = 0;
     virtual void *calloc(size_t num, size_t size) = 0;
     virtual void *realloc(void *ptr, size_t size) = 0;
@@ -23,17 +22,16 @@ public:
     virtual bool is_high_bandwidth() = 0;
     virtual size_t get_page_size() = 0;
 
-    virtual ~Allocator(void) {}
+    virtual ~Allocator(void)
+    {}
 };
 
-class MemkindAllocator : public Allocator
+class MemkindAllocator: public Allocator
 {
 public:
-
     MemkindAllocator(memkind_memtype_t memtype, memkind_policy_t policy,
-                     memkind_bits_t flags) :
-        memtype(memtype),
-        flags(flags)
+                     memkind_bits_t flags)
+        : memtype(memtype), flags(flags)
     {
         int ret = memkind_create_kind(memtype, policy, flags, &kind);
         assert(ret == MEMKIND_SUCCESS);
@@ -83,11 +81,10 @@ public:
             std::make_pair(MEMKIND_DEFAULT, MPOL_DEFAULT),
             std::make_pair(MEMKIND_HUGETLB, MPOL_DEFAULT),
             std::make_pair(MEMKIND_HBW_ALL_HUGETLB, MPOL_BIND),
-            std::make_pair(MEMKIND_HBW_ALL, MPOL_BIND)
-        };
+            std::make_pair(MEMKIND_HBW_ALL, MPOL_BIND)};
         auto it = kind_policy.find(kind);
 
-        if(it != std::end(kind_policy)) {
+        if (it != std::end(kind_policy)) {
             return it->second;
         }
         return -1;
@@ -95,22 +92,19 @@ public:
 
     virtual bool is_high_bandwidth()
     {
-        return  memtype == MEMKIND_MEMTYPE_HIGH_BANDWIDTH ||
-                kind == MEMKIND_HBW ||
-                kind == MEMKIND_HBW_HUGETLB ||
-                kind == MEMKIND_HBW_PREFERRED ||
-                kind == MEMKIND_HBW_INTERLEAVE;
+        return memtype == MEMKIND_MEMTYPE_HIGH_BANDWIDTH ||
+            kind == MEMKIND_HBW || kind == MEMKIND_HBW_HUGETLB ||
+            kind == MEMKIND_HBW_PREFERRED || kind == MEMKIND_HBW_INTERLEAVE;
     }
 
     virtual size_t get_page_size()
     {
-        if (kind == MEMKIND_HUGETLB ||
-            kind == MEMKIND_HBW_HUGETLB ||
+        if (kind == MEMKIND_HUGETLB || kind == MEMKIND_HBW_HUGETLB ||
             kind == MEMKIND_HBW_PREFERRED_HUGETLB ||
             (flags & MEMKIND_MASK_PAGE_SIZE_2MB)) {
-            return 2*MB;
+            return 2 * MB;
         }
-        return 4*KB;
+        return 4 * KB;
     }
 
     virtual ~MemkindAllocator()
@@ -126,10 +120,9 @@ private:
     memkind_bits_t flags = memkind_bits_t();
 };
 
-class HbwmallocAllocator : public Allocator
+class HbwmallocAllocator: public Allocator
 {
 public:
-
     HbwmallocAllocator(hbw_policy_t hbw_policy)
     {
         hbw_set_policy(hbw_policy);
@@ -184,18 +177,17 @@ public:
 
     virtual bool is_high_bandwidth()
     {
-        return  hbw_check_available() == 0;
+        return hbw_check_available() == 0;
     }
 
     virtual size_t get_page_size()
     {
         if (page_size == HBW_PAGESIZE_2MB) {
-            return 2*MB;
+            return 2 * MB;
         }
-        return 4*KB;
+        return 4 * KB;
     }
 
 private:
     hbw_pagesize_t page_size = HBW_PAGESIZE_4KB;
 };
-

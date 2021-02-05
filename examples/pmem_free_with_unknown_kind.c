@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static char path[PATH_MAX]="/tmp/";
+static char path[PATH_MAX] = "/tmp/";
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * 1024;
 
 static void print_err_message(int err)
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     const size_t size = 512;
     struct memkind *pmem_kind = NULL;
     const int arraySize = 100;
-    char *ptr[100] = { NULL };
+    char *ptr[100] = {NULL};
     int i = 0;
     int err = 0;
 
@@ -34,14 +34,16 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    fprintf(stdout,
-            "This example shows how to use memkind_free with unknown kind as a parameter.\n");
+    fprintf(
+        stdout,
+        "This example shows how to use memkind_free with unknown kind as a parameter.\n");
 
     int status = memkind_check_dax_path(path);
     if (!status) {
         fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
     } else {
-        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n",
+                path);
     }
 
     err = memkind_create_pmem(path, PMEM_PART_SIZE, &pmem_kind);
@@ -65,8 +67,9 @@ int main(int argc, char **argv)
             }
         }
     }
-    fprintf(stdout,
-            "Memory was successfully allocated in default kind and pmem kind.\n");
+    fprintf(
+        stdout,
+        "Memory was successfully allocated in default kind and pmem kind.\n");
 
     sprintf(ptr[10], "Hello world from standard memory - ptr[10].\n");
     sprintf(ptr[40], "Hello world from standard memory - ptr[40].\n");

@@ -1,29 +1,29 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2014 - 2021 Intel Corporation. */
 
-#include <memkind/internal/memkind_hbw.h>
-#include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_hugetlb.h>
-#include <memkind/internal/memkind_bitmask.h>
-#include <memkind/internal/memkind_arena.h>
-#include <memkind/internal/memkind_mem_attributes.h>
-#include <memkind/internal/memkind_log.h>
 #include <memkind/internal/heap_manager.h>
+#include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_bitmask.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_hbw.h>
+#include <memkind/internal/memkind_hugetlb.h>
+#include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_mem_attributes.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
+#include <assert.h>
+#include <errno.h>
 #include <limits.h>
-#include <pthread.h>
 #include <numa.h>
 #include <numaif.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <utmpx.h>
+#include <pthread.h>
 #include <sched.h>
 #include <stdint.h>
-#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <utmpx.h>
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
@@ -43,8 +43,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
     .create = memkind_arena_create,
@@ -64,8 +63,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .create = memkind_arena_create,
@@ -85,8 +83,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
     .create = memkind_arena_create,
@@ -106,8 +103,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .create = memkind_arena_create,
@@ -127,8 +123,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .create = memkind_arena_create,
@@ -148,8 +143,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .create = memkind_arena_create,
@@ -170,8 +164,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 struct hbw_numanode_t {
     int init_err;
@@ -179,14 +172,16 @@ struct hbw_numanode_t {
 };
 
 static struct hbw_numanode_t memkind_hbw_numanode_g[NODE_VARIANT_MAX_EXT];
-static pthread_once_t memkind_hbw_numanode_once_g[NODE_VARIANT_MAX_EXT] = {PTHREAD_ONCE_INIT};
+static pthread_once_t memkind_hbw_numanode_once_g[NODE_VARIANT_MAX_EXT] = {
+    PTHREAD_ONCE_INIT};
 
 static void memkind_hbw_closest_numanode_init(void);
 static void memkind_hbw_closest_preferred_numanode_init(void);
 static void memkind_hbw_all_numanode_init(void);
 
-// This declaration is necessary, cause it's missing in headers from libnuma 2.0.8
-extern unsigned int numa_bitmask_weight(const struct bitmask *bmp );
+// This declaration is necessary, cause it's missing in headers from
+// libnuma 2.0.8
+extern unsigned int numa_bitmask_weight(const struct bitmask *bmp);
 
 MEMKIND_EXPORT int memkind_hbw_check_available(struct memkind *kind)
 {
@@ -210,8 +205,8 @@ MEMKIND_EXPORT int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
     pthread_once(&memkind_hbw_numanode_once_g[NODE_VARIANT_MULTIPLE],
                  memkind_hbw_closest_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err)) {
-        g->init_err = set_bitmask_for_current_numanode(nodemask, maxnode,
-                                                       g->numanode);
+        g->init_err =
+            set_bitmask_for_current_numanode(nodemask, maxnode, g->numanode);
     }
     return g->init_err;
 }
@@ -224,8 +219,8 @@ int memkind_hbw_get_preferred_mbind_nodemask(struct memkind *kind,
     pthread_once(&memkind_hbw_numanode_once_g[NODE_VARIANT_SINGLE],
                  memkind_hbw_closest_preferred_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err)) {
-        g->init_err = set_bitmask_for_current_numanode(nodemask, maxnode,
-                                                       g->numanode);
+        g->init_err =
+            set_bitmask_for_current_numanode(nodemask, maxnode, g->numanode);
     }
     return g->init_err;
 }
@@ -238,8 +233,8 @@ MEMKIND_EXPORT int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
     pthread_once(&memkind_hbw_numanode_once_g[NODE_VARIANT_ALL],
                  memkind_hbw_all_numanode_init);
     if (MEMKIND_LIKELY(!g->init_err)) {
-        g->init_err = set_bitmask_for_current_numanode(nodemask, maxnode,
-                                                       g->numanode);
+        g->init_err =
+            set_bitmask_for_current_numanode(nodemask, maxnode, g->numanode);
     }
     return g->init_err;
 }
@@ -254,25 +249,25 @@ typedef struct registers_t {
 inline static void cpuid_asm(int leaf, int subleaf, registers_t *registers)
 {
 #ifdef __x86_64__
-    asm volatile("cpuid":"=a"(registers->eax),
-                 "=b"(registers->ebx),
-                 "=c"(registers->ecx),
-                 "=d"(registers->edx):"0"(leaf), "2"(subleaf));
+    asm volatile("cpuid"
+                 : "=a"(registers->eax), "=b"(registers->ebx),
+                   "=c"(registers->ecx), "=d"(registers->edx)
+                 : "0"(leaf), "2"(subleaf));
 #else
     // Non-x86 can't possibly be Knight's Landing nor Knight's Mill.
     registers->eax = 0;
 #endif
 }
 
-#define CPUID_MODEL_SHIFT       (4)
-#define CPUID_MODEL_MASK        (0xf)
-#define CPUID_EXT_MODEL_MASK    (0xf)
-#define CPUID_EXT_MODEL_SHIFT   (16)
-#define CPUID_FAMILY_MASK       (0xf)
-#define CPUID_FAMILY_SHIFT      (8)
-#define CPU_MODEL_KNL           (0x57)
-#define CPU_MODEL_KNM           (0x85)
-#define CPU_FAMILY_INTEL        (0x06)
+#define CPUID_MODEL_SHIFT (4)
+#define CPUID_MODEL_MASK (0xf)
+#define CPUID_EXT_MODEL_MASK (0xf)
+#define CPUID_EXT_MODEL_SHIFT (16)
+#define CPUID_FAMILY_MASK (0xf)
+#define CPUID_FAMILY_SHIFT (8)
+#define CPU_MODEL_KNL (0x57)
+#define CPU_MODEL_KNM (0x85)
+#define CPU_FAMILY_INTEL (0x06)
 
 #define NO_NUMA_NODES_FLAT_MODE_OTHER (2)
 #define NO_NUMA_NODES_FLAT_MODE_SNC_2 (4)
@@ -288,14 +283,14 @@ static bool is_hbm_legacy_supported(void)
     registers_t registers;
     cpuid_asm(1, 0, &registers);
     uint32_t model = (registers.eax >> CPUID_MODEL_SHIFT) & CPUID_MODEL_MASK;
-    uint32_t model_ext = (registers.eax >> CPUID_EXT_MODEL_SHIFT) &
-                         CPUID_EXT_MODEL_MASK;
+    uint32_t model_ext =
+        (registers.eax >> CPUID_EXT_MODEL_SHIFT) & CPUID_EXT_MODEL_MASK;
 
     cpu_model_data_t data;
     data.model = model | (model_ext << 4);
     data.family = (registers.eax >> CPUID_FAMILY_SHIFT) & CPUID_FAMILY_MASK;
     return data.family == CPU_FAMILY_INTEL &&
-           (data.model == CPU_MODEL_KNL || data.model == CPU_MODEL_KNM);
+        (data.model == CPU_MODEL_KNL || data.model == CPU_MODEL_KNM);
 }
 
 static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
@@ -305,10 +300,11 @@ static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
 
     // Check if NUMA configuration is supported.
     int nodes_num = numa_num_configured_nodes();
-    if(nodes_num != NO_NUMA_NODES_FLAT_MODE_OTHER &&
-       nodes_num != NO_NUMA_NODES_FLAT_MODE_SNC_2 &&
-       nodes_num != NO_NUMA_NODES_FLAT_MODE_SNC_4) {
-        log_err("High Bandwidth Memory is not supported by this NUMA configuration.");
+    if (nodes_num != NO_NUMA_NODES_FLAT_MODE_OTHER &&
+        nodes_num != NO_NUMA_NODES_FLAT_MODE_SNC_2 &&
+        nodes_num != NO_NUMA_NODES_FLAT_MODE_SNC_4) {
+        log_err(
+            "High Bandwidth Memory is not supported by this NUMA configuration.");
         return MEMKIND_ERROR_UNAVAILABLE;
     }
 
@@ -324,15 +320,15 @@ static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
         return MEMKIND_ERROR_UNAVAILABLE;
     }
     assert(node_cpumask->size >= nodes_num);
-    for(i=0; i<nodes_num; ++i) {
+    for (i = 0; i < nodes_num; ++i) {
         numa_node_to_cpus(i, node_cpumask);
-        if(numa_bitmask_weight(node_cpumask) == 0) {
-            //NUMA nodes without CPU are HBW nodes.
+        if (numa_bitmask_weight(node_cpumask) == 0) {
+            // NUMA nodes without CPU are HBW nodes.
             numa_bitmask_setbit(*hbw_node_mask, i);
         }
     }
 
-    if(2*numa_bitmask_weight(*hbw_node_mask) == nodes_num) {
+    if (2 * numa_bitmask_weight(*hbw_node_mask) == nodes_num) {
         numa_bitmask_free(node_cpumask);
         log_info("Detected High Bandwidth Memory.");
         return MEMKIND_SUCCESS;
@@ -364,11 +360,11 @@ static void memkind_hbw_closest_numanode_init(void)
     struct hbw_numanode_t *g = &memkind_hbw_numanode_g[NODE_VARIANT_MULTIPLE];
     g->numanode = NULL;
     if (!is_hmat_supported()) {
-        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask, &g->numanode,
-                                           NODE_VARIANT_MULTIPLE);
+        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
+                                           &g->numanode, NODE_VARIANT_MULTIPLE);
     } else {
-        g->init_err = set_closest_numanode_mem_attr(&g->numanode,
-                                                    NODE_VARIANT_MULTIPLE);
+        g->init_err =
+            set_closest_numanode_mem_attr(&g->numanode, NODE_VARIANT_MULTIPLE);
     }
 }
 
@@ -377,10 +373,11 @@ static void memkind_hbw_closest_preferred_numanode_init(void)
     struct hbw_numanode_t *g = &memkind_hbw_numanode_g[NODE_VARIANT_SINGLE];
     g->numanode = NULL;
     if (!is_hmat_supported()) {
-        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask, &g->numanode,
-                                           NODE_VARIANT_SINGLE);
+        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
+                                           &g->numanode, NODE_VARIANT_SINGLE);
     } else {
-        g->init_err = set_closest_numanode_mem_attr(&g->numanode, NODE_VARIANT_SINGLE);
+        g->init_err =
+            set_closest_numanode_mem_attr(&g->numanode, NODE_VARIANT_SINGLE);
     }
 }
 
@@ -389,10 +386,11 @@ static void memkind_hbw_all_numanode_init(void)
     struct hbw_numanode_t *g = &memkind_hbw_numanode_g[NODE_VARIANT_ALL];
     g->numanode = NULL;
     if (!is_hmat_supported()) {
-        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask, &g->numanode,
-                                           NODE_VARIANT_ALL);
+        g->init_err = set_closest_numanode(memkind_hbw_get_nodemask,
+                                           &g->numanode, NODE_VARIANT_ALL);
     } else {
-        g->init_err = set_closest_numanode_mem_attr(&g->numanode, NODE_VARIANT_ALL);
+        g->init_err =
+            set_closest_numanode_mem_attr(&g->numanode, NODE_VARIANT_ALL);
     }
 }
 

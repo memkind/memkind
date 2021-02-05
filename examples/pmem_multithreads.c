@@ -4,15 +4,15 @@
 #include <memkind.h>
 
 #include <limits.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <unistd.h>
 
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 #define NUM_THREADS 10
 
-static char path[PATH_MAX]="/tmp/";
+static char path[PATH_MAX] = "/tmp/";
 
 void *thread_ind(void *arg);
 
@@ -36,9 +36,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fprintf(stdout,
-            "This example shows how to use multithreading with independent pmem kinds."
-            "\nPMEM kind directory: %s\n", path);
+    fprintf(
+        stdout,
+        "This example shows how to use multithreading with independent pmem kinds."
+        "\nPMEM kind directory: %s\n",
+        path);
 
     pthread_t pmem_threads[NUM_THREADS];
     int t;
@@ -64,7 +66,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    fprintf(stdout, "Threads successfully allocated memory in the PMEM kinds.\n");
+    fprintf(stdout,
+            "Threads successfully allocated memory in the PMEM kinds.\n");
 
     return 0;
 }
@@ -90,7 +93,8 @@ void *thread_ind(void *arg)
     if (!status) {
         fprintf(stdout, "PMEM kind %s is on DAX-enabled File system.\n", path);
     } else {
-        fprintf(stdout, "PMEM kind %s is not on DAX-enabled File system.\n", path);
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled File system.\n",
+                path);
     }
 
     int err = memkind_create_pmem(path, PMEM_MAX_SIZE, &pmem_kind);

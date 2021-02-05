@@ -17,7 +17,8 @@ extern "C" {
  */
 
 int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind *kind,
-                                            unsigned long *nodemask, unsigned long maxnode);
+                                            unsigned long *nodemask,
+                                            unsigned long maxnode);
 
 extern struct memkind_ops MEMKIND_DAX_KMEM_OPS;
 extern struct memkind_ops MEMKIND_DAX_KMEM_ALL_OPS;

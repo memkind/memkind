@@ -1,27 +1,29 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2018 - 2020 Intel Corporation. */
 
-#include <memkind.h>
 #include "allocator_perf_tool/TimerSysTime.hpp"
 #include "common.h"
+#include <memkind.h>
 
-#define STRESS_TIME (3*24*60*60)
+#define STRESS_TIME (3 * 24 * 60 * 60)
 
-extern const char  *PMEM_DIR;
+extern const char *PMEM_DIR;
 
-static const size_t small_size[] = {8, 16, 32, 48, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384,
-                                    448, 512, 640, 768, 896, 1 * KB, 1280, 1536, 1792, 2 * KB, 2560, 3 * KB,
-                                    3584, 4 * KB, 5 * KB, 6 * KB, 7 * KB, 8 * KB, 10 * KB, 12 * KB, 14 * KB
-                                   };
+static const size_t small_size[] = {
+    8,    16,     32,     48,     64,     80,     96,      112,     128,
+    160,  192,    224,    256,    320,    384,    448,     512,     640,
+    768,  896,    1 * KB, 1280,   1536,   1792,   2 * KB,  2560,    3 * KB,
+    3584, 4 * KB, 5 * KB, 6 * KB, 7 * KB, 8 * KB, 10 * KB, 12 * KB, 14 * KB};
 
-static const size_t large_size[] = {16 * KB, 32 * KB, 20 * KB, 24 * KB, 28 * KB, 32 * KB, 40 * KB, 48 * KB,
-                                    56 * KB, 64 * KB, 80 * KB, 96 * KB, 112 * KB, 128 * KB, 160 * KB, 192 * KB,
-                                    224 * KB, 256 * KB, 320 * KB, 384 * KB, 448 * KB, 512 * KB, 640 * KB,
-                                    768 * KB, 896 * KB, 1 * MB, 1280 * KB, 1536 * KB, 1792 * KB, 2 * MB,
-                                    2560 * KB, 3 * MB, 3584 * KB, 4 * MB, 5 * MB, 6 * MB, 7 * MB, 8 * MB
-                                   };
+static const size_t large_size[] = {
+    16 * KB,   32 * KB,  20 * KB,   24 * KB,  28 * KB,   32 * KB,   40 * KB,
+    48 * KB,   56 * KB,  64 * KB,   80 * KB,  96 * KB,   112 * KB,  128 * KB,
+    160 * KB,  192 * KB, 224 * KB,  256 * KB, 320 * KB,  384 * KB,  448 * KB,
+    512 * KB,  640 * KB, 768 * KB,  896 * KB, 1 * MB,    1280 * KB, 1536 * KB,
+    1792 * KB, 2 * MB,   2560 * KB, 3 * MB,   3584 * KB, 4 * MB,    5 * MB,
+    6 * MB,    7 * MB,   8 * MB};
 
-class MemkindPmemLongTimeStress: public :: testing::Test
+class MemkindPmemLongTimeStress: public ::testing::Test
 {
 
 protected:

@@ -2,17 +2,17 @@
 /* Copyright (C) 2015 - 2020 Intel Corporation. */
 
 #include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_pmem.h>
 #include <memkind/internal/memkind_private.h>
-#include <memkind/internal/memkind_log.h>
 
-#include <sys/mman.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <unistd.h>
 
 #ifndef MAP_SYNC
 #define MAP_SYNC 0x80000
@@ -37,15 +37,10 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
     .finalize = memkind_pmem_destroy,
     .update_memory_usage_policy = memkind_arena_update_memory_usage_policy,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
-void *pmem_extent_alloc(extent_hooks_t *extent_hooks,
-                        void *new_addr,
-                        size_t size,
-                        size_t alignment,
-                        bool *zero,
-                        bool *commit,
+void *pmem_extent_alloc(extent_hooks_t *extent_hooks, void *new_addr,
+                        size_t size, size_t alignment, bool *zero, bool *commit,
                         unsigned arena_ind)
 {
     int err;
@@ -80,20 +75,18 @@ exit:
     return addr;
 }
 
-bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
-                        void *addr,
-                        size_t size,
-                        bool committed,
-                        unsigned arena_ind)
+bool pmem_extent_dalloc(extent_hooks_t *extent_hooks, void *addr, size_t size,
+                        bool committed, unsigned arena_ind)
 {
     bool result = true;
     if (memkind_get_hog_memory()) {
         return result;
     }
 
-    // if madvise fail, it means that addr isn't mapped shared (doesn't come from pmem)
-    // and it should be also unmapped to avoid space exhaustion when calling large number of
-    // operations like memkind_create_pmem and memkind_destroy_kind
+    // if madvise fail, it means that addr isn't mapped shared (doesn't come
+    // from pmem) and it should be also unmapped to avoid space exhaustion when
+    // calling large number of operations like memkind_create_pmem and
+    // memkind_destroy_kind
     errno = 0;
     int status = madvise(addr, size, MADV_REMOVE);
     if (!status) {
@@ -119,84 +112,59 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks,
     return result;
 }
 
-bool pmem_extent_commit(extent_hooks_t *extent_hooks,
-                        void *addr,
-                        size_t size,
-                        size_t offset,
-                        size_t length,
-                        unsigned arena_ind)
+bool pmem_extent_commit(extent_hooks_t *extent_hooks, void *addr, size_t size,
+                        size_t offset, size_t length, unsigned arena_ind)
 {
     /* do nothing - report success */
     return false;
 }
 
-bool pmem_extent_decommit(extent_hooks_t *extent_hooks,
-                          void *addr,
-                          size_t size,
-                          size_t offset,
-                          size_t length,
-                          unsigned arena_ind)
+bool pmem_extent_decommit(extent_hooks_t *extent_hooks, void *addr, size_t size,
+                          size_t offset, size_t length, unsigned arena_ind)
 {
     /* do nothing - report failure (opt-out) */
     return true;
 }
 
-bool pmem_extent_purge(extent_hooks_t *extent_hooks,
-                       void *addr,
-                       size_t size,
-                       size_t offset,
-                       size_t length,
-                       unsigned arena_ind)
+bool pmem_extent_purge(extent_hooks_t *extent_hooks, void *addr, size_t size,
+                       size_t offset, size_t length, unsigned arena_ind)
 {
     /* do nothing - report failure (opt-out) */
     return true;
 }
 
-bool pmem_extent_split(extent_hooks_t *extent_hooks,
-                       void *addr,
-                       size_t size,
-                       size_t size_a,
-                       size_t size_b,
-                       bool committed,
+bool pmem_extent_split(extent_hooks_t *extent_hooks, void *addr, size_t size,
+                       size_t size_a, size_t size_b, bool committed,
                        unsigned arena_ind)
 {
     /* do nothing - report success */
     return false;
 }
 
-bool pmem_extent_merge(extent_hooks_t *extent_hooks,
-                       void *addr_a,
-                       size_t size_a,
-                       void *addr_b,
-                       size_t size_b,
-                       bool committed,
-                       unsigned arena_ind)
+bool pmem_extent_merge(extent_hooks_t *extent_hooks, void *addr_a,
+                       size_t size_a, void *addr_b, size_t size_b,
+                       bool committed, unsigned arena_ind)
 {
     /* do nothing - report success */
     return false;
 }
 
-void pmem_extent_destroy(extent_hooks_t *extent_hooks,
-                         void *addr,
-                         size_t size,
-                         bool committed,
-                         unsigned arena_ind)
+void pmem_extent_destroy(extent_hooks_t *extent_hooks, void *addr, size_t size,
+                         bool committed, unsigned arena_ind)
 {
     if (munmap(addr, size) == -1) {
         log_err("munmap failed!");
     }
 }
 
-static extent_hooks_t pmem_extent_hooks = {
-    .alloc = pmem_extent_alloc,
-    .dalloc = pmem_extent_dalloc,
-    .commit = pmem_extent_commit,
-    .decommit = pmem_extent_decommit,
-    .purge_lazy = pmem_extent_purge,
-    .split = pmem_extent_split,
-    .merge = pmem_extent_merge,
-    .destroy = pmem_extent_destroy
-};
+static extent_hooks_t pmem_extent_hooks = {.alloc = pmem_extent_alloc,
+                                           .dalloc = pmem_extent_dalloc,
+                                           .commit = pmem_extent_commit,
+                                           .decommit = pmem_extent_decommit,
+                                           .purge_lazy = pmem_extent_purge,
+                                           .split = pmem_extent_split,
+                                           .merge = pmem_extent_merge,
+                                           .destroy = pmem_extent_destroy};
 
 int memkind_pmem_create_tmpfile(const char *dir, int *fd)
 {
@@ -210,13 +178,13 @@ int memkind_pmem_create_tmpfile(const char *dir, int *fd)
         return MEMKIND_ERROR_INVALID;
     }
 
-    char fullname[dir_len + sizeof (template)];
-    (void) strcpy(fullname, dir);
-    (void) strcat(fullname, template);
+    char fullname[dir_len + sizeof(template)];
+    (void)strcpy(fullname, dir);
+    (void)strcat(fullname, template);
 
     sigset_t set, oldset;
     sigfillset(&set);
-    (void) sigprocmask(SIG_BLOCK, &set, &oldset);
+    (void)sigprocmask(SIG_BLOCK, &set, &oldset);
 
     if ((*fd = mkstemp(fullname)) < 0) {
         log_err("Could not create temporary file: errno=%d.", errno);
@@ -224,16 +192,16 @@ int memkind_pmem_create_tmpfile(const char *dir, int *fd)
         goto exit;
     }
 
-    (void) unlink(fullname);
-    (void) sigprocmask(SIG_SETMASK, &oldset, NULL);
+    (void)unlink(fullname);
+    (void)sigprocmask(SIG_SETMASK, &oldset, NULL);
 
     return err;
 
 exit:
     oerrno = errno;
-    (void) sigprocmask(SIG_SETMASK, &oldset, NULL);
+    (void)sigprocmask(SIG_SETMASK, &oldset, NULL);
     if (*fd != -1) {
-        (void) close(*fd);
+        (void)close(*fd);
     }
     *fd = -1;
     errno = oerrno;
@@ -241,7 +209,8 @@ exit:
 }
 
 MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
-                                       struct memkind_ops *ops, const char *name)
+                                       struct memkind_ops *ops,
+                                       const char *name)
 {
     struct memkind_pmem *priv;
     int err;
@@ -271,7 +240,8 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
     return 0;
 
 exit:
-    /* err is set, please don't overwrite it with result of pthread_mutex_destroy */
+    /* err is set, please don't overwrite it with result of
+     * pthread_mutex_destroy */
     pthread_mutex_destroy(&priv->pmem_lock);
     jemk_free(priv);
     return err;
@@ -285,7 +255,7 @@ MEMKIND_EXPORT int memkind_pmem_destroy(struct memkind *kind)
 
     pthread_mutex_destroy(&priv->pmem_lock);
 
-    (void) close(priv->fd);
+    (void)close(priv->fd);
     jemk_free(priv->dir);
     jemk_free(priv);
 

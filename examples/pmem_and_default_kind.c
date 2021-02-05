@@ -3,16 +3,16 @@
 
 #include <memkind.h>
 
+#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <sys/resource.h>
 
 #define MB (1024 * 1024)
 #define HEAP_LIMIT_SIMULATE (1024 * MB)
 
-static char path[PATH_MAX]="/tmp/";
+static char path[PATH_MAX] = "/tmp/";
 
 static void print_err_message(int err)
 {
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
     // Operation below limit the current size of heap
     // to show different place of allocation
-    const struct rlimit heap_limit = { HEAP_LIMIT_SIMULATE, HEAP_LIMIT_SIMULATE };
+    const struct rlimit heap_limit = {HEAP_LIMIT_SIMULATE, HEAP_LIMIT_SIMULATE};
     err = setrlimit(RLIMIT_DATA, &heap_limit);
     if (err) {
         fprintf(stderr, "Unable to set heap limit.\n");
@@ -51,15 +51,18 @@ int main(int argc, char *argv[])
     char *ptr_default_not_possible = NULL;
     char *ptr_pmem = NULL;
 
-    fprintf(stdout,
-            "This example shows how to allocate memory using standard memory (MEMKIND_DEFAULT) "
-            "and file-backed kind of memory (PMEM).\nPMEM kind directory: %s\n", path);
+    fprintf(
+        stdout,
+        "This example shows how to allocate memory using standard memory (MEMKIND_DEFAULT) "
+        "and file-backed kind of memory (PMEM).\nPMEM kind directory: %s\n",
+        path);
 
     int status = memkind_check_dax_path(path);
     if (!status) {
         fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
     } else {
-        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n",
+                path);
     }
 
     err = memkind_create_pmem(path, 0, &pmem_kind);
@@ -75,8 +78,8 @@ int main(int argc, char *argv[])
     }
 
     errno = 0;
-    ptr_default_not_possible = (char *)memkind_malloc(MEMKIND_DEFAULT,
-                                                      HEAP_LIMIT_SIMULATE);
+    ptr_default_not_possible =
+        (char *)memkind_malloc(MEMKIND_DEFAULT, HEAP_LIMIT_SIMULATE);
     if (ptr_default_not_possible) {
         fprintf(stderr,
                 "Failure, this allocation should not be possible "
@@ -84,19 +87,22 @@ int main(int argc, char *argv[])
         return 1;
     }
     if (errno != ENOMEM) {
-        fprintf(stderr,
-                "Failure, this allocation should set errno to ENOMEM value, because of setlimit function.\n");
+        fprintf(
+            stderr,
+            "Failure, this allocation should set errno to ENOMEM value, because of setlimit function.\n");
         return 1;
     }
 
     errno = 0;
     ptr_pmem = (char *)memkind_malloc(pmem_kind, HEAP_LIMIT_SIMULATE);
     if (!ptr_pmem) {
-        fprintf(stderr, "Unable allocate HEAP_LIMIT_SIMULATE in file-backed memory.\n");
+        fprintf(stderr,
+                "Unable allocate HEAP_LIMIT_SIMULATE in file-backed memory.\n");
         return 1;
     }
     if (errno != 0) {
-        fprintf(stderr, "Failure, this allocation should not set errno value.\n");
+        fprintf(stderr,
+                "Failure, this allocation should not set errno value.\n");
         return 1;
     }
 

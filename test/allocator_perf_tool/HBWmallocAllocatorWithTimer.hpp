@@ -5,18 +5,16 @@
 
 #include <hbwmalloc.h>
 
-#include "Allocator.hpp"
 #include "Allocation_info.hpp"
+#include "Allocator.hpp"
 #include "Configuration.hpp"
-#include "WrappersMacros.hpp"
 #include "FunctionCalls.hpp"
+#include "WrappersMacros.hpp"
 #include <cerrno>
 
 #include <stdlib.h>
 
-
-class HBWmallocAllocatorWithTimer
-    : public Allocator
+class HBWmallocAllocatorWithTimer: public Allocator
 {
 public:
     memory_operation wrapped_malloc(size_t size)
@@ -49,5 +47,4 @@ public:
     {
         return AllocatorTypes::HBWMALLOC_ALLOCATOR;
     }
-
 };

@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2016 - 2020 Intel Corporation. */
 
-#include "memkind.h"
-#include "hbwmalloc.h"
-#include "common.h"
-#include "trial_generator.h"
 #include "allocator_perf_tool/HugePageOrganizer.hpp"
+#include "common.h"
+#include "hbwmalloc.h"
+#include "memkind.h"
+#include "trial_generator.h"
 
 /* This set of tests are intended to test HBW_PAGESIZE_1GB and
  * HBW_PAGESIZE_1GB_STRICT flags.
  */
-class GBPagesTestBindPolicy : public TGTest
+class GBPagesTestBindPolicy: public TGTest
 {
 protected:
     void run(int iterations, size_t alignment, bool psize_strict)
@@ -23,9 +23,11 @@ protected:
             void *ptr = NULL;
             int ret;
             if (psize_strict) {
-                ret = hbw_posix_memalign_psize(&ptr, alignment, GB, HBW_PAGESIZE_1GB_STRICT);
+                ret = hbw_posix_memalign_psize(&ptr, alignment, GB,
+                                               HBW_PAGESIZE_1GB_STRICT);
             } else {
-                ret = hbw_posix_memalign_psize(&ptr, alignment, GB, HBW_PAGESIZE_1GB);
+                ret = hbw_posix_memalign_psize(&ptr, alignment, GB,
+                                               HBW_PAGESIZE_1GB);
             }
             ASSERT_EQ(0, ret);
             ASSERT_FALSE(ptr == NULL);
@@ -45,7 +47,7 @@ private:
 TEST_F(GBPagesTestBindPolicy,
        test_TC_MEMKIND_GBPages_ext_HBW_Misalign_Preferred_Bind_Strict_1GB)
 {
-    run(1, 2*GB, true);
+    run(1, 2 * GB, true);
 }
 
 TEST_F(GBPagesTestBindPolicy,
@@ -56,7 +58,7 @@ TEST_F(GBPagesTestBindPolicy,
 
 /*
  * Below tests allocate GB pages incrementally.
-*/
+ */
 
 TEST_F(GBPagesTestBindPolicy,
        test_TC_MEMKIND_GBPages_ext_HBW_Memalign_Psize_Bind_2GB)

@@ -4,17 +4,14 @@
 #ifndef check_include_h
 #define check_include_h
 
-#include <list>
 #include "trial_generator.h"
-
+#include <list>
 
 typedef struct {
     unsigned long start_addr;
     unsigned long end_addr;
     size_t pagesize;
 } smaps_entry_t;
-
-
 
 using namespace std;
 
@@ -28,12 +25,13 @@ public:
     int check_page_size(size_t page_size);
     int check_zero(void);
     int check_align(size_t align);
+
 private:
     const void *ptr;
     size_t size;
     void **address;
     size_t num_address;
-    list<smaps_entry_t>smaps_table;
+    list<smaps_entry_t> smaps_table;
     ifstream ip;
     string skip_to_next_entry(ifstream &);
     string skip_to_next_kpage(ifstream &);

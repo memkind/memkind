@@ -26,7 +26,8 @@ extern "C" {
  *  bandwidth memory to satisfy a user request.  This enum is used with
  *  hbw_get_policy() and hbw_set_policy().
  */
-typedef enum {
+typedef enum
+{
     /*
      *  If insufficient high bandwidth memory pages on nearest NUMA node are
      *  available then OOM killer will be triggered.
@@ -55,30 +56,31 @@ typedef enum {
  *  The hbw_posix_memalign_psize() API gives the user the option to
  *  select the page size from this enumerated list.
  */
-typedef enum {
+typedef enum
+{
 
     /*
      * The four kilobyte page size option. Note that with transparent huge
      * pages enabled these allocations may be promoted by the operating system
      * to two megabyte pages.
      */
-    HBW_PAGESIZE_4KB           = 1,
+    HBW_PAGESIZE_4KB = 1,
 
     /*
      * The two megabyte page size option.
      */
-    HBW_PAGESIZE_2MB           = 2,
+    HBW_PAGESIZE_2MB = 2,
     /*
      * This option is deprecated.
      * Allocate high bandwidth memory using 1GB chunks backed by huge pages.
      */
-    HBW_PAGESIZE_1GB_STRICT    = 3,
+    HBW_PAGESIZE_1GB_STRICT = 3,
 
     /*
      * This option is deprecated.
      * Allocate high bandwidth memory using 1GB chunks backed by huge pages.
      */
-    HBW_PAGESIZE_1GB           = 4,
+    HBW_PAGESIZE_1GB = 4,
 
     /*
      * Helper representing value of the last enum element incremented by 1.
@@ -91,13 +93,15 @@ typedef enum {
 /*
  * Flags for hbw_verify_ptr function
  */
-enum {
+enum
+{
 
     /*
-     * This option touches first byte of all pages in address range starting from "addr" to "addr" + "size"
-     * by read and write (so the content will be overwritten by the same data as it was read).
+     * This option touches first byte of all pages in address range starting
+     * from "addr" to "addr" + "size" by read and write (so the content will be
+     * overwritten by the same data as it was read).
      */
-    HBW_TOUCH_PAGES      = (1 << 0)
+    HBW_TOUCH_PAGES = (1 << 0)
 };
 
 /*
@@ -116,7 +120,8 @@ hbw_policy_t hbw_get_policy(void);
  * Returns:
  *   0: on success
  *   EPERM: if hbw_set_policy () was called more than once
- *   EINVAL: if mode argument was neither HBW_POLICY_PREFERRED, HBW_POLICY_BIND, HBW_POLICY_BIND_ALL nor HBW_POLICY_INTERLEAVE
+ *   EINVAL: if mode argument was neither HBW_POLICY_PREFERRED, HBW_POLICY_BIND,
+ * HBW_POLICY_BIND_ALL nor HBW_POLICY_INTERLEAVE
  */
 int hbw_set_policy(hbw_policy_t mode);
 
@@ -131,10 +136,10 @@ int hbw_check_available(void);
 /*
  * Verifies if allocated memory fully fall into high bandwidth memory.
  * Returns:
- *   0: if memory in address range from "addr" to "addr" + "size" is allocated in high bandwidth memory
- *   -1: if any region of memory was not allocated in high bandwidth memory
- *   EINVAL: if addr is NULL, size equals 0 or flags contained unsupported bit set
- *   EFAULT: could not verify memory
+ *   0: if memory in address range from "addr" to "addr" + "size" is allocated
+ * in high bandwidth memory -1: if any region of memory was not allocated in
+ * high bandwidth memory EINVAL: if addr is NULL, size equals 0 or flags
+ * contained unsupported bit set EFAULT: could not verify memory
  */
 int hbw_verify_memory_region(void *addr, size_t size, int flags);
 
@@ -164,7 +169,8 @@ void *hbw_calloc(size_t num, size_t size);
  * Returns:
  *   0: on success
  *   ENOMEM: if there was insufficient memory to satisfy the request
- *   EINVAL: if the alignment parameter was not a power of two, or was less than sizeof(void *)
+ *   EINVAL: if the alignment parameter was not a power of two, or was less than
+ * sizeof(void *)
  */
 int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
 
@@ -177,7 +183,8 @@ int hbw_posix_memalign(void **memptr, size_t alignment, size_t size);
  * Returns:
  *   0: on success
  *   ENOMEM: if there was insufficient memory to satisfy the request
- *   EINVAL: if the alignment parameter was not a power of two, or was less than sizeof(void *)
+ *   EINVAL: if the alignment parameter was not a power of two, or was less than
+ * sizeof(void *)
  */
 int hbw_posix_memalign_psize(void **memptr, size_t alignment, size_t size,
                              hbw_pagesize_t pagesize);

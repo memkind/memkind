@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2015 - 2020 Intel Corporation. */
 
-#include <memkind/internal/memkind_interleave.h>
-#include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_interleave.h>
 #include <memkind/internal/memkind_private.h>
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
@@ -24,8 +24,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT void memkind_interleave_init_once(void)
 {

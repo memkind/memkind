@@ -2,15 +2,17 @@
 /* Copyright (C) 2015 - 2020 Intel Corporation. */
 #pragma once
 
-#include <string>
-#include <map>
 #include <assert.h>
+#include <map>
+#include <string>
 
-//AllocatorTypes class represent allocator types and names related to this types.
+// AllocatorTypes class represent allocator types and names related to this
+// types.
 class AllocatorTypes
 {
 public:
-    enum {
+    enum
+    {
         STANDARD_ALLOCATOR,
         JEMALLOC,
         MEMKIND_DEFAULT,
@@ -33,35 +35,34 @@ public:
 
     static const std::string &allocator_name(unsigned type)
     {
-        static const std::string names[] = {
-            "STANDARD_ALLOCATOR",
-            "JEMALLOC",
-            "MEMKIND_DEFAULT",
-            "MEMKIND_REGULAR",
-            "MEMKIND_HBW",
-            "MEMKIND_INTERLEAVE",
-            "MEMKIND_HBW_INTERLEAVE",
-            "MEMKIND_HBW_PREFERRED",
-            "MEMKIND_HUGETLB",
-            "MEMKIND_GBTLB",
-            "MEMKIND_HBW_HUGETLB",
-            "MEMKIND_HBW_PREFERRED_HUGETLB",
-            "MEMKIND_HBW_GBTLB",
-            "MEMKIND_HBW_PREFERRED_GBTLB",
-            "HBWMALLOC_ALLOCATOR",
-            "MEMKIND_PMEM",
-            "DAX_KMEM"
-        };
+        static const std::string names[] = {"STANDARD_ALLOCATOR",
+                                            "JEMALLOC",
+                                            "MEMKIND_DEFAULT",
+                                            "MEMKIND_REGULAR",
+                                            "MEMKIND_HBW",
+                                            "MEMKIND_INTERLEAVE",
+                                            "MEMKIND_HBW_INTERLEAVE",
+                                            "MEMKIND_HBW_PREFERRED",
+                                            "MEMKIND_HUGETLB",
+                                            "MEMKIND_GBTLB",
+                                            "MEMKIND_HBW_HUGETLB",
+                                            "MEMKIND_HBW_PREFERRED_HUGETLB",
+                                            "MEMKIND_HBW_GBTLB",
+                                            "MEMKIND_HBW_PREFERRED_GBTLB",
+                                            "HBWMALLOC_ALLOCATOR",
+                                            "MEMKIND_PMEM",
+                                            "DAX_KMEM"};
 
-        if(type >= NUM_OF_ALLOCATOR_TYPES) assert(!"Invalid input argument!");
+        if (type >= NUM_OF_ALLOCATOR_TYPES)
+            assert(!"Invalid input argument!");
 
         return names[type];
     }
 
     static unsigned allocator_type(const std::string &name)
     {
-        for (unsigned i=0; i<NUM_OF_ALLOCATOR_TYPES; i++) {
-            if(allocator_name(i) == name)
+        for (unsigned i = 0; i < NUM_OF_ALLOCATOR_TYPES; i++) {
+            if (allocator_name(i) == name)
                 return i;
         }
 
@@ -74,11 +75,12 @@ public:
     }
 };
 
-//Enable or disable enum values (types).
+// Enable or disable enum values (types).
 class TypesConf
 {
 public:
-    TypesConf() {}
+    TypesConf()
+    {}
 
     TypesConf(unsigned type)
     {
@@ -92,7 +94,7 @@ public:
 
     void disable_type(unsigned type)
     {
-        if(types.count(type))
+        if (types.count(type))
             types[type] = false;
     }
 
@@ -105,8 +107,9 @@ private:
     std::map<unsigned, bool> types;
 };
 
-//AllocationSizesConf class represents allocation sizes configuration.
-//This data is needed to generate "n" sizes in range from "size_from" to "size_to".
+// AllocationSizesConf class represents allocation sizes configuration.
+// This data is needed to generate "n" sizes in range from "size_from" to
+// "size_to".
 class AllocationSizesConf
 {
 public:
@@ -115,8 +118,8 @@ public:
     size_t size_to;
 };
 
-//TaskConf class contain configuration data for task,
-//where:
+// TaskConf class contain configuration data for task,
+// where:
 // - "n" - number of iterations,
 // - "allocation_sizes_conf" - allocation sizes configuration,
 // - "func_calls" - enabled or disabled function calls,

@@ -31,15 +31,17 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fprintf(stdout,
-            "This example shows how to use memkind alignment and how it affects allocations.\nPMEM kind directory: %s\n",
-            path);
+    fprintf(
+        stdout,
+        "This example shows how to use memkind alignment and how it affects allocations.\nPMEM kind directory: %s\n",
+        path);
 
     int status = memkind_check_dax_path(path);
     if (!status) {
         fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
     } else {
-        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n",
+                path);
     }
 
     err = memkind_create_pmem(path, PMEM_MAX_SIZE, &pmem_kind);
@@ -76,19 +78,22 @@ int main(int argc, char *argv[])
     // Perform two allocations - 32 bytes with alignment 64
     err = memkind_posix_memalign(pmem_kind, (void **)&pmem_str10, 64, 32);
     if (err) {
-        fprintf(stderr,
-                "Unable to allocate pmem string (pmem_str10) with alignment.\n");
+        fprintf(
+            stderr,
+            "Unable to allocate pmem string (pmem_str10) with alignment.\n");
         return 1;
     }
 
     err = memkind_posix_memalign(pmem_kind, (void **)&pmem_str11, 64, 32);
     if (err) {
-        fprintf(stderr,
-                "Unable to allocate pmem string (pmem_str11) with alignment.\n");
+        fprintf(
+            stderr,
+            "Unable to allocate pmem string (pmem_str11) with alignment.\n");
         return 1;
     }
 
-    // The addresses of allocations are not close to each other in memory, they are aligned to 64
+    // The addresses of allocations are not close to each other in memory, they
+    // are aligned to 64
     if (pmem_str11 - pmem_str10 != 64) {
         fprintf(stderr, "Something went wrong with alignment allocations.\n");
         return 1;
@@ -103,8 +108,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fprintf(stdout,
-            "The memory has been successfully allocated using memkind alignment.\n");
+    fprintf(
+        stdout,
+        "The memory has been successfully allocated using memkind alignment.\n");
 
     return 0;
 }

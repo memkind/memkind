@@ -31,9 +31,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fprintf(stdout,
-            "This example shows how to use custom configuration to create pmem kind."
-            "\nPMEM kind directory: %s\n", path);
+    fprintf(
+        stdout,
+        "This example shows how to use custom configuration to create pmem kind."
+        "\nPMEM kind directory: %s\n",
+        path);
 
     struct memkind_config *test_cfg = memkind_config_new();
     if (!test_cfg) {
@@ -43,18 +45,19 @@ int main(int argc, char *argv[])
 
     memkind_config_set_path(test_cfg, path);
     memkind_config_set_size(test_cfg, PMEM_MAX_SIZE);
-    memkind_config_set_memory_usage_policy(test_cfg,
-                                           MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
+    memkind_config_set_memory_usage_policy(
+        test_cfg, MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
 
     int status = memkind_check_dax_path(path);
     if (!status) {
         fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
     } else {
-        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n",
+                path);
     }
 
     // Create PMEM partition with specific configuration
-    err =  memkind_create_pmem_with_config(test_cfg, &pmem_kind);
+    err = memkind_create_pmem_with_config(test_cfg, &pmem_kind);
     if (err) {
         print_err_message(err);
         return 1;
@@ -68,8 +71,9 @@ int main(int argc, char *argv[])
 
     memkind_config_delete(test_cfg);
 
-    fprintf(stdout,
-            "PMEM kind and configuration was successfully created and destroyed.\n");
+    fprintf(
+        stdout,
+        "PMEM kind and configuration was successfully created and destroyed.\n");
 
     return 0;
 }

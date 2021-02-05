@@ -23,12 +23,12 @@ private:
     }
 
 public:
-    MemoryManager(memkind_t kind, size_t size) :
-        kind(kind),
-        memory_size(size),
-        memory_pointer(memkind_malloc(kind, size))
+    MemoryManager(memkind_t kind, size_t size)
+        : kind(kind),
+          memory_size(size),
+          memory_pointer(memkind_malloc(kind, size))
     {
-        if(!memory_pointer) {
+        if (!memory_pointer) {
             throw std::bad_alloc();
         }
     }
@@ -57,4 +57,3 @@ public:
             memkind_free(kind, memory_pointer);
     }
 };
-

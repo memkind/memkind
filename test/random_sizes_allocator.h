@@ -3,8 +3,8 @@
 
 #pragma once
 #include "memory_manager.h"
-#include <vector>
 #include <random>
+#include <vector>
 
 class RandomSizesAllocator
 {
@@ -21,9 +21,8 @@ private:
 
 public:
     RandomSizesAllocator(memkind_t kind, size_t min_size, size_t max_size,
-                         int max_allocations_number) :
-        kind(kind),
-        memory_distribution(min_size, max_size)
+                         int max_allocations_number)
+        : kind(kind), memory_distribution(min_size, max_size)
     {
         allocated_memory.reserve(max_allocations_number);
     }
@@ -39,7 +38,8 @@ public:
     {
         if (empty())
             return 0;
-        std::uniform_int_distribution<int> distribution(0, allocated_memory.size() - 1);
+        std::uniform_int_distribution<int> distribution(
+            0, allocated_memory.size() - 1);
         int random_index = distribution(generator);
         auto it = std::begin(allocated_memory) + random_index;
         size_t size = it->size();
@@ -52,4 +52,3 @@ public:
         return allocated_memory.empty();
     }
 };
-

@@ -9,7 +9,7 @@
 
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 
-static char path[PATH_MAX]="/tmp/";
+static char path[PATH_MAX] = "/tmp/";
 
 static void print_err_message(int err)
 {
@@ -31,15 +31,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fprintf(stdout,
-            "This example shows how to allocate memory and possibility to exceed pmem kind size."
-            "\nPMEM kind directory: %s\n", path);
+    fprintf(
+        stdout,
+        "This example shows how to allocate memory and possibility to exceed pmem kind size."
+        "\nPMEM kind directory: %s\n",
+        path);
 
     int status = memkind_check_dax_path(path);
     if (!status) {
         fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
     } else {
-        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n",
+                path);
     }
 
     // Create PMEM partition with specific size
@@ -78,8 +81,9 @@ int main(int argc, char *argv[])
     // Allocate 16 MB of 7.9 MB available - Out Of Memory expected
     pmem_str4 = (char *)memkind_malloc(pmem_kind, 16 * 1024 * 1024);
     if (pmem_str4 != NULL) {
-        fprintf(stderr,
-                "Failure, this allocation should not be possible (expected result was NULL).\n");
+        fprintf(
+            stderr,
+            "Failure, this allocation should not be possible (expected result was NULL).\n");
         return 1;
     }
 

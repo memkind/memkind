@@ -10,7 +10,7 @@
 #define PMEM_MAX_SIZE (1024 * 1024 * 32)
 #define NUM_KINDS 10
 
-static char path[PATH_MAX]="/tmp/";
+static char path[PATH_MAX] = "/tmp/";
 
 static void print_err_message(int err)
 {
@@ -35,15 +35,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fprintf(stdout,
-            "This example shows how to create and destroy pmem kind with defined or unlimited size."
-            "\nPMEM kind directory: %s\n", path);
+    fprintf(
+        stdout,
+        "This example shows how to create and destroy pmem kind with defined or unlimited size."
+        "\nPMEM kind directory: %s\n",
+        path);
 
     int status = memkind_check_dax_path(path);
     if (!status) {
         fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
     } else {
-        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n",
+                path);
     }
 
     // Create first PMEM partition with specific size
@@ -91,7 +94,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    fprintf(stdout, "PMEM kinds have been successfully created and destroyed.\n");
+    fprintf(stdout,
+            "PMEM kinds have been successfully created and destroyed.\n");
 
     return 0;
 }

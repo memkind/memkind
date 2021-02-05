@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2019 - 2020 Intel Corporation. */
 
-#include <memkind/internal/memkind_dax_kmem.h>
 #include <memkind.h>
+#include <memkind/internal/memkind_dax_kmem.h>
 #include <numa.h>
 #include <stdio.h>
 
@@ -38,7 +38,6 @@ static const char *const help_message =
     "    memkind(3)\n"
     "\n";
 
-
 static int print_dax_kmem_nodes()
 {
     unsigned i, j = 0;
@@ -52,19 +51,21 @@ static int print_dax_kmem_nodes()
     }
     numa_bitmask_clearall(&nodemask_dax_kmem);
 
-    //WARNING: code below is usage of memkind experimental API which may be changed in future
+    // WARNING: code below is usage of memkind experimental API which may be
+    // changed in future
     int status = memkind_dax_kmem_all_get_mbind_nodemask(NULL, nodemask.n,
                                                          NUMA_NUM_NODES);
 
-    if (status == MEMKIND_ERROR_OPERATION_FAILED ) {
+    if (status == MEMKIND_ERROR_OPERATION_FAILED) {
         return 1;
-    } else if (status != MEMKIND_SUCCESS ) {
+    } else if (status != MEMKIND_SUCCESS) {
         return 3;
     }
 
-    for(i = 0; i<NUMA_NUM_NODES; i++) {
-        if(numa_bitmask_isbitset(&nodemask_dax_kmem, i)) {
-            printf("%u%s", i, (++j == numa_bitmask_weight(&nodemask_dax_kmem)) ? "" : ",");
+    for (i = 0; i < NUMA_NUM_NODES; i++) {
+        if (numa_bitmask_isbitset(&nodemask_dax_kmem, i)) {
+            printf("%u%s", i,
+                   (++j == numa_bitmask_weight(&nodemask_dax_kmem)) ? "" : ",");
         }
     }
     printf("\n");
@@ -73,10 +74,11 @@ static int print_dax_kmem_nodes()
 
 int main(int argc, char *argv[])
 {
-    if(argc == 1) {
+    if (argc == 1) {
         return print_dax_kmem_nodes();
-    } else if ((argc == 2) && (strncmp(argv[1], "-h", MAX_ARG_LEN) == 0 ||
-                               strncmp(argv[1], "--help", MAX_ARG_LEN) == 0)) {
+    } else if ((argc == 2) &&
+               (strncmp(argv[1], "-h", MAX_ARG_LEN) == 0 ||
+                strncmp(argv[1], "--help", MAX_ARG_LEN) == 0)) {
         printf("%s", help_message);
         return 0;
     }

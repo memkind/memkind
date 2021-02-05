@@ -37,12 +37,13 @@ public:
         unsigned threads_count = 0;
         struct dirent *direntry;
         while ((direntry = readdir(proc_dir)) != NULL) {
-            if(direntry->d_name[0] != '.')
+            if (direntry->d_name[0] != '.')
                 threads_count++;
         }
         closedir(proc_dir);
         return threads_count;
     }
+
 private:
     /* We are avoiding to allocate local buffers,
      * since it can produce noise in memory footprint tests.
@@ -60,7 +61,8 @@ private:
             while (file.getline(line, sizeof(line))) {
                 pos = strstr(line, field_name);
                 if (pos) {
-                    sscanf(pos, "%64[a-zA-Z_0-9()]: %s", current_entry_name, value);
+                    sscanf(pos, "%64[a-zA-Z_0-9()]: %s", current_entry_name,
+                           value);
                     break;
                 }
             }
@@ -68,4 +70,3 @@ private:
         }
     }
 };
-

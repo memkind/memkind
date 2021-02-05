@@ -2,39 +2,39 @@
 /* Copyright (C) 2015 - 2020 Intel Corporation. */
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <sstream>
 #include <fstream>
 #include <ios>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 namespace csv
 {
 
-    class Row
+class Row
+{
+public:
+    Row()
     {
-    public:
-        Row()
-        {
-            row << std::fixed;
-            row.precision(6);
-        }
+        row << std::fixed;
+        row.precision(6);
+    }
 
-        template<class T>
-        void append(const T &e)
-        {
-            row << "," << e;
-        }
+    template <class T>
+    void append(const T &e)
+    {
+        row << "," << e;
+    }
 
-        std::string export_row() const
-        {
-            std::stringstream ss(row.str());
-            ss << std::endl;
-            return ss.str();
-        }
+    std::string export_row() const
+    {
+        std::stringstream ss(row.str());
+        ss << std::endl;
+        return ss.str();
+    }
 
-    private:
-        std::stringstream row;
-    };
+private:
+    std::stringstream row;
+};
 
-}
+} // namespace csv

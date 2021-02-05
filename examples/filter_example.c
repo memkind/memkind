@@ -3,9 +3,9 @@
 
 #include <memkind.h>
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char **argv)
 {
@@ -19,7 +19,8 @@ int main(int argc, char **argv)
 
     srandom(0);
 
-    stream = (double *)memkind_malloc(MEMKIND_DEFAULT, stream_len * sizeof(double));
+    stream =
+        (double *)memkind_malloc(MEMKIND_DEFAULT, stream_len * sizeof(double));
     if (stream == NULL) {
         perror("<memkind>");
         fprintf(stderr, "Unable to allocate stream\n");
@@ -41,11 +42,11 @@ int main(int argc, char **argv)
     }
 
     for (i = 0; i < stream_len; i++) {
-        stream[i] = (double)(random())/(double)(RAND_MAX);
+        stream[i] = (double)(random()) / (double)(RAND_MAX);
     }
 
     for (i = 0; i < filter_len; i++) {
-        filter[i] = (double)(i)/(double)(filter_len);
+        filter[i] = (double)(i) / (double)(filter_len);
     }
 
     for (i = 0; i < num_filter; i++) {

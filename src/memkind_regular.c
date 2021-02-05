@@ -2,9 +2,9 @@
 /* Copyright (C) 2017 - 2020 Intel Corporation. */
 
 #include <memkind.h>
+#include <memkind/internal/heap_manager.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_default.h>
-#include <memkind/internal/heap_manager.h>
 
 #include <numa.h>
 
@@ -39,16 +39,16 @@ static int memkind_regular_check_available(struct memkind *kind)
      * Call pthread_once to be sure that situation mentioned
      * above will never happen */
     pthread_once(&kind->init_once, kind->ops->init_once);
-    return regular_nodes_mask != NULL ? MEMKIND_SUCCESS : MEMKIND_ERROR_UNAVAILABLE;
+    return regular_nodes_mask != NULL ? MEMKIND_SUCCESS
+                                      : MEMKIND_ERROR_UNAVAILABLE;
 }
 
-MEMKIND_EXPORT int memkind_regular_all_get_mbind_nodemask(struct memkind *kind,
-                                                          unsigned long *nodemask,
-                                                          unsigned long maxnode)
+MEMKIND_EXPORT int memkind_regular_all_get_mbind_nodemask(
+    struct memkind *kind, unsigned long *nodemask, unsigned long maxnode)
 {
     struct bitmask nodemask_bm = {maxnode, nodemask};
 
-    if(!regular_nodes_mask) {
+    if (!regular_nodes_mask) {
         return MEMKIND_ERROR_UNAVAILABLE;
     }
 
@@ -58,7 +58,7 @@ MEMKIND_EXPORT int memkind_regular_all_get_mbind_nodemask(struct memkind *kind,
 
 static int memkind_regular_finalize(memkind_t kind)
 {
-    if(regular_nodes_mask)
+    if (regular_nodes_mask)
         numa_bitmask_free(regular_nodes_mask);
 
     return memkind_arena_finalize(kind);
@@ -82,7 +82,4 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_REGULAR_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_regular_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
-
-
+    .defrag_reallocate = memkind_arena_defrag_reallocate};

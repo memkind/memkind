@@ -6,7 +6,7 @@
 
 #include "common.h"
 
-class DlopenTest: public :: testing::Test
+class DlopenTest: public ::testing::Test
 {
 protected:
     DlopenTest()
@@ -15,11 +15,14 @@ protected:
 
         dlerror();
         handle = dlopen(path, RTLD_LAZY);
-        assert((handle != NULL && dlerror() == NULL) && "Couldn't open libmemkind.so");
+        assert((handle != NULL && dlerror() == NULL) &&
+               "Couldn't open libmemkind.so");
         memkind_malloc = (memkind_malloc_t)dlsym(handle, "memkind_malloc");
-        assert(dlerror() == NULL && "Couldn't get memkind_malloc from memkind library");
+        assert(dlerror() == NULL &&
+               "Couldn't get memkind_malloc from memkind library");
         memkind_free = (memkind_free_t)dlsym(handle, "memkind_free");
-        assert(dlerror() == NULL && "Couldn't get memkind_free from memkind library");
+        assert(dlerror() == NULL &&
+               "Couldn't get memkind_free from memkind library");
     }
 
     ~DlopenTest()
@@ -30,11 +33,13 @@ protected:
     void test(const char *kind_name, size_t alloc_size)
     {
         void **kind_ptr = (void **)dlsym(handle, kind_name);
-        EXPECT_TRUE(dlerror() == NULL) << "Couldn't get kind from memkind library";
+        EXPECT_TRUE(dlerror() == NULL)
+            << "Couldn't get kind from memkind library";
         EXPECT_TRUE(kind_ptr != NULL) << "Kind ptr to memkind library is NULL";
 
         void *allocation_ptr = memkind_malloc((*kind_ptr), alloc_size);
-        EXPECT_TRUE(allocation_ptr != NULL) << "Allocation with memkind_malloc failed";
+        EXPECT_TRUE(allocation_ptr != NULL)
+            << "Allocation with memkind_malloc failed";
 
         memset(allocation_ptr, 0, alloc_size);
 

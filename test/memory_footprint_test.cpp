@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2017 - 2020 Intel Corporation. */
 
-#include "common.h"
-#include "random_sizes_allocator.h"
-#include "proc_stat.h"
-#include "allocator_perf_tool/GTestAdapter.hpp"
 #include "allocator_perf_tool/Allocation_info.hpp"
+#include "allocator_perf_tool/GTestAdapter.hpp"
+#include "common.h"
+#include "proc_stat.h"
+#include "random_sizes_allocator.h"
 
 #include <memkind.h>
 
@@ -20,7 +20,9 @@ class Worker
 {
 public:
     Worker(RandomSizesAllocator &&allocator, double malloc_probability)
-        : allocator(std::move(allocator)), malloc_probability(malloc_probability)  {}
+        : allocator(std::move(allocator)),
+          malloc_probability(malloc_probability)
+    {}
 
     void work()
     {
@@ -48,7 +50,6 @@ private:
     size_t requested_memory_sum = 0;
     double malloc_probability;
 };
-
 
 class MemoryFootprintStats
 {
@@ -80,7 +81,8 @@ public:
 
         requested_memory = requested_memory_bytes;
 
-        current_vm_overhead = current_vm - initial_virtual_memory - requested_memory;
+        current_vm_overhead =
+            current_vm - initial_virtual_memory - requested_memory;
         vm_overhead_sum += current_vm_overhead;
         max_vm_overhead = std::max(max_vm_overhead, current_vm_overhead);
 
@@ -93,20 +95,25 @@ public:
     {
         std::lock_guard<std::mutex> lk(sample_guard);
         GTestAdapter::RecordProperty("avg_vm_overhead_per_operation_mb",
-                                     convert_bytes_to_mb(vm_overhead_sum) / sample_count);
+                                     convert_bytes_to_mb(vm_overhead_sum) /
+                                         sample_count);
         GTestAdapter::RecordProperty("avg_vm_overhead_growth_per_operation_mb",
-                                     convert_bytes_to_mb(current_vm_overhead) / sample_count);
+                                     convert_bytes_to_mb(current_vm_overhead) /
+                                         sample_count);
         GTestAdapter::RecordProperty("max_vm_overhead_mb",
                                      convert_bytes_to_mb(max_vm_overhead));
         GTestAdapter::RecordProperty("avg_phys_overhead_per_operation_mb",
-                                     convert_bytes_to_mb(phys_overhead_sum) / sample_count);
+                                     convert_bytes_to_mb(phys_overhead_sum) /
+                                         sample_count);
         GTestAdapter::RecordProperty("max_phys_overhead_mb",
                                      convert_bytes_to_mb(max_phys_overhead));
-        GTestAdapter::RecordProperty("overhead_to_requested_memory_ratio_percent",
-                                     100.f * current_vm_overhead / requested_memory);
+        GTestAdapter::RecordProperty(
+            "overhead_to_requested_memory_ratio_percent",
+            100.f * current_vm_overhead / requested_memory);
         GTestAdapter::RecordProperty("requested_memory_mb",
                                      convert_bytes_to_mb(requested_memory));
     }
+
 private:
     long long initial_virtual_memory;
     long long vm_overhead_sum = 0;
@@ -131,11 +138,12 @@ private:
 /* Execute func calling it n_calls times in n_threads threads.
  * The execution is multithreaded but the func calls order is sequential.
  * func takes thread id, and operation id as an argument,
- * and must return thread id of the next thread, where thread ids are in range <0, n_threads-1>.
- * init_thread_id specify the initial thread id.
+ * and must return thread id of the next thread, where thread ids are in range
+ * <0, n_threads-1>. init_thread_id specify the initial thread id.
  */
-void run_multithreaded_seq_exec(unsigned n_threads, unsigned init_thread_id,
-                                unsigned n_calls, std::function<unsigned(unsigned, unsigned)> func)
+void run_multithreaded_seq_exec(
+    unsigned n_threads, unsigned init_thread_id, unsigned n_calls,
+    std::function<unsigned(unsigned, unsigned)> func)
 {
     std::vector<std::thread> threads;
     std::mutex mutex;
@@ -147,12 +155,14 @@ void run_multithreaded_seq_exec(unsigned n_threads, unsigned init_thread_id,
 
     mutex.lock();
 
-    for(int tid=0; tid<n_threads; ++tid) {
-        threads.emplace_back([ &, tid]() {
-            while(current_call < n_calls) {
+    for (int tid = 0; tid < n_threads; ++tid) {
+        threads.emplace_back([&, tid]() {
+            while (current_call < n_calls) {
                 std::unique_lock<std::mutex> lk(mutex);
-                turns_holder.wait(lk, [ &,tid] {return current_tid == tid || current_call == n_calls;});
-                if(current_call == n_calls) {
+                turns_holder.wait(lk, [&, tid] {
+                    return current_tid == tid || current_call == n_calls;
+                });
+                if (current_call == n_calls) {
                     return;
                 }
                 current_tid = func(tid, current_call);
@@ -166,17 +176,19 @@ void run_multithreaded_seq_exec(unsigned n_threads, unsigned init_thread_id,
 
     mutex.unlock();
 
-    for(int i=0; i<threads.size(); i++) {
+    for (int i = 0; i < threads.size(); i++) {
         threads[i].join();
     }
 }
 
 /*
  * Create threads and measure the cost of maintaining allocations from threads.
- * Allocations order is sequential (otherwise the results might be very nondeterministic).
+ * Allocations order is sequential (otherwise the results might be very
+ * nondeterministic).
  */
 void run_test(memkind_t kind, size_t min_size, size_t max_size,
-              unsigned n_threads, double malloc_probability=1.0, unsigned n_calls=1000)
+              unsigned n_threads, double malloc_probability = 1.0,
+              unsigned n_calls = 1000)
 {
     Worker worker(RandomSizesAllocator(kind, min_size, max_size, n_calls),
                   malloc_probability);
@@ -184,22 +196,22 @@ void run_test(memkind_t kind, size_t min_size, size_t max_size,
     MemoryFootprintStats mem_footprint_stats;
 
     auto func = [&](unsigned tid, unsigned id) -> unsigned {
-        if(id == 0)
-        {
+        if (id == 0) {
             mem_footprint_stats.reset();
         }
 
         worker.work();
         mem_footprint_stats.sample(worker.get_requested_memory_sum_bytes());
 
-        return (tid + 1) % n_threads; //next thread id
+        return (tid + 1) % n_threads; // next thread id
     };
     run_multithreaded_seq_exec(n_threads, 0, n_calls, func);
     mem_footprint_stats.log_data();
 }
 
-class MemoryFootprintTest: public :: testing::Test
-{};
+class MemoryFootprintTest: public ::testing::Test
+{
+};
 
 TEST_F(MemoryFootprintTest,
        test_TC_MEMKIND_DEFAULT_only_malloc_small_allocations_1_thread)
@@ -237,40 +249,46 @@ TEST_F(MemoryFootprintTest,
     run_test(MEMKIND_DEFAULT, 2 * MB, 10 * MB, 10, 1.0, 100);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_small_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_small_allocations_1_thread)
 {
     run_test(MEMKIND_DEFAULT, 128, 15 * KB, 1, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_small_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_small_allocations_10_thread)
 {
     run_test(MEMKIND_DEFAULT, 128, 15 * KB, 10, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_medium_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_medium_allocations_1_thread)
 {
     run_test(MEMKIND_DEFAULT, 16 * KB, 1 * MB, 1, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_medium_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_medium_allocations_10_thread)
 {
     run_test(MEMKIND_DEFAULT, 16 * KB, 1 * MB, 10, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_large_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_large_allocations_1_thread)
 {
     run_test(MEMKIND_DEFAULT, 2 * MB, 10 * MB, 1, 0.8, 100);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_large_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DEFAULT_random_malloc80_free20_random_large_allocations_10_thread)
 {
-    run_test(MEMKIND_DEFAULT, 2 * MB, 10 * MB,  10, 0.8, 100);
+    run_test(MEMKIND_DEFAULT, 2 * MB, 10 * MB, 10, 0.8, 100);
 }
 
 TEST_F(MemoryFootprintTest,
@@ -309,38 +327,44 @@ TEST_F(MemoryFootprintTest,
     run_test(MEMKIND_HBW, 2 * MB, 10 * MB, 10, 100);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_HBW_random_malloc80_free20_random_small_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_HBW_random_malloc80_free20_random_small_allocations_1_thread)
 {
     run_test(MEMKIND_HBW, 128, 15 * KB, 1, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_HBW_random_malloc80_free20_random_small_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_HBW_random_malloc80_free20_random_small_allocations_10_thread)
 {
     run_test(MEMKIND_HBW, 128, 15 * KB, 10, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_HBW_random_malloc80_free20_random_medium_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_HBW_random_malloc80_free20_random_medium_allocations_1_thread)
 {
     run_test(MEMKIND_HBW, 16 * KB, 1 * MB, 1, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_HBW_random_malloc80_free20_random_medium_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_HBW_random_malloc80_free20_random_medium_allocations_10_thread)
 {
     run_test(MEMKIND_HBW, 16 * KB, 1 * MB, 10, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_HBW_random_malloc80_free20_random_large_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_HBW_random_malloc80_free20_random_large_allocations_1_thread)
 {
     run_test(MEMKIND_HBW, 2 * MB, 10 * MB, 1, 0.8, 100);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_HBW_random_malloc80_free20_random_large_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_HBW_random_malloc80_free20_random_large_allocations_10_thread)
 {
     run_test(MEMKIND_HBW, 2 * MB, 10 * MB, 10, 0.8, 100);
 }
@@ -381,38 +405,44 @@ TEST_F(MemoryFootprintTest,
     run_test(MEMKIND_DAX_KMEM, 2 * MB, 10 * MB, 10, 100);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_small_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_small_allocations_1_thread)
 {
     run_test(MEMKIND_DAX_KMEM, 128, 15 * KB, 1, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_small_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_small_allocations_10_thread)
 {
     run_test(MEMKIND_DAX_KMEM, 128, 15 * KB, 10, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_medium_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_medium_allocations_1_thread)
 {
     run_test(MEMKIND_DAX_KMEM, 16 * KB, 1 * MB, 1, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_medium_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_medium_allocations_10_thread)
 {
     run_test(MEMKIND_DAX_KMEM, 16 * KB, 1 * MB, 10, 0.8);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_large_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_large_allocations_1_thread)
 {
     run_test(MEMKIND_DAX_KMEM, 2 * MB, 10 * MB, 1, 0.8, 100);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_large_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_DAX_KMEM_random_malloc80_free20_random_large_allocations_10_thread)
 {
     run_test(MEMKIND_DAX_KMEM, 2 * MB, 10 * MB, 10, 0.8, 100);
 }
@@ -471,8 +501,9 @@ TEST_F(MemoryFootprintTest,
     memkind_destroy_kind(kind);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_small_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_small_allocations_1_thread)
 {
     struct memkind *kind = nullptr;
     memkind_create_pmem(PMEM_DIR, 0, &kind);
@@ -480,8 +511,9 @@ TEST_F(MemoryFootprintTest,
     memkind_destroy_kind(kind);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_small_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_small_allocations_10_thread)
 {
     struct memkind *kind = nullptr;
     memkind_create_pmem(PMEM_DIR, 0, &kind);
@@ -489,8 +521,9 @@ TEST_F(MemoryFootprintTest,
     memkind_destroy_kind(kind);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_medium_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_medium_allocations_1_thread)
 {
     struct memkind *kind = nullptr;
     memkind_create_pmem(PMEM_DIR, 0, &kind);
@@ -498,8 +531,9 @@ TEST_F(MemoryFootprintTest,
     memkind_destroy_kind(kind);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_medium_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_medium_allocations_10_thread)
 {
     struct memkind *kind = nullptr;
     memkind_create_pmem(PMEM_DIR, 0, &kind);
@@ -507,8 +541,9 @@ TEST_F(MemoryFootprintTest,
     memkind_destroy_kind(kind);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_large_allocations_1_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_large_allocations_1_thread)
 {
     struct memkind *kind = nullptr;
     memkind_create_pmem(PMEM_DIR, 0, &kind);
@@ -516,8 +551,9 @@ TEST_F(MemoryFootprintTest,
     memkind_destroy_kind(kind);
 }
 
-TEST_F(MemoryFootprintTest,
-       test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_large_allocations_10_thread)
+TEST_F(
+    MemoryFootprintTest,
+    test_TC_MEMKIND_MEMKIND_PMEM_random_malloc80_free20_random_large_allocations_10_thread)
 {
     struct memkind *kind = nullptr;
     memkind_create_pmem(PMEM_DIR, 0, &kind);

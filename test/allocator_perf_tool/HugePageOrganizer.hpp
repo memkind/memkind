@@ -3,15 +3,16 @@
 #pragma once
 
 #include <fstream>
-#include <string.h>
-#include <numa.h>
-#include <vector>
 #include <iostream>
+#include <numa.h>
 #include <stdexcept>
+#include <string.h>
+#include <vector>
 
 /*
- * HugePageOrganizer sets hugepages per NUMA node and restore initial setup of hugepages.
- * It writes and reads from the same file, so using HugePageOrganizer with parallel execution may cause undefined behaviour.
+ * HugePageOrganizer sets hugepages per NUMA node and restore initial setup of
+ * hugepages. It writes and reads from the same file, so using HugePageOrganizer
+ * with parallel execution may cause undefined behaviour.
  */
 
 class HugePageOrganizer
@@ -19,11 +20,13 @@ class HugePageOrganizer
 public:
     HugePageOrganizer(int nr_hugepages_per_node)
     {
-        for (int node_id = 0; node_id < numa_num_configured_nodes(); node_id++) {
+        for (int node_id = 0; node_id < numa_num_configured_nodes();
+             node_id++) {
             initial_nr_hugepages_per_nodes.push_back(get_nr_hugepages(node_id));
             if (set_nr_hugepages(nr_hugepages_per_node, node_id)) {
                 restore();
-                throw std::runtime_error("Error: Could not set the requested amount of huge pages.");
+                throw std::runtime_error(
+                    "Error: Could not set the requested amount of huge pages.");
             }
         }
     }
@@ -32,6 +35,7 @@ public:
     {
         restore();
     }
+
 private:
     std::vector<int> initial_nr_hugepages_per_nodes;
 
@@ -39,9 +43,10 @@ private:
     {
         std::string line;
         char path[128];
-        sprintf(path,
-                "/sys/devices/system/node/node%d/hugepages/hugepages-2048kB/nr_hugepages",
-                node_number);
+        sprintf(
+            path,
+            "/sys/devices/system/node/node%d/hugepages/hugepages-2048kB/nr_hugepages",
+            node_number);
         std::ifstream file(path);
         if (!file) {
             return -1;
@@ -64,8 +69,8 @@ private:
 
     void restore()
     {
-        for(size_t node_id = 0; node_id < initial_nr_hugepages_per_nodes.size();
-            node_id++) {
+        for (size_t node_id = 0;
+             node_id < initial_nr_hugepages_per_nodes.size(); node_id++) {
             set_nr_hugepages(initial_nr_hugepages_per_nodes[node_id], node_id);
         }
     }

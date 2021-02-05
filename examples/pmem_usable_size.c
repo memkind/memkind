@@ -9,7 +9,7 @@
 
 #define MB (1024 * 1024)
 
-static char path[PATH_MAX]="/tmp/";
+static char path[PATH_MAX] = "/tmp/";
 
 static void print_err_message(int err)
 {
@@ -31,15 +31,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fprintf(stdout,
-            "This example shows difference between the expected and the actual allocation size."
-            "\nPMEM kind directory: %s\n", path);
+    fprintf(
+        stdout,
+        "This example shows difference between the expected and the actual allocation size."
+        "\nPMEM kind directory: %s\n",
+        path);
 
     int status = memkind_check_dax_path(path);
     if (!status) {
         fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
     } else {
-        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n",
+                path);
     }
 
     err = memkind_create_pmem(path, 0, &pmem_kind_unlimited);
@@ -61,7 +64,8 @@ int main(int argc, char *argv[])
 
     // Check real usable size for this allocation
     if (memkind_malloc_usable_size(pmem_kind_unlimited, pmem_str10) != 32) {
-        fprintf(stderr, "Wrong usable size for small allocation (pmem_str10).\n");
+        fprintf(stderr,
+                "Wrong usable size for small allocation (pmem_str10).\n");
         return 1;
     }
 
@@ -74,7 +78,8 @@ int main(int argc, char *argv[])
 
     // Check real usable size for this allocation, its 32 again
     if (memkind_malloc_usable_size(pmem_kind_unlimited, pmem_str11) != 32) {
-        fprintf(stderr, "Wrong usable size for small allocation (pmem_str11).\n");
+        fprintf(stderr,
+                "Wrong usable size for small allocation (pmem_str11).\n");
         return 1;
     }
 
@@ -87,7 +92,8 @@ int main(int argc, char *argv[])
 
     // Check real usable size for this allocation, its 48 now
     if (memkind_malloc_usable_size(pmem_kind_unlimited, pmem_str12) != 48) {
-        fprintf(stderr, "Wrong usable size for small allocation (pmem_str12).\n");
+        fprintf(stderr,
+                "Wrong usable size for small allocation (pmem_str12).\n");
         return 1;
     }
 
@@ -104,7 +110,8 @@ int main(int argc, char *argv[])
 
     // Check real usable size for this allocation
     if (memkind_malloc_usable_size(pmem_kind_unlimited, pmem_str10) != 5 * MB) {
-        fprintf(stderr, "Wrong usable size for large allocation (pmem_str10).\n");
+        fprintf(stderr,
+                "Wrong usable size for large allocation (pmem_str10).\n");
         return 1;
     }
 
@@ -117,7 +124,8 @@ int main(int argc, char *argv[])
 
     // Check real usable size for this allocation, its 6MB now
     if (memkind_malloc_usable_size(pmem_kind_unlimited, pmem_str11) != 6 * MB) {
-        fprintf(stderr, "Wrong usable size for large allocation (pmem_str11).\n");
+        fprintf(stderr,
+                "Wrong usable size for large allocation (pmem_str11).\n");
         return 1;
     }
 

@@ -17,8 +17,9 @@ int main()
 
     char *ptr_regular = (char *)memkind_malloc(MEMKIND_REGULAR, size);
 
-    fprintf(stdout,
-            "This example shows how to use memkind API to retrieve information about allocation stats.\n");
+    fprintf(
+        stdout,
+        "This example shows how to use memkind API to retrieve information about allocation stats.\n");
 
     snprintf(ptr_regular, size,
              "Hello world from regular kind memory - ptr_regular.\n");
@@ -37,10 +38,11 @@ int main()
     fprintf(stdout,
             "\n Global stats \nresident %zu \nactive %zu, \nallocated %zu \n",
             stats_resident, stats_active, stats_allocated);
-    fprintf(stdout,
-            "\n MEMKIND_REGULAR stats \nresident %zu \nactive %zu, \nallocated %zu \n",
-            stats_kind_regular_resident, stats_kind_regular_active,
-            stats_kind_regular_allocated);
+    fprintf(
+        stdout,
+        "\n MEMKIND_REGULAR stats \nresident %zu \nactive %zu, \nallocated %zu \n",
+        stats_kind_regular_resident, stats_kind_regular_active,
+        stats_kind_regular_allocated);
 
     memkind_free(NULL, ptr_regular);
 

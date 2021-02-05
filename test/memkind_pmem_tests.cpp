@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2015 - 2020 Intel Corporation. */
 
+#include "allocator_perf_tool/TimerSysTime.hpp"
 #include <memkind/internal/memkind_pmem.h>
 #include <memkind/internal/memkind_private.h>
-#include "allocator_perf_tool/TimerSysTime.hpp"
 
-#include <sys/param.h>
-#include <sys/mman.h>
-#include <sys/statfs.h>
-#include <stdio.h>
-#include <pthread.h>
-#include <vector>
 #include "common.h"
+#include <pthread.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/param.h>
+#include <sys/statfs.h>
+#include <vector>
 
 static const size_t PMEM_PART_SIZE = MEMKIND_PMEM_MIN_SIZE + 4 * KB;
 static const size_t PMEM_NO_LIMIT = 0;
-extern const char  *PMEM_DIR;
+extern const char *PMEM_DIR;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
@@ -39,19 +39,21 @@ protected:
     }
 };
 
-class MemkindPmemTestsCalloc : public MemkindPmemTests,
-    public ::testing::WithParamInterface<std::tuple<int, int>>
+class MemkindPmemTestsCalloc
+    : public MemkindPmemTests,
+      public ::testing::WithParamInterface<std::tuple<int, int>>
 {
 };
 
-class MemkindPmemTestsMalloc : public ::testing::Test,
-    public ::testing::WithParamInterface<size_t>
+class MemkindPmemTestsMalloc: public ::testing::Test,
+                              public ::testing::WithParamInterface<size_t>
 {
 };
 
 static void pmem_get_size(struct memkind *kind, size_t &total, size_t &free)
 {
-    struct memkind_pmem *priv = reinterpret_cast<struct memkind_pmem *>(kind->priv);
+    struct memkind_pmem *priv =
+        reinterpret_cast<struct memkind_pmem *>(kind->priv);
 
     total = priv->max_size;
     free = priv->max_size - priv->current_size; /* rough estimation */
@@ -114,19 +116,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCheckDaxSuccess)
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocFragmentation)
 {
-    const size_t size_array[] = {
-        10,
-        100,
-        200,
-        500,
-        1000,
-        2000,
-        3000,
-        1 * MB,
-        2 * MB,
-        3 * MB,
-        4 * MB
-    };
+    const size_t size_array[] = {10,   100,    200,    500,    1000,  2000,
+                                 3000, 1 * MB, 2 * MB, 3 * MB, 4 * MB};
 
     const size_t iteration = 1000;
 
@@ -136,9 +127,9 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocFragmentation)
     ASSERT_EQ(0, err);
     ASSERT_NE(nullptr, pmem_temp);
 
-    //check malloc-free possibility with same sizes and 1000 iterations
-    for ( unsigned j = 0; j < iteration; ++j) {
-        for (unsigned i = 0 ; i < ARRAY_SIZE(size_array); ++i) {
+    // check malloc-free possibility with same sizes and 1000 iterations
+    for (unsigned j = 0; j < iteration; ++j) {
+        for (unsigned i = 0; i < ARRAY_SIZE(size_array); ++i) {
             void *alloc = memkind_malloc(pmem_temp, size_array[i]);
             ASSERT_NE(nullptr, alloc);
             memkind_free(pmem_temp, alloc);
@@ -244,11 +235,10 @@ TEST_P(MemkindPmemTestsCalloc, test_TC_MEMKIND_PmemCallocZero)
     ASSERT_EQ(test, nullptr);
 }
 
-INSTANTIATE_TEST_CASE_P(
-    CallocParam, MemkindPmemTestsCalloc,
-    ::testing::Values(std::make_tuple(10, 0),
-                      std::make_tuple(0, 0),
-                      std::make_tuple(0, 10)));
+INSTANTIATE_TEST_CASE_P(CallocParam, MemkindPmemTestsCalloc,
+                        ::testing::Values(std::make_tuple(10, 0),
+                                          std::make_tuple(0, 0),
+                                          std::make_tuple(0, 10)));
 
 TEST_P(MemkindPmemTestsCalloc, test_TC_MEMKIND_PmemCallocSizeMax)
 {
@@ -306,7 +296,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeMemoryAfterDestroyLargeClass)
     ASSERT_EQ(0, statfs(PMEM_DIR, &st));
     blocksInitial = st.f_bfree;
 
-    while(1) {
+    while (1) {
         if (memkind_malloc(pmem_kind_test, 16 * KB) == nullptr)
             break;
     }
@@ -336,7 +326,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeMemoryAfterDestroySmallClass)
     ASSERT_EQ(0, statfs(PMEM_DIR, &st));
     blocksInitial = st.f_bfree;
 
-    for(int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 100; ++i) {
         ASSERT_NE(memkind_malloc(pmem_kind_test, 32), nullptr);
     }
 
@@ -378,19 +368,17 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocUsableSize)
     const struct {
         size_t size;
         size_t spacing;
-    } check_sizes[] = {
-        {.size = 10, .spacing = 8},
-        {.size = 100, .spacing = 16},
-        {.size = 200, .spacing = 32},
-        {.size = 500, .spacing = 64},
-        {.size = 1000, .spacing = 128},
-        {.size = 2000, .spacing = 256},
-        {.size = 3000, .spacing = 512},
-        {.size = 1 * MB, .spacing = 4 * MB},
-        {.size = 2 * MB, .spacing = 4 * MB},
-        {.size = 3 * MB, .spacing = 4 * MB},
-        {.size = 4 * MB, .spacing = 4 * MB}
-    };
+    } check_sizes[] = {{.size = 10, .spacing = 8},
+                       {.size = 100, .spacing = 16},
+                       {.size = 200, .spacing = 32},
+                       {.size = 500, .spacing = 64},
+                       {.size = 1000, .spacing = 128},
+                       {.size = 2000, .spacing = 256},
+                       {.size = 3000, .spacing = 512},
+                       {.size = 1 * MB, .spacing = 4 * MB},
+                       {.size = 2 * MB, .spacing = 4 * MB},
+                       {.size = 3 * MB, .spacing = 4 * MB},
+                       {.size = 4 * MB, .spacing = 4 * MB}};
     struct memkind *pmem_temp = nullptr;
 
     int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
@@ -441,7 +429,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemResize)
     ASSERT_EQ(0, err);
     ASSERT_NE(nullptr, pmem_kind_no_limit);
 
-    pmem_str10 = (char *)memkind_malloc(pmem_kind_no_limit, MEMKIND_PMEM_MIN_SIZE);
+    pmem_str10 =
+        (char *)memkind_malloc(pmem_kind_no_limit, MEMKIND_PMEM_MIN_SIZE);
     ASSERT_NE(nullptr, pmem_str10);
 
     pmem_strX = (char *)memkind_malloc(pmem_kind_no_limit, size);
@@ -453,7 +442,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemResize)
     err = memkind_destroy_kind(pmem_kind_no_limit);
     ASSERT_EQ(0, err);
 
-    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE-1,
+    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE - 1,
                               &pmem_kind_not_possible);
     ASSERT_EQ(MEMKIND_ERROR_INVALID, err);
     ASSERT_EQ(nullptr, pmem_kind_not_possible);
@@ -695,7 +684,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocInPlace)
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMaxFill)
 {
     const int possible_alloc_max = 4;
-    void *test[possible_alloc_max+1] = {nullptr};
+    void *test[possible_alloc_max + 1] = {nullptr};
     size_t total_mem = 0;
     size_t free_mem = 0;
     int i, j;
@@ -705,7 +694,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMaxFill)
     for (i = 0; i < possible_alloc_max; i++) {
         for (j = total_mem; j > 0; --j) {
             test[i] = memkind_malloc(pmem_kind, j);
-            if(test[i] != nullptr)
+            if (test[i] != nullptr)
                 break;
         }
         ASSERT_NE(j, 0);
@@ -713,10 +702,10 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMaxFill)
 
     for (j = total_mem; j > 0; --j) {
         test[possible_alloc_max] = memkind_malloc(pmem_kind, j);
-        if(test[possible_alloc_max] != nullptr)
+        if (test[possible_alloc_max] != nullptr)
             break;
     }
-    //Ensure there is no more space available on kind
+    // Ensure there is no more space available on kind
     ASSERT_EQ(j, 0);
 
     for (i = 0; i < possible_alloc_max; i++) {
@@ -743,7 +732,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptrSizeZero)
     timer.start();
     do {
         errno = 0;
-        //equivalent to memkind_malloc(pmem_kind,0)
+        // equivalent to memkind_malloc(pmem_kind,0)
         test_nullptr = memkind_realloc(pmem_kind, nullptr, 0);
         ASSERT_EQ(test_nullptr, nullptr);
         ASSERT_EQ(errno, 0);
@@ -789,26 +778,26 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSizeConservative)
     memkind_config *test_cfg = memkind_config_new();
     ASSERT_NE(nullptr, test_cfg);
     memkind_config_set_path(test_cfg, PMEM_DIR);
-    memkind_config_set_size(test_cfg, 5*PMEM_PART_SIZE);
-    memkind_config_set_memory_usage_policy(test_cfg,
-                                           MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
-    err =  memkind_create_pmem_with_config(test_cfg, &kind);
+    memkind_config_set_size(test_cfg, 5 * PMEM_PART_SIZE);
+    memkind_config_set_memory_usage_policy(
+        test_cfg, MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
+    err = memkind_create_pmem_with_config(test_cfg, &kind);
     ASSERT_EQ(err, 0);
     memkind_config_delete(test_cfg);
 
-    //check maximum number of allocations right after creating the kind
+    // check maximum number of allocations right after creating the kind
     while ((ptr = memkind_malloc(kind, alloc_size)) != nullptr) {
         pmem_vec.push_back(ptr);
     }
 
     initial_alloc_limit = pmem_vec.size();
 
-    for(auto const &val: pmem_vec) {
+    for (auto const &val : pmem_vec) {
         memkind_free(kind, val);
     }
     pmem_vec.clear();
 
-    //check number of allocations in consecutive iterations of malloc-free loop
+    // check number of allocations in consecutive iterations of malloc-free loop
     for (i = 0; i < loop_limit; i++) {
 
         while ((ptr = memkind_malloc(kind, alloc_size)) != nullptr) {
@@ -816,7 +805,7 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSizeConservative)
         }
         int temp_limit_of_allocations = pmem_vec.size();
 
-        for(auto const &val: pmem_vec) {
+        for (auto const &val : pmem_vec) {
             memkind_free(kind, val);
         }
         pmem_vec.clear();
@@ -827,20 +816,21 @@ TEST_P(MemkindPmemTestsMalloc, test_TC_MEMKIND_PmemMallocSizeConservative)
     ASSERT_EQ(0, err);
 }
 
-INSTANTIATE_TEST_CASE_P(
-    MallocParam, MemkindPmemTestsMalloc,
-    ::testing::Values(32, 60, 80, 100, 128, 150, 160, 250, 256, 300, 320,
-                      500, 512, 800, 896, 3000, 4 * KB, 6000, 10000, 60000,
-                      96 * KB, 112 * KB, 128 * KB, 160 * KB, 192 * KB, 500000,
-                      2 * MB, 5 * MB));
+INSTANTIATE_TEST_CASE_P(MallocParam, MemkindPmemTestsMalloc,
+                        ::testing::Values(32, 60, 80, 100, 128, 150, 160, 250,
+                                          256, 300, 320, 500, 512, 800, 896,
+                                          3000, 4 * KB, 6000, 10000, 60000,
+                                          96 * KB, 112 * KB, 128 * KB, 160 * KB,
+                                          192 * KB, 500000, 2 * MB, 5 * MB));
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFillConservative)
 {
-    const size_t small_size[] = {8, 16, 32, 48, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384,
-                                 448, 512, 640, 768, 896, 1 * KB, 1280, 1536, 1792, 2 * KB, 2560,
-                                 3 * KB, 3584, 4 * KB, 5 * KB, 6 * KB, 7 * KB, 8 * KB, 10 * KB,
-                                 12 * KB, 14 * KB
-                                };
+    const size_t small_size[] = {
+        8,      16,      32,      48,     64,     80,     96,     112,
+        128,    160,     192,     224,    256,    320,    384,    448,
+        512,    640,     768,     896,    1 * KB, 1280,   1536,   1792,
+        2 * KB, 2560,    3 * KB,  3584,   4 * KB, 5 * KB, 6 * KB, 7 * KB,
+        8 * KB, 10 * KB, 12 * KB, 14 * KB};
     const int loop_limit = 100;
     int initial_alloc_limit = 0;
     int err;
@@ -854,38 +844,40 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFillConservative)
 
     memkind_config_set_path(test_cfg, PMEM_DIR);
     memkind_config_set_size(test_cfg, PMEM_PART_SIZE);
-    memkind_config_set_memory_usage_policy(test_cfg,
-                                           MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
-    err =  memkind_create_pmem_with_config(test_cfg, &kind);
+    memkind_config_set_memory_usage_policy(
+        test_cfg, MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
+    err = memkind_create_pmem_with_config(test_cfg, &kind);
     ASSERT_EQ(err, 0);
     memkind_config_delete(test_cfg);
 
-    //check maximum number of allocations right after creating the kind
+    // check maximum number of allocations right after creating the kind
     j = 0;
     while ((ptr = memkind_malloc(kind, small_size[j++])) != nullptr) {
         pmem_vec.push_back(ptr);
-        if (j == ARRAY_SIZE(small_size)) j = 0;
+        if (j == ARRAY_SIZE(small_size))
+            j = 0;
     }
 
     initial_alloc_limit = pmem_vec.size();
 
-    for(auto const &val: pmem_vec) {
+    for (auto const &val : pmem_vec) {
         memkind_free(kind, val);
     }
     pmem_vec.clear();
 
-    //check number of allocations in consecutive iterations of malloc-free loop
+    // check number of allocations in consecutive iterations of malloc-free loop
     for (i = 0; i < loop_limit; i++) {
 
         j = 0;
         while ((ptr = memkind_malloc(kind, small_size[j++])) != nullptr) {
             pmem_vec.push_back(ptr);
-            if (j == ARRAY_SIZE(small_size)) j = 0;
+            if (j == ARRAY_SIZE(small_size))
+                j = 0;
         }
 
         int temp_limit_of_allocations = pmem_vec.size();
 
-        for(auto const &val: pmem_vec) {
+        for (auto const &val : pmem_vec) {
             memkind_free(kind, val);
         }
         pmem_vec.clear();
@@ -896,8 +888,9 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSmallSizeFillConservative)
     ASSERT_EQ(0, err);
 }
 
-TEST_F(MemkindPmemTests,
-       test_TC_MEMKIND_PmemPosixMemalignWrongAlignmentLessThanVoidAndNotPowerOfTwo)
+TEST_F(
+    MemkindPmemTests,
+    test_TC_MEMKIND_PmemPosixMemalignWrongAlignmentLessThanVoidAndNotPowerOfTwo)
 {
     void *test = nullptr;
     size_t size = 32;
@@ -915,7 +908,7 @@ TEST_F(MemkindPmemTests,
 {
     void *test = nullptr;
     size_t size = 32;
-    size_t wrong_alignment = sizeof(void *)/2;
+    size_t wrong_alignment = sizeof(void *) / 2;
 
     errno = 0;
     int ret = memkind_posix_memalign(pmem_kind, &test, wrong_alignment, size);
@@ -929,7 +922,7 @@ TEST_F(MemkindPmemTests,
 {
     void *test = nullptr;
     size_t size = 32;
-    size_t wrong_alignment = sizeof(void *)+1;
+    size_t wrong_alignment = sizeof(void *) + 1;
 
     errno = 0;
     int ret = memkind_posix_memalign(pmem_kind, &test, wrong_alignment, size);
@@ -992,25 +985,25 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalign)
     std::vector<void *> pmem_vec;
     int ret;
 
-    for(alignment =  1 * KB; alignment <= 128 * KB; alignment *= 2) {
+    for (alignment = 1 * KB; alignment <= 128 * KB; alignment *= 2) {
         for (i = 0; i < test_loop; i++) {
             errno = 0;
-            while((ret = memkind_posix_memalign(pmem_kind, &test, alignment,
-                                                sizeof(int *))) == 0) {
+            while ((ret = memkind_posix_memalign(pmem_kind, &test, alignment,
+                                                 sizeof(int *))) == 0) {
                 ASSERT_EQ(errno, 0);
 
                 pmem_vec.push_back(test);
 
-                //test pointer should be usable
+                // test pointer should be usable
                 *(int *)test = test_value;
                 ASSERT_EQ(*(int *)test, test_value);
 
-                //check for correct address alignment
+                // check for correct address alignment
                 ASSERT_EQ((uintptr_t)(test) & (alignment - 1), (uintptr_t)0);
                 errno = 0;
             }
 
-            for(auto const &val: pmem_vec) {
+            for (auto const &val : pmem_vec) {
                 memkind_free(pmem_kind, val);
             }
             pmem_vec.clear();
@@ -1028,7 +1021,8 @@ static void *thread_func(void *arg)
         int pool_id = start_idx + idx;
 
         if (pools[pool_id] == nullptr) {
-            err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pools[pool_id]);
+            err =
+                memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pools[pool_id]);
             EXPECT_EQ(0, err);
         }
 
@@ -1055,7 +1049,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreads)
 
     for (int t = 0; t < nthreads; t++) {
         pool_idx[t] = npools * t;
-        status = pthread_create(&threads[t], nullptr, thread_func, &pool_idx[t]);
+        status =
+            pthread_create(&threads[t], nullptr, thread_func, &pool_idx[t]);
         ASSERT_EQ(0, status);
     }
 
@@ -1082,18 +1077,21 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemDestroyKind)
     ASSERT_EQ(err, 0);
 
     for (unsigned int i = 0; i < pmem_array_size; ++i) {
-        err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_kind_array[i]);
+        err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE,
+                                  &pmem_kind_array[i]);
         ASSERT_EQ(err, 0);
     }
 
-    memcpy(pmem_middle_name, pmem_kind_array[5]->name, MEMKIND_NAME_LENGTH_PRIV);
+    memcpy(pmem_middle_name, pmem_kind_array[5]->name,
+           MEMKIND_NAME_LENGTH_PRIV);
     err = memkind_destroy_kind(pmem_kind_array[5]);
     ASSERT_EQ(err, 0);
 
     err = memkind_destroy_kind(pmem_kind_array[6]);
     ASSERT_EQ(err, 0);
 
-    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_kind_array[5]);
+    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE,
+                              &pmem_kind_array[5]);
     ASSERT_EQ(err, 0);
 
     char *pmem_new_middle_name = pmem_kind_array[5]->name;
@@ -1113,7 +1111,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemDestroyKindArenaZero)
     struct memkind *pmem_temp_1 = nullptr;
     struct memkind *pmem_temp_2 = nullptr;
     unsigned int arena_zero = 0;
-    int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp_1);
+    int err =
+        memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp_1);
     ASSERT_EQ(err, 0);
 
     arena_zero = pmem_temp_1->arena_zero;
@@ -1122,7 +1121,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemDestroyKindArenaZero)
     err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp_2);
     ASSERT_EQ(err, 0);
 
-    ASSERT_EQ(arena_zero,pmem_temp_2->arena_zero);
+    ASSERT_EQ(arena_zero, pmem_temp_2->arena_zero);
 
     err = memkind_destroy_kind(pmem_temp_2);
     ASSERT_EQ(err, 0);
@@ -1133,21 +1132,24 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreateDestroyKindEmptyLoop)
     struct memkind *pmem_temp = nullptr;
 
     for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
-        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        int err =
+            memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         ASSERT_EQ(err, 0);
         err = memkind_destroy_kind(pmem_temp);
         ASSERT_EQ(err, 0);
     }
 }
 
-TEST_F(MemkindPmemTests,
-       test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocSmallSizeFreeDefinedPmemKind)
+TEST_F(
+    MemkindPmemTests,
+    test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocSmallSizeFreeDefinedPmemKind)
 {
     struct memkind *pmem_temp = nullptr;
     const size_t size = 1 * KB;
 
     for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
-        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        int err =
+            memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         ASSERT_EQ(err, 0);
         void *ptr = memkind_malloc(pmem_temp, size);
         ASSERT_NE(nullptr, ptr);
@@ -1157,8 +1159,9 @@ TEST_F(MemkindPmemTests,
     }
 }
 
-TEST_F(MemkindPmemTests,
-       test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocDifferentSizesDifferentKindsDefinedFreeForAllKinds)
+TEST_F(
+    MemkindPmemTests,
+    test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocDifferentSizesDifferentKindsDefinedFreeForAllKinds)
 {
     struct memkind *pmem_temp = nullptr;
     const size_t size_1 = 1 * KB;
@@ -1167,7 +1170,8 @@ TEST_F(MemkindPmemTests,
     void *ptr_default = nullptr;
     void *ptr_regular = nullptr;
     for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
-        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        int err =
+            memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         ASSERT_EQ(err, 0);
 
         ptr = memkind_malloc(pmem_temp, size_1);
@@ -1194,8 +1198,9 @@ TEST_F(MemkindPmemTests,
     }
 }
 
-TEST_F(MemkindPmemTests,
-       test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocDifferentSizesDifferentKindsDefinedFreeForNotPmemKinds)
+TEST_F(
+    MemkindPmemTests,
+    test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocDifferentSizesDifferentKindsDefinedFreeForNotPmemKinds)
 {
     struct memkind *pmem_temp = nullptr;
     const size_t size_1 = 1 * KB;
@@ -1204,7 +1209,8 @@ TEST_F(MemkindPmemTests,
     void *ptr_default = nullptr;
     void *ptr_regular = nullptr;
     for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
-        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        int err =
+            memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         ASSERT_EQ(err, 0);
 
         ptr = memkind_malloc(pmem_temp, size_1);
@@ -1231,8 +1237,9 @@ TEST_F(MemkindPmemTests,
     }
 }
 
-TEST_F(MemkindPmemTests,
-       test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocDifferentSizesDifferentKindsNullKindFree)
+TEST_F(
+    MemkindPmemTests,
+    test_TC_MEMKIND_PmemCreateDestroyKindLoopMallocDifferentSizesDifferentKindsNullKindFree)
 {
     struct memkind *pmem_temp = nullptr;
     const size_t size_1 = 1 * KB;
@@ -1241,7 +1248,8 @@ TEST_F(MemkindPmemTests,
     void *ptr_default = nullptr;
     void *ptr_regular = nullptr;
     for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
-        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        int err =
+            memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         ASSERT_EQ(err, 0);
 
         ptr = memkind_malloc(pmem_temp, size_1);
@@ -1268,15 +1276,15 @@ TEST_F(MemkindPmemTests,
     }
 }
 
-TEST_F(MemkindPmemTests,
-       test_TC_MEMKIND_PmemCreateDestroyKindLoopWithRealloc)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreateDestroyKindLoopWithRealloc)
 {
     struct memkind *pmem_temp = nullptr;
     const size_t size_1 = 512;
     const size_t size_2 = 1 * KB;
 
     for (unsigned int i = 0; i < MEMKIND_MAX_KIND; ++i) {
-        int err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
+        int err =
+            memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp);
         ASSERT_EQ(err, 0);
         void *ptr = memkind_malloc(pmem_temp, size_1);
         ASSERT_NE(nullptr, ptr);
@@ -1288,15 +1296,15 @@ TEST_F(MemkindPmemTests,
     }
 }
 
-TEST_F(MemkindPmemTests,
-       test_TC_MEMKIND_PmemCreateCheckErrorCodeArenaCreate)
+TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCreateCheckErrorCodeArenaCreate)
 {
-    struct memkind *pmem_temp[MEMKIND_MAX_KIND] = { nullptr };
+    struct memkind *pmem_temp[MEMKIND_MAX_KIND] = {nullptr};
     unsigned i = 0, j = 0;
     int err = 0;
 
     for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
-        err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp[i]);
+        err =
+            memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_temp[i]);
         if (err) {
             ASSERT_EQ(err, MEMKIND_ERROR_ARENAS_CREATE);
             break;
@@ -1319,7 +1327,7 @@ static void *thread_func_kinds(void *arg)
 
     err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_thread_kind);
 
-    if(err == 0) {
+    if (err == 0) {
         void *test = memkind_malloc(pmem_thread_kind, 32);
         EXPECT_TRUE(test != nullptr);
 
@@ -1344,7 +1352,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMultithreadsStressKindsCreate)
     // to obtain a real kind limit
     for (i = 0; i < MEMKIND_MAX_KIND; i++) {
         err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kinds[i]);
-        if(err != 0) {
+        if (err != 0) {
             ASSERT_GT(i, 0);
             max_possible_kind = i;
             --i;
@@ -1384,7 +1392,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkOneThread)
 {
     const size_t pmem_array_size = 10;
     const size_t alloc_size = 512;
-    struct memkind *pmem_kind_array[pmem_array_size] = { nullptr };
+    struct memkind *pmem_kind_array[pmem_array_size] = {nullptr};
     std::vector<void *> pmem_vec_exp[pmem_array_size];
     std::vector<void *> pmem_vec_imp[pmem_array_size];
     void *ptr;
@@ -1392,19 +1400,21 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkOneThread)
     double test1Time, test2Time;
 
     for (size_t i = 0; i < pmem_array_size; ++i) {
-        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_array[i]);
+        int err =
+            memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_array[i]);
         ASSERT_EQ(0, err);
     }
 
     for (size_t i = 0; i < pmem_array_size; ++i) {
-        while ((ptr = memkind_malloc(pmem_kind_array[i], alloc_size)) != nullptr) {
+        while ((ptr = memkind_malloc(pmem_kind_array[i], alloc_size)) !=
+               nullptr) {
             pmem_vec_exp[i].push_back(ptr);
         }
     }
 
     timer.start();
     for (size_t i = 0; i < pmem_array_size; ++i) {
-        for(auto const &val: pmem_vec_exp[i]) {
+        for (auto const &val : pmem_vec_exp[i]) {
             memkind_free(pmem_kind_array[i], val);
         }
     }
@@ -1412,16 +1422,16 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkOneThread)
     test1Time = timer.getElapsedTime();
     printf("Free time with explicitly kind: %f\n", test1Time);
 
-
     for (size_t i = 0; i < pmem_array_size; ++i) {
-        while ((ptr = memkind_malloc(pmem_kind_array[i], alloc_size)) != nullptr) {
+        while ((ptr = memkind_malloc(pmem_kind_array[i], alloc_size)) !=
+               nullptr) {
             pmem_vec_imp[i].push_back(ptr);
         }
     }
 
     timer.start();
     for (size_t i = 0; i < pmem_array_size; ++i) {
-        for(auto const &val: pmem_vec_imp[i]) {
+        for (auto const &val : pmem_vec_imp[i]) {
             memkind_free(nullptr, val);
         }
     }
@@ -1437,9 +1447,9 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkOneThread)
 }
 
 static const int threadsNum = 10;
-static memkind *testKind[threadsNum] = { nullptr };
+static memkind *testKind[threadsNum] = {nullptr};
 static const int mallocCount = 100000;
-static void *ptr[threadsNum][mallocCount] = { { nullptr } };
+static void *ptr[threadsNum][mallocCount] = {{nullptr}};
 
 static void *thread_func_FreeWithNullptr(void *arg)
 {
@@ -1561,24 +1571,26 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkWithThreads)
 
 /*
  * Test will create array of kinds, fill them and then attempt to free one ptr
- * passing nullptr instead of kind. Then it will try to malloc again and if it will be
- * successful the test passes (memkind_free(nullptr,...) was successful)
+ * passing nullptr instead of kind. Then it will try to malloc again and if it
+ * will be successful the test passes (memkind_free(nullptr,...) was successful)
  */
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeUsingNullptrInsteadOfKind)
 {
     const size_t pmem_array_size = 10;
     const size_t alloc_size = 1 * KB;
-    struct memkind *pmem_kind_array[pmem_array_size] = { nullptr };
+    struct memkind *pmem_kind_array[pmem_array_size] = {nullptr};
     std::vector<void *> pmem_vec[pmem_array_size];
     void *testPtr = nullptr;
 
     for (size_t i = 0; i < pmem_array_size; ++i) {
-        int err = memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_array[i]);
+        int err =
+            memkind_create_pmem(PMEM_DIR, PMEM_PART_SIZE, &pmem_kind_array[i]);
         ASSERT_EQ(0, err);
     }
 
     for (size_t i = 0; i < pmem_array_size; ++i) {
-        while ((testPtr = memkind_malloc(pmem_kind_array[i], alloc_size)) != nullptr) {
+        while ((testPtr = memkind_malloc(pmem_kind_array[i], alloc_size)) !=
+               nullptr) {
             pmem_vec[i].push_back(testPtr);
         }
     }
@@ -1589,7 +1601,8 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeUsingNullptrInsteadOfKind)
         // attempt to alloc memory to the kinds
         testPtr = memkind_malloc(pmem_kind_array[i], alloc_size);
         if (i == 5) {
-            // allocation should be successful - confirmation that memkind_free(nullptr,...) works fine
+            // allocation should be successful - confirmation that
+            // memkind_free(nullptr,...) works fine
             ASSERT_NE(testPtr, nullptr);
             pmem_vec[i].at(5) = testPtr;
         } else {
@@ -1600,7 +1613,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeUsingNullptrInsteadOfKind)
 
     // free the rest of the space and destroy kinds.
     for (size_t i = 0; i < pmem_array_size; ++i) {
-        for(auto const &val: pmem_vec[i]) {
+        for (auto const &val : pmem_vec[i]) {
             memkind_free(pmem_kind_array[i], val);
         }
         int err = memkind_destroy_kind(pmem_kind_array[i]);
@@ -1609,14 +1622,14 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeUsingNullptrInsteadOfKind)
 }
 
 /*
- * This is a test which confirms that extent deallocation function ( pmem_extent_dalloc )
- * was called correctly for pmem allocation.
+ * This is a test which confirms that extent deallocation function (
+ * pmem_extent_dalloc ) was called correctly for pmem allocation.
  */
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemCheckExtentDalloc)
 {
     struct memkind *kind = nullptr;
     const int mallocLimit = 10000;
-    void *ptr[mallocLimit] = { nullptr };
+    void *ptr[mallocLimit] = {nullptr};
     struct stat st;
     double initialBlocks;
 
@@ -1676,7 +1689,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKINDPmemDefragreallocate_success)
     ASSERT_EQ(err, 0);
 
     for (i = 0; i < alloc; ++i) {
-        void *ptr =  memkind_malloc(kind, 1 * KB);
+        void *ptr = memkind_malloc(kind, 1 * KB);
         ASSERT_NE(ptr, nullptr);
         memset(ptr, 'a', 1 * KB);
         pmem_vec.push_back(ptr);
@@ -1701,7 +1714,7 @@ TEST_F(MemkindPmemTests, test_TC_MEMKINDPmemDefragreallocate_success)
     }
     ASSERT_NE(count_mem_transfer, 0U);
 
-    for(auto const &val: pmem_vec) {
+    for (auto const &val : pmem_vec) {
         memkind_free(kind, val);
     }
 

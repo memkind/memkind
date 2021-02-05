@@ -3,11 +3,11 @@
 
 #include <memkind.h>
 
-#include <iostream>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <iostream>
 #include <random>
 #include <vector>
 
@@ -16,22 +16,21 @@
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #define BENCHMARK_LOG "bench_single_thread_%Y%m%d-%H%M"
 
-static size_t block_size [] =
-{8519680, 4325376, 8519680, 4325376, 8519680, 4325376, 8519680, 4325376, 432517, 608478};
+static size_t block_size[] = {8519680, 4325376, 8519680, 4325376, 8519680,
+                              4325376, 8519680, 4325376, 432517,  608478};
 
 static struct memkind *pmem_kind;
 static FILE *log_file;
 
-static const char *const log_tag[] = {
-    "_mem_default.log",
-    "_mem_conservative.log"
-};
+static const char *const log_tag[] = {"_mem_default.log",
+                                      "_mem_conservative.log"};
 
 static void usage(char *name)
 {
-    fprintf(stderr,
-            "Usage: %s pmem_kind_dir_path pmem_size pmem_policy test_time_limit_in_sec\n",
-            name);
+    fprintf(
+        stderr,
+        "Usage: %s pmem_kind_dir_path pmem_size pmem_policy test_time_limit_in_sec\n",
+        name);
 }
 
 static int fragmentatation_test(size_t pmem_max_size, double test_time)
@@ -54,15 +53,16 @@ static int fragmentatation_test(size_t pmem_max_size, double test_time)
         size_t length = pmem_strs.size() / 2;
         std::uniform_int_distribution<size_t> m_index(0, length - 1);
 
-        while ((pmem_str = static_cast<char *>(memkind_malloc(pmem_kind,
-                                                              size))) == nullptr) {
+        while ((pmem_str = static_cast<char *>(
+                    memkind_malloc(pmem_kind, size))) == nullptr) {
             size_t to_evict = m_index(mt);
             char *str_to_evict = pmem_strs[to_evict];
-            size_t evict_size = memkind_malloc_usable_size(pmem_kind, str_to_evict);
+            size_t evict_size =
+                memkind_malloc_usable_size(pmem_kind, str_to_evict);
             total_allocated -= evict_size;
 
             if (total_allocated < total_size * 0.1) {
-                fprintf(stderr,"allocated less than 10 percent.\n");
+                fprintf(stderr, "allocated less than 10 percent.\n");
                 return 1;
             }
             memkind_free(pmem_kind, str_to_evict);
@@ -72,13 +72,16 @@ static int fragmentatation_test(size_t pmem_max_size, double test_time)
         total_allocated += memkind_malloc_usable_size(pmem_kind, pmem_str);
 
         if (print_iter % PRINT_FREQ == 0) {
-            fprintf(log_file,"%f\n", static_cast<double>(total_allocated) / total_size);
+            fprintf(log_file, "%f\n",
+                    static_cast<double>(total_allocated) / total_size);
             fflush(stdout);
         }
 
         auto finish = std::chrono::steady_clock::now();
-        elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>
-                          (finish - start).count();
+        elapsed_seconds =
+            std::chrono::duration_cast<std::chrono::duration<double>>(finish -
+                                                                      start)
+                .count();
     } while (elapsed_seconds < test_time);
     return 0;
 }
@@ -87,7 +90,7 @@ static int create_pmem(const char *pmem_dir, size_t pmem_size,
                        memkind_mem_usage_policy policy)
 {
     int err = 0;
-    if (pmem_size == 0 ) {
+    if (pmem_size == 0) {
         fprintf(stderr, "Invalid size to pmem kind must be not equal zero.\n");
         return 1;
     }
@@ -148,7 +151,8 @@ int main(int argc, char *argv[])
     } else {
         pmem_dir = argv[1];
         pmem_size = std::stoull(argv[2]) * MB;
-        pmem_policy = static_cast<memkind_mem_usage_policy>(std::stoul(argv[3]));
+        pmem_policy =
+            static_cast<memkind_mem_usage_policy>(std::stoul(argv[3]));
         test_time_limit_in_sec = std::stod(argv[4]);
     }
 
@@ -174,5 +178,4 @@ int main(int argc, char *argv[])
 
     fclose(log_file);
     return status;
-
 }

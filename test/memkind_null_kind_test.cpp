@@ -17,7 +17,6 @@ protected:
     {}
 };
 
-
 TEST_F(MemkindNullKindTests, test_TC_MEMKIND_DefaultKindFreeNullPtr)
 {
     const double test_time = 5;
@@ -89,7 +88,7 @@ TEST_F(MemkindNullKindTests, test_TC_MEMKIND_DefaultReallocNullptrSizeZero)
         ASSERT_EQ(errno, 0);
 
         errno = 0;
-        //equivalent to memkind_malloc(MEMKIND_DEFAULT,0)
+        // equivalent to memkind_malloc(MEMKIND_DEFAULT,0)
         test_nullptr = memkind_realloc(MEMKIND_DEFAULT, nullptr, 0);
         ASSERT_EQ(test_nullptr, nullptr);
         ASSERT_EQ(errno, 0);
@@ -141,7 +140,8 @@ TEST_F(MemkindNullKindTests,
     size_t size = 1 * KB;
     char *test1 = nullptr;
     char *test2 = nullptr;
-    const char val[] = "test_TC_MEMKIND_DefaultReallocIncreaseSizeNullKindVariant";
+    const char val[] =
+        "test_TC_MEMKIND_DefaultReallocIncreaseSizeNullKindVariant";
     int status;
 
     test1 = (char *)memkind_malloc(MEMKIND_DEFAULT, size);
@@ -174,7 +174,8 @@ TEST_F(MemkindNullKindTests,
     size_t size = 1 * KB;
     char *test1 = nullptr;
     char *test2 = nullptr;
-    const char val[] = "test_TC_MEMKIND_DefaultReallocDecreaseSizeNullKindVariant";
+    const char val[] =
+        "test_TC_MEMKIND_DefaultReallocDecreaseSizeNullKindVariant";
     int status;
 
     test1 = (char *)memkind_malloc(MEMKIND_DEFAULT, size);

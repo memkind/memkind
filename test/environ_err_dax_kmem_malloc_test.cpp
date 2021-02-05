@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2019 - 2020 Intel Corporation. */
 
-#include <memkind.h>
 #include "memkind/internal/memkind_dax_kmem.h"
+#include <memkind.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -33,11 +33,11 @@ int main()
     }
 
     expected_nodemask = numa_allocate_nodemask();
-    status = memkind_dax_kmem_all_get_mbind_nodemask(nullptr,
-                                                     expected_nodemask->maskp,
-                                                     expected_nodemask->size);
+    status = memkind_dax_kmem_all_get_mbind_nodemask(
+        nullptr, expected_nodemask->maskp, expected_nodemask->size);
     if (status != MEMKIND_ERROR_ENVIRON) {
-        printf("Error: wrong return value from memkind_dax_kmem_all_get_mbind_nodemask()\n");
+        printf(
+            "Error: wrong return value from memkind_dax_kmem_all_get_mbind_nodemask()\n");
         printf("Expected: %d\n", MEMKIND_ERROR_ENVIRON);
         printf("Actual: %d\n", status);
         goto exit;
@@ -45,8 +45,7 @@ int main()
 
     returned_nodemask = numa_allocate_nodemask();
     status = get_mempolicy(nullptr, returned_nodemask->maskp,
-                           returned_nodemask->size,
-                           ptr, MPOL_F_ADDR);
+                           returned_nodemask->size, ptr, MPOL_F_ADDR);
     if (status) {
         printf("Error: get_mempolicy() returned %d\n", status);
         goto exit;
@@ -54,7 +53,8 @@ int main()
 
     ret = numa_bitmask_equal(returned_nodemask, expected_nodemask);
     if (!ret) {
-        printf("Error: Memkind dax kmem and allocated pointer nodemasks are not equal\n");
+        printf(
+            "Error: Memkind dax kmem and allocated pointer nodemasks are not equal\n");
     }
 
 exit:

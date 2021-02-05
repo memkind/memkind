@@ -8,9 +8,9 @@ class Workload
 {
 public:
     virtual bool run() = 0;
-    virtual ~Workload(void) {}
+    virtual ~Workload(void)
+    {}
 
 protected:
     Allocator *allocator;
 };
-

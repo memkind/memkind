@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2015 - 2020 Intel Corporation. */
 #pragma once
-#include <pthread.h>
 #include <assert.h>
+#include <pthread.h>
 
 #include "Runnable.hpp"
 
 class Thread
 {
 public:
-    Thread(Runnable *runnable) : runnable_task(runnable) {}
+    Thread(Runnable *runnable) : runnable_task(runnable)
+    {}
 
     void start()
     {
@@ -41,11 +42,11 @@ private:
     Runnable *runnable_task;
 };
 
-
 class ThreadsManager
 {
 public:
-    ThreadsManager(std::vector<Thread *> &threads_vec) : threads(threads_vec) {}
+    ThreadsManager(std::vector<Thread *> &threads_vec) : threads(threads_vec)
+    {}
     ~ThreadsManager()
     {
         release();
@@ -53,21 +54,21 @@ public:
 
     void start()
     {
-        for (int i=0; i<threads.size(); i++) {
+        for (int i = 0; i < threads.size(); i++) {
             threads[i]->start();
         }
     }
 
     void barrier()
     {
-        for (int i=0; i<threads.size(); i++) {
+        for (int i = 0; i < threads.size(); i++) {
             threads[i]->wait();
         }
     }
 
     void release()
     {
-        for (int i=0; i<threads.size(); i++) {
+        for (int i = 0; i < threads.size(); i++) {
             delete threads[i];
         }
         threads.clear();

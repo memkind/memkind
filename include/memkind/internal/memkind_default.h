@@ -31,7 +31,8 @@ int memkind_default_mbind(struct memkind *kind, void *ptr, size_t size);
 int memkind_default_get_mmap_flags(struct memkind *kind, int *flags);
 int memkind_default_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_default_get_mbind_nodemask(struct memkind *kind,
-                                       unsigned long *nodemask, unsigned long maxnode);
+                                       unsigned long *nodemask,
+                                       unsigned long maxnode);
 int memkind_preferred_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_interleave_get_mbind_mode(struct memkind *kind, int *mode);
 int memkind_nohugepage_madvise(struct memkind *kind, void *addr, size_t size);

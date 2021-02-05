@@ -4,14 +4,14 @@
 #include <memkind.h>
 
 #include <limits.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <unistd.h>
 
 #define NUM_THREADS 10
 #define NUM_ALLOCS 100
-static char path[PATH_MAX]="/tmp/";
+static char path[PATH_MAX] = "/tmp/";
 
 static void print_err_message(int err)
 {
@@ -44,15 +44,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fprintf(stdout,
-            "This example shows how to use multithreading with one main pmem kind."
-            "\nPMEM kind directory: %s\n", path);
+    fprintf(
+        stdout,
+        "This example shows how to use multithreading with one main pmem kind."
+        "\nPMEM kind directory: %s\n",
+        path);
 
     int status = memkind_check_dax_path(path);
     if (!status) {
         fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
     } else {
-        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n",
+                path);
     }
 
     // Create PMEM partition with unlimited size
@@ -69,14 +72,14 @@ int main(int argc, char *argv[])
 
     struct arg_struct *args[NUM_THREADS];
 
-    for (t = 0; t<NUM_THREADS; t++) {
+    for (t = 0; t < NUM_THREADS; t++) {
         args[t] = malloc(sizeof(struct arg_struct));
         args[t]->id = t;
         args[t]->ptr = &pmem_tint[t][0];
         args[t]->kind = pmem_kind_unlimited;
 
         if (pthread_create(&pmem_threads[t], NULL, thread_onekind,
-                           (void *)args[t])!= 0) {
+                           (void *)args[t]) != 0) {
             fprintf(stderr, "Unable to create a thread.\n");
             return 1;
         }
@@ -98,17 +101,19 @@ int main(int argc, char *argv[])
     // Check if we can read the values outside of threads and free resources
     for (t = 0; t < NUM_THREADS; t++) {
         for (i = 0; i < NUM_ALLOCS; i++) {
-            if(*pmem_tint[t][i] != t) {
-                fprintf(stderr,
-                        "pmem_tint value has not been saved correctly in the thread.\n");
+            if (*pmem_tint[t][i] != t) {
+                fprintf(
+                    stderr,
+                    "pmem_tint value has not been saved correctly in the thread.\n");
                 return 1;
             }
-            memkind_free(args[t]->kind, *(args[t]->ptr+i));
+            memkind_free(args[t]->kind, *(args[t]->ptr + i));
         }
         free(args[t]);
     }
 
-    fprintf(stdout, "Threads successfully allocated memory in the PMEM kind.\n");
+    fprintf(stdout,
+            "Threads successfully allocated memory in the PMEM kind.\n");
 
     return 0;
 }
@@ -133,12 +138,12 @@ void *thread_onekind(void *arg)
 
     // Lets alloc int and put there thread ID
     for (i = 0; i < NUM_ALLOCS; i++) {
-        *(args->ptr+i) = (int *)memkind_malloc(args->kind, sizeof(int));
-        if (*(args->ptr+i) == NULL) {
+        *(args->ptr + i) = (int *)memkind_malloc(args->kind, sizeof(int));
+        if (*(args->ptr + i) == NULL) {
             fprintf(stderr, "Unable to allocate pmem int.\n");
             return NULL;
         }
-        **(args->ptr+i) = args->id;
+        **(args->ptr + i) = args->id;
     }
 
     return NULL;

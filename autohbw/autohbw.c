@@ -28,7 +28,8 @@
 // 0 = no log messages for allocations are printed but INFO messages are printed
 // 1 = a log message is printed for each allocation (Default)
 // 2 = a log message is printed for each allocation with a backtrace
-enum {
+enum
+{
     ALWAYS = -1,
     INFO,
     ALLOC,
@@ -58,11 +59,11 @@ static memkind_t hbw_kind;
 // API control for HBW allocations.
 static bool isAutoHBWEnabled = true;
 
-#define LOG(level, ...)                                                                            \
-    do {                                                                                           \
-        if (LogLevel >= level) {                                                                   \
-            fprintf(stderr, __VA_ARGS__);                                                          \
-        }                                                                                          \
+#define LOG(level, ...)                                                        \
+    do {                                                                       \
+        if (LogLevel >= level) {                                               \
+            fprintf(stderr, __VA_ARGS__);                                      \
+        }                                                                      \
     } while (0)
 
 static bool isAllocInHBW(size_t size)
@@ -118,17 +119,20 @@ static void printLimits()
     // Inform according to the limits set
     if ((HBWLowLimit > 0) && (HBWHighLimit < -1ull)) {
         // if both high and low limits are specified, we use a range
-        LOG(INFO, "INFO: Allocations between %ldK - %ldK will be allocated in "
+        LOG(INFO,
+            "INFO: Allocations between %ldK - %ldK will be allocated in "
             "HBW. Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
             HBWLowLimit / 1024, HBWHighLimit / 1024);
     } else if (HBWLowLimit > 0) {
         // if only a low limit is provided, use that
-        LOG(INFO, "INFO: Allocations greater than %ldK will be allocated in HBW."
+        LOG(INFO,
+            "INFO: Allocations greater than %ldK will be allocated in HBW."
             " Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
             HBWLowLimit / 1024);
     } else if (HBWHighLimit < -1ull) {
         // if only a high limit is provided, use that
-        LOG(INFO, "INFO: Allocations smaller than %ldK will be allocated in HBW. "
+        LOG(INFO,
+            "INFO: Allocations smaller than %ldK will be allocated in HBW. "
             "Set AUTO_HBW_SIZE=X:Y to change this limit.\n",
             HBWHighLimit / 1024);
     } else {
@@ -143,17 +147,17 @@ struct kind_name_t {
 };
 
 static struct kind_name_t named_kinds[] = {
-    { &MEMKIND_DEFAULT, "memkind_default" },
-    { &MEMKIND_HUGETLB, "memkind_hugetlb" },
-    { &MEMKIND_INTERLEAVE, "memkind_interleave" },
-    { &MEMKIND_HBW, "memkind_hbw" },
-    { &MEMKIND_HBW_PREFERRED, "memkind_hbw_preferred" },
-    { &MEMKIND_HBW_HUGETLB, "memkind_hbw_hugetlb" },
-    { &MEMKIND_HBW_PREFERRED_HUGETLB, "memkind_hbw_preferred_hugetlb" },
-    { &MEMKIND_HBW_GBTLB, "memkind_hbw_gbtlb" },
-    { &MEMKIND_HBW_PREFERRED_GBTLB, "memkind_hbw_preferred_gbtlb" },
-    { &MEMKIND_GBTLB, "memkind_gbtlb" },
-    { &MEMKIND_HBW_INTERLEAVE, "memkind_hbw_interleave" },
+    {&MEMKIND_DEFAULT, "memkind_default"},
+    {&MEMKIND_HUGETLB, "memkind_hugetlb"},
+    {&MEMKIND_INTERLEAVE, "memkind_interleave"},
+    {&MEMKIND_HBW, "memkind_hbw"},
+    {&MEMKIND_HBW_PREFERRED, "memkind_hbw_preferred"},
+    {&MEMKIND_HBW_HUGETLB, "memkind_hbw_hugetlb"},
+    {&MEMKIND_HBW_PREFERRED_HUGETLB, "memkind_hbw_preferred_hugetlb"},
+    {&MEMKIND_HBW_GBTLB, "memkind_hbw_gbtlb"},
+    {&MEMKIND_HBW_PREFERRED_GBTLB, "memkind_hbw_preferred_gbtlb"},
+    {&MEMKIND_GBTLB, "memkind_gbtlb"},
+    {&MEMKIND_HBW_INTERLEAVE, "memkind_hbw_interleave"},
 };
 
 static memkind_t get_kind_by_name(const char *name)
@@ -182,13 +186,16 @@ static void setEnvValues()
     }
 
     if (LogLevel == INFO) {
-        LOG(INFO, "INFO: HBW allocation stats will not be printed. "
+        LOG(INFO,
+            "INFO: HBW allocation stats will not be printed. "
             "Set AUTO_HBW_LOG to enable.\n");
     } else if (LogLevel == ALLOC) {
-        LOG(INFO, "INFO: Only HBW allocations will be printed. "
+        LOG(INFO,
+            "INFO: Only HBW allocations will be printed. "
             "Set AUTO_HBW_LOG to disable/enable.\n");
     } else if (LogLevel == VERBOSE) {
-        LOG(INFO, "INFO: HBW allocation with backtrace info will be printed. "
+        LOG(INFO,
+            "INFO: HBW allocation with backtrace info will be printed. "
             "Set AUTO_HBW_LOG to disable.\n");
     }
 
@@ -197,13 +204,15 @@ static void setEnvValues()
     // types
     const char *memtype_str = getenv("AUTO_HBW_MEM_TYPE");
     if (memtype_str && strlen(memtype_str)) {
-        // Find the memkind_t using the name the user has provided in the env variable
+        // Find the memkind_t using the name the user has provided in the env
+        // variable
         memkind_t mty = get_kind_by_name(memtype_str);
         if (mty != 0) {
             hbw_kind = mty;
             LOG(INFO, "INFO: Setting HBW memory type to %s\n", memtype_str);
         } else {
-            LOG(ALWAYS, "WARN: Memory type %s not recognized. Using default type\n",
+            LOG(ALWAYS,
+                "WARN: Memory type %s not recognized. Using default type\n",
                 memtype_str);
         }
     }
@@ -233,21 +242,23 @@ static void setEnvValues()
                     highC = ' ';
             }
 
-            LOG(INFO, "INFO: lowlim=%zu(%c), highlim=%zu(%c)\n", lowlim, lowC, highlim,
-                highC);
+            LOG(INFO, "INFO: lowlim=%zu(%c), highlim=%zu(%c)\n", lowlim, lowC,
+                highlim, highC);
         }
 
         HBWLowLimit = getLimit(lowlim, lowC);
         HBWHighLimit = getLimit(highlim, highC);
 
         if (HBWLowLimit >= HBWHighLimit) {
-            LOG(ALWAYS, "WARN: In AUTO_HBW_SIZE=X:Y, X cannot be greater or equal to Y. "
+            LOG(ALWAYS,
+                "WARN: In AUTO_HBW_SIZE=X:Y, X cannot be greater or equal to Y. "
                 "None of allocations will use HBW memory.\n");
         }
     } else {
         // if the user did not specify any limits, inform that we are using
         // default limits
-        LOG(INFO, "INFO: Using default values for array size thresholds. "
+        LOG(INFO,
+            "INFO: Using default values for array size thresholds. "
             "Set AUTO_HBW_SIZE=X:Y to change.\n");
     }
 
@@ -268,7 +279,8 @@ static void AUTOHBW_INIT autohbw_load(void)
     // Note: If HBM is not installed on a system, memkind_hbw_preferred call
     //       would fail. Therefore, we need to check for availability first.
     if (memkind_check_available(MEMKIND_HBW) != 0) {
-        LOG(ALWAYS, "WARN: *** No HBM found in system. Will use default (DDR) "
+        LOG(ALWAYS,
+            "WARN: *** No HBM found in system. Will use default (DDR) "
             "OR user specified type ***\n");
         hbw_kind = MEMKIND_DEFAULT;
     } else {
@@ -284,7 +296,8 @@ static void AUTOHBW_INIT autohbw_load(void)
     // dummy HBW call to initialize HBW arena
     void *pp = memkind_malloc(hbw_kind, 16);
     if (pp == 0) {
-        LOG(ALWAYS, "\t-HBW init call FAILED. "
+        LOG(ALWAYS,
+            "\t-HBW init call FAILED. "
             "Is required memory type present on your system?\n");
         abort();
     }
@@ -382,7 +395,8 @@ AUTOHBW_EXPORT void enableAutoHBW()
 AUTOHBW_EXPORT void disableAutoHBW()
 {
     isAutoHBWEnabled = false;
-    LOG(INFO, "INFO: HBW allocations disabled by application (for this rank)\n");
+    LOG(INFO,
+        "INFO: HBW allocations disabled by application (for this rank)\n");
 }
 
 AUTOHBW_EXPORT void *malloc(size_t size)
