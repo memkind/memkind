@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2015 - 2020 Intel Corporation. */
+/* Copyright (C) 2015 - 2021 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <memkind.h>
-#include "memkind_default.h"
 #include "memkind_arena.h"
+#include "memkind_default.h"
+#include <memkind.h>
 
 #include <pthread.h>
 

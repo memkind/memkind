@@ -30,14 +30,11 @@ protected:
 
 INSTANTIATE_TEST_CASE_P(
     KindParam, MemkindHMATFunctionalTestsParam,
-    ::testing::Values(MEMKIND_HBW,
-                      MEMKIND_HBW_ALL,
-                      MEMKIND_HIGHEST_CAPACITY_LOCAL,
-                      MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED,
-                      MEMKIND_LOWEST_LATENCY_LOCAL,
-                      MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED,
-                      MEMKIND_HIGHEST_BANDWIDTH_LOCAL,
-                      MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED));
+    ::testing::Values(
+        MEMKIND_HBW, MEMKIND_HBW_ALL, MEMKIND_HIGHEST_CAPACITY_LOCAL,
+        MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED, MEMKIND_LOWEST_LATENCY_LOCAL,
+        MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED, MEMKIND_HIGHEST_BANDWIDTH_LOCAL,
+        MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED));
 
 TEST_P(MemkindHMATFunctionalTestsParam,
        test_tc_memkind_HMAT_verify_InitTargetNode)
@@ -45,11 +42,11 @@ TEST_P(MemkindHMATFunctionalTestsParam,
     int status = numa_available();
     ASSERT_EQ(status, 0);
     // use big size to ensure that we call jemalloc extent
-    const size_t size = 11*MB-5;
+    const size_t size = 11 * MB - 5;
     int threads_num = get_nprocs();
     auto topology = TopologyFactory(memory_tpg, memory_kind);
-    #pragma omp parallel for num_threads(threads_num)
-    for(int thread_id=0; thread_id<threads_num; ++thread_id) {
+#pragma omp parallel for num_threads(threads_num)
+    for (int thread_id = 0; thread_id < threads_num; ++thread_id) {
         cpu_set_t cpu_set;
         CPU_ZERO(&cpu_set);
         CPU_SET(thread_id, &cpu_set);
