@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2021 Intel Corporation.
 
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
@@ -271,6 +271,16 @@ if test "x$enable_heap_manager" = "x1" ; then
 fi
 AC_SUBST([enable_heap_manager])
 
+#===============================clang-format====================================
+clang_support=no;
+AC_CHECK_PROGS(CLANG_FORMAT, [clang-format-11 clang-format-10 clang-format], "")
+if test "$CLANG_FORMAT" != ""; then
+  CLANG_FORMAT_VERSION=$($CLANG_FORMAT --version)
+  AX_COMPARE_VERSION([$CLANG_FORMAT_VERSION], [ge], [10.0.0], [clang_support=yes], [])
+fi
+AC_SUBST([clang_format], $CLANG_FORMAT)
+AM_CONDITIONAL([HAVE_CLANG_FORMAT], [test "x$clang_support" = xyes])
+
 #============================cxx11=============================================
 
 AX_CXX_COMPILE_STDCXX_11([noext], [optional])
@@ -302,5 +312,15 @@ AC_MSG_RESULT([
                Utilization of information about memory performance characteristics is disabled
                To enable this feature please install libhwloc-devel v2.3.0 or later
                and run configure again])
+fi
+if test "$clang_support" = "yes" ; then
+AC_MSG_RESULT([
+               Automatic code style formatting is enabled
+               Calling 'make code-style-check' will print suggested style changes
+               Calling 'make code-style-apply' will apply suggested style changes to code])
+else
+AC_MSG_RESULT([
+               Automatic code style formatting is disabled. To enable this feature please
+               install clang-format v10.0.0 or later and run configure again.])
 fi
 AC_MSG_RESULT([=================================================================================])
