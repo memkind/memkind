@@ -23,6 +23,11 @@ AC_CHECK_LIB(numa, numa_available, [], [AC_MSG_ERROR([libnuma is required depend
 AX_PTHREAD([LIBS="$PTHREAD_LIBS $LIBS" CFLAGS="$CFLAGS $PTHREAD_CFLAGS" CC="$PTHREAD_CC"],
            [AC_MSG_ERROR([pthreads are required dependency])])
 
+AC_CHECK_PROG(CLANG_FORMAT, [clang-format], [yes],
+  [AC_MSG_ERROR([clang-format is required for code style checking])])
+AX_COMPARE_VERSION([$(clang-format --version)], [ge], [9.0.0],,
+  AC_MSG_ERROR([clang-format version:$CLANG_FORMAT_VERSION too low]))
+
 AM_PROG_CC_C_O
 
 #============================tls===============================================
