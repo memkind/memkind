@@ -4,6 +4,9 @@
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
 MAN2HTML = groff -mandoc -Thtml
+CLANG_FORMAT = @clang_format@ --style=file
+CLANG_FORMAT_FILES = . -path "./jemalloc" -prune -false -o -path "./test/gtest_fused" -prune -false -o \
+                     -iname "*.h" -o -iname "*.hpp" -o -iname "*.c" -o -iname "*.cpp"
 
 lib_LTLIBRARIES = libmemkind.la
 
@@ -61,7 +64,6 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
 
 EXTRA_DIST = CONTRIBUTING \
              VERSION \
-             astyle.sh \
              autogen.sh \
              build.sh \
              examples/README \
@@ -494,7 +496,9 @@ clean-jemalloc_deps:
 	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
 	[ -e jemalloc/configure ] && (cd jemalloc && rm configure) || exit 0
 
-.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps html-local
+.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps html-local \
+	code-style-check code-style-apply
+
 .NOTPARALLEL: static_lib
 
 # build check programs without running tests
@@ -545,6 +549,22 @@ unit_tests_hmat: checkprogs
 
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
+
+code-style-check:
+if HAVE_CLANG_FORMAT
+	find $(CLANG_FORMAT_FILES) | xargs $(CLANG_FORMAT) --dry-run --Werror
+else
+	@echo "clang-format not found please install version >= 10.0.0 or later and run configure again"
+	exit 1
+endif
+
+code-style-apply:
+if HAVE_CLANG_FORMAT
+	find $(CLANG_FORMAT_FILES) | xargs $(CLANG_FORMAT) -i
+else
+	@echo "clang-format not found please install version >= 10.0.0 or later and run configure again"
+	exit 1
+endif
 
 include autohbw/Makefile.mk
 include test/Makefile.mk
