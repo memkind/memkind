@@ -34,6 +34,7 @@ We are moving to a more open development model with memkind.
 - Pull requests are welcome.
 
 - White space formatting generally conforms to
+TODO
   $ astyle --style=linux --indent=spaces=4 -S --max-continuation-indent=80 \
            --max-code-length=80 --break-after-logical --indent-namespaces -z2 \
            --align-pointer=name

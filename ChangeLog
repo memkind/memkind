@@ -1,3 +1,12 @@
+* Wed Feb 3 2021 Michal Biesek <michal.biesek@intel.com> v1.11.0-rc1
+- Provided a function to verify if path supports DAX - memkind_check_dax_path()
+- Provided a NUMA node interleave variant for MEMKIND_DAX_KMEM (MEMKIND_DAX_KMEM_INTERLEAVE)
+- Provided a function to enable/disable - memkind_set_bg_threads()
+- Extended memkind to support HMAT (libhwloc required)
+- Provided memory property abstraction (MEMKIND_HIGHEST_CAPACITY*,
+  MEMKIND_LOWEST_LATENCY_LOCAL*, MEMKIND_HIGHEST_BANDWIDTH_LOCAL*)
+- Extended support for MEMKIND_HBW* to platforms with full HMAT support (kernel+hardware)
+
 * Mon Sep 14 2020 Michal Biesek <michal.biesek@intel.com> v1.10.1
 - Fixed calculation size for pmem kind
 - Added support for MEMKIND_HOG_MEMORY in pmem kind

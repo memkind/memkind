@@ -5,17 +5,17 @@ jobs:
 
   linting:
     runs-on: ubuntu-20.04
-    name: Code Linting - Astyle
+    name: Code Linting - clang-format
     steps:
 
-    - name: Install astyle
-      run: sudo apt install astyle
+    - name: Install clang-format
+      run: sudo apt install clang-format-10
 
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Run Astyle
-      run: ./astyle.sh
+    - name: Run clang-format
+      run: ./clang-format.sh
 
   building:
     runs-on: ${{ matrix.os }}

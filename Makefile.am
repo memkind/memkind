@@ -61,9 +61,9 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
 
 EXTRA_DIST = CONTRIBUTING \
              VERSION \
-             astyle.sh \
              autogen.sh \
              build.sh \
+             clang-format.sh \
              examples/README \
              jemalloc/.appveyor.yml \
              jemalloc/.autom4te.cfg \

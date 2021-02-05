@@ -7,7 +7,6 @@ ChangeLog
 Makefile.am
 NEWS
 README
-astyle.sh
 autogen.sh
 autohbw/Makefile.mk
 autohbw/autohbw.c
@@ -15,6 +14,7 @@ autohbw/autohbw_README
 autohbw/autohbw_get_src_lines.pl
 autohbw/autohbw_test.sh
 build.sh
+clang-format.sh
 codecov.yml
 configure.ac
 examples/Makefile.mk
@@ -66,7 +66,7 @@ include/memkind/internal/vec.h
 include/memkind_allocator.h
 include/memkind_deprecated.h
 include/pmem_allocator.h
-install_astyle.sh
+install_clang-format.sh
 jemalloc/.appveyor.yml
 jemalloc/.autom4te.cfg
 jemalloc/.gitattributes
