@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include "common.h"
 
@@ -26,7 +26,8 @@ int main(int argc, char **argv)
 
                 if (stat(PMEM_DIR, &st) != 0 || !S_ISDIR(st.st_mode)) {
                     printf("%s : Error in getting path status or"
-                           " invalid or non-existent directory\n", PMEM_DIR);
+                           " invalid or non-existent directory\n",
+                           PMEM_DIR);
                     return -1;
                 }
 

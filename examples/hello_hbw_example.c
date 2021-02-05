@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include <hbwmalloc.h>
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char **argv)
 {
@@ -40,7 +40,8 @@ int main(int argc, char **argv)
 
     sprintf(default_str, "Hello world from standard memory\n");
     sprintf(hbw_str, "Hello world from high bandwidth memory\n");
-    sprintf(hbw_hugetlb_str, "Hello world from high bandwidth 2 MB paged memory\n");
+    sprintf(hbw_hugetlb_str,
+            "Hello world from high bandwidth 2 MB paged memory\n");
 
     fprintf(stdout, "%s", default_str);
     fprintf(stdout, "%s", hbw_str);

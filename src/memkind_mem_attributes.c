@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2020 - 2021 Intel Corporation. */
 
-#include <memkind/internal/memkind_mem_attributes.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_mem_attributes.h>
 #include <memkind/internal/memkind_private.h>
 
 #include "config.h"
@@ -13,10 +13,12 @@
 
 #include <hwloc.h>
 #include <hwloc/linux-libnuma.h>
-#define MEMKIND_HBW_THRESHOLD_DEFAULT (200 * 1024) // Default threshold is 200 GB/s
+#define MEMKIND_HBW_THRESHOLD_DEFAULT                                          \
+    (200 * 1024) // Default threshold is 200 GB/s
 
 int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
-                                 memkind_node_variant_t node_variant, memory_attribute_t attr)
+                                 memkind_node_variant_t node_variant,
+                                 memory_attribute_t attr)
 {
     int num_nodes = numa_num_configured_nodes();
     int num_cpus = numa_num_configured_cpus();
@@ -90,8 +92,8 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
         initiator.type = HWLOC_LOCATION_TYPE_CPUSET;
         initiator.location.cpuset = init_node->cpuset;
         unsigned int num_local_nodes = num_nodes;
-        err = hwloc_get_local_numanode_objs(topology, &initiator, &num_local_nodes,
-                                            local_nodes, 0);
+        err = hwloc_get_local_numanode_objs(topology, &initiator,
+                                            &num_local_nodes, local_nodes, 0);
         if (err) {
             log_err("hwloc_get_local_numanode_objs");
             ret = MEMKIND_ERROR_UNAVAILABLE;
@@ -99,7 +101,7 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
         }
 
         hwloc_bitmap_zero(attr_loc_mask);
-        switch(attr) {
+        switch (attr) {
             case MEM_ATTR_CAPACITY:
                 best_mem_attr = 0;
                 for (i = 0; i < num_local_nodes; ++i) {
@@ -108,11 +110,16 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                         continue;
                     }
 
-                    if (local_nodes[i]->attr->numanode.local_memory > best_mem_attr) {
-                        best_mem_attr = local_nodes[i]->attr->numanode.local_memory;
-                        hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
-                    } else if (local_nodes[i]->attr->numanode.local_memory == best_mem_attr) {
-                        hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
+                    if (local_nodes[i]->attr->numanode.local_memory >
+                        best_mem_attr) {
+                        best_mem_attr =
+                            local_nodes[i]->attr->numanode.local_memory;
+                        hwloc_bitmap_only(attr_loc_mask,
+                                          local_nodes[i]->os_index);
+                    } else if (local_nodes[i]->attr->numanode.local_memory ==
+                               best_mem_attr) {
+                        hwloc_bitmap_set(attr_loc_mask,
+                                         local_nodes[i]->os_index);
                     }
                 }
                 break;
@@ -120,20 +127,23 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
             case MEM_ATTR_BANDWIDTH:
                 best_mem_attr = 0;
                 for (i = 0; i < num_local_nodes; ++i) {
-                    err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH,
-                                                  local_nodes[i],
-                                                  &initiator, 0, &mem_attr);
+                    err = hwloc_memattr_get_value(
+                        topology, HWLOC_MEMATTR_ID_BANDWIDTH, local_nodes[i],
+                        &initiator, 0, &mem_attr);
                     if (err) {
-                        log_info("Node skipped - cannot read initiator Node %d and target Node %d.",
-                                 init_node->os_index, local_nodes[i]->os_index);
+                        log_info(
+                            "Node skipped - cannot read initiator Node %d and target Node %d.",
+                            init_node->os_index, local_nodes[i]->os_index);
                         continue;
                     }
 
                     if (mem_attr > best_mem_attr) {
                         best_mem_attr = mem_attr;
-                        hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
+                        hwloc_bitmap_only(attr_loc_mask,
+                                          local_nodes[i]->os_index);
                     } else if (mem_attr == best_mem_attr) {
-                        hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
+                        hwloc_bitmap_set(attr_loc_mask,
+                                         local_nodes[i]->os_index);
                     }
                 }
                 break;
@@ -141,20 +151,23 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
             case MEM_ATTR_LATENCY:
                 best_mem_attr = INT_MAX;
                 for (i = 0; i < num_local_nodes; ++i) {
-                    err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_LATENCY,
-                                                  local_nodes[i],
-                                                  &initiator, 0, &mem_attr);
+                    err = hwloc_memattr_get_value(
+                        topology, HWLOC_MEMATTR_ID_LATENCY, local_nodes[i],
+                        &initiator, 0, &mem_attr);
                     if (err) {
-                        log_info("Node skipped - cannot read initiator Node %d and target Node %d.",
-                                 init_node->os_index, local_nodes[i]->os_index);
+                        log_info(
+                            "Node skipped - cannot read initiator Node %d and target Node %d.",
+                            init_node->os_index, local_nodes[i]->os_index);
                         continue;
                     }
 
                     if (mem_attr < best_mem_attr) {
                         best_mem_attr = mem_attr;
-                        hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
+                        hwloc_bitmap_only(attr_loc_mask,
+                                          local_nodes[i]->os_index);
                     } else if (mem_attr == best_mem_attr) {
-                        hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
+                        hwloc_bitmap_set(attr_loc_mask,
+                                         local_nodes[i]->os_index);
                     }
                 }
                 break;
@@ -169,21 +182,23 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
         if (node_variant == NODE_VARIANT_SINGLE && mem_attr_nodes > 1) {
             ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
-            log_err("Multiple NUMA Nodes have the same value of memory attribute for init node %d.",
-                    init_node->os_index);
+            log_err(
+                "Multiple NUMA Nodes have the same value of memory attribute for init node %d.",
+                init_node->os_index);
             goto error;
         }
 
         if (mem_attr_nodes == 0) {
             ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
-            log_err("No memory attribute Nodes for init node %d.", init_node->os_index);
+            log_err("No memory attribute Nodes for init node %d.",
+                    init_node->os_index);
             goto error;
         }
 
-        // populate memory attribute nodemask to all CPU's from initiator NUMA node
-        hwloc_bitmap_foreach_begin(i, init_node->cpuset)
-        (*nodes_mask)[i] = hwloc_nodeset_to_linux_libnuma_bitmask(topology,
-                                                                  attr_loc_mask);
+        // populate memory attribute nodemask to all CPU's from initiator NUMA
+        // node
+        hwloc_bitmap_foreach_begin(i, init_node->cpuset)(*nodes_mask)[i] =
+            hwloc_nodeset_to_linux_libnuma_bitmask(topology, attr_loc_mask);
         if (MEMKIND_UNLIKELY((*nodes_mask)[i] == NULL)) {
             ret = MEMKIND_ERROR_MALLOC;
             log_err("hwloc_nodeset_to_linux_libnuma_bitmask() failed.");
@@ -196,7 +211,7 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
     goto success;
 
 error:
-    for(i = 0; i < num_cpus; ++i) {
+    for (i = 0; i < num_cpus; ++i) {
         if ((*nodes_mask)[i]) {
             numa_bitmask_free((*nodes_mask)[i]);
         }
@@ -212,7 +227,7 @@ success:
     return ret;
 }
 
-//Vector of CPUs with memory NUMA Node id(s)
+// Vector of CPUs with memory NUMA Node id(s)
 VEC(vec_cpu_node, int);
 
 int set_closest_numanode_mem_attr(void **numanode,
@@ -233,7 +248,8 @@ int set_closest_numanode_mem_attr(void **numanode,
         errno = 0;
         hbw_threshold = strtoull(hbw_threshold_env, &end, 10);
         if (hbw_threshold > UINT_MAX || *end != '\0' || errno != 0) {
-            log_err("Environment variable MEMKIND_HBW_THRESHOLD is invalid value.");
+            log_err(
+                "Environment variable MEMKIND_HBW_THRESHOLD is invalid value.");
             return MEMKIND_ERROR_ENVIRON;
         }
     } else {
@@ -262,8 +278,8 @@ int set_closest_numanode_mem_attr(void **numanode,
 
     VEC(vec_temp, int) current_dest_nodes = VEC_INITIALIZER;
 
-    struct vec_cpu_node *node_arr = (struct vec_cpu_node *) calloc(num_cpu,
-                                                                   sizeof(struct vec_cpu_node));
+    struct vec_cpu_node *node_arr =
+        (struct vec_cpu_node *)calloc(num_cpu, sizeof(struct vec_cpu_node));
 
     if (MEMKIND_UNLIKELY(node_arr == NULL)) {
         log_err("calloc failed");
@@ -277,7 +293,7 @@ int set_closest_numanode_mem_attr(void **numanode,
         hwloc_obj_t target = NULL;
         int min_distance = INT_MAX;
 
-        //skip node which could not be a initiator
+        // skip node which could not be a initiator
         if (hwloc_bitmap_isincluded(init_node->cpuset, node_cpus)) {
             log_info("Node %d skipped - no CPU detected in initiator Node.",
                      init_node->os_index);
@@ -291,14 +307,15 @@ int set_closest_numanode_mem_attr(void **numanode,
 
         VEC_CLEAR(&current_dest_nodes);
 
-        while ((target = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE,
-                                                    target)) != NULL) {
+        while ((target = hwloc_get_next_obj_by_type(
+                    topology, HWLOC_OBJ_NUMANODE, target)) != NULL) {
             hwloc_uint64_t bandwidth;
-            err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH, target,
-                                          &initiator, 0, &bandwidth);
+            err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH,
+                                          target, &initiator, 0, &bandwidth);
             if (err) {
-                log_info("Node skipped - cannot read initiator Node %d and target Node %d.",
-                         init_node->os_index, target->os_index);
+                log_info(
+                    "Node skipped - cannot read initiator Node %d and target Node %d.",
+                    init_node->os_index, target->os_index);
                 continue;
             }
 
@@ -306,7 +323,8 @@ int set_closest_numanode_mem_attr(void **numanode,
                 if (node_variant == NODE_VARIANT_ALL) {
                     VEC_PUSH_BACK(&current_dest_nodes, target->os_index);
                 } else {
-                    int dist = numa_distance(init_node->os_index, target->os_index);
+                    int dist =
+                        numa_distance(init_node->os_index, target->os_index);
                     if (dist < min_distance) {
                         min_distance = dist;
                         VEC_CLEAR(&current_dest_nodes);
@@ -326,17 +344,19 @@ int set_closest_numanode_mem_attr(void **numanode,
             goto free_node_arr;
         }
 
-        //validate single NUMA Node condition
+        // validate single NUMA Node condition
         if (node_variant == NODE_VARIANT_SINGLE && vec_size > 1) {
-            log_err("Invalid Numa Configuration for Node %d", init_node->os_index);
+            log_err("Invalid Numa Configuration for Node %d",
+                    init_node->os_index);
             status = MEMKIND_ERROR_RUNTIME;
             goto free_node_arr;
         }
 
-        // populate memory attribute nodemask to all CPU's from initiator NUMA node
-        hwloc_bitmap_foreach_begin(i, init_node->cpuset)
-        int node = -1;
-        VEC_FOREACH(node, &current_dest_nodes) {
+        // populate memory attribute nodemask to all CPU's from initiator NUMA
+        // node
+        hwloc_bitmap_foreach_begin(i, init_node->cpuset) int node = -1;
+        VEC_FOREACH(node, &current_dest_nodes)
+        {
             VEC_PUSH_BACK(&node_arr[i], node);
         }
         hwloc_bitmap_foreach_end();
@@ -366,7 +386,8 @@ hwloc_destroy:
 }
 #else
 int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
-                                 memkind_node_variant_t node_variant, memory_attribute_t attr)
+                                 memkind_node_variant_t node_variant,
+                                 memory_attribute_t attr)
 {
     log_err("Memory attribute NUMA nodes cannot be automatically detected.");
     return MEMKIND_ERROR_OPERATION_FAILED;

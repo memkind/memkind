@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2015 - 2020 Intel Corporation. */
+/* Copyright (C) 2015 - 2021 Intel Corporation. */
 #pragma once
 
-template<class T>
+template <class T>
 class Iterator
 {
 public:
@@ -10,4 +10,3 @@ public:
     virtual T next() = 0;
     virtual size_t size() const = 0;
 };
-
