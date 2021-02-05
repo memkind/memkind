@@ -1,5 +1,4 @@
 Makefile.am
-astyle.sh
 autogen.sh
 autohbw/Makefile.mk
 autohbw/autohbw.c
@@ -40,7 +39,6 @@ include/memkind/internal/vec.h
 include/memkind_allocator.h
 include/memkind_deprecated.h
 include/pmem_allocator.h
-install_astyle.sh
 man/autohbw.7
 man/hbwallocator.3
 man/hbwmalloc.3

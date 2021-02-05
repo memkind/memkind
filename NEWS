@@ -32,11 +32,3 @@ We are moving to a more open development model with memkind.
   https://admin.fedoraproject.org/pkgdb/package/memkind/
 
 - Pull requests are welcome.
-
-- White space formatting generally conforms to
-  $ astyle --style=linux --indent=spaces=4 -S --max-continuation-indent=80 \
-           --max-code-length=80 --break-after-logical --indent-namespaces -z2 \
-           --align-pointer=name
-
-- For more information about astyle:
-  http://astyle.sourceforge.net/
