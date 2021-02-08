@@ -257,6 +257,11 @@ fully supports HMAT and memkind library is configured and built with the support
 .I libhwloc
 (./configure --enable-hwloc).
 .PP
+.BR Note:
+Operating system limits exposed information about memory performance characteristics.
+For a given target NUMA Node, only characteristics of the highest performing NUMA Node(s),
+which can initiate the allocation, are available.
+.PP
 .I libhwloc
 can be reached on:
 .UR https://www.open-mpi.org/projects/hwloc
