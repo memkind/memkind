@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2015 - 2020 Intel Corporation. */
+/* Copyright (C) 2015 - 2021 Intel Corporation. */
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
-
-
-//This structure is responsible to store information about single memory operation.
+// This structure is responsible to store information about single memory
+// operation.
 struct memory_operation {
     void *ptr;
     double total_time;

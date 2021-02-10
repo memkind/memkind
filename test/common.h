@@ -7,17 +7,17 @@
 #include <hbwmalloc.h>
 #include <memkind.h>
 
+#include <gtest/gtest.h>
 #include <iostream>
 #include <stdint.h>
 #include <stdlib.h>
-#include <gtest/gtest.h>
 
 #define MB 1048576ULL
 #define GB 1073741824ULL
 #define KB 1024ULL
 
 #define HBW_SUCCESS 0
-#define HBW_ERROR -1
+#define HBW_ERROR   -1
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
@@ -75,23 +75,25 @@ static const char *kind_name(memkind_t kind)
         return "MEMKIND_HIGHEST_BANDWIDTH_LOCAL";
     else if (kind == MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED)
         return "MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED";
-    else return "Unknown memory kind";
+    else
+        return "Unknown memory kind";
 }
 
 class Memkind_Param_Test: public ::testing::Test,
-    public ::testing::WithParamInterface<memkind_t>
+                          public ::testing::WithParamInterface<memkind_t>
 {
 protected:
     memkind_t memory_kind;
     void SetUp()
     {
         memory_kind = GetParam();
-        std::cout << "Testing memory kind: " << kind_name(memory_kind) << std::endl;
+        std::cout << "Testing memory kind: " << kind_name(memory_kind)
+                  << std::endl;
     }
     void TearDown()
     {
-        std::cout << "Finished testing memory kind: " << kind_name(
-                      memory_kind) << std::endl;
+        std::cout << "Finished testing memory kind: " << kind_name(memory_kind)
+                  << std::endl;
     }
 };
 

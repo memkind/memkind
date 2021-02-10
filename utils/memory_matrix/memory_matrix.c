@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2021 Intel Corporation. */
 
-#include <stdio.h>
 #include "config.h"
+#include <stdio.h>
 
 #ifdef MEMKIND_HWLOC
 #include "hwloc.h"
@@ -28,13 +28,13 @@ static void print_attr(hwloc_memattr_id_t mem_attr)
     }
 
     printf("node");
-    for (init_id=0; init_id<=max_node_id; ++init_id) {
+    for (init_id = 0; init_id <= max_node_id; ++init_id) {
         if (numa_bitmask_isbitset(numa_all_nodes_ptr, init_id)) {
             printf("%6d ", init_id);
         }
     }
     printf("\n");
-    for (init_id=0; init_id<=max_node_id; ++init_id) {
+    for (init_id = 0; init_id <= max_node_id; ++init_id) {
         if (numa_bitmask_isbitset(numa_all_nodes_ptr, init_id)) {
             printf("%3d:", init_id);
             if (numa_node_to_cpus(init_id, node_cpumask)) {
@@ -44,7 +44,7 @@ static void print_attr(hwloc_memattr_id_t mem_attr)
                 exit(-1);
             }
             if (numa_bitmask_weight(node_cpumask) == 0) {
-                for (target_id=0; target_id<=max_node_id; ++target_id) {
+                for (target_id = 0; target_id <= max_node_id; ++target_id) {
                     if (numa_bitmask_isbitset(numa_all_nodes_ptr, target_id)) {
                         printf("%6s ", "-");
                     }
@@ -52,15 +52,18 @@ static void print_attr(hwloc_memattr_id_t mem_attr)
             } else {
                 hwloc_uint64_t attr_val;
                 struct hwloc_location initiator;
-                hwloc_obj_t init_node = hwloc_get_numanode_obj_by_os_index(topology, init_id);
+                hwloc_obj_t init_node =
+                    hwloc_get_numanode_obj_by_os_index(topology, init_id);
                 initiator.type = HWLOC_LOCATION_TYPE_CPUSET;
                 initiator.location.cpuset = init_node->cpuset;
-                for (target_id=0; target_id<=max_node_id; ++target_id) {
+                for (target_id = 0; target_id <= max_node_id; ++target_id) {
                     if (numa_bitmask_isbitset(numa_all_nodes_ptr, target_id)) {
-                        hwloc_obj_t target_node = hwloc_get_numanode_obj_by_os_index(topology,
-                                                                                     target_id);
-                        int err = hwloc_memattr_get_value(topology, mem_attr, target_node, &initiator,
-                                                          0, &attr_val);
+                        hwloc_obj_t target_node =
+                            hwloc_get_numanode_obj_by_os_index(topology,
+                                                               target_id);
+                        int err = hwloc_memattr_get_value(
+                            topology, mem_attr, target_node, &initiator, 0,
+                            &attr_val);
                         if (err) {
                             printf("%6s ", "X");
                         } else {
