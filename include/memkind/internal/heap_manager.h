@@ -14,5 +14,5 @@ int heap_manager_update_cached_stats(void);
 int heap_manager_get_stat(memkind_stat_type stat, size_t *value);
 void *heap_manager_defrag_reallocate(void *ptr);
 int heap_manager_set_bg_threads(bool state);
-int heap_manager_stats_print(void (*write_cb) (void *, const char *),
+int heap_manager_stats_print(void (*write_cb)(void *, const char *),
                              void *cbopaque, memkind_stat_print_opt opts);

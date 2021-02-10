@@ -5,11 +5,11 @@
 #include <limits.h>
 #include <stdint.h>
 
-#include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_bitmask.h>
+#include <memkind/internal/memkind_log.h>
 #include <memkind/internal/vec.h>
 
-//Vector of CPUs with memory NUMA Node id(s)
+// Vector of CPUs with memory NUMA Node id(s)
 VEC(vec_cpu_node, int);
 
 int memkind_env_get_nodemask(char *nodes_env, struct bitmask **bm)
@@ -40,8 +40,8 @@ int set_closest_numanode(get_node_bitmask get_bitmask, void **numanode,
 
     VEC(vec_temp, int) current_dest_nodes = VEC_INITIALIZER;
 
-    struct vec_cpu_node *node_arr = (struct vec_cpu_node *) calloc(num_cpu,
-                                                                   sizeof(struct vec_cpu_node));
+    struct vec_cpu_node *node_arr =
+        (struct vec_cpu_node *)calloc(num_cpu, sizeof(struct vec_cpu_node));
     if (!node_arr) {
         status = MEMKIND_ERROR_MALLOC;
         log_err("calloc() failed.");
@@ -53,17 +53,17 @@ int set_closest_numanode(get_node_bitmask get_bitmask, void **numanode,
 
     for (init_node = 0; init_node <= max_node_id; ++init_node) {
 
-        //skip missing node and node which could not be a initiator
-        if((numa_node_to_cpus(init_node, node_cpu_mask) != 0) ||
-           numa_bitmask_weight(node_cpu_mask) == 0) {
+        // skip missing node and node which could not be a initiator
+        if ((numa_node_to_cpus(init_node, node_cpu_mask) != 0) ||
+            numa_bitmask_weight(node_cpu_mask) == 0) {
             continue;
         }
 
-        //find closest NUMA Node(s) from destnation NUMA Node(s)
+        // find closest NUMA Node(s) from destnation NUMA Node(s)
         int min_distance = INT_MAX;
         VEC_CLEAR(&current_dest_nodes);
         for (dest_node = 0; dest_node <= max_node_id; ++dest_node) {
-            if(numa_bitmask_isbitset(dest_nodes_mask, dest_node)) {
+            if (numa_bitmask_isbitset(dest_nodes_mask, dest_node)) {
                 if (node_variant == NODE_VARIANT_ALL) {
                     VEC_PUSH_BACK(&current_dest_nodes, dest_node);
                 } else {
@@ -81,7 +81,7 @@ int set_closest_numanode(get_node_bitmask get_bitmask, void **numanode,
             }
         }
 
-        //validate single NUMA Node condition
+        // validate single NUMA Node condition
         if ((node_variant == NODE_VARIANT_SINGLE) &&
             (VEC_SIZE(&current_dest_nodes) > 1)) {
             log_err("Invalid Numa Configuration for Node %d", init_node);
@@ -93,11 +93,12 @@ int set_closest_numanode(get_node_bitmask get_bitmask, void **numanode,
             goto free_node_arr;
         }
 
-        //fill mapping CPU destination memory Node(s)
+        // fill mapping CPU destination memory Node(s)
         for (cpu_id = 0; cpu_id < num_cpu; ++cpu_id) {
-            if(numa_bitmask_isbitset(node_cpu_mask, cpu_id)) {
+            if (numa_bitmask_isbitset(node_cpu_mask, cpu_id)) {
                 int node = -1;
-                VEC_FOREACH(node, &current_dest_nodes) {
+                VEC_FOREACH(node, &current_dest_nodes)
+                {
                     VEC_PUSH_BACK(&node_arr[cpu_id], node);
                 }
             }
@@ -124,16 +125,18 @@ free_dest_nodemask:
 }
 
 int set_bitmask_for_current_numanode(unsigned long *nodemask,
-                                     unsigned long maxnode, const void *numanode)
+                                     unsigned long maxnode,
+                                     const void *numanode)
 {
     if (MEMKIND_LIKELY(nodemask)) {
         struct bitmask nodemask_bm = {maxnode, nodemask};
         numa_bitmask_clearall(&nodemask_bm);
         int cpu = sched_getcpu();
         int node = -1;
-        const struct vec_cpu_node *closest_numanode_vec = (const struct vec_cpu_node *)
-                                                          numanode;
-        VEC_FOREACH(node, &closest_numanode_vec[cpu]) {
+        const struct vec_cpu_node *closest_numanode_vec =
+            (const struct vec_cpu_node *)numanode;
+        VEC_FOREACH(node, &closest_numanode_vec[cpu])
+        {
             numa_bitmask_setbit(&nodemask_bm, node);
         }
     }

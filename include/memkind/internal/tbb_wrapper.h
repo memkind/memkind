@@ -40,7 +40,7 @@ void *tbb_pool_defrag_reallocate_with_kind_detect(void *ptr);
 int tbb_set_bg_threads(bool state);
 
 /* print malloc statistics for TBB (unsupported) */
-int tbb_stats_print(void (*write_cb) (void *, const char *), void *cbopaque,
+int tbb_stats_print(void (*write_cb)(void *, const char *), void *cbopaque,
                     memkind_stat_print_opt opts);
 
 #ifdef __cplusplus

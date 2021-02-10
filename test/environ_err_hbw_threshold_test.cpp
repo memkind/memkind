@@ -10,14 +10,14 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "memory_topology.h"
 #include "TestPrereq.hpp"
+#include "memory_topology.h"
 
-#define MB (1024*1024)
+#define MB (1024 * 1024)
 
 using MapNodeSet = std::unordered_map<int, std::unordered_set<int>>;
 
-class TestPrereq_threshold : public TestPrereq
+class TestPrereq_threshold: public TestPrereq
 {
 public:
     TestPrereq_threshold() : TestPrereq()
@@ -29,14 +29,12 @@ public:
 
         int threshold_val = std::stoi(threshold_str);
 
-        auto supported_vals = std::unordered_set<int>({
-            default_value,
-            negative_value,
-            low_value,
-            high_value });
+        auto supported_vals = std::unordered_set<int>(
+            {default_value, negative_value, low_value, high_value});
 
         if (supported_vals.find(threshold_val) == supported_vals.end())
-            throw std::runtime_error("Testing unsupported MEMKIND_HBW_THRESHOLD value.");
+            throw std::runtime_error(
+                "Testing unsupported MEMKIND_HBW_THRESHOLD value.");
     }
 
     static const int default_value = 204800;
@@ -65,34 +63,35 @@ protected:
 
 using TpgPtr = std::unique_ptr<AbstractTopology>;
 
-class KNM_All2All_threshold : public KNM_All2All, TopologyCfg
+class KNM_All2All_threshold: public KNM_All2All, TopologyCfg
 {
 public:
-    KNM_All2All_threshold(memkind_t kind):KNM_All2All(kind) {};
+    KNM_All2All_threshold(memkind_t kind) : KNM_All2All(kind){};
 };
 
-class KNM_SNC2_threshold : public KNM_SNC2, TopologyCfg
+class KNM_SNC2_threshold: public KNM_SNC2, TopologyCfg
 {
 public:
-    KNM_SNC2_threshold(memkind_t kind):KNM_SNC2(kind) {}
+    KNM_SNC2_threshold(memkind_t kind) : KNM_SNC2(kind)
+    {}
 };
 
-class KNM_SNC4_threshold : public KNM_SNC4, TopologyCfg
+class KNM_SNC4_threshold: public KNM_SNC4, TopologyCfg
 {
 public:
-    KNM_SNC4_threshold(memkind_t kind):KNM_SNC4(kind) {};
+    KNM_SNC4_threshold(memkind_t kind) : KNM_SNC4(kind){};
 };
 
-class CLX_2_var1_threshold : public CLX_2_var1, TopologyCfg
+class CLX_2_var1_threshold: public CLX_2_var1, TopologyCfg
 {
 public:
-    CLX_2_var1_threshold(memkind_t kind):CLX_2_var1(kind) {};
+    CLX_2_var1_threshold(memkind_t kind) : CLX_2_var1(kind){};
 };
 
-class CLX_2_var1_HMAT_threshold : public CLX_2_var1_HMAT, TopologyCfg
+class CLX_2_var1_HMAT_threshold: public CLX_2_var1_HMAT, TopologyCfg
 {
 public:
-    CLX_2_var1_HMAT_threshold(memkind_t kind):CLX_2_var1_HMAT(kind) {};
+    CLX_2_var1_HMAT_threshold(memkind_t kind) : CLX_2_var1_HMAT(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -120,10 +119,10 @@ private:
     }
 };
 
-class CLX_2_var1_HBW_threshold : public CLX_2_var1_HBW, TopologyCfg
+class CLX_2_var1_HBW_threshold: public CLX_2_var1_HBW, TopologyCfg
 {
 public:
-    CLX_2_var1_HBW_threshold(memkind_t kind):CLX_2_var1_HBW(kind) {};
+    CLX_2_var1_HBW_threshold(memkind_t kind) : CLX_2_var1_HBW(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -151,16 +150,16 @@ private:
     }
 };
 
-class CLX_2_var2_threshold : public CLX_2_var2, TopologyCfg
+class CLX_2_var2_threshold: public CLX_2_var2, TopologyCfg
 {
 public:
-    CLX_2_var2_threshold(memkind_t kind):CLX_2_var2(kind) {};
+    CLX_2_var2_threshold(memkind_t kind) : CLX_2_var2(kind){};
 };
 
-class CLX_2_var2_HMAT_threshold : public CLX_2_var2_HMAT, TopologyCfg
+class CLX_2_var2_HMAT_threshold: public CLX_2_var2_HMAT, TopologyCfg
 {
 public:
-    CLX_2_var2_HMAT_threshold(memkind_t kind):CLX_2_var2_HMAT(kind) {};
+    CLX_2_var2_HMAT_threshold(memkind_t kind) : CLX_2_var2_HMAT(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -188,10 +187,10 @@ private:
     }
 };
 
-class CLX_2_var2_HBW_threshold : public CLX_2_var2_HBW, TopologyCfg
+class CLX_2_var2_HBW_threshold: public CLX_2_var2_HBW, TopologyCfg
 {
 public:
-    CLX_2_var2_HBW_threshold(memkind_t kind):CLX_2_var2_HBW(kind) {};
+    CLX_2_var2_HBW_threshold(memkind_t kind) : CLX_2_var2_HBW(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -219,16 +218,16 @@ private:
     }
 };
 
-class CLX_2_var3_threshold : public CLX_2_var3, TopologyCfg
+class CLX_2_var3_threshold: public CLX_2_var3, TopologyCfg
 {
 public:
-    CLX_2_var3_threshold(memkind_t kind):CLX_2_var3(kind) {};
+    CLX_2_var3_threshold(memkind_t kind) : CLX_2_var3(kind){};
 };
 
-class CLX_2_var3_HMAT_threshold : public CLX_2_var3_HMAT, TopologyCfg
+class CLX_2_var3_HMAT_threshold: public CLX_2_var3_HMAT, TopologyCfg
 {
 public:
-    CLX_2_var3_HMAT_threshold(memkind_t kind):CLX_2_var3_HMAT(kind) {};
+    CLX_2_var3_HMAT_threshold(memkind_t kind) : CLX_2_var3_HMAT(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -256,10 +255,10 @@ private:
     }
 };
 
-class CLX_2_var3_HBW_threshold : public CLX_2_var3_HBW, TopologyCfg
+class CLX_2_var3_HBW_threshold: public CLX_2_var3_HBW, TopologyCfg
 {
 public:
-    CLX_2_var3_HBW_threshold(memkind_t kind):CLX_2_var3_HBW(kind) {};
+    CLX_2_var3_HBW_threshold(memkind_t kind) : CLX_2_var3_HBW(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -267,14 +266,15 @@ private:
         switch (m_threshold_val) {
             case TestPrereq_threshold::default_value:
                 return CLX_2_var3_HBW::HBW_nodes();
-            case TestPrereq_threshold::low_value: {
+            case TestPrereq_threshold::low_value:
+            {
                 MapNodeSet nodeset_map;
                 nodeset_map.emplace(NodeSet(0, {0}));
                 nodeset_map.emplace(NodeSet(1, {1}));
                 return nodeset_map;
             }
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 
@@ -283,22 +283,23 @@ private:
         switch (m_threshold_val) {
             case TestPrereq_threshold::default_value:
                 return CLX_2_var3_HBW::HBW_all_nodes();
-            case TestPrereq_threshold::low_value: {
+            case TestPrereq_threshold::low_value:
+            {
                 MapNodeSet nodeset_map;
                 nodeset_map.emplace(NodeSet(0, {0, 2}));
                 nodeset_map.emplace(NodeSet(1, {1, 3}));
                 return nodeset_map;
             }
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 };
 
-class CLX_2_var4_HBW_threshold : public CLX_2_var4_HBW, TopologyCfg
+class CLX_2_var4_HBW_threshold: public CLX_2_var4_HBW, TopologyCfg
 {
 public:
-    CLX_2_var4_HBW_threshold(memkind_t kind):CLX_2_var4_HBW(kind) {};
+    CLX_2_var4_HBW_threshold(memkind_t kind) : CLX_2_var4_HBW(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -308,7 +309,7 @@ private:
             case TestPrereq_threshold::default_value:
                 return CLX_2_var4_HBW::HBW_nodes();
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 
@@ -319,15 +320,15 @@ private:
             case TestPrereq_threshold::default_value:
                 return CLX_2_var4_HBW::HBW_all_nodes();
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 };
 
-class CLX_2_var5_HBW_threshold : public CLX_2_var5_HBW, TopologyCfg
+class CLX_2_var5_HBW_threshold: public CLX_2_var5_HBW, TopologyCfg
 {
 public:
-    CLX_2_var5_HBW_threshold(memkind_t kind):CLX_2_var5_HBW(kind) {};
+    CLX_2_var5_HBW_threshold(memkind_t kind) : CLX_2_var5_HBW(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -337,7 +338,7 @@ private:
             case TestPrereq_threshold::default_value:
                 return CLX_2_var5_HBW::HBW_nodes();
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 
@@ -348,21 +349,21 @@ private:
             case TestPrereq_threshold::default_value:
                 return CLX_2_var5_HBW::HBW_all_nodes();
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 };
 
-class CLX_4_var1_threshold : public CLX_4_var1, TopologyCfg
+class CLX_4_var1_threshold: public CLX_4_var1, TopologyCfg
 {
 public:
-    CLX_4_var1_threshold(memkind_t kind):CLX_4_var1(kind) {};
+    CLX_4_var1_threshold(memkind_t kind) : CLX_4_var1(kind){};
 };
 
-class CLX_4_var1_HMAT_threshold : public CLX_4_var1_HMAT, TopologyCfg
+class CLX_4_var1_HMAT_threshold: public CLX_4_var1_HMAT, TopologyCfg
 {
 public:
-    CLX_4_var1_HMAT_threshold(memkind_t kind):CLX_4_var1_HMAT(kind) {};
+    CLX_4_var1_HMAT_threshold(memkind_t kind) : CLX_4_var1_HMAT(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -370,7 +371,8 @@ private:
         switch (m_threshold_val) {
             case TestPrereq_threshold::default_value:
                 return CLX_4_var1_HMAT::HBW_nodes();
-            case TestPrereq_threshold::low_value: {
+            case TestPrereq_threshold::low_value:
+            {
                 MapNodeSet nodeset_map;
                 nodeset_map.emplace(NodeSet(0, {0}));
                 nodeset_map.emplace(NodeSet(1, {1}));
@@ -379,7 +381,7 @@ private:
                 return nodeset_map;
             }
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 
@@ -388,7 +390,8 @@ private:
         switch (m_threshold_val) {
             case TestPrereq_threshold::default_value:
                 return CLX_4_var1_HMAT::HBW_all_nodes();
-            case TestPrereq_threshold::low_value: {
+            case TestPrereq_threshold::low_value:
+            {
                 MapNodeSet nodeset_map;
                 nodeset_map.emplace(NodeSet(0, {0, 4}));
                 nodeset_map.emplace(NodeSet(1, {1, 5}));
@@ -397,15 +400,15 @@ private:
                 return nodeset_map;
             }
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 };
 
-class CLX_4_var1_HBW_threshold : public CLX_4_var1_HBW, TopologyCfg
+class CLX_4_var1_HBW_threshold: public CLX_4_var1_HBW, TopologyCfg
 {
 public:
-    CLX_4_var1_HBW_threshold(memkind_t kind):CLX_4_var1_HBW(kind) {};
+    CLX_4_var1_HBW_threshold(memkind_t kind) : CLX_4_var1_HBW(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -413,7 +416,8 @@ private:
         switch (m_threshold_val) {
             case TestPrereq_threshold::default_value:
                 return CLX_4_var1_HBW::HBW_nodes();
-            case TestPrereq_threshold::low_value: {
+            case TestPrereq_threshold::low_value:
+            {
                 MapNodeSet nodeset_map;
                 nodeset_map.emplace(NodeSet(0, {0}));
                 nodeset_map.emplace(NodeSet(1, {1}));
@@ -422,7 +426,7 @@ private:
                 return nodeset_map;
             }
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 
@@ -431,7 +435,8 @@ private:
         switch (m_threshold_val) {
             case TestPrereq_threshold::default_value:
                 return CLX_4_var1_HBW::HBW_all_nodes();
-            case TestPrereq_threshold::low_value: {
+            case TestPrereq_threshold::low_value:
+            {
                 MapNodeSet nodeset_map;
                 nodeset_map.emplace(NodeSet(0, {0, 4}));
                 nodeset_map.emplace(NodeSet(1, {1, 5}));
@@ -440,21 +445,21 @@ private:
                 return nodeset_map;
             }
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 };
 
-class CLX_4_var2_threshold : public CLX_4_var2, TopologyCfg
+class CLX_4_var2_threshold: public CLX_4_var2, TopologyCfg
 {
 public:
-    CLX_4_var2_threshold(memkind_t kind):CLX_4_var2(kind) {};
+    CLX_4_var2_threshold(memkind_t kind) : CLX_4_var2(kind){};
 };
 
-class CLX_4_var2_HMAT_threshold : public CLX_4_var2_HMAT, TopologyCfg
+class CLX_4_var2_HMAT_threshold: public CLX_4_var2_HMAT, TopologyCfg
 {
 public:
-    CLX_4_var2_HMAT_threshold(memkind_t kind):CLX_4_var2_HMAT(kind) {};
+    CLX_4_var2_HMAT_threshold(memkind_t kind) : CLX_4_var2_HMAT(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -486,10 +491,10 @@ private:
     }
 };
 
-class CLX_4_var2_HBW_threshold : public CLX_4_var2_HBW, TopologyCfg
+class CLX_4_var2_HBW_threshold: public CLX_4_var2_HBW, TopologyCfg
 {
 public:
-    CLX_4_var2_HBW_threshold(memkind_t kind):CLX_4_var2_HBW(kind) {};
+    CLX_4_var2_HBW_threshold(memkind_t kind) : CLX_4_var2_HBW(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -521,16 +526,16 @@ private:
     }
 };
 
-class CLX_4_var3_threshold : public CLX_4_var3, TopologyCfg
+class CLX_4_var3_threshold: public CLX_4_var3, TopologyCfg
 {
 public:
-    CLX_4_var3_threshold(memkind_t kind):CLX_4_var3(kind) {};
+    CLX_4_var3_threshold(memkind_t kind) : CLX_4_var3(kind){};
 };
 
-class CLX_4_var3_HMAT_threshold : public CLX_4_var3_HMAT, TopologyCfg
+class CLX_4_var3_HMAT_threshold: public CLX_4_var3_HMAT, TopologyCfg
 {
 public:
-    CLX_4_var3_HMAT_threshold(memkind_t kind):CLX_4_var3_HMAT(kind) {};
+    CLX_4_var3_HMAT_threshold(memkind_t kind) : CLX_4_var3_HMAT(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -562,10 +567,10 @@ private:
     }
 };
 
-class CLX_4_var3_HBW_threshold : public CLX_4_var3_HBW, TopologyCfg
+class CLX_4_var3_HBW_threshold: public CLX_4_var3_HBW, TopologyCfg
 {
 public:
-    CLX_4_var3_HBW_threshold(memkind_t kind):CLX_4_var3_HBW(kind) {};
+    CLX_4_var3_HBW_threshold(memkind_t kind) : CLX_4_var3_HBW(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -597,16 +602,16 @@ private:
     }
 };
 
-class CLX_4_var4_threshold : public CLX_4_var4, TopologyCfg
+class CLX_4_var4_threshold: public CLX_4_var4, TopologyCfg
 {
 public:
-    CLX_4_var4_threshold(memkind_t kind):CLX_4_var4(kind) {};
+    CLX_4_var4_threshold(memkind_t kind) : CLX_4_var4(kind){};
 };
 
-class CLX_4_var4_HMAT_threshold : public CLX_4_var4_HMAT, TopologyCfg
+class CLX_4_var4_HMAT_threshold: public CLX_4_var4_HMAT, TopologyCfg
 {
 public:
-    CLX_4_var4_HMAT_threshold(memkind_t kind):CLX_4_var4_HMAT(kind) {};
+    CLX_4_var4_HMAT_threshold(memkind_t kind) : CLX_4_var4_HMAT(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -628,7 +633,8 @@ private:
         switch (m_threshold_val) {
             case TestPrereq_threshold::default_value:
                 return CLX_4_var4_HMAT::HBW_all_nodes();
-            case TestPrereq_threshold::low_value: {
+            case TestPrereq_threshold::low_value:
+            {
                 MapNodeSet nodeset_map;
                 nodeset_map.emplace(NodeSet(0, {0, 4}));
                 nodeset_map.emplace(NodeSet(1, {1}));
@@ -637,15 +643,15 @@ private:
                 return nodeset_map;
             }
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 };
 
-class CLX_4_var4_HBW_threshold : public CLX_4_var4_HBW, TopologyCfg
+class CLX_4_var4_HBW_threshold: public CLX_4_var4_HBW, TopologyCfg
 {
 public:
-    CLX_4_var4_HBW_threshold(memkind_t kind):CLX_4_var4_HBW(kind) {};
+    CLX_4_var4_HBW_threshold(memkind_t kind) : CLX_4_var4_HBW(kind){};
 
 private:
     MapNodeSet HBW_nodes() const final
@@ -667,7 +673,8 @@ private:
         switch (m_threshold_val) {
             case TestPrereq_threshold::default_value:
                 return CLX_4_var4_HBW::HBW_all_nodes();
-            case TestPrereq_threshold::low_value: {
+            case TestPrereq_threshold::low_value:
+            {
                 MapNodeSet nodeset_map;
                 nodeset_map.emplace(NodeSet(0, {0, 4}));
                 nodeset_map.emplace(NodeSet(1, {1}));
@@ -676,7 +683,7 @@ private:
                 return nodeset_map;
             }
             default:
-                return MapNodeSet {};
+                return MapNodeSet{};
         };
     }
 };
@@ -754,12 +761,12 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    const size_t size = 11*MB-5;
+    const size_t size = 11 * MB - 5;
     int threads_num = get_nprocs();
     auto tpg = TopologyCfgFactory(argv[1]);
     bool status = true;
-    #pragma omp parallel for num_threads(threads_num)
-    for (int thread_id=0; thread_id<threads_num; ++thread_id) {
+#pragma omp parallel for num_threads(threads_num)
+    for (int thread_id = 0; thread_id < threads_num; ++thread_id) {
         cpu_set_t cpu_set;
         CPU_ZERO(&cpu_set);
         CPU_SET(thread_id, &cpu_set);
@@ -775,7 +782,8 @@ int main(int argc, char *argv[])
             tpg->deallocate(ptr);
         } else if (ptr) {
             tpg->deallocate(ptr);
-            std::cerr << "Kind is not supported but allocation succeed" << std::endl;
+            std::cerr << "Kind is not supported but allocation succeed"
+                      << std::endl;
             status = false;
         }
     }
