@@ -4,12 +4,12 @@
 
 set -e
 
-cd $(dirname $0)
-EXTRA_CONF=$@
+cd "$(dirname $0)"
+EXTRA_CONF=$*
 
 ./autogen.sh
 ./configure $EXTRA_CONF
 
 #use V=1 for full cmdlines of build
-make all -j`nproc`
-make checkprogs -j`nproc`
+make all -j"`nproc`"
+make checkprogs -j"`nproc`"

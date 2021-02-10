@@ -15,7 +15,7 @@ DOCKER_IMAGE_NAME="$1"
 export PMEM_HOST_PATH=${PMEM_HOST_PATH:-/tmp/}
 
 if [[ ! -f "$DOCKER_IMAGE_NAME" ]]; then
-    echo "Docker image "$DOCKER_IMAGE_NAME" does not exist."
+    echo "Docker image " $DOCKER_IMAGE_NAME " does not exist."
     exit 1
 fi
 

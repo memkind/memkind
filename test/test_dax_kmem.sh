@@ -45,17 +45,17 @@ function emit() {
 }
 
 function normalize_path {
-    local PATH=$1
-    if [ ! -d $PATH ];
+    local INPUT_PATH=$1
+    if [ ! -d $INPUT_PATH ];
     then
-        echo "Not a directory: '$PATH'"
+        echo "Not a directory: '$INPUT_PATH'"
         usage
         exit 1
     fi
-    if [[ $PATH != /* ]]; then
-        PATH=`pwd`/$PATH
+    if [[ $INPUT_PATH != /* ]]; then
+        PATH=`pwd`/$INPUT_PATH
     fi
-    echo $PATH
+    echo $INPUT_PATH
 }
 
 function show_skipped_tests()
@@ -104,7 +104,7 @@ function execute_gtest()
     TEST=$2
     # Apply filter (if provided)
     if [ "$TEST_FILTER" != "" ]; then
-        if [[ $TEST != $TEST_FILTER ]]; then
+        if [[ $TEST != "$TEST_FILTER" ]]; then
             return
         fi
     fi
