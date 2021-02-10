@@ -4,14 +4,12 @@
 #include <stdint.h>
 
 typedef void *(*rawAllocType)(intptr_t pool_id, size_t *bytes);
-typedef int   (*rawFreeType)(intptr_t pool_id, void *raw_ptr, size_t raw_bytes);
+typedef int (*rawFreeType)(intptr_t pool_id, void *raw_ptr, size_t raw_bytes);
 
 struct MemPoolPolicy {
     rawAllocType pAlloc;
-    rawFreeType  pFree;
-    size_t       granularity;
-    int          version;
-    unsigned     fixedPool : 1,
-                 keepAllMemory : 1,
-                 reserved : 30;
+    rawFreeType pFree;
+    size_t granularity;
+    int version;
+    unsigned fixedPool : 1, keepAllMemory : 1, reserved : 30;
 };

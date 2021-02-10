@@ -7,7 +7,7 @@
 #include <vector>
 
 // Tests for hbw::allocator class.
-class HbwAllocatorTests: public :: testing::Test
+class HbwAllocatorTests: public ::testing::Test
 {
 
 protected:
@@ -16,10 +16,9 @@ protected:
 
     void TearDown()
     {}
-
 };
 
-//Test standard memory allocation and deallocation.
+// Test standard memory allocation and deallocation.
 TEST_F(HbwAllocatorTests, test_TC_MEMKIND_DetaultAllocatorTest)
 {
     const size_t size = 512;
@@ -29,15 +28,15 @@ TEST_F(HbwAllocatorTests, test_TC_MEMKIND_DetaultAllocatorTest)
 
     ASSERT_TRUE(NULL != ptr);
 
-    //Do the actually memory writing
-    for (size_t i=0; i<size; i++) {
+    // Do the actually memory writing
+    for (size_t i = 0; i < size; i++) {
         ptr[i] = i;
     }
 
     allocator.deallocate(ptr, size);
 }
 
-//Test address conversion functionality.
+// Test address conversion functionality.
 TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AddressConversion)
 {
     const size_t size = 512;
@@ -54,8 +53,8 @@ TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AddressConversion)
     hbw::allocator<int>::const_reference const_reference = *ptr;
 
     hbw::allocator<int>::pointer test_ptr = allocator.address(reference);
-    hbw::allocator<int>::const_pointer test_const_ptr = allocator.address(
-                                                            const_reference);
+    hbw::allocator<int>::const_pointer test_const_ptr =
+        allocator.address(const_reference);
 
     ASSERT_TRUE(NULL != test_ptr);
     ASSERT_TRUE(NULL != test_const_ptr);
@@ -66,8 +65,8 @@ TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AddressConversion)
     allocator.deallocate(ptr, size);
 }
 
-//Test for boundaries of allocation sizes.
-//We expect to catch allocation exceptions caused by out of bound sizes.
+// Test for boundaries of allocation sizes.
+// We expect to catch allocation exceptions caused by out of bound sizes.
 TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AllocationSizeOutOfBounds)
 {
     hbw::allocator<size_t> allocator;
@@ -76,14 +75,14 @@ TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AllocationSizeOutOfBounds)
 
     ASSERT_THROW(allocator.allocate(over_size), std::bad_alloc);
 
-    const size_t max_size = -1; //This will give maximum value of size_t.
+    const size_t max_size = -1; // This will give maximum value of size_t.
 
     ASSERT_THROW(allocator.allocate(max_size), std::bad_alloc);
 
     ASSERT_THROW(allocator.allocate(0), std::bad_alloc);
 }
 
-//Test if variable will be constructed.
+// Test if variable will be constructed.
 TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AllocatorConstruct)
 {
     hbw::allocator<int> allocator;
@@ -95,13 +94,13 @@ TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AllocatorConstruct)
     EXPECT_EQ(expect_val, x);
 }
 
-//Test the integration with std::vector.
+// Test the integration with std::vector.
 TEST_F(HbwAllocatorTests, test_TC_MEMKIND_StandardVector)
 {
-    std::vector<int, hbw::allocator<int> > vec;
+    std::vector<int, hbw::allocator<int>> vec;
     const size_t size = 10000;
 
-    for (size_t i=0; i<size; i++) {
+    for (size_t i = 0; i < size; i++) {
         vec.push_back(i);
     }
 

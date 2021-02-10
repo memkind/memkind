@@ -9,19 +9,17 @@
 // Date   : Sept 10, 2015
 ///////////////////////////////////////////////////////////////////////////
 
-
 #include <memkind.h>
 
-#include <stdlib.h>
 #include <stdio.h>
-
+#include <stdlib.h>
 
 ///////////////////////////////////////////////////////////////////////////
 // This function contains an example case for each heap allocation function
 // intercepted by the AutoHBW library
 ///////////////////////////////////////////////////////////////////////////
 
-//volatile is needed to prevent optimizing out below hooks
+// volatile is needed to prevent optimizing out below hooks
 volatile int memkind_called_g;
 
 void memkind_malloc_post(struct memkind *kind, size_t size, void **result)
@@ -51,9 +49,9 @@ void memkind_free_pre(struct memkind **kind, void **ptr)
 void finish_testcase(int fail_condition, const char *fail_message, int *err)
 {
 
-    if(memkind_called_g != 1 || fail_condition) {
+    if (memkind_called_g != 1 || fail_condition) {
         printf("%s\n", fail_message);
-        *err= -1;
+        *err = -1;
     }
     memkind_called_g = 0;
 }
@@ -61,38 +59,38 @@ void finish_testcase(int fail_condition, const char *fail_message, int *err)
 int main()
 {
     int err = 0;
-    const size_t size = 1024 * 1024;   // 1M of data
+    const size_t size = 1024 * 1024; // 1M of data
 
     void *buf = NULL;
     memkind_called_g = 0;
 
     // Test 1: Test malloc and free
     buf = malloc(size);
-    finish_testcase(buf==NULL, "Malloc failed!", &err);
+    finish_testcase(buf == NULL, "Malloc failed!", &err);
 
     free(buf);
     finish_testcase(0, "Free after malloc failed!", &err);
 
     // Test 2: Test calloc and free
     buf = calloc(size, 1);
-    finish_testcase(buf==NULL, "Calloc failed!", &err);
+    finish_testcase(buf == NULL, "Calloc failed!", &err);
 
     free(buf);
     finish_testcase(0, "Free after calloc failed!", &err);
 
     // Test 3: Test realloc and free
     buf = malloc(size);
-    finish_testcase(buf==NULL, "Malloc before realloc failed!", &err);
+    finish_testcase(buf == NULL, "Malloc before realloc failed!", &err);
 
-    buf = realloc(buf,  size * 2);
-    finish_testcase(buf==NULL, "Realloc failed!", &err);
+    buf = realloc(buf, size * 2);
+    finish_testcase(buf == NULL, "Realloc failed!", &err);
 
     free(buf);
     finish_testcase(0, "Free after realloc failed!", &err);
     buf = NULL;
 
     // Test 4: Test posix_memalign and free
-    int ret = posix_memalign(&buf,  64, size);
+    int ret = posix_memalign(&buf, 64, size);
     finish_testcase(ret, "Posix_memalign failed!", &err);
 
     free(buf);

@@ -4,12 +4,12 @@
 #include "memkind_allocator.h"
 
 #include <cassert>
+#include <deque>
 #include <forward_list>
 #include <iostream>
 #include <scoped_allocator>
 #include <set>
 #include <string>
-#include <deque>
 
 #define STL_FWLIST_TEST
 #define STL_DEQUE_TEST
@@ -24,8 +24,9 @@ int main(int argc, char *argv[])
 #ifdef STL_FWLIST_TEST
     {
         std::cout << "FORWARD LIST OPEN" << std::endl;
-        libmemkind::static_kind::allocator<int> alc{ libmemkind::kinds::REGULAR };
-        std::forward_list<int, libmemkind::static_kind::allocator<int>> fwlist {alc};
+        libmemkind::static_kind::allocator<int> alc{libmemkind::kinds::REGULAR};
+        std::forward_list<int, libmemkind::static_kind::allocator<int>> fwlist{
+            alc};
         int i;
 
         for (i = 0; i <= 20; ++i) {
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
 
         fwlist.sort(std::greater<int>());
 
-        for(auto &el: fwlist) {
+        for (auto &el : fwlist) {
             i--;
             assert(el == i);
         }
@@ -47,16 +48,16 @@ int main(int argc, char *argv[])
 
 #ifdef STL_DEQUE_TEST
     std::cout << "DEQUE OPEN" << std::endl;
-    libmemkind::static_kind::allocator<int> int_alc{ libmemkind::kinds::REGULAR };
-    std::deque<int, libmemkind::static_kind::allocator<int>> deque {int_alc};
+    libmemkind::static_kind::allocator<int> int_alc{libmemkind::kinds::REGULAR};
+    std::deque<int, libmemkind::static_kind::allocator<int>> deque{int_alc};
 
-    for (int i=0; i<10; i++) {
+    for (int i = 0; i < 10; i++) {
         deque.push_back(i);
     }
 
     assert(deque.size() == 10);
 
-    while(!deque.empty()) {
+    while (!deque.empty()) {
         deque.pop_front();
     }
 
@@ -68,10 +69,13 @@ int main(int argc, char *argv[])
 #ifdef STL_MULTISET_TEST
     {
         std::cout << "MULTISET OPEN" << std::endl;
-        typedef libmemkind::static_kind::allocator<std::string> multiset_alloc_t;
-        multiset_alloc_t multiset_alloc { libmemkind::kinds::DEFAULT };
-        std::multiset<std::string, std::less<std::string>, std::scoped_allocator_adaptor<multiset_alloc_t> >
-        multiset{ std::scoped_allocator_adaptor<multiset_alloc_t>(multiset_alloc) };
+        typedef libmemkind::static_kind::allocator<std::string>
+            multiset_alloc_t;
+        multiset_alloc_t multiset_alloc{libmemkind::kinds::DEFAULT};
+        std::multiset<std::string, std::less<std::string>,
+                      std::scoped_allocator_adaptor<multiset_alloc_t>>
+            multiset{std::scoped_allocator_adaptor<multiset_alloc_t>(
+                multiset_alloc)};
 
         multiset.insert("S");
         multiset.insert("A");

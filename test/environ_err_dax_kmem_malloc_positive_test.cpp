@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2019 - 2020 Intel Corporation. */
 
-#include <memkind.h>
 #include "memkind/internal/memkind_dax_kmem.h"
+#include <memkind.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -26,7 +26,7 @@ int main()
     char *env_value_str = getenv("MEMKIND_DAX_KMEM_NODES");
     int process_cpu = sched_getcpu();
     int process_node = numa_node_of_cpu(process_cpu);
-    unsigned numa_max_id = (unsigned) numa_max_node();
+    unsigned numa_max_id = (unsigned)numa_max_node();
     int min_distance;
 
     if (!env_value_str) {
@@ -39,7 +39,7 @@ int main()
         printf("Error: allocation failed\n");
         goto exit;
     }
-    memset(ptr, 'A', KB/2);
+    memset(ptr, 'A', KB / 2);
 
     all_dax_kmem_nodes_nodemask = numa_parse_nodestring(env_value_str);
     min_distance = INT_MAX;
@@ -56,7 +56,8 @@ int main()
         }
     }
 
-    get_mempolicy(&returned_numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
+    get_mempolicy(&returned_numa_id, nullptr, 0, ptr,
+                  MPOL_F_NODE | MPOL_F_ADDR);
 
     for (auto const &closest_numa : closest_numa_ids) {
         if (closest_numa == returned_numa_id) {
@@ -66,8 +67,9 @@ int main()
         }
     }
     if (ret) {
-        printf("Error: Memkind dax kmem and allocated pointer node id's are not equal: %d!=%d\n",
-               expected_numa_id, returned_numa_id);
+        printf(
+            "Error: Memkind dax kmem and allocated pointer node id's are not equal: %d!=%d\n",
+            expected_numa_id, returned_numa_id);
     }
 
 exit:

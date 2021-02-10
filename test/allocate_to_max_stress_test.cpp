@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2015 - 2020 Intel Corporation. */
 
-#include <chrono>
-#include "common.h"
 #include "allocator_perf_tool/Configuration.hpp"
-#include "allocator_perf_tool/StressIncreaseToMax.h"
 #include "allocator_perf_tool/HugePageOrganizer.hpp"
+#include "allocator_perf_tool/StressIncreaseToMax.h"
+#include "common.h"
+#include <chrono>
 
-//memkind stress and longevity tests using Allocatr Perf Tool.
-class AllocateToMaxStressTests: public :: testing::Test
+// memkind stress and longevity tests using Allocatr Perf Tool.
+class AllocateToMaxStressTests: public ::testing::Test
 {
 
 protected:
@@ -18,7 +18,7 @@ protected:
     void TearDown()
     {}
 
-    //Allocates memory up to 'memory_request_limit'.
+    // Allocates memory up to 'memory_request_limit'.
     void run(TypesConf kinds, TypesConf func_calls, unsigned operations,
              size_t size_from, size_t size_to, size_t memory_request_limit,
              bool touch_memory)
@@ -28,22 +28,20 @@ protected:
         RecordProperty("size_to", size_to);
 
         TaskConf task_conf = {
-            .n = operations, //number of memory operations
-            .allocation_sizes_conf = {
-                operations, //number of memory operations
-                size_from, //no random sizes.
-                size_to
-            },
-            .func_calls = func_calls, //enable allocator function call
-            .allocators_types = kinds, //enable allocator
-            .seed = 11, //random seed
-            .touch_memory = touch_memory //enable or disable touching memory
+            .n = operations,                      // number of memory operations
+            .allocation_sizes_conf = {operations, // number of memory operations
+                                      size_from,  // no random sizes.
+                                      size_to},
+            .func_calls = func_calls,    // enable allocator function call
+            .allocators_types = kinds,   // enable allocator
+            .seed = 11,                  // random seed
+            .touch_memory = touch_memory // enable or disable touching memory
         };
 
         std::chrono::time_point<std::chrono::system_clock> start, end;
         start = std::chrono::system_clock::now();
 
-        //Execute test iterations.
+        // Execute test iterations.
         std::vector<iteration_result> results =
             StressIncreaseToMax::execute_test_iterations(task_conf, 120,
                                                          memory_request_limit);
@@ -54,19 +52,19 @@ protected:
 
         RecordProperty("elapsed_time", elapsed_time.count());
 
-        //Check finish status.
+        // Check finish status.
         EXPECT_EQ(check_allocation_errors(results, task_conf), 0);
     }
 
-    //Check true allocation errors over all iterations.
-    //Return iteration number (>0) when error occurs, or zero
+    // Check true allocation errors over all iterations.
+    // Return iteration number (>0) when error occurs, or zero
     int check_allocation_errors(std::vector<iteration_result> &results,
                                 const TaskConf &task_conf)
     {
-        for (size_t i=0; i<results.size(); i++) {
-            //Check if test ends with allocation error.
-            if(results[i].is_allocation_error) {
-                return i+1;
+        for (size_t i = 0; i < results.size(); i++) {
+            // Check if test ends with allocation error.
+            if (results[i].is_allocation_error) {
+                return i + 1;
             }
         }
 
@@ -77,22 +75,22 @@ protected:
 TEST_F(AllocateToMaxStressTests,
        test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW)
 {
-    run(TypesConf(AllocatorTypes::MEMKIND_HBW), TypesConf(FunctionCalls::MALLOC),
-        1024, MB, MB, GB, true);
+    run(TypesConf(AllocatorTypes::MEMKIND_HBW),
+        TypesConf(FunctionCalls::MALLOC), 1024, MB, MB, GB, true);
 }
 
 TEST_F(AllocateToMaxStressTests,
        test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_INTERLEAVE)
 {
     run(TypesConf(AllocatorTypes::MEMKIND_INTERLEAVE),
-        TypesConf(FunctionCalls::MALLOC), 4096, MB, MB, 4*GB, true);
+        TypesConf(FunctionCalls::MALLOC), 4096, MB, MB, 4 * GB, true);
 }
 
 TEST_F(AllocateToMaxStressTests,
        test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_MEMKIND_HBW_PREFERRED)
 {
     run(TypesConf(AllocatorTypes::MEMKIND_HBW_PREFERRED),
-        TypesConf(FunctionCalls::MALLOC), 17408, MB, MB, 17*GB, true);
+        TypesConf(FunctionCalls::MALLOC), 17408, MB, MB, 17 * GB, true);
 }
 
 TEST_F(AllocateToMaxStressTests,
@@ -100,14 +98,14 @@ TEST_F(AllocateToMaxStressTests,
 {
     HugePageOrganizer huge_page_organizer(2250);
     run(TypesConf(AllocatorTypes::MEMKIND_HBW_HUGETLB),
-        TypesConf(FunctionCalls::MALLOC), 1024, 4*MB, 4*MB, GB, true);
+        TypesConf(FunctionCalls::MALLOC), 1024, 4 * MB, 4 * MB, GB, true);
 }
 
 TEST_F(AllocateToMaxStressTests,
        test_TC_MEMKIND_slts_ALLOCATE_TO_MAX_DIFFERENT_SIZES)
 {
-    run(TypesConf(AllocatorTypes::MEMKIND_HBW), TypesConf(FunctionCalls::MALLOC),
-        2500, 1, 8*MB, GB, true);
+    run(TypesConf(AllocatorTypes::MEMKIND_HBW),
+        TypesConf(FunctionCalls::MALLOC), 2500, 1, 8 * MB, GB, true);
 }
 
 TEST_F(AllocateToMaxStressTests,
@@ -116,8 +114,8 @@ TEST_F(AllocateToMaxStressTests,
     TypesConf func_calls;
     func_calls.enable_type(FunctionCalls::MALLOC);
     func_calls.enable_type(FunctionCalls::FREE);
-    run(TypesConf(AllocatorTypes::MEMKIND_DEFAULT), func_calls, 2500, 500*MB, 8*GB,
-        16*GB, false);
+    run(TypesConf(AllocatorTypes::MEMKIND_DEFAULT), func_calls, 2500, 500 * MB,
+        8 * GB, 16 * GB, false);
 }
 
 TEST_F(AllocateToMaxStressTests,
@@ -126,8 +124,8 @@ TEST_F(AllocateToMaxStressTests,
     TypesConf func_calls;
     func_calls.enable_type(FunctionCalls::MALLOC);
     func_calls.enable_type(FunctionCalls::FREE);
-    run(TypesConf(AllocatorTypes::MEMKIND_REGULAR), func_calls, 2500, 500*MB, 8*GB,
-        16*GB, false);
+    run(TypesConf(AllocatorTypes::MEMKIND_REGULAR), func_calls, 2500, 500 * MB,
+        8 * GB, 16 * GB, false);
 }
 
 TEST_F(AllocateToMaxStressTests,
@@ -140,7 +138,7 @@ TEST_F(AllocateToMaxStressTests,
     kinds.enable_type(AllocatorTypes::MEMKIND_INTERLEAVE);
     kinds.enable_type(AllocatorTypes::MEMKIND_HBW_INTERLEAVE);
     kinds.enable_type(AllocatorTypes::MEMKIND_REGULAR);
-    run(kinds, TypesConf(FunctionCalls::MALLOC), 2048, MB, MB, 2*GB, true);
+    run(kinds, TypesConf(FunctionCalls::MALLOC), 2048, MB, MB, 2 * GB, true);
 }
 
 TEST_F(AllocateToMaxStressTests,
@@ -151,5 +149,5 @@ TEST_F(AllocateToMaxStressTests,
     kinds.enable_type(AllocatorTypes::MEMKIND_HBW);
     kinds.enable_type(AllocatorTypes::MEMKIND_HBW_HUGETLB);
     kinds.enable_type(AllocatorTypes::MEMKIND_HBW_PREFERRED_HUGETLB);
-    run(kinds, TypesConf(FunctionCalls::MALLOC), 2048, MB, MB, 2*GB, true);
+    run(kinds, TypesConf(FunctionCalls::MALLOC), 2048, MB, MB, 2 * GB, true);
 }

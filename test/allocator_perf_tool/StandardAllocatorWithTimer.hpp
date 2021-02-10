@@ -2,19 +2,17 @@
 /* Copyright (C) 2015 - 2020 Intel Corporation. */
 #pragma once
 
-#include "Allocator.hpp"
 #include "Allocation_info.hpp"
+#include "Allocator.hpp"
 #include "Configuration.hpp"
-#include "WrappersMacros.hpp"
 #include "FunctionCalls.hpp"
+#include "WrappersMacros.hpp"
 
 #include <stdlib.h>
 
-class StandardAllocatorWithTimer
-    : public Allocator
+class StandardAllocatorWithTimer: public Allocator
 {
 public:
-
     memory_operation wrapped_malloc(size_t size)
     {
         START_TEST(AllocatorTypes::STANDARD_ALLOCATOR, FunctionCalls::MALLOC)

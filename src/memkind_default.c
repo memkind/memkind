@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2014 - 2020 Intel Corporation. */
 
+#include <memkind/internal/heap_manager.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_private.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_private.h>
 #include <memkind/internal/tbb_wrapper.h>
-#include <memkind/internal/heap_manager.h>
 
-#include <numa.h>
-#include <numaif.h>
-#include <sys/mman.h>
 #include <errno.h>
 #include <jemalloc/jemalloc.h>
+#include <numa.h>
+#include <numaif.h>
 #include <stdint.h>
+#include <sys/mman.h>
 
 #include "config.h"
 
@@ -39,11 +39,11 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_default_destroy,
     .get_stat = memkind_default_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT int memkind_default_create(struct memkind *kind,
-                                          struct memkind_ops *ops, const char *name)
+                                          struct memkind_ops *ops,
+                                          const char *name)
 {
     int err = 0;
 
@@ -64,7 +64,7 @@ MEMKIND_EXPORT int memkind_default_destroy(struct memkind *kind)
 
 MEMKIND_EXPORT void *memkind_default_malloc(struct memkind *kind, size_t size)
 {
-    if(MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
+    if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         return NULL;
     }
     return jemk_malloc(size);
@@ -73,16 +73,17 @@ MEMKIND_EXPORT void *memkind_default_malloc(struct memkind *kind, size_t size)
 MEMKIND_EXPORT void *memkind_default_calloc(struct memkind *kind, size_t num,
                                             size_t size)
 {
-    if(MEMKIND_UNLIKELY(size_out_of_bounds(num) || size_out_of_bounds(size))) {
+    if (MEMKIND_UNLIKELY(size_out_of_bounds(num) || size_out_of_bounds(size))) {
         return NULL;
     }
     return jemk_calloc(num, size);
 }
 
 MEMKIND_EXPORT int memkind_default_posix_memalign(struct memkind *kind,
-                                                  void **memptr, size_t alignment, size_t size)
+                                                  void **memptr,
+                                                  size_t alignment, size_t size)
 {
-    if(MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
+    if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         *memptr = NULL;
         return 0;
     }
@@ -92,7 +93,7 @@ MEMKIND_EXPORT int memkind_default_posix_memalign(struct memkind *kind,
 MEMKIND_EXPORT void *memkind_default_realloc(struct memkind *kind, void *ptr,
                                              size_t size)
 {
-    if(MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
+    if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         jemk_free(ptr);
         return NULL;
     }
@@ -151,8 +152,8 @@ MEMKIND_EXPORT int memkind_nohugepage_madvise(struct memkind *kind, void *addr,
 {
     int err = madvise(addr, size, MADV_NOHUGEPAGE);
 
-    //checking if EINVAL was returned due to lack of THP support in kernel
-    if ((err == EINVAL) && (((uintptr_t) addr & (uintptr_t) 0xfff) == 0) &&
+    // checking if EINVAL was returned due to lack of THP support in kernel
+    if ((err == EINVAL) && (((uintptr_t)addr & (uintptr_t)0xfff) == 0) &&
         (size > 0)) {
         return 0;
     }
@@ -171,7 +172,8 @@ MEMKIND_EXPORT int memkind_default_mbind(struct memkind *kind, void *ptr,
 
     if (MEMKIND_UNLIKELY(kind->ops->get_mbind_nodemask == NULL ||
                          kind->ops->get_mbind_mode == NULL)) {
-        log_err("memkind_ops->mbind_mode or memkind_ops->bind_nodemask is NULL.");
+        log_err(
+            "memkind_ops->mbind_mode or memkind_ops->bind_nodemask is NULL.");
         return MEMKIND_ERROR_BADOPS;
     }
     err = kind->ops->get_mbind_nodemask(kind, nodemask.n, NUMA_NUM_NODES);
@@ -231,8 +233,7 @@ MEMKIND_EXPORT int memkind_posix_check_alignment(struct memkind *kind,
                                                  size_t alignment)
 {
     int err = 0;
-    if ((alignment < sizeof(void *)) ||
-        (((alignment - 1) & alignment) != 0)) {
+    if ((alignment < sizeof(void *)) || (((alignment - 1) & alignment) != 0)) {
         err = EINVAL;
     }
     return err;

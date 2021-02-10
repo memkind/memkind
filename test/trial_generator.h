@@ -7,18 +7,17 @@
 #include "hbwmalloc.h"
 #include "memkind.h"
 
-#include <vector>
-#include <stdlib.h>
-#include <vector>
-#include <memory>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <stdlib.h>
+#include <vector>
 
 #include "common.h"
 
-
-typedef enum {
+typedef enum
+{
     HBW_MALLOC,
     HBW_CALLOC,
     HBW_REALLOC,
@@ -44,26 +43,24 @@ typedef struct {
 class TrialGenerator
 {
 public:
-    TrialGenerator() {}
+    TrialGenerator()
+    {}
     void generate_gb(alloc_api_t api, int number_of_gb_pages, memkind_t memkind,
-                     alloc_api_t api_free, bool psize_strict=false, size_t align = GB);
+                     alloc_api_t api_free, bool psize_strict = false,
+                     size_t align = GB);
     void run(int num_bandwidth, std::vector<int> &bandwidths);
     void generate_size_2bytes_2KB_2MB(alloc_api_t api);
     /*For debugging purposes*/
     void print();
+
 private:
     std::vector<trial_t> trial_vec;
-    trial_t create_trial_tuple(alloc_api_t api,
-                               size_t size,
-                               size_t alignment,
-                               int page_size,
-                               memkind_t memkind,
+    trial_t create_trial_tuple(alloc_api_t api, size_t size, size_t alignment,
+                               int page_size, memkind_t memkind,
                                int free_index);
-
-
 };
 
-class TGTest : public::testing::Test
+class TGTest: public ::testing::Test
 {
 protected:
     size_t num_bandwidth;

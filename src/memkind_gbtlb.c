@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2014 - 2020 Intel Corporation. */
 
-#include <memkind/internal/memkind_gbtlb.h>
-#include <memkind/internal/memkind_hugetlb.h>
-#include <memkind/internal/memkind_default.h>
-#include <memkind/internal/memkind_hbw.h>
-#include <memkind/internal/memkind_private.h>
-#include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_gbtlb.h>
+#include <memkind/internal/memkind_hbw.h>
+#include <memkind/internal/memkind_hugetlb.h>
+#include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_private.h>
 
 static void memkind_hbw_gbtlb_init_once(void);
 static void memkind_hbw_preferred_gbtlb_init_once(void);
@@ -34,8 +34,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .create = memkind_arena_create,
@@ -56,8 +55,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
     .create = memkind_arena_create,
@@ -75,8 +73,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
-};
+    .defrag_reallocate = memkind_arena_defrag_reallocate};
 
 #define ONE_GB 1073741824ULL
 

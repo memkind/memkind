@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2019 - 2020 Intel Corporation. */
 
-#include <memkind.h>
 #include "common.h"
+#include <memkind.h>
 
 extern const char *PMEM_DIR;
 
@@ -84,7 +84,8 @@ TEST_F(MemkindDetectKindTests, test_TC_MEMKIND_DetectKindMixKind)
     ASSERT_EQ(0, err);
     ASSERT_NE(nullptr, pmem_kind_temp_1);
 
-    err = memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_kind_temp_2);
+    err =
+        memkind_create_pmem(PMEM_DIR, MEMKIND_PMEM_MIN_SIZE, &pmem_kind_temp_2);
     ASSERT_EQ(0, err);
     ASSERT_NE(nullptr, pmem_kind_temp_2);
 

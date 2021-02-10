@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static char path[PATH_MAX]="/tmp/";
+static char path[PATH_MAX] = "/tmp/";
 
 static void print_err_message(int err)
 {
@@ -35,16 +35,18 @@ int main(int argc, char *argv[])
     char *ptr_dax_kmem = NULL;
     char *ptr_pmem = NULL;
 
-    fprintf(stdout,
-            "This example shows how to allocate to PMEM memory using file-backed memory (pmem kind) "
-            "and persistent memory NUMA node (MEMKIND_DAX_KMEM).\nPMEM kind directory: %s\n",
-            path);
+    fprintf(
+        stdout,
+        "This example shows how to allocate to PMEM memory using file-backed memory (pmem kind) "
+        "and persistent memory NUMA node (MEMKIND_DAX_KMEM).\nPMEM kind directory: %s\n",
+        path);
 
     int status = memkind_check_dax_path(path);
     if (!status) {
         fprintf(stdout, "PMEM kind %s is on DAX-enabled file system.\n", path);
     } else {
-        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n", path);
+        fprintf(stdout, "PMEM kind %s is not on DAX-enabled file system.\n",
+                path);
     }
 
     err = memkind_create_pmem(path, 0, &pmem_kind);
@@ -55,7 +57,8 @@ int main(int argc, char *argv[])
 
     ptr_dax_kmem = (char *)memkind_malloc(MEMKIND_DAX_KMEM, size);
     if (!ptr_dax_kmem) {
-        fprintf(stderr, "Unable allocate 512 bytes in persistent memory NUMA node.\n");
+        fprintf(stderr,
+                "Unable allocate 512 bytes in persistent memory NUMA node.\n");
         return 1;
     }
 
@@ -67,7 +70,8 @@ int main(int argc, char *argv[])
 
     snprintf(ptr_dax_kmem, size,
              "Hello world from persistent memory NUMA node - ptr_dax_kmem.\n");
-    snprintf(ptr_pmem, size, "Hello world from file-backed memory - ptr_pmem.\n");
+    snprintf(ptr_pmem, size,
+             "Hello world from file-backed memory - ptr_pmem.\n");
 
     fprintf(stdout, "%s", ptr_dax_kmem);
     fprintf(stdout, "%s", ptr_pmem);

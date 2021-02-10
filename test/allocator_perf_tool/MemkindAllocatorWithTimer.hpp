@@ -5,28 +5,28 @@
 
 #include <memkind.h>
 
-#include "Allocator.hpp"
 #include "Allocation_info.hpp"
+#include "Allocator.hpp"
 #include "Configuration.hpp"
-#include "WrappersMacros.hpp"
 #include "FunctionCalls.hpp"
+#include "WrappersMacros.hpp"
 #include <cerrno>
 
 #include <stdlib.h>
 
-
-class MemkindAllocatorWithTimer
-    : public Allocator
+class MemkindAllocatorWithTimer: public Allocator
 {
 public:
-    MemkindAllocatorWithTimer() : kind(&MEMKIND_DEFAULT) {}
+    MemkindAllocatorWithTimer() : kind(&MEMKIND_DEFAULT)
+    {}
 
     MemkindAllocatorWithTimer(memkind_t &memory_kind, unsigned kind_type_id)
     {
         kind = &memory_kind;
         type_id = kind_type_id;
     }
-    ~MemkindAllocatorWithTimer(void) {}
+    ~MemkindAllocatorWithTimer(void)
+    {}
 
     memory_operation wrapped_malloc(size_t size)
     {
@@ -72,5 +72,4 @@ public:
 private:
     memkind_t *kind;
     unsigned type_id;
-
 };

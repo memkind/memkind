@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2014 - 2020 Intel Corporation. */
 
+#include "memkind/internal/memkind_hbw.h"
 #include <hbwmalloc.h>
 #include <memkind.h>
-#include "memkind/internal/memkind_hbw.h"
 
 #include <numa.h>
 #include <numaif.h>
@@ -32,15 +32,16 @@ int main()
     status = memkind_hbw_all_get_mbind_nodemask(NULL, expected_nodemask->maskp,
                                                 expected_nodemask->size);
     if (status != MEMKIND_ERROR_ENVIRON) {
-        printf("Error: wrong return value from memkind_hbw_all_get_mbind_nodemask()\n");
+        printf(
+            "Error: wrong return value from memkind_hbw_all_get_mbind_nodemask()\n");
         printf("Expected: %d\n", MEMKIND_ERROR_ENVIRON);
         printf("Actual: %d\n", status);
         goto exit;
     }
 
     returned_nodemask = numa_allocate_nodemask();
-    status = get_mempolicy(NULL, returned_nodemask->maskp, returned_nodemask->size,
-                           ptr, MPOL_F_ADDR);
+    status = get_mempolicy(NULL, returned_nodemask->maskp,
+                           returned_nodemask->size, ptr, MPOL_F_ADDR);
     if (status) {
         printf("Error: get_mempolicy() returned %d\n", status);
         goto exit;
@@ -48,7 +49,8 @@ int main()
 
     ret = numa_bitmask_equal(returned_nodemask, expected_nodemask);
     if (!ret) {
-        printf("Error: Memkind hbw and allocated pointer nodemasks are not equal\n");
+        printf(
+            "Error: Memkind hbw and allocated pointer nodemasks are not equal\n");
     }
 
 exit:

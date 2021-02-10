@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     const size_t size = 1024 * 1024;
     void *buf = NULL;
 
-    //It is expected that "MEMKIND_HBW" or "MEMKIND_HUGETLB" argument is passed
+    // It is expected that "MEMKIND_HBW" or "MEMKIND_HUGETLB" argument is passed
     if (argc != 2) {
         printf("Error: Wrong number of parameters\n");
         err = -1;

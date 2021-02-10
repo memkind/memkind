@@ -6,12 +6,10 @@
 
 #include <vector>
 
-template<class T>
-class VectorIterator
-    : public Iterator<T>
+template <class T>
+class VectorIterator: public Iterator<T>
 {
 public:
-
     static VectorIterator create(int init_size)
     {
         return VectorIterator(init_size);

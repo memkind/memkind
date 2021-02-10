@@ -1,22 +1,19 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2014 - 2020 Intel Corporation. */
 
-#include <memkind/internal/memkind_hbw.h>
 #include "allocator_perf_tool/HugePageOrganizer.hpp"
+#include <memkind/internal/memkind_hbw.h>
 
-#include "trial_generator.h"
 #include "check.h"
-#include <vector>
+#include "trial_generator.h"
 #include <numa.h>
 #include <numaif.h>
 #include <unistd.h>
+#include <vector>
 
-trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
-                                             size_t size,
-                                             size_t alignment,
-                                             int page_size,
-                                             memkind_t memkind,
-                                             int free_index)
+trial_t TrialGenerator ::create_trial_tuple(alloc_api_t api, size_t size,
+                                            size_t alignment, int page_size,
+                                            memkind_t memkind, int free_index)
 {
     trial_t ltrial;
     ltrial.api = api;
@@ -28,31 +25,30 @@ trial_t TrialGenerator :: create_trial_tuple(alloc_api_t api,
     return ltrial;
 }
 
-
-void TrialGenerator :: generate_gb (alloc_api_t api, int number_of_gb_pages,
-                                    memkind_t memkind, alloc_api_t api_free, bool psize_strict, size_t align)
+void TrialGenerator ::generate_gb(alloc_api_t api, int number_of_gb_pages,
+                                  memkind_t memkind, alloc_api_t api_free,
+                                  bool psize_strict, size_t align)
 {
     std::vector<size_t> sizes_to_alloc;
-    //When API = HBW_MEMALIGN_PSIZE: psize is set to HBW_PAGESIZE_1GB_STRICT when allocation is a multiple of 1GB. Otherwise it is set to HBW_PAGESIZE_1GB.
-    for (int i=1; i <= number_of_gb_pages; i++) {
-        if (psize_strict || api!=HBW_MEMALIGN_PSIZE)
-            sizes_to_alloc.push_back(i*GB);
+    // When API = HBW_MEMALIGN_PSIZE: psize is set to HBW_PAGESIZE_1GB_STRICT
+    // when allocation is a multiple of 1GB. Otherwise it is set to
+    // HBW_PAGESIZE_1GB.
+    for (int i = 1; i <= number_of_gb_pages; i++) {
+        if (psize_strict || api != HBW_MEMALIGN_PSIZE)
+            sizes_to_alloc.push_back(i * GB);
         else
-            sizes_to_alloc.push_back(i*GB+1);
+            sizes_to_alloc.push_back(i * GB + 1);
     }
     int k = 0;
     trial_vec.clear();
 
-    for (int i = 0; i< (int)sizes_to_alloc.size(); i++) {
-        trial_vec.push_back(create_trial_tuple(api, sizes_to_alloc[i],
-                                               align, 2*MB,
-                                               memkind,
-                                               -1));
+    for (int i = 0; i < (int)sizes_to_alloc.size(); i++) {
+        trial_vec.push_back(create_trial_tuple(api, sizes_to_alloc[i], align,
+                                               2 * MB, memkind, -1));
         if (i > 0)
             k++;
-        trial_vec.push_back(create_trial_tuple(api_free,0,0,0,
-                                               memkind,
-                                               k++));
+        trial_vec.push_back(
+            create_trial_tuple(api_free, 0, 0, 0, memkind, k++));
     }
 }
 
@@ -61,65 +57,49 @@ int n_random(int i)
     return random() % i;
 }
 
-void TrialGenerator :: generate_size_2bytes_2KB_2MB(alloc_api_t api)
+void TrialGenerator ::generate_size_2bytes_2KB_2MB(alloc_api_t api)
 {
-    size_t size[] = {2, 2*KB, 2*MB};
+    size_t size[] = {2, 2 * KB, 2 * MB};
 
     int k = 0;
     trial_vec.clear();
-    for (unsigned int i = 0; i < (int)(sizeof(size)/sizeof(size[0]));
-         i++) {
-        trial_vec.push_back(
-            create_trial_tuple(
-                api,size[i],
-                32,
-                sysconf(_SC_PAGESIZE),
-                MEMKIND_HBW,
-                -1
-            )
-        );
+    for (unsigned int i = 0; i < (int)(sizeof(size) / sizeof(size[0])); i++) {
+        trial_vec.push_back(create_trial_tuple(
+            api, size[i], 32, sysconf(_SC_PAGESIZE), MEMKIND_HBW, -1));
 
-        if (i > 0) k++;
-        trial_vec.push_back(create_trial_tuple(HBW_FREE, 0, 0, 0,
-                                               MEMKIND_HBW, k));
+        if (i > 0)
+            k++;
+        trial_vec.push_back(
+            create_trial_tuple(HBW_FREE, 0, 0, 0, MEMKIND_HBW, k));
         k++;
     }
 }
 
-void TrialGenerator :: print()
+void TrialGenerator ::print()
 {
 
-    std::vector<trial_t>:: iterator it;
+    std::vector<trial_t>::iterator it;
 
-    std::cout <<"*********** Size: "<< trial_vec.size()
-              <<"********\n";
-    std::cout << "SIZE PSIZE ALIGN FREE KIND"<<std::endl;
+    std::cout << "*********** Size: " << trial_vec.size() << "********\n";
+    std::cout << "SIZE PSIZE ALIGN FREE KIND" << std::endl;
 
-    for (it = trial_vec.begin();
-         it != trial_vec.end();
-         it++) {
-        std::cout << it->size <<" "
-                  << it->page_size <<" "
-                  << it->alignment <<" "
-                  << it->free_index <<" "
-                  << it->memkind <<" "
-                  <<std::endl;
+    for (it = trial_vec.begin(); it != trial_vec.end(); it++) {
+        std::cout << it->size << " " << it->page_size << " " << it->alignment
+                  << " " << it->free_index << " " << it->memkind << " "
+                  << std::endl;
     }
-
 }
 
-
-void TrialGenerator :: run(int num_bandwidth, std::vector<int> &bandwidth)
+void TrialGenerator ::run(int num_bandwidth, std::vector<int> &bandwidth)
 {
 
     int num_trial = trial_vec.size();
     int i, ret = 0;
     void **ptr_vec = NULL;
 
-    ptr_vec = (void **) malloc (num_trial *
-                                sizeof (void *));
+    ptr_vec = (void **)malloc(num_trial * sizeof(void *));
     if (NULL == ptr_vec) {
-        fprintf (stderr, "Error in allocating ptr array\n");
+        fprintf(stderr, "Error in allocating ptr array\n");
         exit(-1);
     }
 
@@ -127,110 +107,107 @@ void TrialGenerator :: run(int num_bandwidth, std::vector<int> &bandwidth)
         ptr_vec[i] = NULL;
     }
     for (i = 0; i < num_trial; ++i) {
-        switch(trial_vec[i].api) {
+        switch (trial_vec[i].api) {
             case HBW_FREE:
                 if (i == num_trial - 1 || trial_vec[i + 1].api != HBW_REALLOC) {
                     hbw_free(ptr_vec[trial_vec[i].free_index]);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                     ptr_vec[i] = NULL;
                 } else {
-                    ptr_vec[i + 1] = hbw_realloc(ptr_vec[trial_vec[i].free_index],
-                                                 trial_vec[i + 1].size);
+                    ptr_vec[i + 1] =
+                        hbw_realloc(ptr_vec[trial_vec[i].free_index],
+                                    trial_vec[i + 1].size);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                 }
                 break;
             case MEMKIND_FREE:
-                if (i == num_trial - 1 || trial_vec[i + 1].api != MEMKIND_REALLOC) {
+                if (i == num_trial - 1 ||
+                    trial_vec[i + 1].api != MEMKIND_REALLOC) {
                     memkind_free(trial_vec[i].memkind,
                                  ptr_vec[trial_vec[i].free_index]);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                     ptr_vec[i] = NULL;
                 } else {
-                    ptr_vec[i + 1] = memkind_realloc(trial_vec[i].memkind,
-                                                     ptr_vec[trial_vec[i].free_index],
-                                                     trial_vec[i + 1].size);
+                    ptr_vec[i + 1] = memkind_realloc(
+                        trial_vec[i].memkind, ptr_vec[trial_vec[i].free_index],
+                        trial_vec[i + 1].size);
                     ptr_vec[trial_vec[i].free_index] = NULL;
                 }
                 break;
             case HBW_MALLOC:
-                fprintf (stdout,"Allocating %zd bytes using hbw_malloc\n",
-                         trial_vec[i].size);
+                fprintf(stdout, "Allocating %zd bytes using hbw_malloc\n",
+                        trial_vec[i].size);
                 ptr_vec[i] = hbw_malloc(trial_vec[i].size);
                 break;
             case HBW_CALLOC:
-                fprintf (stdout,"Allocating %zd bytes using hbw_calloc\n",
-                         trial_vec[i].size);
+                fprintf(stdout, "Allocating %zd bytes using hbw_calloc\n",
+                        trial_vec[i].size);
                 ptr_vec[i] = hbw_calloc(trial_vec[i].size, 1);
                 break;
             case HBW_REALLOC:
-                fprintf (stdout,"Allocating %zd bytes using hbw_realloc\n",
-                         trial_vec[i].size);
+                fprintf(stdout, "Allocating %zd bytes using hbw_realloc\n",
+                        trial_vec[i].size);
                 fflush(stdout);
                 if (NULL == ptr_vec[i]) {
                     ptr_vec[i] = hbw_realloc(NULL, trial_vec[i].size);
                 }
                 break;
             case HBW_MEMALIGN:
-                fprintf (stdout,"Allocating %zd bytes using hbw_memalign\n",
-                         trial_vec[i].size);
-                ret =  hbw_posix_memalign(&ptr_vec[i],
-                                          trial_vec[i].alignment,
-                                          trial_vec[i].size);
+                fprintf(stdout, "Allocating %zd bytes using hbw_memalign\n",
+                        trial_vec[i].size);
+                ret = hbw_posix_memalign(&ptr_vec[i], trial_vec[i].alignment,
+                                         trial_vec[i].size);
                 break;
             case HBW_MEMALIGN_PSIZE:
-                fprintf (stdout,"Allocating %zd bytes using hbw_memalign_psize\n",
-                         trial_vec[i].size);
+                fprintf(stdout,
+                        "Allocating %zd bytes using hbw_memalign_psize\n",
+                        trial_vec[i].size);
                 hbw_pagesize_t psize;
                 if (trial_vec[i].page_size == (size_t)sysconf(_SC_PAGESIZE))
                     psize = HBW_PAGESIZE_4KB;
                 else if (trial_vec[i].page_size == 2097152)
                     psize = HBW_PAGESIZE_2MB;
-                else if (trial_vec[i].size %
-                         trial_vec[i].page_size > 0)
+                else if (trial_vec[i].size % trial_vec[i].page_size > 0)
                     psize = HBW_PAGESIZE_1GB;
                 else
                     psize = HBW_PAGESIZE_1GB_STRICT;
 
                 ret = hbw_posix_memalign_psize(&ptr_vec[i],
                                                trial_vec[i].alignment,
-                                               trial_vec[i].size,
-                                               psize);
+                                               trial_vec[i].size, psize);
 
                 break;
             case MEMKIND_MALLOC:
-                fprintf (stdout,"Allocating %zd bytes using memkind_malloc\n",
-                         trial_vec[i].size);
-                ptr_vec[i] = memkind_malloc(trial_vec[i].memkind,
-                                            trial_vec[i].size);
+                fprintf(stdout, "Allocating %zd bytes using memkind_malloc\n",
+                        trial_vec[i].size);
+                ptr_vec[i] =
+                    memkind_malloc(trial_vec[i].memkind, trial_vec[i].size);
                 break;
             case MEMKIND_CALLOC:
-                fprintf (stdout,"Allocating %zd bytes using memkind_calloc\n",
-                         trial_vec[i].size);
-                ptr_vec[i] = memkind_calloc(trial_vec[i].memkind,
-                                            trial_vec[i].size, 1);
+                fprintf(stdout, "Allocating %zd bytes using memkind_calloc\n",
+                        trial_vec[i].size);
+                ptr_vec[i] =
+                    memkind_calloc(trial_vec[i].memkind, trial_vec[i].size, 1);
                 break;
             case MEMKIND_REALLOC:
-                fprintf (stdout,"Allocating %zd bytes using memkind_realloc\n",
-                         trial_vec[i].size);
+                fprintf(stdout, "Allocating %zd bytes using memkind_realloc\n",
+                        trial_vec[i].size);
                 if (NULL == ptr_vec[i]) {
                     ptr_vec[i] = memkind_realloc(trial_vec[i].memkind,
-                                                 ptr_vec[i],
-                                                 trial_vec[i].size);
+                                                 ptr_vec[i], trial_vec[i].size);
                 }
                 break;
             case MEMKIND_POSIX_MEMALIGN:
-                fprintf (stdout,
-                         "Allocating %zd bytes using memkind_posix_memalign\n",
-                         trial_vec[i].size);
+                fprintf(stdout,
+                        "Allocating %zd bytes using memkind_posix_memalign\n",
+                        trial_vec[i].size);
 
-                ret = memkind_posix_memalign(trial_vec[i].memkind,
-                                             &ptr_vec[i],
+                ret = memkind_posix_memalign(trial_vec[i].memkind, &ptr_vec[i],
                                              trial_vec[i].alignment,
                                              trial_vec[i].size);
                 break;
         }
-        if (trial_vec[i].api != HBW_FREE &&
-            trial_vec[i].api != MEMKIND_FREE &&
+        if (trial_vec[i].api != HBW_FREE && trial_vec[i].api != MEMKIND_FREE &&
             trial_vec[i].memkind != MEMKIND_DEFAULT) {
             ASSERT_TRUE(ptr_vec[i] != NULL);
             memset(ptr_vec[i], 0, trial_vec[i].size);
@@ -259,7 +236,7 @@ void TrialGenerator :: run(int num_bandwidth, std::vector<int> &bandwidth)
     }
 }
 
-void TGTest :: SetUp()
+void TGTest ::SetUp()
 {
     size_t node;
     char *hbw_nodes_env, *endptr;
@@ -289,7 +266,7 @@ void TGTest :: SetUp()
         memkind_hbw_all_get_mbind_nodemask(NULL, nodemask.n, NUMA_NUM_NODES);
 
         int i, nodes_num = numa_num_configured_nodes();
-        for (i=0; i<NUMA_NUM_NODES; i++) {
+        for (i = 0; i < NUMA_NUM_NODES; i++) {
             if (i >= nodes_num) {
                 bandwidth.push_back(0);
             } else if (numa_bitmask_isbitset(&nodemask_bm, i)) {
@@ -301,5 +278,5 @@ void TGTest :: SetUp()
     }
 }
 
-void TGTest :: TearDown()
+void TGTest ::TearDown()
 {}

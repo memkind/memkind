@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2019 - 2020 Intel Corporation. */
 
-#include "memkind.h"
-#include "include/memkind/internal/memkind_private.h"
 #include "include/memkind/internal/memkind_pmem.h"
+#include "include/memkind/internal/memkind_private.h"
+#include "memkind.h"
 
 #include "common.h"
 
 #include <sys/statfs.h>
 
-extern const char  *PMEM_DIR;
+extern const char *PMEM_DIR;
 
 class MemkindConfigTests: public ::testing::Test
 {
@@ -64,8 +64,8 @@ TEST_F(MemkindConfigTests, test_TC_MEMKIND_PmemSetDefaultMemoryUsagePolicy)
 
 TEST_F(MemkindConfigTests, test_TC_MEMKIND_SetConservativeMemoryUsagePolicy)
 {
-    memkind_config_set_memory_usage_policy(global_test_cfg,
-                                           MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
+    memkind_config_set_memory_usage_policy(
+        global_test_cfg, MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
 
     ASSERT_EQ(global_test_cfg->policy, MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
 }
@@ -90,7 +90,7 @@ TEST_F(MemkindConfigTests,
     memkind_t pmem_kind = nullptr;
 
     memkind_config_set_path(global_test_cfg, PMEM_DIR);
-    memkind_config_set_size(global_test_cfg, MEMKIND_PMEM_MIN_SIZE -1);
+    memkind_config_set_size(global_test_cfg, MEMKIND_PMEM_MIN_SIZE - 1);
     memkind_config_set_memory_usage_policy(global_test_cfg,
                                            MEMKIND_MEM_USAGE_POLICY_DEFAULT);
 
@@ -104,7 +104,7 @@ TEST_F(MemkindConfigTests,
     memkind_t pmem_kind = nullptr;
 
     memkind_config_set_path(global_test_cfg, PMEM_DIR);
-    memkind_config_set_size(global_test_cfg, MEMKIND_PMEM_MIN_SIZE -1);
+    memkind_config_set_size(global_test_cfg, MEMKIND_PMEM_MIN_SIZE - 1);
     memkind_config_set_memory_usage_policy(global_test_cfg,
                                            MEMKIND_MEM_USAGE_POLICY_MAX_VALUE);
 
@@ -129,8 +129,8 @@ TEST_F(MemkindConfigTests,
     }
     memkind_config_set_path(global_test_cfg, PMEM_DIR);
     memkind_config_set_size(global_test_cfg, 0U);
-    memkind_config_set_memory_usage_policy(global_test_cfg,
-                                           MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
+    memkind_config_set_memory_usage_policy(
+        global_test_cfg, MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE);
     err = memkind_create_pmem_with_config(global_test_cfg, &pmem_kind);
     ASSERT_EQ(err, 0);
 
@@ -148,7 +148,7 @@ TEST_F(MemkindConfigTests,
     ASSERT_EQ(err, 0);
     blocksAfterFree = st.st_blocks;
 
-    //if blocksAfterFree is less than blocksBeforeFree, extent was called.
+    // if blocksAfterFree is less than blocksBeforeFree, extent was called.
     ASSERT_LT(blocksAfterFree, blocksBeforeFree);
 
     err = memkind_destroy_kind(pmem_kind);

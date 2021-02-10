@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2015 - 2020 Intel Corporation. */
 #pragma once
-#include "Workload.hpp"
-#include "FunctionCalls.hpp"
 #include "Allocator.hpp"
 #include "AllocatorFactory.hpp"
+#include "FunctionCalls.hpp"
+#include "Workload.hpp"
 
 #include <string.h>
 
-class ScenarioWorkload :
-    public Workload
+class ScenarioWorkload: public Workload
 {
 public:
     ScenarioWorkload(VectorIterator<Allocator *> *a, VectorIterator<size_t> *as,
@@ -44,4 +43,3 @@ private:
     VectorIterator<size_t> *alloc_sizes;
     VectorIterator<Allocator *> *allocators;
 };
-

@@ -2,19 +2,17 @@
 /* Copyright (C) 2015 - 2020 Intel Corporation. */
 #pragma once
 
+#include <assert.h>
 #include <cstdlib>
 #include <vector>
-#include <assert.h>
 
-#include "Task.hpp"
-#include "FunctionCallsPerformanceTask.h"
 #include "Configuration.hpp"
-
+#include "FunctionCallsPerformanceTask.h"
+#include "Task.hpp"
 
 class TaskFactory
 {
 public:
-
     Task *create(TaskConf conf)
     {
         Task *task = NULL;
@@ -27,7 +25,7 @@ public:
 
     ~TaskFactory()
     {
-        for (int i=0; i<tasks.size(); i++) {
+        for (int i = 0; i < tasks.size(); i++) {
             delete tasks[i];
         }
     }

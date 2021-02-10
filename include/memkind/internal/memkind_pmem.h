@@ -6,9 +6,9 @@
 extern "C" {
 #endif
 
-#include <memkind.h>
-#include "memkind_default.h"
 #include "memkind_arena.h"
+#include "memkind_default.h"
+#include <memkind.h>
 
 #include <pthread.h>
 
