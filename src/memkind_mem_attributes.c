@@ -16,7 +16,7 @@
 #define MEMKIND_HBW_THRESHOLD_DEFAULT (200 * 1024) // Default threshold is 200 GB/s
 
 int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
-                                 memkind_node_variant_t node_variant, memory_attribute_t attr)
+                                 memory_attribute_t attr)
 {
     int num_nodes = numa_num_configured_nodes();
     int num_cpus = numa_num_configured_cpus();
@@ -26,11 +26,11 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
     hwloc_cpuset_t node_cpus = NULL;
     hwloc_nodeset_t attr_loc_mask = NULL;
     hwloc_uint64_t mem_attr, best_mem_attr;
-    unsigned int mem_attr_nodes;
 
     hwloc_topology_t topology;
     int i;
     int ret;
+    size_t unpreferred_val;
 
     int err = hwloc_topology_init(&topology);
     if (MEMKIND_UNLIKELY(err)) {
@@ -101,6 +101,7 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
         hwloc_bitmap_zero(attr_loc_mask);
         switch(attr) {
             case MEM_ATTR_CAPACITY:
+                unpreferred_val = 0;
                 best_mem_attr = 0;
                 for (i = 0; i < num_local_nodes; ++i) {
                     if (local_nodes[i]->attr->numanode.local_memory == 0) {
@@ -110,15 +111,20 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
                     if (local_nodes[i]->attr->numanode.local_memory > best_mem_attr) {
                         best_mem_attr = local_nodes[i]->attr->numanode.local_memory;
+                        unpreferred_val = numa_distance(init_node->os_index, local_nodes[i]->os_index);
                         hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
-                    } else if (local_nodes[i]->attr->numanode.local_memory == best_mem_attr) {
-                        hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
+                        // preffer capacity over latency
+                    } else if (local_nodes[i]->attr->numanode.local_memory == best_mem_attr &&
+                               (numa_distance(init_node->os_index,
+                                              local_nodes[i]->os_index) > unpreferred_val)) {
+                        hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
                     }
                 }
                 break;
 
             case MEM_ATTR_BANDWIDTH:
                 best_mem_attr = 0;
+                unpreferred_val = SIZE_MAX;
                 for (i = 0; i < num_local_nodes; ++i) {
                     err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH,
                                                   local_nodes[i],
@@ -131,15 +137,19 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
                     if (mem_attr > best_mem_attr) {
                         best_mem_attr = mem_attr;
+                        unpreferred_val = local_nodes[i]->attr->numanode.local_memory;
                         hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
-                    } else if (mem_attr == best_mem_attr) {
-                        hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
+                        // choose bandwidth over capacity
+                    } else if (mem_attr == best_mem_attr &&
+                               (local_nodes[i]->attr->numanode.local_memory < unpreferred_val)) {
+                        hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
                     }
                 }
                 break;
 
             case MEM_ATTR_LATENCY:
                 best_mem_attr = INT_MAX;
+                unpreferred_val = SIZE_MAX;
                 for (i = 0; i < num_local_nodes; ++i) {
                     err = hwloc_memattr_get_value(topology, HWLOC_MEMATTR_ID_LATENCY,
                                                   local_nodes[i],
@@ -152,9 +162,12 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
 
                     if (mem_attr < best_mem_attr) {
                         best_mem_attr = mem_attr;
+                        unpreferred_val = local_nodes[i]->attr->numanode.local_memory;
                         hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
-                    } else if (mem_attr == best_mem_attr) {
-                        hwloc_bitmap_set(attr_loc_mask, local_nodes[i]->os_index);
+                        // choose latency over capacity
+                    } else if (mem_attr == best_mem_attr &&
+                               (local_nodes[i]->attr->numanode.local_memory < unpreferred_val)) {
+                        hwloc_bitmap_only(attr_loc_mask, local_nodes[i]->os_index);
                     }
                 }
                 break;
@@ -165,16 +178,7 @@ int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                 goto error;
         }
 
-        mem_attr_nodes = hwloc_bitmap_weight(attr_loc_mask);
-
-        if (node_variant == NODE_VARIANT_SINGLE && mem_attr_nodes > 1) {
-            ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
-            log_err("Multiple NUMA Nodes have the same value of memory attribute for init node %d.",
-                    init_node->os_index);
-            goto error;
-        }
-
-        if (mem_attr_nodes == 0) {
+        if (hwloc_bitmap_weight(attr_loc_mask) == 0) {
             ret = MEMKIND_ERROR_MEMTYPE_NOT_AVAILABLE;
             log_err("No memory attribute Nodes for init node %d.", init_node->os_index);
             goto error;
@@ -366,7 +370,7 @@ hwloc_destroy:
 }
 #else
 int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
-                                 memkind_node_variant_t node_variant, memory_attribute_t attr)
+                                 memory_attribute_t attr)
 {
     log_err("Memory attribute NUMA nodes cannot be automatically detected.");
     return MEMKIND_ERROR_OPERATION_FAILED;
