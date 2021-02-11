@@ -324,6 +324,35 @@ private:
     }
 };
 
+class CLX_2_var5_HBW_threshold : public CLX_2_var5_HBW, TopologyCfg
+{
+public:
+    CLX_2_var5_HBW_threshold(memkind_t kind):CLX_2_var5_HBW(kind) {};
+
+private:
+    MapNodeSet HBW_nodes() const final
+    {
+        switch (m_threshold_val) {
+            case TestPrereq_threshold::low_value:
+            case TestPrereq_threshold::default_value:
+                return CLX_2_var5_HBW::HBW_nodes();
+            default:
+                return MapNodeSet {};
+        };
+    }
+
+    MapNodeSet HBW_all_nodes() const final
+    {
+        switch (m_threshold_val) {
+            case TestPrereq_threshold::low_value:
+            case TestPrereq_threshold::default_value:
+                return CLX_2_var5_HBW::HBW_all_nodes();
+            default:
+                return MapNodeSet {};
+        };
+    }
+};
+
 class CLX_4_var1_threshold : public CLX_4_var1, TopologyCfg
 {
 public:
@@ -688,6 +717,8 @@ TpgPtr TopologyCfgFactory(std::string kind_name)
         return TpgPtr(new CLX_2_var3_HBW_threshold(kind));
     else if (env_tpg.compare("CascadeLake2Var4HBW") == 0)
         return TpgPtr(new CLX_2_var4_HBW_threshold(kind));
+    else if (env_tpg.compare("CascadeLake2Var5HBW") == 0)
+        return TpgPtr(new CLX_2_var5_HBW_threshold(kind));
     else if (env_tpg.compare("CascadeLake4Var1") == 0)
         return TpgPtr(new CLX_4_var1_threshold(kind));
     else if (env_tpg.compare("CascadeLake4Var1HMAT") == 0)
