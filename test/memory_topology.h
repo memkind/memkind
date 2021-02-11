@@ -577,6 +577,46 @@ private:
     }
 };
 
+class CLX_2_var5_HBW : public AbstractTopology
+{
+public:
+    CLX_2_var5_HBW(memkind_t kind) : AbstractTopology(kind) {};
+
+protected:
+    MapNodeSet HBW_nodes() const
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+
+    MapNodeSet HBW_all_nodes() const
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0, 2}));
+        nodeset_map.emplace(NodeSet(1, {1, 3}));
+        return nodeset_map;
+    }
+
+private:
+    MapNodeSet Capacity_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {0}));
+        nodeset_map.emplace(NodeSet(1, {3}));
+        return nodeset_map;
+    }
+
+    MapNodeSet Bandwidth_local_nodes() const final
+    {
+        MapNodeSet nodeset_map;
+        nodeset_map.emplace(NodeSet(0, {2}));
+        nodeset_map.emplace(NodeSet(1, {1}));
+        return nodeset_map;
+    }
+};
+
 class CLX_4_var1 : public AbstractTopology
 {
 public:
@@ -942,6 +982,8 @@ TpgPtr TopologyFactory(std::string tpg_name, memkind_t kind)
         return TpgPtr(new CLX_2_var3_HBW(kind));
     else if (tpg_name.compare("CascadeLake2Var4HBW") == 0)
         return TpgPtr(new CLX_2_var4_HBW(kind));
+    else if (tpg_name.compare("CascadeLake2Var5HBW") == 0)
+        return TpgPtr(new CLX_2_var5_HBW(kind));
     else if (tpg_name.compare("CascadeLake4Var1") == 0)
         return TpgPtr(new CLX_4_var1(kind));
     else if (tpg_name.compare("CascadeLake4Var1HMAT") == 0)
