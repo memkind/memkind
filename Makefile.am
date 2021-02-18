@@ -550,6 +550,9 @@ unit_tests_hmat: checkprogs
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
 
+unit_tests_tiering: tiering/libmemtier.la
+	python3 -m pytest -s test/tiering-wip/tiering_tests.py
+
 code-style-check:
 if HAVE_CLANG_FORMAT
 	find $(CLANG_FORMAT_FILES) | xargs $(CLANG_FORMAT) --dry-run --Werror
@@ -570,5 +573,6 @@ include autohbw/Makefile.mk
 include test/Makefile.mk
 include examples/Makefile.mk
 include src/Makefile.mk
+include tiering/Makefile.mk
 include utils/memkind_malloc_wrapper/Makefile.mk
 include utils/memory_matrix/Makefile.mk

@@ -130,8 +130,10 @@ cd %{_builddir}/%{buildsubdir}
 %{__install} test/.libs/* test/*.sh test/*.ts test/*.py %{buildroot}$(memkind_test_dir)
 %{__install} test/python_framework/*.py %{buildroot}/$(memkind_test_dir)/python_framework
 rm -f %{buildroot}$(memkind_test_dir)/libautohbw.*
+rm -f %{buildroot}$(memkind_test_dir)/libmemtier.*
 rm -f %{buildroot}/%{_libdir}/lib%{namespace}.{l,}a
 rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
+rm -f %{buildroot}/%{_libdir}/libmemtier.{l,}a
 
 %pre
 
@@ -151,6 +153,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %dir %{_docdir}/%{namespace}
 %{_libdir}/lib%{namespace}.so.*
 %{_libdir}/libautohbw.so.*
+%{_libdir}/libmemtier.so.*
 %{_bindir}/%{namespace}-auto-dax-kmem-nodes
 %{_bindir}/%{namespace}-hbw-nodes
 
@@ -163,6 +166,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %{_includedir}/pmem_allocator.h
 %{_libdir}/lib%{namespace}.so
 %{_libdir}/libautohbw.so
+%{_libdir}/libmemtier.so
 %{_libdir}/pkgconfig/memkind.pc
 %{_includedir}/%{namespace}.h
 %{_mandir}/man1/memkind-auto-dax-kmem-nodes.1.*
