@@ -34,6 +34,7 @@ test/dax_kmem_env_var_test.py \
 test/autohbw_test.py \
 test/trace_mechanism_test.py \
 test/draw_plots.py \
+test/tiering_tests.py
 VERSION
 
 all: $(rpm)
