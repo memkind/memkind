@@ -123,6 +123,7 @@
 /test/pmem_multithreads_onekind
 /test/pmem_test
 /test/pmem_usable_size
+/test/stats_print_test_helper
 /test/trace_mechanism_test_helper
 /test/defrag_reallocate
 /vs

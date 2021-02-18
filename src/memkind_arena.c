@@ -29,6 +29,9 @@
 #define HUGE_PAGE_SIZE (1ull << MEMKIND_MASK_PAGE_SIZE_2MB)
 #define PAGE_2_BYTES(x) ((x) << 12)
 
+/* Clear bits in x, but only this specified in mask. */
+#define CLEAR_BIT(x, mask) ((x) &= (~(mask)))
+
 static const char *const global_stats[MEMKIND_STAT_TYPE_MAX_VALUE] = {
     "stats.resident",
     "stats.active",
@@ -880,4 +883,64 @@ void *memkind_arena_defrag_reallocate(struct memkind *kind, void *ptr)
         return ptr_new;
     }
     return NULL;
+}
+
+static bool is_stats_print_opts_valid(memkind_stat_print_opt opts)
+{
+    CLEAR_BIT(opts, MEMKIND_STAT_PRINT_JSON_FORMAT);
+    CLEAR_BIT(opts, MEMKIND_STAT_PRINT_OMIT_GENERAL);
+    CLEAR_BIT(opts, MEMKIND_STAT_PRINT_OMIT_MERGED_ARENA);
+    CLEAR_BIT(opts, MEMKIND_STAT_PRINT_OMIT_DESTROYED_MERGED_ARENA);
+    CLEAR_BIT(opts, MEMKIND_STAT_PRINT_OMIT_PER_ARENA);
+    CLEAR_BIT(opts, MEMKIND_STAT_PRINT_OMIT_PER_SIZE_CLASS_BINS);
+    CLEAR_BIT(opts, MEMKIND_STAT_PRINT_OMIT_PER_SIZE_CLASS_LARGE);
+    CLEAR_BIT(opts, MEMKIND_STAT_PRINT_OMIT_MUTEX);
+    CLEAR_BIT(opts, MEMKIND_STAT_PRINT_OMIT_EXTENT);
+
+    return opts ? false : true;
+}
+
+int memkind_arena_stats_print(void (*write_cb) (void *, const char *),
+                              void *cbopaque, memkind_stat_print_opt opts)
+{
+    if (!is_stats_print_opts_valid(opts)) {
+        log_err("Printing statistics failed. Unsupported options '%d'", opts);
+        return MEMKIND_ERROR_INVALID;
+    }
+
+    char temp[12] = "";
+    char *char_opts = NULL;
+    if (opts != MEMKIND_STAT_PRINT_ALL) {
+        if (opts & MEMKIND_STAT_PRINT_JSON_FORMAT) {
+            strcat(temp, "J");
+        }
+        if (opts & MEMKIND_STAT_PRINT_OMIT_GENERAL) {
+            strcat(temp, "g");
+        }
+        if (opts & MEMKIND_STAT_PRINT_OMIT_MERGED_ARENA) {
+            strcat(temp, "m");
+        }
+        if (opts & MEMKIND_STAT_PRINT_OMIT_DESTROYED_MERGED_ARENA) {
+            strcat(temp, "d");
+        }
+        if (opts & MEMKIND_STAT_PRINT_OMIT_PER_ARENA) {
+            strcat(temp, "a");
+        }
+        if (opts & MEMKIND_STAT_PRINT_OMIT_PER_SIZE_CLASS_BINS) {
+            strcat(temp, "b");
+        }
+        if (opts & MEMKIND_STAT_PRINT_OMIT_PER_SIZE_CLASS_LARGE) {
+            strcat(temp, "l");
+        }
+        if (opts & MEMKIND_STAT_PRINT_OMIT_MUTEX) {
+            strcat(temp, "x");
+        }
+        if (opts & MEMKIND_STAT_PRINT_OMIT_EXTENT) {
+            strcat(temp, "e");
+        }
+        char_opts = temp;
+    }
+
+    jemk_malloc_stats_print(write_cb, cbopaque, char_opts);
+    return MEMKIND_SUCCESS;
 }

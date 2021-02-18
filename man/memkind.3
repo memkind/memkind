@@ -77,6 +77,8 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .BI "int memkind_update_cached_stats(void);"
 .br
 .BI "int memkind_get_stat(memkind_t " "kind" ", memkind_stat " "stat" ", size_t " "*value" );
+.br
+.BI "int memkind_stats_print(void " "(*write_cb) (void *, const char *)" ", void " "*cbopaque" ", memkind_stat_print_opt "opts" );
 .sp
 .B "DECORATORS:"
 .br
@@ -592,6 +594,33 @@ You need to call
 before calling
 .BR memkind_get_stat ()
 because statistics are cached by memkind library.
+.PP
+.BR memkind_stats_print ()
+prints summary statistics. This function wraps jemalloc's function
+.BR je_malloc_stats_print ().
+Uses
+.I write_cb
+function to print the output. While providing custom writer function, use
+.BR syscall(2)
+rather than
+.BR write(2).
+Pass
+.IR NULL
+in order to use the default
+.I write_cb
+function which prints the output to the stderr. Use
+.I cbopaque
+parameter in order to pass some data to your
+.I write_cb
+function. Pass additional options using
+.IR "opts".
+For more details on
+.I opts
+see the
+.B "MEMORY STATISTICS PRINT OPTIONS"
+section below.
+Returns MEMKIND_ERROR_INVALID when failed to parse options string, MEMKIND_SUCCESS on success.
+.PP
 .sp
 .B "DECORATORS:"
 .br
@@ -962,6 +991,38 @@ Total number of bytes in active pages.
 .TP
 .B MEMKIND_STAT_TYPE_ALLOCATED
 Total number of allocated bytes.
+.SH "MEMORY STATISTICS PRINT OPTIONS"
+The available options for printing statistics:
+.TP
+.B MEMKIND_STAT_PRINT_ALL
+Print all statistics.
+.TP
+.B MEMKIND_STAT_PRINT_JSON_FORMAT
+Print statistics in JSON format.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_GENERAL
+Omit general information that never changes during execution.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_MERGED_ARENA
+Omit merged arena statistics.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_DESTROYED_MERGED_ARENA
+Omit destroyed merged arena statistics.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_PER_ARENA
+Omit per arena statistics.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_PER_SIZE_CLASS_BINS
+Omit per size class statistics for bins.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_PER_SIZE_CLASS_LARGE
+Omit per size class statistics for large objects.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_MUTEX
+Omit all mutex statistics.
+.TP
+.B MEMKIND_STAT_PRINT_OMIT_EXTENT
+Omit extent statistics.
 .SH "ERRORS"
 .TP
 .BR memkind_posix_memalign ()
@@ -1202,4 +1263,6 @@ Copyright (C) 2014 - 2021 Intel Corporation. All rights reserved.
 .BR memkind_arena (3),
 .BR memkind_hbw (3),
 .BR memkind_hugetlb (3),
-.BR memkind_pmem (3)
+.BR memkind_pmem (3),
+.BR syscall(2),
+.BR write(2)
