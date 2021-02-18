@@ -402,6 +402,7 @@ man/memkind_hbw.3
 man/memkind_hugetlb.3
 man/memkind_pmem.3
 man/memkindallocator.3
+man/memtier.7
 man/pmemallocator.3
 memkind.pc.in
 memkind.spec.mk
@@ -549,10 +550,15 @@ test/stats_print_test_helper.c
 test/tbbmalloc.h
 test/test.sh
 test/test_dax_kmem.sh
+test/tiering_tests.py
 test/trace_mechanism_test.py
 test/trace_mechanism_test_helper.c
 test/trial_generator.cpp
 test/trial_generator.h
+tiering/Makefile.mk
+tiering/memtier.c
+tiering/memtier_log.c
+tiering/memtier_log.h
 utils/docker/Dockerfile.centos-7
 utils/docker/Dockerfile.fedora-32
 utils/docker/Dockerfile.ubuntu-20.04
