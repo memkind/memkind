@@ -10,24 +10,43 @@ This is EXPERIMENTAL API. The functionality and the header file itself can be ch
 .SH "SYNOPSIS"
 .sp
 .BI "int memkind_arena_create(struct memkind " "*kind" ", struct memkind_ops " "*ops" ", const char " "*name" );
+.br
 .BI "int memkind_arena_create_map(struct memkind " "*kind" ", extent_hooks_t " "*hooks" );
+.br
 .BI "int memkind_arena_destroy(struct memkind " "*kind" );
+.br
 .BI "void *memkind_arena_malloc(struct memkind " "*kind" ", size_t " "size" );
+.br
 .BI "void *memkind_arena_calloc(struct memkind " "*kind" ", size_t " "num" ", size_t " "size" );
+.br
 .BI "int memkind_arena_posix_memalign(struct memkind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.br
 .BI "void *memkind_arena_realloc(struct memkind " "*kind" ", void " "*ptr" ", size_t " "size" );
+.br
 .BI "void *memkind_arena_realloc_with_kind_detect(void " "*ptr" ", size_t " "size" );
+.br
 .BI "int memkind_thread_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" ", size_t " "size" );
+.br
 .BI "int memkind_bijective_get_arena(struct memkind " "*kind" ", unsigned int " "*arena" ", size_t " "size" );
+.br
 .BI "struct memkind *get_kind_by_arena(unsigned " "arena_ind" );
+.br
 .BI "struct memkind *memkind_arena_detect_kind(void " "*ptr" );
+.br
 .BI "int memkind_arena_finalize(struct memkind " "*kind" );
+.br
 .BI "void memkind_arena_init(struct memkind " "*kind" );
+.br
 .BI "void memkind_arena_free(struct memkind " "*kind" ", void " "*ptr" );
+.br
 .BI "void memkind_arena_free_with_kind_detect(void " "*ptr" );
+.br
 .BI "size_t memkind_arena_malloc_usable_size(void " "*ptr" );
+.br
 .BI "int memkind_arena_update_memory_usage_policy(struct memkind " "*kind" ", memkind_mem_usage_policy " "policy" );
+.br
 .BI "int memkind_arena_set_max_bg_threads(size_t " "threads_limit" );
+.br
 .BI "int memkind_arena_set_bg_threads(bool " "state" );
 .br
 .BI "int memkind_arena_stats_print(void " "(*write_cb) (void *, const char *)" ", void " "*cbopaque" ", memkind_stat_print_opt " "opts" );
