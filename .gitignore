@@ -67,6 +67,9 @@
 /stamp-h2
 /test-driver
 /test-suite.log
+/test/__pycache__
+/test/python_framework/__pycache__
+/test/tiering-wip/__pycache__
 /test/*.o
 /test/*.pyc
 /test/*.so
