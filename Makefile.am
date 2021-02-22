@@ -550,6 +550,9 @@ unit_tests_hmat: checkprogs
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
 
+unit_tests_tiering: checkprogs
+	pytest -s test/tiering-wip/tiering_tests.py
+
 code-style-check:
 if HAVE_CLANG_FORMAT
 	find $(CLANG_FORMAT_FILES) | xargs $(CLANG_FORMAT) --dry-run --Werror
