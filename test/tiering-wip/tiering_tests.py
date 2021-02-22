@@ -1,15 +1,13 @@
 # SPDX-License-Identifier: BSD-2-Clause
 # Copyright (C) 2021 Intel Corporation.
 
-import sys
-sys.path.append("..")
-from python_framework import CMD_helper
-
 import os
 import pytest
+from python_framework import CMD_helper
 
 class Test_tiering(object):
-    utils_lib_path = "../../tiering/.libs/libutils.so"
+    # NOTE: this script should be called from the root of memkind repository
+    utils_lib_path = "tiering/.libs/libutils.so"
     cmd_helper = CMD_helper()
 
     def test_utils_init(self):
