@@ -9,8 +9,7 @@
 # -memkind repository directory
 # Options used:
 # -p dir       Project root directory
-# -Z           Exit with 1 if not successful. Default will Exit with 0
 
 MEMKIND_REPO_PATH=$1
 CURL_ARGS="--retry 10 --retry-delay 2 --connect-timeout 10"
-bash <(curl -s  https://codecov.io/bash) -t "$CODECOV_TOKEN" -cF "$TEST_SUITE_NAME" -p "$MEMKIND_REPO_PATH" -Z -U "$CURL_ARGS"
+bash <(curl -s  https://codecov.io/bash) -t "$CODECOV_TOKEN" -cF "$TEST_SUITE_NAME" -p "$MEMKIND_REPO_PATH" -U "$CURL_ARGS"
