@@ -24,6 +24,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_interleave.c \
                         src/memkind_local.c \
                         src/memkind_log.c \
+                        src/memkind_memtier.c \
                         src/memkind_mem_attributes.c \
                         src/memkind_pmem.c \
                         src/memkind_regular.c \
@@ -38,6 +39,7 @@ include_HEADERS = include/hbw_allocator.h \
                   include/memkind.h \
                   include/memkind_allocator.h \
                   include/memkind_deprecated.h \
+                  include/memkind_memtier.h \
                   include/pmem_allocator.h \
                   # end
 
@@ -456,6 +458,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind_hugetlb.3 \
                  man/memkind_pmem.3 \
                  man/memkindallocator.3 \
+                 man/memtier.3 \
                  man/memtier.7 \
                  man/pmemallocator.3 \
                  # end
@@ -492,6 +495,7 @@ html-local:
 	$(MAN2HTML) man/hbwmalloc.3 > man/hbwmalloc.html
 	$(MAN2HTML) man/memkind.3 > man/memkind.html
 	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
+	$(MAN2HTML) man/memtier.3 > man/memtier.html
 	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
 
 clean-jemalloc_deps:
