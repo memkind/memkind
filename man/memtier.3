@@ -1,0 +1,65 @@
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\" Copyright (C) 2021 Intel Corporation.
+.\"
+.TH "MEMTIER" 3 "2021-03-01" "Intel Corporation" "MEMTIER" \" -*- nroff -*-
+.SH "NAME"
+memtier \- memory tiering interface
+.br
+.BR Note:
+.I memkind_memtier.h
+functionality is considered as stable API (STANDARD API).
+.SH "SYNOPSIS"
+.nf
+.B #include <memkind_memtier.h>
+.sp
+.B Link with -lmemkind
+.sp
+.B "TIER MANAGEMENT:"
+.sp
+.BI "struct memtier_tier *memtier_tier_new(void);"
+.br
+.BI "void memtier_tier_delete(struct memtier_tier  " "*tier" );
+.br
+.BI "int memtier_tier_set_ratio(struct memtier_tier " "*tier" ", size_t " "ratio" );
+.br
+.BI "int memtier_tier_set_memory_kind(struct memtier_tier " "*tier" ", memkind_t " "kind" );
+.br
+.BI "struct memtier_builder *memtier_builder(void);"
+.br
+.BI "int memtier_builder_add_tier(struct memtier_builder " "*builder" ", struct memtier_tier " "*tier" );
+.br
+.BI "int memtier_builder_set_policy(struct memtier_builder " "*builder" ", memtier_policy_t " "policy" );
+.br
+.BI "int memtier_builder_construct_kind(struct memtier_builder " "*builder" ", struct memtier_kind " "**kind" );
+.br
+.BI "void memtier_delete_kind(struct memtier_kind " "*kind" );
+.sp
+.B "HEAP MANAGEMENT:
+.br
+.BI "void *memtier_kind_malloc(struct memtier_kind " "*kind" ", size_t " "size" );
+.br
+.BI "void *memtier_tier_malloc(struct memtier_tier " "*tier" ", size_t " "size" );
+.br
+.BI "void *memtier_kind_calloc(struct memtier_kind " "*kind" ", size_t " "num" ", size_t " "size" );
+.br
+.BI "void *memtier_tier_calloc(struct memtier_tier " "*tier" ", size_t " "num" ", size_t " "size" );
+.br
+.BI "void *memtier_kind_realloc(struct memtier_kind " "*kind" ", void " "*ptr" ", size_t " "size" );
+.br
+.BI "void *memtier_tier_realloc(struct memtier_tier " "*tier" ", void " "*ptr" ", size_t " "size" );
+.br
+.BI "int memtier_kind_posix_memalign(memtier_kind " "*kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.br
+.BI "int memtier_tier_posix_memalign(memtier_tier " "*tier" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" );
+.br
+.BI "size_t memtier_usable_size(void " "*ptr" );
+.br
+.BI "void memtier_free(void " "*ptr" );
+.sp
+.sp
+.br
+.SH "DESCRIPTION"
+.SH "COPYRIGHT"
+Copyright (C) 2021 Intel Corporation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3)
