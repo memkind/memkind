@@ -550,7 +550,7 @@ unit_tests_hmat: checkprogs
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
 
-unit_tests_tiering: tiering/libutils.la
+unit_tests_tiering: tiering/libmemtier.la
 	pytest -s test/tiering-wip/tiering_tests.py
 
 code-style-check:

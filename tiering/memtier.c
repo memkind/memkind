@@ -76,8 +76,9 @@ void log_debug(const char *format, ...)
 
 void log_init_once(void)
 {
-    char *log_level_env = utils_get_env("MEMKIND_MEM_TIERING_LOG_LEVEL");
+    log_level = MESSAGE_TYPE_ERROR;
 
+    char *log_level_env = utils_get_env("MEMKIND_MEM_TIERING_LOG_LEVEL");
     if (log_level_env) {
         char *end;
         errno = 0;
