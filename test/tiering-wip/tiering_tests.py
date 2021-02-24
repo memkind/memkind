@@ -73,8 +73,8 @@ class Test_tiering(object):
         assert output.split("\n")[0] == \
             "MEMKIND_MEM_TIERING_LOG_DEBUG: Setting log level to: 2", "Bad init message"
 
-        assert "MEMKIND_MEM_TIERING_LOG_INFO: Memkind mem tiering utils lib loaded!" in output.split("\n"), \
-            "Bad init message"
+        assert output.split("\n")[1] == \
+            "MEMKIND_MEM_TIERING_LOG_INFO: Memkind mem tiering utils lib loaded!", "Bad init message"
 
         # next, extract from the output all lines starting with
         # "MEMKIND_MEM_TIERING_LOG" prefix and check if they are correct
@@ -108,3 +108,99 @@ class Test_tiering(object):
 
         assert output_level_neg.split("\n")[0] == \
             "MEMKIND_MEM_TIERING_LOG_ERROR: Wrong value of MEMKIND_MEM_TIERING_LOG_LEVEL=4", "Bad init message"
+
+
+class Test_tiering_config_env(object):
+    # NOTE: this script should be called from the root of memkind repository
+    utils_lib_path = "tiering/.libs/libmemtier.so"
+    ld_preload_env = "LD_PRELOAD=" + utils_lib_path
+    bin_path = "ls"
+    cmd_helper = CMD_helper()
+    log_level_env = "MEMKIND_MEM_TIERING_LOG_LEVEL=2"
+
+    def test_DRAM_only(self):
+        config_env = "MEMKIND_TIERING_CONFIG=DRAM:1"
+        command = " ".join(
+            [self.ld_preload_env, self.log_level_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[2] == \
+            "MEMKIND_MEM_TIERING_LOG_DEBUG: kind_name: DRAM", "Wrong message"
+        assert output.splitlines()[3] == \
+            "MEMKIND_MEM_TIERING_LOG_DEBUG: ratio_value: 1", "Wrong message"
+
+    def test_FSDAX_only(self):
+        config_env = "MEMKIND_TIERING_CONFIG=FS_DAX:/mnt/pmem1/:10G:1"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+
+        # TODO assert
+
+    def test_FSDAX_negative_size(self):
+        config_env = "MEMKIND_TIERING_CONFIG=FS_DAX:/mnt/pmem1/:-1:1"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+
+        # TODO assert
+
+    def test_FSDAX_wrong_size(self):
+        config_env = "MEMKIND_TIERING_CONFIG=FS_DAX:/mnt/pmem1/:as:1"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+
+        # TODO assert
+
+    def test_FSDAX_negative_ratio(self):
+        config_env = "MEMKIND_TIERING_CONFIG=FS_DAX:/mnt/pmem1/:10G:-1"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+
+        # TODO assert
+
+    def test_FSDAX_wrong_ratio(self):
+        config_env = "MEMKIND_TIERING_CONFIG=FS_DAX:/mnt/pmem1/:10G:a"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+
+        # TODO assert
+
+    def test_multiple_DRAM(self):
+        config_env = "MEMKIND_TIERING_CONFIG=DRAM:1,DRAM:2"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+
+        # TODO assert
+
+    def test_class_not_defined(self):
+        config_env = "MEMKIND_TIERING_CONFIG=2"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported kind: 2", "Wrong message"
+
+    def test_bad_ratio(self):
+        config_env = "MEMKIND_TIERING_CONFIG=DRAM:A"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported ratio: A", "Wrong message"
+
+    def test_no_ratio(self):
+        config_env = "MEMKIND_TIERING_CONFIG=DRAM"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Ratio not provided", "Wrong message"
+
+    def test_bad_class(self):
+        config_env = "MEMKIND_TIERING_CONFIG=a1b2:10"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported kind: a1b2", "Wrong message"
+
+    def test_negative_ratio(self):
+        config_env = "MEMKIND_TIERING_CONFIG=DRAM:-1"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported ratio: -1", "Wrong message"
