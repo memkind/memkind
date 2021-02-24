@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 # Copyright (C) 2021 Intel Corporation.
 
+import pytest
 import re
 
 from python_framework import CMD_helper
@@ -141,3 +142,123 @@ class Test_tiering(object):
         assert output_level_neg.split("\n")[0] == \
             "MEMKIND_MEM_TIERING_LOG_ERROR: Wrong value of " + \
             "MEMKIND_MEM_TIERING_LOG_LEVEL=4", "Bad init message"
+
+
+class Test_tiering_config_env(object):
+    ld_preload_env = "LD_PRELOAD=tiering/.libs/libmemtier.so"
+    cmd_helper = CMD_helper()
+
+    def get_cmd_output(self, config_env, log_level="0"):
+        command = " ".join(
+            [self.ld_preload_env, "MEMKIND_MEM_TIERING_LOG_LEVEL=" + log_level, config_env, "ls"])
+        output, retcode = self.cmd_helper.execute_cmd(command)
+
+        assert retcode == 0, \
+            "Test failed with error: \nExecution of: '" + command + \
+            "' returns: " + str(retcode) + "\noutput: " + output
+        return output
+
+    def test_DRAM_only(self):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1", log_level="2")
+
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: kind_name: DRAM" in output.splitlines(), \
+               "Wrong message"
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: ratio_value: 1" in output.splitlines(), \
+               "Wrong message"
+
+    def test_FSDAX_only(self):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:1", log_level="2")
+
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: kind_name: FS_DAX" in output.splitlines(), \
+               "Wrong message"
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: pmem_path: /tmp/" in output.splitlines(), \
+               "Wrong message"
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: pmem_size: 10G" in output.splitlines(), \
+               "Wrong message"
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: ratio_value: 1" in output.splitlines(), \
+               "Wrong message"
+
+    def test_FSDAX_negative_size(self):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:-1:1")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: -1", "Wrong message"
+
+    def test_FSDAX_negative_size_min(self):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:-9223372036854775808:1")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: -9223372036854775808", "Wrong message"
+
+    def test_FSDAX_wrong_size(self):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:as:1")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: as", "Wrong message"
+
+    def test_FSDAX_negative_ratio(self):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:-1")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported ratio: -1", "Wrong message"
+
+    def test_FSDAX_wrong_ratio(self):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:a")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported ratio: a", "Wrong message"
+
+    def test_class_not_defined(self):
+        output = self.get_cmd_output("MEMKIND_MEM_TIERING_CONFIG=2")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported kind: 2", "Wrong message"
+
+    def test_bad_ratio(self):
+        output = self.get_cmd_output("MEMKIND_MEM_TIERING_CONFIG=DRAM:A")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported ratio: A", "Wrong message"
+
+    def test_no_ratio(self):
+        output = self.get_cmd_output("MEMKIND_MEM_TIERING_CONFIG=DRAM")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Ratio not provided", "Wrong message"
+
+    def test_bad_class(self):
+        output = self.get_cmd_output("MEMKIND_MEM_TIERING_CONFIG=a1b2:10")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported kind: a1b2", "Wrong message"
+
+    def test_negative_ratio(self):
+        output = self.get_cmd_output("MEMKIND_MEM_TIERING_CONFIG=DRAM:-1")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported ratio: -1", "Wrong message"
+
+    @pytest.mark.parametrize("config_str", ["", ",", ",,,"])
+    def test_negative_config_str_invalid(self, config_str):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=" + config_str)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: No valid query found in: " + \
+            config_str, "Wrong message"
+
+    @pytest.mark.parametrize("query_str", [":", ":::"])
+    def test_negative_query_str_invalid(self, query_str):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=" + query_str)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Kind name string not found in: " + \
+            query_str, "Wrong message"
