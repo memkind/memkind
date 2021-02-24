@@ -6,21 +6,23 @@ import pytest
 from python_framework import CMD_helper
 
 
-class Test_tiering(object):
+class Test_tiering_log_level(object):
     # NOTE: this script should be called from the root of memkind repository
     utils_lib_path = "tiering/.libs/libmemtier.so"
     ld_preload_env = "LD_PRELOAD=" + utils_lib_path
+    config_env = "MEMKIND_MEM_TIERING_CONFIG=DRAM:1"
     bin_path = "ls"
     cmd_helper = CMD_helper()
 
-    def test_utils_init(self):
+    def test_init(self):
         log_level_env = "MEMKIND_MEM_TIERING_LOG_LEVEL=1"
 
         # run command without LD_PRELOAD
         default_output, ls_retcode = self.cmd_helper.execute_cmd(self.bin_path)
 
         # run command with LD_PRELOAD
-        command = " ".join([self.ld_preload_env, log_level_env, self.bin_path])
+        command = " ".join([self.ld_preload_env, log_level_env,
+                            self.config_env, self.bin_path])
         output, retcode = self.cmd_helper.execute_cmd(command)
 
         assert retcode == 0, f"Test failed with error: \nExecution of: \'{command}\' returns: {retcode} \noutput: {output}"
@@ -32,34 +34,37 @@ class Test_tiering(object):
         rest_output = "\n".join(output.split("\n")[1:])
         assert rest_output == default_output, "Bad command output"
 
-    def test_utils_log_level_default(self):
+    def test_log_level_default(self):
         # run command without LD_PRELOAD
         default_output = self.cmd_helper.execute_cmd(self.bin_path)
 
         # run command with LD_PRELOAD
         log_level_env = "MEMKIND_MEM_TIERING_LOG_LEVEL=0"
-        command = " ".join([self.ld_preload_env, log_level_env, self.bin_path])
+        command = " ".join([self.ld_preload_env, log_level_env,
+                            self.config_env, self.bin_path])
         output_level_0 = self.cmd_helper.execute_cmd(command)
 
         assert output_level_0 == default_output, "Bad command output"
 
-    def test_utils_log_level_not_set(self):
+    def test_log_level_not_set(self):
         # run command without LD_PRELOAD
         default_output = self.cmd_helper.execute_cmd(self.bin_path)
 
         # run command with LD_PRELOAD
-        command = " ".join([self.ld_preload_env, self.bin_path])
+        command = " ".join([self.ld_preload_env, self.config_env,
+                            self.bin_path])
         output = self.cmd_helper.execute_cmd(command)
 
         assert output == default_output, "Bad command output"
 
-    def test_utils_log_level_debug(self):
+    def test_log_level_debug(self):
         # run command without LD_PRELOAD
         default_output, retcode = self.cmd_helper.execute_cmd(self.bin_path)
 
         # run command with LD_PRELOAD
         log_level_env = "MEMKIND_MEM_TIERING_LOG_LEVEL=2"
-        command = " ".join([self.ld_preload_env, log_level_env, self.bin_path])
+        command = " ".join([self.ld_preload_env, log_level_env,
+                            self.config_env, self.bin_path])
         output, retcode = self.cmd_helper.execute_cmd(command)
 
         assert output.split("\n")[0] == \
@@ -72,20 +77,94 @@ class Test_tiering(object):
         rest_output = "\n".join(output.split("\n")[2:])
         assert rest_output == default_output, "Bad ls output"
 
-    def test_utils_log_level_negative(self):
+    def test_log_level_negative(self):
         log_level_env = "MEMKIND_MEM_TIERING_LOG_LEVEL=-1"
-        command = " ".join([self.ld_preload_env, log_level_env, self.bin_path])
+        command = " ".join([self.ld_preload_env, log_level_env,
+                            self.config_env, self.bin_path])
         output_level_neg, retcode = self.cmd_helper.execute_cmd(command)
 
         assert output_level_neg.split("\n")[0] == \
             "MEMKIND_MEM_TIERING_LOG_ERROR: Wrong value of MEMKIND_MEM_TIERING_LOG_LEVEL=-1", "Bad init message"
 
-    def test_utils_log_level_too_high(self):
+    def test_log_level_too_high(self):
         log_level_env = "MEMKIND_MEM_TIERING_LOG_LEVEL=4"
-        command = " ".join([self.ld_preload_env, log_level_env, self.bin_path])
+        command = " ".join([self.ld_preload_env, log_level_env,
+                            self.config_env, self.bin_path])
         output_level_neg, retcode = self.cmd_helper.execute_cmd(command)
 
         assert output_level_neg.split("\n")[0] == \
             "MEMKIND_MEM_TIERING_LOG_ERROR: Wrong value of MEMKIND_MEM_TIERING_LOG_LEVEL=4", "Bad init message"
 
     # TODO: extend tests for log level using output from malloc wrapper
+
+
+class Test_tiering_config_env(object):
+    # NOTE: this script should be called from the root of memkind repository
+    utils_lib_path = "tiering/.libs/libmemtier.so"
+    ld_preload_env = "LD_PRELOAD=" + utils_lib_path
+    bin_path = "ls"
+    cmd_helper = CMD_helper()
+    log_level_env = "MEMKIND_MEM_TIERING_LOG_LEVEL=2"
+
+    def test_DRAM_only(self):
+        config_env = "MEMKIND_TIERING_CONFIG=DRAM:1"
+        command = " ".join(
+            [self.ld_preload_env, self.log_level_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[2] == \
+            "MEMKIND_MEM_TIERING_LOG_DEBUG: kind_name: DRAM", "Wrong message"
+        assert output.splitlines()[3] == \
+            "MEMKIND_MEM_TIERING_LOG_DEBUG: ratio_value: 1", "Wrong message"
+
+    def test_FSDAX_only(self):
+        config_env = "MEMKIND_TIERING_CONFIG=FS_DAX:/mnt/pmem1/:10G:1"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+
+        # TODO assert
+
+    def test_multiple_DRAM(self):
+        config_env = "MEMKIND_TIERING_CONFIG=DRAM:1,DRAM:2"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+
+        # TODO assert
+
+    def test_class_not_defined(self):
+        config_env = "MEMKIND_TIERING_CONFIG=2"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported kind: 2", "Wrong message"
+
+    def test_bad_ratio(self):
+        config_env = "MEMKIND_TIERING_CONFIG=DRAM:A"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported ratio: A", "Wrong message"
+
+    def test_no_ratio(self):
+        config_env = "MEMKIND_TIERING_CONFIG=DRAM"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Ratio not provided", "Wrong message"
+
+    def test_bad_class(self):
+        config_env = "MEMKIND_TIERING_CONFIG=a1b2:10"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported kind: a1b2", "Wrong message"
+
+    def test_negative_ratio(self):
+        config_env = "MEMKIND_TIERING_CONFIG=DRAM:-1"
+        command = " ".join([self.ld_preload_env, config_env, self.bin_path])
+        output, _ = self.cmd_helper.execute_cmd(command)
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported ratio: -1", "Wrong message"
