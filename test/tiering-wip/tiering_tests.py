@@ -73,8 +73,8 @@ class Test_tiering(object):
         assert output.split("\n")[0] == \
             "MEMKIND_MEM_TIERING_LOG_DEBUG: Setting log level to: 2", "Bad init message"
 
-        assert output.split("\n")[1] == \
-            "MEMKIND_MEM_TIERING_LOG_INFO: Memkind mem tiering utils lib loaded!", "Bad init message"
+        assert "MEMKIND_MEM_TIERING_LOG_INFO: Memkind mem tiering utils lib loaded!" in output.split("\n"), \
+            "Bad init message"
 
         # next, extract from the output all lines starting with
         # "MEMKIND_MEM_TIERING_LOG" prefix and check if they are correct
