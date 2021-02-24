@@ -65,8 +65,8 @@ class Test_tiering(object):
         assert output.split("\n")[0] == \
             "MEMKIND_MEM_TIERING_LOG_DEBUG: Setting log level to: 2", "Bad init message"
 
-        assert output.split("\n")[1] == \
-            "MEMKIND_MEM_TIERING_LOG_INFO: Memkind mem tiering utils lib loaded!", "Bad init message"
+        assert "MEMKIND_MEM_TIERING_LOG_INFO: Memkind mem tiering utils lib loaded!" in output.split("\n"), \
+            "Bad init message"
 
         # check if rest of output from LS is unchanged
         rest_output = "\n".join(output.split("\n")[2:])
