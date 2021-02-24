@@ -2,6 +2,7 @@
 /* Copyright (C) 2021 Intel Corporation. */
 
 #include "../config.h"
+#include "ctl.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -109,11 +110,28 @@ void log_generic(message_type_t type, const char *format, va_list args)
     }
 }
 
+int parse_env_string(char *env_var_string)
+{
+    char *kind_name;
+    char *ratio_value;
+    ctl_load_config(env_var_string, &kind_name, &ratio_value);
+    
+    log_debug("kind_name: %s", kind_name);
+    log_debug("ratio_value: %s", ratio_value);
+
+    return 0;
+}
+
 static void UTILS_INIT utils_init(void)
 {
     pthread_once(&init_once, log_init_once);
 
     log_info("Memkind mem tiering utils lib loaded!");
+
+    char *env_var = utils_get_env("MEMKIND_TIERING_CONFIG");
+    if (env_var) {
+        parse_env_string(env_var);
+    }
 }
 
 static void UTILS_FINI utils_fini(void)

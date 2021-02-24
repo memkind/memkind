@@ -4,7 +4,7 @@
 noinst_LTLIBRARIES += tiering/libmemtier.la \
                    # end
 
-tiering_libmemtier_la_SOURCES = tiering/memtier.c
+tiering_libmemtier_la_SOURCES = tiering/memtier.c tiering/ctl.c
 tiering_libmemtier_la_LDFLAGS = -rpath /nowhere
 
 # TODO - handle debug version
