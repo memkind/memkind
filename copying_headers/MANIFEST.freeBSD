@@ -194,6 +194,8 @@ test/trace_mechanism_test.py
 test/trace_mechanism_test_helper.c
 test/trial_generator.cpp
 test/trial_generator.h
+tiering/Makefile.mk
+tiering/memtier.c
 utils/docker/Dockerfile.centos-7
 utils/docker/Dockerfile.fedora-32
 utils/docker/Dockerfile.ubuntu-20.04
