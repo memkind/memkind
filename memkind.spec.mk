@@ -34,7 +34,7 @@ BuildRequires: numactl-devel
 
 %define daxctl_min_version 66
 %if %{defined suse_version}
-BuildRequires: libdaxctl-devel >= %{daxctl_min_version}
+BuildRequires: libndctl-devel >= %{daxctl_min_version}
 %else
 BuildRequires: daxctl-devel >= %{daxctl_min_version}
 %endif
