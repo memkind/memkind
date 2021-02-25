@@ -109,6 +109,33 @@ void log_generic(message_type_t type, const char *format, va_list args)
     }
 }
 
+// glibc defines these, a version portable to others libcs would need to call
+// dlsym() at runtime.
+extern void *__libc_malloc(size_t size);
+extern void *__libc_calloc(size_t nmemb, size_t size);
+extern void *__libc_realloc(void *ptr, size_t size);
+extern void __libc_free(void *ptr);
+
+void *memtier_malloc(size_t size)
+{
+    return __libc_malloc(size);
+}
+
+void *memtier_calloc(size_t nmemb, size_t size)
+{
+    return __libc_calloc(nmemb, size);
+}
+
+void *memtier_realloc(void *ptr, size_t size)
+{
+    return __libc_realloc(ptr, size);
+}
+
+void memtier_free(void *ptr)
+{
+    return __libc_free(ptr);
+}
+
 static void UTILS_INIT utils_init(void)
 {
     pthread_once(&init_once, log_init_once);
