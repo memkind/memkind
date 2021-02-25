@@ -91,12 +91,13 @@ class Test_tiering(object):
 
     def test_utils_log_level_debug(self):
         # run command without LD_PRELOAD
-        default_output, retcode = self.cmd_helper.execute_cmd(self.bin_path)
+        default_output, _ = self.cmd_helper.execute_cmd(self.bin_path)
+        default_output = default_output.split("\n")
 
         # run command with LD_PRELOAD
         log_level_env = "MEMKIND_MEM_TIERING_LOG_LEVEL=2"
         command = " ".join([self.ld_preload_env, log_level_env, self.bin_path])
-        output, retcode = self.cmd_helper.execute_cmd(command)
+        output, _ = self.cmd_helper.execute_cmd(command)
 
         assert output.split("\n")[0] == "MEMKIND_MEM_TIERING_LOG_DEBUG: " + \
             "Setting log level to: 2", "Bad init message"
@@ -118,13 +119,13 @@ class Test_tiering(object):
                 "Bad log message format: " + log_line
 
         # finally check if rest of output from command is unchanged
-        output = "\n".join([l for l in output if l not in log_output])
+        output = [l for l in output if l not in log_output]
         assert output == default_output, "Bad ls output"
 
     def test_utils_log_level_negative(self):
         log_level_env = "MEMKIND_MEM_TIERING_LOG_LEVEL=-1"
         command = " ".join([self.ld_preload_env, log_level_env, self.bin_path])
-        output_level_neg, retcode = self.cmd_helper.execute_cmd(command)
+        output_level_neg, _ = self.cmd_helper.execute_cmd(command)
 
         assert output_level_neg.split("\n")[0] == \
             "MEMKIND_MEM_TIERING_LOG_ERROR: Wrong value of " + \
@@ -133,7 +134,7 @@ class Test_tiering(object):
     def test_utils_log_level_too_high(self):
         log_level_env = "MEMKIND_MEM_TIERING_LOG_LEVEL=4"
         command = " ".join([self.ld_preload_env, log_level_env, self.bin_path])
-        output_level_neg, retcode = self.cmd_helper.execute_cmd(command)
+        output_level_neg, _ = self.cmd_helper.execute_cmd(command)
 
         assert output_level_neg.split("\n")[0] == \
             "MEMKIND_MEM_TIERING_LOG_ERROR: Wrong value of " + \
