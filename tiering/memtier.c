@@ -10,8 +10,7 @@
 #define MEMTIER_INIT   __attribute__((constructor))
 #define MEMTIER_FINI   __attribute__((destructor))
 
-// glibc defines these, a version portable to others libcs would need to call
-// dlsym() at runtime.
+// functions below are defined in glibc
 extern void *__libc_malloc(size_t size);
 extern void *__libc_calloc(size_t nmemb, size_t size);
 extern void *__libc_realloc(void *ptr, size_t size);
@@ -65,17 +64,3 @@ static void MEMTIER_FINI memtier_fini(void)
 {
     log_info("Unloading memkind memtier lib!");
 }
-
-UTILS_EXPORT void *test(size_t size)
-{
-    log_debug("test");
-
-    return 0;
-}
-
-#ifndef __MALLOC_HOOK_VOLATILE
-#define __MALLOC_HOOK_VOLATILE
-#endif
-
-void *(*__MALLOC_HOOK_VOLATILE __test_hook)(size_t size,
-                                            const void *caller) = (void *)test;
