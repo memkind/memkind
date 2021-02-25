@@ -9,8 +9,7 @@
 #define MEMTIER_INIT   __attribute__((constructor))
 #define MEMTIER_FINI   __attribute__((destructor))
 
-// glibc defines these, a version portable to others libcs would need to call
-// dlsym() at runtime.
+// functions below are defined in glibc
 extern void *__libc_malloc(size_t size);
 extern void *__libc_calloc(size_t nmemb, size_t size);
 extern void *__libc_realloc(void *ptr, size_t size);
