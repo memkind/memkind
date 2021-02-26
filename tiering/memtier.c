@@ -116,23 +116,30 @@ extern void *__libc_calloc(size_t nmemb, size_t size);
 extern void *__libc_realloc(void *ptr, size_t size);
 extern void __libc_free(void *ptr);
 
-void *memtier_malloc(size_t size)
+void UTILS_EXPORT *malloc(size_t size)
 {
-    return __libc_malloc(size);
+    void *ret = __libc_malloc(size);
+    log_debug("malloc(%u) = %p", size, ret);
+    return ret;
 }
 
-void *memtier_calloc(size_t nmemb, size_t size)
+void UTILS_EXPORT *calloc(size_t nmemb, size_t size)
 {
-    return __libc_calloc(nmemb, size);
+    void *ret = __libc_calloc(nmemb, size);
+    log_debug("calloc(%u, %u) = %p", nmemb, size, ret);
+    return ret;
 }
 
-void *memtier_realloc(void *ptr, size_t size)
+void UTILS_EXPORT *realloc(void *ptr, size_t size)
 {
-    return __libc_realloc(ptr, size);
+    void *ret = __libc_realloc(ptr, size);
+    log_debug("realloc(%p, %u) = %p", ptr, size, ret);
+    return ret;
 }
 
-void memtier_free(void *ptr)
+void UTILS_EXPORT free(void *ptr)
 {
+    log_debug("free(%p)", ptr);
     return __libc_free(ptr);
 }
 
@@ -147,17 +154,3 @@ static void UTILS_FINI utils_fini(void)
 {
     log_info("Unloading memkind mem tiering utils lib!");
 }
-
-UTILS_EXPORT void *test(size_t size)
-{
-    log_debug("test");
-
-    return 0;
-}
-
-#ifndef __MALLOC_HOOK_VOLATILE
-#define __MALLOC_HOOK_VOLATILE
-#endif
-
-void *(*__MALLOC_HOOK_VOLATILE __test_hook)(size_t size,
-                                            const void *caller) = (void *)test;
