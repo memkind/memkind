@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <utmpx.h>
 
+// clang-format off
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
@@ -43,7 +44,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate
+};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
     .create = memkind_arena_create,
@@ -63,7 +65,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate
+};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .create = memkind_arena_create,
@@ -83,7 +86,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate
+};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
     .create = memkind_arena_create,
@@ -103,7 +107,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate
+};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .create = memkind_arena_create,
@@ -123,7 +128,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate
+};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .create = memkind_arena_create,
@@ -143,7 +149,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate
+};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .create = memkind_arena_create,
@@ -164,7 +171,9 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate
+};
+// clang-format on
 
 struct hbw_numanode_t {
     int init_err;

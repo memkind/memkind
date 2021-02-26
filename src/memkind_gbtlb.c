@@ -15,6 +15,7 @@ static void memkind_gbtlb_init_once(void);
 
 static void *gbtlb_mmap(struct memkind *kind, void *addr, size_t size);
 
+// clang-format off
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
@@ -34,7 +35,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate
+};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .create = memkind_arena_create,
@@ -55,7 +57,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate
+};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
     .create = memkind_arena_create,
@@ -73,7 +76,9 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate
+};
+// clang-format on
 
 #define ONE_GB 1073741824ULL
 
