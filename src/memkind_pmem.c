@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2015 - 2020 Intel Corporation. */
+/* Copyright (C) 2015 - 2021 Intel Corporation. */
 
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_pmem.h>
@@ -37,7 +37,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
     .finalize = memkind_pmem_destroy,
     .update_memory_usage_policy = memkind_arena_update_memory_usage_policy,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge = memkind_arena_purge
 };
 
 void *pmem_extent_alloc(extent_hooks_t *extent_hooks,

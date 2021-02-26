@@ -221,6 +221,12 @@ static void tbb_pool_free(struct memkind *kind, void *ptr)
     pool_free(kind->priv, ptr);
 }
 
+static int tbb_pool_purge(struct memkind *kind)
+{
+    log_err("Purge is not supported by TBB");
+    return MEMKIND_ERROR_OPERATION_FAILED;
+}
+
 static size_t tbb_pool_common_malloc_usable_size(void *pool, void *ptr)
 {
     if (pool_msize) {
@@ -297,4 +303,5 @@ void tbb_initialize(struct memkind *kind)
     kind->ops->update_memory_usage_policy = tbb_update_memory_usage_policy;
     kind->ops->get_stat = tbb_get_kind_stat;
     kind->ops->defrag_reallocate = tbb_defrag_reallocate;
+    kind->ops->purge = tbb_pool_purge;
 }

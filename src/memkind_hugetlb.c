@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2020 Intel Corporation. */
+/* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #include <memkind/internal/memkind_hugetlb.h>
 #include <memkind/internal/memkind_default.h>
@@ -36,7 +36,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .purge =  memkind_arena_purge
 };
 
 static int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out);

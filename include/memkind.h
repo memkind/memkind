@@ -284,6 +284,14 @@ int memkind_destroy_kind(memkind_t kind);
 ///
 memkind_t memkind_detect_kind(void *ptr);
 
+///
+/// \brief Purge specified kind
+/// \note STANDARD API
+/// \param kind specified memory kind
+/// \return Memkind operation status, MEMKIND_SUCCESS on success, other values on failure
+///
+int memkind_purge_kind(memkind_t kind);
+
 #include "memkind_deprecated.h"
 
 /// \warning EXPERIMENTAL API
