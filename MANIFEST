@@ -65,6 +65,7 @@ include/memkind/internal/tbb_wrapper.h
 include/memkind/internal/vec.h
 include/memkind_allocator.h
 include/memkind_deprecated.h
+include/memkind_memtier.h
 include/pmem_allocator.h
 jemalloc/.appveyor.yml
 jemalloc/.autom4te.cfg
@@ -402,6 +403,7 @@ man/memkind_hbw.3
 man/memkind_hugetlb.3
 man/memkind_pmem.3
 man/memkindallocator.3
+man/memtier.3
 man/pmemallocator.3
 memkind.pc.in
 memkind.spec.mk
@@ -423,6 +425,7 @@ src/memkind_interleave.c
 src/memkind_local.c
 src/memkind_log.c
 src/memkind_mem_attributes.c
+src/memkind_memtier.c
 src/memkind_pmem.c
 src/memkind_regular.c
 src/tbb_wrapper.c
