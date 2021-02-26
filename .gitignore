@@ -36,6 +36,7 @@
 /examples/hello_memkind_debug
 /examples/memkind_allocated
 /examples/memkind_cpp_allocator
+/examples/memkind_cpp_concurrent_hash_map
 /examples/memkind_get_stat
 /examples/pmem_alignment
 /examples/pmem_and_dax_kmem_kind

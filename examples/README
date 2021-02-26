@@ -67,6 +67,14 @@ and free memory without a need to remember which kind it belongs to.
 This example shows usage of C++ allocator mechanism designed for file-backed memory
 kind with different data structures like: vector, list and map.
 
+## memkind_cpp_concurrent_hash_map.cpp
+
+This example shows how to use tbb::concurrent_hash_map with memkind pmem allocator. The example
+also customizes concurrent_hash_map with a DRAM-resident lock type (which improves performance).
+
+To enable this example, you must set --enable-tbb-example=1 during configure step and have tbb
+installed (in version at least XXX).
+
 ## Other memkind examples
 
 ### memkind_get_stat.c
