@@ -39,7 +39,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_default_destroy,
     .get_stat = memkind_default_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+};
 
 MEMKIND_EXPORT int memkind_default_create(struct memkind *kind,
                                           struct memkind_ops *ops,

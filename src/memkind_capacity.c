@@ -164,7 +164,8 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_hi_cap_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+};
 
 MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_PREFERRED_OPS = {
     .create = memkind_arena_create,
@@ -184,4 +185,5 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_PREFERRED_OPS = {
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_hi_cap_preferred_finalize,
     .get_stat = memkind_arena_get_kind_stat,
-    .defrag_reallocate = memkind_arena_defrag_reallocate};
+    .defrag_reallocate = memkind_arena_defrag_reallocate,
+};
