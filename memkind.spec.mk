@@ -177,6 +177,7 @@ rm -f %{buildroot}/%{_libdir}/libmemtier.{l,}a
 %{_mandir}/man3/pmemallocator.3.*
 %{_mandir}/man3/%{namespace}*.3.*
 %{_mandir}/man7/autohbw.7.*
+%{_mandir}/man7/memtier.7.*
 
 %files tests
 %defattr(-,root,root,-)
@@ -241,6 +242,7 @@ $(memkind_test_dir)/python_framework/cmd_helper.py
 $(memkind_test_dir)/python_framework/huge_page_organizer.py
 $(memkind_test_dir)/python_framework/__init__.py
 $(memkind_test_dir)/draw_plots.py
+$(memkind_test_dir)/tiering_tests.py
 $(memkind_test_dir)/run_alloc_benchmark.sh
 $(memkind_test_dir)/alloc_benchmark_hbw
 $(memkind_test_dir)/alloc_benchmark_glibc
