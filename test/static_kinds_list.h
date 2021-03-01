@@ -5,7 +5,6 @@
 
 #include <memkind.h>
 
-
 static memkind_t static_kinds_list[] = {
     MEMKIND_DEFAULT,
     MEMKIND_HBW,
@@ -31,5 +30,3 @@ static memkind_t static_kinds_list[] = {
     MEMKIND_HIGHEST_BANDWIDTH_LOCAL,
     MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED,
 };
-
-

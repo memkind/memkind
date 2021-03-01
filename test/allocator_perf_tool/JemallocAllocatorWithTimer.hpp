@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2015 - 2020 Intel Corporation. */
+/* Copyright (C) 2015 - 2021 Intel Corporation. */
 #pragma once
 
-#include "Allocator.hpp"
 #include "Allocation_info.hpp"
+#include "Allocator.hpp"
 #include "Configuration.hpp"
-#include "WrappersMacros.hpp"
 #include "FunctionCalls.hpp"
+#include "WrappersMacros.hpp"
 
 #include <jemalloc/jemalloc.h>
 
-class JemallocAllocatorWithTimer
-    : public Allocator
+class JemallocAllocatorWithTimer: public Allocator
 {
 public:
-
     memory_operation wrapped_malloc(size_t size)
     {
         START_TEST(AllocatorTypes::JEMALLOC, FunctionCalls::MALLOC)

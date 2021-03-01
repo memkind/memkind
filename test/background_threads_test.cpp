@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-class BackgroundThreadsTests: public :: testing::Test
+class BackgroundThreadsTests: public ::testing::Test
 {
 protected:
     void SetUp()

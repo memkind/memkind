@@ -9,7 +9,8 @@ extern "C" {
 #include <memkind/internal/memkind_private.h>
 #include <numa.h>
 
-typedef enum memory_attribute_t {
+typedef enum memory_attribute_t
+{
     MEM_ATTR_CAPACITY = 0,
     MEM_ATTR_BANDWIDTH = 1,
     MEM_ATTR_LATENCY = 2

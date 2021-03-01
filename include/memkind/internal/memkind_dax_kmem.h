@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2020 Intel Corporation. */
+/* Copyright (C) 2019 - 2021 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -17,7 +17,8 @@ extern "C" {
  */
 
 int memkind_dax_kmem_all_get_mbind_nodemask(struct memkind *kind,
-                                            unsigned long *nodemask, unsigned long maxnode);
+                                            unsigned long *nodemask,
+                                            unsigned long maxnode);
 
 extern struct memkind_ops MEMKIND_DAX_KMEM_OPS;
 extern struct memkind_ops MEMKIND_DAX_KMEM_ALL_OPS;
