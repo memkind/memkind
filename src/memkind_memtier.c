@@ -34,14 +34,14 @@ MEMKIND_EXPORT struct memtier_builder *memtier_builder(void)
     return jemk_malloc(sizeof(struct memtier_builder));
 }
 
-MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *cfg,
+MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
                                             struct memtier_tier *tier)
 {
     // TODO provide adding tiering logic
     return 0;
 }
 
-MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *cfg,
+MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
                                               memtier_policy_t policy)
 {
     // TODO provide setting policy logic
