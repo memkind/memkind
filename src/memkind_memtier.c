@@ -62,6 +62,8 @@ MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
                                             size_t tier_ratio)
 {
     // TODO provide adding tiering logic
+    if (!tier)
+        return -1;
     return 0;
 }
 
@@ -69,7 +71,10 @@ MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
                                               memtier_policy_t policy)
 {
     // TODO provide setting policy logic
-    return 0;
+    if (policy == MEMTIER_DUMMY_VALUE)
+        return 0;
+    else
+        return -1;
 }
 
 MEMKIND_EXPORT int
