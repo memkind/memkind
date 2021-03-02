@@ -39,33 +39,31 @@
 #include <sys/param.h>
 #include <unistd.h>
 
+// clang-format off
 #ifdef MEMKIND_ENABLE_HEAP_MANAGER
-#define m_detect_kind(ptr)             heap_manager_detect_kind(ptr)
-#define m_free(ptr)                    heap_manager_free(ptr)
-#define m_realloc(ptr, size)           heap_manager_realloc(ptr, size)
-#define m_usable_size(ptr)             heap_manager_malloc_usable_size(ptr)
-#define m_defrag_reallocate(ptr)       heap_manager_defrag_reallocate(ptr)
-#define m_get_global_stat(stat, value) heap_manager_get_stat(stat, value)
-#define m_update_cached_stats          heap_manager_update_cached_stats
-#define m_init                         heap_manager_init
-#define m_set_bg_threads(state)        heap_manager_set_bg_threads(state)
-#define m_stats_print(write_cb, cbopaque, opts)                                \
-    heap_manager_stats_print(write_cb, cbopaque, opts)
+#define m_detect_kind(ptr)                      heap_manager_detect_kind(ptr)
+#define m_free(ptr)                             heap_manager_free(ptr)
+#define m_realloc(ptr, size)                    heap_manager_realloc(ptr, size)
+#define m_usable_size(ptr)                      heap_manager_malloc_usable_size(ptr)
+#define m_defrag_reallocate(ptr)                heap_manager_defrag_reallocate(ptr)
+#define m_get_global_stat(stat, value)          heap_manager_get_stat(stat, value)
+#define m_update_cached_stats                   heap_manager_update_cached_stats
+#define m_init                                  heap_manager_init
+#define m_set_bg_threads(state)                 heap_manager_set_bg_threads(state)
+#define m_stats_print(write_cb, cbopaque, opts) heap_manager_stats_print(write_cb, cbopaque, opts)
 #else
-#define m_detect_kind(ptr)   memkind_arena_detect_kind(ptr)
-#define m_free(ptr)          memkind_arena_free_with_kind_detect(ptr)
-#define m_realloc(ptr, size) memkind_arena_realloc_with_kind_detect(ptr, size)
-#define m_usable_size(ptr)   memkind_default_malloc_usable_size(NULL, ptr)
-#define m_defrag_reallocate(ptr)                                               \
-    memkind_arena_defrag_reallocate_with_kind_detect(ptr)
-#define m_get_global_stat(stat, value)                                         \
-    memkind_arena_get_global_stat(stat, value)
-#define m_update_cached_stats   memkind_arena_update_cached_stats
-#define m_init                  memkind_arena_init
-#define m_set_bg_threads(state) memkind_arena_set_bg_threads(state)
-#define m_stats_print(write_cb, cbopaque, opts)                                \
-    memkind_arena_stats_print(write_cb, cbopaque, opts)
+#define m_detect_kind(ptr)                      memkind_arena_detect_kind(ptr)
+#define m_free(ptr)                             memkind_arena_free_with_kind_detect(ptr)
+#define m_realloc(ptr, size)                    memkind_arena_realloc_with_kind_detect(ptr, size)
+#define m_usable_size(ptr)                      memkind_default_malloc_usable_size(NULL, ptr)
+#define m_defrag_reallocate(ptr)                memkind_arena_defrag_reallocate_with_kind_detect(ptr)
+#define m_get_global_stat(stat, value)          memkind_arena_get_global_stat(stat, value)
+#define m_update_cached_stats                   memkind_arena_update_cached_stats
+#define m_init                                  memkind_arena_init
+#define m_set_bg_threads(state)                 memkind_arena_set_bg_threads(state)
+#define m_stats_print(write_cb, cbopaque, opts) memkind_arena_stats_print(write_cb, cbopaque, opts)
 #endif
+// clang-format on
 
 /* Clear bits in x, but only this specified in mask. */
 #define CLEAR_BIT(x, mask) ((x) &= (~(mask)))
@@ -258,49 +256,33 @@ static struct memkind MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC = {
     .init_once = PTHREAD_ONCE_INIT,
 };
 
+// clang-format off
 MEMKIND_EXPORT struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HUGETLB = &MEMKIND_HUGETLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_INTERLEAVE = &MEMKIND_INTERLEAVE_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW = &MEMKIND_HBW_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_ALL = &MEMKIND_HBW_ALL_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED =
-    &MEMKIND_HBW_PREFERRED_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HBW_HUGETLB =
-    &MEMKIND_HBW_HUGETLB_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HBW_ALL_HUGETLB =
-    &MEMKIND_HBW_ALL_HUGETLB_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED_HUGETLB =
-    &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED = &MEMKIND_HBW_PREFERRED_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_HUGETLB = &MEMKIND_HBW_HUGETLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_ALL_HUGETLB = &MEMKIND_HBW_ALL_HUGETLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED_HUGETLB = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_GBTLB = &MEMKIND_HBW_GBTLB_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED_GBTLB =
-    &MEMKIND_HBW_PREFERRED_GBTLB_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED_GBTLB = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_GBTLB = &MEMKIND_GBTLB_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HBW_INTERLEAVE =
-    &MEMKIND_HBW_INTERLEAVE_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HBW_INTERLEAVE = &MEMKIND_HBW_INTERLEAVE_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_REGULAR = &MEMKIND_REGULAR_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM = &MEMKIND_DAX_KMEM_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_ALL =
-    &MEMKIND_DAX_KMEM_ALL_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_PREFERRED =
-    &MEMKIND_DAX_KMEM_PREFERRED_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_INTERLEAVE =
-    &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_CAPACITY =
-    &MEMKIND_HIGHEST_CAPACITY_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_CAPACITY_PREFERRED =
-    &MEMKIND_HIGHEST_CAPACITY_PREFERRED_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_CAPACITY_LOCAL =
-    &MEMKIND_HIGHEST_CAPACITY_LOCAL_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED =
-    &MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_LOWEST_LATENCY_LOCAL =
-    &MEMKIND_LOWEST_LATENCY_LOCAL_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED =
-    &MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_BANDWIDTH_LOCAL =
-    &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED =
-    &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_ALL = &MEMKIND_DAX_KMEM_ALL_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_PREFERRED = &MEMKIND_DAX_KMEM_PREFERRED_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM_INTERLEAVE = &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_CAPACITY = &MEMKIND_HIGHEST_CAPACITY_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_CAPACITY_PREFERRED = &MEMKIND_HIGHEST_CAPACITY_PREFERRED_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_CAPACITY_LOCAL = &MEMKIND_HIGHEST_CAPACITY_LOCAL_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED = &MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_LOWEST_LATENCY_LOCAL = &MEMKIND_LOWEST_LATENCY_LOCAL_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED = &MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_BANDWIDTH_LOCAL = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC;
 
 struct memkind_registry {
     struct memkind *partition_map[MEMKIND_MAX_KIND];
@@ -314,12 +296,10 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_HBW] = &MEMKIND_HBW_STATIC,
         [MEMKIND_PARTITION_HBW_PREFERRED] = &MEMKIND_HBW_PREFERRED_STATIC,
         [MEMKIND_PARTITION_HBW_HUGETLB] = &MEMKIND_HBW_HUGETLB_STATIC,
-        [MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB] =
-            &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
+        [MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB] = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
         [MEMKIND_PARTITION_HUGETLB] = &MEMKIND_HUGETLB_STATIC,
         [MEMKIND_PARTITION_HBW_GBTLB] = &MEMKIND_HBW_GBTLB_STATIC,
-        [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] =
-            &MEMKIND_HBW_PREFERRED_GBTLB_STATIC,
+        [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC,
         [MEMKIND_PARTITION_GBTLB] = &MEMKIND_GBTLB_STATIC,
         [MEMKIND_PARTITION_HBW_INTERLEAVE] = &MEMKIND_HBW_INTERLEAVE_STATIC,
         [MEMKIND_PARTITION_INTERLEAVE] = &MEMKIND_INTERLEAVE_STATIC,
@@ -328,28 +308,21 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_HBW_ALL_HUGETLB] = &MEMKIND_HBW_ALL_HUGETLB_STATIC,
         [MEMKIND_PARTITION_DAX_KMEM] = &MEMKIND_DAX_KMEM_STATIC,
         [MEMKIND_PARTITION_DAX_KMEM_ALL] = &MEMKIND_DAX_KMEM_ALL_STATIC,
-        [MEMKIND_PARTITION_DAX_KMEM_PREFERRED] =
-            &MEMKIND_DAX_KMEM_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE] =
-            &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC,
+        [MEMKIND_PARTITION_DAX_KMEM_PREFERRED] = &MEMKIND_DAX_KMEM_PREFERRED_STATIC,
+        [MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE] = &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC,
         [MEMKIND_PARTITION_HIGHEST_CAPACITY] = &MEMKIND_HIGHEST_CAPACITY_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_CAPACITY_PREFERRED] =
-            &MEMKIND_HIGHEST_CAPACITY_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL] =
-            &MEMKIND_HIGHEST_CAPACITY_LOCAL_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL_PREFERRED] =
-            &MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_LOWEST_LATENCY_LOCAL] =
-            &MEMKIND_LOWEST_LATENCY_LOCAL_STATIC,
-        [MEMKIND_PARTITION_LOWEST_LATENCY_LOCAL_PREFERRED] =
-            &MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_BANDWIDTH_LOCAL] =
-            &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_BANDWIDTH_LOCAL_PREFERRED] =
-            &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC,
+        [MEMKIND_PARTITION_HIGHEST_CAPACITY_PREFERRED] = &MEMKIND_HIGHEST_CAPACITY_PREFERRED_STATIC,
+        [MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL] =  &MEMKIND_HIGHEST_CAPACITY_LOCAL_STATIC,
+        [MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL_PREFERRED] = &MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_STATIC,
+        [MEMKIND_PARTITION_LOWEST_LATENCY_LOCAL] = &MEMKIND_LOWEST_LATENCY_LOCAL_STATIC,
+        [MEMKIND_PARTITION_LOWEST_LATENCY_LOCAL_PREFERRED] = &MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_STATIC,
+        [MEMKIND_PARTITION_HIGHEST_BANDWIDTH_LOCAL] = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_STATIC,
+        [MEMKIND_PARTITION_HIGHEST_BANDWIDTH_LOCAL_PREFERRED] = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC,
     },
     MEMKIND_NUM_BASE_KIND,
-    PTHREAD_MUTEX_INITIALIZER};
+    PTHREAD_MUTEX_INITIALIZER
+};
+// clang-format on
 
 void *kind_mmap(struct memkind *kind, void *addr, size_t size)
 {
@@ -396,29 +369,21 @@ struct create_args {
     memkind_memtype_t memtype_flags;
 };
 
+// clang-format off
 static struct create_args supported_args[] = {
 
-    {&MEMKIND_HBW_STATIC, MEMKIND_POLICY_BIND_LOCAL, 0,
-     MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
-    {&MEMKIND_HBW_HUGETLB_STATIC, MEMKIND_POLICY_BIND_LOCAL,
-     MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
-    {&MEMKIND_HBW_ALL_STATIC, MEMKIND_POLICY_BIND_ALL, 0,
-     MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
-    {&MEMKIND_HBW_ALL_HUGETLB_STATIC, MEMKIND_POLICY_BIND_ALL,
-     MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
-    {&MEMKIND_HBW_PREFERRED_STATIC, MEMKIND_POLICY_PREFERRED_LOCAL, 0,
-     MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
-    {&MEMKIND_HBW_PREFERRED_HUGETLB_STATIC, MEMKIND_POLICY_PREFERRED_LOCAL,
-     MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
-    {&MEMKIND_HBW_INTERLEAVE_STATIC, MEMKIND_POLICY_INTERLEAVE_ALL, 0,
-     MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
-    {&MEMKIND_DEFAULT_STATIC, MEMKIND_POLICY_PREFERRED_LOCAL, 0,
-     MEMKIND_MEMTYPE_DEFAULT},
-    {&MEMKIND_HUGETLB_STATIC, MEMKIND_POLICY_PREFERRED_LOCAL,
-     MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_DEFAULT},
-    {&MEMKIND_INTERLEAVE_STATIC, MEMKIND_POLICY_INTERLEAVE_ALL, 0,
-     MEMKIND_MEMTYPE_HIGH_BANDWIDTH | MEMKIND_MEMTYPE_DEFAULT},
+    {&MEMKIND_HBW_STATIC, MEMKIND_POLICY_BIND_LOCAL, 0, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_HUGETLB_STATIC, MEMKIND_POLICY_BIND_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_ALL_STATIC, MEMKIND_POLICY_BIND_ALL, 0, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_ALL_HUGETLB_STATIC, MEMKIND_POLICY_BIND_ALL, MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_PREFERRED_STATIC, MEMKIND_POLICY_PREFERRED_LOCAL, 0, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_PREFERRED_HUGETLB_STATIC, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_HBW_INTERLEAVE_STATIC, MEMKIND_POLICY_INTERLEAVE_ALL, 0, MEMKIND_MEMTYPE_HIGH_BANDWIDTH},
+    {&MEMKIND_DEFAULT_STATIC, MEMKIND_POLICY_PREFERRED_LOCAL, 0, MEMKIND_MEMTYPE_DEFAULT},
+    {&MEMKIND_HUGETLB_STATIC, MEMKIND_POLICY_PREFERRED_LOCAL, MEMKIND_MASK_PAGE_SIZE_2MB, MEMKIND_MEMTYPE_DEFAULT},
+    {&MEMKIND_INTERLEAVE_STATIC, MEMKIND_POLICY_INTERLEAVE_ALL, 0, MEMKIND_MEMTYPE_HIGH_BANDWIDTH | MEMKIND_MEMTYPE_DEFAULT},
 };
+// clang-format on
 
 /* Kind creation */
 MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
