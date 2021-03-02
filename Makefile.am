@@ -394,6 +394,7 @@ EXTRA_DIST = CONTRIBUTING \
              memkind.spec.mk \
              test/test.sh \
              test/test_dax_kmem.sh \
+             test/tiering_tests.py \
              utils/docker/Dockerfile.centos-7 \
              utils/docker/Dockerfile.fedora-32 \
              utils/docker/Dockerfile.ubuntu-20.04 \
@@ -458,6 +459,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind_pmem.3 \
                  man/memkindallocator.3 \
                  man/memtier.3 \
+                 man/memtier.7 \
                  man/pmemallocator.3 \
                  # end
 
@@ -555,7 +557,7 @@ unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
 
 unit_tests_tiering: tiering/libmemtier.la
-	python3 -m pytest -s test/tiering-wip/tiering_tests.py
+	pytest -s test/tiering_tests.py
 
 code-style-check:
 if HAVE_CLANG_FORMAT

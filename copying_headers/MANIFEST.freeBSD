@@ -54,6 +54,7 @@ man/memkind_hugetlb.3
 man/memkind_pmem.3
 man/memkindallocator.3
 man/memtier.3
+man/memtier.7
 man/pmemallocator.3
 memkind.spec.mk
 src/Makefile.mk
@@ -199,6 +200,8 @@ test/trial_generator.cpp
 test/trial_generator.h
 tiering/Makefile.mk
 tiering/memtier.c
+tiering/memtier_log.c
+tiering/memtier_log.h
 utils/docker/Dockerfile.centos-7
 utils/docker/Dockerfile.fedora-32
 utils/docker/Dockerfile.ubuntu-20.04
