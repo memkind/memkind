@@ -108,7 +108,6 @@ typedef enum memkind_node_variant_t
 
 struct memtier_tier {
     memkind_t kind;    // Memory kind
-    size_t ratio;      // Expected Memory Ratio
     size_t alloc_size; // Allocated size #TODO make this atomic
 };
 

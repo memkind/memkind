@@ -5,28 +5,17 @@
 
 #include <memkind/internal/memkind_arena.h>
 
-MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(void)
+MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
 {
-    return jemk_malloc(sizeof(struct memtier_tier));
+    struct memtier_tier *tier = jemk_malloc(sizeof(struct memtier_tier));
+    if(tier)
+        tier->kind = kind;
+    return tier;
 }
 
 MEMKIND_EXPORT void memtier_tier_delete(struct memtier_tier *tier)
 {
     jemk_free(tier);
-}
-
-MEMKIND_EXPORT int memtier_tier_set_ratio(struct memtier_tier *tier,
-                                          size_t ratio)
-{
-    tier->ratio = ratio;
-    return 0;
-}
-
-MEMKIND_EXPORT int memtier_tier_set_memory_kind(struct memtier_tier *tier,
-                                                memkind_t kind)
-{
-    tier->kind = kind;
-    return 0;
 }
 
 MEMKIND_EXPORT struct memtier_builder *memtier_builder(void)
@@ -35,7 +24,8 @@ MEMKIND_EXPORT struct memtier_builder *memtier_builder(void)
 }
 
 MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
-                                            struct memtier_tier *tier)
+                                            struct memtier_tier *tier,
+                                            size_t tier_ratio)
 {
     // TODO provide adding tiering logic
     return 0;
