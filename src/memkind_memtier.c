@@ -5,16 +5,50 @@
 
 #include <memkind/internal/memkind_arena.h>
 
+#include <assert.h>
+
+// Provide translation from memkind_t to memtier_t
+// memkind_t partition id -> memtier tier
+struct memtier_registry {
+    struct memtier_tier *memtier_kind_map[MEMKIND_MAX_KIND];
+    pthread_mutex_t lock;
+};
+
+static struct memtier_registry memtier_registry_g = {
+    {NULL},
+    PTHREAD_MUTEX_INITIALIZER,
+};
+
 MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
 {
-    struct memtier_tier *tier = jemk_malloc(sizeof(struct memtier_tier));
-    if(tier)
+    struct memtier_tier *tier;
+    if (pthread_mutex_lock(&memtier_registry_g.lock) != 0)
+        assert(0 && "failed to acquire mutex");
+    if (!kind || memtier_registry_g.memtier_kind_map[kind->partition]) {
+        if (pthread_mutex_unlock(&memtier_registry_g.lock) != 0)
+            assert(0 && "failed to release mutex");
+        return NULL;
+    }
+
+    tier = jemk_malloc(sizeof(struct memtier_tier));
+    if (tier) {
         tier->kind = kind;
+        memtier_registry_g.memtier_kind_map[kind->partition] = tier;
+    }
+    if (pthread_mutex_unlock(&memtier_registry_g.lock) != 0)
+        assert(0 && "failed to release mutex");
     return tier;
 }
 
 MEMKIND_EXPORT void memtier_tier_delete(struct memtier_tier *tier)
 {
+    if (tier) {
+        if (pthread_mutex_lock(&memtier_registry_g.lock) != 0)
+            assert(0 && "failed to acquire mutex");
+        memtier_registry_g.memtier_kind_map[tier->kind->partition] = NULL;
+        if (pthread_mutex_unlock(&memtier_registry_g.lock) != 0)
+            assert(0 && "failed to release mutex");
+    }
     jemk_free(tier);
 }
 
@@ -127,7 +161,11 @@ MEMKIND_EXPORT size_t memtier_usable_size(void *ptr)
 MEMKIND_EXPORT void memtier_free(void *ptr)
 {
     struct memkind *kind = memkind_detect_kind(ptr);
-    // TODO detect tier from which kind belongs
+    if (!kind)
+        return;
+    unsigned part = kind->partition;
+    struct memtier_tier *tier = memtier_registry_g.memtier_kind_map[part];
+    (void)(tier);
     // TODO provide increment/decrement counter logic
     memkind_free(kind, ptr);
 }
