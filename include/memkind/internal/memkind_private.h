@@ -108,16 +108,17 @@ typedef enum memkind_node_variant_t
 
 struct memtier_tier {
     memkind_t kind;    // Memory kind
-    size_t ratio;      // Expected Memory Ratio
     size_t alloc_size; // Allocated size #TODO make this atomic
 };
 
 struct memtier_builder {
-    int dummy_field; // #TODO handle the logic here
+    memkind_t todo_kind; // #TODO Memory kind handle the list of kind
+    int dummy_field;     // #TODO handle the logic here
 };
 
 struct memtier_kind {
-    int dummy_field; // #TODO handle the logic here
+    memkind_t todo_kind; // #TODO Memory kind handle the real logic here
+    int dummy_field;     // #TODO handle the logic here
 };
 
 void memkind_init(memkind_t kind, bool check_numa);

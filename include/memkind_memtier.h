@@ -33,9 +33,10 @@ typedef enum memtier_policy_t
 ///
 /// \brief Create a memtier tier
 /// \note STANDARD API
+/// \param kind memkind kind
 /// \return memtier tier, NULL on failure
 ///
-struct memtier_tier *memtier_tier_new(void);
+struct memtier_tier *memtier_tier_new(memkind_t kind);
 
 ///
 /// \brief Delete memtier tier
@@ -43,26 +44,6 @@ struct memtier_tier *memtier_tier_new(void);
 /// \param tier memtier tier
 ///
 void memtier_tier_delete(struct memtier_tier *tier);
-
-///
-/// \brief Set memtier ratio of memtier tier
-/// \note STANDARD API
-/// \param tier memtier tier
-/// \param ratio expected ratio of tier
-/// \return Operation status, 0 on success, other values on
-/// failure
-///
-int memtier_tier_set_ratio(struct memtier_tier *tier, size_t ratio);
-
-///
-/// \brief Set memory kind of memtier tier
-/// \note STANDARD API
-/// \param tier memtier tier
-/// \param kind memkind kind
-/// \return Operation status, 0 on success, other values on
-/// failure
-///
-int memtier_tier_set_memory_kind(struct memtier_tier *tier, memkind_t kind);
 
 ///
 /// \brief Create a memtier builder
@@ -76,11 +57,12 @@ struct memtier_builder *memtier_builder(void);
 /// \note STANDARD API
 /// \param builder memtier builder
 /// \param tier memtier tier
+/// \param tier_ratio expected memtier tier ratio
 /// \return Operation status, 0 on success, other values on
 /// failure
 ///
 int memtier_builder_add_tier(struct memtier_builder *builder,
-                             struct memtier_tier *tier);
+                             struct memtier_tier *tier, size_t tier_ratio);
 
 ///
 /// \brief Set memtier policy to memtier builder

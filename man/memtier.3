@@ -16,17 +16,13 @@ functionality is considered as stable API (STANDARD API).
 .sp
 .B "TIER MANAGEMENT:"
 .sp
-.BI "struct memtier_tier *memtier_tier_new(void);"
+.BI "struct memtier_tier *memtier_tier_new(memkind_t " "kind");
 .br
 .BI "void memtier_tier_delete(struct memtier_tier  " "*tier" );
 .br
-.BI "int memtier_tier_set_ratio(struct memtier_tier " "*tier" ", size_t " "ratio" );
-.br
-.BI "int memtier_tier_set_memory_kind(struct memtier_tier " "*tier" ", memkind_t " "kind" );
-.br
 .BI "struct memtier_builder *memtier_builder(void);"
 .br
-.BI "int memtier_builder_add_tier(struct memtier_builder " "*builder" ", struct memtier_tier " "*tier" );
+.BI "int memtier_builder_add_tier(struct memtier_builder " "*builder" ", struct memtier_tier " "*tier" ", size_t " "tier_ratio");
 .br
 .BI "int memtier_builder_set_policy(struct memtier_builder " "*builder" ", memtier_policy_t " "policy" );
 .br
