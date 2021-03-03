@@ -90,3 +90,4 @@ jobs:
       run: |
           ccache --max-size=150M
           ./build.sh
+          make dist

@@ -51,14 +51,13 @@ enum memkind_const_private
     MEMKIND_NAME_LENGTH_PRIV = 64
 };
 
+// clang-format off
 struct memkind_ops {
-    int (*create)(struct memkind *kind, struct memkind_ops *ops,
-                  const char *name);
+    int (*create)(struct memkind *kind, struct memkind_ops *ops, const char *name);
     int (*destroy)(struct memkind *kind);
     void *(*malloc)(struct memkind *kind, size_t size);
     void *(*calloc)(struct memkind *kind, size_t num, size_t size);
-    int (*posix_memalign)(struct memkind *kind, void **memptr, size_t alignment,
-                          size_t size);
+    int (*posix_memalign)(struct memkind *kind, void **memptr, size_t alignment, size_t size);
     void *(*realloc)(struct memkind *kind, void *ptr, size_t size);
     void (*free)(struct memkind *kind, void *ptr);
     void *(*mmap)(struct memkind *kind, void *addr, size_t size);
@@ -66,18 +65,17 @@ struct memkind_ops {
     int (*madvise)(struct memkind *kind, void *addr, size_t size);
     int (*get_mmap_flags)(struct memkind *kind, int *flags);
     int (*get_mbind_mode)(struct memkind *kind, int *mode);
-    int (*get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask,
-                              unsigned long maxnode);
+    int (*get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask, unsigned long maxnode);
     int (*get_arena)(struct memkind *kind, unsigned int *arena, size_t size);
     int (*check_available)(struct memkind *kind);
     void (*init_once)(void);
     int (*finalize)(struct memkind *kind);
     size_t (*malloc_usable_size)(struct memkind *kind, void *ptr);
-    int (*update_memory_usage_policy)(struct memkind *kind,
-                                      memkind_mem_usage_policy policy);
+    int (*update_memory_usage_policy)(struct memkind *kind, memkind_mem_usage_policy policy);
     int (*get_stat)(memkind_t kind, memkind_stat_type stat, size_t *value);
     void *(*defrag_reallocate)(struct memkind *kind, void *ptr);
 };
+// clang-format on
 
 struct memkind {
     struct memkind_ops *ops;
