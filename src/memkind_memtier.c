@@ -59,7 +59,7 @@ MEMKIND_EXPORT struct memtier_builder *memtier_builder(void)
 
 MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
                                             struct memtier_tier *tier,
-                                            size_t tier_ratio)
+                                            unsigned tier_ratio)
 {
     // TODO provide adding tiering logic
     if (!tier)

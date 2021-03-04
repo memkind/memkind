@@ -62,7 +62,7 @@ struct memtier_builder *memtier_builder(void);
 /// failure
 ///
 int memtier_builder_add_tier(struct memtier_builder *builder,
-                             struct memtier_tier *tier, size_t tier_ratio);
+                             struct memtier_tier *tier, unsigned tier_ratio);
 
 ///
 /// \brief Set memtier policy to memtier builder
