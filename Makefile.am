@@ -558,7 +558,7 @@ unit_tests_dax_kmem: checkprogs
 
 unit_tests_tiering: tiering/libmemtier.la checkprogs
 	test/memkind_memtier_test
-	pytest -s test/tiering_tests.py
+	pytest -s -vv test/tiering_tests.py
 
 code-style-check:
 if HAVE_CLANG_FORMAT
