@@ -401,9 +401,9 @@ man/memkind_dax_kmem.3
 man/memkind_default.3
 man/memkind_hbw.3
 man/memkind_hugetlb.3
+man/memkind_memtier.3
 man/memkind_pmem.3
 man/memkindallocator.3
-man/memtier.3
 man/memtier.7
 man/pmemallocator.3
 memkind.pc.in
