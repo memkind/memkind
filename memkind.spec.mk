@@ -163,6 +163,7 @@ rm -f %{buildroot}/%{_libdir}/libmemtier.{l,}a
 %{_includedir}/hbwmalloc.h
 %{_includedir}/hbw_allocator.h
 %{_includedir}/memkind_allocator.h
+%{_includedir}/memkind_memtier.h
 %{_includedir}/pmem_allocator.h
 %{_libdir}/lib%{namespace}.so
 %{_libdir}/libautohbw.so
@@ -201,6 +202,7 @@ $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/memkind_cpp_allocator
 $(memkind_test_dir)/memkind_get_stat
 ${memkind_test_dir}/memkind_highcapacity_test
+${memkind_test_dir}/memkind_memtier_test
 $(memkind_test_dir)/memkind_stat_test
 $(memkind_test_dir)/autohbw_candidates
 ${memkind_test_dir}/pmem_kinds
