@@ -179,69 +179,92 @@ class Test_memkind_log(Helper):
 
 
 class Test_tiering_config_env(Helper):
-    def test_DRAM_only(self):
+    @pytest.mark.parametrize("ratio", ["1", "1000", "4294967295"])
+    def test_DRAM(self, ratio):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1", log_level="2")
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio, log_level="2")
 
         assert self.log_debug_prefix + "kind_name: " + \
             self.kind_name_dict.get('DRAM') in output, "Wrong message"
-        assert self.log_debug_prefix + "ratio_value: 1" in output, \
+        assert self.log_debug_prefix + "ratio_value: " + ratio in output, \
             "Wrong message"
 
     # TODO enable this check after implementing full FS_DAX support in
     # libmemtier
     """
-    def test_FSDAX_only(self):
+    @pytest.mark.parametrize("pmem_size", ["0", "1", "18446744073709551615"])
+    def test_FSDAX(self, pmem_size):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:1", log_level="2")
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1", log_level="2")
+
+        assert self.log_debug_prefix + "kind_name: FS_DAX" in output, \
+            "Wrong message"
+        assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
+            "Wrong message"
+        assert self.log_debug_prefix + "pmem_size: " + pmem_size in output, \
+            "Wrong message"
+        assert self.log_debug_prefix + "ratio_value: 1" in output, \
+            "Wrong message"
+
+    @pytest.mark.parametrize("pmem_size", ["1073741824", "1048576K", "1024M", "1G"])
+    def test_FSDAX_pmem_size_with_suffix(self, pmem_size):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1", log_level="2")
 
         assert self.log_debug_prefix + "kind_name: " + \
             self.kind_name_dict.get('FS_DAX') in output, "Wrong message"
         assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
             "Wrong message"
-        assert self.log_debug_prefix + "pmem_size: 10G" in output, \
+        assert self.log_debug_prefix + "pmem_size: 1073741824" in output, \
             "Wrong message"
         assert self.log_debug_prefix + "ratio_value: 1" in output, \
             "Wrong message"
     """
 
-    def test_FSDAX_negative_size(self):
+    @pytest.mark.parametrize("pmem_size", ["-1", "-4294967295", "-18446744073709551615", "18446744073709551616"])
+    def test_FSDAX_pmem_size_outside_limits(self, pmem_size):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:-1:1",
-            validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1", validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
-            "Failed to parse pmem size: -1", "Wrong message"
+            "Failed to parse pmem size: " + pmem_size, "Wrong message"
 
-    def test_FSDAX_negative_size_min(self):
+    @pytest.mark.parametrize("pmem_size", ["18446744073709551615K", "18446744073709551615M", "18446744073709551615G"])
+    def test_FSDAX_pmem_size_with_suffix_too_big(self, pmem_size):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:-9223372036854775808:1",
-            validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1", validate_retcode=False)
+        assert "MEMKIND_MEM_TIERING_LOG_ERROR: Failed to parse pmem size: " + \
+            pmem_size in output, "Wrong message"
 
         assert output[0] == self.log_error_prefix + \
-            "Failed to parse pmem size: -9223372036854775808", \
+            "Provided pmem size is too big: 18446744073709551615", \
             "Wrong message"
 
-    def test_FSDAX_wrong_size(self):
+    def test_FSDAX_no_size(self):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:as:1",
-            validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX", validate_retcode=False)
+
+        assert "MEMKIND_MEM_TIERING_LOG_ERROR: Couldn't load MEMKIND_MEM_TIERING_CONFIG env var" in output, \
+            "Wrong message"
+
+    @pytest.mark.parametrize("pmem_size", ["as", "10K1", "M", "M2", "10KM"])
+    def test_FSDAX_wrong_size(self, pmem_size):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1", validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
-            "Failed to parse pmem size: as", "Wrong message"
+            "Failed to parse pmem size: " + pmem_size, "Wrong message"
 
     def test_FSDAX_negative_ratio(self):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:-1",
-            validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10K:-1", validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Unsupported ratio: -1", "Wrong message"
 
     def test_FSDAX_wrong_ratio(self):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:a",
-            validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10K:a", validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Unsupported ratio: a", "Wrong message"
