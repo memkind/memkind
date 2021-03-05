@@ -4,6 +4,7 @@
 #include <memkind_memtier.h>
 
 #include <memkind/internal/memkind_arena.h>
+#include <memkind/internal/memkind_log.h>
 
 #include <assert.h>
 
@@ -25,6 +26,7 @@ MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
     if (pthread_mutex_lock(&memtier_registry_g.lock) != 0)
         assert(0 && "failed to acquire mutex");
     if (!kind || memtier_registry_g.kind_map[kind->partition]) {
+        log_err("Kind is empty or tier with kind already exists.");
         if (pthread_mutex_unlock(&memtier_registry_g.lock) != 0)
             assert(0 && "failed to release mutex");
         return NULL;
@@ -62,8 +64,10 @@ MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
                                             unsigned tier_ratio)
 {
     // TODO provide adding tiering logic
-    if (!tier)
+    if (!tier) {
+        log_err("Tier is empty.");
         return -1;
+    }
     builder->todo_kind = tier->kind;
     return 0;
 }
@@ -74,8 +78,8 @@ MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
     // TODO provide setting policy logic
     if (policy == MEMTIER_DUMMY_VALUE)
         return 0;
-    else
-        return -1;
+    log_err("Unrecognized memory policy %u", policy);
+    return -1;
 }
 
 MEMKIND_EXPORT int
@@ -88,6 +92,7 @@ memtier_builder_construct_kind(struct memtier_builder *builder,
         jemk_free(builder);
         return 0;
     }
+    log_err("malloc() failed.");
     return -1;
 }
 
