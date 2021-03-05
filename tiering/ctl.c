@@ -13,6 +13,10 @@
 #define CTL_VALUE_SEPARATOR        ":"
 #define CTL_STRING_QUERY_SEPARATOR ","
 
+#define k             1024
+#define M             (1024 * 1024)
+#define PMEM_MAX_SIZE (1024 * 1024 * 32)
+
 /*
  * ctl_parse_u -- (internal) parses and returns an unsigned integer
  */
@@ -47,24 +51,42 @@ static int ctl_validate_kind_name(const char *kind_name)
     return 0;
 }
 
-// TODO: Parse pmem_size string to unsigned long long supporting kMGT suffixes
-static int ctl_validate_pmem_size(const char *pmem_size)
+static int ctl_parse_pmem_size(const char *pmem_size_str, unsigned *pmem_size)
 {
-    if (pmem_size == NULL) {
+    if (pmem_size_str == NULL) {
         log_err("PMEM size not provided");
         return -1;
     }
 
     regex_t regex;
-    int ret = regcomp(&regex, "[[:digit:]+]G", 0);
+
+    int ret = regcomp(&regex, "^[[:digit:]]+[kM]{0,1}$", REG_EXTENDED);
     if (ret) {
         log_err(
             "Unsuccessful compilation of regex occurred during validation of PMEM size");
         return -1;
     }
-    int regex_ret = regexec(&regex, pmem_size, 0, NULL, 0);
+    int regex_ret = regexec(&regex, pmem_size_str, 0, NULL, 0);
     if (regex_ret == REG_NOMATCH) {
-        log_err("Unsupported pmem_size format: %s", pmem_size);
+        log_err("Unsupported pmem_size format: %s", pmem_size_str);
+        return -1;
+    }
+
+    ret = ctl_parse_u(pmem_size_str, pmem_size);
+    if (ret != 0) {
+        log_err("Unsupported pmem size: %s", pmem_size_str);
+        pmem_size = NULL;
+        return -1;
+    }
+
+    if (strchr(pmem_size_str, 'k') != NULL) {
+        *pmem_size = *pmem_size * k;
+    } else if (strchr(pmem_size_str, 'M') != NULL) {
+        *pmem_size = *pmem_size * M;
+    }
+    if (*pmem_size > PMEM_MAX_SIZE) {
+        log_err("Provided pmem size is too big: %s. The max size is: %d",
+                pmem_size_str, PMEM_MAX_SIZE);
         return -1;
     }
 
@@ -93,7 +115,7 @@ static int ctl_parse_ratio(const char *ratio_str, unsigned *dest)
  * into single queries
  */
 static int ctl_parse_query(char *qbuf, char **kind_name, char **pmem_path,
-                           char **pmem_size, unsigned *ratio_value)
+                           unsigned *pmem_size_value, unsigned *ratio_value)
 {
     char *sptr = NULL;
     *kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
@@ -106,16 +128,18 @@ static int ctl_parse_query(char *qbuf, char **kind_name, char **pmem_path,
         return -1;
     }
 
+    char *pmem_size_str = NULL;
     if (!strcmp(*kind_name, "FS_DAX")) {
         *pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-        *pmem_size = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-        ret = ctl_validate_pmem_size(*pmem_size);
+        pmem_size_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
+        ret = ctl_parse_pmem_size(pmem_size_str, pmem_size_value);
         if (ret != 0) {
             return -1;
         }
     } else {
-        pmem_path = NULL;
-        pmem_size = NULL;
+        // TODO: Raise error
+        *pmem_path = NULL;
+        *pmem_size_value = 0;
     }
 
     char *ratio_value_str = NULL;
@@ -138,7 +162,7 @@ static int ctl_parse_query(char *qbuf, char **kind_name, char **pmem_path,
  * ctl_load_config -- splits an entire config into query strings
  */
 int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
-                    char **pmem_size, unsigned *ratio_value)
+                    unsigned *pmem_size, unsigned *ratio_value)
 {
     int ret = 0;
     char *sptr = NULL;
