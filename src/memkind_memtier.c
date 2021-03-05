@@ -22,7 +22,6 @@ static struct memtier_registry memtier_registry_g = {
 
 MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
 {
-    struct memtier_tier *tier;
     if (pthread_mutex_lock(&memtier_registry_g.lock) != 0)
         assert(0 && "failed to acquire mutex");
     if (!kind || memtier_registry_g.kind_map[kind->partition]) {
@@ -32,7 +31,7 @@ MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
         return NULL;
     }
 
-    tier = jemk_malloc(sizeof(struct memtier_tier));
+    struct memtier_tier *tier = jemk_malloc(sizeof(*tier));
     if (tier) {
         tier->kind = kind;
         memtier_registry_g.kind_map[kind->partition] = tier;
@@ -86,7 +85,7 @@ MEMKIND_EXPORT int
 memtier_builder_construct_kind(struct memtier_builder *builder,
                                struct memtier_kind **kind)
 {
-    *kind = (struct memtier_kind *)jemk_malloc(sizeof(struct memtier_kind));
+    *kind = (struct memtier_kind *)jemk_malloc(sizeof(*kind));
     if (*kind) {
         (*kind)->todo_kind = builder->todo_kind;
         jemk_free(builder);
