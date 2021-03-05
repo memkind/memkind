@@ -55,8 +55,9 @@ static int parse_env_string(char *env_var_string)
 {
     char *kind_name = NULL;
     char *pmem_path = NULL;
-    char *pmem_size = NULL;
-    unsigned ratio_value = -1;
+    size_t pmem_size;
+    unsigned ratio_value = 0;
+
     int ret = ctl_load_config(env_var_string, &kind_name, &pmem_path,
                               &pmem_size, &ratio_value);
     if (ret != 0) {
@@ -65,7 +66,7 @@ static int parse_env_string(char *env_var_string)
 
     log_debug("kind_name: %s", kind_name);
     log_debug("pmem_path: %s", pmem_path);
-    log_debug("pmem_size: %s", pmem_size);
+    log_debug("pmem_size: %zu", pmem_size);
     log_debug("ratio_value: %u", ratio_value);
 
     return 0;

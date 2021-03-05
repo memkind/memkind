@@ -175,7 +175,7 @@ class Test_tiering_config_env(object):
                "Wrong message"
         assert "MEMKIND_MEM_TIERING_LOG_DEBUG: pmem_path: /tmp/" in output.splitlines(), \
                "Wrong message"
-        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: pmem_size: 10G" in output.splitlines(), \
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: pmem_size: 10737418240" in output.splitlines(), \
                "Wrong message"
         assert "MEMKIND_MEM_TIERING_LOG_DEBUG: ratio_value: 1" in output.splitlines(), \
                "Wrong message"
@@ -185,21 +185,21 @@ class Test_tiering_config_env(object):
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:-1:1")
 
         assert output.splitlines()[0] == \
-            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: -1", "Wrong message"
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Failed to parse pmem size: -1", "Wrong message"
 
     def test_FSDAX_negative_size_min(self):
         output = self.get_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:-9223372036854775808:1")
 
         assert output.splitlines()[0] == \
-            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: -9223372036854775808", "Wrong message"
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Failed to parse pmem size: -9223372036854775808", "Wrong message"
 
     def test_FSDAX_wrong_size(self):
         output = self.get_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:as:1")
 
         assert output.splitlines()[0] == \
-            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: as", "Wrong message"
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Failed to parse pmem size: as", "Wrong message"
 
     def test_FSDAX_negative_ratio(self):
         output = self.get_cmd_output(
