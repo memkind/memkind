@@ -91,7 +91,7 @@ class Test_tiering_log(Helper):
             self.log_debug_prefix + r"free\(" + re_hex_or_nil + r"\)$",
             self.log_debug_prefix + r"kind_name: \w+$",
             self.log_debug_prefix + r"pmem_path: .*$",  # TODO add path re
-            self.log_debug_prefix + r"pmem_size: (\(null\))|\d+$",
+            self.log_debug_prefix + r"pmem_size: \d+$",
             self.log_debug_prefix + r"ratio_value: \d+$",
         ]
 
@@ -211,7 +211,7 @@ class Test_tiering_config_env(Helper):
             validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
-            "Unsupported pmem_size format: -1", "Wrong message"
+            "Failed to parse pmem size: -1", "Wrong message"
 
     def test_FSDAX_negative_size_min(self):
         output = self.get_ld_preload_cmd_output(
@@ -219,7 +219,7 @@ class Test_tiering_config_env(Helper):
             validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
-            "Unsupported pmem_size format: -9223372036854775808", \
+            "Failed to parse pmem size: -9223372036854775808", \
             "Wrong message"
 
     def test_FSDAX_wrong_size(self):
@@ -228,7 +228,7 @@ class Test_tiering_config_env(Helper):
             validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
-            "Unsupported pmem_size format: as", "Wrong message"
+            "Failed to parse pmem size: as", "Wrong message"
 
     def test_FSDAX_negative_ratio(self):
         output = self.get_ld_preload_cmd_output(

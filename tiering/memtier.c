@@ -102,7 +102,7 @@ MEMTIER_EXPORT void free(void *ptr)
 }
 
 static memkind_t get_kind(const char *str, const char *pmem_path,
-                          const char *pmem_size)
+                          size_t pmem_size)
 {
     memkind_t kind = NULL;
     if (strcmp(str, "DRAM") == 0) {
@@ -113,7 +113,7 @@ static memkind_t get_kind(const char *str, const char *pmem_path,
 
     log_debug("kind_name: %s", kind->name);
     log_debug("pmem_path: %s", pmem_path);
-    log_debug("pmem_size: %s", pmem_size);
+    log_debug("pmem_size: %zu", pmem_size);
 
     return kind;
 }
@@ -123,8 +123,8 @@ static int create_tiered_kind_from_env(char *env_var_string)
 {
     char *kind_name = NULL;
     char *pmem_path = NULL;
-    char *pmem_size = NULL;
-    unsigned ratio_value = -1;
+    size_t pmem_size;
+    unsigned ratio_value = 0;
     struct memtier_builder *builder = NULL;
 
     int ret = ctl_load_config(env_var_string, &kind_name, &pmem_path,
