@@ -158,59 +158,88 @@ class Test_tiering_config_env(object):
             "' returns: " + str(retcode) + "\noutput: " + output
         return output
 
-    def test_DRAM_only(self):
+    @pytest.mark.parametrize("ratio", ["1", "1000", "4294967295"])
+    def test_DRAM_only(self, ratio):
         output = self.get_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1", log_level="2")
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio, log_level="2")
 
         assert "MEMKIND_MEM_TIERING_LOG_DEBUG: kind_name: DRAM" in output.splitlines(), \
                "Wrong message"
-        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: ratio_value: 1" in output.splitlines(), \
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: ratio_value: " + ratio in output.splitlines(), \
                "Wrong message"
 
-    def test_FSDAX_only(self):
+    @pytest.mark.parametrize("pmem_size", ["0", "1"])
+    def test_FSDAX_only_pmem_size(self, pmem_size):
         output = self.get_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:1", log_level="2")
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1", log_level="2")
 
         assert "MEMKIND_MEM_TIERING_LOG_DEBUG: kind_name: FS_DAX" in output.splitlines(), \
                "Wrong message"
         assert "MEMKIND_MEM_TIERING_LOG_DEBUG: pmem_path: /tmp/" in output.splitlines(), \
                "Wrong message"
-        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: pmem_size: 10G" in output.splitlines(), \
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: pmem_size: " + pmem_size in output.splitlines(), \
                "Wrong message"
         assert "MEMKIND_MEM_TIERING_LOG_DEBUG: ratio_value: 1" in output.splitlines(), \
                "Wrong message"
 
-    def test_FSDAX_negative_size(self):
+    @pytest.mark.parametrize("pmem_size", ["33554432", "32768k", "32M"])
+    def test_FSDAX_only_pmem_size_max(self, pmem_size):
         output = self.get_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:-1:1")
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1", log_level="2")
+
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: kind_name: FS_DAX" in output.splitlines(), \
+               "Wrong message"
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: pmem_path: /tmp/" in output.splitlines(), \
+               "Wrong message"
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: pmem_size: 33554432" in output.splitlines(), \
+               "Wrong message"
+        assert "MEMKIND_MEM_TIERING_LOG_DEBUG: ratio_value: 1" in output.splitlines(), \
+               "Wrong message"
+
+    @pytest.mark.parametrize("pmem_size", ["-1", "-4294967295", "-18446744073709551615"])
+    def test_FSDAX_negative_size(self, pmem_size):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1")
 
         assert output.splitlines()[0] == \
-            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: -1", "Wrong message"
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: " + \
+            pmem_size, "Wrong message"
 
-    def test_FSDAX_negative_size_min(self):
+    @pytest.mark.parametrize("pmem_size", ["33554433", "32769k", "33M"])
+    def test_FSDAX_pmem_size_too_high(self, pmem_size):
         output = self.get_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:-9223372036854775808:1")
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1")
 
         assert output.splitlines()[0] == \
-            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: -9223372036854775808", "Wrong message"
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Provided pmem size is too big: " + pmem_size + ". The max size is: 33554432", \
+            "Wrong message"
 
-    def test_FSDAX_wrong_size(self):
+    def test_FSDAX_no_size(self):
         output = self.get_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:as:1")
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX")
 
         assert output.splitlines()[0] == \
-            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: as", "Wrong message"
+            "MEMKIND_MEM_TIERING_LOG_ERROR: PMEM size not provided", "Wrong message"
+
+    @pytest.mark.parametrize("pmem_size", ["as", "10k1", "M", "M2", "10kM"])
+    def test_FSDAX_wrong_size(self, pmem_size):
+        output = self.get_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1")
+
+        assert output.splitlines()[0] == \
+            "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported pmem_size format: " + \
+            pmem_size, "Wrong message"
 
     def test_FSDAX_negative_ratio(self):
         output = self.get_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:-1")
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10k:-1")
 
         assert output.splitlines()[0] == \
             "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported ratio: -1", "Wrong message"
 
     def test_FSDAX_wrong_ratio(self):
         output = self.get_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:a")
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10k:a")
 
         assert output.splitlines()[0] == \
             "MEMKIND_MEM_TIERING_LOG_ERROR: Unsupported ratio: a", "Wrong message"
