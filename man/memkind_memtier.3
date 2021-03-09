@@ -18,9 +18,11 @@ functionality is considered as stable API (STANDARD API).
 .sp
 .BI "struct memtier_tier *memtier_tier_new(memkind_t " "kind");
 .br
-.BI "void memtier_tier_delete(struct memtier_tier  " "*tier" );
+.BI "void memtier_tier_delete(struct memtier_tier  " "*tier");
 .br
-.BI "struct memtier_builder *memtier_builder(void);"
+.BI "struct memtier_builder *memtier_builder_new(void);"
+.br
+.BI "void memtier_builder_delete(struct memtier_builder " "*builder");
 .br
 .BI "int memtier_builder_add_tier(struct memtier_builder " "*builder" ", struct memtier_tier " "*tier" ", unsigned " "tier_ratio");
 .br

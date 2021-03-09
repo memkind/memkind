@@ -21,6 +21,7 @@ static int destructed;
 
 // TODO create structure to keep kind + multiple tiers
 static struct memtier_kind *current_kind;
+static struct memtier_builder *current_builder;
 static struct memtier_tier *current_tier;
 
 MEMTIER_EXPORT void *malloc(size_t size)
@@ -120,23 +121,24 @@ static int create_tiered_kind_from_env(char *env_var_string)
         return -1;
     }
 
-    struct memtier_builder *builder = memtier_builder();
-    if (builder == NULL) {
+    current_builder = memtier_builder_new();
+    if (current_builder == NULL) {
         return -1;
     }
 
-    ret = memtier_builder_add_tier(builder, current_tier, ratio_value);
+    ret = memtier_builder_add_tier(current_builder, current_tier, ratio_value);
     if (ret != 0) {
-        // TODO call sth like buildier_delete?
+        memtier_builder_delete(current_builder);
         return -1;
     }
 
-    ret = memtier_builder_set_policy(builder, MEMTIER_DUMMY_VALUE);
+    ret = memtier_builder_set_policy(current_builder, MEMTIER_DUMMY_VALUE);
     if (ret != 0) {
+        memtier_builder_delete(current_builder);
         return -1;
     }
 
-    return memtier_builder_construct_kind(builder, &current_kind);
+    return memtier_builder_construct_kind(current_builder, &current_kind);
 }
 
 static pthread_once_t init_once = PTHREAD_ONCE_INIT;
@@ -167,6 +169,7 @@ static MEMTIER_FINI void memtier_fini(void)
     if (current_kind) {
         // TODO currently we handle one tier
         memtier_tier_delete(current_tier);
+        memtier_builder_delete(current_builder);
         memtier_delete_kind(current_kind);
     }
 
