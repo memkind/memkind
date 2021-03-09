@@ -34,9 +34,9 @@ static void log_generic(message_type_t type, const char *format, va_list args)
         assert(0 && "failed to acquire log mutex");
     }
 
-    fprintf(stderr, "%s: ", message_prefixes[type]);
-    vfprintf(stderr, format, args);
-    fprintf(stderr, "\n");
+    dprintf(2, "%s: ", message_prefixes[type]);
+    vdprintf(2, format, args);
+    dprintf(2, "\n");
 
     if (pthread_mutex_unlock(&log_lock) != 0) {
         assert(0 && "failed to release log mutex");
