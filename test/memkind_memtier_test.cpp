@@ -26,7 +26,7 @@ protected:
     void SetUp()
     {
         m_tier = memtier_tier_new(MEMKIND_DEFAULT);
-        struct memtier_builder *builder = memtier_builder();
+        struct memtier_builder *builder = memtier_builder_new();
         ASSERT_NE(nullptr, m_tier);
         ASSERT_NE(nullptr, builder);
         int res = memtier_builder_add_tier(builder, m_tier, 1);
@@ -35,6 +35,7 @@ protected:
         ASSERT_EQ(0, res);
         res = memtier_builder_construct_kind(builder, &m_tier_kind);
         ASSERT_EQ(0, res);
+        memtier_builder_delete(builder);
     }
 
     void TearDown()
@@ -101,16 +102,17 @@ TEST_F(MemkindMemtierTest, test_tier_allocate)
 
 TEST_F(MemkindMemtierTest, test_tier_builder_failure)
 {
-    struct memtier_builder *builder = memtier_builder();
+    struct memtier_builder *builder = memtier_builder_new();
     ASSERT_NE(nullptr, builder);
     int res = memtier_builder_add_tier(builder, NULL, 1);
     ASSERT_NE(0, res);
+    memtier_builder_delete(builder);
 }
 
 TEST_F(MemkindMemtierTest, test_tier_builder_set_policy_failure)
 {
     struct memtier_tier *tier = memtier_tier_new(MEMKIND_DEFAULT);
-    struct memtier_builder *builder = memtier_builder();
+    struct memtier_builder *builder = memtier_builder_new();
     ASSERT_NE(nullptr, tier);
     ASSERT_NE(nullptr, builder);
     int res = memtier_builder_add_tier(builder, tier, 1);
@@ -119,6 +121,7 @@ TEST_F(MemkindMemtierTest, test_tier_builder_set_policy_failure)
     res = memtier_builder_set_policy(builder, fake_policy);
     ASSERT_NE(0, res);
     memtier_tier_delete(tier);
+    memtier_builder_delete(builder);
 }
 
 TEST_F(MemkindMemtierTest, test_tier_free_nullptr)
