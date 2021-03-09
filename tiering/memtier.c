@@ -123,22 +123,26 @@ static int create_tiered_kind_from_env(char *env_var_string)
 
     current_builder = memtier_builder_new();
     if (current_builder == NULL) {
-        return -1;
+        goto tier_delete;
     }
 
     ret = memtier_builder_add_tier(current_builder, current_tier, ratio_value);
     if (ret != 0) {
-        memtier_builder_delete(current_builder);
-        return -1;
+        goto builder_delete;
     }
 
     ret = memtier_builder_set_policy(current_builder, MEMTIER_DUMMY_VALUE);
     if (ret != 0) {
-        memtier_builder_delete(current_builder);
-        return -1;
+        goto builder_delete;
     }
 
     return memtier_builder_construct_kind(current_builder, &current_kind);
+
+tier_delete:
+    memtier_tier_delete(current_tier);
+builder_delete:
+    memtier_builder_delete(current_builder);
+    return -1;
 }
 
 static pthread_once_t init_once = PTHREAD_ONCE_INIT;
