@@ -899,7 +899,9 @@ MEMKIND_EXPORT int memkind_create_pmem(const char *dir, size_t max_size,
     int oerrno;
 
     if (max_size && max_size < MEMKIND_PMEM_MIN_SIZE) {
-        log_err("Cannot create pmem: invalid size.");
+        log_err(
+            "Cannot create pmem: invalid size: %zu - size must be equal 0 or greater than or equal to MEMKIND_PMEM_MIN_SIZE",
+            max_size);
         return MEMKIND_ERROR_INVALID;
     }
 
