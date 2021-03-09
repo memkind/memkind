@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 static const char *message_prefixes[MESSAGE_TYPE_MAX_VALUE] = {
     [MESSAGE_TYPE_ERROR] = "MEMKIND_MEM_TIERING_LOG_ERROR",
@@ -30,14 +31,24 @@ static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static void log_generic(message_type_t type, const char *format, va_list args)
 {
+    static char buf[4096], *b;
+
+    b = buf + sprintf(buf, "%s: ", message_prefixes[type]);
+    int blen = sizeof buf + (buf - b) - 1;
+    int len = vsnprintf(b, blen, format, args);
+    sprintf(b + len, "\n");
+    b += len + 1;
+
+    const char overflow_msg[] = "Warning: message truncated.\n";
+    if (len >= blen)
+        if (write(STDERR_FILENO, overflow_msg, sizeof overflow_msg))
+            ;
+
     if (pthread_mutex_lock(&log_lock) != 0) {
         assert(0 && "failed to acquire log mutex");
     }
-
-    fprintf(stderr, "%s: ", message_prefixes[type]);
-    vfprintf(stderr, format, args);
-    fprintf(stderr, "\n");
-
+    if (write(STDERR_FILENO, buf, b - buf))
+        ;
     if (pthread_mutex_unlock(&log_lock) != 0) {
         assert(0 && "failed to release log mutex");
     }
