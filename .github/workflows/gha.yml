@@ -35,6 +35,36 @@ jobs:
         skip: ./jemalloc,./test/gtest_fused/gtest,./.github/workflows/gha.yml
         ignore_words_list: "ue"
 
+  docker-build:
+    runs-on: ${{ matrix.os }}
+    name: Docker build  ${{ matrix.docker_image }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        docker_image: [fedora-32, ubuntu-20.04, centos-7]
+    env:
+        MEMKIND_HOST_WORKDIR: ${{ github.workspace }}
+        ENABLE_HWLOC: 1
+        DOCKER_RUN_SCRIPT: utils/docker/run_local.sh
+        DOCKER_IMAGE_FULL_PATH: utils/docker/Dockerfile.${{ matrix.docker_image }}
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Change permissions for Docker user
+        run: sudo chmod -R o+rwx ${{ github.workspace }}
+
+      - name: Run Docker build
+        run: |
+          if [ "${{ matrix.docker_image }}" == centos-7 ]; then
+            sudo --preserve-env=MEMKIND_HOST_WORKDIR "${{ env.DOCKER_RUN_SCRIPT }}" "${{ env.DOCKER_IMAGE_FULL_PATH }}"
+          else
+            sudo --preserve-env=MEMKIND_HOST_WORKDIR,ENABLE_HWLOC "${{ env.DOCKER_RUN_SCRIPT }}" "${{ env.DOCKER_IMAGE_FULL_PATH }}"
+          fi
+
   building:
     runs-on: ${{ matrix.os }}
     name: Building memkind daxctl ${{ matrix.daxctl }} | hwloc ${{ matrix.hwloc }} | ${{ matrix.os }} | ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
@@ -73,7 +103,7 @@ jobs:
     - name: Install daxctl dependency
       run: |
           if [ "${{ matrix.daxctl }}" == true ]; then
-              sudo apt install libdaxctl-dev
+            sudo apt install libdaxctl-dev
           else
             echo "Skipping daxctl installation"
           fi
