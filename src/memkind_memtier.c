@@ -54,9 +54,14 @@ MEMKIND_EXPORT void memtier_tier_delete(struct memtier_tier *tier)
     jemk_free(tier);
 }
 
-MEMKIND_EXPORT struct memtier_builder *memtier_builder(void)
+MEMKIND_EXPORT struct memtier_builder *memtier_builder_new(void)
 {
     return jemk_malloc(sizeof(struct memtier_builder));
+}
+
+MEMKIND_EXPORT void memtier_builder_delete(struct memtier_builder *builder)
+{
+    jemk_free(builder);
 }
 
 MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
@@ -89,7 +94,6 @@ memtier_builder_construct_kind(struct memtier_builder *builder,
     *kind = (struct memtier_kind *)jemk_malloc(sizeof(struct memtier_kind));
     if (*kind) {
         (*kind)->todo_kind = builder->todo_kind;
-        jemk_free(builder);
         return 0;
     }
     log_err("malloc() failed.");

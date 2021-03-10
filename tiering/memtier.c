@@ -103,6 +103,8 @@ static int create_tiered_kind_from_env(char *env_var_string)
     char *pmem_path = NULL;
     char *pmem_size = NULL;
     unsigned ratio_value = -1;
+    struct memtier_builder *builder = NULL;
+
     int ret = ctl_load_config(env_var_string, &kind_name, &pmem_path,
                               &pmem_size, &ratio_value);
     if (ret != 0) {
@@ -120,23 +122,37 @@ static int create_tiered_kind_from_env(char *env_var_string)
         return -1;
     }
 
-    struct memtier_builder *builder = memtier_builder();
-    if (builder == NULL) {
-        return -1;
+    builder = memtier_builder_new();
+    if (!builder) {
+        ret = -1;
+        goto tier_delete;
     }
 
     ret = memtier_builder_add_tier(builder, current_tier, ratio_value);
     if (ret != 0) {
-        // TODO call sth like buildier_delete?
-        return -1;
+        goto builder_delete;
     }
 
     ret = memtier_builder_set_policy(builder, MEMTIER_DUMMY_VALUE);
     if (ret != 0) {
-        return -1;
+        goto builder_delete;
     }
 
-    return memtier_builder_construct_kind(builder, &current_kind);
+    ret = memtier_builder_construct_kind(builder, &current_kind);
+    if (ret != 0) {
+        goto builder_delete;
+    }
+    memtier_builder_delete(builder);
+
+    return ret;
+
+builder_delete:
+    memtier_builder_delete(builder);
+
+tier_delete:
+    memtier_tier_delete(current_tier);
+
+    return ret;
 }
 
 static pthread_once_t init_once = PTHREAD_ONCE_INIT;
