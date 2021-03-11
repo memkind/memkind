@@ -9,7 +9,7 @@ jobs:
     steps:
 
     - name: Install basic dependencies
-      run: sudo apt install autoconf libnuma-dev
+      run: sudo apt install autoconf clang-format-11 libnuma-dev
 
     - name: Checkout
       uses: actions/checkout@v2
