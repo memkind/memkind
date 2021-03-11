@@ -554,7 +554,7 @@ code-style-check:
 if HAVE_CLANG_FORMAT
 	find $(CLANG_FORMAT_FILES) | xargs $(CLANG_FORMAT) --dry-run --Werror
 else
-	@echo "clang-format not found please install version >= 10.0.0 or later and run configure again"
+	@echo "clang-format not found please install version >= 11.0.0 or later and run configure again"
 	exit 1
 endif
 
@@ -562,7 +562,7 @@ code-style-apply:
 if HAVE_CLANG_FORMAT
 	find $(CLANG_FORMAT_FILES) | xargs $(CLANG_FORMAT) -i
 else
-	@echo "clang-format not found please install version >= 10.0.0 or later and run configure again"
+	@echo "clang-format not found please install version >= 11.0.0 or later and run configure again"
 	exit 1
 endif
 
