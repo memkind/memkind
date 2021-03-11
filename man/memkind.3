@@ -921,6 +921,9 @@ across all persistent memory NUMA nodes.
 .B MEMKIND_REGULAR
 Allocate from regular memory using the default page size. Regular means general purpose memory
 from the NUMA nodes containing CPUs.
+.TP
+.B MEMKIND_CPU_LOCAL
+Allocate from the memory that has the closest NUMA distance to the CPU of the calling process.
 .SH "MEMORY TYPES"
 The available types of memory:
 .TP

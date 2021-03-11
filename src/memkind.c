@@ -9,6 +9,7 @@
 #include <memkind/internal/heap_manager.h>
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_capacity.h>
+#include <memkind/internal/memkind_cpu.h>
 #include <memkind/internal/memkind_dax_kmem.h>
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_gbtlb.h>
@@ -19,7 +20,6 @@
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_pmem.h>
 #include <memkind/internal/memkind_private.h>
-#include <memkind/internal/memkind_regular.h>
 #include <memkind/internal/tbb_wrapper.h>
 
 #include "config.h"
@@ -256,7 +256,15 @@ static struct memkind MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC = {
     .init_once = PTHREAD_ONCE_INIT,
 };
 
+static struct memkind MEMKIND_CPU_LOCAL_STATIC = {
+    .ops = &MEMKIND_CPU_LOCAL_OPS,
+    .partition = MEMKIND_PARTITION_CPU_LOCAL,
+    .name = "memkind_cpu_local",
+    .init_once = PTHREAD_ONCE_INIT,
+};
+
 // clang-format off
+
 MEMKIND_EXPORT struct memkind *MEMKIND_DEFAULT = &MEMKIND_DEFAULT_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HUGETLB = &MEMKIND_HUGETLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_INTERLEAVE = &MEMKIND_INTERLEAVE_STATIC;
@@ -283,6 +291,7 @@ MEMKIND_EXPORT struct memkind *MEMKIND_LOWEST_LATENCY_LOCAL = &MEMKIND_LOWEST_LA
 MEMKIND_EXPORT struct memkind *MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED = &MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_BANDWIDTH_LOCAL = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC;
+MEMKIND_EXPORT struct memkind *MEMKIND_CPU_LOCAL = &MEMKIND_CPU_LOCAL_STATIC;
 
 struct memkind_registry {
     struct memkind *partition_map[MEMKIND_MAX_KIND];
@@ -312,12 +321,13 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE] = &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC,
         [MEMKIND_PARTITION_HIGHEST_CAPACITY] = &MEMKIND_HIGHEST_CAPACITY_STATIC,
         [MEMKIND_PARTITION_HIGHEST_CAPACITY_PREFERRED] = &MEMKIND_HIGHEST_CAPACITY_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL] =  &MEMKIND_HIGHEST_CAPACITY_LOCAL_STATIC,
+        [MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL] = &MEMKIND_HIGHEST_CAPACITY_LOCAL_STATIC,
         [MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL_PREFERRED] = &MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_STATIC,
         [MEMKIND_PARTITION_LOWEST_LATENCY_LOCAL] = &MEMKIND_LOWEST_LATENCY_LOCAL_STATIC,
         [MEMKIND_PARTITION_LOWEST_LATENCY_LOCAL_PREFERRED] = &MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_STATIC,
         [MEMKIND_PARTITION_HIGHEST_BANDWIDTH_LOCAL] = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_STATIC,
         [MEMKIND_PARTITION_HIGHEST_BANDWIDTH_LOCAL_PREFERRED] = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC,
+        [MEMKIND_PARTITION_CPU_LOCAL] = &MEMKIND_CPU_LOCAL_STATIC,
     },
     MEMKIND_NUM_BASE_KIND,
     PTHREAD_MUTEX_INITIALIZER

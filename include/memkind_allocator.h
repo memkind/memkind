@@ -49,7 +49,8 @@ enum class kinds
     LOWEST_LATENCY_LOCAL = 19,
     LOWEST_LATENCY_LOCAL_PREFERRED = 20,
     HIGHEST_BANDWIDTH_LOCAL = 21,
-    HIGHEST_BANDWIDTH_LOCAL_PREFERRED = 22
+    HIGHEST_BANDWIDTH_LOCAL_PREFERRED = 22,
+    CPU_LOCAL = 23
 };
 
 namespace static_kind
@@ -157,6 +158,9 @@ public:
                 break;
             case libmemkind::kinds::HIGHEST_BANDWIDTH_LOCAL_PREFERRED:
                 _kind = MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED;
+                break;
+            case libmemkind::kinds::CPU_LOCAL:
+                _kind = MEMKIND_CPU_LOCAL;
                 break;
             default:
                 throw std::runtime_error("Unknown libmemkind::kinds");
