@@ -290,10 +290,10 @@ AC_SUBST([enable_heap_manager])
 
 #===============================clang-format====================================
 clang_support=no;
-AC_CHECK_PROGS(CLANG_FORMAT, [clang-format-11 clang-format-10 clang-format], "")
+AC_CHECK_PROGS(CLANG_FORMAT, [clang-format-11 clang-format], "")
 if test "$CLANG_FORMAT" != ""; then
   CLANG_FORMAT_VERSION=$($CLANG_FORMAT --version)
-  AX_COMPARE_VERSION([$CLANG_FORMAT_VERSION], [ge], [10.0.0], [clang_support=yes], [])
+  AX_COMPARE_VERSION([$CLANG_FORMAT_VERSION], [ge], [11.0.0], [clang_support=yes], [])
 fi
 AC_SUBST([clang_format], $CLANG_FORMAT)
 AM_CONDITIONAL([HAVE_CLANG_FORMAT], [test "x$clang_support" = xyes])
@@ -338,6 +338,6 @@ AC_MSG_RESULT([
 else
 AC_MSG_RESULT([
                Automatic code style formatting is disabled. To enable this feature please
-               install clang-format v10.0.0 or later and run configure again.])
+               install clang-format v11.0.0 or later and run configure again.])
 fi
 AC_MSG_RESULT([=================================================================================])

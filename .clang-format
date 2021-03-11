@@ -15,8 +15,7 @@ BraceWrapping:
   AfterUnion: false
   BeforeCatch: false
   BeforeElse: false
-# Uncomment after switching to clang-format >= 11.0
-# BeforeWhile: false
+  BeforeWhile: false
   IndentBraces: false
   SplitEmptyFunction: false
 AlignConsecutiveMacros: true
