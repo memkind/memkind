@@ -578,10 +578,6 @@ utils/docker/docker_run_test.sh
 utils/docker/hwloc.spec.mk
 utils/docker/run_local.sh
 utils/docker/set_host_configuration.sh
-utils/memkind_malloc_wrapper/Makefile.mk
-utils/memkind_malloc_wrapper/README.md
-utils/memkind_malloc_wrapper/memkind_malloc_wrapper_test.c
-utils/memkind_malloc_wrapper/memkind_malloc_wrapper_test.sh
 utils/memory_matrix/Makefile.mk
 utils/memory_matrix/memory_matrix.c
 utils/qemu/README.md
