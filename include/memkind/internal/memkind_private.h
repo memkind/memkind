@@ -106,26 +106,6 @@ typedef enum memkind_node_variant_t
     NODE_VARIANT_MAX_EXT = 3
 } memkind_node_variant_t;
 
-struct memtier_tier {
-    memkind_t kind;    // Memory kind
-    size_t alloc_size; // Allocated size #TODO make this atomic
-};
-
-struct memtier_tier_cfg {
-    struct memtier_tier *tier; // Memory tier
-    unsigned tier_ratio;       // Memory tier ratio
-};
-
-struct memtier_builder {
-    unsigned size;                // Number of memory tiers
-    unsigned policy;              // Tiering policy
-    struct memtier_tier_cfg *cfg; // Memory Tier configuration
-};
-
-struct memtier_kind {
-    struct memtier_builder *builder; // Tiering kind configuration
-};
-
 void memkind_init(memkind_t kind, bool check_numa);
 
 void *kind_mmap(struct memkind *kind, void *addr, size_t size);

@@ -298,6 +298,33 @@ fi
 AC_SUBST([clang_format], $CLANG_FORMAT)
 AM_CONDITIONAL([HAVE_CLANG_FORMAT], [test "x$clang_support" = xyes])
 
+#===============================atomic=========================================
+AC_CHECK_HEADERS(stdatomic.h)
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <stdint.h>
+#include <stdatomic.h>
+]],[[
+atomic_int v = 8;
+atomic_fetch_add_explicit(&v, 1, memory_order_relaxed);
+]])], [memkind_c11_atomics="1"], [memkind_c11_atomics="0"])
+if test "x$memkind_c11_atomics" = "x1" ; then
+  AC_DEFINE([MEMKIND_ATOMIC_C11_SUPPORT], [1], [C11 Atomics are supported])
+fi
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]],[[
+int v = 8;
+__atomic_add_fetch(&v, 1, __ATOMIC_RELAXED);
+]])], [memkind_atomic_builtins="1"], [memkind_atomic_builtins="0"])
+if test "x$memkind_atomic_builtins" = "x1" ; then
+  AC_DEFINE([MEMKIND_ATOMIC_BUILTINS_SUPPORT], [1], [__atomic_c* compiler builtins are supported])
+fi
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]],[[
+int v = 8;
+__sync_add_and_fetch(&v, 1);
+]])], [memkind_sync_fetch="1"], [memkind_sync_fetch="0"])
+if test "x$memkind_sync_fetch" = "x1" ; then
+  AC_DEFINE([MEMKIND_ATOMIC_SYNC_SUPPORT], [1], [__sync_* compiler builtins are supported])
+fi
+
 #============================cxx11=============================================
 
 AX_CXX_COMPILE_STDCXX_11([noext], [optional])
