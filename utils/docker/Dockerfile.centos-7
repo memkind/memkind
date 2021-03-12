@@ -26,7 +26,7 @@ RUN yum update -y && yum install -y \
     numactl \
     numactl-devel \
     pkgconfig \
-    python-pip \
+    python3-pip \
     rpmdevtools \
     rpm-build \
     rubygem-asciidoctor \
@@ -38,9 +38,9 @@ RUN yum update -y && yum install -y \
  && yum clean all
 
 # Install pytest
-RUN pip install --upgrade pip
-RUN pip install wheel
-RUN pip install pytest==3.9.2
+RUN pip3 install --upgrade pip
+RUN pip3 install wheel
+RUN pip3 install pytest==3.9.2
 
 # Add user
 ENV USER memkinduser
