@@ -20,6 +20,9 @@ static struct memtier_registry memtier_registry_g = {
     PTHREAD_MUTEX_INITIALIZER,
 };
 
+// TODO REMOVE THIS !!!!
+static unsigned tier_id;
+
 MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
 {
     if (pthread_mutex_lock(&memtier_registry_g.lock) != 0)
@@ -92,7 +95,7 @@ MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
                                               memtier_policy_t policy)
 {
     // TODO provide setting policy logic
-    if (policy == MEMTIER_DUMMY_VALUE) {
+    if (policy == MEMTIER_POLICY_CIRCULAR) {
         builder->policy = policy;
         return 0;
     }
@@ -100,10 +103,14 @@ MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
     return -1;
 }
 
-static inline memkind_t get_memtier_kind(const struct memtier_kind *tier_kind)
+static inline memkind_t get_memtier_kind(struct memtier_kind *tier_kind)
 {
-    // TODO now assign first memory kind - fix it with policy logic
-    return tier_kind->builder->cfg[0].tier->kind;
+    if (tier_kind->builder->policy == MEMTIER_POLICY_CIRCULAR) {
+        unsigned temp_id = (tier_id++) % tier_kind->builder->size;
+        return tier_kind->builder->cfg[temp_id].tier->kind;
+    }
+    // not reached
+    return NULL;
 }
 
 MEMKIND_EXPORT int
@@ -131,7 +138,7 @@ memtier_builder_construct_kind(struct memtier_builder *builder,
     (*kind)->builder->cfg =
         jemk_calloc(builder->size, sizeof(struct memtier_tier_cfg));
     if (!(*kind)->builder->cfg) {
-        log_err("malloc() failed.");
+        log_err("calloc() failed.");
         goto free_builder;
     }
 
@@ -141,6 +148,7 @@ memtier_builder_construct_kind(struct memtier_builder *builder,
         (*kind)->builder->cfg[i].tier = builder->cfg[i].tier;
         (*kind)->builder->cfg[i].tier_ratio = builder->cfg[i].tier_ratio;
     }
+    tier_id = 0;
     return 0;
 
 free_builder:
@@ -160,7 +168,6 @@ MEMKIND_EXPORT void memtier_delete_kind(struct memtier_kind *kind)
 
 MEMKIND_EXPORT void *memtier_kind_malloc(struct memtier_kind *kind, size_t size)
 {
-    // TODO provide tiering_kind logic
     return memkind_malloc(get_memtier_kind(kind), size);
 }
 
@@ -173,7 +180,6 @@ MEMKIND_EXPORT void *memtier_tier_malloc(struct memtier_tier *tier, size_t size)
 MEMKIND_EXPORT void *memtier_kind_calloc(struct memtier_kind *kind, size_t num,
                                          size_t size)
 {
-    // TODO provide tiering_kind logic
     return memkind_calloc(get_memtier_kind(kind), num, size);
 }
 
@@ -187,8 +193,14 @@ MEMKIND_EXPORT void *memtier_tier_calloc(struct memtier_tier *tier, size_t num,
 MEMKIND_EXPORT void *memtier_kind_realloc(struct memtier_kind *kind, void *ptr,
                                           size_t size)
 {
-    // TODO provide tiering_kind logic
-    return memkind_realloc(get_memtier_kind(kind), ptr, size);
+    // reallocate inside same memtier tier
+    if (ptr) {
+        struct memkind *kind = memkind_detect_kind(ptr);
+        struct memtier_tier *tier =
+            memtier_registry_g.kind_map[kind->partition];
+        return memtier_tier_realloc(tier, ptr, size);
+    }
+    return memtier_kind_malloc(kind, size);
 }
 
 MEMKIND_EXPORT void *memtier_tier_realloc(struct memtier_tier *tier, void *ptr,
@@ -213,7 +225,6 @@ MEMKIND_EXPORT int memtier_kind_posix_memalign(struct memtier_kind *kind,
                                                void **memptr, size_t alignment,
                                                size_t size)
 {
-    // TODO provide tiering_kind logic
     return memkind_posix_memalign(get_memtier_kind(kind), memptr, alignment,
                                   size);
 }
