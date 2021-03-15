@@ -42,6 +42,13 @@ class Helper(object):
             "' returns: " + str(retcode) + "\noutput: " + output
         return output.splitlines()
 
+    def kind_env_to_kind_name(self, kind_env):
+        if kind_env == "DRAM":
+            return "memkind_default"
+        elif kind_env == "FS_DAX":
+            return "memkind_dax_kmem"
+        return ""
+
 
 class Test_tiering_log(Helper):
 
@@ -179,24 +186,30 @@ class Test_tiering_config_env(Helper):
     def test_DRAM_only(self):
         output = self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:1", log_level="2")
+        expected_kind_name = self.kind_env_to_kind_name("DRAM")
 
-        assert self.log_debug_prefix + "kind_name: DRAM" in output, \
-            "Wrong message"
+        assert self.log_debug_prefix + "kind_name: " + expected_kind_name \
+            in output, "Wrong message"
         assert self.log_debug_prefix + "ratio_value: 1" in output, \
             "Wrong message"
 
+    # TODO enable this check after implementing full FS_DAX support in
+    # libmemtier
+    """
     def test_FSDAX_only(self):
         output = self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:1", log_level="2")
+        expected_kind_name = self.kind_env_to_kind_name("FS_DAX")
 
-        assert self.log_debug_prefix + "kind_name: FS_DAX" in output, \
-            "Wrong message"
+        assert self.log_debug_prefix + "kind_name: " + expected_kind_name \
+            in output, "Wrong message"
         assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
             "Wrong message"
         assert self.log_debug_prefix + "pmem_size: 10G" in output, \
             "Wrong message"
         assert self.log_debug_prefix + "ratio_value: 1" in output, \
             "Wrong message"
+    """
 
     def test_FSDAX_negative_size(self):
         output = self.get_ld_preload_cmd_output(

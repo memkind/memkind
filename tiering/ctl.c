@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2021 Intel Corporation. */
 
+#include <memkind.h>
 #include <tiering/memtier_log.h>
 
 #include <errno.h>
@@ -37,9 +38,13 @@ static int ctl_parse_u(const char *str, unsigned *dest)
     return 0;
 }
 
-static int ctl_validate_kind_name(const char *kind_name)
+static int ctl_parse_kind_name(const char *kind_name, memkind_t *kind)
 {
-    if (strcmp(kind_name, "DRAM") && strcmp(kind_name, "FS_DAX")) {
+    if (strcmp(kind_name, "DRAM") == 0) {
+        *kind = MEMKIND_DEFAULT;
+    } else if (strcmp(kind_name, "FS_DAX") == 0) {
+        *kind = MEMKIND_DAX_KMEM;
+    } else {
         log_err("Unsupported kind: %s", kind_name);
         return -1;
     }
@@ -92,21 +97,22 @@ static int ctl_parse_ratio(const char *ratio_str, unsigned *dest)
  * ctl_parse_query -- (internal) splits an entire query string
  * into single queries
  */
-static int ctl_parse_query(char *qbuf, char **kind_name, char **pmem_path,
+static int ctl_parse_query(char *qbuf, memkind_t *kind, char **pmem_path,
                            char **pmem_size, unsigned *ratio_value)
 {
     char *sptr = NULL;
-    *kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
-    if (*kind_name == NULL) {
+    char *kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
+    if (kind_name == NULL) {
         log_err("Kind name string not found in: %s", qbuf);
         return -1;
     }
-    int ret = ctl_validate_kind_name(*kind_name);
+
+    int ret = ctl_parse_kind_name(kind_name, kind);
     if (ret != 0) {
         return -1;
     }
 
-    if (!strcmp(*kind_name, "FS_DAX")) {
+    if (*kind == MEMKIND_DAX_KMEM) {
         *pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
         *pmem_size = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
         ret = ctl_validate_pmem_size(*pmem_size);
@@ -137,7 +143,7 @@ static int ctl_parse_query(char *qbuf, char **kind_name, char **pmem_path,
 /*
  * ctl_load_config -- splits an entire config into query strings
  */
-int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
+int ctl_load_config(char *buf, memkind_t *kind, char **pmem_path,
                     char **pmem_size, unsigned *ratio_value)
 {
     int ret = 0;
@@ -150,8 +156,7 @@ int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
         return -1;
     }
     while (qbuf != NULL) {
-        ret =
-            ctl_parse_query(qbuf, kind_name, pmem_path, pmem_size, ratio_value);
+        ret = ctl_parse_query(qbuf, kind, pmem_path, pmem_size, ratio_value);
         if (ret != 0) {
             log_err("Failed to parse query: %s", qbuf);
             return -1;
