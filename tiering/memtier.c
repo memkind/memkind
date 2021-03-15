@@ -133,7 +133,7 @@ static int create_tiered_kind_from_env(char *env_var_string)
         goto builder_delete;
     }
 
-    ret = memtier_builder_set_policy(builder, MEMTIER_DUMMY_VALUE);
+    ret = memtier_builder_set_policy(builder, MEMTIER_POLICY_CIRCULAR);
     if (ret != 0) {
         goto builder_delete;
     }
