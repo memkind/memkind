@@ -116,7 +116,7 @@ memtier_builder_construct_kind(struct memtier_builder *builder,
         return -1;
     }
 
-    *kind = jemk_malloc(sizeof(*kind));
+    *kind = jemk_malloc(sizeof(sizeof(struct memtier_kind)));
     if (!*kind) {
         log_err("malloc() failed.");
         return -1;
