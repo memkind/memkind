@@ -111,7 +111,18 @@ TEST_F(MemkindMemtierTest, test_tier_builder_failure)
 {
     struct memtier_builder *builder = memtier_builder_new();
     ASSERT_NE(nullptr, builder);
-    int res = memtier_builder_add_tier(builder, NULL, 1);
+    int res = memtier_builder_add_tier(builder, nullptr, 1);
+    ASSERT_NE(0, res);
+    memtier_builder_delete(builder);
+}
+
+TEST_F(MemkindMemtierTest, test_tier_construct_failure_zero_tiers)
+{
+    struct memtier_kind *tier_kind = nullptr;
+    struct memtier_builder *builder = memtier_builder_new();
+    int res = memtier_builder_set_policy(builder, MEMTIER_DUMMY_VALUE);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_construct_kind(builder, &tier_kind);
     ASSERT_NE(0, res);
     memtier_builder_delete(builder);
 }
