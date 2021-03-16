@@ -15,43 +15,6 @@ private:
     {}
 };
 
-class MemkindMemtierBuilderTest: public ::testing::Test
-{
-private:
-    struct memtier_tier *m_tier_default;
-    struct memtier_tier *m_tier_regular;
-
-protected:
-    struct memtier_kind *m_tier_kind;
-
-    void SetUp()
-    {
-        m_tier_default = memtier_tier_new(MEMKIND_DEFAULT);
-        m_tier_regular = memtier_tier_new(MEMKIND_REGULAR);
-        struct memtier_builder *builder = memtier_builder_new();
-        ASSERT_NE(nullptr, m_tier_default);
-        ASSERT_NE(nullptr, m_tier_regular);
-        ASSERT_NE(nullptr, builder);
-
-        int res = memtier_builder_add_tier(builder, m_tier_default, 1);
-        ASSERT_EQ(0, res);
-        res = memtier_builder_add_tier(builder, m_tier_regular, 1000);
-        ASSERT_EQ(0, res);
-        res = memtier_builder_set_policy(builder, MEMTIER_DUMMY_VALUE);
-        ASSERT_EQ(0, res);
-        res = memtier_builder_construct_kind(builder, &m_tier_kind);
-        ASSERT_EQ(0, res);
-        memtier_builder_delete(builder);
-    }
-
-    void TearDown()
-    {
-        memtier_delete_kind(m_tier_kind);
-        memtier_tier_delete(m_tier_default);
-        memtier_tier_delete(m_tier_regular);
-    }
-};
-
 TEST_F(MemkindMemtierTest, test_tier_create_fatal)
 {
     struct memtier_tier *tier = memtier_tier_new(nullptr);
@@ -111,7 +74,18 @@ TEST_F(MemkindMemtierTest, test_tier_builder_failure)
 {
     struct memtier_builder *builder = memtier_builder_new();
     ASSERT_NE(nullptr, builder);
-    int res = memtier_builder_add_tier(builder, NULL, 1);
+    int res = memtier_builder_add_tier(builder, nullptr, 1);
+    ASSERT_NE(0, res);
+    memtier_builder_delete(builder);
+}
+
+TEST_F(MemkindMemtierTest, test_tier_construct_failure_zero_tiers)
+{
+    struct memtier_kind *tier_kind = nullptr;
+    struct memtier_builder *builder = memtier_builder_new();
+    int res = memtier_builder_set_policy(builder, MEMTIER_POLICY_CIRCULAR);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_construct_kind(builder, &tier_kind);
     ASSERT_NE(0, res);
     memtier_builder_delete(builder);
 }
@@ -138,22 +112,42 @@ TEST_F(MemkindMemtierTest, test_tier_free_nullptr)
     }
 }
 
-TEST_F(MemkindMemtierBuilderTest, test_tier_builder_allocation_test_success)
+TEST_F(MemkindMemtierTest, test_tier_builder_allocation_test_success)
 {
+    struct memtier_kind *tier_kind = nullptr;
+    struct memtier_tier *tier_default = memtier_tier_new(MEMKIND_DEFAULT);
+    struct memtier_tier *tier_regular = memtier_tier_new(MEMKIND_REGULAR);
+    struct memtier_builder *builder = memtier_builder_new();
+    ASSERT_NE(nullptr, tier_default);
+    ASSERT_NE(nullptr, tier_regular);
+    ASSERT_NE(nullptr, builder);
+
+    int res = memtier_builder_add_tier(builder, tier_default, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, tier_regular, 1000);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_set_policy(builder, MEMTIER_POLICY_CIRCULAR);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_construct_kind(builder, &tier_kind);
+    ASSERT_EQ(0, res);
+    memtier_builder_delete(builder);
     const size_t size = 512;
-    void *ptr = memtier_kind_malloc(m_tier_kind, size);
+    void *ptr = memtier_kind_malloc(tier_kind, size);
     ASSERT_NE(nullptr, ptr);
     ASSERT_EQ(MEMKIND_DEFAULT, memkind_detect_kind(ptr));
     memtier_free(ptr);
-    ptr = memtier_kind_calloc(m_tier_kind, size, size);
+    ptr = memtier_kind_calloc(tier_kind, size, size);
     ASSERT_NE(nullptr, ptr);
-    ASSERT_EQ(MEMKIND_DEFAULT, memkind_detect_kind(ptr));
-    void *new_ptr = memtier_kind_realloc(m_tier_kind, ptr, size);
+    ASSERT_EQ(MEMKIND_REGULAR, memkind_detect_kind(ptr));
+    void *new_ptr = memtier_kind_realloc(tier_kind, ptr, size);
     ASSERT_NE(nullptr, new_ptr);
-    ASSERT_EQ(MEMKIND_DEFAULT, memkind_detect_kind(ptr));
+    ASSERT_EQ(MEMKIND_REGULAR, memkind_detect_kind(ptr));
     memtier_free(new_ptr);
-    int err = memtier_kind_posix_memalign(m_tier_kind, &ptr, 64, 32);
+    int err = memtier_kind_posix_memalign(tier_kind, &ptr, 64, 32);
     ASSERT_EQ(0, err);
     ASSERT_EQ(MEMKIND_DEFAULT, memkind_detect_kind(ptr));
     memtier_free(ptr);
+    memtier_delete_kind(tier_kind);
+    memtier_tier_delete(tier_regular);
+    memtier_tier_delete(tier_default);
 }
