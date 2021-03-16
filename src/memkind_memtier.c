@@ -239,7 +239,7 @@ MEMKIND_EXPORT int memtier_tier_posix_memalign(struct memtier_tier *tier,
 
 MEMKIND_EXPORT size_t memtier_usable_size(void *ptr)
 {
-    return memkind_malloc_usable_size(NULL, ptr);
+    return jemk_malloc_usable_size(ptr);
 }
 
 MEMKIND_EXPORT void memtier_free(void *ptr)
