@@ -104,11 +104,11 @@ MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
     return -1;
 }
 
-static inline memkind_t get_memtier_kind(struct memtier_kind *tier_kind)
+static inline struct memtier_tier *get_tier(struct memtier_kind *tier_kind)
 {
     if (tier_kind->builder->policy == MEMTIER_POLICY_CIRCULAR) {
         unsigned temp_id = (tier_id++) % tier_kind->builder->size;
-        return tier_kind->builder->cfg[temp_id].tier->kind;
+        return tier_kind->builder->cfg[temp_id].tier;
     }
     // not reached
     return NULL;
@@ -169,7 +169,7 @@ MEMKIND_EXPORT void memtier_delete_kind(struct memtier_kind *kind)
 
 MEMKIND_EXPORT void *memtier_kind_malloc(struct memtier_kind *kind, size_t size)
 {
-    return memkind_malloc(get_memtier_kind(kind), size);
+    return memtier_tier_malloc(get_tier(kind), size);
 }
 
 MEMKIND_EXPORT void *memtier_tier_malloc(struct memtier_tier *tier, size_t size)
@@ -181,7 +181,7 @@ MEMKIND_EXPORT void *memtier_tier_malloc(struct memtier_tier *tier, size_t size)
 MEMKIND_EXPORT void *memtier_kind_calloc(struct memtier_kind *kind, size_t num,
                                          size_t size)
 {
-    return memkind_calloc(get_memtier_kind(kind), num, size);
+    return memtier_tier_calloc(get_tier(kind), num, size);
 }
 
 MEMKIND_EXPORT void *memtier_tier_calloc(struct memtier_tier *tier, size_t num,
@@ -201,7 +201,7 @@ MEMKIND_EXPORT void *memtier_kind_realloc(struct memtier_kind *kind, void *ptr,
             memtier_registry_g.kind_map[kind->partition];
         return memtier_tier_realloc(tier, ptr, size);
     }
-    return memtier_kind_malloc(kind, size);
+    return memtier_tier_malloc(get_tier(kind), size);
 }
 
 MEMKIND_EXPORT void *memtier_tier_realloc(struct memtier_tier *tier, void *ptr,
@@ -226,8 +226,7 @@ MEMKIND_EXPORT int memtier_kind_posix_memalign(struct memtier_kind *kind,
                                                void **memptr, size_t alignment,
                                                size_t size)
 {
-    return memkind_posix_memalign(get_memtier_kind(kind), memptr, alignment,
-                                  size);
+    return memtier_tier_posix_memalign(get_tier(kind), memptr, alignment, size);
 }
 
 MEMKIND_EXPORT int memtier_tier_posix_memalign(struct memtier_tier *tier,
