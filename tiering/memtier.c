@@ -8,6 +8,10 @@
 #include <tiering/memtier_log.h>
 
 #include <pthread.h>
+#include <string.h>
+
+// TODO - remove this after logging cleanup
+#include <memkind/internal/memkind_private.h>
 
 #define MEMTIER_EXPORT __attribute__((visibility("default")))
 #define MEMTIER_INIT   __attribute__((constructor))
@@ -97,6 +101,24 @@ MEMTIER_EXPORT void free(void *ptr)
     }
 }
 
+static memkind_t get_kind(const char *str, const char *pmem_path,
+                          size_t pmem_size)
+{
+    memkind_t kind = NULL;
+    if (strcmp(str, "DRAM") == 0) {
+        kind = MEMKIND_DEFAULT;
+    } else if (strcmp(str, "FS_DAX") == 0) {
+        // TODO handle FS_DAX here
+    }
+
+    log_debug("kind_name: %s", kind->name);
+    log_debug("pmem_path: %s", pmem_path);
+    log_debug("pmem_size: %zu", pmem_size);
+
+    return kind;
+}
+
+// TODO move this logic to ctl
 static int create_tiered_kind_from_env(char *env_var_string)
 {
     char *kind_name = NULL;
@@ -111,13 +133,14 @@ static int create_tiered_kind_from_env(char *env_var_string)
         return -1;
     }
 
-    log_debug("kind_name: %s", kind_name);
-    log_debug("pmem_path: %s", pmem_path);
-    log_debug("pmem_size: %zu", pmem_size);
+    memkind_t kind = get_kind(kind_name, pmem_path, pmem_size);
+    if (kind == NULL) {
+        return -1;
+    }
+
     log_debug("ratio_value: %u", ratio_value);
 
-    // TODO add "DRAM" -> MEMKIND_DEFAULT etc. mapping logic
-    current_tier = memtier_tier_new(MEMKIND_DEFAULT);
+    current_tier = memtier_tier_new(kind);
     if (current_tier == NULL) {
         return -1;
     }
