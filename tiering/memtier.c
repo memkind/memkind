@@ -185,18 +185,18 @@ static MEMTIER_INIT void memtier_init(void)
     pthread_once(&init_once, log_init_once);
     log_info("Memkind memtier lib loaded!");
 
-    // TODO: Handle failure when this variable (or config variable) is not
-    // present
     char *env_var = utils_get_env("MEMKIND_MEM_TIERING_CONFIG");
     if (env_var) {
         int ret = create_tiered_kind_from_env(env_var);
-        if (ret != 0) {
-            log_err("Couldn't load MEMKIND_MEM_TIERING_CONFIG env var");
-            abort();
-        } else {
+        if (!ret) {
             initialized = 1;
+            return;
         }
+        log_err("Error with parsing MEMKIND_MEM_TIERING_CONFIG");
+    } else {
+        log_err("Missing MEMKIND_MEM_TIERING_CONFIG env var");
     }
+    abort();
 }
 
 static MEMTIER_FINI void memtier_fini(void)
