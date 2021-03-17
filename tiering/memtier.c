@@ -118,6 +118,21 @@ static memkind_t get_kind(const char *str, const char *pmem_path,
     return kind;
 }
 
+// TODO - move this code during refactoring after implementing support for
+// multiple kinds
+char *policy_to_str(memtier_policy_t policy)
+{
+    if (policy < MEMTIER_POLICY_CIRCULAR ||
+        policy >= MEMTIER_POLICY_MAX_VALUE) {
+        log_err("Unknown policy: %d", policy);
+        return NULL;
+    }
+
+    char *policies[] = {"POLICY_CIRCULAR"};
+
+    return policies[policy];
+}
+
 // TODO move this logic to ctl
 static int create_tiered_kind_from_env(char *env_var_string)
 {
@@ -125,10 +140,10 @@ static int create_tiered_kind_from_env(char *env_var_string)
     char *pmem_path = NULL;
     char *pmem_size = NULL;
     unsigned ratio_value = -1;
-    struct memtier_builder *builder = NULL;
+    memtier_policy_t policy = MEMTIER_POLICY_MAX_VALUE;
 
     int ret = ctl_load_config(env_var_string, &kind_name, &pmem_path,
-                              &pmem_size, &ratio_value);
+                              &pmem_size, &ratio_value, &policy);
     if (ret != 0) {
         return -1;
     }
@@ -139,13 +154,14 @@ static int create_tiered_kind_from_env(char *env_var_string)
     }
 
     log_debug("ratio_value: %u", ratio_value);
+    log_debug("policy: %s", policy_to_str(policy));
 
     current_tier = memtier_tier_new(kind);
     if (current_tier == NULL) {
         return -1;
     }
 
-    builder = memtier_builder_new();
+    struct memtier_builder *builder = memtier_builder_new();
     if (!builder) {
         ret = -1;
         goto tier_delete;
@@ -156,7 +172,7 @@ static int create_tiered_kind_from_env(char *env_var_string)
         goto builder_delete;
     }
 
-    ret = memtier_builder_set_policy(builder, MEMTIER_POLICY_CIRCULAR);
+    ret = memtier_builder_set_policy(builder, policy);
     if (ret != 0) {
         goto builder_delete;
     }
