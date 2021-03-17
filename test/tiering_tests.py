@@ -23,6 +23,10 @@ class Helper(object):
     kind_name_dict = {
         'DRAM': 'memkind_default'}
 
+    # POLICY_CIRCULAR is a policy used in tests that have to set a valid policy
+    # but don't test anything related to allocation policies
+    default_policy = "POLICY_CIRCULAR"
+
     def get_ld_preload_cmd_output(self, config_env, log_level=None,
                                   validate_retcode=True):
         log_level_env = self.log_prefix + "LOG_LEVEL=" + log_level \
@@ -52,7 +56,8 @@ class Test_tiering_log(Helper):
         default_output = self.get_default_cmd_output()
 
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1", log_level="1")
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy,
+            log_level="1")
 
         assert output[0] == self.log_info_prefix + \
             "Memkind memtier lib loaded!", "Bad init message"
@@ -65,7 +70,8 @@ class Test_tiering_log(Helper):
         default_output = self.get_default_cmd_output()
 
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1", log_level="0")
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy,
+            log_level="0")
 
         assert output == default_output, "Bad command output"
 
@@ -73,7 +79,7 @@ class Test_tiering_log(Helper):
         default_output = self.get_default_cmd_output()
 
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1")
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy)
 
         assert output == default_output, "Bad command output"
 
@@ -93,12 +99,14 @@ class Test_tiering_log(Helper):
             self.log_debug_prefix + r"pmem_path: .*$",  # TODO add path re
             self.log_debug_prefix + r"pmem_size: \d+$",
             self.log_debug_prefix + r"ratio_value: \d+$",
+            self.log_debug_prefix + r"policy: \w+$",
         ]
 
         default_output = self.get_default_cmd_output()
 
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1", log_level="2")
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy,
+            log_level="2")
 
         assert output[0] == self.log_debug_prefix + \
             "Setting log level to: 2", "Bad init message"
@@ -159,7 +167,8 @@ class Test_memkind_log(Helper):
 
     def test_DRAM_only(self):
         memkind_debug_env = "MEMKIND_DEBUG=1"
-        tiering_cfg_env = "MEMKIND_MEM_TIERING_CONFIG=DRAM:1"
+        tiering_cfg_env = "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + \
+            self.default_policy
 
         command = " ".join([self.ld_preload_env, tiering_cfg_env,
                             memkind_debug_env, self.bin_path])
@@ -182,7 +191,8 @@ class Test_tiering_config_env(Helper):
     @pytest.mark.parametrize("ratio", ["1", "1000", "4294967295"])
     def test_DRAM(self, ratio):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio, log_level="2")
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio + "," +
+            self.default_policy, log_level="2")
 
         assert self.log_debug_prefix + "kind_name: " + \
             self.kind_name_dict.get('DRAM') in output, "Wrong message"
@@ -224,7 +234,9 @@ class Test_tiering_config_env(Helper):
     @pytest.mark.parametrize("pmem_size", ["-1", "-4294967295", "-18446744073709551615", "18446744073709551616"])
     def test_FSDAX_pmem_size_outside_limits(self, pmem_size):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1", validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
+            self.default_policy,
+            validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Failed to parse pmem size: " + pmem_size, "Wrong message"
@@ -232,9 +244,9 @@ class Test_tiering_config_env(Helper):
     @pytest.mark.parametrize("pmem_size", ["18446744073709551615K", "18446744073709551615M", "18446744073709551615G"])
     def test_FSDAX_pmem_size_with_suffix_too_big(self, pmem_size):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1", validate_retcode=False)
-        assert "MEMKIND_MEM_TIERING_LOG_ERROR: Failed to parse pmem size: " + \
-            pmem_size in output, "Wrong message"
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
+            self.default_policy,
+            validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Provided pmem size is too big: 18446744073709551615", \
@@ -250,21 +262,27 @@ class Test_tiering_config_env(Helper):
     @pytest.mark.parametrize("pmem_size", ["as", "10K1", "M", "M2", "10KM"])
     def test_FSDAX_wrong_size(self, pmem_size):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1", validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
+            self.default_policy,
+            validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Failed to parse pmem size: " + pmem_size, "Wrong message"
 
     def test_FSDAX_negative_ratio(self):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10K:-1", validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:-1," +
+            self.default_policy,
+            validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Unsupported ratio: -1", "Wrong message"
 
     def test_FSDAX_wrong_ratio(self):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10K:a", validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:a," +
+            self.default_policy,
+            validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Unsupported ratio: a", "Wrong message"
@@ -274,35 +292,68 @@ class Test_tiering_config_env(Helper):
             "MEMKIND_MEM_TIERING_CONFIG=2", validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
-            "Unsupported kind: 2", "Wrong message"
+            "Too low number of queries in configuration string: 2", \
+            "Wrong message"
 
     def test_bad_ratio(self):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:A", validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:A," +
+            self.default_policy, validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Unsupported ratio: A", "Wrong message"
 
     def test_no_ratio(self):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM", validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM," +
+            self.default_policy, validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Ratio not provided", "Wrong message"
 
     def test_bad_class(self):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=a1b2:10", validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=a1b2:10," +
+            self.default_policy, validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Unsupported kind: a1b2", "Wrong message"
 
     def test_negative_ratio(self):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:-1", validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:-1," +
+            self.default_policy, validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Unsupported ratio: -1", "Wrong message"
+
+    @pytest.mark.parametrize("policy_str",
+                             ["ABC", "5252", "1AB2C3", "#@%srfs"])
+    def test_negative_unsupported_policy(self, policy_str):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + policy_str,
+            validate_retcode=False)
+
+        assert output[0] == self.log_error_prefix + \
+            "Unknown policy: " + policy_str, "Wrong message"
+
+    def test_negative_multiple_policies(self):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy +
+            "," + self.default_policy, validate_retcode=False)
+
+        # NOTE: only last query is treated as a policy
+        assert output[0] == self.log_error_prefix + \
+            "Unsupported kind: " + self.default_policy, "Wrong message"
+
+    def test_negative_policy_not_last(self):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=" + self.default_policy + ",DRAM:1",
+            validate_retcode=False)
+
+        # NOTE: only last query is treated as a policy
+        assert output[0] == self.log_error_prefix + \
+            "Unsupported kind: " + self.default_policy, "Wrong message"
 
     @pytest.mark.parametrize("config_str", ["", ",", ",,,"])
     def test_negative_config_str_invalid(self, config_str):
@@ -315,7 +366,8 @@ class Test_tiering_config_env(Helper):
     @pytest.mark.parametrize("query_str", [":", ":::"])
     def test_negative_query_str_invalid(self, query_str):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=" + query_str, validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=" + query_str + "," +
+            self.default_policy, validate_retcode=False)
 
         assert output[0] == self.log_error_prefix + \
             "Kind name string not found in: " + query_str, "Wrong message"
