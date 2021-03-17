@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2021 Intel Corporation. */
 
+#include <memkind_memtier.h>
 #include <tiering/memtier_log.h>
 
 #include <errno.h>
@@ -114,6 +115,20 @@ static int ctl_parse_pmem_size(const char *str, size_t *sizep)
     return -1;
 }
 
+/*
+ * ctl_parse_policy -- (internal) returns memtier_policy that matches value in
+ * query buffer
+ */
+static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
+{
+    if (strcmp(qbuf, "POLICY_CIRCULAR") == 0) {
+        return *policy = MEMTIER_POLICY_CIRCULAR;
+    }
+
+    log_err("Unknown policy: %s", qbuf);
+    return -1;
+}
+
 static int ctl_parse_ratio(const char *ratio_str, unsigned *dest)
 {
     if (ratio_str == NULL) {
@@ -183,26 +198,45 @@ static int ctl_parse_query(char *qbuf, char **kind_name, char **pmem_path,
  * ctl_load_config -- splits an entire config into query strings
  */
 int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
-                    size_t *pmem_size, unsigned *ratio_value)
+                    size_t *pmem_size, unsigned *ratio_value,
+                    memtier_policy_t *policy)
 {
-    int ret = 0;
+    int ret;
     char *sptr = NULL;
+    char *qbuf = buf;
 
-    // TODO: Allow multiple kinds to be created
-    char *qbuf = strtok_r(buf, CTL_STRING_QUERY_SEPARATOR, &sptr);
+    size_t query_count = 1;
+    while (*qbuf)
+        if (*qbuf++ == *CTL_STRING_QUERY_SEPARATOR)
+            ++query_count;
+
+    qbuf = strtok_r(buf, CTL_STRING_QUERY_SEPARATOR, &sptr);
     if (qbuf == NULL) {
         log_err("No valid query found in: %s", buf);
         return -1;
     }
-    while (qbuf != NULL) {
-        ret =
-            ctl_parse_query(qbuf, kind_name, pmem_path, pmem_size, ratio_value);
+
+    if (query_count < 2) {
+        log_err("Too low number of queries in configuration string: %s", buf);
+        return -1;
+    }
+
+    // TODO: Allow multiple kinds to be created
+    while (query_count) {
+        if (query_count > 1) {
+            ret = ctl_parse_query(qbuf, kind_name, pmem_path, pmem_size,
+                                  ratio_value);
+        } else {
+            ret = ctl_parse_policy(qbuf, policy);
+        }
+
         if (ret != 0) {
             log_err("Failed to parse query: %s", qbuf);
             return -1;
         }
 
         qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
+        query_count--;
     }
 
     return 0;
