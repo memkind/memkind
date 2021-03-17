@@ -28,7 +28,7 @@ typedef enum memtier_policy_t
      * Circular policy
      */
     MEMTIER_POLICY_CIRCULAR = 0,
-
+    MEMTIER_POLICY_MAX_VALUE
 } memtier_policy_t;
 
 ///
