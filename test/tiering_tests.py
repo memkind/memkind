@@ -188,6 +188,22 @@ class Test_memkind_log(Helper):
 
 
 class Test_tiering_config_env(Helper):
+
+    def test_no_config(self):
+        output = self.get_ld_preload_cmd_output('', validate_retcode=False)
+
+        assert self.log_error_prefix + \
+            "Missing MEMKIND_MEM_TIERING_CONFIG env var" in output, \
+            "Wrong message"
+
+    def test_empty_config(self):
+        output = self.get_ld_preload_cmd_output(
+            'MEMKIND_MEM_TIERING_CONFIG=""', validate_retcode=False)
+
+        assert self.log_error_prefix + \
+            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
+            "Wrong message"
+
     @pytest.mark.parametrize("ratio", ["1", "1000", "4294967295"])
     def test_DRAM(self, ratio):
         output = self.get_ld_preload_cmd_output(
@@ -256,7 +272,8 @@ class Test_tiering_config_env(Helper):
         output = self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX", validate_retcode=False)
 
-        assert "MEMKIND_MEM_TIERING_LOG_ERROR: Couldn't load MEMKIND_MEM_TIERING_CONFIG env var" in output, \
+        assert self.log_error_prefix + \
+            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
             "Wrong message"
 
     @pytest.mark.parametrize("pmem_size", ["as", "10K1", "M", "M2", "10KM"])
