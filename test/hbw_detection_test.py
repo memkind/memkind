@@ -24,8 +24,8 @@ class Test_hbw_detection(object):
             command = "MEMKIND_HBW_NODES={}".format(nodemask) + command
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         assert retcode == 0, self.fail_msg.format(
-            "\nError: Execution of \'{0}\' returns {1},",
-            " \noutput: {2}".format(command, retcode, output))
+            "\nError: Execution of: \'{0}\' returns: {1} \noutput: {2}".format(
+                command, retcode, output))
         print("\nExecution of {} returns output {}".format(command, output))
         return output
 
@@ -36,9 +36,9 @@ class Test_hbw_detection(object):
         hbw_nodemask_env_variable = self.get_hbw_nodes(hbw_nodemask_default)
         assert hbw_nodemask_default == (
             hbw_nodemask_env_variable, self.fail_msg.format(
-                "Error: Nodemask hbw_nodemask_default ({0}) ",
-                "is not the same as nodemask",
-                " hbw_nodemask_env_variable ({1})".format(
+                f"Error: Nodemask hbw_nodemask_default ({0}) \
+                is not the same as nodemask \
+                hbw_nodemask_env_variable ({1})".format(
                     hbw_nodemask_default, hbw_nodemask_env_variable)))
 
     def test_TC_MEMKIND_hbw_detection_negative_hbw_malloc(self):

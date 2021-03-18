@@ -31,7 +31,7 @@ class Test_malloc_stats_print(object):
         self.bin_param = bin_param
         output, _ = self.run_test_binary()
         assert output.endswith("--- End jemalloc statistics ---\n"), \
-            f"Error: Didn't get the expected output"\
+            "Error: Didn't get the expected output"\
             " from the '{self.bin_path}' binary."
 
     def test_TC_MEMKIND_malloc_stats_print_multi_opt_test(self):
@@ -84,7 +84,7 @@ class Test_malloc_stats_print(object):
         self.bin_param = "negative_test"
         output, _ = self.run_test_binary()
         assert len(output) == 0, \
-            f"Error: There should be no output from"\
+            "Error: There should be no output from"\
             " the '{self.bin_path}' binary."
 
     def test_TC_MEMKIND_malloc_stats_print_opts_negative_test(self):

@@ -39,9 +39,9 @@ class Test_dax_kmem_env_var(object):
         assert dax_kmem_nodemask_default == (
             dax_kmem_nodemask_env_variable,
             self.fail_msg.format(
-                "Error: Nodemask dax_kmem_nodemask_default ({0}) ",
-                "is not the same as nodemask",
-                " dax_kmem_nodemask_env_variable ({1})".format(
+                f"Error: Nodemask dax_kmem_nodemask_default ({0}) \
+                is not the same as nodemask \
+                dax_kmem_nodemask_env_variable ({1})".format(
                     dax_kmem_nodemask_default,
                     dax_kmem_nodemask_env_variable)))
 
