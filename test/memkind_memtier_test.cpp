@@ -3,6 +3,8 @@
 
 #include <memkind_memtier.h>
 
+#include <thread>
+
 #include "common.h"
 
 class MemkindMemtierTest: public ::testing::Test
@@ -524,4 +526,52 @@ TEST_F(MemkindMemtierKindTest, test_tier_kind_check_size_posix_memalign_kind)
 
     ASSERT_EQ(0ULL, memtier_tier_allocated_size(m_tier_default));
     ASSERT_EQ(0ULL, memtier_tier_allocated_size(m_tier_regular));
+}
+
+TEST_F(MemkindMemtierKindTest, test_tier_kind_thread_safety_calc_size)
+{
+    pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    const size_t num_threads = 1000;
+    const size_t iteration_count = 5000;
+    const size_t alloc_size = 16;
+    const size_t max_size = alloc_size * num_threads * iteration_count;
+    std::vector<std::thread> thds;
+    std::vector<void *> alloc_vec;
+    alloc_vec.reserve(num_threads * iteration_count);
+
+    for (size_t i = 0; i < num_threads; ++i) {
+        thds.push_back(std::thread([&]() {
+            for (size_t j = 0; j < iteration_count; ++j) {
+                void *ptr = memtier_kind_malloc(m_tier_kind, alloc_size);
+                pthread_mutex_lock(&mutex);
+                alloc_vec.push_back(ptr);
+                pthread_mutex_unlock(&mutex);
+            }
+        }));
+    }
+    for (size_t i = 0; i < num_threads; ++i) {
+        thds[i].join();
+    }
+
+    thds.clear();
+
+    ASSERT_EQ(max_size, allocation_sum());
+
+    for (size_t i = 0; i < num_threads; ++i) {
+        thds.push_back(std::thread([&]() {
+            for (size_t j = 0; j < iteration_count; ++j) {
+                pthread_mutex_lock(&mutex);
+                void *ptr = alloc_vec.back();
+                alloc_vec.pop_back();
+                pthread_mutex_unlock(&mutex);
+                memtier_free(ptr);
+            }
+        }));
+    }
+
+    for (size_t i = 0; i < num_threads; ++i) {
+        thds[i].join();
+    }
+
+    ASSERT_EQ(0ULL, allocation_sum());
 }
