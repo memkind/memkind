@@ -256,3 +256,8 @@ MEMKIND_EXPORT void memtier_free(void *ptr)
     tier->alloc_size -= jemk_malloc_usable_size(ptr);
     memkind_free(kind, ptr);
 }
+
+MEMKIND_EXPORT size_t memtier_tier_allocated_size(struct memtier_tier *tier)
+{
+    return tier->alloc_size;
+}
