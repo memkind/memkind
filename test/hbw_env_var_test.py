@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 # Copyright (C) 2021 Intel Corporation.
 
-from python_framework import CMD_helper
+from python_framework.cmd_helper import CMD_helper
 import pytest
 
 

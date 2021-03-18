@@ -21,7 +21,7 @@ class CMD_helper(object):
             # Read stdout from file
             outfile.seek(0)
             stdout = outfile.read()
-        except:
+        except subprocess.CalledProcessError:
             raise
         finally:
             # Make sure the file is closed

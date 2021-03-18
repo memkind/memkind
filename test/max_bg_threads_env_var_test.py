@@ -46,7 +46,7 @@ class Test_max_bg_threads_env_var():
         output, threads_count = self.run_test_binary()
         assert int(output) > self.min_threads, \
             self.fail_msg.format(
-                f"Error: There should be more than",
+                "Error: There should be more than",
                 " {self.min_threads} threads running. ",
                 f"Counted threads: {output}.")
 
@@ -58,6 +58,6 @@ class Test_max_bg_threads_env_var():
         output, retcode, threads_count = self.run_test_binary()
         assert retcode == 134, \
             self.fail_msg.format(
-                f"Error: Negative value of MEMKIND_BACKGROUND_THREAD_LIMIT",
+                "Error: Negative value of MEMKIND_BACKGROUND_THREAD_LIMIT",
                 " should not be handled. ",
                 f"Counted threads: {threads_count}. Output: {output}")

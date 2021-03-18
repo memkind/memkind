@@ -128,7 +128,7 @@ def load_data_from_files():
 
 def set_bar_width_and_offsets(requested_width):
     bar_width = requested_width
-    offsets = (0, bar_width, 2*bar_width, 3*bar_width)
+    offsets = (0, bar_width, 2 * bar_width, 3 * bar_width)
     return bar_width, offsets
 
 
@@ -156,12 +156,9 @@ for size_values, size_index, size_display in zip(sizes_values,
         for operation in operations:
             # add bar_width to each element of size_index
             ax = init_axis(fig, "%s time of %s sizes (%s iterations)" % (
-                operation, size_display, iterations), '3d',
-                           'size [kB]',
-                           size_index + (bar_width,) * len(
-                               size_index), size_values,
-                           'threads', threads_index, threads_values,
-                           'time [ms]')
+                operation, size_display, iterations), '3d', 'size [kB]',
+                size_index + (bar_width,) * len(size_index), size_values,
+                'threads', threads_index, threads_values, 'time [ms]')
             legend_data = []
             # for each allocator (hbw, glibc, tbb, pmem)
             for entry, offset, draw_color in zip(data, offsets, colors):
@@ -192,7 +189,7 @@ for size_values, size_index, size_display in zip(sizes_values,
                 elif operation == 'Total':
                     draw_bar(ax, show_first_operation, size_col,
                              threads_col, total_time_col,
-                             first_alloc_time_col+first_free_time_col,
+                             first_alloc_time_col + first_free_time_col,
                              draw_color)
                 legend_data.append(plt.Rectangle((0, 0), 1, 1, fc=draw_color))
             if show_first_operation is True:
@@ -220,8 +217,8 @@ for size_values, size_index, size_display in zip(sizes_values,
             # for each operation (allocation, free, total)
             for operation in operations:
                 # add bar_width to each element of size_index
-                ax = init_axis(fig, "%s time of %s sizes with %s ",
-                               "threads (%s operations)"
+                ax = init_axis(fig, "%s time of %s sizes with %s "
+                               / "threads (%s operations)"
                                % (operation, size_display, thread, iterations),
                                None, 'size [kB]', size_index + (bar_width,)
                                * len(size_index), size_values,
@@ -259,7 +256,7 @@ for size_values, size_index, size_display in zip(sizes_values,
                     elif operation == 'Total':
                         draw_bar(ax, show_first_operation, size_col, None,
                                  total_time_col,
-                                 first_alloc_time_col+first_free_time_col,
+                                 first_alloc_time_col + first_free_time_col,
                                  draw_color)
                     legend_data.append(plt.Rectangle(
                         (0, 0), 1, 1, fc=draw_color))
@@ -269,9 +266,9 @@ for size_values, size_index, size_display in zip(sizes_values,
                 ax.legend(legend_data, legend, loc='best')
                 plt.grid()
                 save_plot(show_first_operation, "constant_thread",
-                          "%s_time_of_%s_sizes_with_%s_threads_%s_iterations",
-                          ".png" % (operation,
-                                    size_display, thread, iterations))
+                          "%s_time_of_%s_sizes_with_%s_threads_%s_iterations"
+                          / ".png" % (operation,
+                                      size_display, thread, iterations))
 
 ################################################
 # Draw 2D plots (time, threads, constant size) #
@@ -328,7 +325,7 @@ for size_values, size_index, size_display in zip(sizes_values,
                     elif operation == 'Total':
                         draw_bar(ax, show_first_operation, threads_col, None,
                                  total_time_col,
-                                 first_alloc_time_col+first_free_time_col,
+                                 first_alloc_time_col + first_free_time_col,
                                  draw_color)
                     legend_data.append(plt.Rectangle(
                         (0, 0), 1, 1, fc=draw_color))

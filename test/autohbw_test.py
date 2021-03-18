@@ -45,8 +45,8 @@ class Test_autohbw(object):
         """ This test executes ./autohbw_test_helper with
             LD_PRELOAD that is overriding calloc() and free()
             to equivalent autohbw functions"""
-        command = (self.test_prefix +
-                   self.cmd_helper.get_command_path(self.binary) + " calloc")
+        command = (self.test_prefix
+                   + self.cmd_helper.get_command_path(self.binary) + " calloc")
         print("Executing command: {0}".format(command))
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         assert retcode == (0,

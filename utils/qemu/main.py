@@ -59,8 +59,8 @@ class MemoryHostException(Exception):
 
     def __str__(self) -> str:
         return (f'Memory on host) {self.total_memory} bytes are not enough '
-                f'for memory required by',
-                ' {self.tpg} : {self.tpg_memory} bytes.')
+                f'for memory required by'
+                f' {self.tpg} : {self.tpg_memory} bytes.')
 
 
 class GuestConnection:
@@ -183,14 +183,14 @@ class GuestConnection:
                 with fabric.Connection(**self._connection_params) as c:
                     c.run('whoami', hide='both')
             except paramiko.SSHException:
-                print(f'FAILURE: SSH connection',
+                print('FAILURE: SSH connection',
                       ' to guest after {sec} sec - retrying.')
                 time.sleep(1)
             else:
                 print(f'SUCCESS: SSH connection to guest after {sec} sec.')
                 return
-        sys.exit(f'SSH connection to guest fails after',
-                 ' {self.CONNECT_TIMEOUT} sec.')
+        sys.exit(f'SSH connection to guest fails after'
+                 f' {self.CONNECT_TIMEOUT} sec.')
 
     @_logger
     def run_connection_test(self, force_reinstall: bool) -> None:
@@ -223,7 +223,7 @@ class GuestConnection:
                     self._set_test_env_name(c)
                     if force_reinstall:
                         self._build_and_reinstall_memkind(c)
-                print(f'QEMU development is ready to use via SSH',
+                print('QEMU development is ready to use via SSH',
                       ' ({TCP_PORT}) or VNC ({VNC_DEFAULT_PORT + VNC_PORT})')
             except fabric.exceptions.GroupException:
                 self._shutdown(c)
@@ -275,8 +275,8 @@ class QEMU:
         - VNC on port 5
         - tcp on port 10022
         """
-        return (f'-vnc :{VNC_PORT} -netdev user,',
-                'id=net0,hostfwd=tcp::{TCP_PORT}-:22 '
+        return (f'-vnc :{VNC_PORT} -netdev user,'
+                f'id=net0,hostfwd=tcp::{TCP_PORT}-:22 '
                 f'-device virtio-net,netdev=net0')
 
     @property
@@ -345,10 +345,10 @@ class QEMU:
         mount option
         - Start from first virtual hard drive
         """
-        return (f'-fsdev local,security_model=passthrough,',
-                'id=fsdev0,path={self.cfg.workdir} '
-                f'-device virtio-9p-pci,id=fs0,fsdev=fsdev0,',
-                'mount_tag={MEMKIND_MOUNT_TAG}')
+        return (f'-fsdev local,security_model=passthrough,'
+                f'id=fsdev0,path={self.cfg.workdir} '
+                f'-device virtio-9p-pci,id=fs0,fsdev=fsdev0,'
+                f'mount_tag={MEMKIND_MOUNT_TAG}')
 
     def _qemu_cmd(self, tpg: TopologyCfg) -> typing.List[str]:
         """
@@ -381,8 +381,8 @@ class QEMU:
                 if proc.name() == self._qemu_exec:
                     self.pid = proc.pid
         except subprocess.CalledProcessError:
-            sys.exit(f'\nQEMU cannot start process:',
-                     ' image {self.cfg.image}: {result.stderr}.')
+            sys.exit(f'\nQEMU cannot start process:'
+                     f' image {self.cfg.image}: {result.stderr}.')
 
     def run(self) -> None:
         """
