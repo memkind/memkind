@@ -65,6 +65,24 @@ jobs:
             sudo --preserve-env=MEMKIND_HOST_WORKDIR,ENABLE_HWLOC "${{ env.DOCKER_RUN_SCRIPT }}" "${{ env.DOCKER_IMAGE_FULL_PATH }}"
           fi
 
+  python-linting:
+    runs-on: ubuntu-20.04
+    name: Code Linting - Python
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up Python environment
+      uses: actions/setup-python@v2
+      with:
+        python-version: "2.x"
+
+    - name: flake8 Lint
+      uses: py-actions/flake8@v1
+      with:
+        path: "./test/tiering_tests.py"
+
   building:
     runs-on: ${{ matrix.os }}
     name: Building memkind daxctl ${{ matrix.daxctl }} | hwloc ${{ matrix.hwloc }} | ${{ matrix.os }} | ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
