@@ -212,6 +212,9 @@ typedef enum memkind_mem_usage_policy
      */
     MEMKIND_MEM_USAGE_POLICY_CONSERVATIVE = 1,
 
+    /**
+     * Max memory usage policy value.
+     */
     MEMKIND_MEM_USAGE_POLICY_MAX_VALUE
 } memkind_mem_usage_policy;
 
@@ -232,6 +235,10 @@ typedef enum memkind_stat_type
      * Total number of allocated bytes.
      */
     MEMKIND_STAT_TYPE_ALLOCATED = 2,
+
+    /**
+     * Max memory statistics type.
+     */
     MEMKIND_STAT_TYPE_MAX_VALUE
 } memkind_stat_type;
 
