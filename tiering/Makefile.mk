@@ -16,4 +16,4 @@ tiering_libmemtier_la_LIBADD = libmemkind.la
 clean-local: tiering-clean
 
 tiering-clean:
-	rm -f tiering/memtier.gcno
+	rm -f tiering/*.gcno
