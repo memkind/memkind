@@ -4,7 +4,12 @@
 lib_LTLIBRARIES += tiering/libmemtier.la \
                    # end
 
-tiering_libmemtier_la_SOURCES = tiering/ctl.c tiering/memtier.c tiering/memtier_log.c
+tiering_libmemtier_la_SOURCES = tiering/ctl.c \
+                  tiering/ctl.h \
+                  tiering/memtier.c \
+                  tiering/memtier_log.c \
+                  tiering/memtier_log.h \
+                  # end
 
 tiering_libmemtier_la_LIBADD = libmemkind.la
 
