@@ -1,5 +1,5 @@
 .\" SPDX-License-Identifier: BSD-2-Clause
-.\" Copyright (C) 2018 - 2020 Intel Corporation.
+.\" Copyright (C) 2018 - 2021 Intel Corporation.
 .\"
 .TH "PMEMALLOCATOR" 3 "2018-09-13" "Intel Corporation" "PMEMALLOCATOR" \" -*- nroff -*-
 .SH "NAME"
@@ -16,7 +16,7 @@ functionality is considered as stable API (STANDARD API).
 .sp
 .BI "libmemkind::pmem::allocator(const char " "*dir" ", size_t " "max_size" );
 .br
-.BI "libmemkind::pmem::llocator(const char " "&dir" ", size_t " "max_size" ", libmemkind::allocation_policy " "alloc_policy" );
+.BI "libmemkind::pmem::allocator(const char " "&dir" ", size_t " "max_size" ", libmemkind::allocation_policy " "alloc_policy" );
 .br
 .BI "libmemkind::pmem::allocator(const std::string " "&dir" ", size_t " "max_size" );
 .br
@@ -90,7 +90,7 @@ using
 .BR memkind_free ().
 
 .SH "COPYRIGHT"
-Copyright (C) 2018 - 2020 Intel Corporation. All rights reserved.
+Copyright (C) 2018 - 2021 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind_pmem (3),
 .BR memkind (3)

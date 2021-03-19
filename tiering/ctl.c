@@ -98,8 +98,8 @@ static int ctl_parse_pmem_size(const char *str, size_t *sizep)
     if (ret == 1) {
         return 0;
     } else if (ret == 2) {
-        for (unsigned i = 0; i < sizeof(suffixes) / sizeof((suffixes)[0]);
-             ++i) {
+        unsigned i;
+        for (i = 0; i < sizeof(suffixes) / sizeof((suffixes)[0]); ++i) {
             if (strcmp(suffixes[i].suff, unit) == 0) {
                 if (SIZE_MAX / suffixes[i].mag >= *sizep) {
                     *sizep *= suffixes[i].mag;
