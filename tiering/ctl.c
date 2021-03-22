@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <regex.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +19,13 @@
 #define CTL_STRING_QUERY_SEPARATOR ","
 
 static struct memtier_tier *current_tier;
+
+typedef struct ctl_tier_cfg {
+    char *kind_name;
+    char *pmem_path;
+    size_t pmem_size;
+    unsigned ratio_value;
+} ctl_tier_cfg;
 
 /*
  * ctl_parse_u -- (internal) parses and returns an unsigned integer
@@ -154,30 +162,29 @@ static int ctl_parse_ratio(const char *ratio_str, unsigned *dest)
  * ctl_parse_query -- (internal) splits an entire query string
  * into single queries
  */
-static int ctl_parse_query(char *qbuf, char **kind_name, char **pmem_path,
-                           size_t *pmem_size_value, unsigned *ratio_value)
+static int ctl_parse_query(char *qbuf, ctl_tier_cfg *tier)
 {
     char *sptr = NULL;
-    *kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
-    if (*kind_name == NULL) {
+    tier->kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
+    if (tier->kind_name == NULL) {
         log_err("Kind name string not found in: %s", qbuf);
         return -1;
     }
-    int ret = ctl_validate_kind_name(*kind_name);
+    int ret = ctl_validate_kind_name(tier->kind_name);
     if (ret != 0) {
         return -1;
     }
 
-    if (!strcmp(*kind_name, "FS_DAX")) {
-        *pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-        if (*pmem_path == NULL) {
+    if (!strcmp(tier->kind_name, "FS_DAX")) {
+        tier->pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
+        if (tier->pmem_path == NULL) {
             return -1;
         }
         char *pmem_size_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
         if (pmem_size_str == NULL) {
             return -1;
         }
-        ret = ctl_parse_pmem_size(pmem_size_str, pmem_size_value);
+        ret = ctl_parse_pmem_size(pmem_size_str, &tier->pmem_size);
         if (ret != 0) {
             log_err("Failed to parse pmem size: %s", pmem_size_str);
             return -1;
@@ -185,7 +192,7 @@ static int ctl_parse_query(char *qbuf, char **kind_name, char **pmem_path,
     }
 
     char *ratio_value_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-    ret = ctl_parse_ratio(ratio_value_str, ratio_value);
+    ret = ctl_parse_ratio(ratio_value_str, &tier->ratio_value);
     if (ret != 0) {
         return -1;
     }
@@ -202,8 +209,7 @@ static int ctl_parse_query(char *qbuf, char **kind_name, char **pmem_path,
 /*
  * ctl_load_config -- splits an entire config into query strings
  */
-static int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
-                           size_t *pmem_size, unsigned *ratio_value,
+static int ctl_load_config(char *buf, ctl_tier_cfg *tier,
                            memtier_policy_t *policy)
 {
     int ret;
@@ -229,8 +235,7 @@ static int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
     // TODO: Allow multiple kinds to be created
     while (query_count) {
         if (query_count > 1) {
-            ret = ctl_parse_query(qbuf, kind_name, pmem_path, pmem_size,
-                                  ratio_value);
+            ret = ctl_parse_query(qbuf, tier);
         } else {
             ret = ctl_parse_policy(qbuf, policy);
         }
@@ -247,19 +252,18 @@ static int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
     return 0;
 }
 
-static memkind_t ctl_get_kind(const char *str, const char *pmem_path,
-                              size_t pmem_size)
+static memkind_t ctl_get_kind(const ctl_tier_cfg *tier)
 {
     memkind_t kind = NULL;
-    if (strcmp(str, "DRAM") == 0) {
+    if (strcmp(tier->kind_name, "DRAM") == 0) {
         kind = MEMKIND_DEFAULT;
-    } else if (strcmp(str, "FS_DAX") == 0) {
+        log_debug("kind_name: %s", kind->name);
+    } else if (strcmp(tier->kind_name, "FS_DAX") == 0) {
         // TODO handle FS_DAX here
+        log_debug("kind_name: %s", tier->kind_name);
+        log_debug("pmem_path: %s", tier->pmem_path);
+        log_debug("pmem_size: %zu", tier->pmem_size);
     }
-
-    log_debug("kind_name: %s", kind->name);
-    log_debug("pmem_path: %s", pmem_path);
-    log_debug("pmem_size: %zu", pmem_size);
 
     return kind;
 }
@@ -279,25 +283,21 @@ static const char *ctl_policy_to_str(memtier_policy_t policy)
 
 struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
 {
-    char *kind_name = NULL;
-    char *pmem_path = NULL;
     struct memtier_kind *tier_kind;
-    size_t pmem_size = 0;
-    unsigned ratio_value = 0;
+    struct ctl_tier_cfg tier = {NULL, NULL, 0, 0};
     memtier_policy_t policy = MEMTIER_POLICY_MAX_VALUE;
 
-    int ret = ctl_load_config(env_var_string, &kind_name, &pmem_path,
-                              &pmem_size, &ratio_value, &policy);
+    int ret = ctl_load_config(env_var_string, &tier, &policy);
     if (ret != 0) {
         return NULL;
     }
 
-    memkind_t kind = ctl_get_kind(kind_name, pmem_path, pmem_size);
+    memkind_t kind = ctl_get_kind(&tier);
     if (kind == NULL) {
         return NULL;
     }
 
-    log_debug("ratio_value: %u", ratio_value);
+    log_debug("ratio_value: %u", tier.ratio_value);
     log_debug("policy: %s", ctl_policy_to_str(policy));
 
     current_tier = memtier_tier_new(kind);
@@ -310,7 +310,7 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
         goto tier_delete;
     }
 
-    ret = memtier_builder_add_tier(builder, current_tier, ratio_value);
+    ret = memtier_builder_add_tier(builder, current_tier, tier.ratio_value);
     if (ret != 0) {
         goto builder_delete;
     }
