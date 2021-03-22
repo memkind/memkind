@@ -50,7 +50,14 @@ void memtier_tier_delete(struct memtier_tier *tier);
 /// \note STANDARD API
 /// \return memtier builder, NULL on failure
 ///
-struct memtier_builder *memtier_builder(void);
+struct memtier_builder *memtier_builder_new(void);
+
+///
+/// \brief Delete memtier builder
+/// \note STANDARD API
+/// \param builder memtier builder
+///
+void memtier_builder_delete(struct memtier_builder *builder);
 
 ///
 /// \brief Add memtier tier to memtier builder

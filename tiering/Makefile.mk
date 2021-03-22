@@ -11,6 +11,8 @@ tiering_libmemtier_la_SOURCES = tiering/ctl.c \
                    tiering/memtier_log.h \
                    # end
 
+tiering_libmemtier_la_LIBADD = libmemkind.la
+
 clean-local: tiering-clean
 
 tiering-clean:
