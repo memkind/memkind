@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2021 Intel Corporation. */
 
-#include "memtier_log.h"
+#include <tiering/ctl.h>
+#include <tiering/memtier_log.h>
 
 #include <pthread.h>
 
@@ -50,11 +51,42 @@ MEMTIER_EXPORT void free(void *ptr)
     return __libc_free(ptr);
 }
 
+static int parse_env_string(char *env_var_string)
+{
+    char *kind_name = NULL;
+    char *pmem_path = NULL;
+    size_t pmem_size;
+    unsigned ratio_value = 0;
+
+    int ret = ctl_load_config(env_var_string, &kind_name, &pmem_path,
+                              &pmem_size, &ratio_value);
+    if (ret != 0) {
+        return -1;
+    }
+
+    log_debug("kind_name: %s", kind_name);
+    log_debug("pmem_path: %s", pmem_path);
+    log_debug("pmem_size: %zu", pmem_size);
+    log_debug("ratio_value: %u", ratio_value);
+
+    return 0;
+}
+
 static pthread_once_t init_once = PTHREAD_ONCE_INIT;
 
 static MEMTIER_INIT void memtier_init(void)
 {
     pthread_once(&init_once, log_init_once);
+
+    // TODO: Handle failure when this variable (or config variable) is not
+    // present
+    char *env_var = utils_get_env("MEMKIND_MEM_TIERING_CONFIG");
+    if (env_var) {
+        int ret = parse_env_string(env_var);
+        if (ret != 0) {
+            log_err("Couldn't load MEMKIND_MEM_TIERING_CONFIG env var");
+        }
+    }
 
     log_info("Memkind memtier lib loaded!");
 }

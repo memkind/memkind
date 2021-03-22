@@ -16,6 +16,7 @@ typedef enum
     MESSAGE_TYPE_MAX_VALUE,
 } message_type_t;
 
+char *utils_get_env(const char *name);
 void log_info(const char *format, ...);
 void log_err(const char *format, ...);
 void log_debug(const char *format, ...);
