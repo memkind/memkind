@@ -581,5 +581,4 @@ include test/Makefile.mk
 include examples/Makefile.mk
 include src/Makefile.mk
 include tiering/Makefile.mk
-include utils/memkind_malloc_wrapper/Makefile.mk
 include utils/memory_matrix/Makefile.mk
