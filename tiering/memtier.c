@@ -107,13 +107,13 @@ static memkind_t get_kind(const char *str, const char *pmem_path,
     memkind_t kind = NULL;
     if (strcmp(str, "DRAM") == 0) {
         kind = MEMKIND_DEFAULT;
+        log_debug("kind_name: %s", kind->name);
     } else if (strcmp(str, "FS_DAX") == 0) {
         // TODO handle FS_DAX here
+        log_debug("kind_name: %s", str);
+        log_debug("pmem_path: %s", pmem_path);
+        log_debug("pmem_size: %zu", pmem_size);
     }
-
-    log_debug("kind_name: %s", kind->name);
-    log_debug("pmem_path: %s", pmem_path);
-    log_debug("pmem_size: %zu", pmem_size);
 
     return kind;
 }
@@ -136,24 +136,20 @@ static const char *policy_to_str(memtier_policy_t policy)
 // TODO move this logic to ctl
 static int create_tiered_kind_from_env(char *env_var_string)
 {
-    char *kind_name = NULL;
-    char *pmem_path = NULL;
-    size_t pmem_size;
-    unsigned ratio_value = 0;
     memtier_policy_t policy = MEMTIER_POLICY_MAX_VALUE;
 
-    int ret = ctl_load_config(env_var_string, &kind_name, &pmem_path,
-                              &pmem_size, &ratio_value, &policy);
+    struct tier_skeleton tier;
+    int ret = ctl_load_config(env_var_string, &tier, &policy);
     if (ret != 0) {
         return -1;
     }
 
-    memkind_t kind = get_kind(kind_name, pmem_path, pmem_size);
+    memkind_t kind = get_kind(tier.kind_name, tier.pmem_path, tier.pmem_size);
     if (kind == NULL) {
         return -1;
     }
 
-    log_debug("ratio_value: %u", ratio_value);
+    log_debug("ratio_value: %u", tier.ratio_value);
     log_debug("policy: %s", policy_to_str(policy));
 
     current_tier = memtier_tier_new(kind);
@@ -167,7 +163,7 @@ static int create_tiered_kind_from_env(char *env_var_string)
         goto tier_delete;
     }
 
-    ret = memtier_builder_add_tier(builder, current_tier, ratio_value);
+    ret = memtier_builder_add_tier(builder, current_tier, tier.ratio_value);
     if (ret != 0) {
         goto builder_delete;
     }
