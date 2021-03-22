@@ -16,15 +16,15 @@ functionality is considered as stable API (STANDARD API).
 .sp
 .B "TIER MANAGEMENT:"
 .sp
-.BI "struct memtier_tier *memtier_tier_new(memkind_t " "kind");
+.BI "struct memtier_tier *memtier_tier_new(memkind_t " "kind" );
 .br
-.BI "void memtier_tier_delete(struct memtier_tier  " "*tier");
+.BI "void memtier_tier_delete(struct memtier_tier  " "*tier" );
 .br
 .BI "struct memtier_builder *memtier_builder_new(void);"
 .br
-.BI "void memtier_builder_delete(struct memtier_builder " "*builder");
+.BI "void memtier_builder_delete(struct memtier_builder " "*builder" );
 .br
-.BI "int memtier_builder_add_tier(struct memtier_builder " "*builder" ", struct memtier_tier " "*tier" ", unsigned " "tier_ratio");
+.BI "int memtier_builder_add_tier(struct memtier_builder " "*builder" ", struct memtier_tier " "*tier" ", unsigned " "tier_ratio" );
 .br
 .BI "int memtier_builder_set_policy(struct memtier_builder " "*builder" ", memtier_policy_t " "policy" );
 .br
@@ -53,6 +53,8 @@ functionality is considered as stable API (STANDARD API).
 .BI "size_t memtier_usable_size(void " "*ptr" );
 .br
 .BI "void memtier_free(void " "*ptr" );
+.br
+.BI "size_t memtier_tier_allocated_size(struct memtier_tier " "*tier" );
 .sp
 .sp
 .br

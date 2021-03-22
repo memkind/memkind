@@ -215,6 +215,14 @@ size_t memtier_usable_size(void *ptr);
 ///
 void memtier_free(void *ptr);
 
+///
+/// \brief Obtain size of allocated memory inside specified memtier tier
+/// \note STANDARD API
+/// \param tier specified memtier tier
+/// \return Number of usable bytes
+///
+size_t memtier_tier_allocated_size(struct memtier_tier *tier);
+
 #ifdef __cplusplus
 }
 #endif
