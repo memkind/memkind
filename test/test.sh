@@ -17,6 +17,10 @@ GTEST_BINARIES=(all_tests decorator_test gb_page_tests_bind_policy \
 PYTEST_FILES=(hbw_detection_test.py autohbw_test.py trace_mechanism_test.py max_bg_threads_env_var_test.py \
               stats_print_test.py)
 
+PYTEST=py.test
+which $PYTEST || PYTEST=py.test-3
+which $PYTEST || { echo >&2 "py.test not found"; exit 1; }
+
 red=`tput setaf 1`
 green=`tput setaf 2`
 yellow=`tput setaf 3`
@@ -100,7 +104,7 @@ function show_skipped_tests()
     for i in ${!PYTEST_FILES[*]}; do
         PTEST_BINARY_PATH=$TEST_PATH${PYTEST_FILES[$i]}
         IFS=$'\n'
-        for LINE in $(py.test $PTEST_BINARY_PATH --collect-only); do
+        for LINE in $($PYTEST $PTEST_BINARY_PATH --collect-only); do
             if [[ $LINE == *"<Class "* ]]; then
                 TEST_SUITE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
             elif [[ $LINE == *"<Function "* ]]; then
@@ -350,12 +354,12 @@ for i in ${!PYTEST_FILES[*]}; do
     emit
     emit "### Processing pytest file '$PTEST_BINARY_PATH' ###"
     IFS=$'\n'
-    for LINE in $(py.test $PTEST_BINARY_PATH --collect-only); do
+    for LINE in $($PYTEST $PTEST_BINARY_PATH --collect-only); do
         if [[ $LINE == *"<Class "* ]]; then
             TEST_SUITE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
         elif [[ $LINE == *"<Function "* ]]; then
             LINE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
-            TEST_CMD="py.test $PTEST_BINARY_PATH -k='%s' 2>&1"
+            TEST_CMD="$PYTEST $PTEST_BINARY_PATH -k='%s' 2>&1"
             execute_pytest "$TEST_CMD" "$TEST_SUITE" "$LINE"
             ret=$?
             if [ $err -eq 0 ]; then err=$ret; fi

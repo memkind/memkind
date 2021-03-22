@@ -545,7 +545,7 @@ unit_tests_pmem: checkprogs
 
 unit_tests_hmat: checkprogs
 	test/hmat_test
-	pytest -s test/hbw_env_var_test.py
+	@pytest@ -s test/hbw_env_var_test.py
 
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
