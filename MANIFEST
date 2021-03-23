@@ -564,7 +564,7 @@ tiering/memtier.c
 tiering/memtier_log.c
 tiering/memtier_log.h
 utils/docker/Dockerfile.centos-7
-utils/docker/Dockerfile.fedora-32
+utils/docker/Dockerfile.fedora-33
 utils/docker/Dockerfile.ubuntu-20.04
 utils/docker/README.md
 utils/docker/docker_install_hwloc.sh

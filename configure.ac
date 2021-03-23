@@ -297,6 +297,7 @@ if test "$CLANG_FORMAT" != ""; then
 fi
 AC_SUBST([clang_format], $CLANG_FORMAT)
 AM_CONDITIONAL([HAVE_CLANG_FORMAT], [test "x$clang_support" = xyes])
+AC_CHECK_PROGS(pytest, [pytest pytest-3], false)
 
 #============================cxx11=============================================
 
