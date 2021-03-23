@@ -2,14 +2,12 @@
 /* Copyright (C) 2021 Intel Corporation. */
 
 #pragma once
-#include <stddef.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
-                    size_t *pmem_size, unsigned *ratio_value,
-                    memtier_policy_t *policy);
+struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string);
+void ctl_destroy_kind(struct memtier_kind *kind);
 
 #ifdef __cplusplus
 }
