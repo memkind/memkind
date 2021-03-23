@@ -111,14 +111,19 @@ struct memtier_tier {
     size_t alloc_size; // Allocated size #TODO make this atomic
 };
 
+struct memtier_tier_cfg {
+    struct memtier_tier *tier; // Memory tier
+    unsigned tier_ratio;       // Memory tier ratio
+};
+
 struct memtier_builder {
-    memkind_t todo_kind; // #TODO Memory kind handle the list of kind
-    int dummy_field;     // #TODO handle the logic here
+    unsigned size;                // Number of memory tiers
+    unsigned policy;              // Tiering policy
+    struct memtier_tier_cfg *cfg; // Memory Tier configuration
 };
 
 struct memtier_kind {
-    memkind_t todo_kind; // #TODO Memory kind handle the real logic here
-    int dummy_field;     // #TODO handle the logic here
+    struct memtier_builder *builder; // Tiering kind configuration
 };
 
 void memkind_init(memkind_t kind, bool check_numa);

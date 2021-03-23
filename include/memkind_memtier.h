@@ -24,9 +24,10 @@ struct memtier_kind;
 typedef enum memtier_policy_t
 {
     /**
-     * TODO FIX ME
+     * TODO REMOVE ME
+     * Circular policy
      */
-    MEMTIER_DUMMY_VALUE = 0,
+    MEMTIER_POLICY_CIRCULAR = 0,
 
 } memtier_policy_t;
 
