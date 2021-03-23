@@ -396,7 +396,7 @@ EXTRA_DIST = CONTRIBUTING \
              test/test_dax_kmem.sh \
              test/tiering_tests.py \
              utils/docker/Dockerfile.centos-7 \
-             utils/docker/Dockerfile.fedora-32 \
+             utils/docker/Dockerfile.fedora-33 \
              utils/docker/Dockerfile.ubuntu-20.04 \
              utils/docker/README.md \
              utils/docker/docker_install_hwloc.sh \
@@ -551,7 +551,7 @@ unit_tests_pmem: checkprogs
 
 unit_tests_hmat: checkprogs
 	test/hmat_test
-	pytest -s test/hbw_env_var_test.py
+	@pytest@ -s test/hbw_env_var_test.py
 
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
