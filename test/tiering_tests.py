@@ -270,8 +270,8 @@ class Test_tiering_config_env(Helper):
             self.default_policy,
             validate_retcode=False)
 
-        assert self.log_error_prefix + "Failed to parse pmem size: " + \
-            pmem_size in output, "Wrong message"
+        assert output[0] == self.log_error_prefix + \
+            "Failed to parse pmem size: " + pmem_size, "Wrong message"
 
     @pytest.mark.parametrize("pmem_size",
                              ["18446744073709551615K", "18446744073709551615M",
@@ -282,11 +282,8 @@ class Test_tiering_config_env(Helper):
             self.default_policy,
             validate_retcode=False)
 
-        assert self.log_error_prefix + "Failed to parse pmem size: " + \
-            pmem_size in output, "Wrong message"
-
-        assert self.log_error_prefix + \
-            "Provided pmem size is too big: 18446744073709551615" in output, \
+        assert output[0] == self.log_error_prefix + \
+            "Provided pmem size is too big: 18446744073709551615", \
             "Wrong message"
 
     def test_FSDAX_no_size(self):
@@ -417,3 +414,81 @@ class Test_tiering_config_env(Helper):
 
         assert output[0] == self.log_error_prefix + \
             "Kind name string not found in: " + query_str, "Wrong message"
+
+    @pytest.mark.parametrize("tier_str",
+                             ["DRAM:1", "FS_DAX:/tmp/:100M:1",
+                              "DRAM:1,FS_DAX:/tmp/:100M:1"])
+    def test_negative_no_policy(self, tier_str):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=" + tier_str, validate_retcode=False)
+        assert self.log_error_prefix + \
+            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
+            "Wrong message"
+
+    def test_multiple_tiers(self):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1,FS_DAX:/tmp/:100M:4,"
+            "FS_DAX:/mnt:150M:8," +
+            self.default_policy, log_level="2")
+        M = 1024 * 1024
+
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get('DRAM') in output, "Wrong message"
+        assert self.log_debug_prefix + "ratio_value: 1" in output, \
+            "Wrong message"
+
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get("FS_DAX") in output, \
+            "Wrong message"
+        output.remove(self.log_debug_prefix + "kind_name: " +
+                      self.kind_name_dict.get("FS_DAX"))
+        assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
+            "Wrong message"
+        assert self.log_debug_prefix + "pmem_size: " + \
+            str(100 * M) in output, "Wrong message"
+        assert self.log_debug_prefix + "ratio_value: 4" in output, \
+            "Wrong message"
+
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get("FS_DAX") in output, \
+            "Wrong message"
+        assert self.log_debug_prefix + "pmem_path: /mnt" in output, \
+            "Wrong message"
+        assert self.log_debug_prefix + "pmem_size: " + \
+            str(150 * M) in output, "Wrong message"
+        assert self.log_debug_prefix + "ratio_value: 8" in output, \
+            "Wrong message"
+
+    @pytest.mark.parametrize("wrong_tier",
+                             ["non_existent:/mnt:150M:8",
+                              "FS_DAX:/non_existent:150M:8",
+                              "FS_DAX:/mnt:1M:8",
+                              "FS_DAX:/mnt:150M:0",
+                              "DRAM:1"])
+    def test_multiple_tiers_wrong_tier(self, wrong_tier):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1,FS_DAX:/tmp/:100M:4," +
+            wrong_tier + self.default_policy, log_level="2",
+            validate_retcode=False)
+        M = 1024 * 1024
+
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get('DRAM') in output, "Wrong message"
+        assert self.log_debug_prefix + "ratio_value: 1" in output, \
+            "Wrong message"
+
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get("FS_DAX") in output, \
+            "Wrong message"
+        output.remove(self.log_debug_prefix + "kind_name: " +
+                      self.kind_name_dict.get("FS_DAX"))
+        assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
+            "Wrong message"
+        assert self.log_debug_prefix + "pmem_size: " + \
+            str(100 * M) in output, "Wrong message"
+        assert self.log_debug_prefix + "ratio_value: 4" in output, \
+            "Wrong message"
+
+        assert self.log_error_prefix + \
+            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
+            "Wrong message"
