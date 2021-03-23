@@ -25,7 +25,7 @@ class Helper(object):
 
     kind_name_dict = {
         'DRAM': 'memkind_default',
-        'FS_DAX': 'FS-DAX'}
+        'FS_DAX': 'FS_DAX'}
 
     # POLICY_CIRCULAR is a policy used in tests that have to set a valid policy
     # but don't test anything related to allocation policies
@@ -274,6 +274,16 @@ class Test_tiering_config_env(Helper):
             pmem_size in output, "Wrong message"
 
     @pytest.mark.parametrize("pmem_size",
+                             ["1", str(MEMKIND_PMEM_MIN_SIZE - 1)])
+    def test_FSDAX_pmem_size_too_small(self, pmem_size):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
+            self.default_policy, validate_retcode=False)
+
+        assert output[0] == self.log_error_prefix + \
+            "Error with parsing MEMKIND_MEM_TIERING_CONFIG", "Wrong message"
+
+    @pytest.mark.parametrize("pmem_size",
                              ["18446744073709551615K", "18446744073709551615M",
                               "18446744073709551615G"])
     def test_FSDAX_pmem_size_with_suffix_too_big(self, pmem_size):
@@ -417,3 +427,33 @@ class Test_tiering_config_env(Helper):
 
         assert output[0] == self.log_error_prefix + \
             "Kind name string not found in: " + query_str, "Wrong message"
+
+    @pytest.mark.parametrize("tier_str",
+                             ["DRAM:1", "FS_DAX:/tmp/:100M:1",
+                              "DRAM:1,FS_DAX:/tmp/:100M:1"])
+    def test_negative_no_policy(self, tier_str):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=" + tier_str, validate_retcode=False)
+        assert self.log_error_prefix + \
+            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
+            "Wrong message"
+
+    def test_multiple_tiers(self):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1,FS_DAX:/tmp/:100M:4," +
+            self.default_policy, log_level="2", validate_retcode=False)
+        M = 1024 * 1024
+
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get('DRAM') in output, "Wrong message"
+        assert self.log_debug_prefix + "ratio_value: 1" in output, \
+            "Wrong message"
+
+        assert self.log_debug_prefix + "kind_name: FS_DAX" in output, \
+            "Wrong message"
+        assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
+            "Wrong message"
+        assert self.log_debug_prefix + "pmem_size: " + \
+            str(100 * M) in output, "Wrong message"
+        assert self.log_debug_prefix + "ratio_value: 4" in output, \
+            "Wrong message"
