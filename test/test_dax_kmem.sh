@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2019 - 2020 Intel Corporation.
+# Copyright (C) 2019 - 2021 Intel Corporation.
 
 basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROGNAME=`basename $0`
@@ -13,6 +13,10 @@ GTEST_BINARIES=(dax_kmem_test)
 
 # Pytest files
 PYTEST_FILES=(dax_kmem_env_var_test.py)
+
+PYTEST=py.test
+which $PYTEST || PYTEST=py.test-3
+which $PYTEST || { echo >&2 "py.test not found"; exit 1; }
 
 red=`tput setaf 1`
 green=`tput setaf 2`
@@ -77,7 +81,7 @@ function show_skipped_tests()
     for i in ${!PYTEST_FILES[*]}; do
         PTEST_BINARY_PATH=$TEST_PATH${PYTEST_FILES[$i]}
         IFS=$'\n'
-        for LINE in $(py.test $PTEST_BINARY_PATH --collect-only); do
+        for LINE in $($PYTEST $PTEST_BINARY_PATH --collect-only); do
             if [[ $LINE == *"<Class "* ]]; then
                 TEST_SUITE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
             elif [[ $LINE == *"<Function "* ]]; then
@@ -250,12 +254,12 @@ for i in ${!PYTEST_FILES[*]}; do
     emit
     emit "### Processing pytest file '$PTEST_BINARY_PATH' ###"
     IFS=$'\n'
-    for LINE in $(py.test $PTEST_BINARY_PATH --collect-only); do
+    for LINE in $($PYTEST $PTEST_BINARY_PATH --collect-only); do
         if [[ $LINE == *"<Class "* ]]; then
             TEST_SUITE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
         elif [[ $LINE == *"<Function "* ]]; then
             LINE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
-            TEST_CMD="py.test $PTEST_BINARY_PATH -k='%s' 2>&1"
+            TEST_CMD="$PYTEST $PTEST_BINARY_PATH -k='%s' 2>&1"
             execute_pytest "$TEST_CMD" "$TEST_SUITE" "$LINE"
             ret=$?
             if [ $err -eq 0 ]; then err=$ret; fi
