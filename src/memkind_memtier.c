@@ -97,6 +97,8 @@ MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
     // TODO provide setting policy logic
     if (policy == MEMTIER_POLICY_CIRCULAR) {
         builder->policy = &MEMTIER_POLICY_CIRCULAR_OBJ;
+    } else if (policy == MEMTIER_POLICY_STATIC_THRESHOLD) {
+        builder->policy = &MEMTIER_POLICY_STATIC_THRESHOLD_OBJ;
     } else {
         log_err("Unrecognized memory policy %u", policy);
         return -1;

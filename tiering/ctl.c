@@ -135,11 +135,16 @@ static int ctl_parse_pmem_size(const char *str, size_t *sizep)
 static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
 {
     if (strcmp(qbuf, "POLICY_CIRCULAR") == 0) {
-        return *policy = MEMTIER_POLICY_CIRCULAR;
+        *policy = MEMTIER_POLICY_CIRCULAR;
+    } else if (strcmp(qbuf, "POLICY_STATIC_THRESHOLD") == 0) {
+        *policy = MEMTIER_POLICY_STATIC_THRESHOLD;
+    } else {
+
+        log_err("Unknown policy: %s", qbuf);
+        return -1;
     }
 
-    log_err("Unknown policy: %s", qbuf);
-    return -1;
+    return 0;
 }
 
 static int ctl_parse_ratio(const char *ratio_str, unsigned *dest)
