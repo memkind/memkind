@@ -43,7 +43,8 @@ protected:
         ASSERT_EQ(0, res);
         res = memtier_builder_add_tier(builder, m_tier_regular, 1000);
         ASSERT_EQ(0, res);
-        res = memtier_builder_set_policy(builder, MEMTIER_POLICY_CIRCULAR);
+        res = memtier_builder_set_policy(builder,
+                                         MEMTIER_POLICY_STATIC_THRESHOLD);
         ASSERT_EQ(0, res);
         res = memtier_builder_construct_kind(builder, &m_tier_kind);
         ASSERT_EQ(0, res);
@@ -126,7 +127,8 @@ TEST_F(MemkindMemtierTest, test_tier_construct_failure_zero_tiers)
 {
     struct memtier_kind *tier_kind = nullptr;
     struct memtier_builder *builder = memtier_builder_new();
-    int res = memtier_builder_set_policy(builder, MEMTIER_POLICY_CIRCULAR);
+    int res =
+        memtier_builder_set_policy(builder, MEMTIER_POLICY_STATIC_THRESHOLD);
     ASSERT_EQ(0, res);
     res = memtier_builder_construct_kind(builder, &tier_kind);
     ASSERT_NE(0, res);
@@ -160,18 +162,16 @@ TEST_F(MemkindMemtierKindTest, test_tier_builder_allocation_test_success)
     const size_t size = 512;
     void *ptr = memtier_kind_malloc(m_tier_kind, size);
     ASSERT_NE(nullptr, ptr);
-    ASSERT_EQ(MEMKIND_DEFAULT, memkind_detect_kind(ptr));
     memtier_free(ptr);
     ptr = memtier_kind_calloc(m_tier_kind, size, size);
     ASSERT_NE(nullptr, ptr);
-    ASSERT_EQ(MEMKIND_REGULAR, memkind_detect_kind(ptr));
+    memkind_t kind = memkind_detect_kind(ptr);
     void *new_ptr = memtier_kind_realloc(m_tier_kind, ptr, size);
     ASSERT_NE(nullptr, new_ptr);
-    ASSERT_EQ(MEMKIND_REGULAR, memkind_detect_kind(ptr));
+    ASSERT_EQ(kind, memkind_detect_kind(ptr));
     memtier_free(new_ptr);
     int err = memtier_kind_posix_memalign(m_tier_kind, &ptr, 64, 32);
     ASSERT_EQ(0, err);
-    ASSERT_EQ(MEMKIND_DEFAULT, memkind_detect_kind(ptr));
     memtier_free(ptr);
 }
 
@@ -574,4 +574,168 @@ TEST_F(MemkindMemtierKindTest, test_tier_kind_thread_safety_calc_size)
     }
 
     ASSERT_EQ(0ULL, allocation_sum());
+}
+
+class MemkindMemtierStaticThresholdTest: public ::testing::Test
+{
+protected:
+    struct memtier_kind *m_tier_kind;
+    struct memtier_tier *m_tier_default;
+    struct memtier_tier *m_tier_regular;
+
+    const int m_tier_default_ratio = 1;
+    const int m_tier_regular_ratio = 4;
+
+    size_t allocation_sum()
+    {
+        return memtier_tier_allocated_size(m_tier_default) +
+            memtier_tier_allocated_size(m_tier_regular);
+    }
+
+    void SetUp()
+    {
+        m_tier_default = memtier_tier_new(MEMKIND_DEFAULT);
+        m_tier_regular = memtier_tier_new(MEMKIND_REGULAR);
+        struct memtier_builder *builder = memtier_builder_new();
+        ASSERT_NE(nullptr, m_tier_default);
+        ASSERT_NE(nullptr, m_tier_regular);
+        ASSERT_NE(nullptr, builder);
+
+        int res = memtier_builder_add_tier(builder, m_tier_default,
+                                           m_tier_default_ratio);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_add_tier(builder, m_tier_regular,
+                                       m_tier_regular_ratio);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_set_policy(builder,
+                                         MEMTIER_POLICY_STATIC_THRESHOLD);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_construct_kind(builder, &m_tier_kind);
+        ASSERT_EQ(0, res);
+        memtier_builder_delete(builder);
+    }
+
+    void TearDown()
+    {
+        memtier_delete_kind(m_tier_kind);
+        memtier_tier_delete(m_tier_default);
+        memtier_tier_delete(m_tier_regular);
+    }
+};
+
+TEST_F(MemkindMemtierStaticThresholdTest, test_basic)
+{
+    std::vector<void *> allocs;
+
+    allocs.push_back(memtier_kind_malloc(m_tier_kind, 16));
+    allocs.push_back(memtier_kind_malloc(m_tier_kind, 16));
+    // actual ratio 1:1, desired 1:4
+    ASSERT_EQ(16ULL, memtier_tier_allocated_size(m_tier_default));
+    ASSERT_EQ(16ULL, memtier_tier_allocated_size(m_tier_regular));
+
+    allocs.push_back(memtier_kind_malloc(m_tier_kind, 16));
+    // actual ratio 1:2, desired 1:4
+    ASSERT_EQ(16ULL, memtier_tier_allocated_size(m_tier_default));
+    ASSERT_EQ(32ULL, memtier_tier_allocated_size(m_tier_regular));
+
+    allocs.push_back(memtier_kind_malloc(m_tier_kind, 16));
+    // actual ratio 1:3, desired 1:4
+    ASSERT_EQ(16ULL, memtier_tier_allocated_size(m_tier_default));
+    ASSERT_EQ(48ULL, memtier_tier_allocated_size(m_tier_regular));
+
+    allocs.push_back(memtier_kind_malloc(m_tier_kind, 8));
+    // actual ratio 1:3.5, desired 1:4
+    ASSERT_EQ(16ULL, memtier_tier_allocated_size(m_tier_default));
+    ASSERT_EQ(56ULL, memtier_tier_allocated_size(m_tier_regular));
+
+    allocs.push_back(memtier_kind_malloc(m_tier_kind, 16));
+    // actual ratio 1:4.5, desired 1:4
+    ASSERT_EQ(16ULL, memtier_tier_allocated_size(m_tier_default));
+    ASSERT_EQ(72ULL, memtier_tier_allocated_size(m_tier_regular));
+
+    allocs.push_back(memtier_kind_malloc(m_tier_kind, 16));
+    // actual ratio 1:2.25, desired 1:4
+    ASSERT_EQ(32ULL, memtier_tier_allocated_size(m_tier_default));
+    ASSERT_EQ(72ULL, memtier_tier_allocated_size(m_tier_regular));
+
+    allocs.push_back(memtier_kind_malloc(m_tier_kind, 36));
+    // actual ratio 1:3.75, desired 1:4
+    ASSERT_EQ(32ULL, memtier_tier_allocated_size(m_tier_default));
+    ASSERT_EQ(120ULL, memtier_tier_allocated_size(m_tier_regular));
+
+    allocs.push_back(memtier_kind_malloc(m_tier_kind, 8));
+    // actual ratio 1:4, desired 1:4
+    ASSERT_EQ(32ULL, memtier_tier_allocated_size(m_tier_default));
+    ASSERT_EQ(128ULL, memtier_tier_allocated_size(m_tier_regular));
+
+    for (size_t i = 0; i < allocs.size(); ++i)
+        memtier_free(allocs[i]);
+}
+
+TEST_F(MemkindMemtierStaticThresholdTest, test_malloc_only)
+{
+    const int sizes_num = 5;
+    const size_t sizes[sizes_num] = {16, 32, 64, 128, 256};
+    size_t num_allocs = 100;
+    std::vector<void *> allocs;
+    size_t i;
+
+    for (i = 0; i < num_allocs; ++i) {
+        size_t size = sizes[i % sizes_num];
+        void *ptr = memtier_kind_malloc(m_tier_kind, size);
+        ASSERT_NE(nullptr, ptr);
+        allocs.push_back(ptr);
+
+        size_t regular_alloc_size = memtier_tier_allocated_size(m_tier_regular);
+        float tier_regular_actual_ratio = (float)regular_alloc_size /
+            memtier_tier_allocated_size(m_tier_default);
+
+        if (tier_regular_actual_ratio < m_tier_regular_ratio) {
+            ASSERT_GE(memtier_tier_allocated_size(m_tier_regular),
+                      regular_alloc_size);
+        }
+    }
+
+    for (i = 0; i < allocs.size(); ++i)
+        memtier_free(allocs[i]);
+}
+
+TEST_F(MemkindMemtierStaticThresholdTest, test_malloc_free)
+{
+    const int sizes_num = 5;
+    const size_t sizes[sizes_num] = {16, 32, 64, 128, 256};
+
+    // 1 = malloc, -1 = free
+    // NOTE that there are the same num of mallocs/free so at the end all
+    // allocations should be freed
+    const int operations_num = 14;
+    int operations[14] = {1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, -1};
+
+    size_t num_allocs = operations_num * sizes_num;
+    std::vector<void *> allocs;
+    size_t i;
+
+    for (i = 0; i < num_allocs; ++i) {
+        size_t size = sizes[i % sizes_num];
+        int op = operations[i % operations_num];
+        if (op == 1) {
+            void *ptr = memtier_kind_malloc(m_tier_kind, size);
+            ASSERT_NE(nullptr, ptr);
+            allocs.push_back(ptr);
+        } else {
+            memtier_free(allocs.back());
+            allocs.pop_back();
+        }
+
+        size_t regular_alloc_size = memtier_tier_allocated_size(m_tier_regular);
+        float tier_regular_actual_ratio = (float)regular_alloc_size /
+            memtier_tier_allocated_size(m_tier_default);
+
+        if (tier_regular_actual_ratio < m_tier_regular_ratio) {
+            ASSERT_GE(memtier_tier_allocated_size(m_tier_regular),
+                      regular_alloc_size);
+        }
+    }
+
+    ASSERT_EQ(0ULL, allocs.size());
 }

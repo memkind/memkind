@@ -23,9 +23,9 @@ class Helper(object):
     kind_name_dict = {
         'DRAM': 'memkind_default'}
 
-    # POLICY_CIRCULAR is a policy used in tests that have to set a valid policy
-    # but don't test anything related to allocation policies
-    default_policy = "POLICY_CIRCULAR"
+    # POLICY_STATIC_THRESHOLD is a policy used in tests that have to set a
+    # valid policy but don't test anything related to allocation policies
+    default_policy = "POLICY_STATIC_THRESHOLD"
 
     def get_ld_preload_cmd_output(self, config_env, log_level=None,
                                   validate_retcode=True):
@@ -205,7 +205,7 @@ class Test_tiering_config_env(Helper):
             "Wrong message"
 
     @pytest.mark.parametrize("ratio", ["1", "1000", "4294967295"])
-    def test_DRAM(self, ratio):
+    def test_DRAM_ratio(self, ratio):
         output = self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio + "," +
             self.default_policy, log_level="2")
@@ -217,6 +217,22 @@ class Test_tiering_config_env(Helper):
         assert self.log_debug_prefix + "policy: " + self.default_policy \
             in output, "Wrong message"
 
+    @pytest.mark.parametrize("policy", ["POLICY_STATIC_THRESHOLD"])
+    def test_DRAM_policy(self, policy):
+        ratio = "1"
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio + "," + policy,
+            log_level="2")
+
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get('DRAM') in output, "Wrong message"
+        assert self.log_debug_prefix + "ratio_value: " + ratio in output, \
+            "Wrong message"
+        assert self.log_debug_prefix + "policy: " + policy in output, \
+            "Wrong message"
+
+    # TODO enable this check after implementing full FS_DAX support in
+    # libmemtier
     @pytest.mark.parametrize("pmem_size", ["0", "1", "18446744073709551615"])
     def test_FSDAX(self, pmem_size):
         output = self.get_ld_preload_cmd_output(

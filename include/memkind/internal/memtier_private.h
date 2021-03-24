@@ -47,7 +47,7 @@ struct memtier_policy {
     void *priv;
 };
 
-extern struct memtier_policy MEMTIER_POLICY_CIRCULAR_OBJ;
+extern struct memtier_policy MEMTIER_POLICY_STATIC_THRESHOLD_OBJ;
 
 #ifdef __cplusplus
 }

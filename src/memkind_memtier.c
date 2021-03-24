@@ -38,9 +38,6 @@ static struct memtier_registry memtier_registry_g = {
     PTHREAD_MUTEX_INITIALIZER,
 };
 
-// TODO REMOVE THIS !!!!
-static unsigned tier_id;
-
 MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
 {
     if (pthread_mutex_lock(&memtier_registry_g.lock) != 0)
@@ -113,9 +110,8 @@ MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
 MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
                                               memtier_policy_t policy)
 {
-    // TODO provide setting policy logic
-    if (policy == MEMTIER_POLICY_CIRCULAR) {
-        builder->policy = &MEMTIER_POLICY_CIRCULAR_OBJ;
+    if (policy == MEMTIER_POLICY_STATIC_THRESHOLD) {
+        builder->policy = &MEMTIER_POLICY_STATIC_THRESHOLD_OBJ;
     } else {
         log_err("Unrecognized memory policy %u", policy);
         return -1;
@@ -164,7 +160,6 @@ memtier_builder_construct_kind(struct memtier_builder *builder,
         (*kind)->builder->cfg[i].tier = builder->cfg[i].tier;
         (*kind)->builder->cfg[i].tier_ratio = builder->cfg[i].tier_ratio;
     }
-    tier_id = 0;
     return 0;
 
 free_builder:
