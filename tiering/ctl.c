@@ -12,9 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// TODO - remove this after logging cleanup
-#include <memkind/internal/memkind_private.h>
-
 #define CTL_VALUE_SEPARATOR        ":"
 #define CTL_STRING_QUERY_SEPARATOR ","
 
@@ -257,7 +254,7 @@ static memkind_t ctl_get_kind(const ctl_tier_cfg *tier)
     memkind_t kind = NULL;
     if (strcmp(tier->kind_name, "DRAM") == 0) {
         kind = MEMKIND_DEFAULT;
-        log_debug("kind_name: %s", kind->name);
+        log_debug("kind_name: memkind_default");
     } else if (strcmp(tier->kind_name, "FS_DAX") == 0) {
         // TODO handle FS_DAX here
         log_debug("kind_name: %s", tier->kind_name);
@@ -293,17 +290,11 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
     }
 
     memkind_t kind = ctl_get_kind(&tier);
-    if (kind == NULL) {
-        return NULL;
-    }
 
     log_debug("ratio_value: %u", tier.ratio_value);
     log_debug("policy: %s", ctl_policy_to_str(policy));
 
     current_tier = memtier_tier_new(kind);
-    if (current_tier == NULL) {
-        return NULL;
-    }
 
     struct memtier_builder *builder = memtier_builder_new();
     if (!builder) {
