@@ -30,6 +30,11 @@ typedef enum memtier_policy_t
     MEMTIER_POLICY_CIRCULAR = 0,
 
     /**
+     * Static Threshold policy
+     */
+    MEMTIER_POLICY_STATIC_THRESHOLD = 1,
+
+    /**
      * Max policy value.
      */
     MEMTIER_POLICY_MAX_VALUE
