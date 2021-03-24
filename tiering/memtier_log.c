@@ -9,6 +9,8 @@
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <syscall.h>
+#include <unistd.h>
 
 static const char *message_prefixes[MESSAGE_TYPE_MAX_VALUE] = {
     [MESSAGE_TYPE_ERROR] = "MEMKIND_MEM_TIERING_LOG_ERROR",
@@ -25,18 +27,32 @@ char *utils_get_env(const char *name)
 #endif
 }
 
+static ssize_t swrite(int fd, const void *buf, size_t count)
+{
+    return syscall(SYS_write, fd, buf, count);
+}
+
 static unsigned log_level;
 static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static void log_generic(message_type_t type, const char *format, va_list args)
 {
+    static char buf[4096], *b;
+
+    b = buf + sprintf(buf, "%s: ", message_prefixes[type]);
+    int blen = sizeof(buf) + (buf - b) - 1;
+    int len = vsnprintf(b, blen, format, args);
+    sprintf(b + len, "\n");
+    b += len + 1;
+
     if (pthread_mutex_lock(&log_lock) != 0) {
         assert(0 && "failed to acquire log mutex");
     }
 
-    fprintf(stderr, "%s: ", message_prefixes[type]);
-    vfprintf(stderr, format, args);
-    fprintf(stderr, "\n");
+    const char overflow_msg[] = "Warning: message truncated.\n";
+    if (len >= blen)
+        swrite(STDERR_FILENO, overflow_msg, sizeof(overflow_msg));
+    swrite(STDERR_FILENO, buf, b - buf);
 
     if (pthread_mutex_unlock(&log_lock) != 0) {
         assert(0 && "failed to release log mutex");
