@@ -21,7 +21,8 @@ class Helper(object):
     log_info_prefix = log_prefix + "LOG_INFO: "
 
     kind_name_dict = {
-        'DRAM': 'memkind_default'}
+        'DRAM': 'memkind_default',
+        'FS_DAX': 'FS-DAX'}
 
     # POLICY_CIRCULAR is a policy used in tests that have to set a valid policy
     # but don't test anything related to allocation policies
@@ -222,8 +223,8 @@ class Test_tiering_config_env(Helper):
             pmem_size + ":1," + self.default_policy,
             log_level="2", validate_retcode=False)
 
-        assert self.log_debug_prefix + "kind_name: FS_DAX" in output, \
-            "Wrong message"
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get('FS_DAX') in output, "Wrong message"
         assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
             "Wrong message"
         assert self.log_debug_prefix + "pmem_size: " + pmem_size in output, \
@@ -239,8 +240,8 @@ class Test_tiering_config_env(Helper):
             pmem_size + ":1," + self.default_policy,
             log_level="2", validate_retcode=False)
 
-        assert self.log_debug_prefix + "kind_name: FS_DAX" in output, \
-            "Wrong message"
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get('FS_DAX') in output, "Wrong message"
         assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
             "Wrong message"
         assert self.log_debug_prefix + "pmem_size: 1073741824" in output, \

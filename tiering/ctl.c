@@ -256,8 +256,8 @@ static memkind_t ctl_get_kind(const ctl_tier_cfg *tier)
         kind = MEMKIND_DEFAULT;
         log_debug("kind_name: memkind_default");
     } else if (strcmp(tier->kind_name, "FS_DAX") == 0) {
-        // TODO handle FS_DAX here
-        log_debug("kind_name: %s", tier->kind_name);
+        memkind_create_pmem(tier->pmem_path, tier->pmem_size, &kind);
+        log_debug("kind_name: FS-DAX");
         log_debug("pmem_path: %s", tier->pmem_path);
         log_debug("pmem_size: %zu", tier->pmem_size);
     }
