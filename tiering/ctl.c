@@ -17,12 +17,39 @@
 
 static struct memtier_tier *current_tier;
 
+typedef struct fs_dax_registy {
+    unsigned size;
+    memkind_t *kinds;
+} fs_dax_registy;
+
 typedef struct ctl_tier_cfg {
     char *kind_name;
     char *pmem_path;
     size_t pmem_size;
     unsigned ratio_value;
 } ctl_tier_cfg;
+
+static struct fs_dax_registy fs_dax_reg_g;
+
+static int ctl_add_pmem_to_fs_dax_reg(memkind_t kind)
+{
+    memkind_t *new_kinds =
+        memkind_realloc(MEMKIND_DEFAULT, fs_dax_reg_g.kinds,
+                        sizeof(fs_dax_reg_g.kinds) * (fs_dax_reg_g.size + 1));
+    if (!new_kinds)
+        return -1;
+    fs_dax_reg_g.kinds = new_kinds;
+    fs_dax_reg_g.size += 1;
+    return 0;
+}
+
+static void ctl_destroy_fs_dax_reg(void)
+{
+    int i;
+    for (i = 0; i < fs_dax_reg_g.size; ++i) {
+        memkind_destroy_kind(fs_dax_reg_g.kinds[i]);
+    }
+}
 
 /*
  * ctl_parse_u -- (internal) parses and returns an unsigned integer
@@ -256,8 +283,11 @@ static memkind_t ctl_get_kind(const ctl_tier_cfg *tier)
         kind = MEMKIND_DEFAULT;
         log_debug("kind_name: memkind_default");
     } else if (strcmp(tier->kind_name, "FS_DAX") == 0) {
-        // TODO handle FS_DAX here
-        log_debug("kind_name: %s", tier->kind_name);
+        memkind_create_pmem(tier->pmem_path, tier->pmem_size, &kind);
+        if (kind) {
+            ctl_add_pmem_to_fs_dax_reg(kind);
+        }
+        log_debug("kind_name: FS-DAX");
         log_debug("pmem_path: %s", tier->pmem_path);
         log_debug("pmem_size: %zu", tier->pmem_size);
     }
@@ -324,12 +354,14 @@ builder_delete:
 
 tier_delete:
     memtier_tier_delete(current_tier);
+    ctl_destroy_fs_dax_reg();
 
     return NULL;
 }
 
 void ctl_destroy_kind(struct memtier_kind *kind)
 {
+    ctl_destroy_fs_dax_reg();
     memtier_tier_delete(current_tier);
     memtier_delete_kind(kind);
 }
