@@ -295,9 +295,6 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
     log_debug("policy: %s", ctl_policy_to_str(policy));
 
     current_tier = memtier_tier_new(kind);
-    if (current_tier == NULL) {
-        return NULL;
-    }
 
     struct memtier_builder *builder = memtier_builder_new();
     if (!builder) {
