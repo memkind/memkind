@@ -8,7 +8,8 @@ extern "C" {
 #endif
 
 int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
-                    size_t *pmem_size, unsigned *ratio_value);
+                    size_t *pmem_size, unsigned *ratio_value,
+                    memtier_policy_t *policy);
 
 #ifdef __cplusplus
 }
