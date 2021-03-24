@@ -11,8 +11,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+// TODO - remove this after logging cleanup
+#include <memkind/internal/memkind_private.h>
+
 #define CTL_VALUE_SEPARATOR        ":"
 #define CTL_STRING_QUERY_SEPARATOR ","
+
+static struct memtier_tier *current_tier;
 
 /*
  * ctl_parse_u -- (internal) parses and returns an unsigned integer
@@ -197,9 +202,9 @@ static int ctl_parse_query(char *qbuf, char **kind_name, char **pmem_path,
 /*
  * ctl_load_config -- splits an entire config into query strings
  */
-int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
-                    size_t *pmem_size, unsigned *ratio_value,
-                    memtier_policy_t *policy)
+static int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
+                           size_t *pmem_size, unsigned *ratio_value,
+                           memtier_policy_t *policy)
 {
     int ret;
     char *sptr = NULL;
@@ -240,4 +245,100 @@ int ctl_load_config(char *buf, char **kind_name, char **pmem_path,
     }
 
     return 0;
+}
+
+static memkind_t ctl_get_kind(const char *str, const char *pmem_path,
+                              size_t pmem_size)
+{
+    memkind_t kind = NULL;
+    if (strcmp(str, "DRAM") == 0) {
+        kind = MEMKIND_DEFAULT;
+    } else if (strcmp(str, "FS_DAX") == 0) {
+        // TODO handle FS_DAX here
+    }
+
+    log_debug("kind_name: %s", kind->name);
+    log_debug("pmem_path: %s", pmem_path);
+    log_debug("pmem_size: %zu", pmem_size);
+
+    return kind;
+}
+
+static const char *ctl_policy_to_str(memtier_policy_t policy)
+{
+    if (policy < MEMTIER_POLICY_CIRCULAR ||
+        policy >= MEMTIER_POLICY_MAX_VALUE) {
+        log_err("Unknown policy: %d", policy);
+        return NULL;
+    }
+
+    const char *policies[] = {"POLICY_CIRCULAR"};
+
+    return policies[policy];
+}
+
+struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
+{
+    char *kind_name = NULL;
+    char *pmem_path = NULL;
+    struct memtier_kind *tier_kind;
+    size_t pmem_size = 0;
+    unsigned ratio_value = 0;
+    memtier_policy_t policy = MEMTIER_POLICY_MAX_VALUE;
+
+    int ret = ctl_load_config(env_var_string, &kind_name, &pmem_path,
+                              &pmem_size, &ratio_value, &policy);
+    if (ret != 0) {
+        return NULL;
+    }
+
+    memkind_t kind = ctl_get_kind(kind_name, pmem_path, pmem_size);
+    if (kind == NULL) {
+        return NULL;
+    }
+
+    log_debug("ratio_value: %u", ratio_value);
+    log_debug("policy: %s", ctl_policy_to_str(policy));
+
+    current_tier = memtier_tier_new(kind);
+    if (current_tier == NULL) {
+        return NULL;
+    }
+
+    struct memtier_builder *builder = memtier_builder_new();
+    if (!builder) {
+        goto tier_delete;
+    }
+
+    ret = memtier_builder_add_tier(builder, current_tier, ratio_value);
+    if (ret != 0) {
+        goto builder_delete;
+    }
+
+    ret = memtier_builder_set_policy(builder, policy);
+    if (ret != 0) {
+        goto builder_delete;
+    }
+
+    ret = memtier_builder_construct_kind(builder, &tier_kind);
+    if (ret != 0) {
+        goto builder_delete;
+    }
+    memtier_builder_delete(builder);
+
+    return tier_kind;
+
+builder_delete:
+    memtier_builder_delete(builder);
+
+tier_delete:
+    memtier_tier_delete(current_tier);
+
+    return NULL;
+}
+
+void ctl_destroy_kind(struct memtier_kind *kind)
+{
+    memtier_tier_delete(current_tier);
+    memtier_delete_kind(kind);
 }
