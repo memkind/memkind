@@ -29,7 +29,7 @@ typedef struct ctl_tier_cfg {
     unsigned ratio_value;
 } ctl_tier_cfg;
 
-static struct fs_dax_registry fs_dax_reg_g;
+static struct fs_dax_registry fs_dax_reg_g = {0, NULL};
 
 static int ctl_add_pmem_kind_to_fs_dax_reg(memkind_t kind)
 {
@@ -286,8 +286,8 @@ static memkind_t ctl_get_kind(const ctl_tier_cfg *tier)
         log_debug("kind_name: memkind_default");
     } else if (strcmp(tier->kind_name, "FS_DAX") == 0) {
         memkind_create_pmem(tier->pmem_path, tier->pmem_size, &kind);
-        if (kind) {
-            ctl_add_pmem_kind_to_fs_dax_reg(kind);
+        if (kind && ctl_add_pmem_kind_to_fs_dax_reg(kind)) {
+            return NULL;
         }
         log_debug("kind_name: FS-DAX");
         log_debug("pmem_path: %s", tier->pmem_path);
