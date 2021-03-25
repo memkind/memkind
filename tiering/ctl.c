@@ -33,7 +33,7 @@ typedef struct fs_dax_registry {
     memkind_t *kinds;
 } fs_dax_registry;
 
-static struct fs_dax_registry fs_dax_reg_g;
+static struct fs_dax_registry fs_dax_reg_g = {0, NULL};
 
 static int ctl_add_pmem_kind_to_fs_dax_reg(memkind_t kind)
 {
@@ -251,9 +251,10 @@ static memkind_t ctl_get_kind(unsigned tier_num)
         kind = MEMKIND_DEFAULT;
         log_debug("kind_name: memkind_default");
     } else if (strcmp(tier_cfg.kind_name, "FS_DAX") == 0) {
-        memkind_create_pmem(tier_cfg.pmem_path, tier_cfg.pmem_size, &kind);
-        if (kind) {
-            ctl_add_pmem_kind_to_fs_dax_reg(kind);
+        int res =
+            memkind_create_pmem(tier_cfg.pmem_path, tier_cfg.pmem_size, &kind);
+        if (res || ctl_add_pmem_kind_to_fs_dax_reg(kind)) {
+            return NULL;
         }
         log_debug("kind_name: FS-DAX");
         log_debug("pmem_path: %s", tier_cfg.pmem_path);
