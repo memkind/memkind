@@ -5,55 +5,7 @@
 
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_log.h>
-
-#include "config.h"
-#include <assert.h>
-
-#ifdef HAVE_STDATOMIC_H
-#include <stdatomic.h>
-#define MEMKIND_ATOMIC _Atomic
-#else
-#define MEMKIND_ATOMIC
-#endif
-
-#if defined(MEMKIND_ATOMIC_C11_SUPPORT)
-#define memkind_atomic_increment(counter, val)                                 \
-    atomic_fetch_add_explicit(&counter, val, memory_order_relaxed)
-#define memkind_atomic_decrement(counter, val)                                 \
-    atomic_fetch_sub_explicit(&counter, val, memory_order_relaxed)
-#elif defined(MEMKIND_ATOMIC_BUILTINS_SUPPORT)
-#define memkind_atomic_increment(counter, val)                                 \
-    __atomic_add_fetch(&counter, val, __ATOMIC_RELAXED)
-#define memkind_atomic_decrement(counter, val)                                 \
-    __atomic_sub_fetch(&counter, val, __ATOMIC_RELAXED)
-#elif defined(MEMKIND_ATOMIC_SYNC_SUPPORT)
-#define memkind_atomic_increment(counter, val)                                 \
-    __sync_add_and_fetch(&counter, val)
-#define memkind_atomic_decrement(counter, val)                                 \
-    __sync_sub_and_fetch(&counter, val)
-#else
-#error "Missing atomic implementation."
-#endif
-
-struct memtier_tier {
-    memkind_t kind;                   // Memory kind
-    MEMKIND_ATOMIC size_t alloc_size; // Allocated size
-};
-
-struct memtier_tier_cfg {
-    struct memtier_tier *tier; // Memory tier
-    unsigned tier_ratio;       // Memory tier ratio
-};
-
-struct memtier_builder {
-    unsigned size;                // Number of memory tiers
-    unsigned policy;              // Tiering policy
-    struct memtier_tier_cfg *cfg; // Memory Tier configuration
-};
-
-struct memtier_kind {
-    struct memtier_builder *builder; // Tiering kind configuration
-};
+#include <memkind/internal/memtier_private.h>
 
 // Provide translation from memkind_t to memtier_t
 // memkind_t partition id -> memtier tier
@@ -144,21 +96,18 @@ MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
 {
     // TODO provide setting policy logic
     if (policy == MEMTIER_POLICY_CIRCULAR) {
-        builder->policy = policy;
-        return 0;
+        builder->policy = &MEMTIER_POLICY_CIRCULAR_OBJ;
+    } else {
+        log_err("Unrecognized memory policy %u", policy);
+        return -1;
     }
-    log_err("Unrecognized memory policy %u", policy);
-    return -1;
+
+    return builder->policy->create(builder);
 }
 
 static inline struct memtier_tier *get_tier(struct memtier_kind *tier_kind)
 {
-    if (tier_kind->builder->policy == MEMTIER_POLICY_CIRCULAR) {
-        unsigned temp_id = (tier_id++) % tier_kind->builder->size;
-        return tier_kind->builder->cfg[temp_id].tier;
-    }
-    // not reached
-    return NULL;
+    return tier_kind->builder->policy->get_tier(tier_kind);
 }
 
 MEMKIND_EXPORT int
