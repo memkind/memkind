@@ -78,6 +78,7 @@ src/memkind_mem_attributes.c
 src/memkind_memtier.c
 src/memkind_pmem.c
 src/memkind_regular.c
+src/memtier_policies.c
 src/tbb_wrapper.c
 test/Allocator.hpp
 test/Makefile.mk
