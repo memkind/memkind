@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+// TODO - remove this after logging cleanup
+#include <memkind/internal/memtier_private.h>
+
 #define CTL_VALUE_SEPARATOR        ":"
 #define CTL_STRING_QUERY_SEPARATOR ","
 
@@ -264,20 +267,6 @@ static memkind_t ctl_get_kind(const ctl_tier_cfg *tier)
 
     return kind;
 }
-
-static const char *ctl_policy_to_str(memtier_policy_t policy)
-{
-    if (policy < MEMTIER_POLICY_CIRCULAR ||
-        policy >= MEMTIER_POLICY_MAX_VALUE) {
-        log_err("Unknown policy: %d", policy);
-        return NULL;
-    }
-
-    const char *policies[] = {"POLICY_CIRCULAR"};
-
-    return policies[policy];
-}
-
 struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
 {
     struct memtier_kind *tier_kind;
@@ -289,10 +278,9 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
         return NULL;
     }
 
-    memkind_t kind = ctl_get_kind(&tier);
-
     log_debug("ratio_value: %u", tier.ratio_value);
-    log_debug("policy: %s", ctl_policy_to_str(policy));
+
+    memkind_t kind = ctl_get_kind(&tier);
 
     current_tier = memtier_tier_new(kind);
 
@@ -310,6 +298,8 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
     if (ret != 0) {
         goto builder_delete;
     }
+
+    log_debug("policy: %s", builder->policy->name);
 
     ret = memtier_builder_construct_kind(builder, &tier_kind);
     if (ret != 0) {

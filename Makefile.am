@@ -28,6 +28,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_mem_attributes.c \
                         src/memkind_pmem.c \
                         src/memkind_regular.c \
+                        src/memtier_policies.c \
                         src/tbb_wrapper.c \
                         # end
 
