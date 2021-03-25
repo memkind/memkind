@@ -97,7 +97,7 @@ class Test_tiering_log(Helper):
             self.log_debug_prefix + r"free\(" + re_hex_or_nil + r"\)$",
             self.log_debug_prefix + r"kind_name: \w+$",
             self.log_debug_prefix + r"pmem_path: .*$",  # TODO add path re
-            self.log_debug_prefix + r"pmem_size: (\(null\)|\d+)$",
+            self.log_debug_prefix + r"pmem_size: \d+$",
             self.log_debug_prefix + r"ratio_value: \d+$",
             self.log_debug_prefix + r"policy: \w+$",
         ]
@@ -278,8 +278,7 @@ class Test_tiering_config_env(Helper):
 
     def test_FSDAX_no_size(self):
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX",
-            validate_retcode=False)
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX", validate_retcode=False)
 
         assert self.log_error_prefix + \
             "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \

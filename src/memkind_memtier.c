@@ -72,7 +72,6 @@ static unsigned tier_id;
 
 MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
 {
-    struct memtier_tier *tier;
     if (pthread_mutex_lock(&memtier_registry_g.lock) != 0)
         assert(0 && "failed to acquire mutex");
     if (!kind || memtier_registry_g.kind_map[kind->partition]) {
@@ -82,7 +81,7 @@ MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
         return NULL;
     }
 
-    tier = jemk_malloc(sizeof(struct memtier_tier));
+    struct memtier_tier *tier = jemk_malloc(sizeof(*tier));
     if (tier) {
         tier->kind = kind;
         tier->alloc_size = 0;
