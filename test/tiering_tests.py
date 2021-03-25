@@ -15,7 +15,7 @@ class Helper(object):
     ld_preload_env = "LD_PRELOAD=tiering/.libs/libmemtier.so"
     # TODO create separate, parametrized binary that could be used for testing
     # instead of using ls here
-    bin_path = "ls -l"
+    bin_path = "ls"
     cmd = CMD_helper()
 
     log_prefix = "MEMKIND_MEM_TIERING_"
