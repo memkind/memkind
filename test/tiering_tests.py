@@ -1,10 +1,13 @@
 # SPDX-License-Identifier: BSD-2-Clause
 # Copyright (C) 2021 Intel Corporation.
 
+import os
 import pytest
 import re
 
 from python_framework import CMD_helper
+
+MEMKIND_PMEM_MIN_SIZE = 1024 * 1024 * 16
 
 
 class Helper(object):
@@ -12,7 +15,7 @@ class Helper(object):
     ld_preload_env = "LD_PRELOAD=tiering/.libs/libmemtier.so"
     # TODO create separate, parametrized binary that could be used for testing
     # instead of using ls here
-    bin_path = "ls -l"
+    bin_path = "ls"
     cmd = CMD_helper()
 
     log_prefix = "MEMKIND_MEM_TIERING_"
@@ -21,11 +24,20 @@ class Helper(object):
     log_info_prefix = log_prefix + "LOG_INFO: "
 
     kind_name_dict = {
-        'DRAM': 'memkind_default'}
+        'DRAM': 'memkind_default',
+        'FS_DAX': 'FS-DAX'}
 
     # POLICY_CIRCULAR is a policy used in tests that have to set a valid policy
     # but don't test anything related to allocation policies
     default_policy = "POLICY_CIRCULAR"
+
+    def check_fs_dax_support(self):
+        fs_dax_path = os.environ.get('PMEM_PATH', '/tmp').rstrip("/")
+        with open('/proc/mounts', 'r') as f:
+            for line in f.readlines():
+                if 'dax' in line and fs_dax_path in line:
+                    return True
+        return False
 
     def get_ld_preload_cmd_output(self, config_env, log_level=None,
                                   validate_retcode=True):
@@ -215,15 +227,16 @@ class Test_tiering_config_env(Helper):
         assert self.log_debug_prefix + "ratio_value: " + ratio in output, \
             "Wrong message"
 
-    @pytest.mark.parametrize("pmem_size", ["0", "1", "18446744073709551615"])
+    @pytest.mark.parametrize("pmem_size", ["0", str(MEMKIND_PMEM_MIN_SIZE),
+                                           "18446744073709551615"])
     def test_FSDAX(self, pmem_size):
         output = self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" +
             pmem_size + ":1," + self.default_policy,
-            log_level="2", validate_retcode=False)
+            log_level="2")
 
-        assert self.log_debug_prefix + "kind_name: FS_DAX" in output, \
-            "Wrong message"
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get('FS_DAX') in output, "Wrong message"
         assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
             "Wrong message"
         assert self.log_debug_prefix + "pmem_size: " + pmem_size in output, \
@@ -237,10 +250,10 @@ class Test_tiering_config_env(Helper):
         output = self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" +
             pmem_size + ":1," + self.default_policy,
-            log_level="2", validate_retcode=False)
+            log_level="2")
 
-        assert self.log_debug_prefix + "kind_name: FS_DAX" in output, \
-            "Wrong message"
+        assert self.log_debug_prefix + "kind_name: " + \
+            self.kind_name_dict.get('FS_DAX') in output, "Wrong message"
         assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
             "Wrong message"
         assert self.log_debug_prefix + "pmem_size: 1073741824" in output, \
@@ -290,6 +303,14 @@ class Test_tiering_config_env(Helper):
 
         assert output[0] == self.log_error_prefix + \
             "Failed to parse pmem size: " + pmem_size, "Wrong message"
+
+    def test_FSDAX_check_only_fs_dax(self):
+        pmem_path = os.environ.get('PMEM_PATH')
+        if not self.check_fs_dax_support():
+            pytest.skip("Missing FS DAX mounted on" + pmem_path)
+        self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:" +
+            pmem_path + ":1G:1," + self.default_policy, log_level="2")
 
     def test_FSDAX_negative_ratio(self):
         output = self.get_ld_preload_cmd_output(
