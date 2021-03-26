@@ -42,8 +42,7 @@ static struct heap_manager_ops arena_heap_manager_g = {
 
 static struct heap_manager_ops tbb_heap_manager_g = {
     .init = tbb_initialize,
-    .heap_manager_malloc_usable_size =
-        tbb_pool_malloc_usable_size_with_kind_detect,
+    .heap_manager_malloc_usable_size = tbb_pool_malloc_usable_size_with_kind_detect,
     .heap_manager_free = tbb_pool_free_with_kind_detect,
     .heap_manager_realloc = tbb_pool_realloc_with_kind_detect,
     .heap_manager_detect_kind = tbb_detect_kind,

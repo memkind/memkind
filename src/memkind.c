@@ -41,31 +41,27 @@
 
 // clang-format off
 #ifdef MEMKIND_ENABLE_HEAP_MANAGER
-#define m_detect_kind(ptr)             heap_manager_detect_kind(ptr)
-#define m_free(ptr)                    heap_manager_free(ptr)
-#define m_realloc(ptr, size)           heap_manager_realloc(ptr, size)
-#define m_usable_size(ptr)             heap_manager_malloc_usable_size(ptr)
-#define m_defrag_reallocate(ptr)       heap_manager_defrag_reallocate(ptr)
-#define m_get_global_stat(stat, value) heap_manager_get_stat(stat, value)
-#define m_update_cached_stats          heap_manager_update_cached_stats
-#define m_init                         heap_manager_init
-#define m_set_bg_threads(state)        heap_manager_set_bg_threads(state)
-#define m_stats_print(write_cb, cbopaque, opts)                                \
-    heap_manager_stats_print(write_cb, cbopaque, opts)
+#define m_detect_kind(ptr)                      heap_manager_detect_kind(ptr)
+#define m_free(ptr)                             heap_manager_free(ptr)
+#define m_realloc(ptr, size)                    heap_manager_realloc(ptr, size)
+#define m_usable_size(ptr)                      heap_manager_malloc_usable_size(ptr)
+#define m_defrag_reallocate(ptr)                heap_manager_defrag_reallocate(ptr)
+#define m_get_global_stat(stat, value)          heap_manager_get_stat(stat, value)
+#define m_update_cached_stats                   heap_manager_update_cached_stats
+#define m_init                                  heap_manager_init
+#define m_set_bg_threads(state)                 heap_manager_set_bg_threads(state)
+#define m_stats_print(write_cb, cbopaque, opts) heap_manager_stats_print(write_cb, cbopaque, opts)
 #else
-#define m_detect_kind(ptr)   memkind_arena_detect_kind(ptr)
-#define m_free(ptr)          memkind_arena_free_with_kind_detect(ptr)
-#define m_realloc(ptr, size) memkind_arena_realloc_with_kind_detect(ptr, size)
-#define m_usable_size(ptr)   memkind_default_malloc_usable_size(NULL, ptr)
-#define m_defrag_reallocate(ptr)                                               \
-    memkind_arena_defrag_reallocate_with_kind_detect(ptr)
-#define m_get_global_stat(stat, value)                                         \
-    memkind_arena_get_global_stat(stat, value)
-#define m_update_cached_stats   memkind_arena_update_cached_stats
-#define m_init                  memkind_arena_init
-#define m_set_bg_threads(state) memkind_arena_set_bg_threads(state)
-#define m_stats_print(write_cb, cbopaque, opts)                                \
-    memkind_arena_stats_print(write_cb, cbopaque, opts)
+#define m_detect_kind(ptr)                      memkind_arena_detect_kind(ptr)
+#define m_free(ptr)                             memkind_arena_free_with_kind_detect(ptr)
+#define m_realloc(ptr, size)                    memkind_arena_realloc_with_kind_detect(ptr, size)
+#define m_usable_size(ptr)                      memkind_default_malloc_usable_size(NULL, ptr)
+#define m_defrag_reallocate(ptr)                memkind_arena_defrag_reallocate_with_kind_detect(ptr)
+#define m_get_global_stat(stat, value)          memkind_arena_get_global_stat(stat, value)
+#define m_update_cached_stats                   memkind_arena_update_cached_stats
+#define m_init                                  memkind_arena_init
+#define m_set_bg_threads(state)                 memkind_arena_set_bg_threads(state)
+#define m_stats_print(write_cb, cbopaque, opts) memkind_arena_stats_print(write_cb, cbopaque, opts)
 #endif
 // clang-format on
 
@@ -300,12 +296,10 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_HBW] = &MEMKIND_HBW_STATIC,
         [MEMKIND_PARTITION_HBW_PREFERRED] = &MEMKIND_HBW_PREFERRED_STATIC,
         [MEMKIND_PARTITION_HBW_HUGETLB] = &MEMKIND_HBW_HUGETLB_STATIC,
-        [MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB] =
-            &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
+        [MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB] = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
         [MEMKIND_PARTITION_HUGETLB] = &MEMKIND_HUGETLB_STATIC,
         [MEMKIND_PARTITION_HBW_GBTLB] = &MEMKIND_HBW_GBTLB_STATIC,
-        [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] =
-            &MEMKIND_HBW_PREFERRED_GBTLB_STATIC,
+        [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC,
         [MEMKIND_PARTITION_GBTLB] = &MEMKIND_GBTLB_STATIC,
         [MEMKIND_PARTITION_HBW_INTERLEAVE] = &MEMKIND_HBW_INTERLEAVE_STATIC,
         [MEMKIND_PARTITION_INTERLEAVE] = &MEMKIND_INTERLEAVE_STATIC,
@@ -314,10 +308,8 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_HBW_ALL_HUGETLB] = &MEMKIND_HBW_ALL_HUGETLB_STATIC,
         [MEMKIND_PARTITION_DAX_KMEM] = &MEMKIND_DAX_KMEM_STATIC,
         [MEMKIND_PARTITION_DAX_KMEM_ALL] = &MEMKIND_DAX_KMEM_ALL_STATIC,
-        [MEMKIND_PARTITION_DAX_KMEM_PREFERRED] =
-            &MEMKIND_DAX_KMEM_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE] =
-            &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC,
+        [MEMKIND_PARTITION_DAX_KMEM_PREFERRED] = &MEMKIND_DAX_KMEM_PREFERRED_STATIC,
+        [MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE] = &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC,
         [MEMKIND_PARTITION_HIGHEST_CAPACITY] = &MEMKIND_HIGHEST_CAPACITY_STATIC,
         [MEMKIND_PARTITION_HIGHEST_CAPACITY_PREFERRED] = &MEMKIND_HIGHEST_CAPACITY_PREFERRED_STATIC,
         [MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL] =  &MEMKIND_HIGHEST_CAPACITY_LOCAL_STATIC,
