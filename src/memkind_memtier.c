@@ -195,7 +195,7 @@ memtier_builder_construct_kind(struct memtier_builder *builder,
         return -1;
     }
 
-    // perform deep copy but store normalized (to tier[0]) ratio instead of
+    // perform deep copy but store normalized (to tier[0] ratio instead of
     // original
     (*kind)->cfg = jemk_calloc(builder->size, sizeof(struct memtier_tier_cfg));
     if (!(*kind)->cfg) {
