@@ -42,17 +42,100 @@ struct memtier_tier {
 
 struct memtier_tier_cfg {
     struct memtier_tier *tier; // Memory tier
-    unsigned tier_ratio;       // Memory tier ratio
+    unsigned normaized_ratio;  // Memory tier ratio
 };
 
 struct memtier_builder {
     unsigned size;                // Number of memory tiers
-    unsigned policy;              // Tiering policy
+    memtier_policy_t policy;      // Tiering policy
     struct memtier_tier_cfg *cfg; // Memory Tier configuration
 };
 
+struct memtier_policy_obj {
+    int (*create_priv)(struct memtier_kind *tier_kind);
+    void (*destroy_priv)(struct memtier_kind *tier_kind);
+    struct memtier_tier *(*get_tier)(struct memtier_kind *tier_kind);
+};
+
 struct memtier_kind {
-    struct memtier_builder *builder; // Tiering kind configuration
+    unsigned size;                    // Number of memory tiers
+    struct memtier_tier_cfg *cfg;     // Memory Tier configuration
+    struct memtier_policy_obj policy; // Tiering policy handlers
+    void *policy_priv;                // Policy private data
+};
+
+struct static_threshold_tier_data {
+    float normalized_ratio;
+    float actual_ratio;
+};
+
+static int
+memtier_policy_static_threshold_create(struct memtier_kind *tier_kind)
+{
+    unsigned int i;
+
+    tier_kind->policy_priv =
+        jemk_calloc(tier_kind->size, sizeof(struct static_threshold_tier_data));
+    if (tier_kind->policy_priv == NULL) {
+        log_err("calloc() failed.");
+        return -1;
+    }
+
+    struct static_threshold_tier_data *tiers =
+        (struct static_threshold_tier_data *)tier_kind->policy_priv;
+
+    // calculate and store normalized (vs tier[0]) tier ratios
+    for (i = 1; i < tier_kind->size; ++i) {
+        tiers[i].normalized_ratio = tier_kind->cfg[i].normaized_ratio /
+            tier_kind->cfg[0].normaized_ratio;
+    }
+    tiers[0].normalized_ratio = 1;
+    tiers[0].actual_ratio = 1;
+
+    return 0;
+}
+
+static void memtier_policy_static_threshold_destroy(struct memtier_kind *kind)
+{
+    jemk_free(kind->policy_priv);
+}
+
+static struct memtier_tier *
+memtier_policy_static_threshold_get_tier(struct memtier_kind *tier_kind)
+{
+    struct static_threshold_tier_data *tiers = tier_kind->policy_priv;
+    struct memtier_tier_cfg *cfg = tier_kind->cfg;
+
+    // algorithm:
+    // * get allocation sizes from all tiers
+    // * calculate actual ratio between tiers
+    // * choose tier with largest difference between actual and desired ratio
+
+    int i;
+    int worst_tier = 0;
+    float worst_ratio = 1.0 / cfg[0].normaized_ratio;
+    for (i = 0; i < tier_kind->size; ++i) {
+        if (cfg[i].tier->alloc_size == 0) {
+            return cfg[i].tier;
+        }
+
+        tiers[i].actual_ratio =
+            (float)cfg[i].tier->alloc_size / cfg[0].tier->alloc_size;
+        float ratio_distance =
+            (float)tiers[i].actual_ratio / cfg[i].normaized_ratio;
+        if (ratio_distance < worst_ratio) {
+            worst_tier = i;
+            worst_ratio = ratio_distance;
+        }
+    }
+
+    return cfg[worst_tier].tier;
+}
+
+struct memtier_policy_obj MEMTIER_POLICY_STATIC_THRESHOLD_OBJ = {
+    .create_priv = memtier_policy_static_threshold_create,
+    .destroy_priv = memtier_policy_static_threshold_destroy,
+    .get_tier = memtier_policy_static_threshold_get_tier,
 };
 
 // Provide translation from memkind_t to memtier_t
@@ -66,9 +149,6 @@ static struct memtier_registry memtier_registry_g = {
     {NULL},
     PTHREAD_MUTEX_INITIALIZER,
 };
-
-// TODO REMOVE THIS !!!!
-static unsigned tier_id;
 
 MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
 {
@@ -134,7 +214,7 @@ MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
 
     builder->cfg = cfg;
     builder->cfg[builder->size].tier = tier;
-    builder->cfg[builder->size].tier_ratio = tier_ratio;
+    builder->cfg[builder->size].normaized_ratio = tier_ratio;
     builder->size += 1;
     return 0;
 }
@@ -142,23 +222,19 @@ MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
 MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
                                               memtier_policy_t policy)
 {
-    // TODO provide setting policy logic
-    if (policy == MEMTIER_POLICY_CIRCULAR) {
+    if (policy == MEMTIER_POLICY_STATIC_THRESHOLD) {
         builder->policy = policy;
-        return 0;
+    } else {
+        log_err("Unrecognized memory policy %u", policy);
+        return -1;
     }
-    log_err("Unrecognized memory policy %u", policy);
-    return -1;
+
+    return 0;
 }
 
 static inline struct memtier_tier *get_tier(struct memtier_kind *tier_kind)
 {
-    if (tier_kind->builder->policy == MEMTIER_POLICY_CIRCULAR) {
-        unsigned temp_id = (tier_id++) % tier_kind->builder->size;
-        return tier_kind->builder->cfg[temp_id].tier;
-    }
-    // not reached
-    return NULL;
+    return tier_kind->policy.get_tier(tier_kind);
 }
 
 MEMKIND_EXPORT int
@@ -171,36 +247,38 @@ memtier_builder_construct_kind(struct memtier_builder *builder,
         return -1;
     }
 
-    *kind = jemk_malloc(sizeof(sizeof(struct memtier_kind)));
+    *kind = jemk_malloc(sizeof(struct memtier_kind));
     if (!*kind) {
         log_err("malloc() failed.");
         return -1;
     }
 
     // perform deep copy
-    (*kind)->builder = memtier_builder_new();
-    if (!(*kind)->builder) {
-        log_err("malloc() failed.");
+    (*kind)->cfg = jemk_calloc(builder->size, sizeof(struct memtier_tier_cfg));
+    if (!(*kind)->cfg) {
+        log_err("calloc() failed.");
         goto free_kind;
     }
-    (*kind)->builder->cfg =
-        jemk_calloc(builder->size, sizeof(struct memtier_tier_cfg));
-    if (!(*kind)->builder->cfg) {
-        log_err("calloc() failed.");
-        goto free_builder;
+
+    for (i = 0; i < builder->size; ++i) {
+        (*kind)->cfg[i].tier = builder->cfg[i].tier;
+        (*kind)->cfg[i].normaized_ratio = builder->cfg[i].normaized_ratio;
     }
 
-    (*kind)->builder->size = builder->size;
-    (*kind)->builder->policy = builder->policy;
-    for (i = 0; i < builder->size; ++i) {
-        (*kind)->builder->cfg[i].tier = builder->cfg[i].tier;
-        (*kind)->builder->cfg[i].tier_ratio = builder->cfg[i].tier_ratio;
+    (*kind)->size = builder->size;
+
+    if (builder->policy == MEMTIER_POLICY_STATIC_THRESHOLD) {
+        (*kind)->policy = MEMTIER_POLICY_STATIC_THRESHOLD_OBJ;
     }
-    tier_id = 0;
+    int ret = (*kind)->policy.create_priv(*kind);
+    if (ret != 0) {
+        log_err("Creation of policy failed.");
+        goto free_cfg;
+    }
     return 0;
 
-free_builder:
-    jemk_free((*kind)->builder);
+free_cfg:
+    jemk_free((*kind)->cfg);
 
 free_kind:
     jemk_free(*kind);
@@ -210,7 +288,8 @@ free_kind:
 
 MEMKIND_EXPORT void memtier_delete_kind(struct memtier_kind *kind)
 {
-    memtier_builder_delete(kind->builder);
+    kind->policy.destroy_priv(kind);
+    jemk_free(kind->cfg);
     jemk_free(kind);
 }
 
