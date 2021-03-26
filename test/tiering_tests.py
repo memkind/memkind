@@ -270,8 +270,8 @@ class Test_tiering_config_env(Helper):
             self.default_policy,
             validate_retcode=False)
 
-        assert output[0] == self.log_error_prefix + \
-            "Failed to parse pmem size: " + pmem_size, "Wrong message"
+        assert self.log_error_prefix + "Failed to parse pmem size: " + \
+            pmem_size in output, "Wrong message"
 
     @pytest.mark.parametrize("pmem_size",
                              ["18446744073709551615K", "18446744073709551615M",
@@ -282,8 +282,11 @@ class Test_tiering_config_env(Helper):
             self.default_policy,
             validate_retcode=False)
 
-        assert output[0] == self.log_error_prefix + \
-            "Provided pmem size is too big: 18446744073709551615", \
+        assert self.log_error_prefix + "Failed to parse pmem size: " + \
+            pmem_size in output, "Wrong message"
+
+        assert self.log_error_prefix + \
+            "Provided pmem size is too big: 18446744073709551615" in output, \
             "Wrong message"
 
     def test_FSDAX_no_size(self):
