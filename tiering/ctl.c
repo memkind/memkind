@@ -118,7 +118,7 @@ static int ctl_validate_kind_name(const char *kind_name)
 /*
  * ctl_parse_pmem_size -- parse size from string
  */
-static int ctl_parse_pmem_size(const char *str, size_t *sizep)
+static int ctl_parse_pmem_size(char **sptr, size_t *sizep)
 {
     struct suff {
         const char *suff;
@@ -130,13 +130,18 @@ static int ctl_parse_pmem_size(const char *str, size_t *sizep)
     char size[32] = {0};
     char unit[3] = {0};
 
-    if (str[0] == '-') {
+    const char *pmem_size_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, sptr);
+    if (pmem_size_str == NULL) {
         return -1;
     }
 
-    int ret = sscanf(str, "%31[0-9]%2s", size, unit);
+    if (pmem_size_str[0] == '-') {
+        goto parse_failure;
+    }
+
+    int ret = sscanf(pmem_size_str, "%31[0-9]%2s", size, unit);
     if (ctl_parse_size_t(size, sizep)) {
-        return -1;
+        goto parse_failure;
     }
     if (ret == 1) {
         return 0;
@@ -148,13 +153,15 @@ static int ctl_parse_pmem_size(const char *str, size_t *sizep)
                     *sizep *= suffixes[i].mag;
                 } else {
                     log_err("Provided pmem size is too big: %s", size);
-                    return -1;
+                    goto parse_failure;
                 }
                 return 0;
             }
         }
     }
 
+parse_failure:
+    log_err("Failed to parse pmem size: %s", pmem_size_str);
     return -1;
 }
 
@@ -175,8 +182,9 @@ static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
     return 0;
 }
 
-static int ctl_parse_ratio(const char *ratio_str, unsigned *dest)
+static int ctl_parse_ratio(char **sptr, unsigned *dest)
 {
+    const char *ratio_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, sptr);
     if (ratio_str == NULL) {
         log_err("Ratio not provided");
         return -1;
@@ -213,19 +221,14 @@ static int ctl_parse_query(char *qbuf, ctl_tier_cfg *tier)
         if (tier->pmem_path == NULL) {
             return -1;
         }
-        char *pmem_size_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-        if (pmem_size_str == NULL) {
-            return -1;
-        }
-        ret = ctl_parse_pmem_size(pmem_size_str, &tier->pmem_size);
+
+        ret = ctl_parse_pmem_size(&sptr, &tier->pmem_size);
         if (ret != 0) {
-            log_err("Failed to parse pmem size: %s", pmem_size_str);
             return -1;
         }
     }
 
-    char *ratio_value_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-    ret = ctl_parse_ratio(ratio_value_str, &tier->ratio_value);
+    ret = ctl_parse_ratio(&sptr, &tier->ratio_value);
     if (ret != 0) {
         return -1;
     }
