@@ -24,10 +24,9 @@ struct memtier_kind;
 typedef enum memtier_policy_t
 {
     /**
-     * TODO REMOVE ME
-     * Circular policy
+     * Static Threshold policy
      */
-    MEMTIER_POLICY_CIRCULAR = 0,
+    MEMTIER_POLICY_STATIC_THRESHOLD = 0,
 
     /**
      * Max policy value.
