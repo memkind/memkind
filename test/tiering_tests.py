@@ -286,6 +286,16 @@ class Test_tiering_config_env(Helper):
             "Failed to parse pmem size: " + pmem_size, "Wrong message"
 
     @pytest.mark.parametrize("pmem_size",
+                             ["1", str(MEMKIND_PMEM_MIN_SIZE - 1)])
+    def test_FSDAX_pmem_size_too_small(self, pmem_size):
+        output = self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
+            self.default_policy, validate_retcode=False)
+
+        assert output[0] == self.log_error_prefix + \
+            "Error with parsing MEMKIND_MEM_TIERING_CONFIG", "Wrong message"
+
+    @pytest.mark.parametrize("pmem_size",
                              ["18446744073709551615K", "18446744073709551615M",
                               "18446744073709551615G"])
     def test_FSDAX_pmem_size_with_suffix_too_big(self, pmem_size):
