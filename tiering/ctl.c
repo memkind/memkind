@@ -160,12 +160,15 @@ static int ctl_parse_pmem_size(const char *str, size_t *sizep)
  */
 static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
 {
-    if (strcmp(qbuf, "POLICY_CIRCULAR") == 0) {
-        return *policy = MEMTIER_POLICY_CIRCULAR;
+    if (strcmp(qbuf, "POLICY_STATIC_THRESHOLD") == 0) {
+        *policy = MEMTIER_POLICY_STATIC_THRESHOLD;
+    } else {
+
+        log_err("Unknown policy: %s", qbuf);
+        return -1;
     }
 
-    log_err("Unknown policy: %s", qbuf);
-    return -1;
+    return 0;
 }
 
 static int ctl_parse_ratio(const char *ratio_str, unsigned *dest)
@@ -299,13 +302,13 @@ static memkind_t ctl_get_kind(const ctl_tier_cfg *tier)
 
 static const char *ctl_policy_to_str(memtier_policy_t policy)
 {
-    if (policy < MEMTIER_POLICY_CIRCULAR ||
+    if (policy < MEMTIER_POLICY_STATIC_THRESHOLD ||
         policy >= MEMTIER_POLICY_MAX_VALUE) {
         log_err("Unknown policy: %d", policy);
         return NULL;
     }
 
-    const char *policies[] = {"POLICY_CIRCULAR"};
+    const char *policies[] = {"POLICY_STATIC_THRESHOLD"};
 
     return policies[policy];
 }
