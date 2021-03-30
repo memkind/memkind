@@ -24,8 +24,6 @@ protected:
     struct memtier_tier *m_tier_default;
     struct memtier_tier *m_tier_regular;
 
-    // TODO: add tests with multiple tiers and different proportions
-    // TODO: add tests with mixed tier/kind allocations
     const int m_tier_default_ratio = 1;
     const int m_tier_regular_ratio = 4;
 
@@ -63,6 +61,62 @@ protected:
         memtier_delete_kind(m_tier_kind);
         memtier_tier_delete(m_tier_default);
         memtier_tier_delete(m_tier_regular);
+    }
+};
+
+class MemkindMemtier3KindsTest: public ::testing::Test
+{
+protected:
+    struct memtier_kind *m_tier_kind;
+    struct memtier_tier *m_tier_default;
+    struct memtier_tier *m_tier_regular;
+    struct memtier_tier *m_tier_hi_cap;
+
+    const int m_tier_default_ratio = 3;
+    const int m_tier_regular_ratio = 1;
+    const int m_tier_hi_cap_ratio = 5;
+
+    size_t allocation_sum()
+    {
+        return memtier_tier_allocated_size(m_tier_default) +
+            memtier_tier_allocated_size(m_tier_regular) +
+            memtier_tier_allocated_size(m_tier_hi_cap);
+    }
+
+    void SetUp()
+    {
+        m_tier_default = memtier_tier_new(MEMKIND_DEFAULT);
+        m_tier_regular = memtier_tier_new(MEMKIND_REGULAR);
+        m_tier_hi_cap = memtier_tier_new(MEMKIND_HIGHEST_CAPACITY);
+        struct memtier_builder *builder = memtier_builder_new();
+        ASSERT_NE(nullptr, m_tier_default);
+        ASSERT_NE(nullptr, m_tier_regular);
+        ASSERT_NE(nullptr, m_tier_hi_cap);
+        ASSERT_NE(nullptr, builder);
+
+        int res = memtier_builder_add_tier(builder, m_tier_default,
+                                           m_tier_default_ratio);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_add_tier(builder, m_tier_regular,
+                                       m_tier_regular_ratio);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_add_tier(builder, m_tier_hi_cap,
+                                       m_tier_hi_cap_ratio);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_set_policy(builder,
+                                         MEMTIER_POLICY_STATIC_THRESHOLD);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_construct_kind(builder, &m_tier_kind);
+        ASSERT_EQ(0, res);
+        memtier_builder_delete(builder);
+    }
+
+    void TearDown()
+    {
+        memtier_delete_kind(m_tier_kind);
+        memtier_tier_delete(m_tier_default);
+        memtier_tier_delete(m_tier_regular);
+        memtier_tier_delete(m_tier_hi_cap);
     }
 };
 
@@ -675,13 +729,13 @@ TEST_F(MemkindMemtierKindTest, test_ratio_basic)
 
 TEST_F(MemkindMemtierKindTest, test_ratio_malloc_only)
 {
-    const int tier_regular_normalized_ratio =
+    const float tier_regular_normalized_ratio =
         m_tier_regular_ratio / m_tier_default_ratio;
     const int sizes_num = 5;
     const size_t sizes[sizes_num] = {16, 32, 64, 128, 256};
-    size_t num_allocs = 100;
+    unsigned num_allocs = 100;
     std::vector<void *> allocs;
-    size_t i;
+    unsigned i;
 
     for (i = 0; i < num_allocs; ++i) {
         size_t regular_alloc_size = memtier_tier_allocated_size(m_tier_regular);
@@ -708,7 +762,7 @@ TEST_F(MemkindMemtierKindTest, test_ratio_malloc_only)
 
 TEST_F(MemkindMemtierKindTest, test_ratio_malloc_free)
 {
-    const int tier_regular_normalized_ratio =
+    const float tier_regular_normalized_ratio =
         m_tier_regular_ratio / m_tier_default_ratio;
     const int sizes_num = 5;
     const size_t sizes[sizes_num] = {16, 32, 64, 128, 256};
@@ -720,9 +774,9 @@ TEST_F(MemkindMemtierKindTest, test_ratio_malloc_free)
     int operations[operations_num] = {1, 1, -1, 1,  -1, -1, 1,
                                       1, 1, -1, -1, 1,  -1, -1};
 
-    size_t num_allocs = operations_num * sizes_num;
+    unsigned num_allocs = operations_num * sizes_num;
     std::vector<void *> allocs;
-    size_t i;
+    unsigned i;
 
     for (i = 0; i < num_allocs; ++i) {
         size_t regular_alloc_size = memtier_tier_allocated_size(m_tier_regular);
@@ -746,6 +800,120 @@ TEST_F(MemkindMemtierKindTest, test_ratio_malloc_free)
             (tier_regular_actual_ratio < tier_regular_normalized_ratio)) {
             ASSERT_GE(memtier_tier_allocated_size(m_tier_regular),
                       regular_alloc_size);
+        }
+    }
+
+    ASSERT_EQ(0ULL, allocs.size());
+}
+
+TEST_F(MemkindMemtier3KindAdvancedTest, test_ratio_malloc_only)
+{
+    const float tier_regular_normalized_ratio =
+        m_tier_regular_ratio / m_tier_default_ratio;
+    const float tier_hi_cap_normalized_ratio =
+        m_tier_hi_cap_ratio / m_tier_default_ratio;
+    const int sizes_num = 10;
+    const size_t sizes[sizes_num] = {16, 32, 16, 64, 16, 128, 32, 256, 64, 128};
+    unsigned num_allocs = 200;
+    std::vector<void *> allocs;
+    unsigned i;
+
+    for (i = 0; i < num_allocs; ++i) {
+        size_t regular_alloc_size = memtier_tier_allocated_size(m_tier_regular);
+        float tier_regular_actual_ratio = (float)regular_alloc_size /
+            memtier_tier_allocated_size(m_tier_default);
+
+        size_t hi_cap_alloc_size = memtier_tier_allocated_size(m_tier_hi_cap);
+        float tier_hi_cap_actual_ratio = (float)hi_cap_alloc_size /
+            memtier_tier_allocated_size(m_tier_default);
+
+        size_t size = sizes[i % sizes_num];
+        void *ptr = memtier_kind_malloc(m_tier_kind, size);
+        ASSERT_NE(nullptr, ptr);
+        allocs.push_back(ptr);
+
+        // if actual ratio between default and regular is lower than desired,
+        // new allocation should go to regular tier,
+        // otherwise check if actual ratio between default and highest capacity
+        // is lower than desired, new allocation should go to highest capacity
+        // tier
+        if (tier_regular_actual_ratio < tier_regular_normalized_ratio) {
+            ASSERT_GE(memtier_tier_allocated_size(m_tier_regular),
+                      regular_alloc_size);
+        } else if (tier_hi_cap_actual_ratio < tier_hi_cap_normalized_ratio) {
+            ASSERT_GE(memtier_tier_allocated_size(m_tier_hi_cap),
+                      hi_cap_alloc_size);
+        }
+    }
+
+    for (auto const &ptr : allocs) {
+        memtier_free(ptr);
+    }
+}
+
+TEST_F(MemkindMemtier3KindAdvancedTest, test_ratio_malloc_free)
+{
+    const float tier_regular_normalized_ratio =
+        m_tier_regular_ratio / m_tier_default_ratio;
+    const float tier_hi_cap_normalized_ratio =
+        m_tier_hi_cap_ratio / m_tier_default_ratio;
+    const int sizes_num = 10;
+    const size_t sizes[sizes_num] = {16, 32, 16, 64, 16, 128, 32, 256, 64, 128};
+
+    // 1 = malloc, 2 = alloc from specified tier, -1 = free
+    // NOTE that there are the same num of mallocs/free so at the end all
+    // allocations should be freed
+    const int operations_num = 22;
+    int operations[operations_num] = {1, 2,  1, -1, 1,  -1, -1, 1, 2,  -1, 1,
+                                      1, -1, 2, -1, -1, 1,  -1, 2, -1, -1, -1};
+
+    struct memtier_tier *tiers[] = {
+        m_tier_default,
+        m_tier_regular,
+        m_tier_hi_cap,
+    };
+    int tier_it = 0;
+
+    unsigned num_allocs = operations_num * sizes_num * 4;
+    std::vector<void *> allocs;
+    unsigned i;
+
+    for (i = 0; i < num_allocs; ++i) {
+        size_t regular_alloc_size = memtier_tier_allocated_size(m_tier_regular);
+        float tier_regular_actual_ratio = (float)regular_alloc_size /
+            memtier_tier_allocated_size(m_tier_default);
+
+        size_t hi_cap_alloc_size = memtier_tier_allocated_size(m_tier_hi_cap);
+        float tier_hi_cap_actual_ratio = (float)hi_cap_alloc_size /
+            memtier_tier_allocated_size(m_tier_default);
+
+        size_t size = sizes[i % sizes_num];
+        int op = operations[i % operations_num];
+        if (op == 1) {
+            void *ptr = memtier_kind_malloc(m_tier_kind, size);
+            ASSERT_NE(nullptr, ptr);
+            allocs.push_back(ptr);
+        } else if (op == 2) {
+            void *ptr = memtier_tier_malloc(tiers[tier_it++ % 3], size);
+            ASSERT_NE(nullptr, ptr);
+            allocs.push_back(ptr);
+        } else {
+            memtier_free(allocs.back());
+            allocs.pop_back();
+        }
+
+        // for memtier_kind_mallocs, if actual ratio between default and
+        // regular is lower than desired, new allocation should go to
+        // regular tier - otherwise do the same check for highest capacity tier
+        if (op == 1) {
+            if (tier_regular_actual_ratio < tier_regular_normalized_ratio) {
+                ASSERT_GE(memtier_tier_allocated_size(m_tier_regular),
+                          regular_alloc_size);
+            } else if (tier_hi_cap_actual_ratio <
+                       tier_hi_cap_normalized_ratio) {
+                ASSERT_GE(memtier_tier_allocated_size(m_tier_hi_cap),
+                          hi_cap_alloc_size);
+            }
         }
     }
 
