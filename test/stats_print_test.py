@@ -20,21 +20,26 @@ class Test_malloc_stats_print(object):
         output, retcode = self.cmd_helper.execute_cmd(command)
         assert retcode == 0, \
             self.fail_msg.format(
-                f"\nError: Execution of \'{command}\' returns {retcode}. Output: {output}")
+                f"\nError: Execution of \'{command}\'",
+                " returns {retcode}. Output: {output}")
         return output, retcode
 
     @pytest.mark.parametrize("bin_param", ["default", "stdout", "no_write_cb"])
     def test_TC_MEMKIND_malloc_stats_print_check_output(self, bin_param):
-        """ This test checks if there is output from malloc_stats_print() memkind API function """
+        """ This test checks if there is output
+            from malloc_stats_print() memkind API function """
         self.bin_param = bin_param
         output, _ = self.run_test_binary()
         assert output.endswith("--- End jemalloc statistics ---\n"), \
-            f"Error: Didn't get the expected output from the '{self.bin_path}' binary."
+            "Error: Didn't get the expected output"\
+            " from the '{self.bin_path}' binary."
 
     def test_TC_MEMKIND_malloc_stats_print_multi_opt_test(self):
-        """ This test checks output from malloc_stats_print() memkind API function when options
-        "MEMKIND_STAT_PRINT_JSON_FORMAT | MEMKIND_STAT_PRINT_OMIT_PER_ARENA | MEMKIND_STAT_PRINT_OMIT_EXTENT"
-        are passed to the function """
+        """ This test checks output from malloc_stats_print()
+            memkind API function when options
+            "MEMKIND_STAT_PRINT_JSON_FORMAT | MEMKIND_STAT_PRINT_OMIT_PER_ARENA
+            | MEMKIND_STAT_PRINT_OMIT_EXTENT"
+            are passed to the function """
         self.bin_param = "pass_opts"
         output, _ = self.run_test_binary()
         assert json.loads(output), \
@@ -45,8 +50,9 @@ class Test_malloc_stats_print(object):
                self.error_msg.format("MEMKIND_STAT_PRINT_OMIT_EXTENT")
 
     def test_TC_MEMKIND_malloc_stats_print_all_opts_test(self):
-        """ This test checks output from malloc_stats_print() memkind API function when all possible options
-        are passed to the function """
+        """ This test checks output from malloc_stats_print()
+            memkind API function when all possible options
+            are passed to the function """
         self.bin_param = "all_opts"
         output, _ = self.run_test_binary()
         assert json.loads(output), \
@@ -72,17 +78,21 @@ class Test_malloc_stats_print(object):
                self.error_msg.format("MEMKIND_STAT_PRINT_OMIT_EXTENT")
 
     def test_TC_MEMKIND_malloc_stats_print_negative_test(self):
-        """ This test checks if there is no output from malloc_stats_print() memkind API function when wrong arguments
+        """ This test checks if there is no output from malloc_stats_print()
+            memkind API function when wrong arguments
             are being passed to the function """
         self.bin_param = "negative_test"
         output, _ = self.run_test_binary()
         assert len(output) == 0, \
-            f"Error: There should be no output from the '{self.bin_path}' binary."
+            "Error: There should be no output from"\
+            " the '{self.bin_path}' binary."
 
     def test_TC_MEMKIND_malloc_stats_print_opts_negative_test(self):
-        """ This test checks if there is a failure in parsing opts in malloc_stats_print() memkind API function
+        """ This test checks if there is a failure in parsing opts
+            in malloc_stats_print() memkind API function
             when wrong options string is passed to the function """
         self.bin_param = "opts_negative_test"
         _, retcode = self.run_test_binary()
         assert retcode == 0, \
-            f"Error: '{self.bin_path}' binary should return 0 indicating that parsing opts string failed."
+            f"Error: '{self.bin_path}' binary should return 0"\
+            " indicating that parsing opts string failed."
