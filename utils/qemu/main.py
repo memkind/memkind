@@ -29,8 +29,12 @@ TOPOLOGY_DIR = 'topology'
 # TODO handling fsdax??
 # TODO handling scaling the memory in xml
 
-QemuCfg = collections.namedtuple('QemuCfg', ['workdir', 'image', 'interactive', 'hwloc', 'force_reinstall', 'verbose', 'run_test', 'topologies', 'codecov'])
-TopologyCfg = collections.namedtuple('TopologyCfg', ['name', 'hmat', 'cpu_model', 'cpu_options', 'mem_options'])
+QemuCfg = collections.namedtuple(
+    'QemuCfg', ['workdir', 'image', 'interactive', 'hwloc',
+                'force_reinstall', 'verbose', 'run_test',
+                'topologies', 'codecov'])
+TopologyCfg = collections.namedtuple(
+    'TopologyCfg', ['name', 'hmat', 'cpu_model', 'cpu_options', 'mem_options'])
 
 
 def _logger(func):
@@ -48,20 +52,24 @@ class MemoryHostException(Exception):
     Exception raised for errors in case of insufficient memory on host.
     """
 
-    def __init__(self, total_memory: int, tpg_memory: int, tpg_name: str) -> None:
+    def __init__(self, total_memory: int,
+                 tpg_memory: int, tpg_name: str) -> None:
         self.total_memory = total_memory
         self.tpg_memory = tpg_memory
         self.tpg = tpg_name
 
     def __str__(self) -> str:
         return (f'Memory on host) {self.total_memory} bytes are not enough '
-                f'for memory required by {self.tpg} : {self.tpg_memory} bytes.')
+                f'for memory required by'
+                f' {self.tpg} : {self.tpg_memory} bytes.')
+
 
 class GuestConnection:
 
     CONNECT_TIMEOUT = 30
 
-    def __init__(self, cfg: QemuCfg, topology_name: str, qemu_pid: int) -> None:
+    def __init__(self, cfg: QemuCfg,
+                 topology_name: str, qemu_pid: int) -> None:
         self.run_test = cfg.run_test
         self.force_reinstall = cfg.force_reinstall
         self.verbose = cfg.verbose
@@ -110,7 +118,8 @@ class GuestConnection:
         nproc = int(result.stdout.strip())
         c.run('make distclean', **self._verbosity_option, warn=True)
         c.run('./autogen.sh', **self._verbosity_option)
-        c.run(f'./configure {self._memkind_configure_params}', **self._verbosity_option)
+        c.run(f'./configure {self._memkind_configure_params}',
+              **self._verbosity_option)
         c.run(f'make -j {nproc}', **self._verbosity_option)
         c.run(f'make checkprogs -j {nproc}', **self._verbosity_option)
         c.run('sudo make uninstall', **self._verbosity_option)
@@ -123,7 +132,8 @@ class GuestConnection:
         Mount working directory from host to guest
         """
         c.run(f'sudo mkdir -p {MEMKIND_GUEST_PATH}', echo=True)
-        c.run(f'sudo mount {MEMKIND_MOUNT_TAG} {MEMKIND_GUEST_PATH} -t 9p -o trans=virtio', echo=True)
+        c.run(f'sudo mount {MEMKIND_MOUNT_TAG} \
+              {MEMKIND_GUEST_PATH} -t 9p -o trans=virtio', echo=True)
 
     def _set_test_env_name(self, c: fabric.Connection) -> None:
         """
@@ -137,10 +147,13 @@ class GuestConnection:
         """
         Run code coverage script
         """
-        codecov_script = pathlib.Path(MEMKIND_GUEST_PATH, MEMKIND_DOCKER_PREFIX, 'docker_run_coverage.sh')
+        codecov_script = pathlib.Path(
+            MEMKIND_GUEST_PATH, MEMKIND_DOCKER_PREFIX,
+            'docker_run_coverage.sh')
         c.config.run.env['TEST_SUITE_NAME'] = self.topology_name
         c.config.run.env['CODECOV_TOKEN'] = self.codecov
-        c.run(f'{codecov_script} {MEMKIND_GUEST_PATH}', **self._verbosity_option)
+        c.run(f'{codecov_script} {MEMKIND_GUEST_PATH}',
+              **self._verbosity_option)
 
     @_logger
     def _run_memkind_test(self, c: fabric.Connection) -> None:
@@ -157,7 +170,8 @@ class GuestConnection:
         Shutdown guest
         """
         c.run('sudo shutdown now', echo=True, warn=True)
-        _, alive = psutil.wait_procs([psutil.Process(self.qemu_pid)], timeout=10)
+        _, alive = psutil.wait_procs([psutil.Process(
+            self.qemu_pid)], timeout=10)
         for p in alive:
             p.kill()
 
@@ -171,19 +185,22 @@ class GuestConnection:
                 with fabric.Connection(**self._connection_params) as c:
                     c.run('whoami', hide='both')
             except paramiko.SSHException:
-                print(f'FAILURE: SSH connection to guest after {sec} sec - retrying.')
+                print('FAILURE: SSH connection',
+                      ' to guest after {sec} sec - retrying.')
                 time.sleep(1)
             else:
                 print(f'SUCCESS: SSH connection to guest after {sec} sec.')
                 return
-        sys.exit(f'SSH connection to guest fails after {self.CONNECT_TIMEOUT} sec.')
+        sys.exit(f'SSH connection to guest fails after'
+                 f' {self.CONNECT_TIMEOUT} sec.')
 
     @_logger
     def run_connection_test(self, force_reinstall: bool) -> None:
         """
         Run QEMU in test mode
         """
-        with fabric.Connection(**self._connection_params, inline_ssh_env=True) as c:
+        with fabric.Connection(**self._connection_params,
+                               inline_ssh_env=True) as c:
             try:
                 self._mount_workdir(c)
                 with c.cd(MEMKIND_GUEST_PATH):
@@ -200,16 +217,19 @@ class GuestConnection:
         """
         Run QEMU in dev mode
         """
-        with fabric.Connection(**self._connection_params, inline_ssh_env=True) as c:
+        with fabric.Connection(**self._connection_params,
+                               inline_ssh_env=True) as c:
             try:
                 self._mount_workdir(c)
                 with c.cd(MEMKIND_GUEST_PATH):
                     self._set_test_env_name(c)
                     if force_reinstall:
                         self._build_and_reinstall_memkind(c)
-                print(f'QEMU development is ready to use via SSH ({TCP_PORT}) or VNC ({VNC_DEFAULT_PORT + VNC_PORT})')
+                print('QEMU development is ready to use via SSH',
+                      ' ({TCP_PORT}) or VNC ({VNC_DEFAULT_PORT + VNC_PORT})')
             except fabric.exceptions.GroupException:
                 self._shutdown(c)
+
 
 class QEMU:
 
@@ -257,7 +277,8 @@ class QEMU:
         - VNC on port 5
         - tcp on port 10022
         """
-        return (f'-vnc :{VNC_PORT} -netdev user,id=net0,hostfwd=tcp::{TCP_PORT}-:22 '
+        return (f'-vnc :{VNC_PORT} -netdev user,'
+                f'id=net0,hostfwd=tcp::{TCP_PORT}-:22 '
                 f'-device virtio-net,netdev=net0')
 
     @property
@@ -312,7 +333,7 @@ class QEMU:
         mem_tpg = tpg.mem_options
         # workaround for QEMU - validation in machine_set_cpu_numa_node method
         if tpg.hmat:
-            mem_tpg_parsed= re.sub(r'cpus=(\d+\-\d+,)', '', tpg.mem_options)
+            mem_tpg_parsed = re.sub(r'cpus=(\d+\-\d+,)', '', tpg.mem_options)
             mem_tpg_list = list(mem_tpg_parsed.partition('-numa dist'))
             for numa_id in re.findall(r'nodeid=(\d+),cpus=', tpg.mem_options):
                 cpu_tpg = f'-numa cpu,node-id={numa_id},socket-id={numa_id} '
@@ -326,8 +347,10 @@ class QEMU:
         mount option
         - Start from first virtual hard drive
         """
-        return (f'-fsdev local,security_model=passthrough,id=fsdev0,path={self.cfg.workdir} '
-                f'-device virtio-9p-pci,id=fs0,fsdev=fsdev0,mount_tag={MEMKIND_MOUNT_TAG}')
+        return (f'-fsdev local,security_model=passthrough,'
+                f'id=fsdev0,path={self.cfg.workdir} '
+                f'-device virtio-9p-pci,id=fs0,fsdev=fsdev0,'
+                f'mount_tag={MEMKIND_MOUNT_TAG}')
 
     def _qemu_cmd(self, tpg: TopologyCfg) -> typing.List[str]:
         """
@@ -360,7 +383,8 @@ class QEMU:
                 if proc.name() == self._qemu_exec:
                     self.pid = proc.pid
         except subprocess.CalledProcessError:
-            sys.exit(f'\nQEMU cannot start process: image {self.cfg.image}: {result.stderr}.')
+            sys.exit(f'\nQEMU cannot start process:'
+                     f' image {self.cfg.image}: {result.stderr}.')
 
     def run(self) -> None:
         """
@@ -395,11 +419,13 @@ def find_root_memkind_dir() -> str:
     Find memkind root directory on host
     """
     try:
-        result = subprocess.run(['git', 'rev-parse', '--show-toplevel'], stdout=subprocess.PIPE)
+        result = subprocess.run(['git', 'rev-parse', '--show-toplevel'],
+                                stdout=subprocess.PIPE)
         result.check_returncode()
         path = result.stdout.decode('utf-8').strip()
     except subprocess.CalledProcessError:
-        # Get root directory without git modify this if we change the path of script
+        # Get root directory without git modify
+        # this if we change the path of script
         path = str(pathlib.Path(__file__).parents[2])
     return path
 
@@ -409,14 +435,18 @@ def parse_topology_xml(tpg_file_name: str) -> TopologyCfg:
     Parse topology xml file
     """
     try:
-        result = subprocess.run(['virsh', 'domxml-to-native', 'qemu-argv', tpg_file_name], stdout=subprocess.PIPE)
+        result = subprocess.run(['virsh', 'domxml-to-native', 'qemu-argv',
+                                tpg_file_name], stdout=subprocess.PIPE)
         result.check_returncode()
         libvirt_args = result.stdout.decode('utf-8').strip()
         tpg_cfg = {'name': re.search(r'guest=(\w+)', libvirt_args).group(1),
                    'hmat': 'hmat=on' in libvirt_args,
                    'cpu_model': re.search(r'cpu (\S+)', libvirt_args).group(1),
-                   'cpu_options': re.search('(?=-smp)(.*)threads=[0-9]+', libvirt_args).group(0),
-                   'mem_options': re.search('(?=-object memory)(.*)(?=-uuid)', libvirt_args).group(1)}
+                   'cpu_options': re.search(
+                       '(?=-smp)(.*)threads=[0-9]+', libvirt_args).group(0),
+                   'mem_options': re.search(
+                       '(?=-object memory)(.*)(?=-uuid)',
+                       libvirt_args).group(1)}
 
         tpg = TopologyCfg(**tpg_cfg)
     except FileNotFoundError:
@@ -435,12 +465,14 @@ def parse_topology(cfg: dict) -> typing.List[TopologyCfg]:
     if single_topology:
         tpg_list.append(parse_topology_xml(single_topology))
     elif cfg['mode'] == 'test':
-        topology_dir = pathlib.Path(find_root_memkind_dir(), MEMKIND_QEMU_PREFIX, TOPOLOGY_DIR)
+        topology_dir = pathlib.Path(
+            find_root_memkind_dir(), MEMKIND_QEMU_PREFIX, TOPOLOGY_DIR)
         for filepath in pathlib.Path.iterdir(topology_dir):
             if filepath.suffix == '.xml':
                 tpg_list.append(parse_topology_xml(str(filepath)))
     else:
-        dev_topology = {'name': '', 'hmat': False, 'cpu_options': '', 'mem_options': ''}
+        dev_topology = {'name': '', 'hmat': False,
+                        'cpu_options': '', 'mem_options': ''}
         tpg_list.append(TopologyCfg(**dev_topology))
     return tpg_list
 
@@ -461,13 +493,20 @@ def parse_arguments() -> QemuCfg:
     qemu_cfg = {'workdir': find_root_memkind_dir()}
     parser = argparse.ArgumentParser()
     parser.add_argument('--image', help='QEMU image', required=True)
-    parser.add_argument('--mode', choices=['dev', 'test'], help='execution mode', default='dev')
-    parser.add_argument('--hwloc', choices=['on', 'off'], help='hwloc support', default='on')
+    parser.add_argument('--mode', choices=['dev', 'test'],
+                        help='execution mode', default='dev')
+    parser.add_argument('--hwloc', choices=['on', 'off'],
+                        help='hwloc support', default='on')
     parser.add_argument('--topology', help='memory topology XML file')
     parser.add_argument('--codecov', help='upload token for Codecov')
-    parser.add_argument('--interactive', action="store_true", help='execute an interactive bash shell', default=False)
-    parser.add_argument('--force_reinstall', action="store_true", help='force rebuild and install memkind', default=False)
-    parser.add_argument('--verbose', action="store_true", help='run script in verbose mode', default=False)
+    parser.add_argument('--interactive', action="store_true",
+                        help='execute an interactive bash shell',
+                        default=False)
+    parser.add_argument('--force_reinstall', action="store_true",
+                        help='force rebuild and install memkind',
+                        default=False)
+    parser.add_argument('--verbose', action="store_true",
+                        help='run script in verbose mode', default=False)
     cli_cfg = vars(parser.parse_args())
 
     if cli_cfg['interactive'] and cli_cfg['mode'] == 'test':
