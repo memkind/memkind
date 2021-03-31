@@ -271,9 +271,8 @@ class Test_tiering_config_env(Helper):
             "Wrong message"
         assert self.log_debug_prefix + "ratio_value: 1" in output, \
             "Wrong message"
-        # TODO uncomment after full implementation of FS_DAX
-        # assert self.log_debug_prefix + "policy: " + self.default_policy \
-        #    in output, "Wrong message"
+        assert self.log_debug_prefix + "policy: " + self.default_policy \
+            in output, "Wrong message"
 
     @pytest.mark.parametrize("pmem_size",
                              ["1073741824", "1048576K", "1024M", "1G"])
@@ -291,9 +290,8 @@ class Test_tiering_config_env(Helper):
             Helper.bytes_from_str("1G") in output, "Wrong message"
         assert self.log_debug_prefix + "ratio_value: 1" in output, \
             "Wrong message"
-        # TODO uncomment after full implementation of FS_DAX
-        # assert self.log_debug_prefix + "policy: " + self.default_policy \
-        #    in output, "Wrong message"
+        assert self.log_debug_prefix + "policy: " + self.default_policy \
+            in output, "Wrong message"
 
     @pytest.mark.parametrize("pmem_size",
                              ["-1", "-4294967295", "-18446744073709551615",
