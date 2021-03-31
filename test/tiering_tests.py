@@ -509,6 +509,9 @@ class Test_tiering_config_env(Helper):
                               "FS_DAX:/mnt:150M:0",
                               "DRAM:1"])
     def test_multiple_tiers_wrong_tier(self, wrong_tier):
+        assert os.access("/mnt", os.W_OK | os.X_OK), \
+            "Write and execute permissions to the /mnt directory "
+        "are required for this test"
         output = self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:1,FS_DAX:/tmp/:100M:4," +
             wrong_tier + "," + self.default_policy, log_level="2",
