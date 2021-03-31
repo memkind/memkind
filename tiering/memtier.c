@@ -95,6 +95,13 @@ MEMTIER_EXPORT void free(void *ptr)
     }
 }
 
+MEMTIER_EXPORT size_t malloc_usable_size(void *ptr)
+{
+    log_debug("malloc_usable_size(%p)", ptr);
+
+    return memtier_usable_size(ptr);
+}
+
 static pthread_once_t init_once = PTHREAD_ONCE_INIT;
 
 static MEMTIER_INIT void memtier_init(void)
