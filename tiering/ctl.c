@@ -242,61 +242,6 @@ static int ctl_parse_query(char *qbuf, ctl_tier_cfg *tier)
     return 0;
 }
 
-/*
- * ctl_load_config -- splits an entire config into query strings
- */
-static int ctl_load_config(char *buf, memtier_policy_t *policy)
-{
-    int ret;
-    char *sptr = NULL;
-    char *qbuf = buf;
-
-    unsigned query_count = 1;
-    while (*qbuf)
-        if (*qbuf++ == *CTL_STRING_QUERY_SEPARATOR)
-            ++query_count;
-
-    tier_count = query_count - 1;
-
-    qbuf = strtok_r(buf, CTL_STRING_QUERY_SEPARATOR, &sptr);
-    if (qbuf == NULL) {
-        log_err("No valid query found in: %s", buf);
-        return -1;
-    }
-
-    if (query_count < 2) {
-        log_err("Too low number of queries in configuration string: %s", buf);
-        return -1;
-    }
-
-    tier_cfgs =
-        memkind_calloc(MEMKIND_DEFAULT, tier_count, sizeof(ctl_tier_cfg));
-    if (!tier_cfgs) {
-        log_err("Error during allocation of memory.");
-        return -1;
-    }
-
-    unsigned i;
-    for (i = 0; i < tier_count; ++i) {
-        ret = ctl_parse_query(qbuf, &tier_cfgs[i]);
-
-        if (ret != 0) {
-            log_err("Failed to parse query: %s", qbuf);
-            return -1;
-        }
-
-        qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
-    }
-
-    ret = ctl_parse_policy(qbuf, policy);
-    if (ret != 0) {
-        log_err("Failed to parse policy: %s", qbuf);
-        return -1;
-    }
-
-    return 0;
-}
-
 static memkind_t ctl_get_kind(unsigned tier_num)
 {
     memkind_t kind = NULL;
@@ -347,9 +292,53 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
     unsigned i;
     unsigned created_tiers = 0;
 
-    int ret = ctl_load_config(env_var_string, &policy);
+    int ret;
+    char *sptr = NULL;
+    char *qbuf = env_var_string;
+
+    unsigned query_count = 1;
+    while (*qbuf)
+        if (*qbuf++ == *CTL_STRING_QUERY_SEPARATOR)
+            ++query_count;
+
+    tier_count = query_count - 1;
+
+    qbuf = strtok_r(env_var_string, CTL_STRING_QUERY_SEPARATOR, &sptr);
+    if (qbuf == NULL) {
+        log_err("No valid query found in: %s", env_var_string);
+        return NULL;
+    }
+
+    if (query_count < 2) {
+        log_err("Too low number of queries in configuration string: %s",
+                env_var_string);
+        return NULL;
+    }
+
+    tier_cfgs =
+        memkind_calloc(MEMKIND_DEFAULT, tier_count, sizeof(ctl_tier_cfg));
+    if (!tier_cfgs) {
+        log_err("Error during allocation of memory.");
+        return NULL;
+    }
+
+    for (i = 0; i < tier_count; ++i) {
+        ret = ctl_parse_query(qbuf, &tier_cfgs[i]);
+
+        if (ret != 0) {
+            log_err("Failed to parse query: %s", qbuf);
+            memkind_free(MEMKIND_DEFAULT, tier_cfgs);
+            return NULL;
+        }
+
+        qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
+    }
+
+    ret = ctl_parse_policy(qbuf, &policy);
     if (ret != 0) {
-        goto tiers_delete;
+        log_err("Failed to parse policy: %s", qbuf);
+        memkind_free(MEMKIND_DEFAULT, tier_cfgs);
+        return NULL;
     }
 
     struct memtier_builder *builder = memtier_builder_new();
