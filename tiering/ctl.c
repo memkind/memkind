@@ -15,8 +15,8 @@
 #define CTL_VALUE_SEPARATOR        ":"
 #define CTL_STRING_QUERY_SEPARATOR ","
 
-static unsigned tier_count;
-static struct memtier_tier *tiers[64] = {NULL};
+#define MAX_TIERS 64
+static struct memtier_tier *tiers[MAX_TIERS] = {NULL};
 
 typedef struct ctl_tier_cfg {
     char *kind_name;
@@ -277,11 +277,12 @@ static const char *ctl_policy_to_str(memtier_policy_t policy)
     return policies[policy];
 }
 
-static void ctl_destroy_tiers(unsigned created_tiers)
+static void ctl_destroy_tiers(void)
 {
     unsigned i;
-    for (i = 0; i < created_tiers; ++i) {
-        memtier_tier_delete(tiers[i]);
+    for (i = 0; i < MAX_TIERS; ++i) {
+        if (tiers[i])
+            memtier_tier_delete(tiers[i]);
     }
     memkind_free(MEMKIND_DEFAULT, tier_cfgs);
 }
@@ -291,7 +292,6 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
     struct memtier_kind *tier_kind;
     memtier_policy_t policy = MEMTIER_POLICY_MAX_VALUE;
     unsigned i;
-    unsigned created_tiers = 0;
 
     int ret;
     char *sptr = NULL;
@@ -302,7 +302,7 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
         if (*qbuf++ == *CTL_STRING_QUERY_SEPARATOR)
             ++query_count;
 
-    tier_count = query_count - 1;
+    unsigned tier_count = query_count - 1;
 
     qbuf = strtok_r(env_var_string, CTL_STRING_QUERY_SEPARATOR, &sptr);
     if (qbuf == NULL) {
@@ -313,6 +313,11 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
     if (query_count < 2) {
         log_err("Too low number of queries in configuration string: %s",
                 env_var_string);
+        return NULL;
+    }
+
+    if (tier_count > MAX_TIERS) {
+        log_err("Too much memory tiers %u", tier_count);
         return NULL;
     }
 
@@ -361,7 +366,6 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
         if (tiers[i] == NULL) {
             goto builder_delete;
         }
-        created_tiers = i;
 
         ret = memtier_builder_add_tier(builder, tiers[i],
                                        tier_cfgs[i].ratio_value);
@@ -387,7 +391,7 @@ builder_delete:
     memtier_builder_delete(builder);
 
 tiers_delete:
-    ctl_destroy_tiers(created_tiers);
+    ctl_destroy_tiers();
     ctl_destroy_fs_dax_reg();
 
     return NULL;
@@ -396,6 +400,6 @@ tiers_delete:
 void ctl_destroy_kind(struct memtier_kind *kind)
 {
     ctl_destroy_fs_dax_reg();
-    ctl_destroy_tiers(tier_count);
+    ctl_destroy_tiers();
     memtier_delete_kind(kind);
 }
