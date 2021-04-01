@@ -203,32 +203,34 @@ static int ctl_parse_ratio(char **sptr, unsigned *dest)
  * ctl_parse_query -- (internal) splits an entire query string
  * into single queries
  */
-static int ctl_parse_query(char *qbuf, ctl_tier_cfg *tier)
+static int ctl_parse_query(char *qbuf, unsigned tier_num)
 {
     char *sptr = NULL;
-    tier->kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
-    if (tier->kind_name == NULL) {
+    ctl_tier_cfg *tier_cfg = &tier_cfgs[tier_num];
+
+    tier_cfg->kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
+    if (tier_cfg->kind_name == NULL) {
         log_err("Kind name string not found in: %s", qbuf);
         return -1;
     }
-    int ret = ctl_validate_kind_name(tier->kind_name);
+    int ret = ctl_validate_kind_name(tier_cfg->kind_name);
     if (ret != 0) {
         return -1;
     }
 
-    if (!strcmp(tier->kind_name, "FS_DAX")) {
-        tier->pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-        if (tier->pmem_path == NULL) {
+    if (!strcmp(tier_cfg->kind_name, "FS_DAX")) {
+        tier_cfg->pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
+        if (tier_cfg->pmem_path == NULL) {
             return -1;
         }
 
-        ret = ctl_parse_pmem_size(&sptr, &tier->pmem_size);
+        ret = ctl_parse_pmem_size(&sptr, &tier_cfg->pmem_size);
         if (ret != 0) {
             return -1;
         }
     }
 
-    ret = ctl_parse_ratio(&sptr, &tier->ratio_value);
+    ret = ctl_parse_ratio(&sptr, &tier_cfg->ratio_value);
     if (ret != 0) {
         return -1;
     }
@@ -329,7 +331,7 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
     }
 
     for (i = 0; i < tier_count; ++i) {
-        ret = ctl_parse_query(qbuf, &tier_cfgs[i]);
+        ret = ctl_parse_query(qbuf, i);
 
         if (ret != 0) {
             log_err("Failed to parse query: %s", qbuf);
