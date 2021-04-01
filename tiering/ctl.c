@@ -18,13 +18,6 @@
 #define MAX_TIERS 64
 static struct memtier_tier *tiers[MAX_TIERS] = {NULL};
 
-typedef struct ctl_tier_cfg {
-    unsigned ratio_value;
-} ctl_tier_cfg;
-
-// TODO: Remove this variable and struct in a code cleanup
-static ctl_tier_cfg *tier_cfgs;
-
 typedef struct fs_dax_registry {
     unsigned size;
     memkind_t *kinds;
@@ -192,6 +185,7 @@ static int ctl_parse_ratio(char **sptr, unsigned *dest)
         log_err("Unsupported ratio: %s", ratio_str);
         return -1;
     }
+    log_debug("ratio_value: %u", *dest);
 
     return 0;
 }
@@ -221,12 +215,11 @@ static memkind_t ctl_get_kind(char *kind_name, char *pmem_path,
  * ctl_parse_query -- (internal) splits an entire query string
  * into single queries
  */
-static int ctl_parse_query(char *qbuf, unsigned tier_num, memkind_t *kind)
+static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
 {
     char *sptr = NULL;
     char *pmem_path = NULL;
     size_t pmem_size = 1;
-    ctl_tier_cfg *tier_cfg = &tier_cfgs[tier_num];
 
     char *kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
     if (kind_name == NULL) {
@@ -252,7 +245,7 @@ static int ctl_parse_query(char *qbuf, unsigned tier_num, memkind_t *kind)
 
     *kind = ctl_get_kind(kind_name, pmem_path, pmem_size);
 
-    ret = ctl_parse_ratio(&sptr, &tier_cfg->ratio_value);
+    ret = ctl_parse_ratio(&sptr, ratio);
     if (ret != 0) {
         return -1;
     }
@@ -286,7 +279,6 @@ static void ctl_destroy_tiers(void)
         if (tiers[i])
             memtier_tier_delete(tiers[i]);
     }
-    memkind_free(MEMKIND_DEFAULT, tier_cfgs);
 }
 
 struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
@@ -323,22 +315,16 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
         return NULL;
     }
 
-    tier_cfgs =
-        memkind_calloc(MEMKIND_DEFAULT, tier_count, sizeof(ctl_tier_cfg));
-    if (!tier_cfgs) {
-        log_err("Error during allocation of memory.");
-        return NULL;
-    }
-
     struct memtier_builder *builder = memtier_builder_new();
     if (!builder) {
-        memkind_free(MEMKIND_DEFAULT, tier_cfgs);
         return NULL;
     }
 
     for (i = 0; i < tier_count; ++i) {
         memkind_t kind = NULL;
-        ret = ctl_parse_query(qbuf, i, &kind);
+        unsigned ratio = 0;
+
+        ret = ctl_parse_query(qbuf, &kind, &ratio);
         if (ret != 0) {
             log_err("Failed to parse query: %s", qbuf);
             goto builder_delete;
@@ -349,15 +335,12 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
 
         qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
 
-        log_debug("ratio_value: %u", tier_cfgs[i].ratio_value);
-
         tiers[i] = memtier_tier_new(kind);
         if (tiers[i] == NULL) {
             goto builder_delete;
         }
 
-        ret = memtier_builder_add_tier(builder, tiers[i],
-                                       tier_cfgs[i].ratio_value);
+        ret = memtier_builder_add_tier(builder, tiers[i], ratio);
         if (ret != 0) {
             goto builder_delete;
         }
