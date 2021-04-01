@@ -95,16 +95,6 @@ static int ctl_parse_size_t(const char *str, size_t *dest)
     return 0;
 }
 
-static int ctl_validate_kind_name(const char *kind_name)
-{
-    if (strcmp(kind_name, "DRAM") && strcmp(kind_name, "FS_DAX")) {
-        log_err("Unsupported kind: %s", kind_name);
-        return -1;
-    }
-
-    return 0;
-}
-
 /*
  * ctl_parse_pmem_size -- parse size from string
  */
@@ -220,18 +210,18 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
     char *sptr = NULL;
     char *pmem_path = NULL;
     size_t pmem_size = 1;
+    int ret = -1;
 
     char *kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
     if (kind_name == NULL) {
         log_err("Kind name string not found in: %s", qbuf);
         return -1;
     }
-    int ret = ctl_validate_kind_name(kind_name);
-    if (ret != 0) {
-        return -1;
-    }
 
-    if (!strcmp(kind_name, "FS_DAX")) {
+    if (strcmp(kind_name, "DRAM") && strcmp(kind_name, "FS_DAX")) {
+        log_err("Unsupported kind: %s", kind_name);
+        return -1;
+    } else if (!strcmp(kind_name, "FS_DAX")) {
         pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
         if (pmem_path == NULL) {
             return -1;
