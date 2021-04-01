@@ -55,7 +55,7 @@ class Test_max_bg_threads_env_var():
            MEMKIND_BACKGROUND_THREAD_LIMIT environment variable is handled
            correctly."""
         self.threads_limit = -1
-        output, retcode = self.run_test_binary()
+        output, retcode, threads_count = self.run_test_binary()
         assert retcode == 134, \
             self.fail_msg.format(
                 f"Error: Negative value of MEMKIND_BACKGROUND_THREAD_LIMIT",
