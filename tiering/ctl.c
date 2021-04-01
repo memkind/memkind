@@ -19,9 +19,6 @@
 static struct memtier_tier *tiers[MAX_TIERS] = {NULL};
 
 typedef struct ctl_tier_cfg {
-    char *kind_name;
-    char *pmem_path;
-    size_t pmem_size;
     unsigned ratio_value;
 } ctl_tier_cfg;
 
@@ -199,36 +196,61 @@ static int ctl_parse_ratio(char **sptr, unsigned *dest)
     return 0;
 }
 
+static memkind_t ctl_get_kind(char *kind_name, char *pmem_path,
+                              size_t pmem_size)
+{
+    memkind_t kind = NULL;
+
+    if (strcmp(kind_name, "DRAM") == 0) {
+        kind = MEMKIND_DEFAULT;
+        log_debug("kind_name: memkind_default");
+    } else if (strcmp(kind_name, "FS_DAX") == 0) {
+        int res = memkind_create_pmem(pmem_path, pmem_size, &kind);
+        if (res || ctl_add_pmem_kind_to_fs_dax_reg(kind)) {
+            return NULL;
+        }
+        log_debug("kind_name: FS-DAX");
+        log_debug("pmem_path: %s", pmem_path);
+        log_debug("pmem_size: %zu", pmem_size);
+    }
+
+    return kind;
+}
+
 /*
  * ctl_parse_query -- (internal) splits an entire query string
  * into single queries
  */
-static int ctl_parse_query(char *qbuf, unsigned tier_num)
+static int ctl_parse_query(char *qbuf, unsigned tier_num, memkind_t *kind)
 {
     char *sptr = NULL;
+    char *pmem_path = NULL;
+    size_t pmem_size = 1;
     ctl_tier_cfg *tier_cfg = &tier_cfgs[tier_num];
 
-    tier_cfg->kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
-    if (tier_cfg->kind_name == NULL) {
+    char *kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
+    if (kind_name == NULL) {
         log_err("Kind name string not found in: %s", qbuf);
         return -1;
     }
-    int ret = ctl_validate_kind_name(tier_cfg->kind_name);
+    int ret = ctl_validate_kind_name(kind_name);
     if (ret != 0) {
         return -1;
     }
 
-    if (!strcmp(tier_cfg->kind_name, "FS_DAX")) {
-        tier_cfg->pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-        if (tier_cfg->pmem_path == NULL) {
+    if (!strcmp(kind_name, "FS_DAX")) {
+        pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
+        if (pmem_path == NULL) {
             return -1;
         }
 
-        ret = ctl_parse_pmem_size(&sptr, &tier_cfg->pmem_size);
+        ret = ctl_parse_pmem_size(&sptr, &pmem_size);
         if (ret != 0) {
             return -1;
         }
     }
+
+    *kind = ctl_get_kind(kind_name, pmem_path, pmem_size);
 
     ret = ctl_parse_ratio(&sptr, &tier_cfg->ratio_value);
     if (ret != 0) {
@@ -242,28 +264,6 @@ static int ctl_parse_query(char *qbuf, unsigned tier_num)
     }
 
     return 0;
-}
-
-static memkind_t ctl_get_kind(unsigned tier_num)
-{
-    memkind_t kind = NULL;
-    ctl_tier_cfg tier_cfg = tier_cfgs[tier_num];
-
-    if (strcmp(tier_cfg.kind_name, "DRAM") == 0) {
-        kind = MEMKIND_DEFAULT;
-        log_debug("kind_name: memkind_default");
-    } else if (strcmp(tier_cfg.kind_name, "FS_DAX") == 0) {
-        int res =
-            memkind_create_pmem(tier_cfg.pmem_path, tier_cfg.pmem_size, &kind);
-        if (res || ctl_add_pmem_kind_to_fs_dax_reg(kind)) {
-            return NULL;
-        }
-        log_debug("kind_name: FS-DAX");
-        log_debug("pmem_path: %s", tier_cfg.pmem_path);
-        log_debug("pmem_size: %zu", tier_cfg.pmem_size);
-    }
-
-    return kind;
 }
 
 static const char *ctl_policy_to_str(memtier_policy_t policy)
@@ -337,19 +337,17 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
     }
 
     for (i = 0; i < tier_count; ++i) {
-        ret = ctl_parse_query(qbuf, i);
-
+        memkind_t kind = NULL;
+        ret = ctl_parse_query(qbuf, i, &kind);
         if (ret != 0) {
             log_err("Failed to parse query: %s", qbuf);
             goto builder_delete;
         }
-
-        qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
-
-        memkind_t kind = ctl_get_kind(i);
         if (kind == NULL) {
             goto builder_delete;
         }
+
+        qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
 
         log_debug("ratio_value: %u", tier_cfgs[i].ratio_value);
 
