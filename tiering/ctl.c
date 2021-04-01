@@ -15,9 +15,11 @@
 #define CTL_VALUE_SEPARATOR        ":"
 #define CTL_STRING_QUERY_SEPARATOR ","
 
+// TODO: Lift this limitation
 #define MAX_TIERS 64
 static struct memtier_tier *tiers[MAX_TIERS] = {NULL};
 
+// TODO: Create tiers registry
 typedef struct fs_dax_registry {
     unsigned size;
     memkind_t *kinds;
@@ -95,16 +97,6 @@ static int ctl_parse_size_t(const char *str, size_t *dest)
     return 0;
 }
 
-static int ctl_validate_kind_name(const char *kind_name)
-{
-    if (strcmp(kind_name, "DRAM") && strcmp(kind_name, "FS_DAX")) {
-        log_err("Unsupported kind: %s", kind_name);
-        return -1;
-    }
-
-    return 0;
-}
-
 /*
  * ctl_parse_pmem_size -- parse size from string
  */
@@ -161,6 +153,7 @@ parse_failure:
  */
 static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
 {
+    // TODO: Remove this function along with logging
     if (strcmp(qbuf, "POLICY_STATIC_THRESHOLD") == 0) {
         *policy = MEMTIER_POLICY_STATIC_THRESHOLD;
     } else {
@@ -190,27 +183,6 @@ static int ctl_parse_ratio(char **sptr, unsigned *dest)
     return 0;
 }
 
-static memkind_t ctl_get_kind(char *kind_name, char *pmem_path,
-                              size_t pmem_size)
-{
-    memkind_t kind = NULL;
-
-    if (strcmp(kind_name, "DRAM") == 0) {
-        kind = MEMKIND_DEFAULT;
-        log_debug("kind_name: memkind_default");
-    } else if (strcmp(kind_name, "FS_DAX") == 0) {
-        int res = memkind_create_pmem(pmem_path, pmem_size, &kind);
-        if (res || ctl_add_pmem_kind_to_fs_dax_reg(kind)) {
-            return NULL;
-        }
-        log_debug("kind_name: FS-DAX");
-        log_debug("pmem_path: %s", pmem_path);
-        log_debug("pmem_size: %zu", pmem_size);
-    }
-
-    return kind;
-}
-
 /*
  * ctl_parse_query -- (internal) splits an entire query string
  * into single queries
@@ -220,18 +192,18 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
     char *sptr = NULL;
     char *pmem_path = NULL;
     size_t pmem_size = 1;
+    int ret = -1;
 
     char *kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
     if (kind_name == NULL) {
         log_err("Kind name string not found in: %s", qbuf);
         return -1;
     }
-    int ret = ctl_validate_kind_name(kind_name);
-    if (ret != 0) {
-        return -1;
-    }
 
-    if (!strcmp(kind_name, "FS_DAX")) {
+    if (!strcmp(kind_name, "DRAM")) {
+        *kind = MEMKIND_DEFAULT;
+        log_debug("kind_name: memkind_default");
+    } else if (!strcmp(kind_name, "FS_DAX")) {
         pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
         if (pmem_path == NULL) {
             return -1;
@@ -241,9 +213,19 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
         if (ret != 0) {
             return -1;
         }
-    }
 
-    *kind = ctl_get_kind(kind_name, pmem_path, pmem_size);
+        ret = memkind_create_pmem(pmem_path, pmem_size, kind);
+        if (ret || ctl_add_pmem_kind_to_fs_dax_reg(*kind)) {
+            return -1;
+        }
+        // TODO: Remove these logs - check for the return code in tests instead
+        log_debug("kind_name: FS-DAX");
+        log_debug("pmem_path: %s", pmem_path);
+        log_debug("pmem_size: %zu", pmem_size);
+    } else {
+        log_err("Unsupported kind: %s", kind_name);
+        return -1;
+    }
 
     ret = ctl_parse_ratio(&sptr, ratio);
     if (ret != 0) {
