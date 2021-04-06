@@ -312,8 +312,9 @@ class Test_tiering_config_env(Helper):
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
             self.default_policy, validate_retcode=False)
 
-        assert output[0] == self.log_error_prefix + \
-            "Error with parsing MEMKIND_MEM_TIERING_CONFIG", "Wrong message"
+        assert self.log_error_prefix + \
+            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
+            "Wrong message"
 
     @pytest.mark.parametrize("pmem_size",
                              ["18446744073709551615K", "18446744073709551615M",

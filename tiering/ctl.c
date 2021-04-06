@@ -15,25 +15,17 @@
 #define CTL_VALUE_SEPARATOR        ":"
 #define CTL_STRING_QUERY_SEPARATOR ","
 
-static unsigned tier_count;
-static struct memtier_tier *tiers[64] = {NULL};
+// TODO: Lift this limitation
+#define MAX_TIERS 64
+static struct memtier_tier *tiers[MAX_TIERS] = {NULL};
 
-typedef struct ctl_tier_cfg {
-    char *kind_name;
-    char *pmem_path;
-    size_t pmem_size;
-    unsigned ratio_value;
-} ctl_tier_cfg;
-
-// TODO: Remove this variable and struct in a code cleanup
-static ctl_tier_cfg *tier_cfgs;
-
+// TODO: Create tiers registry
 typedef struct fs_dax_registry {
     unsigned size;
     memkind_t *kinds;
 } fs_dax_registry;
 
-static struct fs_dax_registry fs_dax_reg_g;
+static struct fs_dax_registry fs_dax_reg_g = {0, NULL};
 
 static int ctl_add_pmem_kind_to_fs_dax_reg(memkind_t kind)
 {
@@ -105,20 +97,10 @@ static int ctl_parse_size_t(const char *str, size_t *dest)
     return 0;
 }
 
-static int ctl_validate_kind_name(const char *kind_name)
-{
-    if (strcmp(kind_name, "DRAM") && strcmp(kind_name, "FS_DAX")) {
-        log_err("Unsupported kind: %s", kind_name);
-        return -1;
-    }
-
-    return 0;
-}
-
 /*
  * ctl_parse_pmem_size -- parse size from string
  */
-static int ctl_parse_pmem_size(const char *str, size_t *sizep)
+static int ctl_parse_pmem_size(char **sptr, size_t *sizep)
 {
     struct suff {
         const char *suff;
@@ -130,13 +112,18 @@ static int ctl_parse_pmem_size(const char *str, size_t *sizep)
     char size[32] = {0};
     char unit[3] = {0};
 
-    if (str[0] == '-') {
+    const char *pmem_size_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, sptr);
+    if (pmem_size_str == NULL) {
         return -1;
     }
 
-    int ret = sscanf(str, "%31[0-9]%2s", size, unit);
+    if (pmem_size_str[0] == '-') {
+        goto parse_failure;
+    }
+
+    int ret = sscanf(pmem_size_str, "%31[0-9]%2s", size, unit);
     if (ctl_parse_size_t(size, sizep)) {
-        return -1;
+        goto parse_failure;
     }
     if (ret == 1) {
         return 0;
@@ -148,13 +135,15 @@ static int ctl_parse_pmem_size(const char *str, size_t *sizep)
                     *sizep *= suffixes[i].mag;
                 } else {
                     log_err("Provided pmem size is too big: %s", size);
-                    return -1;
+                    goto parse_failure;
                 }
                 return 0;
             }
         }
     }
 
+parse_failure:
+    log_err("Failed to parse pmem size: %s", pmem_size_str);
     return -1;
 }
 
@@ -164,6 +153,7 @@ static int ctl_parse_pmem_size(const char *str, size_t *sizep)
  */
 static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
 {
+    // TODO: Remove this function along with logging
     if (strcmp(qbuf, "POLICY_STATIC_THRESHOLD") == 0) {
         *policy = MEMTIER_POLICY_STATIC_THRESHOLD;
     } else {
@@ -175,8 +165,9 @@ static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
     return 0;
 }
 
-static int ctl_parse_ratio(const char *ratio_str, unsigned *dest)
+static int ctl_parse_ratio(char **sptr, unsigned *dest)
 {
+    const char *ratio_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, sptr);
     if (ratio_str == NULL) {
         log_err("Ratio not provided");
         return -1;
@@ -187,6 +178,7 @@ static int ctl_parse_ratio(const char *ratio_str, unsigned *dest)
         log_err("Unsupported ratio: %s", ratio_str);
         return -1;
     }
+    log_debug("ratio_value: %u", *dest);
 
     return 0;
 }
@@ -195,37 +187,47 @@ static int ctl_parse_ratio(const char *ratio_str, unsigned *dest)
  * ctl_parse_query -- (internal) splits an entire query string
  * into single queries
  */
-static int ctl_parse_query(char *qbuf, ctl_tier_cfg *tier)
+static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
 {
     char *sptr = NULL;
-    tier->kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
-    if (tier->kind_name == NULL) {
+    char *pmem_path = NULL;
+    size_t pmem_size = 1;
+    int ret = -1;
+
+    char *kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
+    if (kind_name == NULL) {
         log_err("Kind name string not found in: %s", qbuf);
         return -1;
     }
-    int ret = ctl_validate_kind_name(tier->kind_name);
-    if (ret != 0) {
+
+    if (!strcmp(kind_name, "DRAM")) {
+        *kind = MEMKIND_DEFAULT;
+        log_debug("kind_name: memkind_default");
+    } else if (!strcmp(kind_name, "FS_DAX")) {
+        pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
+        if (pmem_path == NULL) {
+            return -1;
+        }
+
+        ret = ctl_parse_pmem_size(&sptr, &pmem_size);
+        if (ret != 0) {
+            return -1;
+        }
+
+        ret = memkind_create_pmem(pmem_path, pmem_size, kind);
+        if (ret || ctl_add_pmem_kind_to_fs_dax_reg(*kind)) {
+            return -1;
+        }
+        // TODO: Remove these logs - check for the return code in tests instead
+        log_debug("kind_name: FS-DAX");
+        log_debug("pmem_path: %s", pmem_path);
+        log_debug("pmem_size: %zu", pmem_size);
+    } else {
+        log_err("Unsupported kind: %s", kind_name);
         return -1;
     }
 
-    if (!strcmp(tier->kind_name, "FS_DAX")) {
-        tier->pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-        if (tier->pmem_path == NULL) {
-            return -1;
-        }
-        char *pmem_size_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-        if (pmem_size_str == NULL) {
-            return -1;
-        }
-        ret = ctl_parse_pmem_size(pmem_size_str, &tier->pmem_size);
-        if (ret != 0) {
-            log_err("Failed to parse pmem size: %s", pmem_size_str);
-            return -1;
-        }
-    }
-
-    char *ratio_value_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-    ret = ctl_parse_ratio(ratio_value_str, &tier->ratio_value);
+    ret = ctl_parse_ratio(&sptr, ratio);
     if (ret != 0) {
         return -1;
     }
@@ -237,82 +239,6 @@ static int ctl_parse_query(char *qbuf, ctl_tier_cfg *tier)
     }
 
     return 0;
-}
-
-/*
- * ctl_load_config -- splits an entire config into query strings
- */
-static int ctl_load_config(char *buf, memtier_policy_t *policy)
-{
-    int ret;
-    char *sptr = NULL;
-    char *qbuf = buf;
-
-    unsigned query_count = 1;
-    while (*qbuf)
-        if (*qbuf++ == *CTL_STRING_QUERY_SEPARATOR)
-            ++query_count;
-
-    tier_count = query_count - 1;
-
-    qbuf = strtok_r(buf, CTL_STRING_QUERY_SEPARATOR, &sptr);
-    if (qbuf == NULL) {
-        log_err("No valid query found in: %s", buf);
-        return -1;
-    }
-
-    if (query_count < 2) {
-        log_err("Too low number of queries in configuration string: %s", buf);
-        return -1;
-    }
-
-    tier_cfgs =
-        memkind_calloc(MEMKIND_DEFAULT, tier_count, sizeof(ctl_tier_cfg));
-    if (!tier_cfgs) {
-        log_err("Error during allocation of memory.");
-        return -1;
-    }
-
-    unsigned i;
-    for (i = 0; i < tier_count; ++i) {
-        ret = ctl_parse_query(qbuf, &tier_cfgs[i]);
-
-        if (ret != 0) {
-            log_err("Failed to parse query: %s", qbuf);
-            return -1;
-        }
-
-        qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
-    }
-
-    ret = ctl_parse_policy(qbuf, policy);
-    if (ret != 0) {
-        log_err("Failed to parse policy: %s", qbuf);
-        return -1;
-    }
-
-    return 0;
-}
-
-static memkind_t ctl_get_kind(unsigned tier_num)
-{
-    memkind_t kind = NULL;
-    ctl_tier_cfg tier_cfg = tier_cfgs[tier_num];
-
-    if (strcmp(tier_cfg.kind_name, "DRAM") == 0) {
-        kind = MEMKIND_DEFAULT;
-        log_debug("kind_name: memkind_default");
-    } else if (strcmp(tier_cfg.kind_name, "FS_DAX") == 0) {
-        memkind_create_pmem(tier_cfg.pmem_path, tier_cfg.pmem_size, &kind);
-        if (kind) {
-            ctl_add_pmem_kind_to_fs_dax_reg(kind);
-        }
-        log_debug("kind_name: FS-DAX");
-        log_debug("pmem_path: %s", tier_cfg.pmem_path);
-        log_debug("pmem_size: %zu", tier_cfg.pmem_size);
-    }
-
-    return kind;
 }
 
 static const char *ctl_policy_to_str(memtier_policy_t policy)
@@ -328,13 +254,13 @@ static const char *ctl_policy_to_str(memtier_policy_t policy)
     return policies[policy];
 }
 
-static void ctl_destroy_tiers(unsigned created_tiers)
+static void ctl_destroy_tiers(void)
 {
     unsigned i;
-    for (i = 0; i < created_tiers; ++i) {
-        memtier_tier_delete(tiers[i]);
+    for (i = 0; i < MAX_TIERS; ++i) {
+        if (tiers[i])
+            memtier_tier_delete(tiers[i]);
     }
-    memkind_free(MEMKIND_DEFAULT, tier_cfgs);
 }
 
 struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
@@ -342,40 +268,72 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
     struct memtier_kind *tier_kind;
     memtier_policy_t policy = MEMTIER_POLICY_MAX_VALUE;
     unsigned i;
-    unsigned created_tiers = 0;
 
-    int ret = ctl_load_config(env_var_string, &policy);
-    if (ret != 0) {
-        goto tiers_delete;
+    int ret;
+    char *sptr = NULL;
+    char *qbuf = env_var_string;
+
+    unsigned query_count = 1;
+    while (*qbuf)
+        if (*qbuf++ == *CTL_STRING_QUERY_SEPARATOR)
+            ++query_count;
+
+    unsigned tier_count = query_count - 1;
+
+    qbuf = strtok_r(env_var_string, CTL_STRING_QUERY_SEPARATOR, &sptr);
+    if (qbuf == NULL) {
+        log_err("No valid query found in: %s", env_var_string);
+        return NULL;
+    }
+
+    if (query_count < 2) {
+        log_err("Too low number of queries in configuration string: %s",
+                env_var_string);
+        return NULL;
+    }
+
+    if (tier_count > MAX_TIERS) {
+        log_err("Too much memory tiers %u", tier_count);
+        return NULL;
     }
 
     struct memtier_builder *builder = memtier_builder_new();
     if (!builder) {
-        goto tiers_delete;
+        return NULL;
     }
 
     for (i = 0; i < tier_count; ++i) {
+        memkind_t kind = NULL;
+        unsigned ratio = 0;
 
-        memkind_t kind = ctl_get_kind(i);
+        ret = ctl_parse_query(qbuf, &kind, &ratio);
+        if (ret != 0) {
+            log_err("Failed to parse query: %s", qbuf);
+            goto builder_delete;
+        }
         if (kind == NULL) {
             goto builder_delete;
         }
 
-        log_debug("ratio_value: %u", tier_cfgs[i].ratio_value);
-        log_debug("policy: %s", ctl_policy_to_str(policy));
+        qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
 
         tiers[i] = memtier_tier_new(kind);
         if (tiers[i] == NULL) {
             goto builder_delete;
         }
-        created_tiers = i;
 
-        ret = memtier_builder_add_tier(builder, tiers[i],
-                                       tier_cfgs[i].ratio_value);
+        ret = memtier_builder_add_tier(builder, tiers[i], ratio);
         if (ret != 0) {
             goto builder_delete;
         }
     }
+
+    ret = ctl_parse_policy(qbuf, &policy);
+    if (ret != 0) {
+        log_err("Failed to parse policy: %s", qbuf);
+        goto builder_delete;
+    }
+    log_debug("policy: %s", ctl_policy_to_str(policy));
 
     ret = memtier_builder_set_policy(builder, policy);
     if (ret != 0) {
@@ -392,9 +350,7 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
 
 builder_delete:
     memtier_builder_delete(builder);
-
-tiers_delete:
-    ctl_destroy_tiers(created_tiers);
+    ctl_destroy_tiers();
     ctl_destroy_fs_dax_reg();
 
     return NULL;
@@ -403,6 +359,6 @@ tiers_delete:
 void ctl_destroy_kind(struct memtier_kind *kind)
 {
     ctl_destroy_fs_dax_reg();
-    ctl_destroy_tiers(tier_count);
+    ctl_destroy_tiers();
     memtier_delete_kind(kind);
 }
