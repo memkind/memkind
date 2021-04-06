@@ -14,8 +14,7 @@ command {arguments ...}
 .TP
 .B MEMKIND_MEM_TIERING_CONFIG
 Sets the memkind tiering functionality. Passed as a comma separated list of
-.I memkind_tier
-configuration strings ended with a policy. The configuration has to be passed in the following format:
+memory kinds configuration strings ended with a policy. The configuration has to be passed in the following format:
 .IP
 "kind_name:[path_to_pmem:pmem_file_size:]ratio,(...),policy"
 , where:
