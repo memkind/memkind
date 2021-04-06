@@ -15,11 +15,6 @@
 #define CTL_VALUE_SEPARATOR        ":"
 #define CTL_STRING_QUERY_SEPARATOR ","
 
-// TODO: Lift this limitation
-#define MAX_TIERS 64
-static struct memtier_tier *tiers[MAX_TIERS] = {NULL};
-
-// TODO: Create tiers registry
 typedef struct fs_dax_registry {
     unsigned size;
     memkind_t *kinds;
@@ -254,15 +249,6 @@ static const char *ctl_policy_to_str(memtier_policy_t policy)
     return policies[policy];
 }
 
-static void ctl_destroy_tiers(void)
-{
-    unsigned i;
-    for (i = 0; i < MAX_TIERS; ++i) {
-        if (tiers[i])
-            memtier_tier_delete(tiers[i]);
-    }
-}
-
 struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
 {
     struct memtier_kind *tier_kind;
@@ -292,11 +278,6 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
         return NULL;
     }
 
-    if (tier_count > MAX_TIERS) {
-        log_err("Too much memory tiers %u", tier_count);
-        return NULL;
-    }
-
     struct memtier_builder *builder = memtier_builder_new();
     if (!builder) {
         return NULL;
@@ -317,12 +298,7 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
 
         qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
 
-        tiers[i] = memtier_tier_new(kind);
-        if (tiers[i] == NULL) {
-            goto builder_delete;
-        }
-
-        ret = memtier_builder_add_tier(builder, tiers[i], ratio);
+        ret = memtier_builder_add_tier(builder, kind, ratio);
         if (ret != 0) {
             goto builder_delete;
         }
@@ -350,7 +326,6 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
 
 builder_delete:
     memtier_builder_delete(builder);
-    ctl_destroy_tiers();
     ctl_destroy_fs_dax_reg();
 
     return NULL;
@@ -359,6 +334,5 @@ builder_delete:
 void ctl_destroy_kind(struct memtier_kind *kind)
 {
     ctl_destroy_fs_dax_reg();
-    ctl_destroy_tiers();
     memtier_delete_kind(kind);
 }

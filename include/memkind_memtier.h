@@ -17,7 +17,6 @@ extern "C" {
  */
 
 /// \brief Forward declaration
-struct memtier_tier;
 struct memtier_builder;
 struct memtier_kind;
 
@@ -33,21 +32,6 @@ typedef enum memtier_policy_t
      */
     MEMTIER_POLICY_MAX_VALUE
 } memtier_policy_t;
-
-///
-/// \brief Create a memtier tier
-/// \note STANDARD API
-/// \param kind memkind kind
-/// \return memtier tier, NULL on failure
-///
-struct memtier_tier *memtier_tier_new(memkind_t kind);
-
-///
-/// \brief Delete memtier tier
-/// \note STANDARD API
-/// \param tier memtier tier
-///
-void memtier_tier_delete(struct memtier_tier *tier);
 
 ///
 /// \brief Create a memtier builder
@@ -67,13 +51,13 @@ void memtier_builder_delete(struct memtier_builder *builder);
 /// \brief Add memtier tier to memtier builder
 /// \note STANDARD API
 /// \param builder memtier builder
-/// \param tier memtier tier
-/// \param tier_ratio expected memtier tier ratio
+/// \param kind memkind kind
+/// \param kind_ratio expected memtier tier ratio
 /// \return Operation status, 0 on success, other values on
 /// failure
 ///
-int memtier_builder_add_tier(struct memtier_builder *builder,
-                             struct memtier_tier *tier, unsigned tier_ratio);
+int memtier_builder_add_tier(struct memtier_builder *builder, memkind_t kind,
+                             unsigned kind_ratio);
 
 ///
 /// \brief Set memtier policy to memtier builder
@@ -118,10 +102,10 @@ void *memtier_kind_malloc(struct memtier_kind *kind, size_t size);
 /// \brief Allocates size bytes of uninitialized storage of the specified
 ///        memtier tier
 /// \note STANDARD API
-/// \param tier specified memtier tier
+/// \param kind specified memkind kind
 /// \param size number of bytes to allocate
 /// \return Pointer to the allocated memory
-void *memtier_tier_malloc(struct memtier_tier *tier, size_t size);
+void *memtier_tier_malloc(memkind_t kind, size_t size);
 
 ///
 /// \brief Allocates memory of the specified memtier kind for an array of num
@@ -140,12 +124,12 @@ void *memtier_kind_calloc(struct memtier_kind *kind, size_t num, size_t size);
 ///        elements of size bytes each and initializes all bytes in the
 ///        allocated storage to zero
 /// \note STANDARD API
-/// \param tier specified memtier tier
+/// \param kind specified memkind kind
 /// \param num number of objects
 /// \param size specified size of each element
 /// \return Pointer to the allocated memory
 ///
-void *memtier_tier_calloc(struct memtier_tier *tier, size_t num, size_t size);
+void *memtier_tier_calloc(memkind_t kind, size_t num, size_t size);
 
 ///
 /// \brief Reallocates memory of the specified memtier kind
@@ -160,12 +144,12 @@ void *memtier_kind_realloc(struct memtier_kind *kind, void *ptr, size_t size);
 ///
 /// \brief Reallocates memory of the specified memtier tier
 /// \note STANDARD API
-/// \param tier specified memtier tier
+/// \param kind specified memkind kind
 /// \param ptr pointer to the memory block to be reallocated
 /// \param size new size for the memory block in bytes
 /// \return Pointer to the allocated memory
 ///
-void *memtier_tier_realloc(struct memtier_tier *tier, void *ptr, size_t size);
+void *memtier_tier_realloc(memkind_t kind, void *ptr, size_t size);
 
 ///
 /// \brief Allocates size bytes of the specified memtier kind and places the
@@ -189,15 +173,15 @@ int memtier_kind_posix_memalign(struct memtier_kind *kind, void **memptr,
 ///        allocated memory will be a multiple of alignment, which must be a
 ///        power of two and a multiple of sizeof(void*)
 /// \note STANDARD API
-/// \param tier specified memtier tier
+/// \param kind specified memkind kind
 /// \param memptr address of the allocated memory
 /// \param alignment specified alignment of bytes
 /// \param size specified size of bytes
 /// \return operation status, 0 on success, EINVAL or
 ///         ENOMEM on failure
 ///
-int memtier_tier_posix_memalign(struct memtier_tier *tier, void **memptr,
-                                size_t alignment, size_t size);
+int memtier_tier_posix_memalign(memkind_t kind, void **memptr, size_t alignment,
+                                size_t size);
 
 ///
 /// \brief Obtain size of block of memory allocated with the memtier API
@@ -217,10 +201,10 @@ void memtier_free(void *ptr);
 ///
 /// \brief Obtain size of allocated memory inside specified memtier tier
 /// \note STANDARD API
-/// \param tier specified memtier tier
+/// \param kind specified memkind kind
 /// \return Number of usable bytes
 ///
-size_t memtier_tier_allocated_size(struct memtier_tier *tier);
+size_t memtier_tier_allocated_size(memkind_t kind);
 
 #ifdef __cplusplus
 }
