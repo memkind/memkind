@@ -153,11 +153,9 @@ parse_failure:
  */
 static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
 {
-    // TODO: Remove this function along with logging
     if (strcmp(qbuf, "POLICY_STATIC_THRESHOLD") == 0) {
         *policy = MEMTIER_POLICY_STATIC_THRESHOLD;
     } else {
-
         log_err("Unknown policy: %s", qbuf);
         return -1;
     }
@@ -178,7 +176,6 @@ static int ctl_parse_ratio(char **sptr, unsigned *dest)
         log_err("Unsupported ratio: %s", ratio_str);
         return -1;
     }
-    log_debug("ratio_value: %u", *dest);
 
     return 0;
 }
@@ -202,7 +199,6 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
 
     if (!strcmp(kind_name, "DRAM")) {
         *kind = MEMKIND_DEFAULT;
-        log_debug("kind_name: memkind_default");
     } else if (!strcmp(kind_name, "FS_DAX")) {
         pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
         if (pmem_path == NULL) {
@@ -218,10 +214,6 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
         if (ret || ctl_add_pmem_kind_to_fs_dax_reg(*kind)) {
             return -1;
         }
-        // TODO: Remove these logs - check for the return code in tests instead
-        log_debug("kind_name: FS-DAX");
-        log_debug("pmem_path: %s", pmem_path);
-        log_debug("pmem_size: %zu", pmem_size);
     } else {
         log_err("Unsupported kind: %s", kind_name);
         return -1;
@@ -239,19 +231,6 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
     }
 
     return 0;
-}
-
-static const char *ctl_policy_to_str(memtier_policy_t policy)
-{
-    if (policy < MEMTIER_POLICY_STATIC_THRESHOLD ||
-        policy >= MEMTIER_POLICY_MAX_VALUE) {
-        log_err("Unknown policy: %d", policy);
-        return NULL;
-    }
-
-    const char *policies[] = {"POLICY_STATIC_THRESHOLD"};
-
-    return policies[policy];
 }
 
 static void ctl_destroy_tiers(void)
@@ -333,7 +312,6 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
         log_err("Failed to parse policy: %s", qbuf);
         goto builder_delete;
     }
-    log_debug("policy: %s", ctl_policy_to_str(policy));
 
     ret = memtier_builder_set_policy(builder, policy);
     if (ret != 0) {
