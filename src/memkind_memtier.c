@@ -36,8 +36,7 @@
 #endif
 
 struct memtier_tier {
-    memkind_t kind;                   // Memory kind
-    MEMKIND_ATOMIC size_t alloc_size; // Allocated size
+    memkind_t kind; // Memory kind
 };
 
 struct memtier_tier_cfg {
@@ -57,6 +56,8 @@ struct memtier_kind {
     struct memtier_tier_cfg *cfg; // Memory Tier configuration
 };
 
+MEMKIND_ATOMIC size_t kind_alloc_size[MEMKIND_MAX_KIND];
+
 static struct memtier_tier *
 memtier_policy_static_threshold_get_tier(struct memtier_kind *tier_kind)
 {
@@ -65,8 +66,9 @@ memtier_policy_static_threshold_get_tier(struct memtier_kind *tier_kind)
     int i;
     int dest_tier = 0;
     for (i = 1; i < tier_kind->size; ++i) {
-        if ((cfg[i].tier->alloc_size * cfg[i].tier_ratio) <
-            cfg[0].tier->alloc_size) {
+        if ((kind_alloc_size[cfg[i].tier->kind->partition] *
+             cfg[i].tier_ratio) <
+            kind_alloc_size[cfg[0].tier->kind->partition]) {
             dest_tier = i;
         }
     }
@@ -100,7 +102,7 @@ MEMKIND_EXPORT struct memtier_tier *memtier_tier_new(memkind_t kind)
     struct memtier_tier *tier = jemk_malloc(sizeof(*tier));
     if (tier) {
         tier->kind = kind;
-        tier->alloc_size = 0;
+        kind_alloc_size[kind->partition] = 0;
         memtier_registry_g.kind_map[kind->partition] = tier;
     }
     if (pthread_mutex_unlock(&memtier_registry_g.lock) != 0)
@@ -114,6 +116,7 @@ MEMKIND_EXPORT void memtier_tier_delete(struct memtier_tier *tier)
         if (pthread_mutex_lock(&memtier_registry_g.lock) != 0)
             assert(0 && "failed to acquire mutex");
         memtier_registry_g.kind_map[tier->kind->partition] = NULL;
+        kind_alloc_size[tier->kind->partition] = 0;
         if (pthread_mutex_unlock(&memtier_registry_g.lock) != 0)
             assert(0 && "failed to release mutex");
     }
@@ -235,7 +238,8 @@ MEMKIND_EXPORT void *memtier_kind_malloc(struct memtier_kind *kind, size_t size)
 MEMKIND_EXPORT void *memtier_tier_malloc(struct memtier_tier *tier, size_t size)
 {
     void *ptr = memkind_malloc(tier->kind, size);
-    memkind_atomic_increment(tier->alloc_size, jemk_malloc_usable_size(ptr));
+    memkind_atomic_increment(kind_alloc_size[tier->kind->partition],
+                             jemk_malloc_usable_size(ptr));
     return ptr;
 }
 
@@ -249,7 +253,8 @@ MEMKIND_EXPORT void *memtier_tier_calloc(struct memtier_tier *tier, size_t num,
                                          size_t size)
 {
     void *ptr = memkind_calloc(tier->kind, num, size);
-    memkind_atomic_increment(tier->alloc_size, jemk_malloc_usable_size(ptr));
+    memkind_atomic_increment(kind_alloc_size[tier->kind->partition],
+                             jemk_malloc_usable_size(ptr));
     return ptr;
 }
 
@@ -270,20 +275,20 @@ MEMKIND_EXPORT void *memtier_tier_realloc(struct memtier_tier *tier, void *ptr,
                                           size_t size)
 {
     if (size == 0 && ptr != NULL) {
-        memkind_atomic_decrement(tier->alloc_size,
+        memkind_atomic_decrement(kind_alloc_size[tier->kind->partition],
                                  jemk_malloc_usable_size(ptr));
         memkind_free(tier->kind, ptr);
         return NULL;
     } else if (ptr == NULL) {
         void *n_ptr = memkind_malloc(tier->kind, size);
-        memkind_atomic_increment(tier->alloc_size,
+        memkind_atomic_increment(kind_alloc_size[tier->kind->partition],
                                  jemk_malloc_usable_size(n_ptr));
         return n_ptr;
     } else {
-        memkind_atomic_decrement(tier->alloc_size,
+        memkind_atomic_decrement(kind_alloc_size[tier->kind->partition],
                                  jemk_malloc_usable_size(ptr));
         void *n_ptr = memkind_realloc(tier->kind, ptr, size);
-        memkind_atomic_increment(tier->alloc_size,
+        memkind_atomic_increment(kind_alloc_size[tier->kind->partition],
                                  jemk_malloc_usable_size(n_ptr));
         return n_ptr;
     }
@@ -301,7 +306,7 @@ MEMKIND_EXPORT int memtier_tier_posix_memalign(struct memtier_tier *tier,
                                                size_t size)
 {
     int res = memkind_posix_memalign(tier->kind, memptr, alignment, size);
-    memkind_atomic_increment(tier->alloc_size,
+    memkind_atomic_increment(kind_alloc_size[tier->kind->partition],
                              jemk_malloc_usable_size(*memptr));
     return res;
 }
@@ -316,12 +321,12 @@ MEMKIND_EXPORT void memtier_free(void *ptr)
     struct memkind *kind = memkind_detect_kind(ptr);
     if (!kind)
         return;
-    struct memtier_tier *tier = memtier_registry_g.kind_map[kind->partition];
-    memkind_atomic_decrement(tier->alloc_size, jemk_malloc_usable_size(ptr));
+    memkind_atomic_decrement(kind_alloc_size[kind->partition],
+                             jemk_malloc_usable_size(ptr));
     memkind_free(kind, ptr);
 }
 
 MEMKIND_EXPORT size_t memtier_tier_allocated_size(struct memtier_tier *tier)
 {
-    return tier->alloc_size;
+    return kind_alloc_size[tier->kind->partition];
 }
