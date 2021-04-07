@@ -100,6 +100,18 @@ protected:
     }
 };
 
+TEST_F(MemkindMemtierTest, test_tier_size_after_destroy)
+{
+    const size_t size = 512;
+    struct memkind *kind = nullptr;
+    int res = memkind_create_pmem("/tmp/", 0, &kind);
+    ASSERT_EQ(0, res);
+    memtier_tier_malloc(kind, size);
+    ASSERT_EQ(size, memtier_tier_allocated_size(kind));
+    memkind_destroy_kind(kind);
+    ASSERT_EQ(0U, memtier_tier_allocated_size(kind));
+}
+
 TEST_F(MemkindMemtierTest, test_tier_allocate)
 {
     const size_t size = 512;

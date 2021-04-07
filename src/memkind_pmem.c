@@ -14,6 +14,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+extern void memtier_reset_size(unsigned id);
+
 #ifndef MAP_SYNC
 #define MAP_SYNC 0x80000
 #endif
@@ -253,7 +255,7 @@ MEMKIND_EXPORT int memkind_pmem_destroy(struct memkind *kind)
     struct memkind_pmem *priv = kind->priv;
 
     memkind_arena_destroy(kind);
-
+    memtier_reset_size(kind->partition);
     pthread_mutex_destroy(&priv->pmem_lock);
 
     (void)close(priv->fd);
