@@ -228,9 +228,9 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
     return 0;
 }
 
-struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
+struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
 {
-    struct memtier_kind *tier_kind;
+    struct memtier_memory *tier_memory;
     memtier_policy_t policy = MEMTIER_POLICY_MAX_VALUE;
     unsigned i;
 
@@ -294,13 +294,13 @@ struct memtier_kind *ctl_create_tier_kind_from_env(char *env_var_string)
         goto builder_delete;
     }
 
-    ret = memtier_builder_construct_kind(builder, &tier_kind);
+    ret = memtier_builder_construct_memtier_memory(builder, &tier_memory);
     if (ret != 0) {
         goto builder_delete;
     }
 
     memtier_builder_delete(builder);
-    return tier_kind;
+    return tier_memory;
 
 builder_delete:
     memtier_builder_delete(builder);
@@ -309,8 +309,8 @@ builder_delete:
     return NULL;
 }
 
-void ctl_destroy_kind(struct memtier_kind *kind)
+void ctl_destroy_tier_memory(struct memtier_memory *memory)
 {
     ctl_destroy_fs_dax_reg();
-    memtier_delete_kind(kind);
+    memtier_delete_memtier_memory(memory);
 }
