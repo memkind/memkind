@@ -54,6 +54,11 @@ struct memtier_kind {
 
 MEMKIND_ATOMIC size_t kind_alloc_size[MEMKIND_MAX_KIND];
 
+void memtier_reset_size(unsigned id)
+{
+    kind_alloc_size[id] = 0;
+}
+
 static memkind_t
 memtier_policy_static_threshold_get_kind(struct memtier_kind *tier_kind)
 {
