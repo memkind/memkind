@@ -132,7 +132,7 @@ MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
     return 0;
 }
 
-static inline memkind_t get_tier(struct memtier_memory *memory)
+static inline memkind_t get_kind(struct memtier_memory *memory)
 {
 
     if (memory->policy == MEMTIER_POLICY_STATIC_THRESHOLD) {
@@ -194,10 +194,10 @@ MEMKIND_EXPORT void memtier_delete_memtier_memory(struct memtier_memory *memory)
 
 MEMKIND_EXPORT void *memtier_malloc(struct memtier_memory *memory, size_t size)
 {
-    return memtier_tier_malloc(get_tier(memory), size);
+    return memtier_kind_malloc(get_kind(memory), size);
 }
 
-MEMKIND_EXPORT void *memtier_tier_malloc(memkind_t kind, size_t size)
+MEMKIND_EXPORT void *memtier_kind_malloc(memkind_t kind, size_t size)
 {
     void *ptr = memkind_malloc(kind, size);
     memkind_atomic_increment(kind_alloc_size[kind->partition],
@@ -208,10 +208,10 @@ MEMKIND_EXPORT void *memtier_tier_malloc(memkind_t kind, size_t size)
 MEMKIND_EXPORT void *memtier_calloc(struct memtier_memory *memory, size_t num,
                                     size_t size)
 {
-    return memtier_tier_calloc(get_tier(memory), num, size);
+    return memtier_kind_calloc(get_kind(memory), num, size);
 }
 
-MEMKIND_EXPORT void *memtier_tier_calloc(memkind_t kind, size_t num,
+MEMKIND_EXPORT void *memtier_kind_calloc(memkind_t kind, size_t num,
                                          size_t size)
 {
     void *ptr = memkind_calloc(kind, num, size);
@@ -226,12 +226,12 @@ MEMKIND_EXPORT void *memtier_realloc(struct memtier_memory *memory, void *ptr,
     // reallocate inside same kind
     if (ptr) {
         struct memkind *kind = memkind_detect_kind(ptr);
-        return memtier_tier_realloc(kind, ptr, size);
+        return memtier_kind_realloc(kind, ptr, size);
     }
-    return memtier_tier_malloc(get_tier(memory), size);
+    return memtier_kind_malloc(get_kind(memory), size);
 }
 
-MEMKIND_EXPORT void *memtier_tier_realloc(memkind_t kind, void *ptr,
+MEMKIND_EXPORT void *memtier_kind_realloc(memkind_t kind, void *ptr,
                                           size_t size)
 {
     if (size == 0 && ptr != NULL) {
@@ -258,11 +258,11 @@ MEMKIND_EXPORT int memtier_posix_memalign(struct memtier_memory *memory,
                                           void **memptr, size_t alignment,
                                           size_t size)
 {
-    return memtier_tier_posix_memalign(get_tier(memory), memptr, alignment,
+    return memtier_kind_posix_memalign(get_kind(memory), memptr, alignment,
                                        size);
 }
 
-MEMKIND_EXPORT int memtier_tier_posix_memalign(memkind_t kind, void **memptr,
+MEMKIND_EXPORT int memtier_kind_posix_memalign(memkind_t kind, void **memptr,
                                                size_t alignment, size_t size)
 {
     int res = memkind_posix_memalign(kind, memptr, alignment, size);
@@ -286,7 +286,7 @@ MEMKIND_EXPORT void memtier_free(void *ptr)
     memkind_free(kind, ptr);
 }
 
-MEMKIND_EXPORT size_t memtier_tier_allocated_size(memkind_t kind)
+MEMKIND_EXPORT size_t memtier_kind_allocated_size(memkind_t kind)
 {
     return kind_alloc_size[kind->partition];
 }
