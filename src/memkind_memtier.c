@@ -90,9 +90,18 @@ MEMKIND_EXPORT void memtier_builder_delete(struct memtier_builder *builder)
 MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
                                             memkind_t kind, unsigned kind_ratio)
 {
+    int i;
+
     if (!kind) {
         log_err("Kind is empty.");
         return -1;
+    }
+
+    for (i = 0; i < builder->size; ++i) {
+        if (kind == builder->cfg[i].kind) {
+            log_err("Kind is already in builder.");
+            return -1;
+        }
     }
 
     struct memtier_tier_cfg *cfg =
