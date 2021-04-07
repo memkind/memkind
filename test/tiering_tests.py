@@ -52,24 +52,26 @@ class Helper(object):
         return False
 
     def get_ld_preload_cmd_output(self, config_env, log_level=None,
-                                  validate_retcode=True):
+                                  negative_test=False):
         log_level_env = self.log_prefix + "LOG_LEVEL=" + log_level \
             if log_level else ""
         command = " ".join([self.ld_preload_env, log_level_env,
                             config_env, self.bin_path])
         output, retcode = self.cmd.execute_cmd(command)
+        fail_msg = "Execution of: '" + command + \
+            "' returns: " + str(retcode) + "\noutput: " + output
 
-        if validate_retcode:
-            assert retcode == 0, \
-                "Test failed with error: \nExecution of: '" + command + \
-                "' returns: " + str(retcode) + "\noutput: " + output
+        if negative_test:
+            assert retcode != 0, fail_msg
+        else:
+            assert retcode == 0, fail_msg
         return output.splitlines()
 
     def get_default_cmd_output(self):
         output, retcode = self.cmd.execute_cmd(self.bin_path)
 
         assert retcode == 0, \
-            "Test failed with error: \nExecution of: '" + self.bin_path + \
+            "Execution of: '" + self.bin_path + \
             "' returns: " + str(retcode) + "\noutput: " + output
         return output.splitlines()
 
@@ -214,138 +216,76 @@ class Test_memkind_log(Helper):
 class Test_tiering_config_env(Helper):
 
     def test_no_config(self):
-        output = self.get_ld_preload_cmd_output('', validate_retcode=False)
-
-        assert self.log_error_prefix + \
-            "Missing MEMKIND_MEM_TIERING_CONFIG env var" in output, \
-            "Wrong message"
+        self.get_ld_preload_cmd_output('', negative_test=True)
 
     def test_empty_config(self):
-        output = self.get_ld_preload_cmd_output(
-            'MEMKIND_MEM_TIERING_CONFIG=""', validate_retcode=False)
-
-        assert self.log_error_prefix + \
-            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
-            "Wrong message"
+        self.get_ld_preload_cmd_output(
+            'MEMKIND_MEM_TIERING_CONFIG=""', negative_test=True)
 
     @pytest.mark.parametrize("ratio", ["1", "1000", "4294967295"])
     def test_DRAM_ratio(self, ratio):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio + "," +
             self.default_policy, log_level="2")
-
-        assert self.log_debug_prefix + "kind_name: " + \
-            self.kind_name_dict.get('DRAM') in output, "Wrong message"
-        assert self.log_debug_prefix + "ratio_value: " + ratio in output, \
-            "Wrong message"
-        assert self.log_debug_prefix + "policy: " + self.default_policy \
-            in output, "Wrong message"
 
     @pytest.mark.parametrize("policy", ["POLICY_STATIC_THRESHOLD"])
     def test_DRAM_policy(self, policy):
         ratio = "1"
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio + "," + policy,
             log_level="2")
-
-        assert self.log_debug_prefix + "kind_name: " + \
-            self.kind_name_dict.get('DRAM') in output, "Wrong message"
-        assert self.log_debug_prefix + "ratio_value: " + ratio in output, \
-            "Wrong message"
-        assert self.log_debug_prefix + "policy: " + policy in output, \
-            "Wrong message"
 
     @pytest.mark.parametrize("pmem_size", ["0", str(MEMKIND_PMEM_MIN_SIZE),
                                            "18446744073709551615"])
     def test_FSDAX(self, pmem_size):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" +
             pmem_size + ":1," + self.default_policy,
             log_level="2")
-
-        assert self.log_debug_prefix + "kind_name: " + \
-            self.kind_name_dict.get('FS_DAX') in output, "Wrong message"
-        assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
-            "Wrong message"
-        assert self.log_debug_prefix + "pmem_size: " + pmem_size in output, \
-            "Wrong message"
-        assert self.log_debug_prefix + "ratio_value: 1" in output, \
-            "Wrong message"
-        assert self.log_debug_prefix + "policy: " + self.default_policy \
-            in output, "Wrong message"
 
     @pytest.mark.parametrize("pmem_size",
                              ["1073741824", "1048576K", "1024M", "1G"])
     def test_FSDAX_pmem_size_with_suffix(self, pmem_size):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" +
             pmem_size + ":1," + self.default_policy,
             log_level="2")
-
-        assert self.log_debug_prefix + "kind_name: " + \
-            self.kind_name_dict.get('FS_DAX') in output, "Wrong message"
-        assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
-            "Wrong message"
-        assert self.log_debug_prefix + "pmem_size: " + \
-            Helper.bytes_from_str("1G") in output, "Wrong message"
-        assert self.log_debug_prefix + "ratio_value: 1" in output, \
-            "Wrong message"
-        assert self.log_debug_prefix + "policy: " + self.default_policy \
-            in output, "Wrong message"
 
     @pytest.mark.parametrize("pmem_size",
                              ["-1", "-4294967295", "-18446744073709551615",
                               "18446744073709551616"])
     def test_FSDAX_pmem_size_outside_limits(self, pmem_size):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
             self.default_policy,
-            validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Failed to parse pmem size: " + pmem_size, "Wrong message"
+            negative_test=True)
 
     @pytest.mark.parametrize("pmem_size",
                              ["1", str(MEMKIND_PMEM_MIN_SIZE - 1)])
     def test_FSDAX_pmem_size_too_small(self, pmem_size):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
-            self.default_policy, validate_retcode=False)
-
-        assert self.log_error_prefix + \
-            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
-            "Wrong message"
+            self.default_policy, negative_test=True)
 
     @pytest.mark.parametrize("pmem_size",
                              ["18446744073709551615K", "18446744073709551615M",
                               "18446744073709551615G"])
     def test_FSDAX_pmem_size_with_suffix_too_big(self, pmem_size):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
             self.default_policy,
-            validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Provided pmem size is too big: 18446744073709551615", \
-            "Wrong message"
+            negative_test=True)
 
     def test_FSDAX_no_size(self):
-        output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX", validate_retcode=False)
-
-        assert self.log_error_prefix + \
-            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
-            "Wrong message"
+        self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX", negative_test=True)
 
     @pytest.mark.parametrize("pmem_size", ["as", "10K1", "M", "M2", "10KM"])
     def test_FSDAX_wrong_size(self, pmem_size):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
             self.default_policy,
-            validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Failed to parse pmem size: " + pmem_size, "Wrong message"
+            negative_test=True)
 
     def test_FSDAX_check_only_fs_dax(self):
         pmem_path = os.environ.get('PMEM_PATH')
@@ -356,150 +296,81 @@ class Test_tiering_config_env(Helper):
             pmem_path + ":1G:1," + self.default_policy, log_level="2")
 
     def test_FSDAX_negative_ratio(self):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:-1," +
             self.default_policy,
-            validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Unsupported ratio: -1", "Wrong message"
+            negative_test=True)
 
     def test_FSDAX_wrong_ratio(self):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:a," +
             self.default_policy,
-            validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Unsupported ratio: a", "Wrong message"
+            negative_test=True)
 
     def test_class_not_defined(self):
-        output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=2", validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Too low number of queries in configuration string: 2", \
-            "Wrong message"
+        self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=2", negative_test=True)
 
     def test_bad_ratio(self):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:A," +
-            self.default_policy, validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Unsupported ratio: A", "Wrong message"
+            self.default_policy, negative_test=True)
 
     def test_no_ratio(self):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM," +
-            self.default_policy, validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Ratio not provided", "Wrong message"
+            self.default_policy, negative_test=True)
 
     def test_bad_class(self):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=a1b2:10," +
-            self.default_policy, validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Unsupported kind: a1b2", "Wrong message"
+            self.default_policy, negative_test=True)
 
     def test_negative_ratio(self):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:-1," +
-            self.default_policy, validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Unsupported ratio: -1", "Wrong message"
+            self.default_policy, negative_test=True)
 
     @pytest.mark.parametrize("policy_str",
                              ["ABC", "5252", "1AB2C3", "#@%srfs"])
     def test_negative_unsupported_policy(self, policy_str):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + policy_str,
-            validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Unknown policy: " + policy_str, "Wrong message"
+            negative_test=True)
 
     def test_negative_multiple_policies(self):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy +
-            "," + self.default_policy, validate_retcode=False)
-
-        # NOTE: only last query is treated as a policy
-        assert output[0] == self.log_error_prefix + \
-            "Unsupported kind: " + self.default_policy, "Wrong message"
+            "," + self.default_policy, negative_test=True)
 
     def test_negative_policy_not_last(self):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=" + self.default_policy + ",DRAM:1",
-            validate_retcode=False)
-
-        # NOTE: only last query is treated as a policy
-        assert output[0] == self.log_error_prefix + \
-            "Unsupported kind: " + self.default_policy, "Wrong message"
+            negative_test=True)
 
     @pytest.mark.parametrize("config_str", ["", ",", ",,,"])
     def test_negative_config_str_invalid(self, config_str):
-        output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=" + config_str, validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "No valid query found in: " + config_str, "Wrong message"
+        self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=" + config_str, negative_test=True)
 
     @pytest.mark.parametrize("query_str", [":", ":::"])
     def test_negative_query_str_invalid(self, query_str):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=" + query_str + "," +
-            self.default_policy, validate_retcode=False)
-
-        assert output[0] == self.log_error_prefix + \
-            "Kind name string not found in: " + query_str, "Wrong message"
+            self.default_policy, negative_test=True)
 
     @pytest.mark.parametrize("tier_str",
                              ["DRAM:1", "FS_DAX:/tmp/:100M:1",
                               "DRAM:1,FS_DAX:/tmp/:100M:1"])
     def test_negative_no_policy(self, tier_str):
-        output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=" + tier_str, validate_retcode=False)
-        assert self.log_error_prefix + \
-            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
-            "Wrong message"
+        self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=" + tier_str, negative_test=True)
 
     def test_multiple_tiers(self):
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:1,FS_DAX:/tmp/:100M:4,"
             "FS_DAX:/mnt:150M:8," +
             self.default_policy, log_level="2")
-
-        assert self.log_debug_prefix + "kind_name: " + \
-            self.kind_name_dict.get('DRAM') in output, "Wrong message"
-        assert self.log_debug_prefix + "ratio_value: 1" in output, \
-            "Wrong message"
-
-        assert self.log_debug_prefix + "kind_name: " + \
-            self.kind_name_dict.get("FS_DAX") in output, \
-            "Wrong message"
-        output.remove(self.log_debug_prefix + "kind_name: " +
-                      self.kind_name_dict.get("FS_DAX"))
-        assert self.log_debug_prefix + "pmem_path: /tmp/" in output, \
-            "Wrong message"
-        assert self.log_debug_prefix + "pmem_size: " + \
-            Helper.bytes_from_str("100M") in output, "Wrong message"
-        assert self.log_debug_prefix + "ratio_value: 4" in output, \
-            "Wrong message"
-
-        assert self.log_debug_prefix + "kind_name: " + \
-            self.kind_name_dict.get("FS_DAX") in output, \
-            "Wrong message"
-        assert self.log_debug_prefix + "pmem_path: /mnt" in output, \
-            "Wrong message"
-        assert self.log_debug_prefix + "pmem_size: " + \
-            Helper.bytes_from_str("150M") in output, "Wrong message"
-        assert self.log_debug_prefix + "ratio_value: 8" in output, \
-            "Wrong message"
 
     @pytest.mark.parametrize("wrong_tier",
                              ["non_existent:/mnt:150M:8",
@@ -511,11 +382,7 @@ class Test_tiering_config_env(Helper):
         assert os.access("/mnt", os.W_OK | os.X_OK), \
             "Write and execute permissions to the /mnt directory "
         "are required for this test"
-        output = self.get_ld_preload_cmd_output(
+        self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:1,FS_DAX:/tmp/:100M:4," +
             wrong_tier + "," + self.default_policy, log_level="2",
-            validate_retcode=False)
-
-        assert self.log_error_prefix + \
-            "Error with parsing MEMKIND_MEM_TIERING_CONFIG" in output, \
-            "Wrong message"
+            negative_test=True)
