@@ -175,17 +175,17 @@ TEST_F(MemkindMemtierTest, test_tier_free_nullptr)
 TEST_F(MemkindMemtierMemoryTest, test_tier_builder_allocation_test_success)
 {
     const size_t size = 512;
-    void *ptr = memtier_kind_malloc(m_tier_memory, size);
+    void *ptr = memtier_malloc(m_tier_memory, size);
     ASSERT_NE(nullptr, ptr);
     memtier_free(ptr);
-    ptr = memtier_kind_calloc(m_tier_memory, size, size);
+    ptr = memtier_calloc(m_tier_memory, size, size);
     ASSERT_NE(nullptr, ptr);
     memkind_t kind = memkind_detect_kind(ptr);
-    void *new_ptr = memtier_kind_realloc(m_tier_memory, ptr, size);
+    void *new_ptr = memtier_realloc(m_tier_memory, ptr, size);
     ASSERT_NE(nullptr, new_ptr);
     ASSERT_EQ(kind, memkind_detect_kind(ptr));
     memtier_free(new_ptr);
-    int err = memtier_kind_posix_memalign(m_tier_memory, &ptr, 64, 32);
+    int err = memtier_posix_memalign(m_tier_memory, &ptr, 64, 32);
     ASSERT_EQ(0, err);
     memtier_free(ptr);
 }
@@ -199,7 +199,7 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_check_size_empty_tier)
 TEST_F(MemkindMemtierMemoryTest, test_tier_memory_check_size_nullptr)
 {
     const size_t test_size = 512;
-    void *ptr = memtier_kind_malloc(m_tier_memory, test_size);
+    void *ptr = memtier_malloc(m_tier_memory, test_size);
     ASSERT_NE(ptr, nullptr);
     size_t ptr_usable_size = memtier_usable_size(ptr);
 
@@ -208,7 +208,7 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_memory_check_size_nullptr)
     memtier_free(nullptr);
     ASSERT_EQ(ptr_usable_size, allocation_sum());
 
-    void *no_ptr = memtier_kind_malloc(m_tier_memory, SIZE_MAX);
+    void *no_ptr = memtier_malloc(m_tier_memory, SIZE_MAX);
     ASSERT_EQ(no_ptr, nullptr);
     ASSERT_EQ(ptr_usable_size, allocation_sum());
 
@@ -238,12 +238,12 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_check_size_malloc)
     const size_t alloc_sum = (size_default + size_regular) * alloc_no;
 
     for (i = 0; i < alloc_no; ++i) {
-        void *ptr = memtier_kind_malloc(m_tier_memory, size_default);
+        void *ptr = memtier_malloc(m_tier_memory, size_default);
         ASSERT_NE(ptr, nullptr);
         kind_vec.push_back(ptr);
         alloc_counter += memtier_usable_size(ptr);
 
-        ptr = memtier_kind_malloc(m_tier_memory, size_regular);
+        ptr = memtier_malloc(m_tier_memory, size_regular);
         ASSERT_NE(ptr, nullptr);
         kind_vec.push_back(ptr);
         alloc_counter += memtier_usable_size(ptr);
@@ -302,12 +302,12 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_check_size_calloc)
     const size_t alloc_sum = (size_default + size_regular) * alloc_no * num;
 
     for (i = 0; i < alloc_no; ++i) {
-        void *ptr = memtier_kind_calloc(m_tier_memory, num, size_default);
+        void *ptr = memtier_calloc(m_tier_memory, num, size_default);
         ASSERT_NE(ptr, nullptr);
         kind_vec.push_back(ptr);
         alloc_counter += memtier_usable_size(ptr);
 
-        ptr = memtier_kind_calloc(m_tier_memory, num, size_regular);
+        ptr = memtier_calloc(m_tier_memory, num, size_regular);
         ASSERT_NE(ptr, nullptr);
         kind_vec.push_back(ptr);
         alloc_counter += memtier_usable_size(ptr);
@@ -317,7 +317,7 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_check_size_calloc)
     ASSERT_EQ(alloc_counter, allocation_sum());
 
     for (auto const &ptr : kind_vec) {
-        void *new_ptr = memtier_kind_realloc(m_tier_memory, ptr, 0);
+        void *new_ptr = memtier_realloc(m_tier_memory, ptr, 0);
         ASSERT_EQ(new_ptr, nullptr);
     }
 
@@ -373,12 +373,12 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_kind_check_size_realloc_kind)
     size_t def_sum, reg_sum;
 
     for (i = 0; i < alloc_no; ++i) {
-        void *ptr = memtier_kind_realloc(m_tier_memory, nullptr, size_default);
+        void *ptr = memtier_realloc(m_tier_memory, nullptr, size_default);
         ASSERT_NE(ptr, nullptr);
         kind_vec.push_back(ptr);
         alloc_counter += memtier_usable_size(ptr);
 
-        ptr = memtier_kind_realloc(m_tier_memory, nullptr, size_regular);
+        ptr = memtier_realloc(m_tier_memory, nullptr, size_regular);
         ASSERT_NE(ptr, nullptr);
         kind_vec.push_back(ptr);
         alloc_counter += memtier_usable_size(ptr);
@@ -390,7 +390,7 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_kind_check_size_realloc_kind)
     for (i = 0; i < kind_vec.size(); ++i) {
         alloc_counter -= memtier_usable_size(kind_vec[i]);
         void *new_ptr =
-            memtier_kind_realloc(m_tier_memory, kind_vec[i], new_less_size);
+            memtier_realloc(m_tier_memory, kind_vec[i], new_less_size);
         ASSERT_NE(new_ptr, nullptr);
         alloc_counter += memtier_usable_size(new_ptr);
         kind_vec[i] = new_ptr;
@@ -403,7 +403,7 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_kind_check_size_realloc_kind)
     for (i = 0; i < kind_vec.size(); ++i) {
         alloc_counter -= memtier_usable_size(kind_vec[i]);
         void *new_ptr =
-            memtier_kind_realloc(m_tier_memory, kind_vec[i], new_bigger_size);
+            memtier_realloc(m_tier_memory, kind_vec[i], new_bigger_size);
         ASSERT_NE(new_ptr, nullptr);
         alloc_counter += memtier_usable_size(new_ptr);
         kind_vec[i] = new_ptr;
@@ -493,14 +493,14 @@ TEST_F(MemkindMemtierMemoryTest,
     const size_t alloc_sum = (size_default + size_regular) * alloc_no;
 
     for (i = 0; i < alloc_no; ++i) {
-        int res = memtier_kind_posix_memalign(m_tier_memory, &ptr, alignment,
-                                              size_default);
+        int res = memtier_posix_memalign(m_tier_memory, &ptr, alignment,
+                                         size_default);
         ASSERT_EQ(0, res);
         kind_vec.push_back(ptr);
         alloc_counter += memtier_usable_size(ptr);
 
-        res = memtier_kind_posix_memalign(m_tier_memory, &ptr, alignment,
-                                          size_regular);
+        res = memtier_posix_memalign(m_tier_memory, &ptr, alignment,
+                                     size_regular);
         ASSERT_EQ(0, res);
         kind_vec.push_back(ptr);
         alloc_counter += memtier_usable_size(ptr);
@@ -559,7 +559,7 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_memory_thread_safety_calc_size)
     for (size_t i = 0; i < num_threads; ++i) {
         thds.push_back(std::thread([&]() {
             for (size_t j = 0; j < iteration_count; ++j) {
-                void *ptr = memtier_kind_malloc(m_tier_memory, alloc_size);
+                void *ptr = memtier_malloc(m_tier_memory, alloc_size);
                 pthread_mutex_lock(&mutex);
                 alloc_vec.push_back(ptr);
                 pthread_mutex_unlock(&mutex);
@@ -597,83 +597,83 @@ TEST_F(MemkindMemtierMemoryTest, test_ratio_basic)
 {
     std::vector<void *> allocs;
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 16));
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 16));
+    allocs.push_back(memtier_malloc(m_tier_memory, 16));
+    allocs.push_back(memtier_malloc(m_tier_memory, 16));
     // actual ratio 1:1, desired 1:4
     ASSERT_EQ(16ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(16ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 16));
+    allocs.push_back(memtier_malloc(m_tier_memory, 16));
     // actual ratio 1:2, desired 1:4
     ASSERT_EQ(16ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(32ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 16));
+    allocs.push_back(memtier_malloc(m_tier_memory, 16));
     // actual ratio 1:3, desired 1:4
     ASSERT_EQ(16ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(48ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 8));
+    allocs.push_back(memtier_malloc(m_tier_memory, 8));
     // actual ratio 1:3.5, desired 1:4
     ASSERT_EQ(16ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(56ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 16));
+    allocs.push_back(memtier_malloc(m_tier_memory, 16));
     // actual ratio 1:4.5, desired 1:4
     ASSERT_EQ(16ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(72ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 16));
+    allocs.push_back(memtier_malloc(m_tier_memory, 16));
     // actual ratio 1:2.25, desired 1:4
     ASSERT_EQ(32ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(72ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 36));
+    allocs.push_back(memtier_malloc(m_tier_memory, 36));
     // actual ratio 1:3.75, desired 1:4
     ASSERT_EQ(32ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(120ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 8));
+    allocs.push_back(memtier_malloc(m_tier_memory, 8));
     // actual ratio 1:4, desired 1:4
     ASSERT_EQ(32ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(128ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 16));
+    allocs.push_back(memtier_malloc(m_tier_memory, 16));
     // actual ratio 1:2.6, desired 1:4
     ASSERT_EQ(48ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(128ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 128));
+    allocs.push_back(memtier_malloc(m_tier_memory, 128));
     // actual ratio 1:5.3, desired 1:4
     ASSERT_EQ(48ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(256ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 256));
+    allocs.push_back(memtier_malloc(m_tier_memory, 256));
     // actual ratio 1:0.842, desired 1:4
     ASSERT_EQ(304ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(256ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 512));
+    allocs.push_back(memtier_malloc(m_tier_memory, 512));
     // actual ratio 1:2.526, desired 1:4
     ASSERT_EQ(304ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(768ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 1024));
+    allocs.push_back(memtier_malloc(m_tier_memory, 1024));
     // actual ratio 1:5.894, desired 1:4
     ASSERT_EQ(304ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(1792ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 160));
+    allocs.push_back(memtier_malloc(m_tier_memory, 160));
     // actual ratio 1:3.862, desired 1:4
     ASSERT_EQ(464ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(1792ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 256));
+    allocs.push_back(memtier_malloc(m_tier_memory, 256));
     // actual ratio 1:4.413, desired 1:4
     ASSERT_EQ(464ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(2048ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
 
-    allocs.push_back(memtier_kind_malloc(m_tier_memory, 48));
+    allocs.push_back(memtier_malloc(m_tier_memory, 48));
     // actual ratio 1:4, desired 1:4
     ASSERT_EQ(512ULL, memtier_tier_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(2048ULL, memtier_tier_allocated_size(MEMKIND_REGULAR));
@@ -700,7 +700,7 @@ TEST_F(MemkindMemtierMemoryTest, test_ratio_malloc_only)
             memtier_tier_allocated_size(MEMKIND_DEFAULT);
 
         size_t size = sizes[i % sizes_num];
-        void *ptr = memtier_kind_malloc(m_tier_memory, size);
+        void *ptr = memtier_malloc(m_tier_memory, size);
         ASSERT_NE(nullptr, ptr);
         allocs.push_back(ptr);
 
@@ -744,7 +744,7 @@ TEST_F(MemkindMemtierMemoryTest, test_ratio_malloc_free)
         size_t size = sizes[i % sizes_num];
         int op = operations[i % operations_num];
         if (op == 1) {
-            void *ptr = memtier_kind_malloc(m_tier_memory, size);
+            void *ptr = memtier_malloc(m_tier_memory, size);
             ASSERT_NE(nullptr, ptr);
             allocs.push_back(ptr);
         } else {
@@ -788,7 +788,7 @@ TEST_F(MemkindMemtier3KindsTest, test_ratio_malloc_only)
             memtier_tier_allocated_size(MEMKIND_DEFAULT);
 
         size_t size = sizes[i % sizes_num];
-        void *ptr = memtier_kind_malloc(m_tier_memory, size);
+        void *ptr = memtier_malloc(m_tier_memory, size);
         ASSERT_NE(nullptr, ptr);
         allocs.push_back(ptr);
 
@@ -852,7 +852,7 @@ TEST_F(MemkindMemtier3KindsTest, test_ratio_malloc_free)
         size_t size = sizes[i % sizes_num];
         int op = operations[i % operations_num];
         if (op == 1) {
-            void *ptr = memtier_kind_malloc(m_tier_memory, size);
+            void *ptr = memtier_malloc(m_tier_memory, size);
             ASSERT_NE(nullptr, ptr);
             allocs.push_back(ptr);
         } else if (op == 2) {

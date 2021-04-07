@@ -96,7 +96,7 @@ void memtier_delete_memtier_memory(struct memtier_memory *memory);
 /// \param size number of bytes to allocate
 /// \return Pointer to the allocated memory
 ///
-void *memtier_kind_malloc(struct memtier_memory *memory, size_t size);
+void *memtier_malloc(struct memtier_memory *memory, size_t size);
 
 ///
 /// \brief Allocates size bytes of uninitialized storage of the specified
@@ -117,8 +117,7 @@ void *memtier_tier_malloc(memkind_t kind, size_t size);
 /// \param size specified size of each element
 /// \return Pointer to the allocated memory
 ///
-void *memtier_kind_calloc(struct memtier_memory *memory, size_t num,
-                          size_t size);
+void *memtier_calloc(struct memtier_memory *memory, size_t num, size_t size);
 
 ///
 /// \brief Allocates memory of the specified memtier tier for an array of num
@@ -140,8 +139,7 @@ void *memtier_tier_calloc(memkind_t kind, size_t num, size_t size);
 /// \param size new size for the memory block in bytes
 /// \return Pointer to the allocated memory
 ///
-void *memtier_kind_realloc(struct memtier_memory *memory, void *ptr,
-                           size_t size);
+void *memtier_realloc(struct memtier_memory *memory, void *ptr, size_t size);
 
 ///
 /// \brief Reallocates memory of the specified memtier tier
@@ -166,8 +164,8 @@ void *memtier_tier_realloc(memkind_t kind, void *ptr, size_t size);
 /// \return operation status, 0 on success, EINVAL or
 ///         ENOMEM on failure
 ///
-int memtier_kind_posix_memalign(struct memtier_memory *memory, void **memptr,
-                                size_t alignment, size_t size);
+int memtier_posix_memalign(struct memtier_memory *memory, void **memptr,
+                           size_t alignment, size_t size);
 
 ///
 /// \brief Allocates size bytes of the specified memtier tier and places the

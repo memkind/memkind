@@ -26,7 +26,7 @@ MEMTIER_EXPORT void *malloc(size_t size)
     void *ret = NULL;
 
     if (MEMTIER_LIKELY(current_memory)) {
-        ret = memtier_kind_malloc(current_memory, size);
+        ret = memtier_malloc(current_memory, size);
     } else if (destructed == 0) {
         ret = memkind_malloc(MEMKIND_DEFAULT, size);
     }
@@ -42,7 +42,7 @@ MEMTIER_EXPORT void *calloc(size_t num, size_t size)
     void *ret = NULL;
 
     if (MEMTIER_LIKELY(current_memory)) {
-        ret = memtier_kind_calloc(current_memory, num, size);
+        ret = memtier_calloc(current_memory, num, size);
     } else if (destructed == 0) {
         ret = memkind_calloc(MEMKIND_DEFAULT, num, size);
     }
@@ -56,7 +56,7 @@ MEMTIER_EXPORT void *realloc(void *ptr, size_t size)
     void *ret = NULL;
 
     if (MEMTIER_LIKELY(current_memory)) {
-        ret = memtier_kind_realloc(current_memory, ptr, size);
+        ret = memtier_realloc(current_memory, ptr, size);
     } else if (destructed == 0) {
         ret = memkind_realloc(MEMKIND_DEFAULT, ptr, size);
     }
@@ -71,7 +71,7 @@ MEMTIER_EXPORT int posix_memalign(void **memptr, size_t alignment, size_t size)
     int ret = 0;
 
     if (MEMTIER_LIKELY(current_memory)) {
-        ret = memtier_kind_posix_memalign(current_memory, memptr, alignment,
+        ret = memtier_posix_memalign(current_memory, memptr, alignment,
                                           size);
     } else if (destructed == 0) {
         ret = memkind_posix_memalign(MEMKIND_DEFAULT, memptr, alignment,
