@@ -269,37 +269,37 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
         ret = ctl_parse_query(qbuf, &kind, &ratio);
         if (ret != 0) {
             log_err("Failed to parse query: %s", qbuf);
-            goto builder_delete;
+            goto cleanup_after_failure;
         }
 
         qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
 
         ret = memtier_builder_add_tier(builder, kind, ratio);
         if (ret != 0) {
-            goto builder_delete;
+            goto cleanup_after_failure;
         }
     }
 
     ret = ctl_parse_policy(qbuf, &policy);
     if (ret != 0) {
         log_err("Failed to parse policy: %s", qbuf);
-        goto builder_delete;
+        goto cleanup_after_failure;
     }
 
     ret = memtier_builder_set_policy(builder, policy);
     if (ret != 0) {
-        goto builder_delete;
+        goto cleanup_after_failure;
     }
 
     ret = memtier_builder_construct_memtier_memory(builder, &tier_memory);
     if (ret != 0) {
-        goto builder_delete;
+        goto cleanup_after_failure;
     }
 
     memtier_builder_delete(builder);
     return tier_memory;
 
-builder_delete:
+cleanup_after_failure:
     memtier_builder_delete(builder);
     ctl_destroy_fs_dax_reg();
 
