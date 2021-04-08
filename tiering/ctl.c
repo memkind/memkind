@@ -271,9 +271,6 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
             log_err("Failed to parse query: %s", qbuf);
             goto builder_delete;
         }
-        if (kind == NULL) {
-            goto builder_delete;
-        }
 
         qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
 
