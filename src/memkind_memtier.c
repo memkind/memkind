@@ -52,7 +52,7 @@ struct memtier_memory {
     struct memtier_tier_cfg *cfg; // Memory Tier configuration
 };
 
-MEMKIND_ATOMIC size_t kind_alloc_size[MEMKIND_MAX_KIND];
+static MEMKIND_ATOMIC size_t kind_alloc_size[MEMKIND_MAX_KIND];
 
 void memtier_reset_size(unsigned id)
 {
