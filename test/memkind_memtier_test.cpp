@@ -45,8 +45,8 @@ protected:
         res = memtier_builder_set_policy(builder,
                                          MEMTIER_POLICY_STATIC_THRESHOLD);
         ASSERT_EQ(0, res);
-        res = memtier_builder_construct_memtier_memory(builder, &m_tier_memory);
-        ASSERT_EQ(0, res);
+        m_tier_memory = memtier_builder_construct_memtier_memory(builder);
+        ASSERT_NE(nullptr, m_tier_memory);
         memtier_builder_delete(builder);
     }
 
@@ -89,8 +89,8 @@ protected:
         res = memtier_builder_set_policy(builder,
                                          MEMTIER_POLICY_STATIC_THRESHOLD);
         ASSERT_EQ(0, res);
-        res = memtier_builder_construct_memtier_memory(builder, &m_tier_memory);
-        ASSERT_EQ(0, res);
+        m_tier_memory = memtier_builder_construct_memtier_memory(builder);
+        ASSERT_NE(nullptr, m_tier_memory);
         memtier_builder_delete(builder);
     }
 
@@ -148,8 +148,8 @@ TEST_F(MemkindMemtierTest, test_tier_construct_failure_zero_tiers)
     int res =
         memtier_builder_set_policy(builder, MEMTIER_POLICY_STATIC_THRESHOLD);
     ASSERT_EQ(0, res);
-    res = memtier_builder_construct_memtier_memory(builder, &tier_kind);
-    ASSERT_NE(0, res);
+    tier_kind = memtier_builder_construct_memtier_memory(builder);
+    ASSERT_EQ(nullptr, tier_kind);
     memtier_builder_delete(builder);
 }
 

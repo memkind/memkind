@@ -74,12 +74,10 @@ int memtier_builder_set_policy(struct memtier_builder *builder,
 /// \brief Construct a memtier memory
 /// \note STANDARD API
 /// \param builder memtier builder
-/// \param memory pointer to memtier memory which will be created
-/// \return Operation status, 0 on success, other values on
-/// failure
+/// \return Pointer to constructed memtier memory object
 ///
-int memtier_builder_construct_memtier_memory(struct memtier_builder *builder,
-                                             struct memtier_memory **memory);
+struct memtier_memory *
+memtier_builder_construct_memtier_memory(struct memtier_builder *builder);
 
 ///
 /// \brief Delete memtier memory
