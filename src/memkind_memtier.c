@@ -156,47 +156,47 @@ static inline memkind_t get_kind(struct memtier_memory *memory)
     return NULL;
 }
 
-MEMKIND_EXPORT int
-memtier_builder_construct_memtier_memory(struct memtier_builder *builder,
-                                         struct memtier_memory **memory)
+MEMKIND_EXPORT struct memtier_memory *
+memtier_builder_construct_memtier_memory(struct memtier_builder *builder)
 {
     unsigned i;
+    struct memtier_memory *memory = NULL;
+
     if (builder->size == 0) {
         log_err("No tier in builder.");
-        return -1;
+        return NULL;
     }
 
-    *memory = jemk_malloc(sizeof(struct memtier_memory));
-    if (!*memory) {
+    memory = jemk_malloc(sizeof(struct memtier_memory));
+    if (!memory) {
         log_err("malloc() failed.");
-        return -1;
+        return NULL;
     }
 
     // perform deep copy but store normalized (to kind[0]) ratio instead of
     // original
-    (*memory)->cfg =
-        jemk_calloc(builder->size, sizeof(struct memtier_tier_cfg));
-    if (!(*memory)->cfg) {
+    (memory)->cfg = jemk_calloc(builder->size, sizeof(struct memtier_tier_cfg));
+    if (!(memory)->cfg) {
         log_err("calloc() failed.");
         goto failure_calloc;
     }
 
     for (i = 1; i < builder->size; ++i) {
-        (*memory)->cfg[i].kind = builder->cfg[i].kind;
-        (*memory)->cfg[i].kind_ratio =
+        (memory)->cfg[i].kind = builder->cfg[i].kind;
+        (memory)->cfg[i].kind_ratio =
             builder->cfg[0].kind_ratio / builder->cfg[i].kind_ratio;
     }
-    (*memory)->cfg[0].kind = builder->cfg[0].kind;
-    (*memory)->cfg[0].kind_ratio = 1.0;
+    (memory)->cfg[0].kind = builder->cfg[0].kind;
+    (memory)->cfg[0].kind_ratio = 1.0;
 
-    (*memory)->size = builder->size;
-    (*memory)->policy = builder->policy;
-    return 0;
+    (memory)->size = builder->size;
+    (memory)->policy = builder->policy;
+    return memory;
 
 failure_calloc:
-    jemk_free(*memory);
+    jemk_free(memory);
 
-    return -1;
+    return NULL;
 }
 
 MEMKIND_EXPORT void memtier_delete_memtier_memory(struct memtier_memory *memory)

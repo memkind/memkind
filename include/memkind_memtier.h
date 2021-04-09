@@ -78,8 +78,8 @@ int memtier_builder_set_policy(struct memtier_builder *builder,
 /// \return Operation status, 0 on success, other values on
 /// failure
 ///
-int memtier_builder_construct_memtier_memory(struct memtier_builder *builder,
-                                             struct memtier_memory **memory);
+struct memtier_memory *
+memtier_builder_construct_memtier_memory(struct memtier_builder *builder);
 
 ///
 /// \brief Delete memtier memory

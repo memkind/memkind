@@ -230,7 +230,7 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
 
 struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
 {
-    struct memtier_memory *tier_memory;
+    struct memtier_memory *tier_memory = NULL;
     memtier_policy_t policy = MEMTIER_POLICY_MAX_VALUE;
     unsigned i;
 
@@ -291,8 +291,8 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
         goto cleanup_after_failure;
     }
 
-    ret = memtier_builder_construct_memtier_memory(builder, &tier_memory);
-    if (ret != 0) {
+    tier_memory = memtier_builder_construct_memtier_memory(builder);
+    if (!tier_memory) {
         goto cleanup_after_failure;
     }
 
