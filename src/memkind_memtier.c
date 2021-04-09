@@ -21,16 +21,28 @@
     atomic_fetch_add_explicit(&counter, val, memory_order_relaxed)
 #define memkind_atomic_decrement(counter, val)                                 \
     atomic_fetch_sub_explicit(&counter, val, memory_order_relaxed)
+#define memkind_atomic_get(src, dest)                                          \
+    do {                                                                       \
+        dest = atomic_load_explicit(&src, memory_order_relaxed);               \
+    } while (0)
 #elif defined(MEMKIND_ATOMIC_BUILTINS_SUPPORT)
 #define memkind_atomic_increment(counter, val)                                 \
     __atomic_add_fetch(&counter, val, __ATOMIC_RELAXED)
 #define memkind_atomic_decrement(counter, val)                                 \
     __atomic_sub_fetch(&counter, val, __ATOMIC_RELAXED)
+#define memkind_atomic_get(src, dest)                                          \
+    do {                                                                       \
+        dest = __atomic_load_n(&src, __ATOMIC_RELAXED);                        \
+    } while (0)
 #elif defined(MEMKIND_ATOMIC_SYNC_SUPPORT)
 #define memkind_atomic_increment(counter, val)                                 \
     __sync_add_and_fetch(&counter, val)
 #define memkind_atomic_decrement(counter, val)                                 \
     __sync_sub_and_fetch(&counter, val)
+#define memkind_atomic_get(src, dest)                                          \
+    do {                                                                       \
+        dest = __sync_sub_and_fetch(&src, 0)                                   \
+    } while (0)
 #else
 #error "Missing atomic implementation."
 #endif
@@ -66,9 +78,10 @@ memtier_policy_static_threshold_get_kind(struct memtier_memory *memory)
 
     int i;
     int dest_kind = 0;
+
     for (i = 1; i < memory->size; ++i) {
-        if ((kind_alloc_size[cfg[i].kind->partition] * cfg[i].kind_ratio) <
-            kind_alloc_size[cfg[0].kind->partition]) {
+        if ((memtier_kind_allocated_size(cfg[i].kind) * cfg[i].kind_ratio) <
+            memtier_kind_allocated_size(cfg[0].kind)) {
             dest_kind = i;
         }
     }
@@ -288,5 +301,7 @@ MEMKIND_EXPORT void memtier_free(void *ptr)
 
 MEMKIND_EXPORT size_t memtier_kind_allocated_size(memkind_t kind)
 {
-    return kind_alloc_size[kind->partition];
+    size_t size;
+    memkind_atomic_get(kind_alloc_size[kind->partition], size);
+    return size;
 }
