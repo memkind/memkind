@@ -44,7 +44,7 @@ type. Value should be in range from 1 to
 .IP
 .BR
 policy - determines the algorithm used to distribute allocations between provided memory kinds. Currently only
-.I STATIC_THRESHOLD
+.I POLICY_STATIC_THRESHOLD
 policy is valid meaning that allocations are made in such a way that the ratio between memory kinds is static.
 .IP
 See
@@ -67,7 +67,7 @@ both libmemtier.so and libmemkind.so are included in
 Example usage of MEMKIND_MEM_TIERING_CONFIG environment variable where 20% of allocations will go to PMEM
 and 80% of allocations will go to DRAM:
 .IP
-.B MEMKIND_MEM_TIERING_CONFIG="FS_DAX:/tmp/:10G:1,DRAM:4,STATIC_THRESHOLD"
+.B MEMKIND_MEM_TIERING_CONFIG="FS_DAX:/tmp/:10G:1,DRAM:4,POLICY_STATIC_THRESHOLD"
 
 .SH "COPYRIGHT"
 Copyright (C) 2021 Intel Corporation. All rights reserved.
