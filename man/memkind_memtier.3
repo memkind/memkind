@@ -24,7 +24,7 @@ functionality is considered as stable API (STANDARD API).
 .br
 .BI "int memtier_builder_set_policy(struct memtier_builder " "*builder" ", memtier_policy_t " "policy" );
 .br
-.BI "int memtier_builder_construct_memtier_memory(struct memtier_builder " "*builder" ", struct memtier_memory " "**memory" );
+.BI "struct memtier_memory *memtier_builder_construct_memtier_memory(struct memtier_builder " "*builder" );
 .br
 .BI "void memtier_delete_memtier_memory(struct memtier_memory " "*memory" );
 .sp

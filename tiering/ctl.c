@@ -291,8 +291,8 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
         goto cleanup_after_failure;
     }
 
-    ret = memtier_builder_construct_memtier_memory(builder, &tier_memory);
-    if (ret != 0) {
+    tier_memory = memtier_builder_construct_memtier_memory(builder);
+    if (!tier_memory) {
         goto cleanup_after_failure;
     }
 
