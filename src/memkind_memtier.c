@@ -29,6 +29,8 @@
     do {                                                                       \
         dest = atomic_load_explicit(&src, memory_order_relaxed);               \
     } while (0)
+#define memkind_atomic_get_and_zeroing(src)                                    \
+    atomic_exchange_explicit(&src, 0, memory_order_relaxed)
 #elif defined(MEMKIND_ATOMIC_BUILTINS_SUPPORT)
 #define memkind_atomic_increment(counter, val)                                 \
     __atomic_fetch_add(&counter, val, __ATOMIC_RELAXED)
@@ -40,6 +42,8 @@
     do {                                                                       \
         dest = __atomic_load_n(&src, __ATOMIC_RELAXED);                        \
     } while (0)
+#define memkind_atomic_get_and_zeroing(src)                                    \
+    __atomic_exchange_n(&src, 0, __ATOMIC_RELAXED)
 #elif defined(MEMKIND_ATOMIC_SYNC_SUPPORT)
 #define memkind_atomic_increment(counter, val)                                 \
     __sync_fetch_and_add(&counter, val)
@@ -48,6 +52,10 @@
 #define memkind_atomic_get(src, dest)                                          \
     do {                                                                       \
         dest = __sync_sub_and_fetch(&src, 0);                                  \
+    } while (0)
+#define memkind_atomic_get_and_zeroing(src)                                    \
+    do {                                                                       \
+        dest = __sync_fetch_and_sub(&src, &src);                               \
     } while (0)
 #define memkind_atomic_set(counter, val)                                       \
     __atomic_store_n(&counter, val, __ATOMIC_RELAXED)
@@ -102,16 +110,19 @@ struct memtier_memory {
     unsigned thres_check_cnt; // Counter for doing thresholds check
 };
 
-#define THREAD_BUCKETS (256U)
+#define THREAD_BUCKETS  (256U)
+#define FLUSH_THRESHOLD (51200)
 
-static MEMKIND_ATOMIC size_t kind_alloc_size[MEMKIND_MAX_KIND][THREAD_BUCKETS];
+static MEMKIND_ATOMIC long long t_alloc_size[MEMKIND_MAX_KIND][THREAD_BUCKETS];
+static MEMKIND_ATOMIC size_t g_alloc_size[MEMKIND_MAX_KIND];
 
 void memtier_reset_size(unsigned kind_id)
 {
     unsigned bucket_id;
     for (bucket_id = 0; bucket_id < THREAD_BUCKETS; ++bucket_id) {
-        memkind_atomic_set(kind_alloc_size[kind_id][bucket_id], 0);
+        memkind_atomic_set(t_alloc_size[kind_id][bucket_id], 0);
     }
+    memkind_atomic_set(g_alloc_size[kind_id], 0);
 }
 
 // SplitMix64 hash
@@ -127,13 +138,23 @@ static inline unsigned t_hash_64(void)
 static inline void increment_alloc_size(unsigned kind_id, size_t size)
 {
     unsigned bucket_id = t_hash_64();
-    memkind_atomic_increment(kind_alloc_size[kind_id][bucket_id], size);
+    if ((memkind_atomic_increment(t_alloc_size[kind_id][bucket_id], size) +
+         size) > FLUSH_THRESHOLD) {
+        size_t size_f =
+            memkind_atomic_get_and_zeroing(t_alloc_size[kind_id][bucket_id]);
+        memkind_atomic_increment(g_alloc_size[kind_id], size_f);
+    }
 }
 
 static inline void decrement_alloc_size(unsigned kind_id, size_t size)
 {
     unsigned bucket_id = t_hash_64();
-    memkind_atomic_decrement(kind_alloc_size[kind_id][bucket_id], size);
+    if ((memkind_atomic_decrement(t_alloc_size[kind_id][bucket_id], size) -
+         size) < -FLUSH_THRESHOLD) {
+        long long size_f =
+            memkind_atomic_get_and_zeroing(t_alloc_size[kind_id][bucket_id]);
+        memkind_atomic_increment(g_alloc_size[kind_id], size_f);
+    }
 }
 
 static memkind_t
@@ -141,12 +162,15 @@ memtier_policy_static_threshold_get_kind(struct memtier_memory *memory)
 {
     struct memtier_tier_cfg *cfg = memory->cfg;
 
+    size_t size_0;
+    size_t size;
     int i;
     int dest_tier = 0;
 
     for (i = 1; i < memory->size; ++i) {
-        if ((memtier_kind_allocated_size(cfg[i].kind) * cfg[i].kind_ratio) <
-            memtier_kind_allocated_size(cfg[0].kind)) {
+        memkind_atomic_get(g_alloc_size[cfg[0].kind->partition], size_0);
+        memkind_atomic_get(g_alloc_size[cfg[i].kind->partition], size);
+        if ((size * cfg[i].kind_ratio) < size_0) {
             dest_tier = i;
         }
     }
@@ -178,6 +202,7 @@ memtier_policy_dynamic_threshold_update_config(struct memtier_memory *memory)
     struct memtier_tier_cfg *cfg = memory->cfg;
     struct memtier_threshold_cfg *thres = memory->thres;
     int i;
+    size_t prev_alloc_size, next_alloc_size;
 
     // do the ratio checks only every each THRESHOLD_CHECK_CNT
     if (--memory->thres_check_cnt > 0) {
@@ -188,8 +213,10 @@ memtier_policy_dynamic_threshold_update_config(struct memtier_memory *memory)
     // desired ratio between them is above TRIGGER level and if so, change
     // threshold by CHANGE_VAL
     for (i = 0; i < THRESHOLD_NUM(memory); ++i) {
-        size_t prev_alloc_size = memtier_kind_allocated_size(cfg[i].kind);
-        size_t next_alloc_size = memtier_kind_allocated_size(cfg[i + 1].kind);
+        memkind_atomic_get(g_alloc_size[cfg[i].kind->partition],
+                           prev_alloc_size);
+        memkind_atomic_get(g_alloc_size[cfg[i + 1].kind->partition],
+                           next_alloc_size);
 
         float current_ratio = -1;
         if (prev_alloc_size > 0) {
@@ -508,13 +535,17 @@ MEMKIND_EXPORT void memtier_free(void *ptr)
 
 MEMKIND_EXPORT size_t memtier_kind_allocated_size(memkind_t kind)
 {
-    size_t size_all = 0;
-    size_t size;
+    size_t size_ret;
+    long long size_all = 0;
+    long long size;
     unsigned bucket_id;
 
     for (bucket_id = 0; bucket_id < THREAD_BUCKETS; ++bucket_id) {
-        memkind_atomic_get(kind_alloc_size[kind->partition][bucket_id], size);
+        size = memkind_atomic_get_and_zeroing(
+            t_alloc_size[kind->partition][bucket_id]);
         size_all += size;
     }
-    return size_all;
+    size_ret =
+        memkind_atomic_increment(g_alloc_size[kind->partition], size_all);
+    return (size_ret + size_all);
 }
