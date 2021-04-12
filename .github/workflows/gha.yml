@@ -82,7 +82,7 @@ jobs:
       uses: py-actions/flake8@v1
       with:
         exclude: "./jemalloc"
-        ignore: "E501"
+        ignore: ["E501", "W503"]
 
   building:
     runs-on: ${{ matrix.os }}

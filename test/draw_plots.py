@@ -223,8 +223,8 @@ for size_values, size_index, size_display in zip(sizes_values,
                 ax = init_axis(fig, "%s time of %s sizes with %s ",
                                "threads (%s operations)"
                                % (operation, size_display, thread, iterations),
-                               None, 'size [kB]', size_index + (bar_width,)
-                               * len(size_index), size_values,
+                               None, 'size [kB]', size_index + (bar_width,) *
+                               len(size_index), size_values,
                                'time [ms]', None, None, None)
                 legend_data = []
                 # for each allocator (hbw, glibc, tbb, pmem)
@@ -289,8 +289,8 @@ for size_values, size_index, size_display in zip(sizes_values,
                 # add bar_width to each element of threads_index
                 ax = init_axis(fig, "%s time of %s kB (%s operations)"
                                % (operation, size, iterations), None,
-                               'threads', threads_index + (bar_width,)
-                               * len(threads_index), threads_values,
+                               'threads', threads_index + (bar_width,) *
+                               len(threads_index), threads_values,
                                'time [ms]', None, None,
                                None)
                 legend_data = []

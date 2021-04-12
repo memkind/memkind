@@ -52,7 +52,7 @@ class MemoryHostException(Exception):
     Exception raised for errors in case of insufficient memory on host.
     """
 
-    def __init__(self, total_memory: int, tpg_memory: int, tpg_name: str) -> None:
+    def __init__(self, total_memory:  int, tpg_memory: int, tpg_name: str) -> None:
         self.total_memory = total_memory
         self.tpg_memory = tpg_memory
         self.tpg = tpg_name

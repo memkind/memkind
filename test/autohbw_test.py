@@ -26,8 +26,8 @@ class Test_autohbw(object):
     def test_TC_MEMKIND_autohbw_malloc_and_free(self):
         """ This test executes ./autohbw_test_helper with LD_PRELOAD that is
             overriding malloc() and free() to equivalent autohbw functions"""
-        command = (self.test_prefix
-                   + self.cmd_helper.get_command_path(self.binary) + " malloc")
+        command = (self.test_prefix +
+                   self.cmd_helper.get_command_path(self.binary) + " malloc")
         print("Executing command: {0}".format(command))
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
         assert retcode == (0,
@@ -82,8 +82,8 @@ class Test_autohbw(object):
         """ This test executes ./autohbw_test_helper with LD_PRELOAD
             that is overriding posix_memalign() and free()
             to equivalent autohbw functions"""
-        command = (self.test_prefix
-                   + self.cmd_helper.get_command_path(self.binary)
+        command = (self.test_prefix +
+                   self.cmd_helper.get_command_path(self.binary)
                    + " posix_memalign")
         print("Executing command: {0}".format(command))
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
