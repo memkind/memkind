@@ -580,6 +580,9 @@ utils/docker/run_local.sh
 utils/docker/set_host_configuration.sh
 utils/memory_matrix/Makefile.mk
 utils/memory_matrix/memory_matrix.c
+utils/memtier_counter_bench/Makefile.mk
+utils/memtier_counter_bench/memtier_counter_bench.cpp
+utils/memtier_counter_bench/run_perf.sh
 utils/qemu/README.md
 utils/qemu/http/preseed.cfg
 utils/qemu/main.py
