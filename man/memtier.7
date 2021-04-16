@@ -45,7 +45,13 @@ type. Value should be in range from 1 to
 .BR
 policy - determines the algorithm used to distribute allocations between provided memory kinds. Currently only
 .I POLICY_STATIC_THRESHOLD
-policy is valid meaning that allocations are made in such a way that the ratio between memory kinds is static.
+and
+.I POLICY_DYNAMIC_THRESHOLD
+policies are valid. In
+.I POLICY_STATIC_THRESHOLD
+all allocations are made in such a way that the ratio between memory kinds is static. In
+.I POLICY_DYNAMIC_THRESHOLD
+the ratio between tiers is kept with a help of set of thresholds between kinds. TODO
 .IP
 See
 .I EXAMPLES

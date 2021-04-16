@@ -3,6 +3,7 @@
 
 #include <memkind_memtier.h>
 
+#include <random>
 #include <thread>
 
 #include "common.h"
@@ -100,6 +101,53 @@ protected:
     }
 };
 
+class MemkindMemtierThresholdTest: public ::testing::Test
+{
+protected:
+    struct memtier_memory *m_tier_memory;
+
+    const int MEMKIND_DEFAULT_ratio = 3;
+    const int MEMKIND_REGULAR_ratio = 1;
+    const int MEMKIND_HIGHEST_CAPACITY_ratio = 5;
+    size_t allocation_sum()
+    {
+        return memtier_kind_allocated_size(MEMKIND_DEFAULT) +
+            memtier_kind_allocated_size(MEMKIND_REGULAR) +
+            memtier_kind_allocated_size(MEMKIND_HIGHEST_CAPACITY);
+    }
+
+    void SetUp()
+    {
+        struct memtier_builder *builder = memtier_builder_new();
+        ASSERT_NE(nullptr, builder);
+
+        int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT,
+                                           MEMKIND_DEFAULT_ratio);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_add_tier(builder, MEMKIND_REGULAR,
+                                       MEMKIND_REGULAR_ratio);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_add_threshold_min_max(builder, 64, 16, 95);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_add_tier(builder, MEMKIND_HIGHEST_CAPACITY,
+                                       MEMKIND_HIGHEST_CAPACITY_ratio);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_add_threshold_min_max(builder, 512, 96, 4096);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_set_policy(builder,
+                                         MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+        ASSERT_EQ(0, res);
+        m_tier_memory = memtier_builder_construct_memtier_memory(builder);
+        ASSERT_NE(nullptr, m_tier_memory);
+        memtier_builder_delete(builder);
+    }
+
+    void TearDown()
+    {
+        memtier_delete_memtier_memory(m_tier_memory);
+    }
+};
+
 TEST_F(MemkindMemtierTest, test_tier_size_after_destroy)
 {
     const size_t size = 512;
@@ -170,6 +218,183 @@ TEST_F(MemkindMemtierTest, test_tier_free_nullptr)
     for (int i = 0; i < 512; i++) {
         memtier_free(nullptr);
     }
+}
+
+TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_two_kinds)
+{
+    struct memtier_memory *tier_kind = nullptr;
+    struct memtier_builder *builder = memtier_builder_new();
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_REGULAR, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold(builder, 64);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_set_policy(builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+    ASSERT_EQ(0, res);
+    tier_kind = memtier_builder_construct_memtier_memory(builder);
+    ASSERT_NE(nullptr, tier_kind);
+    memtier_builder_delete(builder);
+}
+
+TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_three_kinds)
+{
+    struct memtier_memory *tier_kind = nullptr;
+    struct memtier_builder *builder = memtier_builder_new();
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_REGULAR, 2);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_HIGHEST_CAPACITY, 3);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold(builder, 64);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold(builder, 128);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_set_policy(builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+    ASSERT_EQ(0, res);
+    tier_kind = memtier_builder_construct_memtier_memory(builder);
+    ASSERT_NE(nullptr, tier_kind);
+    memtier_builder_delete(builder);
+}
+
+TEST_F(MemkindMemtierTest,
+       test_tier_policy_dynamic_threshold_three_kinds_min_max)
+{
+    struct memtier_memory *tier_kind = nullptr;
+    struct memtier_builder *builder = memtier_builder_new();
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_REGULAR, 2);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_HIGHEST_CAPACITY, 3);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold_min_max(builder, 64, 0, 1023);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold_min_max(builder, 2048, 1024, 4086);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_set_policy(builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+    ASSERT_EQ(0, res);
+    tier_kind = memtier_builder_construct_memtier_memory(builder);
+    ASSERT_NE(nullptr, tier_kind);
+    memtier_builder_delete(builder);
+}
+
+TEST_F(MemkindMemtierTest,
+       test_tier_policy_dynamic_threshold_failure_no_threshold)
+{
+    struct memtier_memory *tier_kind = nullptr;
+    struct memtier_builder *builder = memtier_builder_new();
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_REGULAR, 2);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_HIGHEST_CAPACITY, 3);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold(builder, 64);
+    ASSERT_EQ(0, res);
+    // NOTE missing 2nd threshold
+    res = memtier_builder_set_policy(builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+    ASSERT_EQ(0, res);
+    tier_kind = memtier_builder_construct_memtier_memory(builder);
+    ASSERT_EQ(nullptr, tier_kind);
+    memtier_builder_delete(builder);
+}
+
+TEST_F(MemkindMemtierTest,
+       test_tier_policy_dynamic_threshold_failure_bad_threshold)
+{
+    struct memtier_memory *tier_kind = nullptr;
+    struct memtier_builder *builder = memtier_builder_new();
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_REGULAR, 2);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_HIGHEST_CAPACITY, 3);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold(builder, 64);
+    ASSERT_EQ(0, res);
+    // NOTE that new threshold is lower than previous
+    res = memtier_builder_add_threshold(builder, 32);
+    ASSERT_NE(0, res);
+    res = memtier_builder_set_policy(builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+    ASSERT_EQ(0, res);
+    tier_kind = memtier_builder_construct_memtier_memory(builder);
+    ASSERT_EQ(nullptr, tier_kind);
+    memtier_builder_delete(builder);
+}
+
+TEST_F(MemkindMemtierTest,
+       test_tier_policy_dynamic_threshold_failure_bad_min_max)
+{
+    struct memtier_memory *tier_kind = nullptr;
+    struct memtier_builder *builder = memtier_builder_new();
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_REGULAR, 2);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_HIGHEST_CAPACITY, 3);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold_min_max(builder, 64, 0, 1024);
+    ASSERT_EQ(0, res);
+    // NOTE that min value of new threshold is lower than max of previous
+    res = memtier_builder_add_threshold_min_max(builder, 1024, 512, 2048);
+    ASSERT_NE(0, res);
+    res = memtier_builder_set_policy(builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+    ASSERT_EQ(0, res);
+    tier_kind = memtier_builder_construct_memtier_memory(builder);
+    ASSERT_EQ(nullptr, tier_kind);
+    memtier_builder_delete(builder);
+}
+
+TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_failure_one_tier)
+{
+    struct memtier_memory *tier_kind = nullptr;
+    struct memtier_builder *builder = memtier_builder_new();
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold(builder, 32);
+    ASSERT_NE(0, res);
+    res = memtier_builder_set_policy(builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+    ASSERT_EQ(0, res);
+    tier_kind = memtier_builder_construct_memtier_memory(builder);
+    ASSERT_EQ(nullptr, tier_kind);
+    memtier_builder_delete(builder);
+}
+
+TEST_F(MemkindMemtierTest,
+       test_tier_policy_dynamic_threshold_failure_min_greater_than_max)
+{
+    struct memtier_builder *builder = memtier_builder_new();
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_HIGHEST_CAPACITY, 2);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold_min_max(builder, 32, 1000, 1);
+    ASSERT_NE(0, res);
+    memtier_builder_delete(builder);
+}
+
+TEST_F(MemkindMemtierTest,
+       test_tier_policy_dynamic_threshold_failure_init_greater_than_max)
+{
+    struct memtier_builder *builder = memtier_builder_new();
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(builder, MEMKIND_HIGHEST_CAPACITY, 2);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_threshold_min_max(builder, 1000, 1, 100);
+    ASSERT_NE(0, res);
+    memtier_builder_delete(builder);
 }
 
 TEST_F(MemkindMemtierMemoryTest, test_tier_builder_allocation_test_success)
@@ -880,4 +1105,121 @@ TEST_F(MemkindMemtier3KindsTest, test_ratio_malloc_free)
     }
 
     ASSERT_EQ(0ULL, allocs.size());
+}
+
+TEST_F(MemkindMemtierThresholdTest, test_init_threshold)
+{
+    std::vector<void *> allocs;
+
+    // initial threshold between DEFAULT and REGULAR tiers is set to 64
+    allocs.push_back(memtier_malloc(m_tier_memory, 32));
+    ASSERT_EQ(32ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
+    allocs.push_back(memtier_malloc(m_tier_memory, 96));
+    ASSERT_EQ(96ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    // ... and between REGULAR and HICAP is set to 512
+    allocs.push_back(memtier_malloc(m_tier_memory, 1024));
+    ASSERT_EQ(1024ULL, memtier_kind_allocated_size(MEMKIND_HIGHEST_CAPACITY));
+
+    for (auto const &ptr : allocs) {
+        memtier_free(ptr);
+    }
+}
+
+TEST_F(MemkindMemtierThresholdTest, test_const_alloc_size)
+{
+    const float tier_regular_normalized_ratio =
+        MEMKIND_REGULAR_ratio / MEMKIND_DEFAULT_ratio;
+
+    std::vector<void *> allocs;
+    unsigned num_allocs = 100;
+    size_t alloc_size = 32;
+
+    // Start checking distance between actual and desired ratio
+    // after "ratio_check_skip" allocations
+    unsigned ratio_check_skip = 100;
+    float max_ratio_distance = 0.2; // 20%
+
+    for (unsigned i = 0; i < num_allocs; ++i) {
+        void *ptr = memtier_malloc(m_tier_memory, alloc_size);
+        ASSERT_NE(nullptr, ptr);
+        allocs.push_back(ptr);
+
+        if (i < ratio_check_skip) {
+            continue;
+        }
+
+        size_t default_alloc_size =
+            memtier_kind_allocated_size(MEMKIND_DEFAULT);
+        size_t regular_alloc_size =
+            memtier_kind_allocated_size(MEMKIND_REGULAR);
+
+        float actual_ratio = default_alloc_size / regular_alloc_size;
+        float dist = abs(tier_regular_normalized_ratio - actual_ratio) /
+            tier_regular_normalized_ratio;
+        ASSERT_LE(dist, max_ratio_distance);
+    }
+
+    // no allocations should go to MEMKIND_HIGHEST_CAPACITY kind
+    ASSERT_EQ(0ULL, memtier_kind_allocated_size(MEMKIND_HIGHEST_CAPACITY));
+
+    for (auto const &ptr : allocs) {
+        memtier_free(ptr);
+    }
+}
+
+TEST_F(MemkindMemtierThresholdTest, test_various_alloc_size)
+{
+    const float tier_def_reg_ratio =
+        MEMKIND_DEFAULT_ratio / MEMKIND_REGULAR_ratio;
+    const float tier_hicap_reg_ratio =
+        MEMKIND_HIGHEST_CAPACITY_ratio / MEMKIND_REGULAR_ratio;
+
+    size_t i;
+    std::mt19937 gen{1}; // set seed = 1
+    std::exponential_distribution<double> exd(3.5);
+    const int alloc_sizes_num = 13;
+    const size_t alloc_sizes[alloc_sizes_num] = {
+        4,   8,   16,   24,       32,       64,       128,
+        256, 512, 1024, 1024 * 2, 1024 * 8, 1024 * 16};
+    const int alloc_num = 10000;
+    size_t sizes[alloc_num];
+    std::vector<void *> allocs;
+
+    // initialize sizes array
+    for (i = 0; i < alloc_num; ++i) {
+        double g;
+        while ((g = exd(gen)) >= 1.0)
+            ;
+        int alloc_size = alloc_sizes[int(g * alloc_sizes_num)];
+        sizes[i] = alloc_size;
+    }
+
+    // do allocations
+    for (i = 0; i < alloc_num; ++i) {
+        void *ptr = memtier_malloc(m_tier_memory, sizes[i]);
+        ASSERT_NE(nullptr, ptr);
+        allocs.push_back(ptr);
+    }
+
+    // check if actual ratios between tiers are close to desired
+    float max_ratio_distance = 0.25; // 25%
+
+    size_t default_alloc_size = memtier_kind_allocated_size(MEMKIND_DEFAULT);
+    size_t regular_alloc_size = memtier_kind_allocated_size(MEMKIND_REGULAR);
+    size_t hi_cap_alloc_size =
+        memtier_kind_allocated_size(MEMKIND_HIGHEST_CAPACITY);
+
+    float reg_def_ratio = (float)regular_alloc_size / default_alloc_size;
+    float hicap_reg_ratio = (float)hi_cap_alloc_size / regular_alloc_size;
+
+    float def_reg_dist =
+        abs(tier_def_reg_ratio - reg_def_ratio) / (tier_def_reg_ratio);
+    ASSERT_LE(def_reg_dist, max_ratio_distance);
+    float hicap_reg_dist =
+        abs(tier_hicap_reg_ratio - hicap_reg_ratio) / (tier_hicap_reg_ratio);
+    ASSERT_LE(hicap_reg_dist, max_ratio_distance);
+
+    for (auto const &ptr : allocs) {
+        memtier_free(ptr);
+    }
 }
