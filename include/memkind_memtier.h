@@ -28,6 +28,11 @@ typedef enum memtier_policy_t
     MEMTIER_POLICY_STATIC_THRESHOLD = 0,
 
     /**
+     * Dynamic Threshold policy
+     */
+    MEMTIER_POLICY_DYNAMIC_THRESHOLD = 1,
+
+    /**
      * Max policy value.
      */
     MEMTIER_POLICY_MAX_VALUE
@@ -69,6 +74,19 @@ int memtier_builder_add_tier(struct memtier_builder *builder, memkind_t kind,
 ///
 int memtier_builder_set_policy(struct memtier_builder *builder,
                                memtier_policy_t policy);
+
+///
+/// \brief Add threshold for DYNAMIC_THRESHOLD policy to memtier builder
+/// \note STANDARD API
+/// \param builder memtier builder
+/// \param init initial threshold level
+/// \param min minimum threshold level
+/// \param max maximum threshold level
+/// \return Operation status, 0 on success, other values on
+/// failure
+///
+int memtier_builder_add_threshold_min_max(struct memtier_builder *builder,
+                                          size_t init, size_t min, size_t max);
 
 ///
 /// \brief Construct a memtier memory
