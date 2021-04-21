@@ -28,6 +28,11 @@ typedef enum memtier_policy_t
     MEMTIER_POLICY_STATIC_THRESHOLD = 0,
 
     /**
+     * Dynamic Threshold policy
+     */
+    MEMTIER_POLICY_DYNAMIC_THRESHOLD = 1,
+
+    /**
      * Max policy value.
      */
     MEMTIER_POLICY_MAX_VALUE
@@ -187,6 +192,14 @@ int memtier_kind_posix_memalign(memkind_t kind, void **memptr, size_t alignment,
 /// \return Number of usable bytes
 ///
 size_t memtier_usable_size(void *ptr);
+
+///
+/// \brief Free the memory space allocated with the memtier API
+/// \note STANDARD API
+/// \param ptr pointer to the allocated memory
+/// \param memory specified memtier memory
+///
+void memtier_memory_free(struct memtier_memory *memory, void *ptr);
 
 ///
 /// \brief Free the memory space allocated with the memtier API

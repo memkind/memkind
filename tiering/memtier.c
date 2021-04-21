@@ -17,6 +17,8 @@
 #define MEMTIER_LIKELY(x)   __builtin_expect(!!(x), 1)
 #define MEMTIER_UNLIKELY(x) __builtin_expect(!!(x), 0)
 
+extern void memtier_memory_free(struct memtier_memory *memory, void *ptr);
+
 static int destructed;
 
 static struct memtier_memory *current_memory;
@@ -89,7 +91,7 @@ MEMTIER_EXPORT void free(void *ptr)
     log_debug("free(%p)", ptr);
 
     if (MEMTIER_LIKELY(current_memory)) {
-        memtier_free(ptr);
+        memtier_memory_free(current_memory, ptr);
     } else if (destructed == 0) {
         memkind_free(MEMKIND_DEFAULT, ptr);
     }
