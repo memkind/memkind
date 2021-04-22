@@ -42,7 +42,7 @@
     __sync_sub_and_fetch(&counter, val)
 #define memkind_atomic_get(src, dest)                                          \
     do {                                                                       \
-        dest = __sync_sub_and_fetch(&src, 0)                                   \
+        dest = __sync_sub_and_fetch(&src, 0);                                  \
     } while (0)
 #else
 #error "Missing atomic implementation."
