@@ -366,11 +366,16 @@ class Test_tiering_config_env(Helper):
         self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=" + tier_str, negative_test=True)
 
-    def test_multiple_tiers(self):
+    @pytest.mark.parametrize("policy",
+                             ["POLICY_STATIC_THRESHOLD",
+                              "POLICY_DYNAMIC_THRESHOLD"])
+    def test_multiple_tiers(self, policy):
+        assert os.access("/mnt", os.W_OK | os.X_OK), \
+            "Write and execute permissions to the /mnt directory "
+        "are required for this test"
         self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:1,FS_DAX:/tmp/:100M:4,"
-            "FS_DAX:/mnt:150M:8," +
-            self.default_policy, log_level="2")
+            "FS_DAX:/mnt:150M:8," + policy, log_level="2")
 
     @pytest.mark.parametrize("wrong_tier",
                              ["non_existent:/mnt:150M:8",
