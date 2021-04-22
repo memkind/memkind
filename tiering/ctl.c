@@ -150,6 +150,8 @@ static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
 {
     if (strcmp(qbuf, "POLICY_STATIC_THRESHOLD") == 0) {
         *policy = MEMTIER_POLICY_STATIC_THRESHOLD;
+    } else if (strcmp(qbuf, "POLICY_DYNAMIC_THRESHOLD") == 0) {
+        *policy = MEMTIER_POLICY_DYNAMIC_THRESHOLD;
     } else {
         log_err("Unknown policy: %s", qbuf);
         return -1;

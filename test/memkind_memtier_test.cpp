@@ -3,18 +3,32 @@
 
 #include <memkind_memtier.h>
 
+#include <random>
 #include <thread>
 
 #include "common.h"
 
 class MemkindMemtierTest: public ::testing::Test
 {
+protected:
+    struct memtier_builder *m_builder;
+    struct memtier_memory *m_tier_memory;
+
 private:
     void SetUp()
-    {}
+    {
+        m_tier_memory = NULL;
+        m_builder = memtier_builder_new();
+        ASSERT_NE(nullptr, m_builder);
+    }
 
     void TearDown()
-    {}
+    {
+        memtier_builder_delete(m_builder);
+        if (m_tier_memory) {
+            memtier_delete_memtier_memory(m_tier_memory);
+        }
+    }
 };
 
 class MemkindMemtierMemoryTest: public ::testing::Test
@@ -24,6 +38,9 @@ protected:
 
     const int MEMKIND_DEFAULT_ratio = 1;
     const int MEMKIND_REGULAR_ratio = 4;
+
+    const float tier_regular_normalized_ratio =
+        MEMKIND_REGULAR_ratio / MEMKIND_DEFAULT_ratio;
 
     size_t allocation_sum()
     {
@@ -65,6 +82,11 @@ protected:
     const int MEMKIND_REGULAR_ratio = 1;
     const int MEMKIND_HIGHEST_CAPACITY_ratio = 5;
 
+    const float tier_regular_normalized_ratio =
+        MEMKIND_REGULAR_ratio / MEMKIND_DEFAULT_ratio;
+    const float tier_hi_cap_normalized_ratio =
+        MEMKIND_HIGHEST_CAPACITY_ratio / MEMKIND_DEFAULT_ratio;
+
     size_t allocation_sum()
     {
         return memtier_kind_allocated_size(MEMKIND_DEFAULT) +
@@ -88,6 +110,48 @@ protected:
         ASSERT_EQ(0, res);
         res = memtier_builder_set_policy(builder,
                                          MEMTIER_POLICY_STATIC_THRESHOLD);
+        ASSERT_EQ(0, res);
+        m_tier_memory = memtier_builder_construct_memtier_memory(builder);
+        ASSERT_NE(nullptr, m_tier_memory);
+        memtier_builder_delete(builder);
+    }
+
+    void TearDown()
+    {
+        memtier_delete_memtier_memory(m_tier_memory);
+    }
+};
+
+class MemkindMemtierThresholdTest: public ::testing::Test
+{
+protected:
+    struct memtier_memory *m_tier_memory;
+
+    const int MEMKIND_DEFAULT_ratio = 3;
+    const int MEMKIND_REGULAR_ratio = 1;
+
+    const float m_tier_regular_normalized_ratio =
+        (float)MEMKIND_REGULAR_ratio / MEMKIND_DEFAULT_ratio;
+
+    size_t allocation_sum()
+    {
+        return memtier_kind_allocated_size(MEMKIND_DEFAULT) +
+            memtier_kind_allocated_size(MEMKIND_REGULAR);
+    }
+
+    void SetUp()
+    {
+        struct memtier_builder *builder = memtier_builder_new();
+        ASSERT_NE(nullptr, builder);
+
+        int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT,
+                                           MEMKIND_DEFAULT_ratio);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_add_tier(builder, MEMKIND_REGULAR,
+                                       MEMKIND_REGULAR_ratio);
+        ASSERT_EQ(0, res);
+        res = memtier_builder_set_policy(builder,
+                                         MEMTIER_POLICY_DYNAMIC_THRESHOLD);
         ASSERT_EQ(0, res);
         m_tier_memory = memtier_builder_construct_memtier_memory(builder);
         ASSERT_NE(nullptr, m_tier_memory);
@@ -134,35 +198,26 @@ TEST_F(MemkindMemtierTest, test_tier_allocate)
 
 TEST_F(MemkindMemtierTest, test_tier_builder_failure)
 {
-    struct memtier_builder *builder = memtier_builder_new();
-    ASSERT_NE(nullptr, builder);
-    int res = memtier_builder_add_tier(builder, nullptr, 1);
+    int res = memtier_builder_add_tier(m_builder, nullptr, 1);
     ASSERT_NE(0, res);
-    memtier_builder_delete(builder);
 }
 
 TEST_F(MemkindMemtierTest, test_tier_construct_failure_zero_tiers)
 {
-    struct memtier_memory *tier_kind = nullptr;
-    struct memtier_builder *builder = memtier_builder_new();
     int res =
-        memtier_builder_set_policy(builder, MEMTIER_POLICY_STATIC_THRESHOLD);
+        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_STATIC_THRESHOLD);
     ASSERT_EQ(0, res);
-    tier_kind = memtier_builder_construct_memtier_memory(builder);
-    ASSERT_EQ(nullptr, tier_kind);
-    memtier_builder_delete(builder);
+    m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
+    ASSERT_EQ(nullptr, m_tier_memory);
 }
 
 TEST_F(MemkindMemtierTest, test_tier_builder_set_policy_failure)
 {
-    struct memtier_builder *builder = memtier_builder_new();
-    ASSERT_NE(nullptr, builder);
-    int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT, 1);
+    int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
     ASSERT_EQ(0, res);
     memtier_policy_t fake_policy = static_cast<memtier_policy_t>(-1);
-    res = memtier_builder_set_policy(builder, fake_policy);
+    res = memtier_builder_set_policy(m_builder, fake_policy);
     ASSERT_NE(0, res);
-    memtier_builder_delete(builder);
 }
 
 TEST_F(MemkindMemtierTest, test_tier_free_nullptr)
@@ -170,6 +225,45 @@ TEST_F(MemkindMemtierTest, test_tier_free_nullptr)
     for (int i = 0; i < 512; i++) {
         memtier_free(nullptr);
     }
+}
+
+TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_two_kinds)
+{
+    int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(m_builder, MEMKIND_REGULAR, 1);
+    ASSERT_EQ(0, res);
+    res =
+        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+    ASSERT_EQ(0, res);
+    m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
+    ASSERT_NE(nullptr, m_tier_memory);
+}
+
+TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_three_kinds)
+{
+    int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(m_builder, MEMKIND_REGULAR, 2);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(m_builder, MEMKIND_HIGHEST_CAPACITY, 3);
+    ASSERT_EQ(0, res);
+    res =
+        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+    ASSERT_EQ(0, res);
+    m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
+    ASSERT_NE(nullptr, m_tier_memory);
+}
+
+TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_failure_one_tier)
+{
+    int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res =
+        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
+    ASSERT_EQ(0, res);
+    m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
+    ASSERT_EQ(nullptr, m_tier_memory);
 }
 
 TEST_F(MemkindMemtierMemoryTest, test_tier_builder_allocation_test_success)
@@ -685,11 +779,9 @@ TEST_F(MemkindMemtierMemoryTest, test_ratio_basic)
 
 TEST_F(MemkindMemtierMemoryTest, test_ratio_malloc_only)
 {
-    const float tier_regular_normalized_ratio =
-        MEMKIND_REGULAR_ratio / MEMKIND_DEFAULT_ratio;
     const int sizes_num = 5;
     const size_t sizes[sizes_num] = {16, 32, 64, 128, 256};
-    unsigned num_allocs = 100;
+    const unsigned num_allocs = 100;
     std::vector<void *> allocs;
     unsigned i;
 
@@ -719,8 +811,6 @@ TEST_F(MemkindMemtierMemoryTest, test_ratio_malloc_only)
 
 TEST_F(MemkindMemtierMemoryTest, test_ratio_malloc_free)
 {
-    const float tier_regular_normalized_ratio =
-        MEMKIND_REGULAR_ratio / MEMKIND_DEFAULT_ratio;
     const int sizes_num = 5;
     const size_t sizes[sizes_num] = {16, 32, 64, 128, 256};
 
@@ -728,10 +818,10 @@ TEST_F(MemkindMemtierMemoryTest, test_ratio_malloc_free)
     // NOTE that there are the same num of mallocs/free so at the end all
     // allocations should be freed
     const int operations_num = 14;
-    int operations[operations_num] = {1, 1, -1, 1,  -1, -1, 1,
-                                      1, 1, -1, -1, 1,  -1, -1};
+    const int operations[operations_num] = {1, 1, -1, 1,  -1, -1, 1,
+                                            1, 1, -1, -1, 1,  -1, -1};
 
-    unsigned num_allocs = operations_num * sizes_num;
+    const unsigned num_allocs = operations_num * sizes_num;
     std::vector<void *> allocs;
     unsigned i;
 
@@ -766,13 +856,9 @@ TEST_F(MemkindMemtierMemoryTest, test_ratio_malloc_free)
 
 TEST_F(MemkindMemtier3KindsTest, test_ratio_malloc_only)
 {
-    const float tier_regular_normalized_ratio =
-        MEMKIND_REGULAR_ratio / MEMKIND_DEFAULT_ratio;
-    const float tier_hi_cap_normalized_ratio =
-        MEMKIND_HIGHEST_CAPACITY_ratio / MEMKIND_DEFAULT_ratio;
     const int sizes_num = 10;
     const size_t sizes[sizes_num] = {16, 32, 16, 64, 16, 128, 32, 256, 64, 128};
-    unsigned num_allocs = 200;
+    const unsigned num_allocs = 200;
     std::vector<void *> allocs;
     unsigned i;
 
@@ -813,10 +899,6 @@ TEST_F(MemkindMemtier3KindsTest, test_ratio_malloc_only)
 
 TEST_F(MemkindMemtier3KindsTest, test_ratio_malloc_free)
 {
-    const float tier_regular_normalized_ratio =
-        MEMKIND_REGULAR_ratio / MEMKIND_DEFAULT_ratio;
-    const float tier_hi_cap_normalized_ratio =
-        MEMKIND_HIGHEST_CAPACITY_ratio / MEMKIND_DEFAULT_ratio;
     const int sizes_num = 10;
     const size_t sizes[sizes_num] = {16, 32, 16, 64, 16, 128, 32, 256, 64, 128};
 
@@ -824,17 +906,18 @@ TEST_F(MemkindMemtier3KindsTest, test_ratio_malloc_free)
     // NOTE that there are the same num of mallocs/free so at the end all
     // allocations should be freed
     const int operations_num = 22;
-    int operations[operations_num] = {1, 2,  1, -1, 1,  -1, -1, 1, 2,  -1, 1,
-                                      1, -1, 2, -1, -1, 1,  -1, 2, -1, -1, -1};
+    const int operations[operations_num] = {1, 2,  1, -1, 1,  -1, -1, 1,
+                                            2, -1, 1, 1,  -1, 2,  -1, -1,
+                                            1, -1, 2, -1, -1, -1};
 
-    memkind_t tiers[] = {
+    const memkind_t tiers[] = {
         MEMKIND_DEFAULT,
         MEMKIND_REGULAR,
         MEMKIND_HIGHEST_CAPACITY,
     };
     int tier_it = 0;
 
-    unsigned num_allocs = operations_num * sizes_num * 4;
+    const unsigned num_allocs = operations_num * sizes_num * 4;
     std::vector<void *> allocs;
     unsigned i;
 
@@ -880,4 +963,85 @@ TEST_F(MemkindMemtier3KindsTest, test_ratio_malloc_free)
     }
 
     ASSERT_EQ(0ULL, allocs.size());
+}
+
+TEST_F(MemkindMemtierThresholdTest, test_const_alloc_size)
+{
+    std::vector<void *> allocs;
+    const unsigned num_allocs = 10000;
+    const size_t alloc_size = 1024;
+
+    // Start checking distance between actual and desired ratio
+    // after "ratio_check_skip" allocations
+    const unsigned ratio_check_skip = 1000;
+    const float max_ratio_distance = 0.35; // 35%
+
+    for (unsigned i = 0; i < num_allocs; ++i) {
+        void *ptr = memtier_malloc(m_tier_memory, alloc_size);
+        ASSERT_NE(nullptr, ptr);
+        allocs.push_back(ptr);
+
+        if (i < ratio_check_skip) {
+            continue;
+        }
+
+        size_t default_alloc_size =
+            memtier_kind_allocated_size(MEMKIND_DEFAULT);
+        size_t regular_alloc_size =
+            memtier_kind_allocated_size(MEMKIND_REGULAR);
+
+        float actual_ratio = (float)regular_alloc_size / default_alloc_size;
+        float dist = abs(m_tier_regular_normalized_ratio - actual_ratio) /
+            m_tier_regular_normalized_ratio;
+        ASSERT_LE(dist, max_ratio_distance);
+    }
+
+    for (auto const &ptr : allocs) {
+        memtier_free(ptr);
+    }
+}
+
+TEST_F(MemkindMemtierThresholdTest, test_various_alloc_size)
+{
+    size_t i;
+    std::mt19937 gen{1}; // set seed = 1
+    std::exponential_distribution<double> exd(3.5);
+    const int alloc_sizes_num = 10;
+    const size_t alloc_sizes[alloc_sizes_num] = {4,   8,   16,  32,   64,
+                                                 128, 256, 512, 1024, 1024 * 2};
+    const int alloc_num = 10000;
+    size_t sizes[alloc_num];
+    std::vector<void *> allocs;
+
+    // initialize sizes array
+    for (i = 0; i < alloc_num; ++i) {
+        double g;
+        while ((g = exd(gen)) >= 1.0)
+            ;
+        int alloc_size = alloc_sizes[int(g * alloc_sizes_num)];
+        sizes[i] = alloc_size;
+    }
+
+    // do allocations
+    for (i = 0; i < alloc_num; ++i) {
+        void *ptr = memtier_malloc(m_tier_memory, sizes[i]);
+        ASSERT_NE(nullptr, ptr);
+        allocs.push_back(ptr);
+    }
+
+    // check if actual ratios between tiers are close to desired
+    const float max_ratio_distance = 0.25; // 25%
+
+    size_t default_alloc_size = memtier_kind_allocated_size(MEMKIND_DEFAULT);
+    size_t regular_alloc_size = memtier_kind_allocated_size(MEMKIND_REGULAR);
+
+    float reg_def_ratio = (float)regular_alloc_size / default_alloc_size;
+
+    float def_reg_dist = abs(m_tier_regular_normalized_ratio - reg_def_ratio) /
+        (m_tier_regular_normalized_ratio);
+    ASSERT_LE(def_reg_dist, max_ratio_distance);
+
+    for (auto const &ptr : allocs) {
+        memtier_free(ptr);
+    }
 }
