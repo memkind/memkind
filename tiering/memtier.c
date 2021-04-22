@@ -89,7 +89,7 @@ MEMTIER_EXPORT void free(void *ptr)
     log_debug("free(%p)", ptr);
 
     if (MEMTIER_LIKELY(current_memory)) {
-        memtier_free(ptr);
+        memtier_realloc(current_memory, ptr, 0);
     } else if (destructed == 0) {
         memkind_free(MEMKIND_DEFAULT, ptr);
     }
