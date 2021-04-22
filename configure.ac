@@ -313,14 +313,14 @@ if test "x$memkind_c11_atomics" = "x1" ; then
 fi
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[]],[[
 int v = 8;
-__atomic_add_fetch(&v, 1, __ATOMIC_RELAXED);
+__atomic_fetch_add(&v, 1, __ATOMIC_RELAXED);
 ]])], [memkind_atomic_builtins="1"], [memkind_atomic_builtins="0"])
 if test "x$memkind_atomic_builtins" = "x1" ; then
   AC_DEFINE([MEMKIND_ATOMIC_BUILTINS_SUPPORT], [1], [__atomic_c* compiler builtins are supported])
 fi
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[]],[[
 int v = 8;
-__sync_add_and_fetch(&v, 1);
+__sync_fetch_and_add(&v, 1);
 ]])], [memkind_sync_fetch="1"], [memkind_sync_fetch="0"])
 if test "x$memkind_sync_fetch" = "x1" ; then
   AC_DEFINE([MEMKIND_ATOMIC_SYNC_SUPPORT], [1], [__sync_* compiler builtins are supported])

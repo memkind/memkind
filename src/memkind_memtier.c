@@ -28,18 +28,18 @@
     } while (0)
 #elif defined(MEMKIND_ATOMIC_BUILTINS_SUPPORT)
 #define memkind_atomic_increment(counter, val)                                 \
-    __atomic_add_fetch(&counter, val, __ATOMIC_RELAXED)
+    __atomic_fetch_add(&counter, val, __ATOMIC_RELAXED)
 #define memkind_atomic_decrement(counter, val)                                 \
-    __atomic_sub_fetch(&counter, val, __ATOMIC_RELAXED)
+    __atomic_fetch_sub(&counter, val, __ATOMIC_RELAXED)
 #define memkind_atomic_get(src, dest)                                          \
     do {                                                                       \
         dest = __atomic_load_n(&src, __ATOMIC_RELAXED);                        \
     } while (0)
 #elif defined(MEMKIND_ATOMIC_SYNC_SUPPORT)
 #define memkind_atomic_increment(counter, val)                                 \
-    __sync_add_and_fetch(&counter, val)
+    __sync_fetch_and_add(&counter, val)
 #define memkind_atomic_decrement(counter, val)                                 \
-    __sync_sub_and_fetch(&counter, val)
+    __sync_fetch_and_sub(&counter, val)
 #define memkind_atomic_get(src, dest)                                          \
     do {                                                                       \
         dest = __sync_sub_and_fetch(&src, 0);                                  \
