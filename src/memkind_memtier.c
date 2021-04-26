@@ -87,11 +87,12 @@ struct memtier_builder {
 
 struct memtier_memory {
     unsigned size;                // Number of memory kinds
-    memtier_policy_t policy;      // Tiering policy
     struct memtier_tier_cfg *cfg; // Memory Tier configuration
     // Thresholds configuration for DYNAMIC_THRESHOLD policy
     struct memtier_threshold_cfg *thres;
     unsigned thres_check_cnt; // Counter for doing thresholds check
+    memkind_t (*get_kind)(struct memtier_memory *memory, size_t size);
+    void (*update_cfg)(struct memtier_memory *memory);
 };
 
 static MEMKIND_ATOMIC size_t kind_alloc_size[MEMKIND_MAX_KIND];
@@ -101,8 +102,15 @@ void memtier_reset_size(unsigned id)
     kind_alloc_size[id] = 0;
 }
 
+static memkind_t memtier_single_get_kind(struct memtier_memory *memory,
+                                         size_t size)
+{
+    return memory->cfg[0].kind;
+}
+
 static memkind_t
-memtier_policy_static_threshold_get_kind(struct memtier_memory *memory)
+memtier_policy_static_threshold_get_kind(struct memtier_memory *memory,
+                                         size_t size)
 {
     struct memtier_tier_cfg *cfg = memory->cfg;
 
@@ -132,6 +140,10 @@ memtier_policy_dynamic_threshold_get_kind(struct memtier_memory *memory,
     }
     return memory->cfg[i].kind;
 }
+
+static void
+memtier_policy_static_threshold_update_config(struct memtier_memory *memory)
+{}
 
 static void
 memtier_policy_dynamic_threshold_update_config(struct memtier_memory *memory)
@@ -228,7 +240,6 @@ MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
 MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
                                               memtier_policy_t policy)
 {
-    // TODO possible optimisation - use function pointer for decision
     switch (policy) {
         case MEMTIER_POLICY_STATIC_THRESHOLD:
         case MEMTIER_POLICY_DYNAMIC_THRESHOLD:
@@ -239,19 +250,6 @@ MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
             log_err("Unrecognized memory policy %u", policy);
             return -1;
     }
-}
-
-static inline memkind_t get_kind(struct memtier_memory *memory, size_t size)
-{
-
-    if (memory->policy == MEMTIER_POLICY_STATIC_THRESHOLD) {
-        return memtier_policy_static_threshold_get_kind(memory);
-    } else if (memory->policy == MEMTIER_POLICY_DYNAMIC_THRESHOLD) {
-        return memtier_policy_dynamic_threshold_get_kind(memory, size);
-    }
-
-    log_err("Unrecognized memory policy %u", memory->policy);
-    return NULL;
 }
 
 MEMKIND_EXPORT struct memtier_memory *
@@ -314,10 +312,17 @@ memtier_builder_construct_memtier_memory(struct memtier_builder *builder)
             memory->thres[i].norm_ratio =
                 builder->cfg[i + 1].kind_ratio / builder->cfg[i].kind_ratio;
         }
-
+        memory->get_kind = memtier_policy_dynamic_threshold_get_kind;
+        memory->update_cfg = memtier_policy_dynamic_threshold_update_config;
         memory->thres_check_cnt = THRESHOLD_CHECK_CNT;
     } else {
         memory->thres = NULL;
+        if (builder->size == 1)
+            memory->get_kind = memtier_single_get_kind;
+        else {
+            memory->get_kind = memtier_policy_static_threshold_get_kind;
+        }
+        memory->update_cfg = memtier_policy_static_threshold_update_config;
     }
 
     for (i = 1; i < builder->size; ++i) {
@@ -329,7 +334,6 @@ memtier_builder_construct_memtier_memory(struct memtier_builder *builder)
     memory->cfg[0].kind_ratio = 1.0;
 
     memory->size = builder->size;
-    memory->policy = builder->policy;
     return memory;
 
 failure_cfg:
@@ -350,12 +354,8 @@ MEMKIND_EXPORT void memtier_delete_memtier_memory(struct memtier_memory *memory)
 
 MEMKIND_EXPORT void *memtier_malloc(struct memtier_memory *memory, size_t size)
 {
-    void *ptr = memtier_kind_malloc(get_kind(memory, size), size);
-
-    // TODO possible optimization - use function pointer for decision
-    if (memory->policy == MEMTIER_POLICY_DYNAMIC_THRESHOLD) {
-        memtier_policy_dynamic_threshold_update_config(memory);
-    }
+    void *ptr = memtier_kind_malloc(memory->get_kind(memory, size), size);
+    memory->update_cfg(memory);
 
     return ptr;
 }
@@ -371,11 +371,8 @@ MEMKIND_EXPORT void *memtier_kind_malloc(memkind_t kind, size_t size)
 MEMKIND_EXPORT void *memtier_calloc(struct memtier_memory *memory, size_t num,
                                     size_t size)
 {
-    void *ptr = memtier_kind_calloc(get_kind(memory, size), num, size);
-
-    if (memory->policy == MEMTIER_POLICY_DYNAMIC_THRESHOLD) {
-        memtier_policy_dynamic_threshold_update_config(memory);
-    }
+    void *ptr = memtier_kind_calloc(memory->get_kind(memory, size), num, size);
+    memory->update_cfg(memory);
 
     return ptr;
 }
@@ -396,19 +393,13 @@ MEMKIND_EXPORT void *memtier_realloc(struct memtier_memory *memory, void *ptr,
     if (ptr) {
         struct memkind *kind = memkind_detect_kind(ptr);
         ptr = memtier_kind_realloc(kind, ptr, size);
-
-        if (memory->policy == MEMTIER_POLICY_DYNAMIC_THRESHOLD) {
-            memtier_policy_dynamic_threshold_update_config(memory);
-        }
+        memory->update_cfg(memory);
 
         return ptr;
     }
 
-    ptr = memtier_kind_malloc(get_kind(memory, size), size);
-
-    if (memory->policy == MEMTIER_POLICY_DYNAMIC_THRESHOLD) {
-        memtier_policy_dynamic_threshold_update_config(memory);
-    }
+    ptr = memtier_kind_malloc(memory->get_kind(memory, size), size);
+    memory->update_cfg(memory);
 
     return ptr;
 }
@@ -440,12 +431,9 @@ MEMKIND_EXPORT int memtier_posix_memalign(struct memtier_memory *memory,
                                           void **memptr, size_t alignment,
                                           size_t size)
 {
-    int ret = memtier_kind_posix_memalign(get_kind(memory, size), memptr,
-                                          alignment, size);
-
-    if (memory->policy == MEMTIER_POLICY_DYNAMIC_THRESHOLD) {
-        memtier_policy_dynamic_threshold_update_config(memory);
-    }
+    int ret = memtier_kind_posix_memalign(memory->get_kind(memory, size),
+                                          memptr, alignment, size);
+    memory->update_cfg(memory);
 
     return ret;
 }
