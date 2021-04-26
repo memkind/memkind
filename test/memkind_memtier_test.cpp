@@ -48,6 +48,13 @@ protected:
             memtier_kind_allocated_size(MEMKIND_REGULAR);
     }
 
+    double allocation_ratio()
+    {
+        return static_cast<double>(
+                   memtier_kind_allocated_size(MEMKIND_DEFAULT)) /
+            static_cast<double>(memtier_kind_allocated_size(MEMKIND_REGULAR));
+    }
+
     void SetUp()
     {
         struct memtier_builder *builder = memtier_builder_new();
@@ -691,86 +698,73 @@ TEST_F(MemkindMemtierMemoryTest, test_ratio_basic)
 {
     std::vector<void *> allocs;
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 16));
-    allocs.push_back(memtier_malloc(m_tier_memory, 16));
-    // actual ratio 1:1, desired 1:4
-    ASSERT_EQ(16ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(16ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    // desired ratio is 1:4 (0.25)
+    allocs.push_back(memtier_malloc(m_tier_memory, 160 * KB));
+    allocs.push_back(memtier_malloc(m_tier_memory, 160 * KB));
+    ASSERT_DOUBLE_EQ(allocation_ratio(), 1);
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 16));
-    // actual ratio 1:2, desired 1:4
-    ASSERT_EQ(16ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(32ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 160 * KB));
+    ASSERT_DOUBLE_EQ(allocation_ratio(), 0.5);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 16));
-    // actual ratio 1:3, desired 1:4
-    ASSERT_EQ(16ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(48ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 160 * KB));
+    ASSERT_NEAR(allocation_ratio(), 0.33, 0.01);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 8));
-    // actual ratio 1:3.5, desired 1:4
-    ASSERT_EQ(16ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(56ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 80 * KB));
+    ASSERT_NEAR(allocation_ratio(), 0.28, 0.01);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 16));
-    // actual ratio 1:4.5, desired 1:4
-    ASSERT_EQ(16ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(72ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 160 * KB));
+    ASSERT_NEAR(allocation_ratio(), 0.22, 0.01);
+    // next allocation should heighten ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 16));
-    // actual ratio 1:2.25, desired 1:4
-    ASSERT_EQ(32ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(72ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 160 * KB));
+    ASSERT_NEAR(allocation_ratio(), 0.44, 0.01);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 36));
-    // actual ratio 1:3.75, desired 1:4
-    ASSERT_EQ(32ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(120ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 360 * KB));
+    ASSERT_NEAR(allocation_ratio(), 0.28, 0.01);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 8));
-    // actual ratio 1:4, desired 1:4
-    ASSERT_EQ(32ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(128ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 80 * KB));
+    ASSERT_NEAR(allocation_ratio(), 0.27, 0.01);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 16));
-    // actual ratio 1:2.6, desired 1:4
-    ASSERT_EQ(48ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(128ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 160 * KB));
+    ASSERT_NEAR(allocation_ratio(), 0.23, 0.01);
+    // next allocation should heighten ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 128));
-    // actual ratio 1:5.3, desired 1:4
-    ASSERT_EQ(48ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(256ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 1280 * KB));
+    ASSERT_NEAR(allocation_ratio(), 1.19, 0.01);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 256));
-    // actual ratio 1:0.842, desired 1:4
-    ASSERT_EQ(304ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(256ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 2560 * KB));
+    ASSERT_NEAR(allocation_ratio(), 0.40, 0.01);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 512));
-    // actual ratio 1:2.526, desired 1:4
-    ASSERT_EQ(304ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(768ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 5 * MB));
+    ASSERT_NEAR(allocation_ratio(), 0.17, 0.01);
+    // next allocation should heighten ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 1024));
-    // actual ratio 1:5.894, desired 1:4
-    ASSERT_EQ(304ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(1792ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 7 * MB));
+    ASSERT_NEAR(allocation_ratio(), 0.97, 0.01);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 160));
-    // actual ratio 1:3.862, desired 1:4
-    ASSERT_EQ(464ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(1792ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 1600 * KB));
+    ASSERT_NEAR(allocation_ratio(), 0.81, 0.01);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 256));
-    // actual ratio 1:4.413, desired 1:4
-    ASSERT_EQ(464ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(2048ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 3 * MB));
+    ASSERT_NEAR(allocation_ratio(), 0.63, 0.01);
+    // next allocation should lower ratio
 
-    allocs.push_back(memtier_malloc(m_tier_memory, 48));
-    // actual ratio 1:4, desired 1:4
-    ASSERT_EQ(512ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
-    ASSERT_EQ(2048ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
+    allocs.push_back(memtier_malloc(m_tier_memory, 1 * MB));
+    ASSERT_NEAR(allocation_ratio(), 0.5879, 0.01);
+    // next allocation should lower ratio
+
+    allocs.push_back(memtier_malloc(m_tier_memory, 2560 * KB));
+    ASSERT_NEAR(allocation_ratio(), 0.5, 0.01);
 
     for (auto const &ptr : allocs) {
         memtier_free(ptr);
@@ -974,7 +968,7 @@ TEST_F(MemkindMemtierThresholdTest, test_const_alloc_size)
     // Start checking distance between actual and desired ratio
     // after "ratio_check_skip" allocations
     const unsigned ratio_check_skip = 1000;
-    const float max_ratio_distance = 0.35; // 35%
+    const float max_ratio_distance = 0.41; // 41%
 
     for (unsigned i = 0; i < num_allocs; ++i) {
         void *ptr = memtier_malloc(m_tier_memory, alloc_size);
@@ -1030,7 +1024,7 @@ TEST_F(MemkindMemtierThresholdTest, test_various_alloc_size)
     }
 
     // check if actual ratios between tiers are close to desired
-    const float max_ratio_distance = 0.25; // 25%
+    const float max_ratio_distance = 0.32; // 32%
 
     size_t default_alloc_size = memtier_kind_allocated_size(MEMKIND_DEFAULT);
     size_t regular_alloc_size = memtier_kind_allocated_size(MEMKIND_REGULAR);
