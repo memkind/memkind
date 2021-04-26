@@ -209,6 +209,18 @@ void memtier_free(void *ptr);
 ///
 size_t memtier_kind_allocated_size(memkind_t kind);
 
+///
+/// \brief Set memtier property
+/// \note STANDARD API
+/// \param builder memtier builder
+/// \param name name of the property
+/// \param val value to set
+/// \return Operation status, 0 on success, other values on
+/// failure
+///
+int memtier_ctl_set(struct memtier_builder *builder, const char *name,
+                    const void *val);
+
 #ifdef __cplusplus
 }
 #endif
