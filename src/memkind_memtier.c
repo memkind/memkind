@@ -108,14 +108,13 @@ memtier_policy_static_threshold_get_kind(struct memtier_memory *memory)
 
     int i;
     int dest_tier = 0;
-
+    size_t size_0 = memtier_kind_allocated_size(cfg[0].kind);
     for (i = 1; i < memory->size; ++i) {
         if ((memtier_kind_allocated_size(cfg[i].kind) * cfg[i].kind_ratio) <
-            memtier_kind_allocated_size(cfg[0].kind)) {
+            size_0) {
             dest_tier = i;
         }
     }
-
     return cfg[dest_tier].kind;
 }
 
