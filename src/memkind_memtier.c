@@ -126,15 +126,12 @@ memtier_policy_dynamic_threshold_get_kind(struct memtier_memory *memory,
     struct memtier_threshold_cfg *thres = memory->thres;
     int i;
 
-    int dest_tier = THRESHOLD_NUM(memory); // init to last tier
     for (i = 0; i < THRESHOLD_NUM(memory); ++i) {
         if (size < thres[i].val) {
-            dest_tier = i;
             break;
         }
     }
-
-    return memory->cfg[dest_tier].kind;
+    return memory->cfg[i].kind;
 }
 
 static void
