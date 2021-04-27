@@ -256,10 +256,24 @@ memtier_policy_dynamic_threshold_update_config(struct memtier_memory *memory)
     memory->thres_check_cnt = THRESHOLD_CHECK_CNT;
 }
 
-MEMKIND_EXPORT struct memtier_builder *memtier_builder_new(void)
+// clang-format off
+MEMKIND_EXPORT struct memtier_builder *memtier_builder_new(memtier_policy_t policy)
 {
-    return jemk_calloc(1, sizeof(struct memtier_builder));
+    struct memtier_builder *b = jemk_calloc(1, sizeof(struct memtier_builder));
+    if (b) {
+        switch (policy) {
+            case MEMTIER_POLICY_STATIC_THRESHOLD:
+            case MEMTIER_POLICY_DYNAMIC_THRESHOLD:
+                b->policy = policy;
+                return b;
+            default:
+                log_err("Unrecognized memory policy %u", policy);
+                jemk_free(b);
+        }
+    }
+    return NULL;
 }
+// clang-format on
 
 MEMKIND_EXPORT void memtier_builder_delete(struct memtier_builder *builder)
 {
@@ -297,21 +311,6 @@ MEMKIND_EXPORT int memtier_builder_add_tier(struct memtier_builder *builder,
     builder->cfg[builder->size].kind_ratio = kind_ratio;
     builder->size += 1;
     return 0;
-}
-
-MEMKIND_EXPORT int memtier_builder_set_policy(struct memtier_builder *builder,
-                                              memtier_policy_t policy)
-{
-    switch (policy) {
-        case MEMTIER_POLICY_STATIC_THRESHOLD:
-        case MEMTIER_POLICY_DYNAMIC_THRESHOLD:
-            builder->policy = policy;
-            return 0;
-
-        default:
-            log_err("Unrecognized memory policy %u", policy);
-            return -1;
-    }
 }
 
 MEMKIND_EXPORT struct memtier_memory *

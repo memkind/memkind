@@ -97,10 +97,8 @@ class memtier_bench_alloc: public counter_bench_alloc
 public:
     memtier_bench_alloc()
     {
-        m_tier_builder = memtier_builder_new();
+        m_tier_builder = memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
         memtier_builder_add_tier(m_tier_builder, MEMKIND_DEFAULT, 1);
-        memtier_builder_set_policy(m_tier_builder,
-                                   MEMTIER_POLICY_STATIC_THRESHOLD);
         m_tier_memory =
             memtier_builder_construct_memtier_memory(m_tier_builder);
     }
@@ -132,10 +130,9 @@ class memtier_multiple_bench_alloc: public counter_bench_alloc
 public:
     memtier_multiple_bench_alloc(memtier_policy_t policy)
     {
-        m_tier_builder = memtier_builder_new();
+        m_tier_builder = memtier_builder_new(policy);
         memtier_builder_add_tier(m_tier_builder, MEMKIND_DEFAULT, 1);
         memtier_builder_add_tier(m_tier_builder, MEMKIND_REGULAR, 1);
-        memtier_builder_set_policy(m_tier_builder, policy);
         m_tier_memory =
             memtier_builder_construct_memtier_memory(m_tier_builder);
     }
