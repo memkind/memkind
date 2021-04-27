@@ -41,9 +41,10 @@ typedef enum memtier_policy_t
 ///
 /// \brief Create a memtier builder
 /// \note STANDARD API
+/// \param policy memtier policy
 /// \return memtier builder, NULL on failure
 ///
-struct memtier_builder *memtier_builder_new(void);
+struct memtier_builder *memtier_builder_new(memtier_policy_t policy);
 
 ///
 /// \brief Delete memtier builder
@@ -63,17 +64,6 @@ void memtier_builder_delete(struct memtier_builder *builder);
 ///
 int memtier_builder_add_tier(struct memtier_builder *builder, memkind_t kind,
                              unsigned kind_ratio);
-
-///
-/// \brief Set memtier policy to memtier builder
-/// \note STANDARD API
-/// \param builder memtier builder
-/// \param policy memtier policy
-/// \return Operation status, 0 on success, other values on
-/// failure
-///
-int memtier_builder_set_policy(struct memtier_builder *builder,
-                               memtier_policy_t policy);
 
 ///
 /// \brief Construct a memtier memory
