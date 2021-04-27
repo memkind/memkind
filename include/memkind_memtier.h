@@ -196,9 +196,10 @@ size_t memtier_usable_size(void *ptr);
 ///
 /// \brief Free the memory space allocated with the memtier API
 /// \note STANDARD API
+/// \param kind specified memkind kind
 /// \param ptr pointer to the allocated memory
 ///
-void memtier_free(void *ptr);
+void memtier_free(memkind_t kind, void *ptr);
 
 ///
 /// \brief Obtain size of allocated memory with the memtier API inside
