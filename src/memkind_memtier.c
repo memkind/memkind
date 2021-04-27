@@ -508,11 +508,13 @@ MEMKIND_EXPORT size_t memtier_usable_size(void *ptr)
     return jemk_malloc_usable_size(ptr);
 }
 
-MEMKIND_EXPORT void memtier_free(void *ptr)
+MEMKIND_EXPORT void memtier_kind_free(memkind_t kind, void *ptr)
 {
-    memkind_t kind = memkind_detect_kind(ptr);
-    if (!kind)
-        return;
+    if (!kind) {
+        kind = memkind_detect_kind(ptr);
+        if (!kind)
+            return;
+    }
     decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
     memkind_free(kind, ptr);
 }

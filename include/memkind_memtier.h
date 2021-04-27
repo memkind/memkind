@@ -194,11 +194,22 @@ int memtier_kind_posix_memalign(memkind_t kind, void **memptr, size_t alignment,
 size_t memtier_usable_size(void *ptr);
 
 ///
+/// \brief Free the memory space allocated with the memtier_kind API
+/// \note STANDARD API
+/// \param kind specified memkind kind
+/// \param ptr pointer to the allocated memory
+///
+void memtier_kind_free(memkind_t kind, void *ptr);
+
+///
 /// \brief Free the memory space allocated with the memtier API
 /// \note STANDARD API
 /// \param ptr pointer to the allocated memory
 ///
-void memtier_free(void *ptr);
+static inline void memtier_free(void *ptr)
+{
+    memtier_kind_free(NULL, ptr);
+}
 
 ///
 /// \brief Obtain size of allocated memory with the memtier API inside
