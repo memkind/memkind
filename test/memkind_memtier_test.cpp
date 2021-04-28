@@ -189,18 +189,18 @@ TEST_F(MemkindMemtierTest, test_tier_allocate)
     void *ptr = memtier_kind_malloc(MEMKIND_DEFAULT, size);
     ASSERT_NE(nullptr, ptr);
     ASSERT_EQ(MEMKIND_DEFAULT, memkind_detect_kind(ptr));
-    memtier_free(ptr);
+    memtier_kind_free(MEMKIND_DEFAULT, ptr);
     ptr = memtier_kind_calloc(MEMKIND_DEFAULT, size, size);
     ASSERT_NE(nullptr, ptr);
     ASSERT_EQ(MEMKIND_DEFAULT, memkind_detect_kind(ptr));
     void *new_ptr = memtier_kind_realloc(MEMKIND_DEFAULT, ptr, size);
     ASSERT_NE(nullptr, new_ptr);
     ASSERT_EQ(MEMKIND_DEFAULT, memkind_detect_kind(ptr));
-    memtier_free(new_ptr);
+    memtier_kind_free(MEMKIND_DEFAULT, new_ptr);
     int err = memtier_kind_posix_memalign(MEMKIND_DEFAULT, &ptr, 64, 32);
     ASSERT_EQ(0, err);
     ASSERT_EQ(MEMKIND_DEFAULT, memkind_detect_kind(ptr));
-    memtier_free(ptr);
+    memtier_kind_free(MEMKIND_DEFAULT, ptr);
 }
 
 TEST_F(MemkindMemtierTest, test_tier_builder_failure)
@@ -230,6 +230,8 @@ TEST_F(MemkindMemtierTest, test_tier_builder_set_policy_failure)
 TEST_F(MemkindMemtierTest, test_tier_free_nullptr)
 {
     for (int i = 0; i < 512; i++) {
+        memtier_kind_free(MEMKIND_DEFAULT, nullptr);
+        memtier_kind_free(nullptr, nullptr);
         memtier_free(nullptr);
     }
 }
@@ -378,10 +380,10 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_check_size_malloc)
     ASSERT_EQ(reg_counter, memtier_kind_allocated_size(MEMKIND_REGULAR));
 
     for (auto const &ptr : def_vec) {
-        memtier_free(ptr);
+        memtier_kind_free(nullptr, ptr);
     }
     for (auto const &ptr : reg_vec) {
-        memtier_free(ptr);
+        memtier_kind_free(nullptr, ptr);
     }
     ASSERT_EQ(0ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(0ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
@@ -567,10 +569,10 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_kind_check_size_realloc_kind)
     ASSERT_EQ(reg_counter, memtier_kind_allocated_size(MEMKIND_REGULAR));
 
     for (auto const &ptr : def_vec) {
-        memtier_free(ptr);
+        memtier_kind_free(MEMKIND_DEFAULT, ptr);
     }
     for (auto const &ptr : reg_vec) {
-        memtier_free(ptr);
+        memtier_kind_free(MEMKIND_REGULAR, ptr);
     }
     ASSERT_EQ(0ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
     ASSERT_EQ(0ULL, memtier_kind_allocated_size(MEMKIND_REGULAR));
@@ -636,10 +638,10 @@ TEST_F(MemkindMemtierMemoryTest,
     ASSERT_EQ(reg_counter, memtier_kind_allocated_size(MEMKIND_REGULAR));
 
     for (auto const &ptr : def_vec) {
-        memtier_free(ptr);
+        memtier_kind_free(MEMKIND_DEFAULT, ptr);
     }
     for (auto const &ptr : reg_vec) {
-        memtier_free(ptr);
+        memtier_kind_free(MEMKIND_REGULAR, ptr);
     }
 
     ASSERT_EQ(0ULL, memtier_kind_allocated_size(MEMKIND_DEFAULT));
