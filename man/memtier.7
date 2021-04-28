@@ -20,7 +20,7 @@ memory kinds configuration strings ended with a policy. The configuration has to
 , where:
 .IP
 .BR
-kind_name - the name of a kind used in tiering. Allowed kind names are 'DRAM' and 'FS_DAX'.
+kind_name - the name of a kind used in tiering. Allowed kind names are 'DRAM', 'DAX_KMEM' and 'FS_DAX'.
 .IP
 .BR
 path_to_pmem - the path to the location where pmem file will be created. The path has to exist. Pass this option
@@ -86,6 +86,11 @@ Example usage of MEMKIND_MEM_TIERING_CONFIG environment variable where 20% of al
 and 80% of allocations will go to DRAM:
 .IP
 .B MEMKIND_MEM_TIERING_CONFIG="FS_DAX:/tmp/:10G:1,DRAM:4,POLICY_STATIC_THRESHOLD"
+.PP
+Example usage of MEMKIND_MEM_TIERING_CONFIG environment variable where 20% of allocations will go to PMEM
+and 20% of allocations will go to DRAM and 60% of allocations will go to DAX_KMEM nodes:
+.IP
+.B MEMKIND_MEM_TIERING_CONFIG="FS_DAX:/tmp/:10G:1,DRAM:1,DAX_KMEM:3,POLICY_STATIC_THRESHOLD"
 
 .SH "COPYRIGHT"
 Copyright (C) 2021 Intel Corporation. All rights reserved.

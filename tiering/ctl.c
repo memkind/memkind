@@ -198,6 +198,9 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
 
     if (!strcmp(kind_name, "DRAM")) {
         *kind = MEMKIND_DEFAULT;
+    } else if (!strcmp(kind_name, "DAX_KMEM")) {
+        *kind = MEMKIND_DAX_KMEM;
+        memkind_malloc(*kind, 32);
     } else if (!strcmp(kind_name, "FS_DAX")) {
         pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
         if (pmem_path == NULL) {
