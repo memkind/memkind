@@ -25,7 +25,8 @@ class Helper(object):
 
     kind_name_dict = {
         'DRAM': 'memkind_default',
-        'FS_DAX': 'FS-DAX'}
+        'FS_DAX': 'FS-DAX',
+        'DAX_KMEM': 'memkind_dax_kmem'}
 
     mem_tiers_env_var = "MEMKIND_MEM_TIERS"
 
@@ -265,6 +266,17 @@ class Test_tiering_config_env(Helper):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:" + ratio + ";" + policy,
             log_level="2")
+
+    def test_DAX_KMEM(self):
+        self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=DAX_KMEM:8," + self.default_policy)
+
+    @pytest.mark.parametrize("policy", ["POLICY_STATIC_THRESHOLD",
+                                        "POLICY_DYNAMIC_THRESHOLD"])
+    def test_DAX_KMEM_multiple(self, policy):
+        self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=DAX_KMEM:1,DAX_KMEM:8,"
+            + policy, negative_test=True)
 
     @pytest.mark.parametrize("pmem_size", ["0", str(MEMKIND_PMEM_MIN_SIZE),
                                            "18446744073709551615"])

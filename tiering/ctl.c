@@ -200,6 +200,10 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
             char *kind_name = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
             if (!strcmp(kind_name, "DRAM")) {
                 *kind = MEMKIND_DEFAULT;
+            } else if (!strcmp(kind_name, "DAX_KMEM")) {
+                *kind = MEMKIND_DAX_KMEM;
+                void* ptr = memkind_malloc(*kind, 32);
+                memkind_free(*kind, ptr);
             } else if (!strcmp(kind_name, "FS_DAX")) {
                 // for FS_DAX we have to collect all parameteres before
                 // initialization
