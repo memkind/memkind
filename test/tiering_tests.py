@@ -25,7 +25,8 @@ class Helper(object):
 
     kind_name_dict = {
         'DRAM': 'memkind_default',
-        'FS_DAX': 'FS-DAX'}
+        'FS_DAX': 'FS-DAX',
+        'DAX_KMEM': 'memkind_dax_kmem'}
 
     # POLICY_STATIC_THRESHOLD is a policy used in tests that have to set a
     # valid policy but don't test anything related to allocation policies
@@ -234,6 +235,22 @@ class Test_tiering_config_env(Helper):
         self.get_ld_preload_cmd_output(
             "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio + "," + policy,
             log_level="2")
+
+    @pytest.mark.parametrize("tier", ["DAX_KMEM",
+                                      "DAX_KMEM_ALL",
+                                      "DAX_KMEM_PREFERRED",
+                                      "DAX_KMEM_INTERLEAVE"])
+    @pytest.mark.parametrize("policy", ["POLICY_STATIC_THRESHOLD",
+                                        "POLICY_DYNAMIC_THRESHOLD"])
+    def test_DAX_KMEM(self, tier, policy):
+        self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=" + tier + ":8;"
+            + policy)
+
+    def test_DAX_KMEM_multiple(self):
+        self.get_ld_preload_cmd_output(
+            "MEMKIND_MEM_TIERING_CONFIG=DAX_KMEM:1;DAX_KMEM:8;"
+            + self.default_policy, negative_test=True)
 
     @pytest.mark.parametrize("pmem_size", ["0", str(MEMKIND_PMEM_MIN_SIZE),
                                            "18446744073709551615"])
