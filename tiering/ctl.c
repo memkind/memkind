@@ -211,6 +211,8 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
         if (ret || ctl_add_pmem_kind_to_fs_dax_reg(*kind)) {
             return -1;
         }
+    } else if (!strcmp(kind_name, "DAX_KMEM")) {
+        *kind = MEMKIND_DAX_KMEM;
     } else {
         log_err("Unsupported kind: %s", kind_name);
         return -1;
