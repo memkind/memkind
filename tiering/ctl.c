@@ -15,6 +15,8 @@
 #define CTL_VALUE_SEPARATOR        ":"
 #define CTL_STRING_QUERY_SEPARATOR ","
 
+#define MAX_KIND 255
+
 typedef struct fs_dax_registry {
     unsigned size;
     memkind_t *kinds;
@@ -235,6 +237,12 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
     struct memtier_memory *tier_memory;
     memtier_policy_t policy = MEMTIER_POLICY_MAX_VALUE;
     unsigned i;
+    struct tier_cfg {
+        memkind_t kind;
+        unsigned ratio;
+    };
+
+    struct tier_cfg temp_cfg[MAX_KIND];
 
     int ret;
     char *sptr = NULL;
@@ -259,11 +267,6 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
         return NULL;
     }
 
-    struct memtier_builder *builder = memtier_builder_new();
-    if (!builder) {
-        return NULL;
-    }
-
     for (i = 0; i < tier_count; ++i) {
         memkind_t kind = NULL;
         unsigned ratio = 0;
@@ -273,10 +276,10 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
             log_err("Failed to parse query: %s", qbuf);
             goto cleanup_after_failure;
         }
-
+        temp_cfg[i].kind = kind;
+        temp_cfg[i].ratio = ratio;
         qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
 
-        ret = memtier_builder_add_tier(builder, kind, ratio);
         if (ret != 0) {
             goto cleanup_after_failure;
         }
@@ -288,21 +291,33 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
         goto cleanup_after_failure;
     }
 
-    ret = memtier_builder_set_policy(builder, policy);
-    if (ret != 0) {
+    struct memtier_builder *builder = memtier_builder_new(policy);
+    if (!builder) {
+        log_err("Failed to parse policy: %s", qbuf);
         goto cleanup_after_failure;
+    }
+
+    for (i = 0; i < tier_count; ++i) {
+        ret = memtier_builder_add_tier(builder, temp_cfg[i].kind,
+                                       temp_cfg[i].ratio);
+        if (ret != 0) {
+            log_err("Failed to add tier%s", qbuf);
+            goto destroy_builder;
+        }
     }
 
     tier_memory = memtier_builder_construct_memtier_memory(builder);
     if (!tier_memory) {
-        goto cleanup_after_failure;
+        goto destroy_builder;
     }
 
     memtier_builder_delete(builder);
     return tier_memory;
 
-cleanup_after_failure:
+destroy_builder:
     memtier_builder_delete(builder);
+
+cleanup_after_failure:
     ctl_destroy_fs_dax_reg();
 
     return NULL;

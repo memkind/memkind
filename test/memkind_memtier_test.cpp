@@ -8,7 +8,16 @@
 
 #include "common.h"
 
-class MemkindMemtierTest: public ::testing::Test
+class MemkindMemtierKindTest: public ::testing::Test
+{
+private:
+    void SetUp()
+    {}
+    void TearDown()
+    {}
+};
+
+class MemkindMemtierDynamicTest: public ::testing::Test
 {
 protected:
     struct memtier_builder *m_builder;
@@ -17,8 +26,8 @@ protected:
 private:
     void SetUp()
     {
-        m_tier_memory = NULL;
-        m_builder = memtier_builder_new();
+        m_tier_memory = nullptr;
+        m_builder = memtier_builder_new(MEMTIER_POLICY_DYNAMIC_THRESHOLD);
         ASSERT_NE(nullptr, m_builder);
     }
 
@@ -57,7 +66,8 @@ protected:
 
     void SetUp()
     {
-        struct memtier_builder *builder = memtier_builder_new();
+        struct memtier_builder *builder =
+            memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
         ASSERT_NE(nullptr, builder);
 
         int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT,
@@ -65,9 +75,6 @@ protected:
         ASSERT_EQ(0, res);
         res = memtier_builder_add_tier(builder, MEMKIND_REGULAR,
                                        MEMKIND_REGULAR_ratio);
-        ASSERT_EQ(0, res);
-        res = memtier_builder_set_policy(builder,
-                                         MEMTIER_POLICY_STATIC_THRESHOLD);
         ASSERT_EQ(0, res);
         m_tier_memory = memtier_builder_construct_memtier_memory(builder);
         ASSERT_NE(nullptr, m_tier_memory);
@@ -103,7 +110,8 @@ protected:
 
     void SetUp()
     {
-        struct memtier_builder *builder = memtier_builder_new();
+        struct memtier_builder *builder =
+            memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
         ASSERT_NE(nullptr, builder);
 
         int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT,
@@ -114,9 +122,6 @@ protected:
         ASSERT_EQ(0, res);
         res = memtier_builder_add_tier(builder, MEMKIND_HIGHEST_CAPACITY,
                                        MEMKIND_HIGHEST_CAPACITY_ratio);
-        ASSERT_EQ(0, res);
-        res = memtier_builder_set_policy(builder,
-                                         MEMTIER_POLICY_STATIC_THRESHOLD);
         ASSERT_EQ(0, res);
         m_tier_memory = memtier_builder_construct_memtier_memory(builder);
         ASSERT_NE(nullptr, m_tier_memory);
@@ -148,7 +153,8 @@ protected:
 
     void SetUp()
     {
-        struct memtier_builder *builder = memtier_builder_new();
+        struct memtier_builder *builder =
+            memtier_builder_new(MEMTIER_POLICY_DYNAMIC_THRESHOLD);
         ASSERT_NE(nullptr, builder);
 
         int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT,
@@ -156,9 +162,6 @@ protected:
         ASSERT_EQ(0, res);
         res = memtier_builder_add_tier(builder, MEMKIND_REGULAR,
                                        MEMKIND_REGULAR_ratio);
-        ASSERT_EQ(0, res);
-        res = memtier_builder_set_policy(builder,
-                                         MEMTIER_POLICY_DYNAMIC_THRESHOLD);
         ASSERT_EQ(0, res);
         m_tier_memory = memtier_builder_construct_memtier_memory(builder);
         ASSERT_NE(nullptr, m_tier_memory);
@@ -171,7 +174,7 @@ protected:
     }
 };
 
-TEST_F(MemkindMemtierTest, test_tier_size_after_destroy)
+TEST_F(MemkindMemtierKindTest, test_tier_size_after_destroy)
 {
     const size_t size = 512;
     struct memkind *kind = nullptr;
@@ -183,7 +186,7 @@ TEST_F(MemkindMemtierTest, test_tier_size_after_destroy)
     ASSERT_EQ(0U, memtier_kind_allocated_size(kind));
 }
 
-TEST_F(MemkindMemtierTest, test_tier_allocate)
+TEST_F(MemkindMemtierKindTest, test_tier_allocate)
 {
     const size_t size = 512;
     void *ptr = memtier_kind_malloc(MEMKIND_DEFAULT, size);
@@ -203,31 +206,35 @@ TEST_F(MemkindMemtierTest, test_tier_allocate)
     memtier_kind_free(MEMKIND_DEFAULT, ptr);
 }
 
-TEST_F(MemkindMemtierTest, test_tier_builder_failure)
+TEST_F(MemkindMemtierKindTest, test_tier_builder_failure)
 {
-    int res = memtier_builder_add_tier(m_builder, nullptr, 1);
+    struct memtier_builder *builder =
+        memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_builder_add_tier(builder, nullptr, 1);
     ASSERT_NE(0, res);
+    memtier_builder_delete(builder);
 }
 
-TEST_F(MemkindMemtierTest, test_tier_construct_failure_zero_tiers)
+TEST_F(MemkindMemtierKindTest, test_tier_construct_failure_zero_tiers)
 {
-    int res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_STATIC_THRESHOLD);
-    ASSERT_EQ(0, res);
-    m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
-    ASSERT_EQ(nullptr, m_tier_memory);
+    struct memtier_builder *builder =
+        memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
+    ASSERT_NE(nullptr, builder);
+    struct memtier_memory *tier_memory =
+        memtier_builder_construct_memtier_memory(builder);
+    ASSERT_EQ(nullptr, tier_memory);
+    memtier_builder_delete(builder);
 }
 
-TEST_F(MemkindMemtierTest, test_tier_builder_set_policy_failure)
+TEST_F(MemkindMemtierKindTest, test_tier_builder_set_policy_failure)
 {
-    int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
-    ASSERT_EQ(0, res);
     memtier_policy_t fake_policy = static_cast<memtier_policy_t>(-1);
-    res = memtier_builder_set_policy(m_builder, fake_policy);
-    ASSERT_NE(0, res);
+    struct memtier_builder *builder = memtier_builder_new(fake_policy);
+    ASSERT_EQ(nullptr, builder);
 }
 
-TEST_F(MemkindMemtierTest, test_tier_free_nullptr)
+TEST_F(MemkindMemtierKindTest, test_tier_free_nullptr)
 {
     for (int i = 0; i < 512; i++) {
         memtier_kind_free(MEMKIND_DEFAULT, nullptr);
@@ -236,20 +243,18 @@ TEST_F(MemkindMemtierTest, test_tier_free_nullptr)
     }
 }
 
-TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_two_kinds)
+TEST_F(MemkindMemtierDynamicTest, test_tier_policy_dynamic_threshold_two_kinds)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
     ASSERT_EQ(0, res);
     res = memtier_builder_add_tier(m_builder, MEMKIND_REGULAR, 1);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_three_kinds)
+TEST_F(MemkindMemtierDynamicTest,
+       test_tier_policy_dynamic_threshold_three_kinds)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
     ASSERT_EQ(0, res);
@@ -257,25 +262,20 @@ TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_three_kinds)
     ASSERT_EQ(0, res);
     res = memtier_builder_add_tier(m_builder, MEMKIND_HIGHEST_CAPACITY, 3);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_failure_one_tier)
+TEST_F(MemkindMemtierDynamicTest,
+       test_tier_policy_dynamic_threshold_failure_one_tier)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
-    ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
     ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_EQ(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_ctl_set)
+TEST_F(MemkindMemtierDynamicTest, test_tier_policy_dynamic_threshold_ctl_set)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
     ASSERT_EQ(0, res);
@@ -307,14 +307,12 @@ TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_ctl_set)
     res = memtier_ctl_set(m_builder,
                           "policy.dynamic_threshold.thresholds[1].max", &val);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_ctl_set_only_val)
+TEST_F(MemkindMemtierDynamicTest,
+       test_tier_policy_dynamic_threshold_ctl_set_only_val)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
     ASSERT_EQ(0, res);
@@ -324,14 +322,12 @@ TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_ctl_set_only_val)
     res = memtier_ctl_set(m_builder,
                           "policy.dynamic_threshold.thresholds[0].val", &val);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_ctl_set_internals)
+TEST_F(MemkindMemtierDynamicTest,
+       test_tier_policy_dynamic_threshold_ctl_set_internals)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
     ASSERT_EQ(0, res);
@@ -352,14 +348,11 @@ TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_ctl_set_internals)
     size_t step = 1024;
     res = memtier_ctl_set(m_builder, "policy.dynamic_threshold.step", &step);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest,
+TEST_F(MemkindMemtierDynamicTest,
        test_tier_policy_dynamic_threshold_ctl_set_only_first)
 {
     size_t val = 8000;
@@ -378,14 +371,12 @@ TEST_F(MemkindMemtierTest,
     ASSERT_EQ(0, res);
     res = memtier_builder_add_tier(m_builder, MEMKIND_HIGHEST_CAPACITY, 3);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_ctl_set_only_last)
+TEST_F(MemkindMemtierDynamicTest,
+       test_tier_policy_dynamic_threshold_ctl_set_only_last)
 {
     size_t val = 8000;
     int res = memtier_ctl_set(
@@ -403,14 +394,11 @@ TEST_F(MemkindMemtierTest, test_tier_policy_dynamic_threshold_ctl_set_only_last)
     ASSERT_EQ(0, res);
     res = memtier_builder_add_tier(m_builder, MEMKIND_HIGHEST_CAPACITY, 3);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest,
+TEST_F(MemkindMemtierDynamicTest,
        test_tier_policy_dynamic_threshold_ctl_failure_invalid_name)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
@@ -440,7 +428,7 @@ TEST_F(MemkindMemtierTest,
     ASSERT_NE(0, res);
 }
 
-TEST_F(MemkindMemtierTest,
+TEST_F(MemkindMemtierDynamicTest,
        test_tier_policy_dynamic_threshold_ctl_failure_min_max)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
@@ -454,14 +442,11 @@ TEST_F(MemkindMemtierTest,
     val = 1;
     res = memtier_ctl_set(m_builder,
                           "policy.dynamic_threshold.thresholds[0].max", &val);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_EQ(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest,
+TEST_F(MemkindMemtierDynamicTest,
        test_tier_policy_dynamic_threshold_ctl_failure_min_val)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
@@ -476,14 +461,11 @@ TEST_F(MemkindMemtierTest,
     res = memtier_ctl_set(m_builder,
                           "policy.dynamic_threshold.thresholds[0].val", &val);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_EQ(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest,
+TEST_F(MemkindMemtierDynamicTest,
        test_tier_policy_dynamic_threshold_ctl_failure_val_max)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
@@ -498,14 +480,11 @@ TEST_F(MemkindMemtierTest,
     res = memtier_ctl_set(m_builder,
                           "policy.dynamic_threshold.thresholds[0].max", &val);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_EQ(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest,
+TEST_F(MemkindMemtierDynamicTest,
        test_tier_policy_dynamic_threshold_ctl_failure_max_min)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
@@ -521,14 +500,12 @@ TEST_F(MemkindMemtierTest,
     res = memtier_ctl_set(m_builder,
                           "policy.dynamic_threshold.thresholds[1].min", &val);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
+    ;
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_EQ(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest,
+TEST_F(MemkindMemtierDynamicTest,
        test_tier_policy_dynamic_threshold_ctl_failure_negative_thres_degree)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
@@ -539,14 +516,11 @@ TEST_F(MemkindMemtierTest,
     res =
         memtier_ctl_set(m_builder, "policy.dynamic_threshold.degree", &degree);
     ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_EQ(nullptr, m_tier_memory);
 }
 
-TEST_F(MemkindMemtierTest,
+TEST_F(MemkindMemtierDynamicTest,
        test_tier_policy_dynamic_threshold_ctl_failure_negative_thres_trigger)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
@@ -556,9 +530,6 @@ TEST_F(MemkindMemtierTest,
     float trigger = -1.5;
     res = memtier_ctl_set(m_builder, "policy.dynamic_threshold.trigger",
                           &trigger);
-    ASSERT_EQ(0, res);
-    res =
-        memtier_builder_set_policy(m_builder, MEMTIER_POLICY_DYNAMIC_THRESHOLD);
     ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_EQ(nullptr, m_tier_memory);
