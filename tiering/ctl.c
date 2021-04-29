@@ -13,7 +13,8 @@
 #include <string.h>
 
 #define CTL_VALUE_SEPARATOR        ":"
-#define CTL_STRING_QUERY_SEPARATOR ","
+#define CTL_PARAM_SEPARATOR        ","
+#define CTL_STRING_QUERY_SEPARATOR ";"
 
 #define MAX_KIND 255
 
@@ -150,9 +151,9 @@ parse_failure:
  */
 static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
 {
-    if (strcmp(qbuf, "POLICY_STATIC_THRESHOLD") == 0) {
+    if (strcmp(qbuf, "STATIC_THRESHOLD") == 0) {
         *policy = MEMTIER_POLICY_STATIC_THRESHOLD;
-    } else if (strcmp(qbuf, "POLICY_DYNAMIC_THRESHOLD") == 0) {
+    } else if (strcmp(qbuf, "DYNAMIC_THRESHOLD") == 0) {
         *policy = MEMTIER_POLICY_DYNAMIC_THRESHOLD;
     } else {
         log_err("Unknown policy: %s", qbuf);
@@ -186,27 +187,62 @@ static int ctl_parse_ratio(char **sptr, unsigned *dest)
 static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
 {
     char *sptr = NULL;
-    char *pmem_path = NULL;
-    size_t pmem_size = 1;
+    char *ratio_str = NULL;
     int ret = -1;
 
-    char *kind_name = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
-    if (kind_name == NULL) {
-        log_err("Kind name string not found in: %s", qbuf);
+    int is_pmem = 0;
+    char *pmem_path = NULL;
+    char *pmem_size_str = NULL;
+
+    char *param_str = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
+    while (param_str != NULL) {
+        if (!strcmp(param_str, "KIND")) {
+            char *kind_name = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
+            if (!strcmp(kind_name, "DRAM")) {
+                *kind = MEMKIND_DEFAULT;
+            } else if (!strcmp(kind_name, "FS_DAX")) {
+                // for FS_DAX we have to collect all parameteres before
+                // initialization
+                is_pmem = 1;
+            } else {
+                log_err("Unsupported kind: %s", kind_name);
+                return -1;
+            }
+        } else if (!strcmp(param_str, "PATH")) {
+            pmem_path = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
+        } else if (!strcmp(param_str, "PMEM_SIZE_LIMIT")) {
+            pmem_size_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
+        } else if (!strcmp(param_str, "RATIO")) {
+            ratio_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
+            ret = ctl_parse_ratio(&ratio_str, ratio);
+            if (ret != 0) {
+                return -1;
+            }
+        }
+
+        param_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
+    }
+
+    if (!kind) {
+        log_err("KIND param not found");
+        return -1;
+    } else if (!ratio_str) {
+        log_err("RATIO param not found");
         return -1;
     }
 
-    if (!strcmp(kind_name, "DRAM")) {
-        *kind = MEMKIND_DEFAULT;
-    } else if (!strcmp(kind_name, "FS_DAX")) {
-        pmem_path = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
-        if (pmem_path == NULL) {
+    if (is_pmem) {
+        if (!pmem_path) {
+            log_err("PATH param (required for FS_DAX) not found");
             return -1;
         }
 
-        ret = ctl_parse_pmem_size(&sptr, &pmem_size);
-        if (ret != 0) {
-            return -1;
+        size_t pmem_size = 0;
+        if (pmem_size_str) {
+            ret = ctl_parse_pmem_size(&pmem_size_str, &pmem_size);
+            if (ret != 0) {
+                return -1;
+            }
         }
 
         ret = memkind_create_pmem(pmem_path, pmem_size, kind);
@@ -214,13 +250,15 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
             return -1;
         }
     } else {
-        log_err("Unsupported kind: %s", kind_name);
-        return -1;
-    }
+        if (pmem_path) {
+            log_err("PATH param can be defined only for FS_DAX kind");
+            return -1;
+        }
 
-    ret = ctl_parse_ratio(&sptr, ratio);
-    if (ret != 0) {
-        return -1;
+        if (pmem_size_str) {
+            log_err("MAX_SIZE param can be defined only for FS_DAX kind");
+            return -1;
+        }
     }
 
     /* the value itself mustn't include CTL_VALUE_SEPARATOR */
@@ -285,9 +323,15 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
         }
     }
 
-    ret = ctl_parse_policy(qbuf, &policy);
-    if (ret != 0) {
-        log_err("Failed to parse policy: %s", qbuf);
+    qbuf = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
+    if (!strcmp(qbuf, "POLICY")) {
+        ret = ctl_parse_policy(sptr, &policy);
+        if (ret != 0) {
+            log_err("Failed to parse policy: %s", qbuf);
+            goto cleanup_after_failure;
+        }
+    } else {
+        log_err("Failed to parse query: %s", qbuf);
         goto cleanup_after_failure;
     }
 
