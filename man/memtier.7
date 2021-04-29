@@ -12,22 +12,24 @@ command {arguments ...}
 
 .SH "ENVIRONMENT"
 .TP
-.B MEMKIND_MEM_TIERING_CONFIG
-Sets the memkind tiering functionality. Passed as a comma separated list of
-memory kinds configuration strings ended with a policy. The configuration has to be passed in the following format:
+.B MEMKIND_MEM_TIERS
+Sets the memkind tiering functionality. Passed as a semicolon separated list
+of tier configurations ended with a policy parameter. Each configuration consists of
+comma separated list of parameters in following format:
 .IP
-"kind_name:[path_to_pmem:pmem_file_size:]ratio,(...),policy"
-, where:
+"name:value,(...)"
+, where the name of the parameter could be "KIND" or "RATIO" for all
+tiers, "PATH" or "MAX_SIZE" for FS_DAX tiers or "POLICY" for defining allocation
+policy that has to be used. The description of specyfic parameters and allowed values is following:
+.BR
+KIND - the name of a kind used in tiering. Allowed kind names are 'DRAM' and 'FS_DAX'.
 .IP
 .BR
-kind_name - the name of a kind used in tiering. Allowed kind names are 'DRAM' and 'FS_DAX'.
-.IP
-.BR
-path_to_pmem - the path to the location where pmem file will be created. The path has to exist. Pass this option
+PATH - the path to the location where pmem file will be created. The path has to exist. Pass this option
 only with FS_DAX kind.
 .IP
 .BR
-pmem_file_size - the size of pmem file, it's the maximum size of total allocations to PMEM. Pass this option
+MAX_SIZE - the size of pmem file, it's the maximum size of total allocations to PMEM. Pass this option
 only with FS_DAX kind. The accepted formats are: 1, 1K, 1M, 1G. See
 .I memkind(3)
 manual for information about limitations to this value which are the same as for the
@@ -37,13 +39,15 @@ value in
 function.
 .IP
 .BR
-ratio - the part of ratio tied to the given kind. It's represented as an
+RATIO - the part of ratio tied to the given kind. It's represented as an
 .I unsigned
 type. Value should be in range from 1 to
 .I UINT_MAX
 .IP
 .BR
-policy - determines the algorithm used to distribute allocations between provided memory kinds. Currently only
+POLICY - determines the algorithm used to distribute allocations between
+provided memory kinds. This parameter has to be the last parameter in configuration
+string. Currently only
 .I POLICY_STATIC_THRESHOLD
 and
 .I POLICY_DYNAMIC_THRESHOLD
@@ -56,7 +60,7 @@ the ratio between adjacent memory tiers is kept with a help of set of thresholds
 See
 .I EXAMPLES
 section for an example of usage of
-.I MEMKIND_MEM_TIERING_CONFIG
+.I MEMKIND_MEM_TIERS
 environment variable.
 .IP
 NOTE: The application will fail when provided environment variable string is not in a correct format.
@@ -82,10 +86,10 @@ both libmemtier.so and libmemkind.so are included in
 .B LD_PRELOAD=libmemtier.so
 /bin/ls -l
 .PP
-Example usage of MEMKIND_MEM_TIERING_CONFIG environment variable where 20% of allocations will go to PMEM
+Example usage of MEMKIND_MEM_TIERS environment variable where 20% of allocations will go to PMEM
 and 80% of allocations will go to DRAM:
 .IP
-.B MEMKIND_MEM_TIERING_CONFIG="FS_DAX:/tmp/:10G:1,DRAM:4,POLICY_STATIC_THRESHOLD"
+.B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,MAX_SIZE:10G,RATIO:1;KIND:DRAM,RATIO:4;POLICY:POLICY_STATIC_THRESHOLD"
 
 .SH "COPYRIGHT"
 Copyright (C) 2021 Intel Corporation. All rights reserved.
