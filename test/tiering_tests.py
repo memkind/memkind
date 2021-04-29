@@ -27,9 +27,11 @@ class Helper(object):
         'DRAM': 'memkind_default',
         'FS_DAX': 'FS-DAX'}
 
+    mem_tiers_env_var = "MEMKIND_MEM_TIERS"
+
     # POLICY_STATIC_THRESHOLD is a policy used in tests that have to set a
     # valid policy but don't test anything related to allocation policies
-    default_policy = "POLICY_STATIC_THRESHOLD"
+    default_policy = "POLICY:STATIC_THRESHOLD"
 
     @staticmethod
     def bytes_from_str(bytes_str):
@@ -51,10 +53,11 @@ class Helper(object):
                     return True
         return False
 
-    def get_ld_preload_cmd_output(self, config_env, log_level=None,
+    def get_ld_preload_cmd_output(self, config, log_level=None,
                                   negative_test=False):
         log_level_env = self.log_prefix + "LOG_LEVEL=" + log_level \
             if log_level else ""
+        config_env = self.mem_tiers_env_var + '="' + config + '"'
         command = " ".join([self.ld_preload_env, log_level_env,
                             config_env, self.bin_path])
         output, retcode = self.cmd.execute_cmd(command)
@@ -82,7 +85,7 @@ class Test_tiering_log(Helper):
         default_output = self.get_default_cmd_output()
 
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy,
+            "KIND:DRAM,RATIO:1;" + self.default_policy,
             log_level="1")
 
         assert output[0] == self.log_info_prefix + \
@@ -96,8 +99,7 @@ class Test_tiering_log(Helper):
         default_output = self.get_default_cmd_output()
 
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy,
-            log_level="0")
+            "KIND:DRAM,RATIO:1;" + self.default_policy, log_level="0")
 
         assert output == default_output, "Bad command output"
 
@@ -105,7 +107,7 @@ class Test_tiering_log(Helper):
         default_output = self.get_default_cmd_output()
 
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy)
+            "KIND:DRAM,RATIO:1;" + self.default_policy)
 
         assert output == default_output, "Bad command output"
 
@@ -131,7 +133,7 @@ class Test_tiering_log(Helper):
         default_output = self.get_default_cmd_output()
 
         output = self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy,
+            "KIND:DRAM,RATIO:1;" + self.default_policy,
             log_level="2")
 
         assert output[0] == self.log_debug_prefix + \
@@ -193,7 +195,7 @@ class Test_memkind_log(Helper):
 
     def test_DRAM_only(self):
         memkind_debug_env = "MEMKIND_DEBUG=1"
-        tiering_cfg_env = "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + \
+        tiering_cfg_env = "KIND:DRAM,RATIO:1;" + \
             self.default_policy
 
         command = " ".join([self.ld_preload_env, tiering_cfg_env,
@@ -215,76 +217,103 @@ class Test_memkind_log(Helper):
 
 class Test_tiering_config_env(Helper):
 
+    def test_DRAM_ratio_first(self):
+        self.get_ld_preload_cmd_output(
+            "RATIO:1,KIND:DRAM;" + self.default_policy,
+            log_level="2")
+
+    @pytest.mark.parametrize("param_name",
+                             ["fafes", "fdas3rfs43", "%#3^"])
+    def test_bad_param_name(self, param_name):
+        self.get_ld_preload_cmd_output(
+            "RATIO:1," + param_name + ":DRAM;" + self.default_policy,
+            negative_test=True)
+
+    @pytest.mark.parametrize("param_name",
+                             ["PMEM_SIZE_LIMIT:1G", "PATH:/tmp/"])
+    def test_unsupported_param(self, param_name):
+        self.get_ld_preload_cmd_output(
+            "KIND:DRAM," + param_name + ",RATIO:1;" + self.default_policy,
+            negative_test=True)
+
+    @pytest.mark.parametrize("fsdax_cfg",
+                             ["KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:10G,"
+                              "RATIO:1",
+                              "PATH:/tmp/,KIND:FS_DAX,PMEM_SIZE_LIMIT:10G,"
+                              "RATIO:1",
+                              "KIND:FS_DAX,PMEM_SIZE_LIMIT:10G,PATH:/tmp/,"
+                              "RATIO:1",
+                              "RATIO:1,PMEM_SIZE_LIMIT:10G,KIND:FS_DAX,"
+                              "PATH:/tmp/"])
+    def test_FS_DAX_various_param_order(self, fsdax_cfg):
+        self.get_ld_preload_cmd_output(
+            fsdax_cfg + ";" + self.default_policy,
+            log_level="2")
+
     def test_no_config(self):
         self.get_ld_preload_cmd_output('', negative_test=True)
-
-    def test_empty_config(self):
-        self.get_ld_preload_cmd_output(
-            'MEMKIND_MEM_TIERING_CONFIG=""', negative_test=True)
 
     @pytest.mark.parametrize("ratio", ["1", "1000", "4294967295"])
     def test_DRAM_ratio(self, ratio):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio + "," +
-            self.default_policy, log_level="2")
+            "KIND:DRAM,RATIO:" + ratio + ";" + self.default_policy,
+            log_level="2")
 
-    @pytest.mark.parametrize("policy", ["POLICY_STATIC_THRESHOLD"])
+    @pytest.mark.parametrize("policy", ["POLICY:STATIC_THRESHOLD"])
     def test_DRAM_policy(self, policy):
         ratio = "1"
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:" + ratio + "," + policy,
+            "KIND:DRAM,RATIO:" + ratio + ";" + policy,
             log_level="2")
 
     @pytest.mark.parametrize("pmem_size", ["0", str(MEMKIND_PMEM_MIN_SIZE),
                                            "18446744073709551615"])
     def test_FSDAX(self, pmem_size):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" +
-            pmem_size + ":1," + self.default_policy,
-            log_level="2")
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:" + pmem_size +
+            ",RATIO:1;" + self.default_policy, log_level="2")
 
     @pytest.mark.parametrize("pmem_size",
                              ["1073741824", "1048576K", "1024M", "1G"])
     def test_FSDAX_pmem_size_with_suffix(self, pmem_size):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" +
-            pmem_size + ":1," + self.default_policy,
-            log_level="2")
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:" + pmem_size +
+            ",RATIO:1;" + self.default_policy, log_level="2")
 
     @pytest.mark.parametrize("pmem_size",
                              ["-1", "-4294967295", "-18446744073709551615",
                               "18446744073709551616"])
     def test_FSDAX_pmem_size_outside_limits(self, pmem_size):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
-            self.default_policy,
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:" + pmem_size +
+            ",RATIO:1;" + self.default_policy,
             negative_test=True)
 
     @pytest.mark.parametrize("pmem_size",
                              ["1", str(MEMKIND_PMEM_MIN_SIZE - 1)])
     def test_FSDAX_pmem_size_too_small(self, pmem_size):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
-            self.default_policy, negative_test=True)
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:" + pmem_size +
+            ",RATIO:1;" + self.default_policy, negative_test=True)
 
     @pytest.mark.parametrize("pmem_size",
                              ["18446744073709551615K", "18446744073709551615M",
                               "18446744073709551615G"])
     def test_FSDAX_pmem_size_with_suffix_too_big(self, pmem_size):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
-            self.default_policy,
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT" + pmem_size +
+            ",RATIO:1;" + self.default_policy,
             negative_test=True)
 
     def test_FSDAX_no_size(self):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX", negative_test=True)
+            "KIND:FS_DAX", negative_test=True)
 
     @pytest.mark.parametrize("pmem_size", ["as", "10K1", "M", "M2", "10KM"])
     def test_FSDAX_wrong_size(self, pmem_size):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:" + pmem_size + ":1," +
-            self.default_policy,
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:" + pmem_size +
+            ",RATIO:1;" + self.default_policy,
             negative_test=True)
 
     def test_FSDAX_check_only_fs_dax(self):
@@ -292,102 +321,116 @@ class Test_tiering_config_env(Helper):
         if not self.check_fs_dax_support():
             pytest.skip("Missing FS DAX mounted on" + pmem_path)
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:" +
-            pmem_path + ":1G:1," + self.default_policy, log_level="2")
+            "KIND:FS_DAX,PATH:" + pmem_path + ",PMEM_SIZE_LIMIT:1G,RATIO:1;" +
+            self.default_policy, log_level="2")
 
     def test_FSDAX_negative_ratio(self):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:-1," +
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:10G,RATIO:-1;" +
             self.default_policy,
             negative_test=True)
 
     def test_FSDAX_wrong_ratio(self):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=FS_DAX:/tmp/:10G:a," +
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:10G,RATIO:a;" +
             self.default_policy,
             negative_test=True)
 
-    def test_class_not_defined(self):
+    def test_FSDAX_no_path(self):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=2", negative_test=True)
+            "KIND:FS_DAX,PMEM_SIZE_LIMIT:10G,RATIO:1;" +
+            self.default_policy,
+            negative_test=True)
+
+    def test_FSDAX_no_max_size(self):
+        self.get_ld_preload_cmd_output(
+            "KIND:FS_DAX,PATH:/tmp/,RATIO:1;" +
+            self.default_policy, log_level="2")
+
+    def test_class_not_defined(self):
+        self.get_ld_preload_cmd_output("2", negative_test=True)
 
     def test_bad_ratio(self):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:A," +
-            self.default_policy, negative_test=True)
+            "KIND:DRAM,RATIO:A;" + self.default_policy, negative_test=True)
 
     def test_no_ratio(self):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM," +
-            self.default_policy, negative_test=True)
+            "KIND:DRAM;" + self.default_policy, negative_test=True)
 
     def test_bad_class(self):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=a1b2:10," +
-            self.default_policy, negative_test=True)
+            "KIND:a1b2,RATIO:10;" + self.default_policy, negative_test=True)
 
     def test_negative_ratio(self):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:-1," +
-            self.default_policy, negative_test=True)
+            "KIND:DRAM,RATIO:-1;" + self.default_policy, negative_test=True)
 
     @pytest.mark.parametrize("policy_str",
                              ["ABC", "5252", "1AB2C3", "#@%srfs"])
     def test_negative_unsupported_policy(self, policy_str):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + policy_str,
+            "KIND:DRAM,RATIO:1;POLICY:" + policy_str,
             negative_test=True)
 
     def test_negative_multiple_policies(self):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1," + self.default_policy +
-            "," + self.default_policy, negative_test=True)
+            "KIND:DRAM,RATIO:1;" + self.default_policy +
+            ";" + self.default_policy, negative_test=True)
 
     def test_negative_policy_not_last(self):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=" + self.default_policy + ",DRAM:1",
+            self.default_policy + ";KIND:DRAM,RATIO:1",
             negative_test=True)
 
     @pytest.mark.parametrize("config_str", ["", ",", ",,,"])
     def test_negative_config_str_invalid(self, config_str):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=" + config_str, negative_test=True)
+            config_str, negative_test=True)
 
     @pytest.mark.parametrize("query_str", [":", ":::"])
     def test_negative_query_str_invalid(self, query_str):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=" + query_str + "," +
+            "KIND" + query_str + "DRAM;" +
             self.default_policy, negative_test=True)
 
     @pytest.mark.parametrize("tier_str",
-                             ["DRAM:1", "FS_DAX:/tmp/:100M:1",
-                              "DRAM:1,FS_DAX:/tmp/:100M:1"])
+                             ["KIND:DRAM,RATIO:1",
+                              "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,"
+                              "RATIO:1",
+                              "KIND:DRAM,RATIO:1;KIND:FS_DAX,PATH:/tmp/,"
+                              "PMEM_SIZE_LIMIT:100M,RATIO:1"])
     def test_negative_no_policy(self, tier_str):
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=" + tier_str, negative_test=True)
+            tier_str, negative_test=True)
 
     @pytest.mark.parametrize("policy",
-                             ["POLICY_STATIC_THRESHOLD",
-                              "POLICY_DYNAMIC_THRESHOLD"])
+                             ["POLICY:STATIC_THRESHOLD",
+                              "POLICY:DYNAMIC_THRESHOLD"])
     def test_multiple_tiers(self, policy):
         assert os.access("/mnt", os.W_OK | os.X_OK), \
             "Write and execute permissions to the /mnt directory "
         "are required for this test"
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1,FS_DAX:/tmp/:100M:4,"
-            "FS_DAX:/mnt:150M:8," + policy, log_level="2")
+            "KIND:DRAM,RATIO:1;KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,"
+            "RATIO:4;KIND:FS_DAX,PATH:/mnt,PMEM_SIZE_LIMIT:150M,RATIO:8;" +
+            policy, log_level="2")
 
     @pytest.mark.parametrize("wrong_tier",
-                             ["non_existent:/mnt:150M:8",
-                              "FS_DAX:/non_existent:150M:8",
-                              "FS_DAX:/mnt:1M:8",
-                              "FS_DAX:/mnt:150M:0",
-                              "DRAM:1"])
+                             ["KIND:non_existent,PATH:/mnt,"
+                              "PMEM_SIZE_LIMIT:150M,RATIO:8",
+                              "KIND:FS_DAX,PATH:/non_existent,"
+                              "PMEM_SIZE_LIMIT:150M,RATIO:8",
+                              "KIND:FS_DAX,PATH:/mnt,PMEM_SIZE_LIMIT:1M,"
+                              "RATIO:8",
+                              "KIND:FS_DAX,PATH:/mnt,PMEM_SIZE_LIMIT:150M,"
+                              "RATIO:0",
+                              "KIND:DRAM,RATIO:1"])
     def test_multiple_tiers_wrong_tier(self, wrong_tier):
         assert os.access("/mnt", os.W_OK | os.X_OK), \
             "Write and execute permissions to the /mnt directory "
         "are required for this test"
         self.get_ld_preload_cmd_output(
-            "MEMKIND_MEM_TIERING_CONFIG=DRAM:1,FS_DAX:/tmp/:100M:4," +
-            wrong_tier + "," + self.default_policy, log_level="2",
+            "KIND:DRAM,RATIO:1;KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M," +
+            "RATIO:4;" + wrong_tier + ";" + self.default_policy, log_level="2",
             negative_test=True)
