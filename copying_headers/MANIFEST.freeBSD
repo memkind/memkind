@@ -164,8 +164,9 @@ test/memkind_defrag_reallocate.cpp
 test/memkind_detect_kind_tests.cpp
 test/memkind_highcapacity_test.cpp
 test/memkind_hmat_tests.cpp
-test/memkind_null_kind_test.cpp
+test/memkind_memtier_dax_kmem_test.cpp
 test/memkind_memtier_test.cpp
+test/memkind_null_kind_test.cpp
 test/memkind_pmem_config_tests.cpp
 test/memkind_pmem_long_time_tests.cpp
 test/memkind_pmem_tests.cpp
