@@ -90,6 +90,11 @@ Example usage of MEMKIND_MEM_TIERS environment variable where 20% of allocations
 and 80% of allocations will go to DRAM:
 .IP
 .B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:10G,RATIO:1;KIND:DRAM,RATIO:4;POLICY:STATIC_THRESHOLD"
+.PP
+Example usage of MEMKIND_MEM_TIERS environment variable where 100% of allocations will go to PMEM
+with filesystem created on top of it:
+.IP
+.B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,RATIO:1;POLICY:STATIC_THRESHOLD"
 
 .SH "COPYRIGHT"
 Copyright (C) 2021 Intel Corporation. All rights reserved.
