@@ -64,7 +64,6 @@
 #else
 #error "Missing atomic implementation."
 #endif
-// clang-format on
 
 // Default values for DYNAMIC_THRESHOLD configuration
 // TRIGGER       - threshold between tiers will be updated if a difference
@@ -109,6 +108,7 @@ struct memtier_builder {
     size_t step;        // Step (in bytes) between thresholds
     // Builder operations
     struct memtier_memory *(*create_mem)(struct memtier_builder *builder);
+    int (*ctl_set)(struct memtier_builder *builder, const char *name, const void *val);
 };
 
 struct memtier_memory {
@@ -125,6 +125,7 @@ struct memtier_memory {
     memkind_t (*get_kind)(struct memtier_memory *memory, size_t size);
     void (*update_cfg)(struct memtier_memory *memory);
 };
+// clang-format on
 
 #define THREAD_BUCKETS  (256U)
 #define FLUSH_THRESHOLD (51200)
@@ -330,6 +331,13 @@ builder_static_create_memory(struct memtier_builder *builder)
     return memory;
 }
 
+static int builder_static_ctl_set(struct memtier_builder *builder,
+                                  const char *name, const void *val)
+{
+    log_err("Invalid name: %s", name);
+    return -1;
+}
+
 static int memtier_builder_create_threshold(struct memtier_builder *builder,
                                             unsigned id)
 {
@@ -367,6 +375,65 @@ static int memtier_builder_create_threshold(struct memtier_builder *builder,
     }
 
     return 0;
+}
+
+static int builder_dynamic_ctl_set(struct memtier_builder *builder,
+                                   const char *name, const void *val)
+{
+    const char *query = name;
+    char name_substr[256] = {0};
+    int chr_read = 0;
+
+    sscanf(query, "policy.dynamic_threshold.%n", &chr_read);
+    if (chr_read == sizeof("policy.dynamic_threshold.") - 1) {
+        query += chr_read;
+
+        int ret = sscanf(query, "%[^\[]%n", name_substr, &chr_read);
+        if (ret && strcmp(name_substr, "thresholds") == 0) {
+            query += chr_read;
+
+            int th_id = -1;
+            ret = sscanf(query, "[%d]%n", &th_id, &chr_read);
+            if (th_id >= 0) {
+                query += chr_read;
+
+                // make sure that threshold configuration of th_id exist
+                int ret = memtier_builder_create_threshold(builder, th_id);
+                if (ret != 0) {
+                    return -1;
+                }
+
+                struct memtier_threshold_cfg *thres = &builder->thres[th_id];
+
+                ret = sscanf(query, ".%s", name_substr);
+                if (ret && strcmp(name_substr, "val") == 0) {
+                    thres->val = *(size_t *)val;
+                    return 0;
+                } else if (ret && strcmp(name_substr, "min") == 0) {
+                    thres->min = *(size_t *)val;
+                    return 0;
+                } else if (ret && strcmp(name_substr, "max") == 0) {
+                    thres->max = *(size_t *)val;
+                    return 0;
+                }
+            }
+        } else if (ret && strcmp(name_substr, "check_cnt") == 0) {
+            builder->check_cnt = *(unsigned *)val;
+            return 0;
+        } else if (ret && strcmp(name_substr, "trigger") == 0) {
+            builder->trigger = *(float *)val;
+            return 0;
+        } else if (ret && strcmp(name_substr, "degree") == 0) {
+            builder->degree = *(float *)val;
+            return 0;
+        } else if (ret && strcmp(name_substr, "step") == 0) {
+            builder->step = *(size_t *)val;
+            return 0;
+        }
+    }
+
+    log_err("Invalid name: %s", query);
+    return -1;
 }
 
 static int memtier_policy_dynamic_threshold_construct_memtier_memory(
@@ -501,10 +568,12 @@ memtier_builder_new(memtier_policy_t policy)
         switch (policy) {
             case MEMTIER_POLICY_STATIC_THRESHOLD:
                 b->create_mem = builder_static_create_memory;
+                b->ctl_set = builder_static_ctl_set;
                 b->thres = NULL;
                 return b;
             case MEMTIER_POLICY_DYNAMIC_THRESHOLD:
                 b->create_mem = builder_dynamic_create_memory;
+                b->ctl_set = builder_dynamic_ctl_set;
                 b->thres = NULL;
                 b->check_cnt = THRESHOLD_CHECK_CNT;
                 b->trigger = THRESHOLD_TRIGGER;
@@ -578,60 +647,7 @@ MEMKIND_EXPORT void memtier_delete_memtier_memory(struct memtier_memory *memory)
 MEMKIND_EXPORT int memtier_ctl_set(struct memtier_builder *builder,
                                    const char *name, const void *val)
 {
-    const char *query = name;
-    char name_substr[256] = {0};
-    int chr_read = 0;
-
-    sscanf(query, "policy.dynamic_threshold.%n", &chr_read);
-    if (chr_read == sizeof("policy.dynamic_threshold.") - 1) {
-        query += chr_read;
-
-        int ret = sscanf(query, "%[^\[]%n", name_substr, &chr_read);
-        if (ret && strcmp(name_substr, "thresholds") == 0) {
-            query += chr_read;
-
-            int th_id = -1;
-            ret = sscanf(query, "[%d]%n", &th_id, &chr_read);
-            if (th_id >= 0) {
-                query += chr_read;
-
-                // make sure that threshold configuration of th_id exist
-                int ret = memtier_builder_create_threshold(builder, th_id);
-                if (ret != 0) {
-                    return -1;
-                }
-
-                struct memtier_threshold_cfg *thres = &builder->thres[th_id];
-
-                ret = sscanf(query, ".%s", name_substr);
-                if (ret && strcmp(name_substr, "val") == 0) {
-                    thres->val = *(size_t *)val;
-                    return 0;
-                } else if (ret && strcmp(name_substr, "min") == 0) {
-                    thres->min = *(size_t *)val;
-                    return 0;
-                } else if (ret && strcmp(name_substr, "max") == 0) {
-                    thres->max = *(size_t *)val;
-                    return 0;
-                }
-            }
-        } else if (ret && strcmp(name_substr, "check_cnt") == 0) {
-            builder->check_cnt = *(unsigned *)val;
-            return 0;
-        } else if (ret && strcmp(name_substr, "trigger") == 0) {
-            builder->trigger = *(float *)val;
-            return 0;
-        } else if (ret && strcmp(name_substr, "degree") == 0) {
-            builder->degree = *(float *)val;
-            return 0;
-        } else if (ret && strcmp(name_substr, "step") == 0) {
-            builder->step = *(size_t *)val;
-            return 0;
-        }
-    }
-
-    log_err("Invalid name: %s", query);
-    return -1;
+    return builder->ctl_set(builder, name, val);
 }
 
 MEMKIND_EXPORT void *memtier_malloc(struct memtier_memory *memory, size_t size)
