@@ -243,6 +243,18 @@ TEST_F(MemkindMemtierKindTest, test_tier_free_nullptr)
     }
 }
 
+TEST_F(MemkindMemtierKindTest, test_tier_static_policy_failure)
+{
+    const unsigned check_cnt = 5;
+    struct memtier_builder *builder =
+        memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
+    ASSERT_NE(nullptr, builder);
+    int res = memtier_ctl_set(builder, "policy.dynamic_threshold.check_cnt",
+                              &check_cnt);
+    ASSERT_EQ(-1, res);
+    memtier_builder_delete(builder);
+}
+
 TEST_F(MemkindMemtierDynamicTest, test_tier_policy_dynamic_threshold_two_kinds)
 {
     int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
