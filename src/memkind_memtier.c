@@ -212,6 +212,64 @@ memtier_policy_dynamic_threshold_get_kind(struct memtier_memory *memory,
     return memory->cfg[i].kind;
 }
 
+static void print_memtier_memory(struct memtier_memory *memory)
+{
+    int i;
+    if (!memory) {
+        log_info("Empty memtier memory");
+        return;
+    }
+    log_info("Number of memory tiers %u", memory->cfg_size);
+    for (i = 0; i < memory->cfg_size; ++i) {
+        log_info("Tier memory kind %s", memory->cfg[i].kind->name);
+        log_info("Tier normalized ratio %f", memory->cfg[i].kind_ratio);
+        log_info("Tier allocated size %zu",
+                 memtier_kind_allocated_size(memory->cfg[i].kind));
+    }
+    if (memory->thres) {
+        for (i = 0; i < THRESHOLD_NUM(memory); ++i) {
+            log_info("Tier %d threshold minimum %zu", i, memory->thres[i].min);
+            log_info("Tier %d threshold current value %zu", i,
+                     memory->thres[i].val);
+            log_info("Tier %d threshold maximum %zu", i, memory->thres[i].max);
+        }
+    } else {
+        log_info("No thresholds configuration found");
+    }
+    log_info("Threshold tigger value %f", memory->thres_trigger);
+    log_info("Threshold degree value %f", memory->thres_degree);
+    log_info("Threshold coutner setting value %u",
+             memory->thres_init_check_cnt);
+    log_info("Threshold counter current value %u", memory->thres_check_cnt);
+}
+
+static void print_builder(struct memtier_builder *builder)
+{
+    int i;
+    if (!builder) {
+        log_info("Empty builder");
+        return;
+    }
+    log_info("Number of memory tiers %u", builder->cfg_size);
+    for (i = 0; i < builder->cfg_size; ++i) {
+        log_info("Tier memory kind %s", builder->cfg[i].kind->name);
+        log_info("Tier normalized ratio %f", builder->cfg[i].kind_ratio);
+    }
+    if (builder->thres) {
+        for (i = 0; i < THRESHOLD_NUM(builder); ++i) {
+            log_info("Tier %d threshold minimum %zu", i, builder->thres[i].min);
+            log_info("Tier %d threshold current value %zu", i,
+                     builder->thres[i].val);
+            log_info("Tier %d threshold maximum %zu", i, builder->thres[i].max);
+        }
+    } else {
+        log_info("No thresholds configuration found");
+    }
+    log_info("Threshold tigger value %f", builder->trigger);
+    log_info("Threshold degree value %f", builder->degree);
+    log_info("Threshold counter setting value %u", builder->check_cnt);
+}
+
 static void
 memtier_policy_static_threshold_update_config(struct memtier_memory *memory)
 {}
@@ -297,6 +355,7 @@ MEMKIND_EXPORT struct memtier_builder *memtier_builder_new(memtier_policy_t poli
 
 MEMKIND_EXPORT void memtier_builder_delete(struct memtier_builder *builder)
 {
+    print_builder(builder);
     jemk_free(builder->thres);
     jemk_free(builder->cfg);
     jemk_free(builder);
@@ -535,6 +594,7 @@ failure_calloc:
 
 MEMKIND_EXPORT void memtier_delete_memtier_memory(struct memtier_memory *memory)
 {
+    print_memtier_memory(memory);
     jemk_free(memory->thres);
     jemk_free(memory->cfg);
     jemk_free(memory);
