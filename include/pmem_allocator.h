@@ -54,10 +54,17 @@ public:
         int err_c = memkind_create_pmem_with_config(cfg, &kind);
         memkind_config_delete(cfg);
         if (err_c) {
-            throw std::runtime_error(
-                std::string(
-                    "An error occurred while creating pmem kind; error code: ") +
-                std::to_string(err_c));
+            if (err_c == MEMKIND_ERROR_INVALID) {
+                throw std::invalid_argument(
+                    std::string(
+                        "An invalid argument was passed to create pmem kind; error code: ") +
+                    std::to_string(err_c));
+            } else {
+                throw std::runtime_error(
+                    std::string(
+                        "An error occurred while creating pmem kind; error code: ") +
+                    std::to_string(err_c));
+            }
         }
     }
 
