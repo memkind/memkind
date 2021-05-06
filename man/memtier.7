@@ -96,19 +96,6 @@ NOTE: Because setting above parameters is optional, they will be set to default 
 Default values for a threshold between first two tiers is VAL = 1024, MIN = 513 and MAX = 1536.
 If there are more tiers defined, each next undefined threshold will have all parameters increased by 1024,
 so next undefined threshold between next two tier will have VAL = 2048, MIN = 1537, MAX = 2560 and so on.
-
-.SH "CTL API"
-.B TODO
-.br
-Supported names (with type):
-policy.dynamic_threshold.thresholds[ID].val (size_t)
-policy.dynamic_threshold.thresholds[ID].min (size_t)
-policy.dynamic_threshold.thresholds[ID].max (size_t)
-policy.dynamic_threshold.check_cnt (unsigned)
-policy.dynamic_threshold.trigger (float)
-policy.dynamic_threshold.degree (float)
-policy.dynamic_threshold.step (size_t)
-
 .SH "EXAMPLES"
 .br
 The following will run /bin/ls with Memtier library. Make sure that paths to
