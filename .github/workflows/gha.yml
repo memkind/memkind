@@ -65,6 +65,18 @@ jobs:
             sudo --preserve-env=MEMKIND_HOST_WORKDIR,ENABLE_HWLOC "${{ env.DOCKER_RUN_SCRIPT }}" "${{ env.DOCKER_IMAGE_FULL_PATH }}"
           fi
 
+  shellcheck:
+    runs-on: ubuntu-20.04
+    name: Code Linting - Shellcheck
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - uses: ludeeus/action-shellcheck@master
+      with:
+        ignore: jemalloc
+
   building:
     runs-on: ${{ matrix.os }}
     name: Building memkind daxctl ${{ matrix.daxctl }} | hwloc ${{ matrix.hwloc }} | ${{ matrix.os }} | ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
