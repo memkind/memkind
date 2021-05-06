@@ -75,14 +75,12 @@ jobs:
 
     - name: Set up Python environment
       uses: actions/setup-python@v2
-      with:
-        python-version: "2.x"
 
     - name: flake8 Lint
       uses: py-actions/flake8@v1
       with:
-        # TODO: Extend linting to all of the memkind python tests
-        path: "./test/tiering_tests.py"
+        exclude: "./jemalloc"
+        ignore: "W503"
 
   building:
     runs-on: ${{ matrix.os }}
