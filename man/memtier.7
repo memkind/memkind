@@ -101,10 +101,13 @@ and 80% of allocations will go to DAX KMEM nodes:
 .IP
 .B MEMKIND_MEM_TIERS="KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:4,POLICY:STATIC_THRESHOLD"
 .B TODO Example with dynamic threshold
-
+.SH "NOTES"
+.B libmemtier
+works for applications which does not statically link a
+.B malloc
+implementation.
 .SH "COPYRIGHT"
 Copyright (C) 2021 Intel Corporation. All rights reserved.
-
 .SH "SEE ALSO"
 .BR memkind(3),
 .BR malloc (3)
