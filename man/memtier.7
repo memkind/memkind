@@ -64,7 +64,19 @@ section for an example of usage of
 environment variable.
 .br
 NOTE: The application will fail when provided environment variable string is not in a correct format.
-
+.PP
+.I DAX_KMEM
+and
+.I FS_DAX
+memory tiers differentiate regarding
+.I DRAM
+fallback policy. If there is not enough memory to satisfy the
+.I DRAM
+tier memory allocation request, with usage of
+.I DAX_KMEM
+tier, allocation will fall back to PMEM memory, wherein with the usage of
+.FS_DAX
+tier will not.
 .SH "CTL API"
 .B TODO
 .br
