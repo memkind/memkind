@@ -95,10 +95,13 @@ Example usage of MEMKIND_MEM_TIERS environment variable where 100% of allocation
 with filesystem created on top of it:
 .IP
 .B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,RATIO:1;POLICY:STATIC_THRESHOLD"
-
+.SH "NOTES"
+.B libmemtier
+work for applications which does not statically link a
+.B malloc
+implementation.
 .SH "COPYRIGHT"
 Copyright (C) 2021 Intel Corporation. All rights reserved.
-
 .SH "SEE ALSO"
 .BR memkind(3),
 .BR malloc (3)
