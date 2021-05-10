@@ -385,10 +385,14 @@ MEMKIND_EXPORT struct memtier_builder *memtier_builder_new(memtier_policy_t poli
         switch (policy) {
             case MEMTIER_POLICY_STATIC_THRESHOLD:
                 b->policy = policy;
+                b->cfg = NULL;
+                b->thres = NULL;
                 b->ctl_set = builder_static_ctl_set;
                 return b;
             case MEMTIER_POLICY_DYNAMIC_THRESHOLD:
                 b->policy = policy;
+                b->cfg = NULL;
+                b->thres = NULL;
                 b->check_cnt = THRESHOLD_CHECK_CNT;
                 b->trigger = THRESHOLD_TRIGGER;
                 b->degree = THRESHOLD_DEGREE;
