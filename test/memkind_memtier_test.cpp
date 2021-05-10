@@ -357,9 +357,6 @@ TEST_F(MemkindMemtierDynamicTest,
     res = memtier_ctl_set(m_builder, "policy.dynamic_threshold.trigger",
                           &trigger);
     ASSERT_EQ(0, res);
-    size_t step = 1024;
-    res = memtier_ctl_set(m_builder, "policy.dynamic_threshold.step", &step);
-    ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
 }
@@ -367,21 +364,45 @@ TEST_F(MemkindMemtierDynamicTest,
 TEST_F(MemkindMemtierDynamicTest,
        test_tier_policy_dynamic_threshold_ctl_set_only_first)
 {
-    size_t val = 8000;
+    const size_t val_0 = 8000;
+    const size_t max_0 = 9000;
+    const size_t min_1 = 9500;
+    const size_t val_1 = 10000;
+    const size_t max_1 = 11000;
     int res = memtier_ctl_set(
-        m_builder, "policy.dynamic_threshold.thresholds[0].val", &val);
-    ASSERT_EQ(0, res);
-    // NOTE: if we want to use default values, but set val for threshold 0,
-    // then we also have to set max value for this threshold.
-    size_t max = 9000;
+        m_builder, "policy.dynamic_threshold.thresholds[0].val", &val_0);
+    ASSERT_EQ(-1, res);
     res = memtier_ctl_set(m_builder,
-                          "policy.dynamic_threshold.thresholds[0].max", &max);
-    ASSERT_EQ(0, res);
+                          "policy.dynamic_threshold.thresholds[0].max", &val_0);
+    ASSERT_EQ(-1, res);
     res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
     ASSERT_EQ(0, res);
+    res = memtier_ctl_set(m_builder,
+                          "policy.dynamic_threshold.thresholds[0].val", &val_0);
+    ASSERT_EQ(-1, res);
+    res = memtier_ctl_set(m_builder,
+                          "policy.dynamic_threshold.thresholds[0].max", &max_0);
+    ASSERT_EQ(-1, res);
     res = memtier_builder_add_tier(m_builder, MEMKIND_REGULAR, 2);
     ASSERT_EQ(0, res);
+    res = memtier_ctl_set(m_builder,
+                          "policy.dynamic_threshold.thresholds[0].val", &val_0);
+    ASSERT_EQ(0, res);
+    res = memtier_ctl_set(m_builder,
+                          "policy.dynamic_threshold.thresholds[0].max", &max_0);
+    ASSERT_EQ(0, res);
     res = memtier_builder_add_tier(m_builder, MEMKIND_HIGHEST_CAPACITY, 3);
+    ASSERT_EQ(0, res);
+    m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
+    ASSERT_EQ(nullptr, m_tier_memory);
+    res = memtier_ctl_set(m_builder,
+                          "policy.dynamic_threshold.thresholds[1].min", &min_1);
+    ASSERT_EQ(0, res);
+    res = memtier_ctl_set(m_builder,
+                          "policy.dynamic_threshold.thresholds[1].val", &val_1);
+    ASSERT_EQ(0, res);
+    res = memtier_ctl_set(m_builder,
+                          "policy.dynamic_threshold.thresholds[1].max", &max_1);
     ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
@@ -390,21 +411,25 @@ TEST_F(MemkindMemtierDynamicTest,
 TEST_F(MemkindMemtierDynamicTest,
        test_tier_policy_dynamic_threshold_ctl_set_only_last)
 {
-    size_t val = 8000;
+    const size_t val = 8000;
+    const size_t max = 9000;
     int res = memtier_ctl_set(
         m_builder, "policy.dynamic_threshold.thresholds[1].val", &val);
-    ASSERT_EQ(0, res);
-    // NOTE: if we want to use default values, but set val for threshold 1,
-    // then we also have to set max value for this threshold.
-    size_t max = 9000;
+    ASSERT_EQ(-1, res);
     res = memtier_ctl_set(m_builder,
                           "policy.dynamic_threshold.thresholds[1].max", &max);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(-1, res);
     res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
     ASSERT_EQ(0, res);
     res = memtier_builder_add_tier(m_builder, MEMKIND_REGULAR, 2);
     ASSERT_EQ(0, res);
     res = memtier_builder_add_tier(m_builder, MEMKIND_HIGHEST_CAPACITY, 3);
+    ASSERT_EQ(0, res);
+    res = memtier_ctl_set(m_builder,
+                          "policy.dynamic_threshold.thresholds[1].val", &val);
+    ASSERT_EQ(0, res);
+    res = memtier_ctl_set(m_builder,
+                          "policy.dynamic_threshold.thresholds[1].max", &max);
     ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
