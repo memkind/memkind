@@ -21,9 +21,22 @@ a comma-separated list of tier parameters in the following format:
 .IP
 "param_name:value,(...)"
 , where the param_name is the name of the parameter. For more details about param_name
-see the PARAMETER NAME section below.
+see the TIER PARAMETER NAME section below.
+.TP
+.B MEMKIND_MEM_THRESHOLDS
+Semicolon-separated list of threshold configurations. Each configuration consists of
+a comma-separated list of threshold parameters in the same format as
+.I MEMKIND_MEM_TIERS
+, where the param_name is one of the VAL, MIN and MAX. Each parameter can be set only
+once. When one of parameters is missing, it will be set to a default value. Order of
+provided configurations is important - configuration of Nth threshold defines threshold
+between Nth and (N+1)th tier. If some threshold configuration is missing, threshold with default
+configuration will be used. Note that for N tiers there should be at most N-1 thresholds defined. Set this variable only
+when
+.I DYNAMIC_THRESHOLD
+policy will is used. For more details about param_name see the THRESHOLD PARAMETER NAME section below. TODO add detailed example.
 
-.SH "PARAMETER NAME"
+.SH "TIER PARAMETER NAME"
 .TP
 KIND (required) - kind of memory used in memory tier. Allowed kind names are 'DRAM' and 'FS_DAX'.
 .TP
@@ -64,6 +77,19 @@ section for an example of usage of
 environment variable.
 .br
 NOTE: The application will fail when provided environment variable string is not in a correct format.
+
+.SH "THRESHOLD PARAMETER NAME"
+.TP
+VAL (optional) - initial value of threshold between two adjacent N and N+1 tiers. For every allocation,
+if it's size is greater or equal than VAL, it will go to tier >= 1. It has to be greater or equal to MIN value
+and less or equal than MAX value. Note that in DYNAMIC_THRESHOLD policy this value could change in time
+to keep desired ratios between tiers.
+.TP
+MIN (optional) - minimum value of threshold. In DYNAMIC_THRESHOLD policy, threshold value could change in time
+to keep desired ratios between tiers, but it will not be lesser than MIN.
+.TP
+MAX (optional) - maximum value of threshold. In DYNAMIC_THRESHOLD policy, threshold value could change in time
+to keep desired ratios between tiers, but it will not be greater than MAX.
 
 .SH "CTL API"
 .B TODO
