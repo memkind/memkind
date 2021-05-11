@@ -366,6 +366,16 @@ class Test_tiering_config_env(Helper):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:-1;" + self.default_policy, negative_test=True)
 
+    def test_double_ratio(self):
+        self.get_ld_preload_cmd_output(
+            "RATIO:2,KIND:DRAM,RATIO:1;" + self.default_policy,
+            negative_test=True)
+
+    def test_multiple_kind(self):
+        self.get_ld_preload_cmd_output(
+            "KIND:DRAM,RATIO:1,KIND:FS_DAX;" + self.default_policy,
+            negative_test=True)
+
     @pytest.mark.parametrize("policy_str",
                              ["ABC", "5252", "1AB2C3", "#@%srfs"])
     def test_negative_unsupported_policy(self, policy_str):
@@ -383,7 +393,7 @@ class Test_tiering_config_env(Helper):
             self.default_policy + ";KIND:DRAM,RATIO:1",
             negative_test=True)
 
-    @pytest.mark.parametrize("config_str", ["", ",", ",,,"])
+    @pytest.mark.parametrize("config_str", ["", ",", ",,,", ":", "::"])
     def test_negative_config_str_invalid(self, config_str):
         self.get_ld_preload_cmd_output(
             config_str, negative_test=True)
