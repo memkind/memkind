@@ -16,7 +16,8 @@
 #define CTL_PARAM_SEPARATOR        ","
 #define CTL_STRING_QUERY_SEPARATOR ";"
 
-#define MAX_KIND 255
+#define MAX_KIND     255
+#define MAX_CTL_NAME 64
 
 typedef struct fs_dax_registry {
     unsigned size;
@@ -96,9 +97,9 @@ static int ctl_parse_size_t(const char *str, size_t *dest)
 }
 
 /*
- * ctl_parse_pmem_size -- parse size from string
+ * ctl_parse_size -- parse size (with optional suffix) from string
  */
-static int ctl_parse_pmem_size(char **sptr, size_t *sizep)
+static int ctl_parse_size(char **sptr, size_t *sizep)
 {
     struct suff {
         const char *suff;
@@ -110,16 +111,16 @@ static int ctl_parse_pmem_size(char **sptr, size_t *sizep)
     char size[32] = {0};
     char unit[3] = {0};
 
-    const char *pmem_size_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, sptr);
-    if (pmem_size_str == NULL) {
+    const char *size_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, sptr);
+    if (size_str == NULL) {
         return -1;
     }
 
-    if (pmem_size_str[0] == '-') {
+    if (size_str[0] == '-') {
         goto parse_failure;
     }
 
-    int ret = sscanf(pmem_size_str, "%31[0-9]%2s", size, unit);
+    int ret = sscanf(size_str, "%31[0-9]%2s", size, unit);
     if (ctl_parse_size_t(size, sizep)) {
         goto parse_failure;
     }
@@ -132,7 +133,7 @@ static int ctl_parse_pmem_size(char **sptr, size_t *sizep)
                 if (SIZE_MAX / suffixes[i].mag >= *sizep) {
                     *sizep *= suffixes[i].mag;
                 } else {
-                    log_err("Provided pmem size is too big: %s", size);
+                    log_err("Provided size is too big: %s", size);
                     goto parse_failure;
                 }
                 return 0;
@@ -141,7 +142,7 @@ static int ctl_parse_pmem_size(char **sptr, size_t *sizep)
     }
 
 parse_failure:
-    log_err("Failed to parse pmem size: %s", pmem_size_str);
+    log_err("Failed to parse size: %s", size_str);
     return -1;
 }
 
@@ -181,10 +182,9 @@ static int ctl_parse_ratio(char **sptr, unsigned *dest)
 }
 
 /*
- * ctl_parse_query -- (internal) splits an entire query string
- * into single queries
+ * ctl_parse_tier_query -- parses query string with tier configuration
  */
-static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
+static int ctl_parse_tier_query(char *qbuf, memkind_t *kind, unsigned *ratio)
 {
     char *sptr = NULL;
     int ret = -1;
@@ -271,7 +271,7 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
 
         size_t fsdax_max_size = 0;
         if (fsdax_size_set) {
-            ret = ctl_parse_pmem_size(&fsdax_size_str, &fsdax_max_size);
+            ret = ctl_parse_size(&fsdax_size_str, &fsdax_max_size);
             if (ret != 0) {
                 return -1;
             }
@@ -298,6 +298,70 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
     char *extra = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
     if (extra != NULL) {
         return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * ctl_parse_threshold_query -- parses query string with threshold configuration
+ */
+static int ctl_parse_threshold_query(char *qbuf, size_t *val, int *val_set,
+                                     size_t *min, int *min_set, size_t *max,
+                                     int *max_set)
+{
+    char *sptr = NULL;
+    int ret = -1;
+
+    char *param_str = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
+    if (param_str == NULL) {
+        log_err("No valid parameters defined");
+        return -1;
+    }
+
+    while (param_str != NULL) {
+        if (!strcmp(param_str, "VAL")) {
+            if (*val_set) {
+                log_err("VAL already defined: %zu", val);
+                return -1;
+            }
+            char *val_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
+            ret = ctl_parse_size(&val_str, val);
+            if (ret != 0) {
+                log_err("Failed to parse value: %s", val_str);
+                return -1;
+            }
+            *val_set = 1;
+        } else if (!strcmp(param_str, "MIN")) {
+            if (*min_set) {
+                log_err("MIN already defined: %zu", min);
+                return -1;
+            }
+            char *min_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
+            ret = ctl_parse_size(&min_str, min);
+            if (ret != 0) {
+                log_err("Failed to parse value: %s", min_str);
+                return -1;
+            }
+            *min_set = 1;
+        } else if (!strcmp(param_str, "MAX")) {
+            if (*max_set) {
+                log_err("MAX already defined: %zu", max);
+                return -1;
+            }
+            char *max_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
+            ret = ctl_parse_size(&max_str, max);
+            if (ret != 0) {
+                log_err("Failed to parse value: %s", max_str);
+                return -1;
+            }
+            *max_set = 1;
+        } else {
+            log_err("Invalid parameter: %s", param_str);
+            return -1;
+        }
+
+        param_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
     }
 
     return 0;
@@ -342,25 +406,21 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
         memkind_t kind = NULL;
         unsigned ratio = 0;
 
-        ret = ctl_parse_query(qbuf, &kind, &ratio);
+        ret = ctl_parse_tier_query(qbuf, &kind, &ratio);
         if (ret != 0) {
             log_err("Failed to parse query: %s", qbuf);
             goto cleanup_after_failure;
         }
+
         temp_cfg[i].kind = kind;
         temp_cfg[i].ratio = ratio;
         qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
-
-        if (ret != 0) {
-            goto cleanup_after_failure;
-        }
     }
 
     qbuf = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
     if (!strcmp(qbuf, "POLICY")) {
         ret = ctl_parse_policy(sptr, &policy);
         if (ret != 0) {
-            log_err("Failed to parse policy: %s", qbuf);
             goto cleanup_after_failure;
         }
     } else {
@@ -370,7 +430,6 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
 
     struct memtier_builder *builder = memtier_builder_new(policy);
     if (!builder) {
-        log_err("Failed to parse policy: %s", qbuf);
         goto cleanup_after_failure;
     }
 
@@ -378,8 +437,81 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
         ret = memtier_builder_add_tier(builder, temp_cfg[i].kind,
                                        temp_cfg[i].ratio);
         if (ret != 0) {
-            log_err("Failed to add tier%s", qbuf);
             goto destroy_builder;
+        }
+    }
+
+    char *thresholds_var_string = utils_get_env("MEMKIND_MEM_THRESHOLDS");
+    if (thresholds_var_string) {
+        if (policy != MEMTIER_POLICY_DYNAMIC_THRESHOLD) {
+            log_err("MEMKIND_MEM_THRESHOLDS env var could be used only with "
+                    "DYNAMIC_THRESHOLD policy");
+            goto destroy_builder;
+        }
+
+        char *qbuf = thresholds_var_string;
+        unsigned thresholds_count = 1;
+        while (*qbuf)
+            if (*qbuf++ == *CTL_STRING_QUERY_SEPARATOR)
+                ++thresholds_count;
+
+        if (thresholds_count >= tier_count) {
+            log_err("Too many thresholds defined");
+            goto destroy_builder;
+        }
+
+        qbuf =
+            strtok_r(thresholds_var_string, CTL_STRING_QUERY_SEPARATOR, &sptr);
+        if (qbuf == NULL) {
+            log_err("No valid thresholds found in: %s", thresholds_var_string);
+            goto destroy_builder;
+        }
+
+        for (i = 0; i < thresholds_count; ++i) {
+            size_t val, min, max;
+            int val_set = 0;
+            int min_set = 0;
+            int max_set = 0;
+
+            ret = ctl_parse_threshold_query(qbuf, &val, &val_set, &min,
+                                            &min_set, &max, &max_set);
+            if (ret != 0) {
+                log_err("Failed to parse threshold: %s", qbuf);
+                goto destroy_builder;
+            }
+
+            char buf[MAX_CTL_NAME] = {0};
+            if (val >= 0) {
+                snprintf(buf, MAX_CTL_NAME,
+                         "policy.dynamic_threshold.thresholds[%d].val", i);
+                size_t st_val = val;
+                ret = memtier_ctl_set(builder, buf, &st_val);
+                if (ret != 0) {
+                    goto destroy_builder;
+                }
+            }
+
+            if (min >= 0) {
+                snprintf(buf, MAX_CTL_NAME,
+                         "policy.dynamic_threshold.thresholds[%d].min", i);
+                size_t st_min = min;
+                ret = memtier_ctl_set(builder, buf, &st_min);
+                if (ret != 0) {
+                    goto destroy_builder;
+                }
+            }
+
+            if (max >= 0) {
+                snprintf(buf, MAX_CTL_NAME,
+                         "policy.dynamic_threshold.thresholds[%d].max", i);
+                size_t st_max = max;
+                ret = memtier_ctl_set(builder, buf, &st_max);
+                if (ret != 0) {
+                    goto destroy_builder;
+                }
+            }
+
+            qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
         }
     }
 

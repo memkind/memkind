@@ -28,6 +28,7 @@ class Helper(object):
         'FS_DAX': 'FS-DAX'}
 
     mem_tiers_env_var = "MEMKIND_MEM_TIERS"
+    mem_thresholds_env_var = "MEMKIND_MEM_THRESHOLDS"
 
     # POLICY_STATIC_THRESHOLD is a policy used in tests that have to set a
     # valid policy but don't test anything related to allocation policies
@@ -53,13 +54,15 @@ class Helper(object):
                     return True
         return False
 
-    def get_ld_preload_cmd_output(self, config, log_level=None,
-                                  negative_test=False):
+    def get_ld_preload_cmd_output(self, tiers_config, thresholds_config=None,
+                                  log_level=None, negative_test=False):
         log_level_env = self.log_prefix + "LOG_LEVEL=" + log_level \
             if log_level else ""
-        config_env = self.mem_tiers_env_var + '="' + config + '"'
+        tiers_env = self.mem_tiers_env_var + '="' + tiers_config + '"'
+        thresholds_env = self.mem_thresholds_env_var + '="' + \
+            thresholds_config + '"' if thresholds_config else ""
         command = " ".join([self.ld_preload_env, log_level_env,
-                            config_env, self.bin_path])
+                            tiers_env, thresholds_env, self.bin_path])
         output, retcode = self.cmd.execute_cmd(command)
         fail_msg = "Execution of: '" + command + \
             "' returns: " + str(retcode) + "\noutput: " + output
@@ -425,6 +428,57 @@ class Test_tiering_config_env(Helper):
             "KIND:DRAM,RATIO:1;KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,"
             "RATIO:4;KIND:FS_DAX,PATH:/mnt,PMEM_SIZE_LIMIT:150M,RATIO:8;" +
             policy, log_level="2")
+
+    @pytest.mark.parametrize("thresholds",
+                             ["VAL:1K,MIN:64,MAX:2K",
+                              "VAL:100,MIN:1,MAX:1000",
+                              "MIN:1,MAX:1000,VAL:100",
+                              "MIN:1,VAL:100,MAX:1000",
+                              "MAX:1000,MIN:1,VAL:100"])
+    def test_two_tiers_thresholds(self, thresholds):
+        self.get_ld_preload_cmd_output(
+            "KIND:DRAM,RATIO:1;" +
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,RATIO:4;" +
+            "POLICY:DYNAMIC_THRESHOLD", thresholds_config=thresholds,
+            log_level="2")
+
+    @pytest.mark.parametrize("thresholds",
+                             ["::", "AAA", "A1B2C3", "AAA:BB", "AA:42",
+                              "VAL:AAA", "VAL:1A2B", "VAL::", "VAL:14,4.4",
+                              "VAL:111,VAL:222"])
+    def test_negative_two_tiers_bad_thresholds(self, thresholds):
+        self.get_ld_preload_cmd_output(
+            "KIND:DRAM,RATIO:1;" +
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,RATIO:4;" +
+            "POLICY:DYNAMIC_THRESHOLD", thresholds_config=thresholds,
+            negative_test=True)
+
+    @pytest.mark.parametrize("thresholds",
+                             ["VAL:101,MIN:1,MAX:100",
+                              "VAL:50,MIN:100,MAX:10",
+                              "VAL:1,MIN:10,MAX:100"])
+    def test_negative_two_tiers_bad_threshold_values(self, thresholds):
+        self.get_ld_preload_cmd_output(
+            "KIND:DRAM,RATIO:1;" +
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,RATIO:4;" +
+            "POLICY:DYNAMIC_THRESHOLD", thresholds_config=thresholds,
+            negative_test=True)
+
+    def test_negative_thresholds_bad_policy(self):
+        self.get_ld_preload_cmd_output(
+            "KIND:DRAM,RATIO:1;" +
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,RATIO:4;" +
+            "POLICY:STATIC_THRESHOLD",
+            thresholds_config="VAL:1K,MIN:64,MAX:2K",
+            negative_test=True)
+
+    def test_negative_too_many_thresholds(self):
+        self.get_ld_preload_cmd_output(
+            "KIND:DRAM,RATIO:1;" +
+            "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,RATIO:4;" +
+            "POLICY:STATIC_THRESHOLD",
+            thresholds_config="VAL:1K,MIN:64,MAX:2K;VAL:10K,MIN:3K,MAX:20K",
+            negative_test=True)
 
     @pytest.mark.parametrize("wrong_tier",
                              ["KIND:non_existent,PATH:/mnt,"
