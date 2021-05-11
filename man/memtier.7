@@ -21,9 +21,22 @@ a comma-separated list of tier parameters in the following format:
 .IP
 "param_name:value,(...)"
 , where the param_name is the name of the parameter. For more details about param_name
-see the PARAMETER NAME section below.
+see the TIER PARAMETER NAME section below.
+.TP
+.B MEMKIND_MEM_THRESHOLDS
+Semicolon-separated list of threshold configurations. Each configuration consists of
+a comma-separated list of threshold parameters in the same format as
+.I MEMKIND_MEM_TIERS
+, where the param_name is one of the VAL, MIN and MAX. Each parameter can be set only
+once. When one of parameters is missing, it will be set to a default value. Order of
+provided configurations is important - configuration of Nth threshold defines threshold
+between Nth and (N+1)th tier. If some threshold configuration is missing, threshold with default
+configuration will be used. Note that for N tiers there should be at most N-1 thresholds defined. Set this variable only
+when
+.I DYNAMIC_THRESHOLD
+policy will is used. For more details about param_name see the THRESHOLD PARAMETER NAME section below. TODO add detailed example.
 
-.SH "PARAMETER NAME"
+.SH "TIER PARAMETER NAME"
 .TP
 KIND (required) - kind of memory used in memory tier. Allowed kind names are 'DRAM' and 'FS_DAX'.
 .TP
@@ -46,8 +59,9 @@ type. Value should be in range from 1 to
 .I UINT_MAX
 .TP
 POLICY (required) - determines the algorithm used to distribute allocations between
-provided memory kinds. This parameter has to be the last parameter in configuration
-string. Currently only
+provided memory kinds. This parameter has to be the last parameter in
+.I MEMKIND_MEM_TIERS
+configuration string. Currently only
 .I STATIC_THRESHOLD
 and
 .I DYNAMIC_THRESHOLD
@@ -64,6 +78,24 @@ section for an example of usage of
 environment variable.
 .br
 NOTE: The application will fail when provided environment variable string is not in a correct format.
+
+.SH "THRESHOLD PARAMETER NAME"
+.TP
+VAL (optional) - initial value of threshold between two adjacent N and N+1 tiers. For every allocation,
+if it's size is greater or equal than VAL, it will go to tier >= 1. It has to be greater or equal to MIN value
+and less or equal than MAX value. Note that in DYNAMIC_THRESHOLD policy this value could change in time
+to keep desired ratios between tiers.
+.TP
+MIN (optional) - minimum value of threshold. In DYNAMIC_THRESHOLD policy, threshold value could change in time
+to keep desired ratios between tiers, but it will not be lesser than MIN.
+.TP
+MAX (optional) - maximum value of threshold. In DYNAMIC_THRESHOLD policy, threshold value could change in time
+to keep desired ratios between tiers, but it will not be greater than MAX.
+.PP
+NOTE: Because setting above parameters is optional, they will be set to default values in case they are not defined.
+Default values for a threshold between first two tiers is VAL = 1024, MIN = 513 and MAX = 1536.
+If there are more tiers defined, each next undefined threshold will have all parameters increased by 1024,
+so next undefined threshold between next two tier will have VAL = 2048, MIN = 1537, MAX = 2560 and so on.
 
 .SH "CTL API"
 .B TODO
