@@ -109,9 +109,11 @@ static MEMTIER_INIT void memtier_init(void)
     pthread_once(&init_once, log_init_once);
     log_info("Memkind memtier lib loaded!");
 
-    char *env_var = utils_get_env("MEMKIND_MEM_TIERS");
-    if (env_var) {
-        current_memory = ctl_create_tier_memory_from_env(env_var);
+    char *tiers_var = utils_get_env("MEMKIND_MEM_TIERS");
+    char *thresholds_var = utils_get_env("MEMKIND_MEM_THRESHOLDS");
+    if (tiers_var) {
+        current_memory =
+            ctl_create_tier_memory_from_env(tiers_var, thresholds_var);
         if (current_memory) {
             return;
         }
