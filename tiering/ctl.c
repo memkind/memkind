@@ -237,6 +237,10 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
             return -1;
         }
 
+        ret = memkind_check_dax_path(fsdax_path);
+        if (ret)
+            log_info("%s don't point to DAX device", fsdax_path);
+
         size_t fsdax_max_size = 0;
         if (fsdax_size_str) {
             ret = ctl_parse_pmem_size(&fsdax_size_str, &fsdax_max_size);
