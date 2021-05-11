@@ -187,16 +187,30 @@ static int ctl_parse_ratio(char **sptr, unsigned *dest)
 static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
 {
     char *sptr = NULL;
-    char *ratio_str = NULL;
     int ret = -1;
 
     int is_fsdax = 0;
     char *fsdax_path = NULL;
+    char *ratio_str = NULL;
     char *fsdax_size_str = NULL;
 
+    int kind_set = 0;
+    int fsdax_path_set = 0;
+    int fsdax_size_set = 0;
+    int ratio_set = 0;
+
     char *param_str = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
+    if (param_str == NULL) {
+        log_err("No valid parameters defined");
+        return -1;
+    }
+
     while (param_str != NULL) {
         if (!strcmp(param_str, "KIND")) {
+            if (kind_set) {
+                log_err("KIND param already defined");
+                return -1;
+            }
             char *kind_name = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
             if (!strcmp(kind_name, "DRAM")) {
                 *kind = MEMKIND_DEFAULT;
@@ -208,16 +222,35 @@ static int ctl_parse_query(char *qbuf, memkind_t *kind, unsigned *ratio)
                 log_err("Unsupported kind: %s", kind_name);
                 return -1;
             }
+            kind_set = 1;
         } else if (!strcmp(param_str, "PATH")) {
+            if (fsdax_path_set) {
+                log_err("PATH param already defined");
+                return -1;
+            }
             fsdax_path = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
+            fsdax_path_set = 1;
         } else if (!strcmp(param_str, "PMEM_SIZE_LIMIT")) {
+            if (fsdax_size_set) {
+                log_err("PMEM_SIZE_LIMIT param already defined");
+                return -1;
+            }
             fsdax_size_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
+            fsdax_size_set = 1;
         } else if (!strcmp(param_str, "RATIO")) {
+            if (ratio_set) {
+                log_err("RATIO param already defined");
+                return -1;
+            }
             ratio_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
             ret = ctl_parse_ratio(&ratio_str, ratio);
             if (ret != 0) {
                 return -1;
             }
+            ratio_set = 1;
+        } else {
+            log_err("Invalid parameter: %s", param_str);
+            return -1;
         }
 
         param_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, &sptr);
