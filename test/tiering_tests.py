@@ -4,6 +4,7 @@
 import os
 import pytest
 import re
+import subprocess
 
 from python_framework import CMD_helper
 
@@ -25,7 +26,8 @@ class Helper(object):
 
     kind_name_dict = {
         'DRAM': 'memkind_default',
-        'FS_DAX': 'FS-DAX'}
+        'FS_DAX': 'FS-DAX',
+        'DAX_KMEM': 'memkind_dax_kmem'}
 
     mem_tiers_env_var = "MEMKIND_MEM_TIERS"
 
@@ -52,6 +54,14 @@ class Helper(object):
                 if 'dax' in line and fs_dax_path in line:
                     return True
         return False
+
+    def check_kmem_dax_support(self):
+        try:
+            subprocess.check_call("./memkind-auto-dax-kmem-nodes")
+        except subprocess.CalledProcessError:
+            return False
+        else:
+            return True
 
     def get_ld_preload_cmd_output(self, config, log_level=None,
                                   negative_test=False):
@@ -265,6 +275,19 @@ class Test_tiering_config_env(Helper):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:" + ratio + ";" + policy,
             log_level="2")
+
+    def test_KMEM_DAX(self):
+        if not self.check_kmem_dax_support():
+            pytest.skip("KMEM DAX is not configured")
+        self.get_ld_preload_cmd_output(
+            "KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:100;" + self.default_policy)
+
+    @pytest.mark.parametrize("policy", ["POLICY:STATIC_THRESHOLD",
+                                        "POLICY:DYNAMIC_THRESHOLD"])
+    def test_KMEM_DAX_multiple(self, policy):
+        self.get_ld_preload_cmd_output(
+            "KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:10;KIND:KMEM_DAX,RATIO:8;"
+            + policy, negative_test=True)
 
     @pytest.mark.parametrize("pmem_size", ["0", str(MEMKIND_PMEM_MIN_SIZE),
                                            "18446744073709551615"])
