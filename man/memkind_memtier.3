@@ -57,6 +57,16 @@ functionality is considered as stable API (STANDARD API).
 .BI "int memtier_ctl_set(struct memtier_builder " "*builder" ", const char " "*name" ", const void " "*val" );
 .sp
 .br
+.SH "CTL API"
+.B TODO
+.br
+Supported names (with type):
+policy.dynamic_threshold.thresholds[ID].val (size_t)
+policy.dynamic_threshold.thresholds[ID].min (size_t)
+policy.dynamic_threshold.thresholds[ID].max (size_t)
+policy.dynamic_threshold.check_cnt (unsigned)
+policy.dynamic_threshold.trigger (float)
+policy.dynamic_threshold.degree (float)
 .SH "DESCRIPTION"
 .SH "COPYRIGHT"
 Copyright (C) 2021 Intel Corporation. All rights reserved.
