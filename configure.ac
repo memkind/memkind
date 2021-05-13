@@ -194,6 +194,19 @@ fi
 
 AC_SUBST(memkind_prefix)
 
+#============================memtier_prefix===========================================
+memtier_prefix=je_;
+AC_ARG_VAR(MEMTIER_PREFIX,
+  [Prefix used for intercept additional malloc API with libmemtier, default value je_]
+)
+if test "$MEMTIER_PREFIX" != "" ; then
+  memtier_prefix=$MEMTIER_PREFIX;
+fi
+
+AC_SUBST(memtier_prefix)
+if test "$memtier_prefix" == "$memkind_prefix" ; then
+  AC_MSG_ERROR([MEMTIER_PREFIX and MEMKIND_PREFIX cannot be the same])
+fi
 #============================min_log_alignment=====================================
 min_lg_align_opt="";
 AC_ARG_VAR(MIN_LG_ALIGN,
