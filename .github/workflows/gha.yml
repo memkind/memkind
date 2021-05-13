@@ -79,7 +79,8 @@ jobs:
     - name: flake8 Lint
       uses: py-actions/flake8@v1
       with:
-        exclude: "./jemalloc"
+        # TODO: Extend linting to test/tiering_tests.py
+        exclude: "./jemalloc, ./test/tiering_tests.py"
         ignore: "W503"
 
   building:
