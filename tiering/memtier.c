@@ -17,6 +17,17 @@
 #define MEMTIER_LIKELY(x)   __builtin_expect(!!(x), 1)
 #define MEMTIER_UNLIKELY(x) __builtin_expect(!!(x), 0)
 
+#define MT_SYMBOL2(a, b) a##b
+#define MT_SYMBOL1(a, b) MT_SYMBOL2(a, b)
+#define MT_SYMBOL(b)     MT_SYMBOL1(MEMTIER_ALLOC_PREFIX, b)
+
+#define mt_malloc             MT_SYMBOL(malloc)
+#define mt_calloc             MT_SYMBOL(calloc)
+#define mt_realloc            MT_SYMBOL(realloc)
+#define mt_free               MT_SYMBOL(free)
+#define mt_posix_memalign     MT_SYMBOL(posix_memalign)
+#define mt_malloc_usable_size MT_SYMBOL(malloc_usable_size)
+
 static int destructed;
 
 static struct memtier_memory *current_memory;
@@ -130,4 +141,35 @@ static MEMTIER_FINI void memtier_fini(void)
     current_memory = NULL;
 
     destructed = 1;
+}
+
+MEMTIER_EXPORT void *mt_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+MEMTIER_EXPORT void *mt_calloc(size_t num, size_t size)
+{
+    return calloc(num, size);
+}
+
+MEMTIER_EXPORT void *mt_realloc(void *ptr, size_t size)
+{
+    return realloc(ptr, size);
+}
+
+MEMTIER_EXPORT void mt_free(void *ptr)
+{
+    free(ptr);
+}
+
+MEMTIER_EXPORT int mt_posix_memalign(void **memptr, size_t alignment,
+                                     size_t size)
+{
+    return posix_memalign(memptr, alignment, size);
+}
+
+MEMTIER_EXPORT size_t mt_malloc_usable_size(void *ptr)
+{
+    return malloc_usable_size(ptr);
 }
