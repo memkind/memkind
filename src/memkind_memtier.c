@@ -360,14 +360,14 @@ static int memtier_builder_create_threshold(struct memtier_builder *builder,
     for (i = old_size; i < builder->thres_size; ++i) {
         if (i == 0) {
             builder->thres[i].val = builder->step;
-            builder->thres[i].min = (float)builder->step * 0.5;
-            builder->thres[i].max = (float)builder->step * 1.5 - 1;
+            builder->thres[i].min = (float)builder->step * 0.5 + 1;
+            builder->thres[i].max = (float)builder->step * 1.5;
         } else {
             builder->thres[i].val =
                 builder->thres[i - i].max + (float)builder->step * 0.5;
             builder->thres[i].min = builder->thres[i - 1].max + 1;
             builder->thres[i].max =
-                builder->thres[i].val + (float)builder->step * 0.5 - 1;
+                builder->thres[i].val + (float)builder->step * 0.5;
         }
         // NOTE: don't set norm_ratio here - it will be calculated during
         // memtier memory construction
