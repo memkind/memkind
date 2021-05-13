@@ -6,7 +6,7 @@ import pytest
 import re
 import subprocess
 
-from python_framework import CMD_helper
+from python_framework import cmd_helper
 
 MEMKIND_PMEM_MIN_SIZE = 1024 * 1024 * 16
 
@@ -17,7 +17,7 @@ class Helper(object):
     # TODO create separate, parametrized binary that could be used for testing
     # instead of using ls here
     bin_path = "ls"
-    cmd = CMD_helper()
+    cmd = cmd_helper.CMD_helper()
 
     log_prefix = "MEMKIND_MEM_TIERING_"
     log_debug_prefix = log_prefix + "LOG_DEBUG: "
