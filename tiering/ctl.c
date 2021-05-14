@@ -19,6 +19,10 @@
 #define MAX_KIND     255
 #define MAX_CTL_NAME 64
 
+#define CTL_THRES_VAL 0U
+#define CTL_THRES_MIN 1U
+#define CTL_THRES_MAX 2U
+
 typedef struct fs_dax_registry {
     unsigned size;
     memkind_t *kinds;
@@ -311,6 +315,40 @@ static int ctl_parse_tier_query(char *qbuf, memkind_t *kind, unsigned *ratio)
     return 0;
 }
 
+static int ctl_set_thr_cfg(char **sptr, unsigned ctl_id, int th_id,
+                           unsigned *ctl_opts, struct memtier_builder *builder)
+{
+    char buf[MAX_CTL_NAME] = {0};
+
+    const char *ctl_cmd[][2] = {
+        {"policy.dynamic_threshold.thresholds[%d].val", "VAL"},
+        {"policy.dynamic_threshold.thresholds[%d].min", "MIN"},
+        {"policy.dynamic_threshold.thresholds[%d].max", "MAX"}};
+
+    size_t val;
+    const unsigned NUM_CMD = sizeof(ctl_cmd) / sizeof(ctl_cmd[0]);
+    if (ctl_id >= NUM_CMD) {
+        return -1;
+    }
+
+    if (*ctl_opts & (1U << ctl_id)) {
+        log_err("%s defined twice", ctl_cmd[ctl_id][1]);
+        return -1;
+    }
+
+    char *val_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, sptr);
+
+    int ret = ctl_parse_size(&val_str, &val);
+    if (ret != 0) {
+        log_err("Failed to parse value: %s", val_str);
+        return -1;
+    }
+
+    snprintf(buf, MAX_CTL_NAME, ctl_cmd[ctl_id][0], th_id);
+    *ctl_opts |= (1U << ctl_id);
+    return memtier_ctl_set(builder, buf, &val);
+}
+
 /*
  * ctl_parse_threshold_query -- parses query string with threshold configuration
  */
@@ -318,15 +356,8 @@ static int ctl_parse_threshold_query(char *qbuf, int threshold_id,
                                      struct memtier_builder *builder)
 {
     char *sptr = NULL;
-    int ret = -1;
-    char buf[MAX_CTL_NAME] = {0};
-
-    size_t val;
-    int val_set = 0;
-    size_t min;
-    int min_set = 0;
-    size_t max;
-    int max_set = 0;
+    int ret;
+    unsigned ctl_opts = 0;
 
     char *param_str = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
     if (param_str == NULL) {
@@ -336,71 +367,20 @@ static int ctl_parse_threshold_query(char *qbuf, int threshold_id,
 
     while (param_str != NULL) {
         if (!strcmp(param_str, "VAL")) {
-            if (val_set) {
-                log_err("VAL already defined: %zu", val);
+            ret = ctl_set_thr_cfg(&sptr, CTL_THRES_VAL, threshold_id, &ctl_opts,
+                                  builder);
+            if (ret != 0)
                 return -1;
-            }
-
-            char *val_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
-            ret = ctl_parse_size(&val_str, &val);
-            if (ret != 0) {
-                log_err("Failed to parse value: %s", val_str);
-                return -1;
-            }
-
-            snprintf(buf, MAX_CTL_NAME,
-                     "policy.dynamic_threshold.thresholds[%d].val",
-                     threshold_id);
-            ret = memtier_ctl_set(builder, buf, &val);
-            if (ret != 0) {
-                return -1;
-            }
-
-            val_set = 1;
         } else if (!strcmp(param_str, "MIN")) {
-            if (min_set) {
-                log_err("MIN already defined: %zu", min);
+            ret = ctl_set_thr_cfg(&sptr, CTL_THRES_MIN, threshold_id, &ctl_opts,
+                                  builder);
+            if (ret != 0)
                 return -1;
-            }
-
-            char *min_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
-            ret = ctl_parse_size(&min_str, &min);
-            if (ret != 0) {
-                log_err("Failed to parse value: %s", min_str);
-                return -1;
-            }
-
-            snprintf(buf, MAX_CTL_NAME,
-                     "policy.dynamic_threshold.thresholds[%d].min",
-                     threshold_id);
-            ret = memtier_ctl_set(builder, buf, &min);
-            if (ret != 0) {
-                return -1;
-            }
-
-            min_set = 1;
         } else if (!strcmp(param_str, "MAX")) {
-            if (max_set) {
-                log_err("MAX already defined: %zu", max);
+            ret = ctl_set_thr_cfg(&sptr, CTL_THRES_MAX, threshold_id, &ctl_opts,
+                                  builder);
+            if (ret != 0)
                 return -1;
-            }
-
-            char *max_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
-            ret = ctl_parse_size(&max_str, &max);
-            if (ret != 0) {
-                log_err("Failed to parse value: %s", max_str);
-                return -1;
-            }
-
-            snprintf(buf, MAX_CTL_NAME,
-                     "policy.dynamic_threshold.thresholds[%d].max",
-                     threshold_id);
-            ret = memtier_ctl_set(builder, buf, &max);
-            if (ret != 0) {
-                return -1;
-            }
-
-            max_set = 1;
         } else {
             log_err("Invalid parameter: %s", param_str);
             return -1;
