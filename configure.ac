@@ -70,6 +70,22 @@ if test "x${enable_decorators}" = "x1" ; then
 fi
 AC_SUBST([enable_decorators])
 
+#============================decorators_memtier===================================
+AC_ARG_ENABLE([decorators-memtier],
+  [AS_HELP_STRING([--enable-decorators-memtier], [Enable decorators])],
+[if test "x$enable_decorators_memtier" = "xyes" ; then
+  enable_decorators_memtier="1"
+else
+  enable_decorators_memtier="0"
+fi
+],
+[enable_decorators_memtier="0"]
+)
+if test "x${enable_decorators_memtier}" = "x1" ; then
+  AC_DEFINE([MEMTIER_DECORATION_ENABLED], [ ], [Enables decorators-memtier])
+fi
+AC_SUBST([enable_decorators_memtier])
+
 #============================debug=============================================
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING([--enable-debug], [Build debugging code and compile with -O0 -g])],
