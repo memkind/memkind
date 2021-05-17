@@ -9,6 +9,7 @@ check_PROGRAMS += test/all_tests \
                   test/background_threads_test \
                   test/dax_kmem_test \
                   test/decorator_test \
+                  test/decorator_memtier_test \
                   test/environ_err_dax_kmem_malloc_test \
                   test/environ_err_dax_kmem_malloc_positive_test \
                   test/environ_err_hbw_malloc_test \
@@ -58,6 +59,7 @@ test_allocator_perf_tool_tests_LDADD = libmemkind.la
 test_autohbw_test_helper_LDADD = libmemkind.la
 test_dax_kmem_test_LDADD = libmemkind.la
 test_decorator_test_LDADD = libmemkind.la
+test_decorator_memtier_test_LDADD = libmemkind.la
 test_environ_err_hbw_malloc_test_LDADD = libmemkind.la
 test_environ_err_dax_kmem_malloc_test_LDADD = libmemkind.la
 test_environ_err_dax_kmem_malloc_positive_test_LDADD = libmemkind.la
@@ -135,6 +137,7 @@ test_locality_test_CXXFLAGS = $(OPENMP_CFLAGS) -O0 -Wno-error $(AM_CPPFLAGS)
 
 test_autohbw_test_helper_SOURCES = test/autohbw_test_helper.c
 test_decorator_test_SOURCES = $(fused_gtest) test/decorator_test.cpp test/decorator_test.h
+test_decorator_memtier_test_SOURCES = $(fused_gtest) test/decorator_memtier_test.cpp test/decorator_memtier_test.h
 test_dax_kmem_test_SOURCES = $(fused_gtest) test/TestPrereq.hpp test/memkind_dax_kmem_test.cpp
 test_environ_err_hbw_malloc_test_SOURCES = test/environ_err_hbw_malloc_test.cpp
 test_environ_err_dax_kmem_malloc_test_SOURCES = test/environ_err_dax_kmem_malloc_test.cpp
