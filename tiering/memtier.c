@@ -44,7 +44,10 @@ MEMTIER_EXPORT void *malloc(size_t size)
 
     // TODO after implementation of decorators memtier decorators this
     // logging call will be obsolete
-    log_debug("malloc(%zu) = %p", size, ret);
+#ifdef MEMTIER_DECORATION_ENABLED
+    memkind_t kind = memkind_detect_kind(ret);
+    log_debug("kind: %s malloc(%zu) = %p", kind->name, size, ret);
+#endif
     return ret;
 }
 
@@ -58,7 +61,10 @@ MEMTIER_EXPORT void *calloc(size_t num, size_t size)
         ret = memkind_calloc(MEMKIND_DEFAULT, num, size);
     }
 
-    log_debug("calloc(%zu, %zu) = %p", num, size, ret);
+#ifdef MEMTIER_DECORATION_ENABLED    
+    memkind_t kind = memkind_detect_kind(ret);
+    log_debug("kind: %s calloc(%zu, %zu) = %p", kind->name, num, size, ret);
+#endif
     return ret;
 }
 
@@ -72,7 +78,10 @@ MEMTIER_EXPORT void *realloc(void *ptr, size_t size)
         ret = memkind_realloc(MEMKIND_DEFAULT, ptr, size);
     }
 
-    log_debug("realloc(%p, %zu) = %p", ptr, size, ret);
+#ifdef MEMTIER_DECORATION_ENABLED    
+    memkind_t kind = memkind_detect_kind(ret);
+    log_debug("kind: %s realloc(%p, %zu) = %p", kind->name, ptr, size, ret);
+#endif
     return ret;
 }
 
@@ -89,15 +98,20 @@ MEMTIER_EXPORT int posix_memalign(void **memptr, size_t alignment, size_t size)
                                      size);
     }
 
+#ifdef MEMTIER_DECORATION_ENABLED    
     log_debug("posix_memalign(%p, %zu, %zu) = %d",
               memptr, alignment, size, ret);
+#endif
     return ret;
 }
 // clang-format on
 
 MEMTIER_EXPORT void free(void *ptr)
 {
-    log_debug("free(%p)", ptr);
+#ifdef MEMTIER_DECORATION_ENABLED    
+    memkind_t kind = memkind_detect_kind(ptr);
+    log_debug("kind: %s free(%p)", kind->name, ptr);
+#endif
 
     if (MEMTIER_LIKELY(current_memory)) {
         memtier_realloc(current_memory, ptr, 0);
@@ -108,7 +122,10 @@ MEMTIER_EXPORT void free(void *ptr)
 
 MEMTIER_EXPORT size_t malloc_usable_size(void *ptr)
 {
-    log_debug("malloc_usable_size(%p)", ptr);
+#ifdef MEMTIER_DECORATION_ENABLED    
+    memkind_t kind = memkind_detect_kind(ptr);
+    log_debug("kind: %s malloc_usable_size(%p)", kind->name, ptr);
+#endif
 
     return memtier_usable_size(ptr);
 }
