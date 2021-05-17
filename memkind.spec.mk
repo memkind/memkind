@@ -163,7 +163,6 @@ rm -f %{buildroot}/%{_libdir}/libmemtier.{l,}a
 %{_includedir}/hbwmalloc.h
 %{_includedir}/hbw_allocator.h
 %{_includedir}/memkind_allocator.h
-%{_includedir}/memkind_memtier.h
 %{_includedir}/pmem_allocator.h
 %{_libdir}/lib%{namespace}.so
 %{_libdir}/libautohbw.so

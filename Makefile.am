@@ -39,7 +39,6 @@ include_HEADERS = include/hbw_allocator.h \
                   include/memkind.h \
                   include/memkind_allocator.h \
                   include/memkind_deprecated.h \
-                  include/memkind_memtier.h \
                   include/pmem_allocator.h \
                   # end
 
@@ -56,6 +55,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_local.h \
                   include/memkind/internal/memkind_log.h \
                   include/memkind/internal/memkind_mem_attributes.h \
+                  include/memkind/internal/memkind_memtier.h \
                   include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
                   include/memkind/internal/memkind_regular.h \
@@ -494,7 +494,6 @@ clean-local: clean-jemalloc_deps
 html-local:
 	$(MAN2HTML) man/hbwmalloc.3 > man/hbwmalloc.html
 	$(MAN2HTML) man/memkind.3 > man/memkind.html
-	$(MAN2HTML) man/memkind_memtier.3 > man/memkind_memtier.html
 	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
 	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
 

@@ -31,6 +31,7 @@ include/memkind/internal/memkind_interleave.h
 include/memkind/internal/memkind_local.h
 include/memkind/internal/memkind_log.h
 include/memkind/internal/memkind_mem_attributes.h
+include/memkind/internal/memkind_memtier.h
 include/memkind/internal/memkind_pmem.h
 include/memkind/internal/memkind_private.h
 include/memkind/internal/memkind_regular.h
@@ -38,7 +39,6 @@ include/memkind/internal/tbb_wrapper.h
 include/memkind/internal/vec.h
 include/memkind_allocator.h
 include/memkind_deprecated.h
-include/memkind_memtier.h
 include/pmem_allocator.h
 man/autohbw.7
 man/hbwallocator.3
