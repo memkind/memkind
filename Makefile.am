@@ -391,7 +391,7 @@ EXTRA_DIST = CONTRIBUTING \
              test/test.sh \
              test/test_dax_kmem.sh \
              utils/docker/Dockerfile.centos-7 \
-             utils/docker/Dockerfile.fedora-32 \
+             utils/docker/Dockerfile.fedora-34 \
              utils/docker/Dockerfile.ubuntu-20.04 \
              utils/docker/README.md \
              utils/docker/docker_install_hwloc.sh \
