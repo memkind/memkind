@@ -16,8 +16,9 @@
 #define CTL_PARAM_SEPARATOR        ","
 #define CTL_STRING_QUERY_SEPARATOR ";"
 
-#define MAX_KIND     255
-#define MAX_CTL_NAME 64
+#define MAX_ENV_STRING 1024
+#define MAX_KIND       255
+#define MAX_CTL_NAME   64
 
 #define CTL_THRES_VAL 0U
 #define CTL_THRES_MIN 1U
@@ -394,6 +395,9 @@ static int ctl_parse_threshold_query(char *qbuf, int threshold_id,
 
 struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
 {
+    char env_var_local[MAX_ENV_STRING] = {0};
+    strncpy(env_var_local, env_var_string, MAX_ENV_STRING - 1);
+
     struct memtier_memory *tier_memory;
     memtier_policy_t policy = MEMTIER_POLICY_MAX_VALUE;
     unsigned i;
@@ -406,7 +410,7 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
 
     int ret;
     char *sptr = NULL;
-    char *qbuf = env_var_string;
+    char *qbuf = env_var_local;
 
     unsigned query_count = 1;
     while (*qbuf)
@@ -415,15 +419,15 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
 
     unsigned tier_count = query_count - 1;
 
-    qbuf = strtok_r(env_var_string, CTL_STRING_QUERY_SEPARATOR, &sptr);
+    qbuf = strtok_r(env_var_local, CTL_STRING_QUERY_SEPARATOR, &sptr);
     if (qbuf == NULL) {
-        log_err("No valid query found in: %s", env_var_string);
+        log_err("No valid query found in: %s", env_var_local);
         return NULL;
     }
 
     if (query_count < 2) {
         log_err("Too low number of queries in configuration string: %s",
-                env_var_string);
+                env_var_local);
         return NULL;
     }
 
@@ -472,13 +476,17 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
     // TODO move all code that set default params from memkind_memtier to CTL
     char *thresholds_var_string = utils_get_env("MEMKIND_MEM_THRESHOLDS");
     if (thresholds_var_string) {
+        char thresholds_var_local[MAX_ENV_STRING] = {0};
+        strncpy(thresholds_var_local, thresholds_var_string,
+                MAX_ENV_STRING - 1);
+
         if (policy != MEMTIER_POLICY_DYNAMIC_THRESHOLD) {
             log_err("MEMKIND_MEM_THRESHOLDS env var could be used only with "
                     "DYNAMIC_THRESHOLD policy");
             goto destroy_builder;
         }
 
-        char *qbuf = thresholds_var_string;
+        char *qbuf = thresholds_var_local;
         unsigned thresholds_count = 1;
         while (*qbuf)
             if (*qbuf++ == *CTL_STRING_QUERY_SEPARATOR)
@@ -490,9 +498,9 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
         }
 
         qbuf =
-            strtok_r(thresholds_var_string, CTL_STRING_QUERY_SEPARATOR, &sptr);
+            strtok_r(thresholds_var_local, CTL_STRING_QUERY_SEPARATOR, &sptr);
         if (qbuf == NULL) {
-            log_err("No valid thresholds found in: %s", thresholds_var_string);
+            log_err("No valid thresholds found in: %s", thresholds_var_local);
             goto destroy_builder;
         }
 
