@@ -195,7 +195,7 @@ test/trace_mechanism_test_helper.c
 test/trial_generator.cpp
 test/trial_generator.h
 utils/docker/Dockerfile.centos-7
-utils/docker/Dockerfile.fedora-33
+utils/docker/Dockerfile.fedora-34
 utils/docker/Dockerfile.ubuntu-20.04
 utils/docker/docker_install_hwloc.sh
 utils/docker/docker_install_libvirt.sh
