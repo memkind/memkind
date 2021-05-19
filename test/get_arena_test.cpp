@@ -37,7 +37,7 @@ TEST_F(GetArenaTest, test_TC_MEMKIND_ThreadHash)
     size_t size = 0;
     int i;
     unsigned max_collisions, collisions;
-    const unsigned collisions_limit = 5;
+    const unsigned collisions_limit = 7;
 
     // Initialize kind
     memkind_malloc(MEMKIND_HBW, 0);
