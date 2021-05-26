@@ -1,3 +1,13 @@
+* Fri Jul 2 2021 Patryk Kaminski <patryk.kaminski@intel.com> v1.12.0-rc1
+- Added memtier intercept library
+- Introduced clang-format instead of astyle for code formatting
+- Removed memkind_malloc_wrapper
+- Added support for running python tests with py.test-3
+- Add python linter to GitHub Actions
+- Obtain arena indexes with a "random" avalaching hash instead of sequential
+- Extended error handling in pmem_allocator
+- Extended CPU models in PMEM tests
+
 * Fri Feb 26 2021 Michal Biesek <michal.biesek@intel.com> v1.11.0
 - Provided a function to verify if path supports DAX - memkind_check_dax_path()
 - Provided a NUMA node interleave variant for MEMKIND_DAX_KMEM (MEMKIND_DAX_KMEM_INTERLEAVE)
