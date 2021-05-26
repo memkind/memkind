@@ -1,3 +1,6 @@
+* Tue Jun 8 2021 Michal Biesek <michal.biesek@intel.com> v1.12.0-rc1
+- Add memtier intercept library
+
 * Fri Feb 26 2021 Michal Biesek <michal.biesek@intel.com> v1.11.0
 - Provided a function to verify if path supports DAX - memkind_check_dax_path()
 - Provided a NUMA node interleave variant for MEMKIND_DAX_KMEM (MEMKIND_DAX_KMEM_INTERLEAVE)
