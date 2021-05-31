@@ -6,8 +6,11 @@
 libmemtier.so \- TODO
 
 .SH "SYNOPSIS"
-.BR LD_PRELOAD=libmemtier.so
+In order to enable the usage of tiering in memkind, pass the following environment variable along with the command:
+.RS
+.B LD_PRELOAD=libmemtier.so
 command {arguments ...}
+.RE
 
 .SH "DESCRIPTION"
 .B TODO
