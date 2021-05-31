@@ -3,14 +3,19 @@
 .\"
 .TH "MEMTIER" 7 "2021-03-01" "Intel Corporation" "MEMTIER" \" -*- nroff -*-
 .SH "NAME"
-libmemtier.so \- TODO
+libmemtier.so - internal library which enables memory tiering
 
 .SH "SYNOPSIS"
-.BR LD_PRELOAD=libmemtier.so
+In order to enable the usage of tiering in memkind, pass the following environment variables along with the command:
+.RS
+.B LD_PRELOAD=libmemtier.so MEMKIND_MEM_TIERS="..."
 command {arguments ...}
+.RE
 
 .SH "DESCRIPTION"
-.B TODO
+This library enables memory tiering mechanism. It allows to make allocations with the usage of multiple kinds keeping a
+specified ratio between them. This ratio determines which parts of all allocated memory will be made with each kind.
+Both LD_PRELOAD and MEMKIND_MEM_TIERS environment variables are mandatory.
 
 .SH "ENVIRONMENT"
 .TP
