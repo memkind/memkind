@@ -3,14 +3,19 @@
 .\"
 .TH "MEMTIER" 7 "2021-03-01" "Intel Corporation" "MEMTIER" \" -*- nroff -*-
 .SH "NAME"
-libmemtier.so \- TODO
+libmemtier.so - interposer library which enables memkind memory tiering
 
 .SH "SYNOPSIS"
-.BR LD_PRELOAD=libmemtier.so
+In order to enable the usage of memory tiering in memkind, pass the following environment variables along with the command:
+.RS
+.B LD_PRELOAD=libmemtier.so MEMKIND_MEM_TIERS="..."
 command {arguments ...}
+.RE
 
 .SH "DESCRIPTION"
-.B TODO
+This library enables memory tiering mechanism. It allows to make allocations with the usage of multiple kinds keeping a
+specified ratio between them. This ratio determines which parts of all allocated memory will be made with each kind.
+Both LD_PRELOAD and MEMKIND_MEM_TIERS environment variables are mandatory.
 
 .SH "ENVIRONMENT"
 .TP
@@ -21,7 +26,8 @@ a comma-separated list of tier parameters in the following format:
 .IP
 "param_name:value,(...)"
 , where the param_name is the name of the parameter. For more details about param_name
-see the TIER PARAMETER NAME section below.
+see the TIER PARAMETER NAME section below. See also EXAMPLES section for examples on how to construct the MEMKIND_MEM_TIERS
+environment variable string.
 .TP
 .B MEMKIND_MEM_THRESHOLDS
 Semicolon-separated list of threshold configurations. Each configuration consists of
@@ -34,7 +40,9 @@ between Nth and (N+1)th tier. If some threshold configuration is missing, thresh
 configuration will be used. Note that for N tiers there should be at most N-1 thresholds defined. Set this variable only
 when
 .I DYNAMIC_THRESHOLD
-policy will is used. For more details about param_name see the THRESHOLD PARAMETER NAME section below. TODO add detailed example.
+policy is used. For more details about param_name see the THRESHOLD PARAMETER NAME section below. See also
+.I EXAMPLES
+section for the usage of MEMKIND_MEM_THRESHOLDS environment variable.
 
 .SH "TIER PARAMETER NAME"
 .TP
@@ -43,7 +51,7 @@ KIND (required) - kind of memory used in memory tier. Allowed kind names are 'DR
 PATH (required for FS_DAX kind) - the path to the location where pmem file will be created. The path has to exist. Pass this option
 only with FS_DAX kind.
 .TP
-PMEM_SIZE_LIMIT (optional) - if set, it is the limitation size of pmem file and the maximum size of total
+PMEM_SIZE_LIMIT (optional) - if set, it limits the size of pmem file and the maximum size of total
 allocations to PMEM. By default no limit is introduced. Pass this option only with FS_DAX kind.
 The accepted formats are: 1, 1K, 1M, 1G. See
 .I memkind(3)
@@ -56,7 +64,8 @@ function.
 RATIO (required) - the part of ratio tied to the given kind. It's represented as an
 .I unsigned
 type. Value should be in range from 1 to
-.I UINT_MAX
+.I UINT_MAX.
+Allocated memory is split between different kinds specified in KIND parameters. See EXAMPLES section.
 .TP
 POLICY (required) - determines the algorithm used to distribute allocations between
 provided memory kinds. This parameter has to be the last parameter in
@@ -69,7 +78,7 @@ policies are valid. In
 .I STATIC_RATIO
 all allocations are made in such a way that the ratio between memory kinds is static. In
 .I DYNAMIC_THRESHOLD
-the ratio between adjacent memory tiers is kept with a help of set of thresholds between kinds. TODO
+the ratio between adjacent memory tiers is kept with a help of set of thresholds between kinds.
 .PP
 See
 .I EXAMPLES
@@ -81,21 +90,19 @@ NOTE: The application will fail when provided environment variable string is not
 
 .SH "THRESHOLD PARAMETER NAME"
 .TP
-VAL (optional) - initial value of threshold between two adjacent N and N+1 tiers. For every allocation,
-if it's size is greater or equal than VAL, it will go to N+1 tier. It has to be greater or equal to MIN value
-and less or equal than MAX value. Note that in DYNAMIC_THRESHOLD policy this value can change in time
+INIT_VAL (optional) - initial value of threshold between two adjacent N and N+1 tiers. For every allocation,
+if its size is greater or equal than VAL, it will go to N+1 tier. It must be greater or equal to MIN value
+and less than or equal to MAX value. Note that in DYNAMIC_THRESHOLD policy this value can change in time
 to keep desired ratio between tiers.
 .TP
-MIN (optional) - minimum value of threshold. In DYNAMIC_THRESHOLD policy, threshold value can change in time
+MIN_VAL (optional) - minimum value of threshold. In DYNAMIC_THRESHOLD policy, threshold value can change in time
 to keep desired ratio between tiers, but it will not be lesser than MIN.
 .TP
-MAX (optional) - maximum value of threshold. In DYNAMIC_THRESHOLD policy, threshold value can change in time
+MAX_VAL (optional) - maximum value of threshold. In DYNAMIC_THRESHOLD policy, threshold value can change in time
 to keep desired ratio between tiers, but it will not be greater than MAX.
 .PP
 NOTE: Because setting above parameters is optional, they will be set to default values in case they are not defined.
-Default values for a threshold between first two tiers is VAL = 1024, MIN = 513 and MAX = 1536.
-If there are more tiers defined, each next undefined threshold will have all parameters increased by 1024,
-so next undefined threshold between next two tier will have VAL = 2048, MIN = 1537, MAX = 2560 and so on.
+Default values for a threshold between two tiers is VAL = 1024, MIN = 513 and MAX = 1536.
 .SH "DRAM FALLBACK POLICY"
 If there is not enough memory to satisfy the
 .I DRAM
@@ -118,7 +125,7 @@ both libmemtier.so and libmemkind.so are included in
 /bin/ls -l
 .PP
 Example usage of MEMKIND_MEM_TIERS environment variable where 20% of allocations will go to PMEM
-and 80% of allocations will go to DRAM:
+and 80% of allocations will go to DRAM (DRAM:FS_DAX ratio is 4:1):
 .IP
 .B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:10G,RATIO:1;KIND:DRAM,RATIO:4;POLICY:STATIC_RATIO"
 .PP
@@ -127,14 +134,16 @@ with filesystem created on top of it:
 .IP
 .B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,RATIO:1;POLICY:STATIC_RATIO"
 .PP
-Example usage of MEMKIND_MEM_TIERING_CONFIG environment variable where 20% of allocations will go to DRAM
-and 80% of allocations will go to DAX KMEM nodes:
+Example usage of MEMKIND_MEM_THRESHOLDS environment variable. With VAL=64, on the application start all allocations
+lower than 64 bytes will go to DRAM and equal to or greater than this value will go to DAX_KMEM nodes. This threshold value
+changes during the runtime in order to maintain the ratio. MIN=1 and MAX=10000 set the lower and upper limits of this threshold
+value. Note that the DYNAMIC_THRESHOLD policy has to be set in MEMKIND_MEM_TIERS environment variable:
 .IP
-.B MEMKIND_MEM_TIERS="KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:4,POLICY:STATIC_RATIO"
-.B TODO Example with dynamic threshold
+.B MEMKIND_MEM_TIERS="KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:4;POLICY:DYNAMIC_THRESHOLD
+.B MEMKIND_MEM_THRESHOLDS="VAL=64,MIN=5,MAX=10000"
 .SH "NOTES"
 .B libmemtier
-works for applications which does not statically link a
+works for applications which do not statically link an
 .B malloc
 implementation.
 .SH "COPYRIGHT"
