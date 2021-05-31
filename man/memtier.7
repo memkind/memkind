@@ -3,14 +3,19 @@
 .\"
 .TH "MEMTIER" 7 "2021-03-01" "Intel Corporation" "MEMTIER" \" -*- nroff -*-
 .SH "NAME"
-libmemtier.so \- TODO
+libmemtier.so - internal library which enables memory tiering
 
 .SH "SYNOPSIS"
-.BR LD_PRELOAD=libmemtier.so
+In order to enable the usage of tiering in memkind, pass the following environment variables along with the command:
+.RS
+.B LD_PRELOAD=libmemtier.so MEMKIND_MEM_TIERS="..."
 command {arguments ...}
+.RE
 
 .SH "DESCRIPTION"
-.B TODO
+This library enables memory tiering mechanism. It allows to make allocations with the usage of multiple kinds keeping a
+specified ratio between them. This ratio determines which parts of all allocated memory will be made with each kind.
+Both LD_PRELOAD and MEMKIND_MEM_TIERS environment variables are mandatory.
 
 .SH "ENVIRONMENT"
 .TP
@@ -34,7 +39,8 @@ between Nth and (N+1)th tier. If some threshold configuration is missing, thresh
 configuration will be used. Note that for N tiers there should be at most N-1 thresholds defined. Set this variable only
 when
 .I DYNAMIC_THRESHOLD
-policy will is used. For more details about param_name see the THRESHOLD PARAMETER NAME section below. TODO add detailed example.
+policy is used. For more details about param_name see the THRESHOLD PARAMETER NAME section below. See also EXAMPLES
+section for the usage of MEMKIND_MEM_THRESHOLDS environment variable.
 
 .SH "TIER PARAMETER NAME"
 .TP
@@ -127,16 +133,22 @@ with filesystem created on top of it:
 .IP
 .B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,RATIO:1;POLICY:STATIC_THRESHOLD"
 .PP
-Example usage of MEMKIND_MEM_TIERING_CONFIG environment variable where 20% of allocations will go to DRAM
-and 80% of allocations will go to DAX KMEM nodes:
+Example usage of MEMKIND_MEM_THRESHOLDS environment variable. With VAL=64, on the application start all allocations
+lower than 64 bytes will go to DRAM and equal to or greater than this value will go to DAX_KMEM nodes. This threshold value
+changes during the runtime in order to maintain the ratio. MIN=1 and MAX=10000 set the lower and upper limits of this threshold
+value. Note that the DYNAMIC_THRESHOLD policy has to be set in MEMKIND_MEM_TIERS environment variable:
 .IP
-.B MEMKIND_MEM_TIERS="KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:4,POLICY:STATIC_THRESHOLD"
-.B TODO Example with dynamic threshold
+.B MEMKIND_MEM_TIERS="KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:4;POLICY:DYNAMIC_THRESHOLD
+.B MEMKIND_MEM_THRESHOLDS="VAL=64,MIN=5,MAX=10000"
 .SH "NOTES"
 .B libmemtier
-works for applications which does not statically link a
+works for applications which does not:
+.IP \(bu
+statically link a
 .B malloc
-implementation.
+implementation,
+.IP \(bu
+use mmap.
 .SH "COPYRIGHT"
 Copyright (C) 2021 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
