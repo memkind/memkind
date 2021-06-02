@@ -50,7 +50,6 @@ static const struct stats_arena arena_stats[MEMKIND_STAT_TYPE_MAX_VALUE] = {
 };
 
 static void *jemk_mallocx_check(size_t size, int flags);
-static void *jemk_rallocx_check(void *ptr, size_t size, int flags);
 static void tcache_finalize(void *args);
 
 static unsigned integer_log2(unsigned v)
@@ -501,18 +500,23 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
 
     if (size == 0 && ptr != NULL) {
         jemk_dallocx(ptr, get_tcache_flag(kind->partition, 0));
-        return NULL;
-    }
-    int err = kind->ops->get_arena(kind, &arena, size);
-    if (MEMKIND_LIKELY(!err)) {
-        if (ptr == NULL) {
-            return jemk_mallocx_check(
-                size,
-                MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
+    } else {
+        int err = kind->ops->get_arena(kind, &arena, size);
+        if (MEMKIND_LIKELY(!err)) {
+            if (ptr == NULL) {
+                return jemk_mallocx_check(
+                    size,
+                    MALLOCX_ARENA(arena) |
+                        get_tcache_flag(kind->partition, size));
+            } else {
+                ptr = jemk_rallocx(ptr, size,
+                                   MALLOCX_ARENA(arena) |
+                                       get_tcache_flag(kind->partition, size));
+                if (MEMKIND_UNLIKELY(!ptr))
+                    errno = ENOMEM;
+                return ptr;
+            }
         }
-        return jemk_rallocx_check(ptr, size,
-                                  MALLOCX_ARENA(arena) |
-                                      get_tcache_flag(kind->partition, size));
     }
     return NULL;
 }
@@ -687,38 +691,13 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
 
 static void *jemk_mallocx_check(size_t size, int flags)
 {
-    /*
-     * Checking for out of range size due to unhandled error in
-     * jemk_mallocx().  Size invalid for the range
-     * LLONG_MAX <= size <= ULLONG_MAX
-     * which is the result of passing a negative signed number as size
-     */
-    void *result = NULL;
-
-    if (MEMKIND_UNLIKELY(size >= LLONG_MAX)) {
-        errno = ENOMEM;
-    } else if (size != 0) {
-        result = jemk_mallocx(size, flags);
+    if (MEMKIND_LIKELY(size)) {
+        void *ptr = jemk_mallocx(size, flags);
+        if (MEMKIND_UNLIKELY(!ptr))
+            errno = ENOMEM;
+        return ptr;
     }
-    return result;
-}
-
-static void *jemk_rallocx_check(void *ptr, size_t size, int flags)
-{
-    /*
-     * Checking for out of range size due to unhandled error in
-     * jemk_mallocx().  Size invalid for the range
-     * LLONG_MAX <= size <= ULLONG_MAX
-     * which is the result of passing a negative signed number as size
-     */
-    void *result = NULL;
-
-    if (MEMKIND_UNLIKELY(size >= LLONG_MAX)) {
-        errno = ENOMEM;
-    } else {
-        result = jemk_rallocx(ptr, size, flags);
-    }
-    return result;
+    return NULL;
 }
 
 void memkind_arena_init(struct memkind *kind)
