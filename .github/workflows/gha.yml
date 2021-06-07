@@ -88,7 +88,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04]
-        compiler_version: [11]
+        compiler_version: [10]
         env:
           - { cc: gcc, cxx: g++}
           - { cc: clang, cxx: clang++}
