@@ -67,7 +67,7 @@ protected:
     void SetUp()
     {
         struct memtier_builder *builder =
-            memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
+            memtier_builder_new(MEMTIER_POLICY_STATIC_RATIO);
         ASSERT_NE(nullptr, builder);
 
         int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT,
@@ -111,7 +111,7 @@ protected:
     void SetUp()
     {
         struct memtier_builder *builder =
-            memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
+            memtier_builder_new(MEMTIER_POLICY_STATIC_RATIO);
         ASSERT_NE(nullptr, builder);
 
         int res = memtier_builder_add_tier(builder, MEMKIND_DEFAULT,
@@ -209,7 +209,7 @@ TEST_F(MemkindMemtierKindTest, test_tier_allocate)
 TEST_F(MemkindMemtierKindTest, test_tier_builder_failure)
 {
     struct memtier_builder *builder =
-        memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
+        memtier_builder_new(MEMTIER_POLICY_STATIC_RATIO);
     ASSERT_NE(nullptr, builder);
     int res = memtier_builder_add_tier(builder, nullptr, 1);
     ASSERT_NE(0, res);
@@ -219,7 +219,7 @@ TEST_F(MemkindMemtierKindTest, test_tier_builder_failure)
 TEST_F(MemkindMemtierKindTest, test_tier_construct_failure_zero_tiers)
 {
     struct memtier_builder *builder =
-        memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
+        memtier_builder_new(MEMTIER_POLICY_STATIC_RATIO);
     ASSERT_NE(nullptr, builder);
     struct memtier_memory *tier_memory =
         memtier_builder_construct_memtier_memory(builder);
@@ -247,7 +247,7 @@ TEST_F(MemkindMemtierKindTest, test_tier_static_policy_failure)
 {
     const unsigned check_cnt = 5;
     struct memtier_builder *builder =
-        memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
+        memtier_builder_new(MEMTIER_POLICY_STATIC_RATIO);
     ASSERT_NE(nullptr, builder);
     int res = memtier_ctl_set(builder, "policy.dynamic_threshold.check_cnt",
                               &check_cnt);

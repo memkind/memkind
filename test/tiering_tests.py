@@ -32,9 +32,9 @@ class Helper(object):
     mem_tiers_env_var = "MEMKIND_MEM_TIERS"
     mem_thresholds_env_var = "MEMKIND_MEM_THRESHOLDS"
 
-    # POLICY_STATIC_THRESHOLD is a policy used in tests that have to set a
+    # POLICY_STATIC_RATIO is a policy used in tests that have to set a
     # valid policy but don't test anything related to allocation policies
-    default_policy = "POLICY:STATIC_THRESHOLD"
+    default_policy = "POLICY:STATIC_RATIO"
 
     @staticmethod
     def bytes_from_str(bytes_str):
@@ -297,7 +297,7 @@ class Test_tiering_config_env(Helper):
             "KIND:DRAM,RATIO:" + ratio + ";" + self.default_policy,
             log_level="2")
 
-    @pytest.mark.parametrize("policy", ["POLICY:STATIC_THRESHOLD"])
+    @pytest.mark.parametrize("policy", ["POLICY:STATIC_RATIO"])
     def test_DRAM_policy(self, policy):
         ratio = "1"
         self.get_ld_preload_cmd_output(
@@ -310,7 +310,7 @@ class Test_tiering_config_env(Helper):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:100;" + self.default_policy)
 
-    @pytest.mark.parametrize("policy", ["POLICY:STATIC_THRESHOLD",
+    @pytest.mark.parametrize("policy", ["POLICY:STATIC_RATIO",
                                         "POLICY:DYNAMIC_THRESHOLD"])
     def test_KMEM_DAX_multiple(self, policy):
         self.get_ld_preload_cmd_output(
@@ -460,7 +460,7 @@ class Test_tiering_config_env(Helper):
             tier_str, negative_test=True)
 
     @pytest.mark.parametrize("policy",
-                             ["POLICY:STATIC_THRESHOLD",
+                             ["POLICY:STATIC_RATIO",
                               "POLICY:DYNAMIC_THRESHOLD"])
     def test_multiple_tiers(self, policy):
         assert os.access("/mnt", os.W_OK | os.X_OK), \
@@ -510,7 +510,7 @@ class Test_tiering_config_env(Helper):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:1;"
             + "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,RATIO:4;"
-            + "POLICY:STATIC_THRESHOLD",
+            + "POLICY:STATIC_RATIO",
             thresholds_config="VAL:1K,MIN:64,MAX:2K",
             negative_test=True)
 
@@ -524,7 +524,7 @@ class Test_tiering_config_env(Helper):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:1;"
             + "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,RATIO:4;"
-            + "POLICY:STATIC_THRESHOLD",
+            + "POLICY:STATIC_RATIO",
             thresholds_config=params,
             negative_test=True)
 

@@ -574,7 +574,7 @@ memtier_builder_new(memtier_policy_t policy)
     struct memtier_builder *b = jemk_calloc(1, sizeof(struct memtier_builder));
     if (b) {
         switch (policy) {
-            case MEMTIER_POLICY_STATIC_THRESHOLD:
+            case MEMTIER_POLICY_STATIC_RATIO:
                 b->create_mem = builder_static_create_memory;
                 b->update_builder = NULL;
                 b->ctl_set = builder_static_ctl_set;

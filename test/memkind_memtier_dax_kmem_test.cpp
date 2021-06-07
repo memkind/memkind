@@ -21,7 +21,7 @@ protected:
         } else {
             memory_kind = MEMKIND_DAX_KMEM;
             m_tier_memory = nullptr;
-            m_builder = memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
+            m_builder = memtier_builder_new(MEMTIER_POLICY_STATIC_RATIO);
             ASSERT_NE(nullptr, m_builder);
         }
     }

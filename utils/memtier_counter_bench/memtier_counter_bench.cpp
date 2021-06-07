@@ -97,7 +97,7 @@ class memtier_bench_alloc: public counter_bench_alloc
 public:
     memtier_bench_alloc()
     {
-        m_tier_builder = memtier_builder_new(MEMTIER_POLICY_STATIC_THRESHOLD);
+        m_tier_builder = memtier_builder_new(MEMTIER_POLICY_STATIC_RATIO);
         memtier_builder_add_tier(m_tier_builder, MEMKIND_DEFAULT, 1);
         m_tier_memory =
             memtier_builder_construct_memtier_memory(m_tier_builder);
@@ -181,7 +181,7 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
             args->bench = Benchptr(new memtier_bench_alloc());
             break;
         case 's':
-            args->bench = Benchptr(new memtier_multiple_bench_alloc(MEMTIER_POLICY_STATIC_THRESHOLD));
+            args->bench = Benchptr(new memtier_multiple_bench_alloc(MEMTIER_POLICY_STATIC_RATIO));
             break;
         case 'd':
             args->bench = Benchptr(new memtier_multiple_bench_alloc(MEMTIER_POLICY_DYNAMIC_THRESHOLD));
