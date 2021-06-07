@@ -62,11 +62,11 @@ POLICY (required) - determines the algorithm used to distribute allocations betw
 provided memory kinds. This parameter has to be the last parameter in
 .I MEMKIND_MEM_TIERS
 configuration string. Currently only
-.I STATIC_THRESHOLD
+.I STATIC_RATIO
 and
 .I DYNAMIC_THRESHOLD
 policies are valid. In
-.I STATIC_THRESHOLD
+.I STATIC_RATIO
 all allocations are made in such a way that the ratio between memory kinds is static. In
 .I DYNAMIC_THRESHOLD
 the ratio between adjacent memory tiers is kept with a help of set of thresholds between kinds. TODO
@@ -120,17 +120,17 @@ both libmemtier.so and libmemkind.so are included in
 Example usage of MEMKIND_MEM_TIERS environment variable where 20% of allocations will go to PMEM
 and 80% of allocations will go to DRAM:
 .IP
-.B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:10G,RATIO:1;KIND:DRAM,RATIO:4;POLICY:STATIC_THRESHOLD"
+.B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:10G,RATIO:1;KIND:DRAM,RATIO:4;POLICY:STATIC_RATIO"
 .PP
 Example usage of MEMKIND_MEM_TIERS environment variable where 100% of allocations will go to PMEM
 with filesystem created on top of it:
 .IP
-.B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,RATIO:1;POLICY:STATIC_THRESHOLD"
+.B MEMKIND_MEM_TIERS="KIND:FS_DAX,PATH:/tmp/,RATIO:1;POLICY:STATIC_RATIO"
 .PP
 Example usage of MEMKIND_MEM_TIERING_CONFIG environment variable where 20% of allocations will go to DRAM
 and 80% of allocations will go to DAX KMEM nodes:
 .IP
-.B MEMKIND_MEM_TIERS="KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:4,POLICY:STATIC_THRESHOLD"
+.B MEMKIND_MEM_TIERS="KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:4,POLICY:STATIC_RATIO"
 .B TODO Example with dynamic threshold
 .SH "NOTES"
 .B libmemtier

@@ -157,8 +157,8 @@ parse_failure:
  */
 static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
 {
-    if (strcmp(qbuf, "STATIC_THRESHOLD") == 0) {
-        *policy = MEMTIER_POLICY_STATIC_THRESHOLD;
+    if (strcmp(qbuf, "STATIC_RATIO") == 0) {
+        *policy = MEMTIER_POLICY_STATIC_RATIO;
     } else if (strcmp(qbuf, "DYNAMIC_THRESHOLD") == 0) {
         *policy = MEMTIER_POLICY_DYNAMIC_THRESHOLD;
     } else {
