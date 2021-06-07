@@ -338,6 +338,15 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
         if (err) {
             goto exit;
         }
+
+        // setup kind partition
+        snprintf(cmd, sizeof(cmd), "arena.%u.memkind_partition", arena_index);
+        err = jemk_mallctl(cmd, NULL, NULL, (void *)&kind->partition,
+                           sizeof(unsigned));
+        if (err) {
+            goto exit;
+        }
+
         arena_registry_g[arena_index] = kind;
     }
 
@@ -490,7 +499,7 @@ MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
 
 MEMKIND_EXPORT void memkind_arena_free_with_kind_detect(void *ptr)
 {
-    memkind_arena_free(memkind_arena_detect_kind(ptr), ptr);
+    jemk_free_with_tcache(ptr, pthread_getspecific(tcache_key));
 }
 
 MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
