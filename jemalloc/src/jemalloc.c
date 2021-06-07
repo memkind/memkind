@@ -3775,6 +3775,28 @@ label_return:
 	LOG("core.arena_lookupx.exit", "result: %d", ret);
 	return ret;
 }
+JEMALLOC_EXPORT void JEMALLOC_NOTHROW
+je_freex(void *ptr, unsigned *tcache_map){
+	tsdn_t *tsdn;
+	LOG("core.freex.entry", "ptr: %p", ptr);
+
+	tsdn = tsdn_fetch();
+	check_entry_exit_locking(tsdn);
+
+	const extent_t *extent = iealloc(tsdn, ptr);
+	arena_t *arena = extent_arena_get(extent);
+	if (arena_is_auto(arena)) {
+		je_free(ptr);
+	} else if (tcache_map && (arena->mk_partition < 26)) {
+		je_dallocx(ptr, MALLOCX_TCACHE(*tcache_map+arena->mk_partition));
+	} else {
+		je_dallocx(ptr, MALLOCX_TCACHE_NONE);
+	}
+
+	check_entry_exit_locking(tsdn);
+	LOG("core.freex.exit", "");
+}
+
 
 JEMALLOC_EXPORT int JEMALLOC_NOTHROW
 je_check_reallocatex(const void *ptr) {
