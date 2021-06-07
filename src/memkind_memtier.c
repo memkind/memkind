@@ -311,7 +311,7 @@ memtier_policy_dynamic_threshold_update_config(struct memtier_memory *memory)
 
         // increase/decrease threshold value by thres_degree and clamp it to
         // (min, max) range
-        size_t threshold = thres[i].val * memory->thres_degree;
+        size_t threshold = thres[i].val * memory->thres_degree + 1;
         if ((prev_alloc_size == 0) || (current_ratio > thres[i].norm_ratio)) {
             size_t higher_threshold = thres[i].val + threshold;
             if (higher_threshold <= thres[i].max) {
