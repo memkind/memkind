@@ -1878,6 +1878,12 @@ arena_dirty_decay_ms_default_set(ssize_t decay_ms) {
 	return false;
 }
 
+bool
+arena_memkind_partition_set(arena_t *arena, unsigned partition_id) {
+	arena->mk_partition = partition_id;
+	return false;
+}
+
 ssize_t
 arena_muzzy_decay_ms_default_get(void) {
 	return atomic_load_zd(&muzzy_decay_ms_default, ATOMIC_RELAXED);

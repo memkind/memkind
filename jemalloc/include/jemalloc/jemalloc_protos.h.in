@@ -57,6 +57,7 @@ JEMALLOC_EXPORT int JEMALLOC_NOTHROW	@je_@arenalookupx(
     const void *ptr) JEMALLOC_CXX_THROW;
 JEMALLOC_EXPORT int JEMALLOC_NOTHROW	@je_@check_reallocatex(
     const void *ptr) JEMALLOC_CXX_THROW;
+JEMALLOC_EXPORT void JEMALLOC_NOTHROW	@je_@free_with_tcache(void *ptr, unsigned *tcache_map);
 
 #ifdef JEMALLOC_OVERRIDE_MEMALIGN
 JEMALLOC_EXPORT JEMALLOC_ALLOCATOR JEMALLOC_RESTRICT_RETURN
