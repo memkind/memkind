@@ -216,6 +216,8 @@ struct arena_s {
 	base_t			*base;
 	/* Used to determine uptime.  Read-only after initialization. */
 	nstime_t		create_time;
+	/* Used to determine memory kind partition.  Read-only after initialization. */
+	unsigned		mk_partition;
 };
 
 /* Used in conjunction with tsd for fast arena-related context lookup. */
