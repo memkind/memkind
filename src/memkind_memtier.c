@@ -180,8 +180,7 @@ static memkind_t memtier_single_get_kind(struct memtier_memory *memory,
 }
 
 static memkind_t
-memtier_policy_static_threshold_get_kind(struct memtier_memory *memory,
-                                         size_t size)
+memtier_policy_static_ratio_get_kind(struct memtier_memory *memory, size_t size)
 {
     struct memtier_tier_cfg *cfg = memory->cfg;
 
@@ -272,7 +271,7 @@ static void print_builder(struct memtier_builder *builder)
 }
 
 static void
-memtier_policy_static_threshold_update_config(struct memtier_memory *memory)
+memtier_policy_static_ratio_update_config(struct memtier_memory *memory)
 {}
 
 static void
@@ -357,9 +356,9 @@ memtier_memory_init(size_t tier_size, bool is_dynamic_threshold)
         if (tier_size == 1)
             memory->get_kind = memtier_single_get_kind;
         else {
-            memory->get_kind = memtier_policy_static_threshold_get_kind;
+            memory->get_kind = memtier_policy_static_ratio_get_kind;
         }
-        memory->update_cfg = memtier_policy_static_threshold_update_config;
+        memory->update_cfg = memtier_policy_static_ratio_update_config;
     }
     memory->thres = NULL;
     memory->cfg_size = tier_size;
@@ -574,7 +573,7 @@ memtier_builder_new(memtier_policy_t policy)
     struct memtier_builder *b = jemk_calloc(1, sizeof(struct memtier_builder));
     if (b) {
         switch (policy) {
-            case MEMTIER_POLICY_STATIC_THRESHOLD:
+            case MEMTIER_POLICY_STATIC_RATIO:
                 b->create_mem = builder_static_create_memory;
                 b->update_builder = NULL;
                 b->ctl_set = builder_static_ctl_set;
