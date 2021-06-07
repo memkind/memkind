@@ -23,9 +23,9 @@ struct memtier_memory;
 typedef enum memtier_policy_t
 {
     /**
-     * Static Threshold policy
+     * Static Ratio policy
      */
-    MEMTIER_POLICY_STATIC_THRESHOLD = 0,
+    MEMTIER_POLICY_STATIC_RATIO = 0,
 
     /**
      * Dynamic Threshold policy
