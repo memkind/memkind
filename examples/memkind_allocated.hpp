@@ -63,7 +63,7 @@ public:
 
     void operator delete(void *ptr)
     {
-        memkind_free(0, ptr);
+        memkind_free(NULL, ptr);
     }
 
     void operator delete[](void *ptr)

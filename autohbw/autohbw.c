@@ -379,7 +379,7 @@ static void MemkindFree(void *ptr)
     // avoid to many useless logs
     if (ptr)
         LOG(VERBOSE, "In my memkind free, ptr:%p\n", ptr);
-    memkind_free(0, ptr);
+    memkind_free(NULL, ptr);
 }
 
 //--------------------------------------------------------------------------

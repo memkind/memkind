@@ -26,6 +26,6 @@ TEST_F(FreeingMemorySegfault,
     });
     t.join();
 
-    memkind_free(0, ptr);
+    memkind_free(NULL, ptr);
     SUCCEED();
 }
