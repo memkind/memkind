@@ -1267,7 +1267,7 @@ TEST_F(MemkindMemtierThresholdTest, test_const_alloc_size)
     // Start checking distance between actual and desired ratio
     // after "ratio_check_skip" allocations
     const unsigned ratio_check_skip = 1000;
-    const float max_ratio_distance = 0.41; // 41%
+    const float max_ratio_distance = 0.20; // 20%
 
     for (unsigned i = 0; i < num_allocs; ++i) {
         void *ptr = memtier_malloc(m_tier_memory, alloc_size);
@@ -1302,7 +1302,7 @@ TEST_F(MemkindMemtierThresholdTest, test_various_alloc_size)
     const int alloc_sizes_num = 10;
     const size_t alloc_sizes[alloc_sizes_num] = {4,   8,   16,  32,   64,
                                                  128, 256, 512, 1024, 1024 * 2};
-    const int alloc_num = 10000;
+    const int alloc_num = 20000;
     size_t sizes[alloc_num];
     std::vector<void *> allocs;
 
