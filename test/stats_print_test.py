@@ -21,7 +21,7 @@ class Test_malloc_stats_print(object):
         assert retcode == 0, \
             self.fail_msg.format(
                 f"\nError: Execution of \'{command}\'",
-                " returns {retcode}. Output: {output}")
+                f" returns {retcode}. Output: {output}")
         return output, retcode
 
     @pytest.mark.parametrize("bin_param", ["default", "stdout", "no_write_cb"])
@@ -94,5 +94,5 @@ class Test_malloc_stats_print(object):
         self.bin_param = "opts_negative_test"
         _, retcode = self.run_test_binary()
         assert retcode == 0, \
-            f"Error: '{self.bin_path}' binary should return 0"\
+            f"Error: '{self.bin_path}' binary should return 0" \
             " indicating that parsing opts string failed."

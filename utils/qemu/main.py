@@ -132,8 +132,8 @@ class GuestConnection:
         Mount working directory from host to guest
         """
         c.run(f'sudo mkdir -p {MEMKIND_GUEST_PATH}', echo=True)
-        c.run(f'sudo mount {MEMKIND_MOUNT_TAG} \
-              {MEMKIND_GUEST_PATH} -t 9p -o trans=virtio', echo=True)
+        c.run(f'sudo mount {MEMKIND_MOUNT_TAG} '
+              f'{MEMKIND_GUEST_PATH} -t 9p -o trans=virtio', echo=True)
 
     def _set_test_env_name(self, c: fabric.Connection) -> None:
         """
@@ -185,8 +185,8 @@ class GuestConnection:
                 with fabric.Connection(**self._connection_params) as c:
                     c.run('whoami', hide='both')
             except paramiko.SSHException:
-                print('FAILURE: SSH connection',
-                      ' to guest after {sec} sec - retrying.')
+                print(f'FAILURE: SSH connection'
+                      f' to guest after {sec} sec - retrying.')
                 time.sleep(1)
             else:
                 print(f'SUCCESS: SSH connection to guest after {sec} sec.')
@@ -225,8 +225,8 @@ class GuestConnection:
                     self._set_test_env_name(c)
                     if force_reinstall:
                         self._build_and_reinstall_memkind(c)
-                print('QEMU development is ready to use via SSH',
-                      ' ({TCP_PORT}) or VNC ({VNC_DEFAULT_PORT + VNC_PORT})')
+                print(f'QEMU development is ready to use via SSH'
+                      f' ({TCP_PORT}) or VNC ({VNC_DEFAULT_PORT + VNC_PORT})')
             except fabric.exceptions.GroupException:
                 self._shutdown(c)
 
