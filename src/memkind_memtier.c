@@ -74,9 +74,9 @@
 // CHECK_CNT     - number of memory management operations that has to be made
 //                 between ratio checks
 // STEP          - default step (in bytes) between thresholds
-#define THRESHOLD_TRIGGER   0.1  // 10%
-#define THRESHOLD_DEGREE    0.25 // 25%
-#define THRESHOLD_CHECK_CNT 5
+#define THRESHOLD_TRIGGER   0.02 // 2%
+#define THRESHOLD_DEGREE    0.15 // 15%
+#define THRESHOLD_CHECK_CNT 20
 #define THRESHOLD_STEP      1024
 
 // Macro to get number of thresholds from parent object
@@ -89,10 +89,13 @@ struct memtier_tier_cfg {
 
 // Thresholds configuration - valid only for DYNAMIC_THRESHOLD policy
 struct memtier_threshold_cfg {
-    size_t val;       // Actual threshold level
-    size_t min;       // Minimum threshold level
-    size_t max;       // Maximum threshold level
-    float norm_ratio; // Normalized ratio between two adjacent tiers
+    size_t val;                // Actual threshold level
+    size_t min;                // Minimum threshold level
+    size_t max;                // Maximum threshold level
+    float exp_norm_ratio;      // Expected normalized ratio between two adjacent
+                               // tiers
+    float current_ratio_diff;  // Difference between actual and expected
+                               // normalized ratio
 };
 
 struct memtier_builder {
@@ -301,8 +304,11 @@ memtier_policy_dynamic_threshold_update_config(struct memtier_memory *memory)
         float current_ratio = -1;
         if (prev_alloc_size > 0) {
             current_ratio = (float)next_alloc_size / prev_alloc_size;
-            float ratio_diff = current_ratio - thres[i].norm_ratio;
-            if (fabs(ratio_diff) < memory->thres_trigger) {
+            float prev_ratio_diff = thres[i].current_ratio_diff;
+            thres[i].current_ratio_diff =
+                fabs(current_ratio - thres[i].exp_norm_ratio);
+            if ((thres[i].current_ratio_diff < memory->thres_trigger) ||
+                (thres[i].current_ratio_diff < prev_ratio_diff)) {
                 // threshold needn't to be changed
                 continue;
             }
@@ -311,7 +317,8 @@ memtier_policy_dynamic_threshold_update_config(struct memtier_memory *memory)
         // increase/decrease threshold value by thres_degree and clamp it to
         // (min, max) range
         size_t threshold = (size_t)ceilf(thres[i].val * memory->thres_degree);
-        if ((prev_alloc_size == 0) || (current_ratio > thres[i].norm_ratio)) {
+        if ((prev_alloc_size == 0) ||
+            (current_ratio > thres[i].exp_norm_ratio)) {
             size_t higher_threshold = thres[i].val + threshold;
             if (higher_threshold <= thres[i].max) {
                 thres[i].val = higher_threshold;
@@ -486,7 +493,7 @@ builder_dynamic_create_memory(struct memtier_builder *builder)
         memory->thres[i].val = builder->thres[i].val;
         memory->thres[i].min = builder->thres[i].min;
         memory->thres[i].max = builder->thres[i].max;
-        memory->thres[i].norm_ratio =
+        memory->thres[i].exp_norm_ratio =
             builder->cfg[i + 1].kind_ratio / builder->cfg[i].kind_ratio;
     }
 
