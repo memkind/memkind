@@ -39,9 +39,9 @@ class Test_dax_kmem_env_var(object):
         assert dax_kmem_nodemask_default == (
             dax_kmem_nodemask_env_variable,
             self.fail_msg.format(
-                f"Error: Nodemask dax_kmem_nodemask_default ({0}) \
-                is not the same as nodemask \
-                dax_kmem_nodemask_env_variable ({1})".format(
+                "Error: Nodemask dax_kmem_nodemask_default ({0}) "
+                "is not the same as nodemask "
+                "dax_kmem_nodemask_env_variable ({1})".format(
                     dax_kmem_nodemask_default,
                     dax_kmem_nodemask_env_variable)))
 
@@ -56,7 +56,7 @@ class Test_dax_kmem_env_var(object):
             "\nError: Execution of: \'{0}\' returns: {1} \noutput: {2}"
             .format(command, retcode, output))
         assert self.expected_libnuma_warning == output, self.fail_msg.format(
-            "Error: expected libnuma warning ({0}) ",
+            "Error: expected libnuma warning ({0}) "
             "was not found (output: {1})").format(
                 self.expected_libnuma_warning, output)
 
