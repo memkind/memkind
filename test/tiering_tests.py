@@ -273,7 +273,7 @@ class Test_tiering_config_env(Helper):
         tiers_str = "KIND:DRAM,RATIO:1;" + \
             "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,RATIO:4;" + \
             "POLICY:DYNAMIC_THRESHOLD"
-        threshold_str = "VAL:1K,MIN:64,MAX:2K"
+        threshold_str = "INIT_VAL:1K,MIN_VAL:64,MAX_VAL:2K"
 
         log_level_env = self.log_prefix + "LOG_LEVEL=2"
         tiers_env = self.mem_tiers_env_var + '="' + tiers_str + '"'
@@ -472,11 +472,11 @@ class Test_tiering_config_env(Helper):
             + policy, log_level="2")
 
     @pytest.mark.parametrize("thresholds",
-                             ["VAL:1K,MIN:64,MAX:2K",
-                              "VAL:100,MIN:1,MAX:1000",
-                              "MIN:1,MAX:1000,VAL:100",
-                              "MIN:1,VAL:100,MAX:1000",
-                              "MAX:1000,MIN:1,VAL:100"])
+                             ["INIT_VAL:1K,MIN_VAL:64,MAX_VAL:2K",
+                              "INIT_VAL:100,MIN_VAL:1,MAX_VAL:1000",
+                              "MIN_VAL:1,MAX_VAL:1000,INIT_VAL:100",
+                              "MIN_VAL:1,INIT_VAL:100,MAX_VAL:1000",
+                              "MAX_VAL:1000,MIN_VAL:1,INIT_VAL:100"])
     def test_two_tiers_thresholds(self, thresholds):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:1;"
@@ -486,8 +486,8 @@ class Test_tiering_config_env(Helper):
 
     @pytest.mark.parametrize("thresholds",
                              ["::", "AAA", "A1B2C3", "AAA:BB", "AA:42",
-                              "VAL:AAA", "VAL:1A2B", "VAL::", "VAL:14,4.4",
-                              "VAL:111,VAL:222"])
+                              "INIT_VAL:AAA", "INIT_VAL:1A2B", "INIT_VAL::",
+                              "INIT_VAL:14,4.4", "INIT_VAL:111,INIT_VAL:222"])
     def test_negative_two_tiers_bad_thresholds(self, thresholds):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:1;"
@@ -496,9 +496,9 @@ class Test_tiering_config_env(Helper):
             negative_test=True)
 
     @pytest.mark.parametrize("thresholds",
-                             ["VAL:101,MIN:1,MAX:100",
-                              "VAL:50,MIN:100,MAX:10",
-                              "VAL:1,MIN:10,MAX:100"])
+                             ["INIT_VAL:101,MIN_VAL:1,MAX_VAL:100",
+                              "INIT_VAL:50,MIN_VAL:100,MAX_VAL:10",
+                              "INIT_VAL:1,MIN_VAL:10,MAX_VAL:100"])
     def test_negative_two_tiers_bad_threshold_values(self, thresholds):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:1;"
@@ -511,15 +511,16 @@ class Test_tiering_config_env(Helper):
             "KIND:DRAM,RATIO:1;"
             + "KIND:FS_DAX,PATH:/tmp/,PMEM_SIZE_LIMIT:100M,RATIO:4;"
             + "POLICY:STATIC_RATIO",
-            thresholds_config="VAL:1K,MIN:64,MAX:2K",
+            thresholds_config="INIT_VAL:1K,MIN_VAL:64,MAX_VAL:2K",
             negative_test=True)
 
     @pytest.mark.parametrize("params",
-                             ["VAL:1K,VAL:2K,MIN:64,MAX:3K",
-                              "VAL:1K,MIN:64,MAX:2K,MAX:10K",
-                              "VAL:1K,MIN:3K,MIN:64,MAX:2K",
-                              "VAL:1K,MIN:64,MAX:2K,VAL:10K",
-                              "VAL:1K,MIN:64,MAX:2K;VAL:10K,MIN:3K,MAX:20K"])
+                             ["INIT_VAL:1K,INIT_VAL:2K,MIN_VAL:64,MAX_VAL:3K",
+                              "INIT_VAL:1K,MIN_VAL:64,MAX_VAL:2K,MAX_VAL:10K",
+                              "INIT_VAL:1K,MIN_VAL:3K,MIN_VAL:64,MAX_VAL:2K",
+                              "INIT_VAL:1K,MIN_VAL:64,MAX_VAL:2K,INIT_VAL:10K",
+                              "INIT_VAL:1K,MIN_VAL:64,MAX_VAL:2K;"
+                              "INIT_VAL:10K,MIN_VAL:3K,MAX_VAL:20K"])
     def test_negative_too_many_threshold_params(self, params):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:1;"

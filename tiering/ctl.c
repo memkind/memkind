@@ -367,17 +367,17 @@ static int ctl_parse_threshold_query(char *qbuf, int threshold_id,
     }
 
     while (param_str != NULL) {
-        if (!strcmp(param_str, "VAL")) {
+        if (!strcmp(param_str, "INIT_VAL")) {
             ret = ctl_set_thr_cfg(&sptr, CTL_THRES_VAL, threshold_id, &ctl_opts,
                                   builder);
             if (ret != 0)
                 return -1;
-        } else if (!strcmp(param_str, "MIN")) {
+        } else if (!strcmp(param_str, "MIN_VAL")) {
             ret = ctl_set_thr_cfg(&sptr, CTL_THRES_MIN, threshold_id, &ctl_opts,
                                   builder);
             if (ret != 0)
                 return -1;
-        } else if (!strcmp(param_str, "MAX")) {
+        } else if (!strcmp(param_str, "MAX_VAL")) {
             ret = ctl_set_thr_cfg(&sptr, CTL_THRES_MAX, threshold_id, &ctl_opts,
                                   builder);
             if (ret != 0)
