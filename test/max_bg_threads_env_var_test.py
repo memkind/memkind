@@ -2,7 +2,7 @@
 # Copyright (C) 2021 Intel Corporation.
 
 import pytest
-from python_framework import CMD_helper
+from python_framework.cmd_helper import CMD_helper
 
 
 class Test_max_bg_threads_env_var():

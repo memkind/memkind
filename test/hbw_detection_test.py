@@ -2,7 +2,7 @@
 # Copyright (C) 2017 - 2021 Intel Corporation.
 
 from distutils.spawn import find_executable
-from python_framework import CMD_helper
+from python_framework.cmd_helper import CMD_helper
 import os
 
 

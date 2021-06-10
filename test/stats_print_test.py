@@ -3,7 +3,7 @@
 
 import json
 import pytest
-from python_framework import CMD_helper
+from python_framework.cmd_helper import CMD_helper
 import re
 
 

@@ -2,7 +2,7 @@
 # Copyright (C) 2016 - 2021 Intel Corporation.
 
 import os
-from python_framework import CMD_helper
+from python_framework.cmd_helper import CMD_helper
 
 
 def _get_libautohbw_path():
