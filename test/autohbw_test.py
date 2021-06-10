@@ -2,7 +2,7 @@
 # Copyright (C) 2016 - 2021 Intel Corporation.
 
 import os
-from python_framework import CMD_helper
+from python_framework.cmd_helper import CMD_helper
 
 
 def _get_libautohbw_path():
@@ -30,10 +30,10 @@ class Test_autohbw(object):
                    + self.cmd_helper.get_command_path(self.binary) + " malloc")
         print("Executing command: {0}".format(command))
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
-        assert retcode == (0,
-                           self.fail_msg.format("\nError: autohbw_test_helper",
-                                                " returned {0} \noutput: {1}"
-                                                .format(retcode, output)))
+        assert retcode == 0, \
+            self.fail_msg.format("\nError: autohbw_test_helper",
+                                 " returned {0} \noutput: {1}"
+                                 .format(retcode, output))
         assert self.memkind_malloc_log in output, self.fail_msg.format(
             "\nError: malloc was not overridden",
             " by autohbw equivalent \noutput: {0}").format(output)
@@ -49,10 +49,10 @@ class Test_autohbw(object):
                    + self.cmd_helper.get_command_path(self.binary) + " calloc")
         print("Executing command: {0}".format(command))
         output, retcode = self.cmd_helper.execute_cmd(command, sudo=False)
-        assert retcode == (0,
-                           self.fail_msg.format("\nError: autohbw_test_helper",
-                                                " returned {0} \noutput: {1}"
-                                                .format(retcode, output)))
+        assert retcode == 0, \
+            self.fail_msg.format("\nError: autohbw_test_helper",
+                                 " returned {0} \noutput: {1}"
+                                 .format(retcode, output))
         assert self.memkind_calloc_log in output, self.fail_msg.format(
             "\nError: calloc was not overridden by",
             " autohbw equivalent \noutput: {0}").format(output)

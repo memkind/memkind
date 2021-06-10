@@ -19,8 +19,8 @@ class Test_max_bg_threads_env_var():
     def run_test_binary(self):
         cmd_path = self.cmd_helper.get_command_path(
             '../environ_max_bg_threads_test')
-        command = f"MEMKIND_BACKGROUND_THREAD_LIMIT={self.threads_limit}" \
-            f" {cmd_path}"
+        command = "MEMKIND_BACKGROUND_THREAD_LIMIT=" \
+            f"{self.threads_limit} {cmd_path}"
         output, retcode = self.cmd_helper.execute_cmd(command)
         assert retcode != 1, \
             self.fail_msg.format(

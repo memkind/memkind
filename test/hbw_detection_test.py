@@ -2,7 +2,7 @@
 # Copyright (C) 2017 - 2021 Intel Corporation.
 
 from distutils.spawn import find_executable
-from python_framework import CMD_helper
+from python_framework.cmd_helper import CMD_helper
 import os
 
 
@@ -11,8 +11,8 @@ class Test_hbw_detection(object):
         os.path.dirname(__file__))
     binary_path = find_executable("memkind-hbw-nodes")
     environ_err_test = "../environ_err_hbw_malloc_test"
-    expected_libnuma_warning = ("libnuma: Warning: node",
-                                " argument -1 is out of range\n\n")
+    expected_libnuma_warning = "libnuma: Warning: node" \
+        " argument -1 is out of range\n\n"
     fail_msg = "Test failed with:\n {0}"
     cmd_helper = CMD_helper()
 
@@ -34,12 +34,12 @@ class Test_hbw_detection(object):
             and hbw_nodemask_env_variable has the same value """
         hbw_nodemask_default = self.get_hbw_nodes()
         hbw_nodemask_env_variable = self.get_hbw_nodes(hbw_nodemask_default)
-        assert hbw_nodemask_default == (
-            hbw_nodemask_env_variable, self.fail_msg.format(
+        assert hbw_nodemask_default == hbw_nodemask_env_variable, \
+            self.fail_msg.format(
                 "Error: Nodemask hbw_nodemask_default ({0}) "
                 "is not the same as nodemask "
                 "hbw_nodemask_env_variable ({1})".format(
-                    hbw_nodemask_default, hbw_nodemask_env_variable)))
+                    hbw_nodemask_default, hbw_nodemask_env_variable))
 
     def test_TC_MEMKIND_hbw_detection_negative_hbw_malloc(self):
         """ This test sets unsupported value of MEMKIND_HBW_NODES,
