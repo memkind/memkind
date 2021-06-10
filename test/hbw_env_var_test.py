@@ -16,8 +16,8 @@ class Test_hbw_env_var(object):
         command = " ".join([env, bin_path, kind])
         output, retcode = self.cmd_helper.execute_cmd(command)
         print(output)
-        fail_msg = (f"Test failed with error: \nExecution of: \'{command}\'",
-                    " returns: {retcode} \noutput: {output}")
+        fail_msg = (f"Test failed with error: \nExecution of: \'{command}\'"
+                    f" returns: {retcode} \noutput: {output}")
         assert retcode == 0, fail_msg
 
     @pytest.mark.parametrize("kind", ["MEMKIND_HBW", "MEMKIND_HBW_ALL"])
