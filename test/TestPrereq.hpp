@@ -63,6 +63,7 @@ private:
 #define CPU_MODEL_KNL         (0x57)
 #define CPU_MODEL_KNM         (0x85)
 #define CPU_MODEL_CLX         (0x55)
+#define CPU_MODEL_PMEM        (0x6A)
 #define CPU_FAMILY_INTEL      (0x06)
 
     typedef struct {
@@ -152,7 +153,7 @@ public:
             {
                 cpu_model_data_t cpu = get_cpu_model_data();
                 return cpu.family == CPU_FAMILY_INTEL &&
-                    (cpu.model == CPU_MODEL_CLX);
+                    (cpu.model == CPU_MODEL_CLX || cpu.model == CPU_MODEL_PMEM);
             }
             default:
                 return false;
