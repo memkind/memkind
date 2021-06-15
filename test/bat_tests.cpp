@@ -397,7 +397,7 @@ TEST_F(BATest,
 {
     void *ptr = memkind_malloc(MEMKIND_DEFAULT, 4096);
     ASSERT_TRUE(ptr != NULL) << "malloc() returns NULL";
-    memkind_free(0, ptr);
+    memkind_free(NULL, ptr);
 }
 
 TEST_F(BATest, test_TC_MEMKIND_free_ext_MEMKIND_GBTLB_4096_bytes)
