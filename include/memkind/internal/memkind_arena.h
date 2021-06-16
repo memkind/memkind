@@ -38,7 +38,6 @@ int memkind_arena_finalize(struct memkind *kind);
 void memkind_arena_init(struct memkind *kind);
 void memkind_arena_free(struct memkind *kind, void *ptr);
 void memkind_arena_free_with_kind_detect(void *ptr);
-size_t memkind_arena_malloc_usable_size(void *ptr);
 int memkind_arena_update_memory_usage_policy(struct memkind *kind,
                                              memkind_mem_usage_policy policy);
 int memkind_arena_set_max_bg_threads(size_t threads_limit);
