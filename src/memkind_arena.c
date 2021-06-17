@@ -862,7 +862,7 @@ void *memkind_arena_defrag_reallocate(struct memkind *kind, void *ptr)
     }
 
     if (!jemk_check_reallocatex(ptr)) {
-        size_t size = memkind_malloc_usable_size(kind, ptr);
+        size_t size = jemk_malloc_usable_size(ptr);
         void *ptr_new = memkind_arena_malloc_no_tcache(kind, size);
         if (MEMKIND_UNLIKELY(!ptr_new))
             return NULL;
