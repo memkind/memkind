@@ -55,7 +55,7 @@
 #define m_detect_kind(ptr)                      memkind_arena_detect_kind(ptr)
 #define m_free(ptr)                             memkind_arena_free_with_kind_detect(ptr)
 #define m_realloc(ptr, size)                    memkind_arena_realloc_with_kind_detect(ptr, size)
-#define m_usable_size(ptr)                      memkind_default_malloc_usable_size(NULL, ptr)
+#define m_usable_size(ptr)                      jemk_malloc_usable_size(ptr)
 #define m_defrag_reallocate(ptr)                memkind_arena_defrag_reallocate_with_kind_detect(ptr)
 #define m_get_global_stat(stat, value)          memkind_arena_get_global_stat(stat, value)
 #define m_update_cached_stats                   memkind_arena_update_cached_stats
