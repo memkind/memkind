@@ -547,9 +547,8 @@ MEMKIND_EXPORT void *memkind_arena_realloc_with_kind_detect(void *ptr,
     struct memkind *kind = memkind_arena_detect_kind(ptr);
     if (kind == MEMKIND_DEFAULT) {
         return memkind_default_realloc(kind, ptr, size);
-    } else {
-        return memkind_arena_realloc(kind, ptr, size);
     }
+    return memkind_arena_realloc(kind, ptr, size);
 }
 
 MEMKIND_EXPORT int
