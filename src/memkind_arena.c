@@ -412,13 +412,8 @@ MEMKIND_EXPORT struct memkind *memkind_arena_detect_kind(void *ptr)
     if (!ptr) {
         return NULL;
     }
-    struct memkind *kind = NULL;
 
-    int result = jemk_arenalookupx(ptr);
-    if (result >= 0) {
-        kind = get_kind_by_arena((unsigned)result);
-    }
-
+    struct memkind *kind = get_kind_by_arena((unsigned)jemk_arenalookupx(ptr));
     /* if no kind was associated with arena it means that allocation doesn't
        come from jemk_*allocx API - it is jemk_*alloc API (MEMKIND_DEFAULT) */
 
