@@ -495,9 +495,7 @@ MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
 
 MEMKIND_EXPORT void memkind_arena_free_with_kind_detect(void *ptr)
 {
-    struct memkind *kind = memkind_arena_detect_kind(ptr);
-
-    memkind_arena_free(kind, ptr);
+    memkind_arena_free(memkind_arena_detect_kind(ptr), ptr);
 }
 
 MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
