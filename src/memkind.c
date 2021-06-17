@@ -747,8 +747,6 @@ MEMKIND_EXPORT void *memkind_malloc(struct memkind *kind, size_t size)
 {
     void *result;
 
-    pthread_once(&kind->init_once, kind->ops->init_once);
-
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memkind_malloc_pre) {
         memkind_malloc_pre(&kind, &size);
@@ -771,8 +769,6 @@ MEMKIND_EXPORT void *memkind_calloc(struct memkind *kind, size_t num,
 {
     void *result;
 
-    pthread_once(&kind->init_once, kind->ops->init_once);
-
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memkind_calloc_pre) {
         memkind_calloc_pre(&kind, &num, &size);
@@ -794,8 +790,6 @@ MEMKIND_EXPORT int memkind_posix_memalign(struct memkind *kind, void **memptr,
                                           size_t alignment, size_t size)
 {
     int err;
-
-    pthread_once(&kind->init_once, kind->ops->init_once);
 
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memkind_posix_memalign_pre) {
@@ -828,7 +822,6 @@ MEMKIND_EXPORT void *memkind_realloc(struct memkind *kind, void *ptr,
     if (!kind) {
         result = m_realloc(ptr, size);
     } else {
-        pthread_once(&kind->init_once, kind->ops->init_once);
         result = kind->ops->realloc(kind, ptr, size);
     }
 
@@ -851,7 +844,6 @@ MEMKIND_EXPORT void memkind_free(struct memkind *kind, void *ptr)
     if (!kind) {
         m_free(ptr);
     } else {
-        pthread_once(&kind->init_once, kind->ops->init_once);
         kind->ops->free(kind, ptr);
     }
 

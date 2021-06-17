@@ -457,6 +457,7 @@ static inline int get_tcache_flag(unsigned partition, size_t size)
 
 MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
 {
+    pthread_once(&kind->init_once, kind->ops->init_once);
     void *result = NULL;
     unsigned arena;
 
@@ -490,6 +491,7 @@ MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
     if (kind == MEMKIND_DEFAULT) {
         jemk_free(ptr);
     } else if (ptr != NULL) {
+        pthread_once(&kind->init_once, kind->ops->init_once);
         jemk_dallocx(ptr, get_tcache_flag(kind->partition, 0));
     }
 }
@@ -504,10 +506,11 @@ MEMKIND_EXPORT void memkind_arena_free_with_kind_detect(void *ptr)
 MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
                                            size_t size)
 {
+    pthread_once(&kind->init_once, kind->ops->init_once);
     unsigned arena;
 
     if (size == 0 && ptr != NULL) {
-        memkind_arena_free(kind, ptr);
+        jemk_dallocx(ptr, get_tcache_flag(kind->partition, 0));
         ptr = NULL;
     } else {
         int err = kind->ops->get_arena(kind, &arena, size);
@@ -587,6 +590,7 @@ memkind_arena_update_memory_usage_policy(struct memkind *kind,
 MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num,
                                           size_t size)
 {
+    pthread_once(&kind->init_once, kind->ops->init_once);
     void *result = NULL;
     unsigned arena;
 
@@ -605,6 +609,7 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
 {
     int err;
     unsigned arena;
+    pthread_once(&kind->init_once, kind->ops->init_once);
 
     *memptr = NULL;
     err = kind->ops->get_arena(kind, &arena, size);
