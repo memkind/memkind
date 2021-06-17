@@ -511,24 +511,20 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
 
     if (size == 0 && ptr != NULL) {
         jemk_dallocx(ptr, get_tcache_flag(kind->partition, 0));
-        ptr = NULL;
-    } else {
-        int err = kind->ops->get_arena(kind, &arena, size);
-        if (MEMKIND_LIKELY(!err)) {
-            if (ptr == NULL) {
-                ptr = jemk_mallocx_check(
-                    size,
-                    MALLOCX_ARENA(arena) |
-                        get_tcache_flag(kind->partition, size));
-            } else {
-                ptr = jemk_rallocx_check(
-                    ptr, size,
-                    MALLOCX_ARENA(arena) |
-                        get_tcache_flag(kind->partition, size));
-            }
-        }
+        return NULL;
     }
-    return ptr;
+    int err = kind->ops->get_arena(kind, &arena, size);
+    if (MEMKIND_LIKELY(!err)) {
+        if (ptr == NULL) {
+            return jemk_mallocx_check(
+                size,
+                MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size));
+        }
+        return jemk_rallocx_check(ptr, size,
+                                  MALLOCX_ARENA(arena) |
+                                      get_tcache_flag(kind->partition, size));
+    }
+    return NULL;
 }
 
 int memkind_arena_update_cached_stats(void)
