@@ -29,7 +29,7 @@ struct heap_manager_ops {
 
 static struct heap_manager_ops arena_heap_manager_g = {
     .init = memkind_arena_init,
-    .heap_manager_malloc_usable_size = memkind_arena_malloc_usable_size,
+    .heap_manager_malloc_usable_size = jemk_malloc_usable_size,
     .heap_manager_free = memkind_arena_free_with_kind_detect,
     .heap_manager_realloc = memkind_arena_realloc_with_kind_detect,
     .heap_manager_detect_kind = memkind_arena_detect_kind,
