@@ -2802,6 +2802,42 @@ free_default(void *ptr) {
 	}
 }
 
+JEMALLOC_NOINLINE
+void
+sfree_default(void *ptr, size_t usize) {
+	UTRACE(ptr, 0, 0);
+	if (likely(ptr != NULL)) {
+		/*
+		 * We avoid setting up tsd fully (e.g. tcache, arena binding)
+		 * based on only free() calls -- other activities trigger the
+		 * minimal to full transition.  This is because free() may
+		 * happen during thread shutdown after tls deallocation: if a
+		 * thread never had any malloc activities until then, a
+		 * fully-setup tsd won't be destructed properly.
+		 */
+		tsd_t *tsd = tsd_fetch_min();
+		check_entry_exit_locking(tsd_tsdn(tsd));
+
+		tcache_t *tcache;
+		if (likely(tsd_fast(tsd))) {
+			tsd_assert_fast(tsd);
+			/* Unconditionally get tcache ptr on fast path. */
+			tcache = tsd_tcachep_get(tsd);
+			isfree(tsd, ptr, usize, tcache, false);
+		} else {
+			if (likely(tsd_reentrancy_level_get(tsd) == 0)) {
+				tcache = tcache_get(tsd);
+			} else {
+				tcache = NULL;
+			}
+			uintptr_t args_raw[3] = {(uintptr_t)ptr};
+			hook_invoke_dalloc(hook_dalloc_free, ptr, args_raw);
+			isfree(tsd, ptr, usize, tcache, true);
+		}
+		check_entry_exit_locking(tsd_tsdn(tsd));
+	}
+}
+
 JEMALLOC_ALWAYS_INLINE
 bool free_fastpath(void *ptr, size_t size, bool size_hint) {
 	tsd_t *tsd = tsd_get(false);
@@ -2868,6 +2904,17 @@ je_free(void *ptr) {
 	}
 
 	LOG("core.free.exit", "");
+}
+
+JEMALLOC_EXPORT void JEMALLOC_NOTHROW
+je_sfree(void *ptr, size_t usize) {
+	LOG("core.sfree.entry", "ptr: %p usize %zu", ptr, usize);
+
+	if (!free_fastpath(ptr, usize, true)) {
+		sfree_default(ptr, usize);
+	}
+
+	LOG("core.sfree.exit", "");
 }
 
 /*
