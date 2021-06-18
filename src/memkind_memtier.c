@@ -730,8 +730,9 @@ MEMKIND_EXPORT void *memtier_kind_realloc(memkind_t kind, void *ptr,
                                           size_t size)
 {
     if (size == 0 && ptr != NULL) {
-        decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
-        memkind_free(kind, ptr);
+        size_t usize = jemk_malloc_usable_size(ptr);
+        decrement_alloc_size(kind->partition, usize);
+        kind->ops->sfree(kind, ptr, usize);
         return NULL;
     } else if (ptr == NULL) {
         void *n_ptr = memkind_malloc(kind, size);
@@ -777,8 +778,9 @@ MEMKIND_EXPORT void memtier_kind_free(memkind_t kind, void *ptr)
         if (!kind)
             return;
     }
-    decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
-    memkind_free(kind, ptr);
+    size_t usize = jemk_malloc_usable_size(ptr);
+    decrement_alloc_size(kind->partition, usize);
+    kind->ops->sfree(kind, ptr, usize);
 }
 
 MEMKIND_EXPORT size_t memtier_kind_allocated_size(memkind_t kind)
