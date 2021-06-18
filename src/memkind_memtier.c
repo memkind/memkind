@@ -737,13 +737,12 @@ MEMKIND_EXPORT void *memtier_kind_realloc(memkind_t kind, void *ptr,
         void *n_ptr = memkind_malloc(kind, size);
         increment_alloc_size(kind->partition, jemk_malloc_usable_size(n_ptr));
         return n_ptr;
-    } else {
-        decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
-
-        void *n_ptr = memkind_realloc(kind, ptr, size);
-        increment_alloc_size(kind->partition, jemk_malloc_usable_size(n_ptr));
-        return n_ptr;
     }
+    decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
+
+    void *n_ptr = memkind_realloc(kind, ptr, size);
+    increment_alloc_size(kind->partition, jemk_malloc_usable_size(n_ptr));
+    return n_ptr;
 }
 
 MEMKIND_EXPORT int memtier_posix_memalign(struct memtier_memory *memory,
