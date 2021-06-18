@@ -26,6 +26,12 @@ void log_err(const char *format, ...) PRINTF_FORMAT;
  */
 void log_fatal(const char *format, ...) PRINTF_FORMAT;
 
+/*
+ * For printing messages
+ * Works *no matter* of MEMKIND_DEBUG state
+ */
+void log_always(const char *format, ...) PRINTF_FORMAT;
+
 #ifdef __cplusplus
 }
 #endif

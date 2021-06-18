@@ -71,6 +71,22 @@ if test "x${enable_decorators}" = "x1" ; then
 fi
 AC_SUBST([enable_decorators])
 
+#============================memtier_logging======================================
+AC_ARG_ENABLE([memtier-logging],
+  [AS_HELP_STRING([--enable-memtier-logging], [Enable logging allocations on memtier])],
+[if test "x$enable_memtier_logging" = "xyes" ; then
+  enable_memtier_logging="1"
+else
+  enable_memtier_logging="0"
+fi
+],
+[enable_memtier_logging="0"]
+)
+if test "x${enable_memtier_logging}" = "x1" ; then
+  AC_DEFINE([MEMTIER_LOGGING], [ ], [Enable logging allocations on memtier])
+fi
+AC_SUBST([enable_memtier_logging])
+
 #============================debug=============================================
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING([--enable-debug], [Build debugging code and compile with -O0 -g])],

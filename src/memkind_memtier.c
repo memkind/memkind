@@ -688,6 +688,9 @@ MEMKIND_EXPORT void *memtier_kind_malloc(memkind_t kind, size_t size)
 {
     void *ptr = memkind_malloc(kind, size);
     increment_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
+#ifdef MEMTIER_LOGGING
+    log_always("kind: %s, malloc:(%zu) = %p", kind->name, size, ptr);
+#endif
     return ptr;
 }
 
@@ -705,6 +708,9 @@ MEMKIND_EXPORT void *memtier_kind_calloc(memkind_t kind, size_t num,
 {
     void *ptr = memkind_calloc(kind, num, size);
     increment_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
+#ifdef MEMTIER_LOGGING
+    log_always("kind: %s, calloc:(%zu, %zu) = %p", kind->name, num, size, ptr);
+#endif
     return ptr;
 }
 
@@ -731,16 +737,21 @@ MEMKIND_EXPORT void *memtier_kind_realloc(memkind_t kind, void *ptr,
 {
     if (size == 0 && ptr != NULL) {
         decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
+#ifdef MEMTIER_LOGGING
+        log_always("kind: %s, free:(%p)", kind->name, ptr);
+#endif
         memkind_free(kind, ptr);
         return NULL;
     } else if (ptr == NULL) {
-        void *n_ptr = memkind_malloc(kind, size);
-        increment_alloc_size(kind->partition, jemk_malloc_usable_size(n_ptr));
-        return n_ptr;
+        return memtier_kind_malloc(kind, size);
     } else {
         decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
 
         void *n_ptr = memkind_realloc(kind, ptr, size);
+#ifdef MEMTIER_LOGGING
+        log_always("kind: %s, realloc(%p, %zu) = %p", kind->name, ptr, size,
+                   n_ptr);
+#endif
         increment_alloc_size(kind->partition, jemk_malloc_usable_size(n_ptr));
         return n_ptr;
     }
@@ -762,11 +773,19 @@ MEMKIND_EXPORT int memtier_kind_posix_memalign(memkind_t kind, void **memptr,
 {
     int res = memkind_posix_memalign(kind, memptr, alignment, size);
     increment_alloc_size(kind->partition, jemk_malloc_usable_size(*memptr));
+#ifdef MEMTIER_LOGGING
+    log_always("kind: %s, posix_memalign(%p, %zu, %zu) = %d", kind->name,
+               memptr, alignment, size, res);
+#endif
     return res;
 }
 
 MEMKIND_EXPORT size_t memtier_usable_size(void *ptr)
 {
+#ifdef MEMTIER_LOGGING
+    memkind_t kind = memkind_detect_kind(ptr);
+    log_always("kind: %s, malloc_usable_size(%p)", kind->name, ptr);
+#endif
     return jemk_malloc_usable_size(ptr);
 }
 
@@ -777,6 +796,9 @@ MEMKIND_EXPORT void memtier_kind_free(memkind_t kind, void *ptr)
         if (!kind)
             return;
     }
+#ifdef MEMTIER_LOGGING
+    log_always("kind: %s, free:(%p)", kind->name, ptr);
+#endif
     decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
     memkind_free(kind, ptr);
 }
