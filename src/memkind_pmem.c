@@ -40,6 +40,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
     .update_memory_usage_policy = memkind_arena_update_memory_usage_policy,
     .get_stat = memkind_arena_get_kind_stat,
     .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .sfree = memkind_arena_sfree,
 };
 
 void *pmem_extent_alloc(extent_hooks_t *extent_hooks, void *new_addr,

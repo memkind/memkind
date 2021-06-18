@@ -25,6 +25,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .finalize = memkind_arena_finalize,
     .get_stat = memkind_arena_get_kind_stat,
     .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .sfree = memkind_arena_sfree,
 };
 
 MEMKIND_EXPORT void memkind_interleave_init_once(void)

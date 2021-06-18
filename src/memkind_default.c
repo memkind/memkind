@@ -27,6 +27,11 @@ static int memkind_default_get_kind_stat(struct memkind *kind,
     return memkind_arena_get_stat_with_check_init(kind, stat, true, value);
 }
 
+static void memkind_default_sfree(struct memkind *kind, void *ptr, size_t usize)
+{
+    jemk_sfree(ptr, usize);
+}
+
 MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
@@ -40,6 +45,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .finalize = memkind_default_destroy,
     .get_stat = memkind_default_get_kind_stat,
     .defrag_reallocate = memkind_arena_defrag_reallocate,
+    .sfree = memkind_default_sfree,
 };
 
 MEMKIND_EXPORT int memkind_default_create(struct memkind *kind,

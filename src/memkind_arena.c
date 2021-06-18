@@ -496,6 +496,12 @@ MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
     }
 }
 
+MEMKIND_EXPORT void memkind_arena_sfree(struct memkind *kind, void *ptr,
+                                        size_t usize)
+{
+    jemk_sdallocx(ptr, usize, get_tcache_flag(kind->partition, 0));
+}
+
 MEMKIND_EXPORT void memkind_arena_free_with_kind_detect(void *ptr)
 {
     struct memkind *kind = memkind_arena_detect_kind(ptr);
