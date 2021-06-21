@@ -734,9 +734,7 @@ MEMKIND_EXPORT void *memtier_kind_realloc(memkind_t kind, void *ptr,
         memkind_free(kind, ptr);
         return NULL;
     } else if (ptr == NULL) {
-        void *n_ptr = memkind_malloc(kind, size);
-        increment_alloc_size(kind->partition, jemk_malloc_usable_size(n_ptr));
-        return n_ptr;
+        return memtier_kind_malloc(kind, size);
     }
     decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
 
