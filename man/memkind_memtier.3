@@ -52,6 +52,20 @@ functionality is considered as stable API (STANDARD API).
 .br
 .BI "size_t memtier_kind_allocated_size(memkind_t " "kind" );
 .sp
+.B "DECORATORS:"
+.br
+.BI "void memtier_kind_malloc_post(memkind_t " "kind" ", size_t " "size" ", void " "**result" );
+.br
+.BI "void memtier_kind_calloc_post(memkind_t " "kind" ", size_t " "nmemb" ", size_t " "size" ", void " "**result" );
+.br
+.BI "void memtier_kind_posix_memalign_post(memkind_t " "kind" ", void " "**memptr" ", size_t " "alignment" ", size_t " "size" ", int " "*err" );
+.br
+.BI "void memtier_kind_realloc_post(memkind_t " "*kind" ", void " "*ptr" ", size_t " "size" ", void " "**result" );
+.br
+.BI "void memtier_kind_free_pre(void " "**ptr" );
+.br
+.BI "void memtier_kind_usable_size_post(void " "**ptr" ", size_t " "size" );
+.sp
 .B "MEMTIER PROPERTY MANAGEMENT:
 .br
 .BI "int memtier_ctl_set(struct memtier_builder " "*builder" ", const char " "*name" ", const void " "*val" );
@@ -67,6 +81,14 @@ policy.dynamic_threshold.thresholds[ID].max (size_t)
 policy.dynamic_threshold.check_cnt (unsigned)
 policy.dynamic_threshold.trigger (float)
 policy.dynamic_threshold.degree (float)
+.sp
+.SH "DECORATORS"
+.br
+See section
+.BR "DECORATORS"
+of
+.BR memkind (3)
+for more details about decorators.
 .SH "DESCRIPTION"
 .SH "COPYRIGHT"
 Copyright (C) 2021 Intel Corporation. All rights reserved.
