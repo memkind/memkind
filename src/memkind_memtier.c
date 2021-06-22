@@ -135,6 +135,20 @@ struct memtier_memory {
 static MEMKIND_ATOMIC long long t_alloc_size[MEMKIND_MAX_KIND][THREAD_BUCKETS];
 static MEMKIND_ATOMIC size_t g_alloc_size[MEMKIND_MAX_KIND];
 
+/* Declare weak symbols for allocator decorators */
+extern void memtier_kind_malloc_post(struct memkind *, size_t, void **)
+    __attribute__((weak));
+extern void memtier_kind_calloc_post(struct memkind *, size_t, size_t, void **)
+    __attribute__((weak));
+extern void memtier_kind_posix_memalign_post(struct memkind *, void **, size_t,
+                                             size_t, int *)
+    __attribute__((weak));
+extern void memtier_kind_realloc_post(struct memkind *, void *, size_t, void **)
+    __attribute__((weak));
+extern void memtier_kind_free_pre(void **) __attribute__((weak));
+extern void memtier_kind_usable_size_post(void **, size_t)
+    __attribute__((weak));
+
 void memtier_reset_size(unsigned kind_id)
 {
     unsigned bucket_id;
@@ -688,6 +702,10 @@ MEMKIND_EXPORT void *memtier_kind_malloc(memkind_t kind, size_t size)
 {
     void *ptr = memkind_malloc(kind, size);
     increment_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
+#ifdef MEMKIND_DECORATION_ENABLED
+    if (memtier_kind_malloc_post)
+        memtier_kind_malloc_post(kind, size, &ptr);
+#endif
     return ptr;
 }
 
@@ -705,6 +723,11 @@ MEMKIND_EXPORT void *memtier_kind_calloc(memkind_t kind, size_t num,
 {
     void *ptr = memkind_calloc(kind, num, size);
     increment_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
+
+#ifdef MEMKIND_DECORATION_ENABLED
+    if (memtier_kind_calloc_post)
+        memtier_kind_calloc_post(kind, num, size, &ptr);
+#endif
     return ptr;
 }
 
@@ -730,18 +753,24 @@ MEMKIND_EXPORT void *memtier_kind_realloc(memkind_t kind, void *ptr,
                                           size_t size)
 {
     if (size == 0 && ptr != NULL) {
+#ifdef MEMKIND_DECORATION_ENABLED
+        if (memtier_kind_free_pre)
+            memtier_kind_free_pre(&ptr);
+#endif
         decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
         memkind_free(kind, ptr);
         return NULL;
     } else if (ptr == NULL) {
-        void *n_ptr = memkind_malloc(kind, size);
-        increment_alloc_size(kind->partition, jemk_malloc_usable_size(n_ptr));
-        return n_ptr;
+        return memtier_kind_malloc(kind, size);
     }
     decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
 
     void *n_ptr = memkind_realloc(kind, ptr, size);
     increment_alloc_size(kind->partition, jemk_malloc_usable_size(n_ptr));
+#ifdef MEMKIND_DECORATION_ENABLED
+    if (memtier_kind_realloc_post)
+        memtier_kind_realloc_post(kind, ptr, size, &n_ptr);
+#endif
     return n_ptr;
 }
 
@@ -761,21 +790,35 @@ MEMKIND_EXPORT int memtier_kind_posix_memalign(memkind_t kind, void **memptr,
 {
     int res = memkind_posix_memalign(kind, memptr, alignment, size);
     increment_alloc_size(kind->partition, jemk_malloc_usable_size(*memptr));
+#ifdef MEMKIND_DECORATION_ENABLED
+    if (memtier_kind_posix_memalign_post)
+        memtier_kind_posix_memalign_post(kind, memptr, alignment, size, &res);
+#endif
     return res;
 }
 
 MEMKIND_EXPORT size_t memtier_usable_size(void *ptr)
 {
-    return jemk_malloc_usable_size(ptr);
+    size_t size = jemk_malloc_usable_size(ptr);
+#ifdef MEMKIND_DECORATION_ENABLED
+    if (memtier_kind_usable_size_post)
+        memtier_kind_usable_size_post(&ptr, size);
+#endif
+    return size;
 }
 
 MEMKIND_EXPORT void memtier_kind_free(memkind_t kind, void *ptr)
 {
+#ifdef MEMKIND_DECORATION_ENABLED
+    if (memtier_kind_free_pre)
+        memtier_kind_free_pre(&ptr);
+#endif
     if (!kind) {
         kind = memkind_detect_kind(ptr);
         if (!kind)
             return;
     }
+
     decrement_alloc_size(kind->partition, jemk_malloc_usable_size(ptr));
     memkind_free(kind, ptr);
 }
