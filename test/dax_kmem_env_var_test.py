@@ -2,7 +2,7 @@
 # Copyright (C) 2019 - 2021 Intel Corporation.
 
 from distutils.spawn import find_executable
-from python_framework import CMD_helper
+from python_framework.cmd_helper import CMD_helper
 import os
 
 
@@ -36,14 +36,13 @@ class Test_dax_kmem_env_var(object):
         dax_kmem_nodemask_default = self.get_dax_kmem_nodes()
         dax_kmem_nodemask_env_variable = self.get_dax_kmem_nodes(
             dax_kmem_nodemask_default)
-        assert dax_kmem_nodemask_default == (
-            dax_kmem_nodemask_env_variable,
+        assert dax_kmem_nodemask_default == dax_kmem_nodemask_env_variable, \
             self.fail_msg.format(
                 "Error: Nodemask dax_kmem_nodemask_default ({0}) "
                 "is not the same as nodemask "
                 "dax_kmem_nodemask_env_variable ({1})".format(
                     dax_kmem_nodemask_default,
-                    dax_kmem_nodemask_env_variable)))
+                    dax_kmem_nodemask_env_variable))
 
     def test_TC_MEMKIND_dax_kmem_env_var_negative_memkind_malloc(self):
         """ This test sets unsupported value of MEMKIND_DAX_KMEM_NODES,
