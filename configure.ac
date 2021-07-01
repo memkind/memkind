@@ -71,6 +71,22 @@ if test "x${enable_decorators}" = "x1" ; then
 fi
 AC_SUBST([enable_decorators])
 
+#============================log_to_file=======================================
+AC_ARG_ENABLE([logging_to_file],
+  [AS_HELP_STRING([--enable-logging-to-file], [Log to file for each process])],
+[if test "x$enable_logging_to_file" = "xyes" ; then
+  enable_logging_to_file="1"
+else
+  enable_logging_to_file="0"
+fi
+],
+[enable_logging_to_file="0"]
+)
+if test "x${enable_logging_to_file}" = "x1" ; then
+  AC_DEFINE([MEMKIND_LOG_TO_FILE], [ ], [Log to file for each process])
+fi
+AC_SUBST([enable_logging_to_file])
+
 #============================debug=============================================
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING([--enable-debug], [Build debugging code and compile with -O0 -g])],
