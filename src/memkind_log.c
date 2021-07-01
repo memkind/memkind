@@ -5,12 +5,15 @@
 #include <memkind/internal/memkind_private.h>
 
 #include <assert.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 typedef enum
 {
@@ -45,13 +48,40 @@ static void log_init_once(void)
     }
 }
 
+#ifdef LOG_TO_FILE
+static void save_log_to_file(char *log, char *fileName)
+{
+	int fd = open(fileName, O_WRONLY | O_APPEND);
+	if (fd == -1)
+        fd = open(fileName, O_CREAT | O_WRONLY, 0600);
+	(void)!write(fd, log, strlen(log));
+	close(fd);
+}
+#endif
+
 static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
 static void log_generic(message_type_t type, const char *format, va_list args)
 {
     pthread_once(&init_once, log_init_once);
+
+    static char buf[4096], *b;
+    b = buf + sprintf(buf, "%s: ", message_prefixes[type]);
+    int blen = sizeof(buf) + (buf - b) - 1;
+    int len = vsnprintf(b, blen, format, args);
+    sprintf(b + len, "\n");
+    b += len + 1;
+
+#ifdef LOG_TO_FILE
+    int pid = getpid();
+    char fileName[11];
+    sprintf(fileName, "%d.log", pid);
+#endif
     if (log_enabled || (type == MESSAGE_TYPE_FATAL)) {
         if (pthread_mutex_lock(&log_lock) != 0)
             assert(0 && "failed to acquire mutex");
+#ifdef LOG_TO_FILE
+        save_log_to_file(buf, fileName);
+#endif
         fprintf(stderr, "%s: ", message_prefixes[type]);
         vfprintf(stderr, format, args);
         fprintf(stderr, "\n");

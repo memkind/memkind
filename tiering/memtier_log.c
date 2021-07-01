@@ -6,10 +6,13 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 #include <syscall.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 static const char *message_prefixes[MESSAGE_TYPE_MAX_VALUE] = {
@@ -35,6 +38,17 @@ static ssize_t swrite(int fd, const void *buf, size_t count)
 static unsigned log_level;
 static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
 
+#ifdef LOG_TO_FILE
+static void save_log_to_file(char *log, char *fileName)
+{
+	int fd = open(fileName, O_WRONLY | O_APPEND);
+	if (fd == -1)
+        fd = open(fileName, O_CREAT | O_WRONLY, 0600);
+	(void)!write(fd, log, strlen(log));
+	close(fd);
+}
+#endif
+
 static void log_generic(message_type_t type, const char *format, va_list args)
 {
     static char buf[4096], *b;
@@ -45,10 +59,18 @@ static void log_generic(message_type_t type, const char *format, va_list args)
     sprintf(b + len, "\n");
     b += len + 1;
 
+#ifdef LOG_TO_FILE
+    int pid = getpid();
+    char fileName[11];
+    sprintf(fileName, "%d.log", pid);
+#endif
+
     if (pthread_mutex_lock(&log_lock) != 0) {
         assert(0 && "failed to acquire log mutex");
     }
-
+#ifdef LOG_TO_FILE
+    save_log_to_file(buf, fileName);
+#endif
     const char overflow_msg[] = "Warning: message truncated.\n";
     if (len >= blen)
         swrite(STDERR_FILENO, overflow_msg, sizeof(overflow_msg));
