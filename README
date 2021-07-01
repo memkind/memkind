@@ -288,6 +288,9 @@ In memkind library logging mechanism could be enabled by setting MEMKIND_DEBUG
 environment variable. Setting MEMKIND_DEBUG to "1" enables printing messages
 like errors and general information about environment to stderr.
 
+In memkind library logs can be saved and named by pid.
+It could be enabled by setting MEMKIND_LOG_TO_FILE in configure option.
+
 ## Setting Heap Manager
 In memkind library heap management can be adjusted with MEMKIND_HEAP_MANAGER
 environment variable, which allows for switching to one of the available
