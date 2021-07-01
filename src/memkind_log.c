@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2016 - 2021 Intel Corporation. */
 
+#include "../config.h"
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_private.h>
 
 #include <assert.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 
 typedef enum
 {
@@ -25,6 +29,13 @@ static char *message_prefixes[MESSAGE_TYPE_MAX_VALUE] = {
     [MESSAGE_TYPE_ERROR] = "MEMKIND_ERROR",
     [MESSAGE_TYPE_FATAL] = "MEMKIND_FATAL",
 };
+
+#ifdef MEMKIND_LOG_TO_FILE
+static ssize_t swrite(int fd, const void *buf, size_t count)
+{
+    return syscall(SYS_write, fd, buf, count);
+}
+#endif
 
 static bool log_enabled;
 
@@ -45,13 +56,49 @@ static void log_init_once(void)
     }
 }
 
+#ifdef MEMKIND_LOG_TO_FILE
+static void save_log_to_file(char *log, char *fileName)
+{
+    int fd = open(fileName, O_WRONLY | O_APPEND);
+    if (fd == -1) {
+        fd = open(fileName, O_CREAT | O_WRONLY, 0600);
+        if (fd == -1) {
+            const char error_msg[] = "Error: cannot open file to save log.\n";
+            swrite(STDERR_FILENO, error_msg, sizeof(error_msg));
+        } else {
+            (void)!write(fd, log, strlen(log));
+            close(fd);
+        }
+    } else {
+        (void)!write(fd, log, strlen(log));
+        close(fd);
+    }
+}
+#endif
+
 static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
-static void log_generic(message_type_t type, const char *format, va_list args)
+void log_generic(message_type_t type, const char *format, va_list args)
 {
     pthread_once(&init_once, log_init_once);
+
+#ifdef MEMKIND_LOG_TO_FILE
+    static char buf[4096], *b;
+    b = buf + sprintf(buf, "%s: ", message_prefixes[type]);
+    int blen = sizeof(buf) + (buf - b) - 1;
+    int len = vsnprintf(b, blen, format, args);
+    sprintf(b + len, "\n");
+
+    int pid = getpid();
+    char fileName[11];
+    sprintf(fileName, "%d.log", pid);
+#endif
+
     if (log_enabled || (type == MESSAGE_TYPE_FATAL)) {
         if (pthread_mutex_lock(&log_lock) != 0)
             assert(0 && "failed to acquire mutex");
+#ifdef MEMKIND_LOG_TO_FILE
+        save_log_to_file(buf, fileName);
+#endif
         fprintf(stderr, "%s: ", message_prefixes[type]);
         vfprintf(stderr, format, args);
         fprintf(stderr, "\n");
