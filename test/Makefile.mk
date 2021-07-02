@@ -26,7 +26,9 @@ check_PROGRAMS += test/pmem_test \
                   test/memkind_highcapacity_test \
                   test/hmat_test \
                   test/environ_err_hbw_threshold_test \
-                  test/defrag_reallocate
+                  test/defrag_reallocate \
+                  test/memkind_memtier_dax_kmem_test \
+                  test/memkind_memtier_test
 endif
 
 TESTS += test/test.sh
@@ -81,6 +83,10 @@ test_defrag_reallocate_LDADD = libmemkind.la
 test_hmat_test_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS)
 test_background_threads_test_SOURCES = $(fused_gtest) test/background_threads_test.cpp
 test_background_threads_test_LDADD = libmemkind.la
+test_memkind_memtier_dax_kmem_test_SOURCES = $(fused_gtest) test/memkind_memtier_dax_kmem_test.cpp
+test_memkind_memtier_dax_kmem_test_LDADD = libmemkind.la
+test_memkind_memtier_test_SOURCES = $(fused_gtest) test/memkind_memtier_test.cpp
+test_memkind_memtier_test_LDADD = libmemkind.la
 endif
 
 fused_gtest = test/gtest_fused/gtest/gtest-all.cc \

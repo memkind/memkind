@@ -24,6 +24,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_interleave.c \
                         src/memkind_local.c \
                         src/memkind_log.c \
+                        src/memkind_memtier.c \
                         src/memkind_mem_attributes.c \
                         src/memkind_pmem.c \
                         src/memkind_regular.c \
@@ -54,6 +55,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_local.h \
                   include/memkind/internal/memkind_log.h \
                   include/memkind/internal/memkind_mem_attributes.h \
+                  include/memkind/internal/memkind_memtier.h \
                   include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
                   include/memkind/internal/memkind_regular.h \
@@ -392,6 +394,7 @@ EXTRA_DIST = CONTRIBUTING \
              memkind.spec.mk \
              test/test.sh \
              test/test_dax_kmem.sh \
+             test/tiering_tests.py \
              utils/docker/Dockerfile.centos-7 \
              utils/docker/Dockerfile.fedora-34 \
              utils/docker/Dockerfile.ubuntu-20.04 \
@@ -453,8 +456,10 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind_default.3 \
                  man/memkind_hbw.3 \
                  man/memkind_hugetlb.3 \
+                 man/memkind_memtier.3 \
                  man/memkind_pmem.3 \
                  man/memkindallocator.3 \
+                 man/memtier.7 \
                  man/pmemallocator.3 \
                  # end
 
@@ -479,7 +484,7 @@ noinst_PROGRAMS =
 noinst_LTLIBRARIES =
 TESTS =
 
-req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DJE_PREFIX=@memkind_prefix@
+req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DJE_PREFIX=@memkind_prefix@ -DMEMTIER_ALLOC_PREFIX=@memtier_prefix@
 
 AM_CFLAGS = $(req_flags)
 AM_CXXFLAGS = $(req_flags)
@@ -491,6 +496,7 @@ html-local:
 	$(MAN2HTML) man/memkind.3 > man/memkind.html
 	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
 	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
+	$(MAN2HTML) man/memtier.7 > man/memtier.html
 
 clean-jemalloc_deps:
 	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
@@ -550,6 +556,11 @@ unit_tests_hmat: checkprogs
 unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
 
+unit_tests_tiering: tiering/libmemtier.la checkprogs
+	test/memkind_memtier_dax_kmem_test
+	test/memkind_memtier_test
+	PMEM_PATH=$(PMEM_PATH) @pytest@ -rs test/tiering_tests.py
+
 code-style-check:
 if HAVE_CLANG_FORMAT
 	find $(CLANG_FORMAT_FILES) | xargs $(CLANG_FORMAT) --dry-run --Werror
@@ -570,5 +581,6 @@ include autohbw/Makefile.mk
 include test/Makefile.mk
 include examples/Makefile.mk
 include src/Makefile.mk
-include utils/memkind_malloc_wrapper/Makefile.mk
+include tiering/Makefile.mk
 include utils/memory_matrix/Makefile.mk
+include utils/memtier_counter_bench/Makefile.mk

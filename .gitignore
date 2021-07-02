@@ -68,7 +68,7 @@
 /test-driver
 /test-suite.log
 /test/*.o
-/test/*.pyc
+/test/**/*.pyc
 /test/*.so
 /test/.deps/
 /test/.dirstamp
@@ -106,6 +106,8 @@
 /test/memkind_get_stat
 /test/memkind_highcapacity_test
 /test/memkind_stat_test
+/test/memkind_memtier_dax_kmem_test
+/test/memkind_memtier_test
 /test/perf_tool
 /test/performance_test
 /test/performance/.deps/
@@ -126,6 +128,7 @@
 /test/stats_print_test_helper
 /test/trace_mechanism_test_helper
 /test/defrag_reallocate
+/utils/memtier_counter_bench/memtier_counter_bench
 /vs
 autom4te.cache/
 memkind.pc

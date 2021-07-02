@@ -57,6 +57,7 @@ include/memkind/internal/memkind_interleave.h
 include/memkind/internal/memkind_local.h
 include/memkind/internal/memkind_log.h
 include/memkind/internal/memkind_mem_attributes.h
+include/memkind/internal/memkind_memtier.h
 include/memkind/internal/memkind_pmem.h
 include/memkind/internal/memkind_private.h
 include/memkind/internal/memkind_regular.h
@@ -400,8 +401,10 @@ man/memkind_dax_kmem.3
 man/memkind_default.3
 man/memkind_hbw.3
 man/memkind_hugetlb.3
+man/memkind_memtier.3
 man/memkind_pmem.3
 man/memkindallocator.3
+man/memtier.7
 man/pmemallocator.3
 memkind.pc.in
 memkind.spec.mk
@@ -423,6 +426,7 @@ src/memkind_interleave.c
 src/memkind_local.c
 src/memkind_log.c
 src/memkind_mem_attributes.c
+src/memkind_memtier.c
 src/memkind_pmem.c
 src/memkind_regular.c
 src/tbb_wrapper.c
@@ -518,6 +522,8 @@ test/memkind_dax_kmem_test.cpp
 test/memkind_detect_kind_tests.cpp
 test/memkind_highcapacity_test.cpp
 test/memkind_hmat_tests.cpp
+test/memkind_memtier_dax_kmem_test.cpp
+test/memkind_memtier_test.cpp
 test/memkind_null_kind_test.cpp
 test/memkind_pmem_config_tests.cpp
 test/memkind_pmem_long_time_tests.cpp
@@ -549,10 +555,15 @@ test/stats_print_test_helper.c
 test/tbbmalloc.h
 test/test.sh
 test/test_dax_kmem.sh
+test/tiering_tests.py
 test/trace_mechanism_test.py
 test/trace_mechanism_test_helper.c
 test/trial_generator.cpp
 test/trial_generator.h
+tiering/Makefile.mk
+tiering/memtier.c
+tiering/memtier_log.c
+tiering/memtier_log.h
 utils/docker/Dockerfile.centos-7
 utils/docker/Dockerfile.fedora-34
 utils/docker/Dockerfile.ubuntu-20.04
@@ -568,12 +579,11 @@ utils/docker/docker_run_test.sh
 utils/docker/hwloc.spec.mk
 utils/docker/run_local.sh
 utils/docker/set_host_configuration.sh
-utils/memkind_malloc_wrapper/Makefile.mk
-utils/memkind_malloc_wrapper/README.md
-utils/memkind_malloc_wrapper/memkind_malloc_wrapper_test.c
-utils/memkind_malloc_wrapper/memkind_malloc_wrapper_test.sh
 utils/memory_matrix/Makefile.mk
 utils/memory_matrix/memory_matrix.c
+utils/memtier_counter_bench/Makefile.mk
+utils/memtier_counter_bench/memtier_counter_bench.cpp
+utils/memtier_counter_bench/run_perf.sh
 utils/qemu/README.md
 utils/qemu/http/preseed.cfg
 utils/qemu/main.py
