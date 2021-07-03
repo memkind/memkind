@@ -78,14 +78,16 @@ exit:
     return addr;
 }
 
+bool pmem_extent_dalloc_hog_memory(extent_hooks_t *extent_hooks, void *addr,
+                                   size_t size, bool committed,
+                                   unsigned arena_ind)
+{
+    return true;
+}
+
 bool pmem_extent_dalloc(extent_hooks_t *extent_hooks, void *addr, size_t size,
                         bool committed, unsigned arena_ind)
 {
-    bool result = true;
-    if (memkind_get_hog_memory()) {
-        return result;
-    }
-
     // if madvise fail, it means that addr isn't mapped shared (doesn't come
     // from pmem) and it should be also unmapped to avoid space exhaustion when
     // calling large number of operations like memkind_create_pmem and
@@ -109,10 +111,9 @@ bool pmem_extent_dalloc(extent_hooks_t *extent_hooks, void *addr, size_t size,
     }
     if (munmap(addr, size) == -1) {
         log_err("munmap failed!");
-    } else {
-        result = false;
+        return true;
     }
-    return result;
+    return false;
 }
 
 bool pmem_extent_commit(extent_hooks_t *extent_hooks, void *addr, size_t size,
@@ -160,14 +161,29 @@ void pmem_extent_destroy(extent_hooks_t *extent_hooks, void *addr, size_t size,
     }
 }
 
-static extent_hooks_t pmem_extent_hooks = {.alloc = pmem_extent_alloc,
-                                           .dalloc = pmem_extent_dalloc,
-                                           .commit = pmem_extent_commit,
-                                           .decommit = pmem_extent_decommit,
-                                           .purge_lazy = pmem_extent_purge,
-                                           .split = pmem_extent_split,
-                                           .merge = pmem_extent_merge,
-                                           .destroy = pmem_extent_destroy};
+// clang-format off
+static extent_hooks_t pmem_extent_hooks = {
+    .alloc = pmem_extent_alloc,
+    .dalloc = pmem_extent_dalloc,
+    .commit = pmem_extent_commit,
+    .decommit = pmem_extent_decommit,
+    .purge_lazy = pmem_extent_purge,
+    .split = pmem_extent_split,
+    .merge = pmem_extent_merge,
+    .destroy = pmem_extent_destroy
+};
+
+static extent_hooks_t pmem_extent_hooks_hog_memory = {
+    .alloc = pmem_extent_alloc,
+    .dalloc = pmem_extent_dalloc_hog_memory,
+    .commit = pmem_extent_commit,
+    .decommit = pmem_extent_decommit,
+    .purge_lazy = pmem_extent_purge,
+    .split = pmem_extent_split,
+    .merge = pmem_extent_merge,
+    .destroy = pmem_extent_destroy
+};
+// clang-format on
 
 int memkind_pmem_create_tmpfile(const char *dir, int *fd)
 {
@@ -233,8 +249,11 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
     if (err) {
         goto exit;
     }
-
-    err = memkind_arena_create_map(kind, &pmem_extent_hooks);
+    if (memkind_get_hog_memory()) {
+        err = memkind_arena_create_map(kind, &pmem_extent_hooks_hog_memory);
+    } else {
+        err = memkind_arena_create_map(kind, &pmem_extent_hooks);
+    }
     if (err) {
         goto exit;
     }
