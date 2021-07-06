@@ -689,6 +689,7 @@ memkind_construct(void)
             memkind_arena_set_max_bg_threads(thread_limit);
         }
     }
+    memkind_set_hog_memory(memkind_get_env("MEMKIND_HOG_MEMORY"));
 }
 
 #ifdef __GNUC__
