@@ -21,6 +21,14 @@
 #define MADV_NOHUGEPAGE 15
 #endif
 
+#ifndef MPOL_PREFERRED_MANY
+#define MPOL_PREFERRED_MANY 5
+#endif
+
+#ifndef MPOL_MF_NUMA_BALANCING
+#define MPOL_MF_NUMA_BALANCING (1<<4)
+#endif
+
 static int memkind_default_get_kind_stat(struct memkind *kind,
                                          memkind_stat_type stat, size_t *value)
 {
@@ -168,6 +176,7 @@ MEMKIND_EXPORT int memkind_default_mbind(struct memkind *kind, void *ptr,
     nodemask_t nodemask;
     int err = 0;
     int mode;
+    int flags;
 
     if (MEMKIND_UNLIKELY(kind->ops->get_mbind_nodemask == NULL ||
                          kind->ops->get_mbind_mode == NULL)) {
@@ -182,7 +191,11 @@ MEMKIND_EXPORT int memkind_default_mbind(struct memkind *kind, void *ptr,
     if (MEMKIND_UNLIKELY(err)) {
         return err;
     }
-    err = mbind(ptr, size, mode, nodemask.n, NUMA_NUM_NODES, 0);
+    err = kind->ops->get_mbind_flags(kind, &flags);
+    if (MEMKIND_UNLIKELY(err)) {
+        return err;
+    }
+    err = mbind(ptr, size, mode, nodemask.n, NUMA_NUM_NODES, flags);
     if (MEMKIND_UNLIKELY(err)) {
         log_err("syscall mbind() returned: %d", err);
         return MEMKIND_ERROR_MBIND;
@@ -220,10 +233,31 @@ MEMKIND_EXPORT int memkind_preferred_get_mbind_mode(struct memkind *kind,
     return 0;
 }
 
+MEMKIND_EXPORT int memkind_preferred_many_get_mbind_mode(struct memkind *kind,
+                                                         int *mode)
+{
+    *mode = MPOL_PREFERRED_MANY;
+    return 0;
+}
+
 MEMKIND_EXPORT int memkind_interleave_get_mbind_mode(struct memkind *kind,
                                                      int *mode)
 {
     *mode = MPOL_INTERLEAVE;
+    return 0;
+}
+
+MEMKIND_EXPORT int memkind_default_get_mbind_flags(struct memkind *kind,
+                                                   int *flags)
+{
+    *flags = 0;
+    return 0;
+}
+
+MEMKIND_EXPORT int memkind_numa_balancing_get_mbind_flags(struct memkind *kind,
+                                                          int *flags)
+{
+    *flags = MPOL_MF_NUMA_BALANCING;
     return 0;
 }
 

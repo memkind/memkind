@@ -59,6 +59,7 @@
 /memkind-*.spec
 /memkind-*.tar.gz
 /memkind-auto-dax-kmem-nodes
+/memkind-balance-verify
 /memkind-hbw-nodes
 /memkind-memory-matrix
 /missing

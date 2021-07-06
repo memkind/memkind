@@ -410,6 +410,7 @@ src/Makefile.mk
 src/hbwmalloc.c
 src/heap_manager.c
 man/memkind-auto-dax-kmem-nodes.c
+src/memkind-balance-verify.c
 src/memkind-hbw-nodes.c
 src/memkind.c
 src/memkind_arena.c

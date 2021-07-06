@@ -23,6 +23,7 @@ extern struct memkind_ops MEMKIND_DAX_KMEM_OPS;
 extern struct memkind_ops MEMKIND_DAX_KMEM_ALL_OPS;
 extern struct memkind_ops MEMKIND_DAX_KMEM_PREFERRED_OPS;
 extern struct memkind_ops MEMKIND_DAX_KMEM_INTERLEAVE_OPS;
+extern struct memkind_ops MEMKIND_DAX_KMEM_BALANCED_OPS;
 
 #ifdef __cplusplus
 }
