@@ -64,6 +64,7 @@ struct memkind_ops {
     int (* madvise)(struct memkind *kind, void *addr, size_t size);
     int (* get_mmap_flags)(struct memkind *kind, int *flags);
     int (* get_mbind_mode)(struct memkind *kind, int *mode);
+    int (* get_mbind_flags)(struct memkind *kind, int *flags);
     int (* get_mbind_nodemask)(struct memkind *kind, unsigned long *nodemask,
                                unsigned long maxnode);
     int (* get_arena)(struct memkind *kind, unsigned int *arena, size_t size);

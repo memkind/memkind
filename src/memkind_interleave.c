@@ -18,6 +18,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .madvise = memkind_nohugepage_madvise,
     .get_mmap_flags = memkind_default_get_mmap_flags,
     .get_mbind_mode = memkind_interleave_get_mbind_mode,
+    .get_mbind_flags = memkind_default_get_mbind_flags,
     .get_mbind_nodemask = memkind_default_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_interleave_init_once,

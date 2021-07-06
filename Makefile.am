@@ -462,7 +462,7 @@ pkgconfig_DATA = memkind.pc
 CLEANFILES = memkind-$(VERSION).spec $(libmemkind_la_LIBADD)
 DISTCLEANFILES = VERSION configure pkgconfig_DATA
 
-bin_PROGRAMS = memkind-auto-dax-kmem-nodes memkind-hbw-nodes
+bin_PROGRAMS = memkind-auto-dax-kmem-nodes memkind-hbw-nodes memkind-balance-verify
 
 memkind_auto_dax_kmem_nodes_SOURCES = src/memkind-auto-dax-kmem-nodes.c
 memkind_auto_dax_kmem_nodes_LDADD = libmemkind.la
@@ -470,6 +470,9 @@ memkind_auto_dax_kmem_nodes_LDFLAGS = $(DAXCTL_LIBS)
 
 memkind_hbw_nodes_SOURCES = src/memkind-hbw-nodes.c
 memkind_hbw_nodes_LDADD = libmemkind.la
+
+memkind_balance_verify_SOURCES = src/memkind-balance-verify.c
+memkind_balance_verify_LDADD = libmemkind.la
 
 bin_SCRIPTS =
 check_PROGRAMS =
