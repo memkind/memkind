@@ -76,6 +76,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_REGULAR_OPS = {
     .mbind = memkind_default_mbind,
     .get_mmap_flags = memkind_default_get_mmap_flags,
     .get_mbind_mode = memkind_default_get_mbind_mode,
+    .get_mbind_flags = memkind_default_get_mbind_flags,
     .get_mbind_nodemask = memkind_regular_all_get_mbind_nodemask,
     .get_arena = memkind_thread_get_arena,
     .init_once = memkind_regular_init_once,

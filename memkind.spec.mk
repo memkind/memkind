@@ -152,6 +152,7 @@ rm -f %{buildroot}/%{_libdir}/libautohbw.{l,}a
 %{_libdir}/lib%{namespace}.so.*
 %{_libdir}/libautohbw.so.*
 %{_bindir}/%{namespace}-auto-dax-kmem-nodes
+%{_bindir}/%{namespace}-balance-verify
 %{_bindir}/%{namespace}-hbw-nodes
 
 %files devel

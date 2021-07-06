@@ -918,6 +918,10 @@ Same as
 except that the pages that support the allocation are interleaved
 across all persistent memory NUMA nodes.
 .TP
+.B MEMKIND_DAX_KMEM_BALANCED (EXPERIMENTAL)
+Allocate from the closest persistent memory NUMA node at the time
+of allocation. The page placement can be later optimized (moved to DRAM) by kernel to react to e.g. the accessing pattern changing.
+.TP
 .B MEMKIND_REGULAR
 Allocate from regular memory using the default page size. Regular means general purpose memory
 from the NUMA nodes containing CPUs.

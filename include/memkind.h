@@ -355,6 +355,9 @@ extern memkind_t MEMKIND_HIGHEST_BANDWIDTH_LOCAL;
 /// \note STANDARD API
 extern memkind_t MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED;
 
+/// \note EXPERIMENTAL API
+extern memkind_t MEMKIND_DAX_KMEM_BALANCED;
+
 ///
 /// \brief Get Memkind API version
 /// \note STANDARD API

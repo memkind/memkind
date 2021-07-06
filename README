@@ -162,9 +162,11 @@ which are using the memkind library for dynamic linking at run time:
 | MEMKIND_DAX_KMEM_ALL                      | X     |             |           | X          |                                     |      |          |
 | MEMKIND_DAX_KMEM_PREFERRED                | X     |             |           | X          |                                     |      |          |
 | MEMKIND_DAX_KMEM_INTERLEAVE               | X     |             |           | X          |                                     |      |          |
+| MEMKIND_DAX_KMEM_BALANCED**               | X     |             |           | X          |                                     |      |          |
 | PMEM kind                                 |       |             |           |            | X                                   |      |          |
 
 *not needed for Intel's 2nd generation Intel(R) Xeon Phi(TM)
+**experimental
 
 ## Kernel
 To correctly control of NUMA, huge pages and file-backed memory following
