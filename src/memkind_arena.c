@@ -268,7 +268,7 @@ bool arena_extent_merge(extent_hooks_t *extent_hooks, void *addr_a,
 }
 
 // clang-format off
-extent_hooks_t arena_extent_hooks = {
+static extent_hooks_t arena_extent_hooks = {
     .alloc = arena_extent_alloc,
     .dalloc = arena_extent_dalloc,
     .commit = arena_extent_commit,
@@ -278,7 +278,7 @@ extent_hooks_t arena_extent_hooks = {
     .merge = arena_extent_merge
 };
 
-extent_hooks_t arena_extent_hooks_hog_memory = {
+static extent_hooks_t arena_extent_hooks_hog_memory = {
     .alloc = arena_extent_alloc,
     .dalloc = arena_extent_dalloc,
     .commit = arena_extent_commit,
@@ -288,7 +288,7 @@ extent_hooks_t arena_extent_hooks_hog_memory = {
     .merge = arena_extent_merge
 };
 
-extent_hooks_t arena_extent_hooks_hugetlb = {
+static extent_hooks_t arena_extent_hooks_hugetlb = {
     .alloc = arena_extent_alloc_hugetlb,
     .dalloc = arena_extent_dalloc,
     .commit = arena_extent_commit,
@@ -298,7 +298,7 @@ extent_hooks_t arena_extent_hooks_hugetlb = {
     .merge = arena_extent_merge
 };
 
-extent_hooks_t arena_extent_hooks_hugetlb_hog_memory = {
+static extent_hooks_t arena_extent_hooks_hugetlb_hog_memory = {
     .alloc = arena_extent_alloc_hugetlb,
     .dalloc = arena_extent_dalloc,
     .commit = arena_extent_commit,
