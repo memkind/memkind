@@ -115,11 +115,13 @@ bool memkind_get_hog_memory(void)
     return memkind_hog_memory;
 }
 
-static void arena_config_init()
+void memkind_set_hog_memory(const char *str)
 {
-    const char *str = memkind_get_env("MEMKIND_HOG_MEMORY");
     memkind_hog_memory = str && str[0] == '1';
+}
 
+static void arena_config_init(void)
+{
     arena_init_status = pthread_key_create(&tcache_key, tcache_finalize);
 }
 

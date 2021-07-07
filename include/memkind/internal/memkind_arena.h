@@ -52,6 +52,7 @@ int memkind_arena_get_global_stat(memkind_stat_type stat_type, size_t *stat);
 void *memkind_arena_defrag_reallocate(struct memkind *kind, void *ptr);
 void *memkind_arena_defrag_reallocate_with_kind_detect(void *ptr);
 bool memkind_get_hog_memory(void);
+void memkind_set_hog_memory(const char *str);
 int memkind_arena_stats_print(void (*write_cb)(void *, const char *),
                               void *cbopaque, memkind_stat_print_opt opts);
 #ifdef __cplusplus
