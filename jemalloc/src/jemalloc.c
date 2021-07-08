@@ -3762,13 +3762,7 @@ je_arenalookupx(const void *ptr) {
 		goto label_return;
 	}
 
-	const arena_t *arena = extent_arena_get(extent);
-	if (arena == NULL) {
-		ret = -1;
-		goto label_return;
-	}
-
-	ret = arena_ind_get(arena);
+	ret = extent_arena_ind_get(extent);
 
 label_return:
 	check_entry_exit_locking(tsdn);
