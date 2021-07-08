@@ -5,7 +5,7 @@
 
 #include <algorithm>
 #include <fstream>
-#include <memkind/internal/memkind_regular.h>
+#include <memkind/internal/memkind_cpu.h>
 #include <numaif.h>
 
 #include "check.h"
