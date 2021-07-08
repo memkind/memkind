@@ -239,13 +239,16 @@ bool arena_extent_decommit(extent_hooks_t *extent_hooks, void *addr,
     return true;
 }
 
+bool arena_extent_purge_hog_memory(extent_hooks_t *extent_hooks, void *addr,
+                                   size_t size, size_t offset, size_t length,
+                                   unsigned arena_ind)
+{
+    return true;
+}
+
 bool arena_extent_purge(extent_hooks_t *extent_hooks, void *addr, size_t size,
                         size_t offset, size_t length, unsigned arena_ind)
 {
-    if (memkind_get_hog_memory()) {
-        return true;
-    }
-
     int err = madvise(addr + offset, length, MADV_DONTNEED);
     return (err != 0);
 }
@@ -264,32 +267,62 @@ bool arena_extent_merge(extent_hooks_t *extent_hooks, void *addr_a,
     return false;
 }
 
-extent_hooks_t arena_extent_hooks = {.alloc = arena_extent_alloc,
-                                     .dalloc = arena_extent_dalloc,
-                                     .commit = arena_extent_commit,
-                                     .decommit = arena_extent_decommit,
-                                     .purge_lazy = arena_extent_purge,
-                                     .split = arena_extent_split,
-                                     .merge = arena_extent_merge};
+// clang-format off
+static extent_hooks_t arena_extent_hooks = {
+    .alloc = arena_extent_alloc,
+    .dalloc = arena_extent_dalloc,
+    .commit = arena_extent_commit,
+    .decommit = arena_extent_decommit,
+    .purge_lazy = arena_extent_purge,
+    .split = arena_extent_split,
+    .merge = arena_extent_merge
+};
 
-extent_hooks_t arena_extent_hooks_hugetlb = {.alloc =
-                                                 arena_extent_alloc_hugetlb,
-                                             .dalloc = arena_extent_dalloc,
-                                             .commit = arena_extent_commit,
-                                             .decommit = arena_extent_decommit,
-                                             .purge_lazy = arena_extent_purge,
-                                             .split = arena_extent_split,
-                                             .merge = arena_extent_merge};
+static extent_hooks_t arena_extent_hooks_hog_memory = {
+    .alloc = arena_extent_alloc,
+    .dalloc = arena_extent_dalloc,
+    .commit = arena_extent_commit,
+    .decommit = arena_extent_decommit,
+    .purge_lazy = arena_extent_purge_hog_memory,
+    .split = arena_extent_split,
+    .merge = arena_extent_merge
+};
+
+static extent_hooks_t arena_extent_hooks_hugetlb = {
+    .alloc = arena_extent_alloc_hugetlb,
+    .dalloc = arena_extent_dalloc,
+    .commit = arena_extent_commit,
+    .decommit = arena_extent_decommit,
+    .purge_lazy = arena_extent_purge,
+    .split = arena_extent_split,
+    .merge = arena_extent_merge
+};
+
+static extent_hooks_t arena_extent_hooks_hugetlb_hog_memory = {
+    .alloc = arena_extent_alloc_hugetlb,
+    .dalloc = arena_extent_dalloc,
+    .commit = arena_extent_commit,
+    .decommit = arena_extent_decommit,
+    .purge_lazy = arena_extent_purge_hog_memory,
+    .split = arena_extent_split,
+    .merge = arena_extent_merge
+};
+// clang-format on
 
 extent_hooks_t *get_extent_hooks_by_kind(struct memkind *kind)
 {
     if (kind == MEMKIND_HUGETLB || kind == MEMKIND_HBW_HUGETLB ||
         kind == MEMKIND_HBW_ALL_HUGETLB ||
         kind == MEMKIND_HBW_PREFERRED_HUGETLB) {
+        if (memkind_get_hog_memory()) {
+            return &arena_extent_hooks_hugetlb_hog_memory;
+        }
         return &arena_extent_hooks_hugetlb;
-    } else {
-        return &arena_extent_hooks;
     }
+    if (memkind_get_hog_memory()) {
+        return &arena_extent_hooks_hog_memory;
+    }
+    return &arena_extent_hooks;
 }
 
 MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
