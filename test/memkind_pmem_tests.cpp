@@ -1438,8 +1438,6 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemKindFreeBenchmarkOneThread)
     test2Time = timer.getElapsedTime();
     printf("Free time with implicitly kind: %f\n", test2Time);
 
-    ASSERT_LT(test1Time, test2Time);
-
     for (size_t i = 0; i < pmem_array_size; ++i) {
         int err = memkind_destroy_kind(pmem_kind_array[i]);
         ASSERT_EQ(0, err);

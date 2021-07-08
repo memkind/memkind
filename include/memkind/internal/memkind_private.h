@@ -45,6 +45,7 @@ extern "C" {
 #define jemk_arenalookupx       JE_SYMBOL(arenalookupx)
 #define jemk_check_reallocatex  JE_SYMBOL(check_reallocatex)
 #define jemk_malloc_stats_print JE_SYMBOL(malloc_stats_print)
+#define jemk_free_with_tcache   JE_SYMBOL(free_with_tcache)
 
 enum memkind_const_private
 {

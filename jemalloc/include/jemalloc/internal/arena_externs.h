@@ -75,6 +75,7 @@ dss_prec_t arena_dss_prec_get(arena_t *arena);
 bool arena_dss_prec_set(arena_t *arena, dss_prec_t dss_prec);
 ssize_t arena_dirty_decay_ms_default_get(void);
 bool arena_dirty_decay_ms_default_set(ssize_t decay_ms);
+bool arena_memkind_partition_set(arena_t *arena, unsigned partition_id);
 ssize_t arena_muzzy_decay_ms_default_get(void);
 bool arena_muzzy_decay_ms_default_set(ssize_t decay_ms);
 bool arena_retain_grow_limit_get_set(tsd_t *tsd, arena_t *arena,

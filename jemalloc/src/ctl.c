@@ -125,6 +125,7 @@ CTL_PROTO(arena_i_dirty_decay_ms)
 CTL_PROTO(arena_i_muzzy_decay_ms)
 CTL_PROTO(arena_i_extent_hooks)
 CTL_PROTO(arena_i_retain_grow_limit)
+CTL_PROTO(arena_i_memkind_partition)
 INDEX_PROTO(arena_i)
 CTL_PROTO(arenas_bin_i_size)
 CTL_PROTO(arenas_bin_i_nregs)
@@ -357,7 +358,8 @@ static const ctl_named_node_t arena_i_node[] = {
 	{NAME("dirty_decay_ms"), CTL(arena_i_dirty_decay_ms)},
 	{NAME("muzzy_decay_ms"), CTL(arena_i_muzzy_decay_ms)},
 	{NAME("extent_hooks"),	CTL(arena_i_extent_hooks)},
-	{NAME("retain_grow_limit"),	CTL(arena_i_retain_grow_limit)}
+	{NAME("retain_grow_limit"),	CTL(arena_i_retain_grow_limit)},
+	{NAME("memkind_partition"), CTL(arena_i_memkind_partition)}
 };
 static const ctl_named_node_t super_arena_i_node[] = {
 	{NAME(""),		CHILD(named, arena_i)}
@@ -2454,6 +2456,36 @@ arena_i_retain_grow_limit_ctl(tsd_t *tsd, const size_t *mib,
 	} else {
 		ret = EFAULT;
 	}
+label_return:
+	malloc_mutex_unlock(tsd_tsdn(tsd), &ctl_mtx);
+	return ret;
+}
+
+static int
+arena_i_memkind_partition_ctl(tsd_t *tsd, const size_t *mib, size_t miblen,
+    void *oldp, size_t *oldlenp, void *newp, size_t newlen) {
+	int ret;
+	unsigned arena_ind;
+	arena_t *arena;
+
+	malloc_mutex_lock(tsd_tsdn(tsd), &ctl_mtx);
+	MIB_UNSIGNED(arena_ind, 1);
+	arena = arena_get(tsd_tsdn(tsd), arena_ind, false);
+	if (newp != NULL) {
+		if (newlen != sizeof(unsigned)) {
+			ret = EINVAL;
+			goto label_return;
+		}
+
+		if (arena_memkind_partition_set(arena, *(unsigned *)newp)) {
+			ret = EFAULT;
+			goto label_return;
+		}
+		ret = 0;
+	} else {
+		ret = EFAULT;
+	}
+
 label_return:
 	malloc_mutex_unlock(tsd_tsdn(tsd), &ctl_mtx);
 	return ret;

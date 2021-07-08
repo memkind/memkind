@@ -3776,6 +3776,38 @@ label_return:
 	return ret;
 }
 
+#define JEMK_MEMKIND_BASE_KIND 26 // must be inline with MEMKIND_BASE_KIND
+
+JEMALLOC_EXPORT void JEMALLOC_NOTHROW
+je_free_with_tcache(void *ptr, unsigned *tcache_map){
+	tsdn_t *tsdn;
+	LOG("core.free_with_tcache.entry", "ptr: %p", ptr);
+
+	tsdn = tsdn_fetch();
+	check_entry_exit_locking(tsdn);
+
+	if (unlikely(ptr == NULL)) {
+		goto label_return;
+	}
+
+	const extent_t *extent = iealloc(tsdn, ptr);
+	arena_t *arena = extent_arena_get(extent);
+	if (arena_is_auto(arena)) {
+		je_free(ptr);
+		goto label_return;
+	}
+
+	if (tcache_map && (arena->mk_partition < JEMK_MEMKIND_BASE_KIND)) {
+		je_dallocx(ptr, MALLOCX_TCACHE(*(tcache_map+arena->mk_partition)));
+	} else {
+		je_dallocx(ptr, MALLOCX_TCACHE_NONE);
+	}
+
+label_return:
+	check_entry_exit_locking(tsdn);
+	LOG("core.free_with_tcache.exit", "");
+}
+
 JEMALLOC_EXPORT int JEMALLOC_NOTHROW
 je_check_reallocatex(const void *ptr) {
 	int ret;
