@@ -229,6 +229,13 @@ memtier_policy_dynamic_threshold_get_kind(struct memtier_memory *memory,
     return memory->cfg[i].kind;
 }
 
+static memkind_t
+memtier_policy_data_hotness_get_kind(struct memtier_memory *memory,
+                                     size_t size)
+{
+    return MEMKIND_DEFAULT;
+}
+
 static void print_memtier_memory(struct memtier_memory *memory)
 {
     int i;
@@ -292,6 +299,10 @@ memtier_policy_static_ratio_update_config(struct memtier_memory *memory)
 {}
 
 static void
+memtier_policy_data_hotness_update_config(struct memtier_memory *memory)
+{}
+
+static void
 memtier_policy_dynamic_threshold_update_config(struct memtier_memory *memory)
 {
     struct memtier_tier_cfg *cfg = memory->cfg;
@@ -350,7 +361,8 @@ memtier_policy_dynamic_threshold_update_config(struct memtier_memory *memory)
 }
 
 static inline struct memtier_memory *
-memtier_memory_init(size_t tier_size, bool is_dynamic_threshold)
+memtier_memory_init(size_t tier_size, bool is_dynamic_threshold,
+                    bool is_data_hotness)
 {
     if (tier_size == 0) {
         log_err("No tier in builder.");
@@ -373,6 +385,9 @@ memtier_memory_init(size_t tier_size, bool is_dynamic_threshold)
         memory->get_kind = memtier_policy_dynamic_threshold_get_kind;
         memory->update_cfg = memtier_policy_dynamic_threshold_update_config;
         memory->thres_check_cnt = THRESHOLD_CHECK_CNT;
+    } else if (is_data_hotness) {
+        memory->get_kind = memtier_policy_data_hotness_get_kind;
+        memory->update_cfg = memtier_policy_data_hotness_update_config;
     } else {
         if (tier_size == 1)
             memory->get_kind = memtier_single_get_kind;
@@ -392,7 +407,7 @@ builder_static_create_memory(struct memtier_builder *builder)
 {
     int i;
     struct memtier_memory *memory =
-        memtier_memory_init(builder->cfg_size, false);
+        memtier_memory_init(builder->cfg_size, false, false);
 
     if (!memory) {
         log_err("memtier_memory_init failed.");
@@ -412,6 +427,13 @@ builder_static_create_memory(struct memtier_builder *builder)
 
 static int builder_static_ctl_set(struct memtier_builder *builder,
                                   const char *name, const void *val)
+{
+    log_err("Invalid name: %s", name);
+    return -1;
+}
+
+static int builder_hot_ctl_set(struct memtier_builder *builder,
+                               const char *name, const void *val)
 {
     log_err("Invalid name: %s", name);
     return -1;
@@ -490,7 +512,7 @@ builder_dynamic_create_memory(struct memtier_builder *builder)
         return NULL;
     }
 
-    memory = memtier_memory_init(builder->cfg_size, true);
+    memory = memtier_memory_init(builder->cfg_size, true, false);
     if (!memory) {
         jemk_free(thres);
         log_err("memtier_memory_init failed.");
@@ -568,6 +590,17 @@ failure:
     return NULL;
 }
 
+static struct memtier_memory *
+builder_hot_create_memory(struct memtier_builder *builder)
+{
+    // TODO create and initialize structures here
+
+    struct memtier_memory *memory =
+        memtier_memory_init(builder->cfg_size, false, true);
+
+    return memory;
+}
+
 static int builder_dynamic_update(struct memtier_builder *builder)
 {
     if (builder->cfg_size < 1)
@@ -611,6 +644,12 @@ memtier_builder_new(memtier_policy_t policy)
                 b->trigger = THRESHOLD_TRIGGER;
                 b->degree = THRESHOLD_DEGREE;
                 return b;
+            case MEMTIER_POLICY_DATA_HOTNESS:
+                b->create_mem = builder_hot_create_memory;
+                b->update_builder = NULL;
+                b->ctl_set = builder_hot_ctl_set;
+                b->cfg = NULL;
+                b->thres = NULL;
             default:
                 log_err("Unrecognized memory policy %u", policy);
                 jemk_free(b);

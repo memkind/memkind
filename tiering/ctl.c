@@ -161,6 +161,8 @@ static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
         *policy = MEMTIER_POLICY_STATIC_RATIO;
     } else if (strcmp(qbuf, "DYNAMIC_THRESHOLD") == 0) {
         *policy = MEMTIER_POLICY_DYNAMIC_THRESHOLD;
+    } else if (strcmp(qbuf, "DATA_HOTNESS") == 0) {
+        *policy = MEMTIER_POLICY_DATA_HOTNESS;
     } else {
         log_err("Unknown policy: %s", qbuf);
         return -1;
