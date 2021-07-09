@@ -417,6 +417,13 @@ static int builder_static_ctl_set(struct memtier_builder *builder,
     return -1;
 }
 
+static int builder_hot_ctl_set(struct memtier_builder *builder,
+                               const char *name, const void *val)
+{
+    log_err("Invalid name: %s", name);
+    return -1;
+}
+
 static int builder_dynamic_ctl_set(struct memtier_builder *builder,
                                    const char *name, const void *val)
 {
@@ -568,6 +575,13 @@ failure:
     return NULL;
 }
 
+static struct memtier_memory *
+builder_hot_create_memory(struct memtier_builder *builder)
+{
+    // TODO create and initialize are structures here
+    return NULL;
+}
+
 static int builder_dynamic_update(struct memtier_builder *builder)
 {
     if (builder->cfg_size < 1)
@@ -611,6 +625,12 @@ memtier_builder_new(memtier_policy_t policy)
                 b->trigger = THRESHOLD_TRIGGER;
                 b->degree = THRESHOLD_DEGREE;
                 return b;
+            case MEMTIER_POLICY_DATA_HOTNESS:
+                b->create_mem = builder_hot_create_memory;
+                b->update_builder = NULL;
+                b->ctl_set = builder_hot_ctl_set;
+                b->cfg = NULL;
+                b->thres = NULL;
             default:
                 log_err("Unrecognized memory policy %u", policy);
                 jemk_free(b);
