@@ -352,6 +352,7 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
     kind->arena_zero = UINT_MAX;
     for (i = 0; i < kind->arena_map_len; i++) {
         unsigned arena_index;
+        char cmd[64];
         // create new arena with consecutive index
         err = jemk_mallctl("arenas.create", (void *)&arena_index,
                            &unsigned_size, NULL, 0);
@@ -365,8 +366,20 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
         if (kind->arena_zero > arena_index) {
             kind->arena_zero = arena_index;
         }
+
+        // setup retain grow limit for PMEM kind
+        if (kind->partition >= MEMKIND_NUM_BASE_KIND) {
+            const size_t retainGrowLimit = 2 * 1024 * 1024; // 2 MB
+            snprintf(cmd, sizeof(cmd), "arena.%u.retain_grow_limit",
+                     arena_index);
+            err = jemk_mallctl(cmd, NULL, NULL, (void *)&retainGrowLimit,
+                               sizeof(retainGrowLimit));
+            if (err) {
+                goto exit;
+            }
+        }
+
         // setup extent_hooks for newly created arena
-        char cmd[64];
         snprintf(cmd, sizeof(cmd), "arena.%u.extent_hooks", arena_index);
         err = jemk_mallctl(cmd, NULL, NULL, (void *)&hooks,
                            sizeof(extent_hooks_t *));
