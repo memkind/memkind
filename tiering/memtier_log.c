@@ -71,12 +71,11 @@ void log_info(const char *format, ...)
 
 void log_err(const char *format, ...)
 {
-    if (log_level >= MESSAGE_TYPE_ERROR) {
-        va_list args;
-        va_start(args, format);
-        log_generic(MESSAGE_TYPE_ERROR, format, args);
-        va_end(args);
-    }
+    // logging errors can't be disabled
+    va_list args;
+    va_start(args, format);
+    log_generic(MESSAGE_TYPE_ERROR, format, args);
+    va_end(args);
 }
 
 void log_debug(const char *format, ...)

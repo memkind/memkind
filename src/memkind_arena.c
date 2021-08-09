@@ -417,7 +417,6 @@ MEMKIND_EXPORT int memkind_arena_destroy(struct memkind *kind)
 #endif
     }
 
-    memkind_default_destroy(kind);
     return 0;
 }
 
