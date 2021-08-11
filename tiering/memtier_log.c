@@ -11,8 +11,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <syscall.h>
 #include <sys/stat.h>
+#include <syscall.h>
 #include <unistd.h>
 
 static const char *message_prefixes[MESSAGE_TYPE_MAX_VALUE] = {
@@ -41,17 +41,16 @@ static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
 #ifdef MEMKIND_LOG_TO_FILE
 static void save_log_to_file(char *log, char *fileName)
 {
-	int fd = open(fileName, O_WRONLY | O_APPEND);
-	if (fd == -1){
-            int new_fd = open(fileName, O_CREAT | O_WRONLY, 0600);
-            if (new_fd != -1) {
-                (void)!write(new_fd, log, strlen(log));
-                close(new_fd);
-            }
-    }
-    else{
-	    (void)!write(fd, log, strlen(log));
-	    close(fd);
+    int fd = open(fileName, O_WRONLY | O_APPEND);
+    if (fd == -1) {
+        int new_fd = open(fileName, O_CREAT | O_WRONLY, 0600);
+        if (new_fd != -1) {
+            (void)!write(new_fd, log, strlen(log));
+            close(new_fd);
+        }
+    } else {
+        (void)!write(fd, log, strlen(log));
+        close(fd);
     }
 }
 #endif
