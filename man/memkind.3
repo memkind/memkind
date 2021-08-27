@@ -70,6 +70,8 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .br
 .BI "int memkind_check_available(memkind_t " "kind" );
 .br
+.BI "ssize_t memkind_get_capacity(memkind_t " "kind" );
+.br
 .BI "int memkind_check_dax_path(const char " "*pmem_dir" );
 .sp
 .B "STATISTICS:"
@@ -552,6 +554,21 @@ returns zero if the specified
 is available or an error code from the
 .B ERRORS
 section if it is not.
+.PP
+.BR memkind_get_capacity ()
+returns memory capacity of nodes available to a given
+.I kind
+(file size or filesystem capacity in case of a file-backed PMEM kind) or -1 in case of an error.
+Supported kinds are:
+.B MEMKIND_DEFAULT, MEMKIND_HIGHEST_CAPACITY, MEMKIND_HIGHEST_CAPACITY_LOCAL, MEMKIND_LOWEST_LATENCY_LOCAL,
+.B MEMKIND_HIGHEST_BANDWIDTH_LOCAL, MEMKIND_HUGETLB, MEMKIND_INTERLEAVE, MEMKIND_HBW,
+.B MEMKIND_HBW_ALL, MEMKIND_HBW_INTERLEAVE, MEMKIND_DAX_KMEM, MEMKIND_DAX_KMEM_ALL,
+.B MEMKIND_DAX_KMEM_INTERLEAVE, MEMKIND_REGULAR
+and file-backed PMEM
+.I kind.
+For
+.B MEMKIND_HUGETLB
+only pages with a default size of 2MB are supported.
 .PP
 .BR memkind_check_dax_path ()
 returns zero if file-backed kind memory is in the specified directory path
