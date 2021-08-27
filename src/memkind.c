@@ -734,6 +734,57 @@ MEMKIND_EXPORT int memkind_check_available(struct memkind *kind)
     return err;
 }
 
+MEMKIND_EXPORT long long memkind_get_free_space(struct memkind *kind)
+{
+    struct bitmask *mask = NULL;
+    long long free_space = 0;
+
+    int err = numa_available();
+    if (err) {
+        log_fatal("[%s] NUMA not available (error code:%d).", kind->name, err);
+        abort();
+    }
+
+    if (MEMKIND_LIKELY(kind->ops->get_mbind_nodemask)) {
+        mask = numa_allocate_nodemask();
+        if (!mask) {
+            log_err("numa_allocate_nodemask() failed");
+            return -1;
+        }
+
+        err = kind->ops->get_mbind_nodemask(kind, mask->maskp, mask->size);
+        if (err != MEMKIND_SUCCESS) {
+            log_err("get_mbind_nodemask() failed");
+            numa_free_nodemask(mask);
+            return -1;
+        }
+    } else if (kind == MEMKIND_DEFAULT) {
+        mask = numa_all_nodes_ptr;
+    }
+
+    if (mask) {
+        int i;
+        for (i = 0; i < mask->size; i++) {
+            if (numa_bitmask_isbitset(mask, i)) {
+                long long numa_free_space = 0;
+                err = numa_node_size64(i, &numa_free_space);
+                if (err == -1) {
+                    log_err("numa_node_size64() failed");
+                    numa_free_nodemask(mask);
+                    return -1;
+                }
+                free_space += numa_free_space;
+            }
+        }
+        numa_free_nodemask(mask);
+    } else if (kind->ops == &MEMKIND_PMEM_OPS) {
+        struct memkind_pmem *pmem_priv = kind->priv;
+        free_space = pmem_priv->max_size - pmem_priv->current_size;
+    }
+
+    return free_space;
+}
+
 MEMKIND_EXPORT size_t memkind_malloc_usable_size(struct memkind *kind,
                                                  void *ptr)
 {

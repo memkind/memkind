@@ -515,6 +515,14 @@ int memkind_create_pmem_with_config(struct memkind_config *cfg,
 int memkind_check_available(memkind_t kind);
 
 ///
+/// \brief Get free space
+/// \note STANDARD API
+/// \param kind specified memory kind
+/// \return Free space in bytes on success, -1 on failure
+///
+long long memkind_get_free_space(memkind_t kind);
+
+///
 /// \brief Update memkind cached statistics
 /// \note STANDARD API
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values
