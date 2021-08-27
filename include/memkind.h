@@ -515,6 +515,15 @@ int memkind_create_pmem_with_config(struct memkind_config *cfg,
 int memkind_check_available(memkind_t kind);
 
 ///
+/// \brief Get capacity of memory for a given kind
+/// \note STANDARD API
+/// \param kind specified memory kind
+/// \return Capacity on nodes from which a given kind could allocate in
+///         bytes on success, -1 on failure
+///
+ssize_t memkind_get_capacity(memkind_t kind);
+
+///
 /// \brief Update memkind cached statistics
 /// \note STANDARD API
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values
