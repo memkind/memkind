@@ -70,6 +70,8 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .br
 .BI "int memkind_check_available(memkind_t " "kind" );
 .br
+.BI "int memkind_get_total_memory(memkind_t " "kind" );
+.br
 .BI "int memkind_check_dax_path(const char " "*pmem_dir" );
 .sp
 .B "STATISTICS:"
@@ -552,6 +554,11 @@ returns zero if the specified
 is available or an error code from the
 .B ERRORS
 section if it is not.
+.PP
+.BR memkind_get_total_memory ()
+returns total amount of memory on nodes available to a given
+.I kind
+or -1 in case of error.
 .PP
 .BR memkind_check_dax_path ()
 returns zero if file-backed kind memory is in the specified directory path
