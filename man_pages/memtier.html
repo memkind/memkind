@@ -1,0 +1,374 @@
+<!-- Creator     : groff version 1.22.4 -->
+<!-- CreationDate: Wed Sep  1 09:26:26 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>MEMTIER</title>
+
+</head>
+<body>
+
+<h1 align="center">MEMTIER</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#ENVIRONMENT">ENVIRONMENT</a><br>
+<a href="#TIER PARAMETERS">TIER PARAMETERS</a><br>
+<a href="#POLICIES">POLICIES</a><br>
+<a href="#THRESHOLD PARAMETERS">THRESHOLD PARAMETERS</a><br>
+<a href="#DRAM FALLBACK POLICY">DRAM FALLBACK POLICY</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">libmemtier.so -
+interposer library which enables the memkind memory
+tiering</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In order to use
+the memkind memory tiering, pass the following environment
+variables along with the command:</p>
+
+
+<p style="margin-left:22%; margin-top: 1em"><b>LD_PRELOAD=libmemtier.so
+MEMKIND_MEM_TIERS=&quot;...&quot;</b> command {arguments
+...}</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">This library
+enables the memkind memory tiering mechanism. With this
+funcionality, allocations will be split between different
+types of memory automatically. The library allows making
+allocations with the usage of multiple kinds keeping a
+specified ratio between them. This ratio determines how much
+of the total allocated memory should be allocated with each
+kind. Both <b>LD_PRELOAD</b> and <b>MEMKIND_MEM_TIERS</b>
+environment variables are mandatory for enabling the memkind
+memory tiering.</p>
+
+<h2>ENVIRONMENT
+<a name="ENVIRONMENT"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_MEM_TIERS</b></p>
+
+<p style="margin-left:22%;">A semicolon-separated list of
+tier configurations ended with a policy parameter. Each of
+the tier configurations is a comma-separated list of tier
+parameters in the format: <b>param_name:value,(...)</b> For
+the list of available tier parameters, please see the
+<b>TIER PARAMETERS</b> section below.</p>
+
+
+<p style="margin-left:11%;"><b>MEMKIND_MEM_THRESHOLDS</b></p>
+
+<p style="margin-left:22%;">Semicolon-separated list of
+threshold configurations. Each configuration consists of a
+comma-separated list of threshold parameters in the same
+format as <b>MEMKIND_MEM_TIERS</b> , where the
+<b>param_name</b> is one of the <i>INIT_VAL, MIN_VAL</i> and
+<i>MAX_VAL.</i> Each parameter can be set only once. When
+any of the parameters are missing, they will be set to a
+default value. If threshold configuration is missing,
+threshold with default configuration will be used. If any of
+the parameters is set more than once, the application will
+be aborted. Order of provided configurations is important -
+configuration of Nth threshold defines threshold between Nth
+and (N+1)th tier. Note that for N+1 tiers there should be at
+most N thresholds defined. Set this variable only when
+<b>DYNAMIC_THRESHOLD</b> policy is used. For more details
+about <b>param_name</b> see the <b>THRESHOLD PARAMETERS</b>
+section below. See also <b>EXAMPLES</b> section for the
+usage of <b>MEMKIND_MEM_THRESHOLDS</b> environment
+variable.</p>
+
+<h2>TIER PARAMETERS
+<a name="TIER PARAMETERS"></a>
+</h2>
+
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="6%">
+
+
+<p style="margin-top: 1em"><b>KIND</b></p></td>
+<td width="5%"></td>
+<td width="78%">
+
+
+<p style="margin-top: 1em">(required) - kind of memory used
+in memory tier. Allowed kind names are
+<i>&rsquo;DRAM&rsquo;, &rsquo;KMEM_DAX&rsquo;</i> and
+<i>&rsquo;FS_DAX&rsquo;.</i> There can be multiple different
+kind names provided in the <b>MEMKIND_MEM_TIERS</b>
+environment variable - one in each tier configuration.
+Additionally, in this variable more than one
+<i>&rsquo;FS_DAX&rsquo;</i> kind name is allowed. More
+information about available kinds can be found in the
+<b>memkind(3)</b> manual, where the
+<i>&rsquo;DRAM&rsquo;</i> kind name allocates memory with
+the usage of the <b>MEMKIND_DEFAULT</b> kind, the
+<i>&rsquo;KMEM_DAX&rsquo;</i> with the
+<b>MEMKIND_DAX_KMEM</b> kind and the
+<i>&rsquo;FS_DAX&rsquo;</i> with a file-backed kind of
+memory created with the <b>memkind_create_pmem()</b>
+function.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="6%">
+
+
+<p><b>PATH</b></p></td>
+<td width="5%"></td>
+<td width="78%">
+
+
+<p>(required only for the <i>FS_DAX</i> kind) - the path to
+the location where pmem file will be created. The path has
+to exist. For other kinds, if set, will cause an error.</p></td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>PMEM_SIZE_LIMIT</b></p>
+
+<p style="margin-left:22%;">(optional, only for the FS_DAX
+kind) - if set, it limits the size of pmem file and the
+maximum size of total allocations from persistent memory. By
+default, no limit is introduced. Pass this option only with
+<i>FS_DAX</i> kind. For other kinds, if set, will cause an
+error. The accepted formats are: 1, 1K, 1M, 1G. See the
+<b>memkind(3)</b> manual for information about limitations
+to this value which are the same as for the <b>max_size</b>
+value of the <b>memkind_create_pmem()</b> function.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>RATIO</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>(required) - the part of the ratio tied to the given
+kind. It&rsquo;s an <i>unsigned</i> type in a range from 1
+to <i>UINT_MAX.</i> See <b>EXAMPLES</b> section.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>POLICY</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>(required, only one in the whole environment variable) -
+determines the algorithm used to distribute allocations
+between provided memory kinds. This parameter has to be the
+last parameter in <b>MEMKIND_MEM_TIERS</b> configuration
+string. Currently only <i>STATIC_RATIO</i> and
+<i>DYNAMIC_THRESHOLD</i> policies are valid. See the
+<b>POLICIES</b> section.</p></td></tr>
+</table>
+
+<p style="margin-left:11%; margin-top: 1em"><b>NOTE:</b>
+The application will fail when provided environment variable
+string is not in the correct format.</p>
+
+<h2>POLICIES
+<a name="POLICIES"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>STATIC_RATIO</b></p>
+
+<p style="margin-left:22%;">All allocations are made in
+such a way that the ratio between memory tiers is constant.
+No threshold is used.</p>
+
+<p style="margin-left:11%;"><b>DYNAMIC_THRESHOLD</b></p>
+
+<p style="margin-left:22%;">The ratio between memory tiers
+is kept with a help of a threshold between kinds which value
+changes in time. Minimum two tiers are required for this
+policy, otherwise the application will be aborted. The
+threshold value can change in time to keep the desired ratio
+between tiers, but it will not be lesser than <i>MIN_VAL</i>
+and it will not be greater than <i>MAX_VAL.</i> For every
+allocation, if its size is greater than or equal to
+<i>INIT_VAL,</i> it will come from the (N+1)th tier.</p>
+
+<p style="margin-left:22%; margin-top: 1em">Default values
+for a threshold between first two tiers in the
+<b>MEMKIND_MEM_TIERS</b> environment variable are:</p>
+
+<p style="margin-left:22%; margin-top: 1em"><b>INIT_VAL =
+1024, MIN_VAL = 513, MAX_VAL = 1536.</b></p>
+
+<p style="margin-left:22%; margin-top: 1em">If there are
+more tiers defined, each next undefined threshold will have
+all parameters increased by 1024, so the next undefined
+threshold between the next two tiers will have:</p>
+
+<p style="margin-left:22%; margin-top: 1em"><b>INIT_VAL =
+2048, MIN_VAL = 1537, MAX_VAL = 2560.</b></p>
+
+<h2>THRESHOLD PARAMETERS
+<a name="THRESHOLD PARAMETERS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>INIT_VAL</b></p>
+
+<p style="margin-left:22%;">(optional) - the initial value
+of the threshold between two adjacent Nth and (N+1)th tiers.
+It must be greater than or equal to <i>MIN_VAL</i> and less
+than or equal to <i>MAX_VAL.</i></p>
+
+<p style="margin-left:11%;"><b>MIN_VAL</b></p>
+
+<p style="margin-left:22%;">(optional) - the minimum value
+of the threshold.</p>
+
+<p style="margin-left:11%;"><b>MAX_VAL</b></p>
+
+<p style="margin-left:22%;">(optional) - the maximum value
+of the threshold.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>NOTE:</b>
+Because setting the above parameters is optional, they will
+be set to default values in case they are not defined.</p>
+
+<h2>DRAM FALLBACK POLICY
+<a name="DRAM FALLBACK POLICY"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">With the usage
+of both <i>DRAM</i> and <i>KMEM_DAX</i> tiers, if there is
+not enough memory to satisfy the <i>DRAM</i> tier memory
+allocation request, the allocation will fall back to PMEM
+memory.</p>
+
+<p style="margin-left:11%; margin-top: 1em">With the usage
+of both <i>DRAM</i> and <i>FS_DAX</i> tiers, if there is not
+enough memory to satisfy the <i>DRAM</i> tier memory
+allocation request, the allocation will fail.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If there is not
+enough memory to satisfy the <i>FS_DAX</i> or
+<i>KMEM_DAX</i> tier memory allocation request, the
+allocation will fail.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The following
+example will run <b>ls</b> with the memkind memory tiering
+library. Make sure that paths to both <b>libmemtier.so</b>
+and <b>libmemkind.so</b> are included in
+<b>LD_LIBRARY_PATH.</b> During the application run, 20% of
+the allocated memory will come from PMEM memory and 80% will
+come from DRAM ( <i>FS_DAX:DRAM</i> ratio is 1:4):</p>
+
+
+<p style="margin-left:22%; margin-top: 1em"><b>LD_PRELOAD=libmemtier.so
+MEMKIND_MEM_TIERS=&quot;KIND:FS_DAX,PATH:/mnt/pmem0,PMEM_SIZE_LIMIT:10G,RATIO:1;KIND:DRAM,RATIO:4;POLICY:STATIC_RATIO&quot;
+/bin/ls -l</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">The example
+value of <b>MEMKIND_MEM_TIERS</b> environment variable where
+all allocations will come from PMEM memory with filesystem
+created with the path /mnt/pmem0 (PMEM file size is limited
+only by the specified filesystem):</p>
+
+
+<p style="margin-left:22%; margin-top: 1em"><b>LD_PRELOAD=libmemtier.so
+MEMKIND_MEM_TIERS=&quot;KIND:FS_DAX,PATH:/mnt/pmem0,RATIO:1;POLICY:STATIC_RATIO&quot;</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">The example
+value of <b>MEMKIND_MEM_THRESHOLDS</b> environment variable.
+With <i>INIT_VAL=64,</i> on the application start all
+allocations lower than 64 bytes threshold will come from
+DRAM and equal to or greater than this value will come from
+PMEM memory NUMA nodes. The threshold value changes during
+the runtime in order to maintain the ratio. <i>MIN_VAL=1</i>
+and <i>MAX_VAL=10000</i> set the lower and upper limits of
+the threshold value. Note that the <i>DYNAMIC_THRESHOLD</i>
+policy has to be set in <b>MEMKIND_MEM_TIERS</b> environment
+variable:</p>
+
+
+<p style="margin-left:22%; margin-top: 1em"><b>LD_PRELOAD=libmemtier.so
+MEMKIND_MEM_TIERS=&quot;KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:4;POLICY:DYNAMIC_THRESHOLD&quot;
+MEMKIND_MEM_THRESHOLDS=&quot;INIT_VAL=64,MIN_VAL=1,MAX_VAL=10000&quot;</b></p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>libmemtier</b>
+works for applications that do not statically link a
+<b>malloc</b> implementation.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright (C)
+2021 Intel Corporation. All rights reserved.</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind(3),
+malloc(3)</b></p>
+<hr>
+</body>
+</html>
