@@ -72,7 +72,8 @@ private:
     {
         if (m_memory_kind == MEMKIND_HBW)
             return HBW_nodes();
-        else if (m_memory_kind == MEMKIND_HBW_ALL)
+        else if (m_memory_kind == MEMKIND_HBW_ALL ||
+                 m_memory_kind == MEMKIND_HBW_INTERLEAVE)
             return HBW_all_nodes();
         else if (m_memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL ||
                  m_memory_kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED)

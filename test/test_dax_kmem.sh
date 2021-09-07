@@ -9,7 +9,7 @@ PROGNAME=`basename $0`
 TEST_PATH="$basedir/"
 
 # Gtest binaries
-GTEST_BINARIES=(dax_kmem_test)
+GTEST_BINARIES=(dax_kmem_test get_capacity_test)
 
 # Pytest files
 PYTEST_FILES=(dax_kmem_env_var_test.py)

@@ -120,6 +120,7 @@ private:
     bool is_kind_HBW(memkind_t kind) const
     {
         return (kind == MEMKIND_HBW || kind == MEMKIND_HBW_ALL ||
+                kind == MEMKIND_HBW_INTERLEAVE ||
                 kind == MEMKIND_HBW_PREFERRED ||
                 kind == MEMKIND_HBW_PREFERRED_HUGETLB ||
                 kind == MEMKIND_HBW_PREFERRED_GBTLB);
@@ -278,6 +279,18 @@ public:
         return regular_nodes;
     }
 
+    std::unordered_set<int> get_all_numa_nodes() const
+    {
+        auto all_nodes = get_regular_numa_nodes();
+        auto mem_only_nodes = get_memory_only_numa_nodes();
+
+        for (auto const &node : mem_only_nodes) {
+            all_nodes.insert(node);
+        }
+
+        return all_nodes;
+    }
+
     size_t get_free_space(std::unordered_set<int> nodes) const
     {
         size_t sum_of_free_space = 0;
@@ -291,6 +304,20 @@ public:
         }
 
         return sum_of_free_space;
+    }
+
+    ssize_t get_capacity(std::unordered_set<int> numa_nodes) const
+    {
+        ssize_t total_memory = 0;
+
+        for (auto node : numa_nodes) {
+            ssize_t curr_node_size = numa_node_size64(node, NULL);
+            if (curr_node_size == -1)
+                return -1;
+            total_memory += curr_node_size;
+        }
+
+        return total_memory;
     }
 
     memkind_t memory_kind_from_str(std::string kind_name)
