@@ -278,6 +278,18 @@ public:
         return regular_nodes;
     }
 
+    std::unordered_set<int> get_all_numa_nodes() const
+    {
+        std::unordered_set<int> all_nodes;
+
+        const int MAXNODE_ID = numa_max_node();
+        for (int id = 0; id <= MAXNODE_ID; ++id) {
+            all_nodes.insert(id);
+        }
+
+        return all_nodes;
+    }
+
     size_t get_free_space(std::unordered_set<int> nodes) const
     {
         size_t sum_of_free_space = 0;

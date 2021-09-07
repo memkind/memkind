@@ -148,6 +148,7 @@ test/fragmentation_benchmark_pmem.cpp
 test/freeing_memory_segfault_test.cpp
 test/gb_page_tests_bind_policy.cpp
 test/get_arena_test.cpp
+test/get_total_memory_test.cpp
 test/hbw_allocator_performance_tests.cpp
 test/hbw_allocator_tests.cpp
 test/hbw_detection_test.py

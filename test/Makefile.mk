@@ -27,6 +27,7 @@ check_PROGRAMS += test/pmem_test \
                   test/hmat_test \
                   test/environ_err_hbw_threshold_test \
                   test/defrag_reallocate \
+				  test/get_total_memory_test \
                   test/memkind_memtier_dax_kmem_test \
                   test/memkind_memtier_test
 endif
@@ -87,6 +88,8 @@ test_memkind_memtier_dax_kmem_test_SOURCES = $(fused_gtest) test/memkind_memtier
 test_memkind_memtier_dax_kmem_test_LDADD = libmemkind.la
 test_memkind_memtier_test_SOURCES = $(fused_gtest) test/memkind_memtier_test.cpp
 test_memkind_memtier_test_LDADD = libmemkind.la
+test_get_total_memory_test_SOURCES = $(fused_gtest) test/get_total_memory_test.cpp
+test_get_total_memory_test_LDADD = libmemkind.la
 endif
 
 fused_gtest = test/gtest_fused/gtest/gtest-all.cc \
