@@ -278,6 +278,18 @@ public:
         return regular_nodes;
     }
 
+    std::unordered_set<int> get_all_numa_nodes() const
+    {
+        std::unordered_set<int> all_nodes;
+
+        const int MAXNODE_ID = numa_max_node();
+        for (int id = 0; id <= MAXNODE_ID; ++id) {
+            all_nodes.insert(id);
+        }
+
+        return all_nodes;
+    }
+
     size_t get_free_space(std::unordered_set<int> nodes) const
     {
         size_t sum_of_free_space = 0;
@@ -291,6 +303,20 @@ public:
         }
 
         return sum_of_free_space;
+    }
+
+    long long get_total_space(std::unordered_set<int> numa_nodes) const
+    {
+        long long total_memory = 0;
+
+        for (auto node : numa_nodes) {
+            long long curr_node_size = numa_node_size64(node, NULL);
+            if (curr_node_size <= 0)
+                return -1;
+            total_memory += curr_node_size;
+        }
+
+        return total_memory;
     }
 
     memkind_t memory_kind_from_str(std::string kind_name)
