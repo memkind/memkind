@@ -554,6 +554,7 @@ unit_tests_hmat: checkprogs
 	@pytest@ -s test/hbw_env_var_test.py
 
 unit_tests_dax_kmem: checkprogs
+	test/get_capacity_test
 	test/test_dax_kmem.sh
 
 unit_tests_tiering: tiering/libmemtier.la checkprogs
