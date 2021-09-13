@@ -250,9 +250,10 @@ MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
         goto exit;
     }
     if (memkind_get_hog_memory()) {
-        err = memkind_arena_create_map(kind, &pmem_extent_hooks_hog_memory);
+        err = memkind_arena_create_map(kind, &pmem_extent_hooks_hog_memory,
+                                       false);
     } else {
-        err = memkind_arena_create_map(kind, &pmem_extent_hooks);
+        err = memkind_arena_create_map(kind, &pmem_extent_hooks, false);
     }
     if (err) {
         goto exit;

@@ -227,6 +227,7 @@ CTL_PROTO(experimental_hooks_remove)
 CTL_PROTO(experimental_utilization_query)
 CTL_PROTO(experimental_utilization_batch_query)
 CTL_PROTO(experimental_arenas_i_pactivep)
+CTL_PROTO(experimental_arenas_create_ext)
 INDEX_PROTO(experimental_arenas_i)
 
 #define MUTEX_STATS_CTL_PROTO_GEN(n)					\
@@ -616,7 +617,8 @@ static const ctl_indexed_node_t experimental_arenas_node[] = {
 static const ctl_named_node_t experimental_node[] = {
 	{NAME("hooks"),		CHILD(named, experimental_hooks)},
 	{NAME("utilization"),	CHILD(named, experimental_utilization)},
-	{NAME("arenas"),	CHILD(indexed, experimental_arenas)}
+	{NAME("arenas"),	CHILD(indexed, experimental_arenas)},
+ 	{NAME("arenas_create_ext"), CTL(experimental_arenas_create_ext)},
 };
 
 static const ctl_named_node_t	root_node[] = {
@@ -1001,7 +1003,7 @@ ctl_arena_refresh(tsdn_t *tsdn, arena_t *arena, ctl_arena_t *ctl_sdarena,
 }
 
 static unsigned
-ctl_arena_init(tsd_t *tsd, extent_hooks_t *extent_hooks) {
+ctl_arena_init(tsd_t *tsd, const arena_config_t *config) {
 	unsigned arena_ind;
 	ctl_arena_t *ctl_arena;
 
@@ -1019,7 +1021,7 @@ ctl_arena_init(tsd_t *tsd, extent_hooks_t *extent_hooks) {
 	}
 
 	/* Initialize new arena. */
-	if (arena_init(tsd_tsdn(tsd), arena_ind, extent_hooks) == NULL) {
+	if (arena_init(tsd_tsdn(tsd), arena_ind, config) == NULL) {
 		return UINT_MAX;
 	}
 
@@ -2392,8 +2394,12 @@ arena_i_extent_hooks_ctl(tsd_t *tsd, const size_t *mib, size_t miblen,
 				extent_hooks_t *new_extent_hooks
 				    JEMALLOC_CC_SILENCE_INIT(NULL);
 				WRITE(new_extent_hooks, extent_hooks_t *);
+
+				arena_config_t config = arena_config_default;
+				config.extent_hooks = new_extent_hooks;
+
 				arena = arena_init(tsd_tsdn(tsd), arena_ind,
-				    new_extent_hooks);
+				    &config);
 				if (arena == NULL) {
 					ret = EFAULT;
 					goto label_return;
@@ -2582,19 +2588,41 @@ static int
 arenas_create_ctl(tsd_t *tsd, const size_t *mib, size_t miblen,
     void *oldp, size_t *oldlenp, void *newp, size_t newlen) {
 	int ret;
-	extent_hooks_t *extent_hooks;
 	unsigned arena_ind;
 
 	malloc_mutex_lock(tsd_tsdn(tsd), &ctl_mtx);
 
-	extent_hooks = (extent_hooks_t *)&extent_hooks_default;
-	WRITE(extent_hooks, extent_hooks_t *);
-	if ((arena_ind = ctl_arena_init(tsd, extent_hooks)) == UINT_MAX) {
+	arena_config_t config = arena_config_default;
+	WRITE(config.extent_hooks, extent_hooks_t *);
+	if ((arena_ind = ctl_arena_init(tsd, &config)) == UINT_MAX) {
 		ret = EAGAIN;
 		goto label_return;
 	}
 	READ(arena_ind, unsigned);
 
+	ret = 0;
+label_return:
+	malloc_mutex_unlock(tsd_tsdn(tsd), &ctl_mtx);
+	return ret;
+}
+
+static int
+experimental_arenas_create_ext_ctl(tsd_t *tsd,
+    const size_t *mib, size_t miblen,
+    void *oldp, size_t *oldlenp, void *newp, size_t newlen) {
+	int ret;
+	unsigned arena_ind;
+
+	malloc_mutex_lock(tsd_tsdn(tsd), &ctl_mtx);
+
+	arena_config_t config = arena_config_default;
+	WRITE(config, arena_config_t);
+
+	if ((arena_ind = ctl_arena_init(tsd, &config)) == UINT_MAX) {
+		ret = EAGAIN;
+		goto label_return;
+	}
+	READ(arena_ind, unsigned);
 	ret = 0;
 label_return:
 	malloc_mutex_unlock(tsd_tsdn(tsd), &ctl_mtx);

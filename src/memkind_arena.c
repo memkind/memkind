@@ -25,6 +25,22 @@
 
 #include "config.h"
 
+/* from jemalloc internals */
+struct arena_config_s {
+    /* extent hooks to be used for the arena */
+    struct extent_hooks_s *extent_hooks;
+
+    /*
+     * Use provided hooks for metadata (base) allocations when true.
+     * Ignored if extent_hooks is NULL.
+     */
+    bool metadata_use_hooks;
+};
+
+typedef struct arena_config_s arena_config_t;
+
+/************************/
+
 #define HUGE_PAGE_SIZE  (1ull << MEMKIND_MASK_PAGE_SIZE_2MB)
 #define PAGE_2_BYTES(x) ((x) << 12)
 
@@ -325,7 +341,8 @@ extent_hooks_t *get_extent_hooks_by_kind(struct memkind *kind)
 }
 
 MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
-                                            extent_hooks_t *hooks)
+                                            extent_hooks_t *hooks,
+                                            bool metadata_use_hooks)
 {
     int err;
 
@@ -352,25 +369,41 @@ MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
     for (i = 0; i < kind->arena_map_len; i++) {
         unsigned arena_index;
         // create new arena with consecutive index
-        err = jemk_mallctl("arenas.create", (void *)&arena_index,
-                           &unsigned_size, NULL, 0);
-        if (err) {
-            log_err("Could not create arena.");
-            err = MEMKIND_ERROR_ARENAS_CREATE;
-            goto exit;
+
+        if (!metadata_use_hooks) {
+            arena_config_t config;
+            config.metadata_use_hooks = metadata_use_hooks;
+            config.extent_hooks = hooks;
+
+            err = jemk_mallctl("experimental.arenas_create_ext",
+                               (void *)&arena_index, &unsigned_size, &config,
+                               sizeof(config));
+            if (err) {
+                log_err("Could not create arena.");
+                err = MEMKIND_ERROR_ARENAS_CREATE;
+                goto exit;
+            }
+        } else {
+            err = jemk_mallctl("arenas.create", (void *)&arena_index,
+                               &unsigned_size, NULL, 0);
+            if (err) {
+                log_err("Could not create arena.");
+                err = MEMKIND_ERROR_ARENAS_CREATE;
+                goto exit;
+            }
+            // setup extent_hooks for newly created arena
+            char cmd[64];
+            snprintf(cmd, sizeof(cmd), "arena.%u.extent_hooks", arena_index);
+            err = jemk_mallctl(cmd, NULL, NULL, (void *)&hooks,
+                               sizeof(extent_hooks_t *));
+            if (err) {
+                goto exit;
+            }
         }
         // store arena with lowest index (arenas could be created in
         // descending/ascending order)
         if (kind->arena_zero > arena_index) {
             kind->arena_zero = arena_index;
-        }
-        // setup extent_hooks for newly created arena
-        char cmd[64];
-        snprintf(cmd, sizeof(cmd), "arena.%u.extent_hooks", arena_index);
-        err = jemk_mallctl(cmd, NULL, NULL, (void *)&hooks,
-                           sizeof(extent_hooks_t *));
-        if (err) {
-            goto exit;
         }
         arena_registry_g[arena_index] = kind;
     }
@@ -387,7 +420,8 @@ MEMKIND_EXPORT int memkind_arena_create(struct memkind *kind,
 {
     int err = memkind_default_create(kind, ops, name);
     if (!err) {
-        err = memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind));
+        err = memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind),
+                                       true);
     }
     return err;
 }
@@ -737,8 +771,8 @@ static void *jemk_mallocx_check(size_t size, int flags)
 void memkind_arena_init(struct memkind *kind)
 {
     if (kind != MEMKIND_DEFAULT) {
-        int err =
-            memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind));
+        int err = memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind),
+                                           true);
         if (err) {
             log_fatal("[%s] Failed to create arena map (error code:%d).",
                       kind->name, err);

@@ -27,6 +27,11 @@ struct base_s {
 	 */
 	atomic_p_t	extent_hooks;
 
+	/*
+	 * Use user hooks for metadata when true.
+	 */
+	bool metadata_use_hooks;
+
 	/* Protects base_alloc() and base_stats_get() operations. */
 	malloc_mutex_t	mtx;
 

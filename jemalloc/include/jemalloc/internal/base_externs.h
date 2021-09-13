@@ -5,7 +5,8 @@ extern metadata_thp_mode_t opt_metadata_thp;
 extern const char *metadata_thp_mode_names[];
 
 base_t *b0get(void);
-base_t *base_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks);
+base_t *base_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks,
+    bool metadata_use_hooks);
 void base_delete(tsdn_t *tsdn, base_t *base);
 extent_hooks_t *base_extent_hooks_get(base_t *base);
 extent_hooks_t *base_extent_hooks_set(base_t *base,

@@ -28,6 +28,14 @@ metadata_thp_madvise(void) {
 	    (init_system_thp_mode == thp_mode_default));
 }
 
+static extent_hooks_t *
+base_hooks_get_for_metadata(base_t *base) {
+	return base->metadata_use_hooks ?
+		(extent_hooks_t *)atomic_load_p(&base->extent_hooks,
+		   ATOMIC_ACQUIRE) :
+		(extent_hooks_t *)&extent_hooks_default;
+}
+
 static void *
 base_map(tsdn_t *tsdn, extent_hooks_t *extent_hooks, unsigned ind, size_t size) {
 	void *addr;
@@ -308,7 +316,7 @@ static extent_t *
 base_extent_alloc(tsdn_t *tsdn, base_t *base, size_t size, size_t alignment) {
 	malloc_mutex_assert_owner(tsdn, &base->mtx);
 
-	extent_hooks_t *extent_hooks = base_extent_hooks_get(base);
+	extent_hooks_t *extent_hooks = base_hooks_get_for_metadata(base);
 	/*
 	 * Drop mutex during base_block_alloc(), because an extent hook will be
 	 * called.
@@ -347,9 +355,13 @@ b0get(void) {
 }
 
 base_t *
-base_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks) {
+base_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks_custom,
+    bool metadata_use_hooks) {
 	pszind_t pind_last = 0;
 	size_t extent_sn_next = 0;
+	extent_hooks_t *extent_hooks = metadata_use_hooks ?
+		extent_hooks_custom : (extent_hooks_t *)&extent_hooks_default;
+
 	base_block_t *block = base_block_alloc(tsdn, NULL, extent_hooks, ind,
 	    &pind_last, &extent_sn_next, sizeof(base_t), QUANTUM);
 	if (block == NULL) {
@@ -362,7 +374,8 @@ base_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks) {
 	base_t *base = (base_t *)base_extent_bump_alloc_helper(&block->extent,
 	    &gap_size, base_size, base_alignment);
 	base->ind = ind;
-	atomic_store_p(&base->extent_hooks, extent_hooks, ATOMIC_RELAXED);
+	atomic_store_p(&base->extent_hooks,
+		extent_hooks_custom, ATOMIC_RELAXED);
 	if (malloc_mutex_init(&base->mtx, "base", WITNESS_RANK_BASE,
 	    malloc_mutex_rank_exclusive)) {
 		base_unmap(tsdn, extent_hooks, ind, block, block->size);
@@ -372,6 +385,7 @@ base_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks) {
 	base->extent_sn_next = extent_sn_next;
 	base->blocks = block;
 	base->auto_thp_switched = false;
+	base->metadata_use_hooks = metadata_use_hooks;
 	for (szind_t i = 0; i < SC_NSIZES; i++) {
 		extent_heap_new(&base->avail[i]);
 	}
@@ -394,7 +408,7 @@ base_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks) {
 
 void
 base_delete(tsdn_t *tsdn, base_t *base) {
-	extent_hooks_t *extent_hooks = base_extent_hooks_get(base);
+	extent_hooks_t *extent_hooks = base_hooks_get_for_metadata(base);
 	base_block_t *next = base->blocks;
 	do {
 		base_block_t *block = next;
@@ -509,6 +523,6 @@ base_postfork_child(tsdn_t *tsdn, base_t *base) {
 
 bool
 base_boot(tsdn_t *tsdn) {
-	b0 = base_new(tsdn, 0, (extent_hooks_t *)&extent_hooks_default);
+	b0 = base_new(tsdn, 0, (extent_hooks_t *)&extent_hooks_default, true);
 	return (b0 == NULL);
 }
