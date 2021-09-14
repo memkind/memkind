@@ -48,6 +48,12 @@ size_t opt_oversize_threshold = OVERSIZE_THRESHOLD_DEFAULT;
 size_t oversize_threshold = OVERSIZE_THRESHOLD_DEFAULT;
 static unsigned huge_arena_ind;
 
+
+const arena_config_t arena_config_default = {
+	.extent_hooks = (extent_hooks_t *)&extent_hooks_default,
+	.metadata_use_hooks = true,
+};
+
 /******************************************************************************/
 /*
  * Function prototypes for static functions that are referenced prior to
@@ -1939,7 +1945,7 @@ arena_extent_sn_next(arena_t *arena) {
 }
 
 arena_t *
-arena_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks) {
+arena_new(tsdn_t *tsdn, unsigned ind, const arena_config_t *config) {
 	arena_t *arena;
 	base_t *base;
 	unsigned i;
@@ -1947,7 +1953,12 @@ arena_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks) {
 	if (ind == 0) {
 		base = b0get();
 	} else {
-		base = base_new(tsdn, ind, extent_hooks);
+		extent_hooks_t *extent_hooks = config->extent_hooks ?
+		    config->extent_hooks :
+		    (extent_hooks_t *)&extent_hooks_default;
+
+		base = base_new(tsdn, ind, extent_hooks,
+		    config->metadata_use_hooks);
 		if (base == NULL) {
 			return NULL;
 		}

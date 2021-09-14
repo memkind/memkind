@@ -83,7 +83,7 @@ unsigned arena_nthreads_get(arena_t *arena, bool internal);
 void arena_nthreads_inc(arena_t *arena, bool internal);
 void arena_nthreads_dec(arena_t *arena, bool internal);
 size_t arena_extent_sn_next(arena_t *arena);
-arena_t *arena_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks);
+arena_t *arena_new(tsdn_t *tsdn, unsigned ind, const arena_config_t *config);
 bool arena_init_huge(void);
 bool arena_is_huge(unsigned arena_ind);
 arena_t *arena_choose_huge(tsd_t *tsd);
