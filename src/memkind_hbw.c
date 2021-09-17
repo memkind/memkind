@@ -306,7 +306,7 @@ static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
     int i;
 
     // Check if NUMA configuration is supported.
-    int nodes_num = numa_num_configured_nodes();
+    int nodes_num = numa_max_node() + 1;
     if (nodes_num != NO_NUMA_NODES_FLAT_MODE_OTHER &&
         nodes_num != NO_NUMA_NODES_FLAT_MODE_SNC_2 &&
         nodes_num != NO_NUMA_NODES_FLAT_MODE_SNC_4) {

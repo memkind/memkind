@@ -13,7 +13,7 @@ static struct bitmask *regular_nodes_mask = NULL;
 static void regular_nodes_init(void)
 {
     unsigned i;
-    unsigned nodes_num = (unsigned)numa_num_configured_nodes();
+    unsigned nodes_num = (unsigned)numa_max_node() + 1;
     struct bitmask *node_cpus = numa_allocate_cpumask();
 
     regular_nodes_mask = numa_allocate_nodemask();
