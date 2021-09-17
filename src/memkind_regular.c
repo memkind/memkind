@@ -19,8 +19,8 @@ static void regular_nodes_init(void)
     regular_nodes_mask = numa_allocate_nodemask();
 
     for (i = 0; i < nodes_num; i++) {
-        numa_node_to_cpus(i, node_cpus);
-        if (numa_bitmask_weight(node_cpus))
+        int ret = numa_node_to_cpus(i, node_cpus);
+        if (ret == 0 && numa_bitmask_weight(node_cpus))
             numa_bitmask_setbit(regular_nodes_mask, i);
     }
     numa_bitmask_free(node_cpus);
