@@ -265,9 +265,9 @@ void TGTest ::SetUp()
 
         memkind_hbw_all_get_mbind_nodemask(NULL, nodemask.n, NUMA_NUM_NODES);
 
-        int i, nodes_num = numa_num_configured_nodes();
+        int i, max_node = numa_max_node();
         for (i = 0; i < NUMA_NUM_NODES; i++) {
-            if (i >= nodes_num) {
+            if (i > max_node) {
                 bandwidth.push_back(0);
             } else if (numa_bitmask_isbitset(&nodemask_bm, i)) {
                 bandwidth.push_back(2);

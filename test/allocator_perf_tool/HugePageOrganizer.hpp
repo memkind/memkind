@@ -20,8 +20,7 @@ class HugePageOrganizer
 public:
     HugePageOrganizer(int nr_hugepages_per_node)
     {
-        for (int node_id = 0; node_id < numa_num_configured_nodes();
-             node_id++) {
+        for (int node_id = 0; node_id < numa_max_node() + 1; node_id++) {
             initial_nr_hugepages_per_nodes.push_back(get_nr_hugepages(node_id));
             if (set_nr_hugepages(nr_hugepages_per_node, node_id)) {
                 restore();

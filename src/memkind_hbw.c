@@ -304,6 +304,7 @@ static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
 {
     struct bitmask *node_cpumask;
     int i;
+    int max_node = numa_max_node();
 
     // Check if NUMA configuration is supported.
     int nodes_num = numa_num_configured_nodes();
@@ -320,14 +321,14 @@ static int get_legacy_hbw_nodes_mask(struct bitmask **hbw_node_mask)
         log_err("numa_allocate_cpumask() failed.");
         return MEMKIND_ERROR_UNAVAILABLE;
     }
-    *hbw_node_mask = numa_bitmask_alloc(nodes_num);
+    *hbw_node_mask = numa_bitmask_alloc(max_node + 1);
     if (*hbw_node_mask == NULL) {
         log_err("numa_bitmask_alloc() failed.");
         numa_bitmask_free(node_cpumask);
         return MEMKIND_ERROR_UNAVAILABLE;
     }
     assert(node_cpumask->size >= nodes_num);
-    for (i = 0; i < nodes_num; ++i) {
+    for (i = 0; i <= max_node; ++i) {
         numa_node_to_cpus(i, node_cpumask);
         if (numa_bitmask_weight(node_cpumask) == 0) {
             // NUMA nodes without CPU are HBW nodes.
