@@ -19,7 +19,7 @@
 int get_per_cpu_local_nodes_mask(struct bitmask ***nodes_mask,
                                  memory_attribute_t attr)
 {
-    int num_nodes = numa_num_configured_nodes();
+    int num_nodes = numa_max_node() + 1;
     int num_cpus = numa_num_configured_cpus();
 
     hwloc_obj_t init_node = NULL;

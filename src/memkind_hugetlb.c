@@ -194,7 +194,7 @@ static void init_hugepage_size_info(size_t pagesize,
         if (snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
             newInfo->nr_hugepages_per_node_array[node] =
                 get_sysfs_entry_value(formatted_path);
-            if (node < numa_num_configured_nodes()) {
+            if (node < numa_max_node() + 1) {
                 log_info("Number of %zu kB hugepages on node %zu equals %zu.",
                          pagesize, node,
                          newInfo->nr_hugepages_per_node_array[node]);
@@ -323,7 +323,7 @@ static int get_nr_hugepages_cached(size_t pagesize, struct bitmask *nodemask,
 {
     int i;
     size_t nr_hugepages = 0;
-    int num_node = numa_num_configured_nodes();
+    int num_node = numa_max_node() + 1;
     pthread_once(&memkind_hugepages_config_once_g, hugepages_config_init_once);
 
     if (memkind_hugepages_config.err != 0) {
