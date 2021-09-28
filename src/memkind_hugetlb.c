@@ -17,7 +17,6 @@
 
 #include <dirent.h>
 #include <errno.h>
-#include <numa.h>
 #include <pthread.h>
 #include <stdio.h>
 
@@ -38,10 +37,6 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .get_stat = memkind_arena_get_kind_stat,
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
-
-static int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out);
-static int get_nr_hugepages_cached(size_t pagesize, struct bitmask *nodemask,
-                                   size_t *out);
 
 static int memkind_hugetlb_check_available(struct memkind *kind,
                                            size_t huge_size);
@@ -194,7 +189,7 @@ static void init_hugepage_size_info(size_t pagesize,
         if (snprintf_ret > 0 && snprintf_ret < sizeof(formatted_path)) {
             newInfo->nr_hugepages_per_node_array[node] =
                 get_sysfs_entry_value(formatted_path);
-            if (node < numa_num_configured_nodes()) {
+            if (node < numa_max_node() + 1) {
                 log_info("Number of %zu kB hugepages on node %zu equals %zu.",
                          pagesize, node,
                          newInfo->nr_hugepages_per_node_array[node]);
@@ -318,12 +313,12 @@ get_hugepage_info_for_pagesize(size_t pagesize)
 }
 
 // returns sum of pre-allocated hugepage for specified pagesize and set of nodes
-static int get_nr_hugepages_cached(size_t pagesize, struct bitmask *nodemask,
-                                   size_t *out)
+int get_nr_hugepages_cached(size_t pagesize, struct bitmask *nodemask,
+                            size_t *out)
 {
     int i;
     size_t nr_hugepages = 0;
-    int num_node = numa_num_configured_nodes();
+    int num_node = numa_max_node() + 1;
     pthread_once(&memkind_hugepages_config_once_g, hugepages_config_init_once);
 
     if (memkind_hugepages_config.err != 0) {
@@ -348,7 +343,7 @@ static int get_nr_hugepages_cached(size_t pagesize, struct bitmask *nodemask,
 }
 
 // returns hugepages overcommit limit for specified pagesize
-static int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out)
+int get_nr_overcommit_hugepages_cached(size_t pagesize, size_t *out)
 {
     pthread_once(&memkind_hugepages_config_once_g, hugepages_config_init_once);
 

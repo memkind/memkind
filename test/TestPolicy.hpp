@@ -135,7 +135,7 @@ void check_all_numa_nodes(int policy, void *ptr, size_t size)
 
     unique_bitmask_ptr expected_bitmask = make_nodemask_ptr();
 
-    for (int i = 0; i < numa_num_configured_nodes(); i++) {
+    for (int i = 0; i < numa_max_node() + 1; i++) {
         numa_bitmask_setbit(expected_bitmask.get(), i);
     }
 
