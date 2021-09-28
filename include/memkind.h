@@ -506,6 +506,17 @@ int memkind_create_pmem_with_config(struct memkind_config *cfg,
                                     memkind_t *kind);
 
 ///
+/// \brief Create a new kind on a fixed size map
+/// \note STANDARD API
+/// \param addr address of the map
+/// \param size size of the map for kind
+/// \param kind pointer to kind which will be created
+/// \return Memkind operation status, MEMKIND_SUCCESS on success, other values
+///         on failure
+///
+int memkind_create_fixed(void *addr, size_t size, memkind_t *kind);
+
+///
 /// \brief Check if kind is available
 /// \note STANDARD API
 /// \param kind specified memory kind

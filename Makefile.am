@@ -27,6 +27,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_memtier.c \
                         src/memkind_mem_attributes.c \
                         src/memkind_pmem.c \
+                        src/memkind_fixed.c \
                         src/memkind_regular.c \
                         src/tbb_wrapper.c \
                         # end
@@ -57,6 +58,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_mem_attributes.h \
                   include/memkind/internal/memkind_memtier.h \
                   include/memkind/internal/memkind_pmem.h \
+                  include/memkind/internal/memkind_fixed.h \
                   include/memkind/internal/memkind_private.h \
                   include/memkind/internal/memkind_regular.h \
                   include/memkind/internal/tbb_mem_pool_policy.h \
