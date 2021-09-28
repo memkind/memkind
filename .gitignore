@@ -46,6 +46,7 @@
 /examples/pmem_free_with_unknown_kind
 /examples/pmem_kinds
 /examples/pmem_malloc
+/examples/fixed_malloc
 /examples/pmem_malloc_unlimited
 /examples/pmem_multithreads
 /examples/pmem_multithreads_onekind
