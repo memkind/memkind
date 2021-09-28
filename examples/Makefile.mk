@@ -15,6 +15,7 @@ noinst_PROGRAMS += examples/autohbw_candidates \
                    examples/pmem_free_with_unknown_kind \
                    examples/pmem_kinds \
                    examples/pmem_malloc \
+                   examples/fixed_malloc \
                    examples/pmem_malloc_unlimited \
                    examples/pmem_multithreads \
                    examples/pmem_multithreads_onekind \
@@ -40,6 +41,7 @@ examples_pmem_detect_kind_LDADD = libmemkind.la
 examples_pmem_free_with_unknown_kind_LDADD = libmemkind.la
 examples_pmem_kinds_LDADD = libmemkind.la
 examples_pmem_malloc_LDADD = libmemkind.la
+examples_fixed_malloc_LDADD = libmemkind.la
 examples_pmem_malloc_unlimited_LDADD = libmemkind.la
 examples_pmem_multithreads_LDADD = libmemkind.la
 examples_pmem_multithreads_onekind_LDADD = libmemkind.la
@@ -64,6 +66,7 @@ examples_pmem_detect_kind_SOURCES = examples/pmem_detect_kind.c
 examples_pmem_free_with_unknown_kind_SOURCES = examples/pmem_free_with_unknown_kind.c
 examples_pmem_kinds_SOURCES = examples/pmem_kinds.c
 examples_pmem_malloc_SOURCES = examples/pmem_malloc.c
+examples_fixed_malloc_SOURCES = examples/fixed_malloc.c
 examples_pmem_malloc_unlimited_SOURCES = examples/pmem_malloc_unlimited.c
 examples_pmem_multithreads_SOURCES = examples/pmem_multithreads.c
 examples_pmem_multithreads_onekind_SOURCES = examples/pmem_multithreads_onekind.c
