@@ -7,7 +7,7 @@
       "disk_size": "30G",
       "accelerator": "kvm",
       "vm_name": "ubuntu-1804.img",
-      "iso_url": "http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/ubuntu-18.04.5-server-amd64.iso",
+      "iso_url": "http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/ubuntu-18.04.6-server-amd64.iso",
       "iso_checksum": "file:http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/SHA256SUMS",
 
       "http_directory": "http",
