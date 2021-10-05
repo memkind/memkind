@@ -41,6 +41,7 @@ include_HEADERS = include/hbw_allocator.h \
                   include/memkind_allocator.h \
                   include/memkind_deprecated.h \
                   include/pmem_allocator.h \
+                  include/fixed_allocator.h \
                   # end
 
 noinst_HEADERS =  include/memkind/internal/heap_manager.h \
