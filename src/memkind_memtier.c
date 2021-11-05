@@ -12,12 +12,22 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <dlfcn.h>
+#include <sys/mman.h>
+#include <pthread.h>
+#include <threads.h>
+#include <execinfo.h>
+
+
+
 #ifdef HAVE_STDATOMIC_H
 #include <stdatomic.h>
 #define MEMKIND_ATOMIC _Atomic
 #else
 #define MEMKIND_ATOMIC
 #endif
+
+extern thread_local bool dont_mmap;
 
 // clang-format off
 #if defined(MEMKIND_ATOMIC_C11_SUPPORT)
@@ -211,6 +221,7 @@ memtier_policy_static_ratio_get_kind(struct memtier_memory *memory, size_t size)
             dest_tier = i;
         }
     }
+    //log_info("kind: %d", dest_tier);
     return cfg[dest_tier].kind;
 }
 
@@ -250,14 +261,15 @@ static void print_memtier_memory(struct memtier_memory *memory)
                      memory->thres[i].val);
             log_info("Threshold %d - maximum %zu", i, memory->thres[i].max);
         }
+
+        log_info("Threshold trigger value %f", memory->thres_trigger);
+        log_info("Threshold degree value %f", memory->thres_degree);
+        log_info("Threshold counter setting value %u",
+                memory->thres_init_check_cnt);
+        log_info("Threshold counter current value %u", memory->thres_check_cnt);
     } else {
         log_info("No thresholds configuration found");
     }
-    log_info("Threshold trigger value %f", memory->thres_trigger);
-    log_info("Threshold degree value %f", memory->thres_degree);
-    log_info("Threshold counter setting value %u",
-             memory->thres_init_check_cnt);
-    log_info("Threshold counter current value %u", memory->thres_check_cnt);
 }
 
 static void print_builder(struct memtier_builder *builder)
@@ -690,12 +702,45 @@ MEMKIND_EXPORT int memtier_ctl_set(struct memtier_builder *builder,
     return builder->ctl_set(builder, name, val);
 }
 
-MEMKIND_EXPORT void *memtier_malloc(struct memtier_memory *memory, size_t size)
+MEMKIND_EXPORT void *memtier_malloc(struct memtier_memory *memory, size_t size, int mmap)
 {
-    void *ptr = memtier_kind_malloc(memory->get_kind(memory, size), size);
+    dont_mmap = true;
+    memkind_t kind = memory->get_kind(memory, size);
+    void *ptr = memtier_kind_malloc(kind, size);
+    if (mmap) {
+        log_info("mmap %lu, %s", size, kind->name);
+    }
     memory->update_cfg(memory);
+    dont_mmap = false;
 
     return ptr;
+}
+
+#include <pthread.h>
+pthread_mutex_t mutex;
+
+MEMKIND_EXPORT void* memtier_mmap(void* real_mmap, struct memtier_memory *memory, void *addr, size_t length, int prot, int flags, int fd, off_t offset)
+{
+    if ((memory == NULL) || dont_mmap) {
+        void *(*xmmap)(void *, size_t, int, int, int, off_t);
+        xmmap = (void* (*)(void *, size_t, int, int, int, off_t))real_mmap;
+        //log_err("dont mmap!");    
+        return xmmap(addr, length, prot, flags, fd, offset);
+    }
+
+    dont_mmap = true;
+    
+    pthread_mutex_lock(&mutex);
+    void* ret = memtier_malloc(memory, length, 1);
+    pthread_mutex_unlock(&mutex);
+    
+    dont_mmap = false;
+    return ret;
+}
+
+MEMKIND_EXPORT void memtier_munmap(void* ptr)
+{
+    memtier_free(ptr);
 }
 
 MEMKIND_EXPORT void *memtier_kind_malloc(memkind_t kind, size_t size)
@@ -712,8 +757,10 @@ MEMKIND_EXPORT void *memtier_kind_malloc(memkind_t kind, size_t size)
 MEMKIND_EXPORT void *memtier_calloc(struct memtier_memory *memory, size_t num,
                                     size_t size)
 {
+    dont_mmap = true;
     void *ptr = memtier_kind_calloc(memory->get_kind(memory, size), num, size);
     memory->update_cfg(memory);
+    dont_mmap = false;
 
     return ptr;
 }
@@ -734,18 +781,23 @@ MEMKIND_EXPORT void *memtier_kind_calloc(memkind_t kind, size_t num,
 MEMKIND_EXPORT void *memtier_realloc(struct memtier_memory *memory, void *ptr,
                                      size_t size)
 {
+    dont_mmap = true;
     // reallocate inside same kind
     if (ptr) {
         struct memkind *kind = memkind_detect_kind(ptr);
         ptr = memtier_kind_realloc(kind, ptr, size);
         memory->update_cfg(memory);
 
+        dont_mmap = false;
         return ptr;
     }
 
-    ptr = memtier_kind_malloc(memory->get_kind(memory, size), size);
-    memory->update_cfg(memory);
+    if (size > 0) {
+        ptr = memtier_kind_malloc(memory->get_kind(memory, size), size);
+        memory->update_cfg(memory);
+    }
 
+    dont_mmap = false;
     return ptr;
 }
 
@@ -778,22 +830,26 @@ MEMKIND_EXPORT int memtier_posix_memalign(struct memtier_memory *memory,
                                           void **memptr, size_t alignment,
                                           size_t size)
 {
+    dont_mmap = true;
     int ret = memtier_kind_posix_memalign(memory->get_kind(memory, size),
                                           memptr, alignment, size);
     memory->update_cfg(memory);
 
+    dont_mmap = false;
     return ret;
 }
 
 MEMKIND_EXPORT int memtier_kind_posix_memalign(memkind_t kind, void **memptr,
                                                size_t alignment, size_t size)
 {
+    dont_mmap = true;
     int res = memkind_posix_memalign(kind, memptr, alignment, size);
     increment_alloc_size(kind->partition, jemk_malloc_usable_size(*memptr));
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memtier_kind_posix_memalign_post)
         memtier_kind_posix_memalign_post(kind, memptr, alignment, size, &res);
 #endif
+    dont_mmap = false;
     return res;
 }
 

@@ -112,7 +112,7 @@ public:
 protected:
     void *bench_alloc(size_t size) const final
     {
-        return memtier_malloc(m_tier_memory, size);
+        return memtier_malloc(m_tier_memory, size, 0);
     }
 
     void bench_free(void *ptr) const final
@@ -146,7 +146,7 @@ public:
 protected:
     void *bench_alloc(size_t size) const final
     {
-        return memtier_malloc(m_tier_memory, size);
+        return memtier_malloc(m_tier_memory, size, 0);
     }
 
     void bench_free(void *ptr) const final

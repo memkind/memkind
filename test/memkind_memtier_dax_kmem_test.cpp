@@ -71,7 +71,7 @@ TEST_F(MemkindMemtierDaxKmemTest, test_tier_builder_allocation_test_success)
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_NE(nullptr, m_tier_memory);
 
-    void *ptr = memtier_malloc(m_tier_memory, size);
+    void *ptr = memtier_malloc(m_tier_memory, size, 0);
     ASSERT_NE(nullptr, ptr);
     memtier_free(ptr);
     ptr = memtier_calloc(m_tier_memory, size, size);

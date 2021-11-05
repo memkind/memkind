@@ -575,7 +575,7 @@ TEST_F(MemkindMemtierDynamicTest,
 TEST_F(MemkindMemtierMemoryTest, test_tier_builder_allocation_test_success)
 {
     const size_t size = 512;
-    void *ptr = memtier_malloc(m_tier_memory, size);
+    void *ptr = memtier_malloc(m_tier_memory, size, 0);
     ASSERT_NE(nullptr, ptr);
     memtier_free(ptr);
     ptr = memtier_calloc(m_tier_memory, size, size);
@@ -599,7 +599,7 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_check_size_empty_tier)
 TEST_F(MemkindMemtierMemoryTest, test_tier_memory_check_size_nullptr)
 {
     const size_t test_size = 512;
-    void *ptr = memtier_malloc(m_tier_memory, test_size);
+    void *ptr = memtier_malloc(m_tier_memory, test_size, 0);
     ASSERT_NE(ptr, nullptr);
     size_t ptr_usable_size = memtier_usable_size(ptr);
 
@@ -608,7 +608,7 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_memory_check_size_nullptr)
     memtier_free(nullptr);
     ASSERT_EQ(ptr_usable_size, allocation_sum());
 
-    void *no_ptr = memtier_malloc(m_tier_memory, SIZE_MAX);
+    void *no_ptr = memtier_malloc(m_tier_memory, SIZE_MAX, 0);
     ASSERT_EQ(no_ptr, nullptr);
     ASSERT_EQ(ptr_usable_size, allocation_sum());
 
@@ -638,12 +638,12 @@ TEST_F(MemkindMemtierMemoryTest, test_tier_check_size_malloc)
     const size_t alloc_sum = (size_default + size_regular) * alloc_no;
 
     for (i = 0; i < alloc_no; ++i) {
-        void *ptr = memtier_malloc(m_tier_memory, size_default);
+        void *ptr = memtier_malloc(m_tier_memory, size_default, 0);
         ASSERT_NE(ptr, nullptr);
         kind_vec.push_back(ptr);
         alloc_counter += memtier_usable_size(ptr);
 
-        ptr = memtier_malloc(m_tier_memory, size_regular);
+        ptr = memtier_malloc(m_tier_memory, size_regular, 0);
         ASSERT_NE(ptr, nullptr);
         kind_vec.push_back(ptr);
         alloc_counter += memtier_usable_size(ptr);
