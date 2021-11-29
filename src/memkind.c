@@ -830,8 +830,8 @@ MEMKIND_EXPORT ssize_t memkind_get_capacity(struct memkind *kind)
     return capacity;
 }
 
-MEMKIND_EXPORT size_t memkind_malloc_usable_size(struct memkind *kind,
-                                                 void *ptr)
+MEMKIND_EXPORT size_t memkind_malloc_usable_size(
+    struct memkind *kind, MEMKIND_MALLOC_USABLE_SIZE_CONST void *ptr)
 {
     if (!kind) {
         return m_usable_size(ptr);

@@ -356,8 +356,21 @@ if test "x$memkind_sync_fetch" = "x1" ; then
   AC_DEFINE([MEMKIND_ATOMIC_SYNC_SUPPORT], [1], [__sync_* compiler builtins are supported])
 fi
 
-#============================cxx11=============================================
+#===============================malloc_usable_size=============================
+AC_CHECK_HEADERS(malloc.h)
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <malloc.h>
+#include <stddef.h>
+]],[[
+size_t malloc_usable_size(const void *ptr);
+]])], [memkind_malloc_usable_size_const="1"], [memkind_malloc_usable_size_const="0"])
+if test "x$memkind_malloc_usable_size_const" = "x1" ; then
+  AC_DEFINE([MEMKIND_MALLOC_USABLE_SIZE_CONST], [const], [malloc_usable_size accepts const ptr])
+else
+  AC_DEFINE([MEMKIND_MALLOC_USABLE_SIZE_CONST], [], [malloc_usable_size doesn't accept const ptr])
+fi
 
+#============================cxx11=============================================
 AX_CXX_COMPILE_STDCXX_11([noext], [optional])
 AM_CONDITIONAL([HAVE_CXX11], [test "x$HAVE_CXX11" = x1])
 

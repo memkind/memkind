@@ -9,6 +9,8 @@ extern "C" {
 #include <stdbool.h>
 #include <sys/types.h>
 
+#include "config.h"
+
 /**
  * Header file for the memkind heap manager.
  * More details in memkind(3) man page.
@@ -574,7 +576,8 @@ void *memkind_malloc(memkind_t kind, size_t size);
 /// \param ptr pointer to the allocated memory
 /// \return Number of usable bytes
 ///
-size_t memkind_malloc_usable_size(memkind_t kind, void *ptr);
+size_t memkind_malloc_usable_size(memkind_t kind,
+                                  MEMKIND_MALLOC_USABLE_SIZE_CONST void *ptr);
 
 ///
 /// \brief Allocates memory of the specified kind for an array of num elements
