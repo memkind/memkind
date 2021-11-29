@@ -830,8 +830,9 @@ MEMKIND_EXPORT ssize_t memkind_get_capacity(struct memkind *kind)
     return capacity;
 }
 
+// clang-format off
 MEMKIND_EXPORT size_t memkind_malloc_usable_size(struct memkind *kind,
-                                                 void *ptr)
+                                                 MEMKIND_MALLOC_USABLE_SIZE_CONST void *ptr)
 {
     if (!kind) {
         return m_usable_size(ptr);
@@ -839,6 +840,7 @@ MEMKIND_EXPORT size_t memkind_malloc_usable_size(struct memkind *kind,
         return kind->ops->malloc_usable_size(kind, ptr);
     }
 }
+// clang-format on
 
 MEMKIND_EXPORT void *memkind_malloc(struct memkind *kind, size_t size)
 {
