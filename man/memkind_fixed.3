@@ -1,0 +1,69 @@
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\" Copyright (C) 2021 Intel Corporation.
+.\"
+.TH "MEMKIND_FIXED" 3 "2021-12-08" "Intel Corporation" "MEMKIND_FIXED" \" -*- nroff -*-
+.SH "NAME"
+memkind_fixed \- memkind operations on user-defined memory.
+.br
+.BR Note:
+This is EXPERIMENTAL API. The functionality and the header file itself can be changed (including non-backward compatible changes) or removed.
+.SH "SYNOPSIS"
+.sp
+.BI "int memkind_fixed_create(struct memkind " "*kind" ", struct memkind_ops " "*ops" ", const char " "*name" );
+.br
+.BI "int memkind_fixed_destroy(struct memkind " "*kind" );
+.br
+.BI "void *memkind_fixed_mmap(struct memkind " "*kind" ", void " "*addr" ", size_t " "size" );
+.br
+.SH DESCRIPTION
+.PP
+The fixed memory memkind operations enable memory kinds built on user-defined
+memory.  Such memory may have different attributes, depending on how the memory
+mapping was created.
+.PP
+The fixed kinds are most useful when a specific memory characteristics, e.g.
+numa binding, which are not fully supported by other memkind API, need to be
+manipulated.
+.PP
+The most convenient way to create fixed kinds is to use
+.BR memkind_create_fixed ()
+(see
+.BR memkind (3)).
+.PP
+.BR memkind_fixed_create ()
+is an implementation of the memkind "create" operation for kinds that are
+created on the memory area supplied by the user.  It allocates space for some
+fixed-kind-specific metadata, then calls
+.BR memkind_arena_create ()
+(see
+.BR memkind_arena (3))
+.PP
+.BR memkind_fixed_destroy ()
+is an implementation of the memkind "destroy" operation for kinds that are
+created on the memory area supplied by the user.  This releases all of the
+resources allocated by
+.BR memkind_fixed_create ()
+, but please note that it does not de-allocate the underlying memory.
+.PP
+.BR memkind_fixed_mmap ()
+allocates the file system space for a block of
+.I size
+bytes in the memory-mapped file associated with given kind.
+The
+.I addr
+hint is ignored.  The return value is the address of mapped memory region or
+.B MAP_FAILED
+in the case of an error.
+.TP
+.SH "COPYRIGHT"
+Copyright (C) 2021 Intel Corporation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3),
+.BR memkind_arena (3),
+.BR memkind_default (3),
+.BR memkind_hbw (3),
+.BR memkind_hugetlb (3),
+.BR libvmem (3),
+.BR jemalloc (3),
+.BR mbind (2),
+.BR mmap (2)

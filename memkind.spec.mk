@@ -175,6 +175,7 @@ rm -f %{buildroot}/%{_libdir}/libmemtier.{l,}a
 %{_mandir}/man3/hbwmalloc.3.*
 %{_mandir}/man3/hbwallocator.3.*
 %{_mandir}/man3/pmemallocator.3.*
+%{_mandir}/man3/fixedallocator.3.*
 %{_mandir}/man3/%{namespace}*.3.*
 %{_mandir}/man7/autohbw.7.*
 %{_mandir}/man7/memtier.7.*
