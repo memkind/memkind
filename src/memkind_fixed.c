@@ -154,9 +154,7 @@ static void fixed_extent_destroy(extent_hooks_t *extent_hooks, void *addr,
                                  size_t size, bool committed,
                                  unsigned arena_ind)
 {
-    if (munmap(addr, size) == -1) {
-        log_err("munmap failed!");
-    }
+    /* do nothing */
 }
 
 // clang-format off
