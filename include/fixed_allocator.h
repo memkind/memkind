@@ -13,6 +13,15 @@
 
 #include "memkind.h"
 
+/*
+ * Header file for the C++ allocator compatible with the C++ standard library
+ * allocator concepts. More details in fixedallocator(3) man page. Note: memory heap
+ * management is based on memkind_malloc, refer to the memkind(3) man page for
+ * more information.
+ *
+ * Functionality defined in this header is considered as experimental API (STANDARD
+ * API). API standards are described in memkind(3) man page.
+ */
 namespace libmemkind
 {
 
@@ -91,14 +100,6 @@ public:
             "libmemkind::fixed::allocator cannot be compiled without CXX11 ABI");
     }
 #endif
-
-    explicit allocator(const char *dir, size_t max_size)
-        : kind_wrapper_ptr(std::make_shared<kind_wrapper_t>(dir, max_size))
-    {}
-
-    explicit allocator(const std::string &dir, size_t max_size)
-        : allocator(dir.c_str(), max_size)
-    {}
 
     explicit allocator(void *addr, size_t size)
         : kind_wrapper_ptr(
