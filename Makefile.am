@@ -449,6 +449,7 @@ EXTRA_DIST = CONTRIBUTING \
 
 dist_doc_DATA = COPYING README VERSION
 dist_man_MANS =  man/autohbw.7 \
+                 man/fixedallocator.3 \
                  man/hbwallocator.3 \
                  man/hbwmalloc.3 \
                  man/memkind-auto-dax-kmem-nodes.1 \
@@ -457,6 +458,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind_arena.3 \
                  man/memkind_dax_kmem.3 \
                  man/memkind_default.3 \
+                 man/memkind_fixed.3 \
                  man/memkind_hbw.3 \
                  man/memkind_hugetlb.3 \
                  man/memkind_memtier.3 \
@@ -499,6 +501,7 @@ html-local:
 	$(MAN2HTML) man/memkind.3 > man/memkind.html
 	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
 	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
+	$(MAN2HTML) man/fixedallocator.3 > man/fixedallocator.html
 	$(MAN2HTML) man/memtier.7 > man/memtier.html
 
 clean-jemalloc_deps:

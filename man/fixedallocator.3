@@ -1,0 +1,78 @@
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\" Copyright (C) 2021 Intel Corporation.
+.TH "FIXEDALLOCATOR" 3 "2021-12-03" "Intel Corporation" "FIXEDALLOCATOR" \" -*- nroff -*-
+.SH "NAME"
+libmemkind::fixed::allocator<T> \- The C++ allocator compatible with the C++ standard library allocator concepts
+.br
+.BR Note:
+.I fixed_allocator.h
+is a part of stable API (STANDARD API).
+.SH "SYNOPSIS"
+.nf
+.B #include <fixed_allocator.h>
+.sp
+.B Link with -lmemkind
+.sp
+.BI "libmemkind::fixed::allocator(void " "*addr" ", size_t " "size" );
+.br
+.BI "template <typename U> libmemkind::fixed::allocator<T>::allocator(const libmemkind::fixed::allocator<U>&)" " "noexcept;
+.br
+.BI "template <typename U> libmemkind::fixed::allocator<T>::allocator(allocator<U>&& " "other" ) " "noexcept;
+.br
+.BI "libmemkind::fixed::allocator<T>::~allocator();
+.br
+.BI "T *libmemkind::fixed::allocator<T>::allocate(std::size_t " "n" ) " "const;
+.br
+.BI "void libmemkind::fixed::allocator<T>::deallocate(T " "*p" ", std::size_t " "n" ) " "const;
+.br
+.BI "template <class U, class... Args> void libmemkind::fixed::allocator<T>::construct(U " "*p" ", Args... " "&&args" ) " "const;
+.br
+.BI "void libmemkind::fixed::allocator<T>::destroy(T " "*p" ) " "const;
+.fi
+.SH "DESCRIPTION"
+The
+.BR libmemkind::fixed::allocator<T>
+is intended to be used with STL containers to allocate memory on specific area. Memory management is handled by jemalloc on the supplied area. Refer
+.BR memkind (3)
+man page for more details.
+.PP
+All public member types and functions correspond to standard library allocator concepts and definitions. The current implementation supports C++11 standard.
+.PP
+Template arguments:
+.br
+.I T
+is an object type aliased by value_type.
+.br
+.I U
+is an object type.
+.PP
+.BR Note:
+.br
+.BI "T *libmemkind::fixed::allocator<T>::allocate(std::size_t " "n")
+allocates memory using
+.BR memkind_malloc ()
+on the area supplied to
+.BR libmemkind::fixed::allocator ().
+Throws
+.I std::bad_alloc
+when:
+.br
+.RS
+.I n
+= 0
+.RE
+.br
+.RS
+or there is not enough memory to satisfy the request.
+.RE
+.PP
+.BI "libmemkind::fixed::allocator<T>::deallocate(T " "*p" ", std::size_t " "n")
+deallocates memory associated with pointer returned by
+.BR allocate ()
+using
+.BR memkind_free ().
+
+.SH "COPYRIGHT"
+Copyright (C) 2021 Intel Corporation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3)
