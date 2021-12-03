@@ -62,6 +62,8 @@ This header expose STANDARD and EXPERIMENTAL API. API Standards are described be
 .sp
 .B "KIND MANAGEMENT:"
 .br
+.BI "int memkind_create_fixed(void " "*addr" ", size_t " "size" ", memkind_t " "*kind" );
+.br
 .BI "int memkind_create_pmem(const char " "*dir" ", size_t " "max_size" ", memkind_t " "*kind" );
 .br
 .BI "int memkind_create_pmem_with_config(struct memkind_config " "*cfg" ", memkind_t " "*kind" );
@@ -135,6 +137,8 @@ For file-backed kind of memory see
 .BR memkind_create_pmem ()
 or
 .BR memkind_create_pmem_with_config ().
+For memory kind created on user-specified area, please check
+.BR memkind_create_fixed ().
 .PP
 .BR memkind_malloc ()
 allocates
@@ -454,6 +458,26 @@ section. The user can also create their own kinds of memory. This
 section describes the API's that enable the tracking of the different
 kinds of memory and determining their properties.
 .PP
+.BR memkind_create_fixed ()
+is a function used to create a kind under user-specified area of memory. The
+memory can be allocated in any possible way, e.g. it might be a static array
+or an mmapped area. User can specify any properties using functions
+such as mbind. User is also responsible for de-allocation of memory after
+the kind destruction. The memory area must remain valid until fixed_kind is
+destroyed. The area starts at address
+.IR addr
+and has size
+.IR size.
+When heap manager runs out of memory (located under user-specified area),
+a call to
+.BR memkind_malloc ()
+returns
+.IR "NULL"
+and
+.BR errno
+is set to
+.BR ENOMEM.
+.PP
 .BR memkind_create_pmem ()
 is a convenient function used to create a file-backed kind of memory.
 It allocates a temporary file in the given directory
@@ -558,13 +582,13 @@ section if it is not.
 .BR memkind_get_capacity ()
 returns memory capacity of nodes available to a given
 .I kind
-(file size or filesystem capacity in case of a file-backed PMEM kind) or -1 in case of an error.
+(file size or filesystem capacity in case of a file-backed PMEM kind; total area size in the case of fixed-kind) or -1 in case of an error.
 Supported kinds are:
 .B MEMKIND_DEFAULT, MEMKIND_HIGHEST_CAPACITY, MEMKIND_HIGHEST_CAPACITY_LOCAL, MEMKIND_LOWEST_LATENCY_LOCAL,
 .B MEMKIND_HIGHEST_BANDWIDTH_LOCAL, MEMKIND_HUGETLB, MEMKIND_INTERLEAVE, MEMKIND_HBW,
 .B MEMKIND_HBW_ALL, MEMKIND_HBW_INTERLEAVE, MEMKIND_DAX_KMEM, MEMKIND_DAX_KMEM_ALL,
 .B MEMKIND_DAX_KMEM_INTERLEAVE, MEMKIND_REGULAR
-and file-backed PMEM
+, file-backed PMEM and fixed-kind.
 .I kind.
 For
 .B MEMKIND_HUGETLB
@@ -1278,6 +1302,7 @@ Copyright (C) 2014 - 2021 Intel Corporation. All rights reserved.
 .BR memkind_dax_kmem (3),
 .BR memkind_default (3),
 .BR memkind_arena (3),
+.BR memkind_fixed (3),
 .BR memkind_hbw (3),
 .BR memkind_hugetlb (3),
 .BR memkind_pmem (3),
