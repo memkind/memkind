@@ -551,6 +551,7 @@ test/performance/perf_tests.hpp
 test/pmem_alloc_performance_tests.cpp
 test/pmem_allocator_tests.cpp
 test/fixed_allocator_tests.cpp
+test/fixed_cpp_allocator.cpp
 test/proc_stat.h
 test/python_framework/__init__.py
 test/python_framework/cmd_helper.py
