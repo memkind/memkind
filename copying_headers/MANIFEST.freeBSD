@@ -58,6 +58,7 @@ man/memkind_pmem.3
 man/memkindallocator.3
 man/memtier.7
 man/pmemallocator.3
+man/fixedallocator.3
 memkind.spec.mk
 src/Makefile.mk
 src/hbwmalloc.c

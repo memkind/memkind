@@ -464,6 +464,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkindallocator.3 \
                  man/memtier.7 \
                  man/pmemallocator.3 \
+                 man/fixedallocator.3 \
                  # end
 
 pkgconfigdir = $(libdir)/pkgconfig
@@ -499,6 +500,7 @@ html-local:
 	$(MAN2HTML) man/memkind.3 > man/memkind.html
 	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
 	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
+	$(MAN2HTML) man/fixedallocator.3 > man/fixedallocator.html
 	$(MAN2HTML) man/memtier.7 > man/memtier.html
 
 clean-jemalloc_deps:

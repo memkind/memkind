@@ -14,7 +14,7 @@ functionality is considered as experimental API (EXPERIMENTAL API).
 .sp
 .B Link with -lmemkind
 .sp
-.BI "libmemkind::fixed::allocator(void " "*dir" ", size_t " "size" );
+.BI "libmemkind::fixed::allocator(void " "*addr" ", size_t " "size" );
 .br
 .BI "template <typename U> libmemkind::fixed::allocator<T>::allocator(const libmemkind::fixed::allocator<U>&)" " "noexcept;
 .br
@@ -50,8 +50,10 @@ is an object type.
 .BR Note:
 .br
 .BI "T *libmemkind::fixed::allocator<T>::allocate(std::size_t " "n")
-allocates persistent memory using
-.BR memkind_malloc ().
+allocates memory using
+.BR memkind_malloc ()
+on area supplied to
+.BR libmemkind::fixed::allocator ().
 Throw
 .I std::bad_alloc
 when:
