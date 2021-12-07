@@ -67,6 +67,11 @@ and free memory without a need to remember which kind it belongs to.
 This example shows usage of C++ allocator mechanism designed for file-backed memory
 kind with different data structures like: vector, list and map.
 
+### fixed_cpp_allocator.cpp
+
+This example shows usage of C++ allocator mechanism designed for custom kind
+created on user-specified area with different data structures like: vector, list and map.
+
 ## Other memkind examples
 
 ### memkind_get_stat.c
