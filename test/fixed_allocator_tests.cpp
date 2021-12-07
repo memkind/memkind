@@ -352,15 +352,14 @@ TEST_F(FixedAllocatorTests, test_TC_MEMKIND_MultipleAllocatorUsageVector_Test)
 }
 
 // Tests with static arrays
-
+#define STATIC_MAX_SIZE (126 * 1024 * 1024)
 // Tests for fixed::allocator class.
 class FixedAllocatorTestsStatic: public ::testing::Test
 {
 public:
-    const static size_t fixed_max_size = 126 * 1024 * 1024;
     // pointer: default constructor is deleted,
     // initializer requires mapped area - cannot be provided here
-    static uint8_t addrs[fixed_max_size][4];
+    static uint8_t addrs[STATIC_MAX_SIZE][4];
     using int_alloc_ptr = std::shared_ptr<libmemkind::fixed::allocator<int>>;
     int_alloc_ptr alloc_source;
     int_alloc_ptr alloc_conservative;
@@ -372,22 +371,22 @@ protected:
     void SetUp()
     {
         alloc_source = std::make_shared<libmemkind::fixed::allocator<int>>(
-            addrs[0], fixed_max_size);
+            addrs[0], STATIC_MAX_SIZE);
         alloc_conservative =
-            std::make_shared<libmemkind::fixed::allocator<int>>(addrs[1],
-                                                                fixed_max_size);
+            std::make_shared<libmemkind::fixed::allocator<int>>(
+                addrs[1], STATIC_MAX_SIZE);
 
         alloc_source_f1 = std::make_shared<libmemkind::fixed::allocator<int>>(
-            addrs[2], fixed_max_size);
+            addrs[2], STATIC_MAX_SIZE);
         alloc_source_f2 = std::make_shared<libmemkind::fixed::allocator<int>>(
-            addrs[3], fixed_max_size);
+            addrs[3], STATIC_MAX_SIZE);
     }
 
     void TearDown()
     {}
 };
 
-uint8_t FixedAllocatorTestsStatic::addrs[fixed_max_size][4] = {};
+uint8_t FixedAllocatorTestsStatic::addrs[STATIC_MAX_SIZE][4] = {};
 
 // Compare two same kind different type allocators
 TEST_F(FixedAllocatorTestsStatic,
@@ -543,16 +542,16 @@ TEST_F(FixedAllocatorTestsStatic,
 TEST_F(FixedAllocatorTestsStatic, test_TC_MEMKIND_MultipleAllocatorUsage_Test)
 {
 
-    void *addr = mmap(NULL, fixed_max_size, PROT_READ | PROT_WRITE,
+    void *addr = mmap(NULL, STATIC_MAX_SIZE, PROT_READ | PROT_WRITE,
                       MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     {
-        libmemkind::fixed::allocator<int> alloc{addr, fixed_max_size};
+        libmemkind::fixed::allocator<int> alloc{addr, STATIC_MAX_SIZE};
     }
 
     {
-        libmemkind::fixed::allocator<int> alloc{addr, fixed_max_size};
+        libmemkind::fixed::allocator<int> alloc{addr, STATIC_MAX_SIZE};
     }
-    munmap(addr, fixed_max_size);
+    munmap(addr, STATIC_MAX_SIZE);
 }
 
 // Test vector
