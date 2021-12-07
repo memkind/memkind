@@ -55,23 +55,25 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef STL_DEQUE_TEST
-    std::cout << "DEQUE OPEN" << std::endl;
-    libmemkind::fixed::allocator<int> int_alc{addr, FIXED_MAP_SIZE};
-    std::deque<int, libmemkind::fixed::allocator<int>> deque{int_alc};
+    {
+        std::cout << "DEQUE OPEN" << std::endl;
+        libmemkind::fixed::allocator<int> int_alc{addr, FIXED_MAP_SIZE};
+        std::deque<int, libmemkind::fixed::allocator<int>> deque{int_alc};
 
-    for (int i = 0; i < 10; i++) {
-        deque.push_back(i);
+        for (int i = 0; i < 10; i++) {
+            deque.push_back(i);
+        }
+
+        assert(deque.size() == 10);
+
+        while (!deque.empty()) {
+            deque.pop_front();
+        }
+
+        assert(deque.size() == 0);
+
+        std::cout << "DEQUE CLOSE" << std::endl;
     }
-
-    assert(deque.size() == 10);
-
-    while (!deque.empty()) {
-        deque.pop_front();
-    }
-
-    assert(deque.size() == 0);
-
-    std::cout << "DEQUE CLOSE" << std::endl;
 #endif
 
 #ifdef STL_MULTISET_TEST
@@ -101,6 +103,7 @@ int main(int argc, char *argv[])
     }
 #endif
 
+    munmap(addr, FIXED_MAP_SIZE);
     std::cout << "TEST SCOPE: GOODBYE" << std::endl;
 
     return 0;
