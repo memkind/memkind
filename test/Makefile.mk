@@ -115,6 +115,7 @@ test_all_tests_SOURCES = $(fused_gtest) \
                          test/multithreaded_tests.cpp \
                          test/negative_tests.cpp \
                          test/pmem_allocator_tests.cpp \
+                         test/fixed_allocator_tests.cpp \
                          test/static_kinds_list.h \
                          test/static_kinds_tests.cpp \
                          test/trial_generator.cpp \
@@ -291,7 +292,8 @@ check_PROGRAMS += test/autohbw_candidates \
 if HAVE_CXX11
 check_PROGRAMS += test/memkind_allocated \
                   test/memkind_cpp_allocator \
-                  test/pmem_cpp_allocator
+                  test/pmem_cpp_allocator \
+                  test/fixed_cpp_allocator
 endif
 
 test_autohbw_candidates_LDADD = libmemkind.la
@@ -316,6 +318,7 @@ if HAVE_CXX11
 test_memkind_allocated_LDADD = libmemkind.la
 test_memkind_cpp_allocator_LDADD = libmemkind.la
 test_pmem_cpp_allocator_LDADD = libmemkind.la
+test_fixed_cpp_allocator_LDADD = libmemkind.la
 endif
 
 test_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
@@ -343,6 +346,7 @@ if HAVE_CXX11
 test_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 test_memkind_cpp_allocator_SOURCES = examples/memkind_cpp_allocator.cpp
 test_pmem_cpp_allocator_SOURCES = examples/pmem_cpp_allocator.cpp
+test_fixed_cpp_allocator_SOURCES = examples/fixed_cpp_allocator.cpp
 endif
 
 clean-local: test-clean
