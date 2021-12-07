@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2018 - 2021 Intel Corporation. */
 #include "common.h"
-#include "memkind.h"
 #include "fixed_allocator.h"
+#include "memkind.h"
 #include <algorithm>
 #include <array>
 #include <list>
@@ -10,17 +10,17 @@
 #include <memory>
 #include <scoped_allocator>
 #include <string>
+#include <sys/mman.h>
 #include <thread>
 #include <utility>
 #include <vector>
-#include <sys/mman.h>
 
 // Tests for fixed::allocator class.
 class FixedAllocatorTests: public ::testing::Test
 {
 public:
     const size_t fixed_max_size = 1024 * 1024 * 1024;
-    // pointer: deafault constructor is deleted,
+    // pointer: default constructor is deleted,
     // initializer requires mapped area - cannot be provided here
     using int_alloc_ptr = std::shared_ptr<libmemkind::fixed::allocator<int>>;
     int_alloc_ptr alloc_source;
@@ -33,25 +33,22 @@ protected:
     void SetUp()
     {
         void *addrs[4];
-        for (size_t i=0; i<sizeof(addrs)/sizeof(addrs[0]); ++i) {
+        for (size_t i = 0; i < sizeof(addrs) / sizeof(addrs[0]); ++i) {
             addrs[i] = mmap(NULL, fixed_max_size, PROT_READ | PROT_WRITE,
                             MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
             assert(addrs[i] != MAP_FAILED);
         }
 
-        alloc_source =
-            std::make_shared<libmemkind::fixed::allocator<int>>(addrs[0],
-                                                                fixed_max_size);
+        alloc_source = std::make_shared<libmemkind::fixed::allocator<int>>(
+            addrs[0], fixed_max_size);
         alloc_conservative =
             std::make_shared<libmemkind::fixed::allocator<int>>(addrs[1],
                                                                 fixed_max_size);
 
-        alloc_source_f1 =
-            std::make_shared<libmemkind::fixed::allocator<int>>(addrs[2],
-                                                                fixed_max_size);
-        alloc_source_f2 =
-            std::make_shared<libmemkind::fixed::allocator<int>>(addrs[3],
-                                                                fixed_max_size);
+        alloc_source_f1 = std::make_shared<libmemkind::fixed::allocator<int>>(
+            addrs[2], fixed_max_size);
+        alloc_source_f2 = std::make_shared<libmemkind::fixed::allocator<int>>(
+            addrs[3], fixed_max_size);
     }
 
     void TearDown()
@@ -180,7 +177,8 @@ TEST_F(FixedAllocatorTests, test_TC_MEMKIND_Allocator_ConstructDestroy_Test)
 }
 
 // Testing thread-safety support
-TEST_F(FixedAllocatorTests, test_TC_MEMKIND_Allocator_MultithreadingSupport_Test)
+TEST_F(FixedAllocatorTests,
+       test_TC_MEMKIND_Allocator_MultithreadingSupport_Test)
 {
     const size_t num_threads = 1000;
     const size_t iteration_count = 5000;
@@ -332,9 +330,6 @@ TEST_F(FixedAllocatorTests,
 }
 #endif // _GLIBCXX_USE_CXX11_ABI
 
-
-
-
 // Test multiple memkind allocator usage - vector of int
 TEST_F(FixedAllocatorTests, test_TC_MEMKIND_MultipleAllocatorUsageVector_Test)
 {
@@ -363,7 +358,7 @@ class FixedAllocatorTestsStatic: public ::testing::Test
 {
 public:
     const static size_t fixed_max_size = 126 * 1024 * 1024;
-    // pointer: deafault constructor is deleted,
+    // pointer: default constructor is deleted,
     // initializer requires mapped area - cannot be provided here
     static uint8_t addrs[fixed_max_size][4];
     using int_alloc_ptr = std::shared_ptr<libmemkind::fixed::allocator<int>>;
@@ -376,27 +371,23 @@ public:
 protected:
     void SetUp()
     {
-        alloc_source =
-            std::make_shared<libmemkind::fixed::allocator<int>>(addrs[0],
-                                                                fixed_max_size);
+        alloc_source = std::make_shared<libmemkind::fixed::allocator<int>>(
+            addrs[0], fixed_max_size);
         alloc_conservative =
             std::make_shared<libmemkind::fixed::allocator<int>>(addrs[1],
                                                                 fixed_max_size);
 
-        alloc_source_f1 =
-            std::make_shared<libmemkind::fixed::allocator<int>>(addrs[2],
-                                                                fixed_max_size);
-        alloc_source_f2 =
-            std::make_shared<libmemkind::fixed::allocator<int>>(addrs[3],
-                                                                fixed_max_size);
+        alloc_source_f1 = std::make_shared<libmemkind::fixed::allocator<int>>(
+            addrs[2], fixed_max_size);
+        alloc_source_f2 = std::make_shared<libmemkind::fixed::allocator<int>>(
+            addrs[3], fixed_max_size);
     }
 
     void TearDown()
     {}
 };
 
-uint8_t FixedAllocatorTestsStatic::addrs[fixed_max_size][4]={0};
-
+uint8_t FixedAllocatorTestsStatic::addrs[fixed_max_size][4] = {};
 
 // Compare two same kind different type allocators
 TEST_F(FixedAllocatorTestsStatic,
@@ -449,7 +440,8 @@ TEST_F(FixedAllocatorTestsStatic, test_TC_MEMKIND_Allocator_CopyAssignment_Test)
 }
 
 // Move constructor test
-TEST_F(FixedAllocatorTestsStatic, test_TC_MEMKIND_Allocator_MoveConstructor_Test)
+TEST_F(FixedAllocatorTestsStatic,
+       test_TC_MEMKIND_Allocator_MoveConstructor_Test)
 {
     libmemkind::fixed::allocator<int> alc1{*alloc_source_f2};
     libmemkind::fixed::allocator<int> alc2{*alloc_source_f2};
@@ -511,7 +503,8 @@ TEST_F(FixedAllocatorTestsStatic,
 }
 
 // Construct-destroy test
-TEST_F(FixedAllocatorTestsStatic, test_TC_MEMKIND_Allocator_ConstructDestroy_Test)
+TEST_F(FixedAllocatorTestsStatic,
+       test_TC_MEMKIND_Allocator_ConstructDestroy_Test)
 {
     libmemkind::fixed::allocator<int> alc1{*alloc_source_f1};
     int *created_object = alc1.allocate(1);
@@ -520,7 +513,8 @@ TEST_F(FixedAllocatorTestsStatic, test_TC_MEMKIND_Allocator_ConstructDestroy_Tes
 }
 
 // Testing thread-safety support
-TEST_F(FixedAllocatorTestsStatic, test_TC_MEMKIND_Allocator_MultithreadingSupport_Test)
+TEST_F(FixedAllocatorTestsStatic,
+       test_TC_MEMKIND_Allocator_MultithreadingSupport_Test)
 {
     const size_t num_threads = 1000;
     const size_t iteration_count = 5000;
@@ -622,7 +616,8 @@ TEST_F(FixedAllocatorTestsStatic, test_TC_MEMKIND_AllocatorUsage_Map_Test)
 
 #if _GLIBCXX_USE_CXX11_ABI
 // Test vector of strings
-TEST_F(FixedAllocatorTestsStatic, test_TC_MEMKIND_AllocatorUsage_VectorOfString_Test)
+TEST_F(FixedAllocatorTestsStatic,
+       test_TC_MEMKIND_AllocatorUsage_VectorOfString_Test)
 {
     typedef std::basic_string<char, std::char_traits<char>,
                               libmemkind::fixed::allocator<char>>
@@ -672,11 +667,9 @@ TEST_F(FixedAllocatorTestsStatic,
 }
 #endif // _GLIBCXX_USE_CXX11_ABI
 
-
-
-
 // Test multiple memkind allocator usage - vector of int
-TEST_F(FixedAllocatorTestsStatic, test_TC_MEMKIND_MultipleAllocatorUsageVector_Test)
+TEST_F(FixedAllocatorTestsStatic,
+       test_TC_MEMKIND_MultipleAllocatorUsageVector_Test)
 {
     libmemkind::fixed::allocator<int> alc1{*alloc_source};
     libmemkind::fixed::allocator<int> alc2{*alloc_source};
