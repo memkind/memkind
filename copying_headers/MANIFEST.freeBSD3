@@ -4,6 +4,7 @@ examples/pmem_and_dax_kmem_kind.c
 examples/pmem_and_default_kind.c
 examples/pmem_config.c
 examples/pmem_cpp_allocator.cpp
+examples/fixed_cpp_allocator.cpp
 examples/pmem_detect_kind.c
 examples/pmem_free_with_unknown_kind.c
 examples/pmem_kinds.c
