@@ -41,6 +41,7 @@ include/memkind/internal/vec.h
 include/memkind_allocator.h
 include/memkind_deprecated.h
 include/pmem_allocator.h
+include/fixed_allocator.h
 man/autohbw.7
 man/hbwallocator.3
 man/hbwmalloc.3
@@ -187,6 +188,7 @@ test/performance/perf_tests.cpp
 test/performance/perf_tests.hpp
 test/pmem_alloc_performance_tests.cpp
 test/pmem_allocator_tests.cpp
+test/fixed_allocator_tests.cpp
 test/proc_stat.h
 test/python_framework/__init__.py
 test/python_framework/cmd_helper.py
