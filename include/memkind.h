@@ -508,8 +508,8 @@ int memkind_create_pmem_with_config(struct memkind_config *cfg,
 ///
 /// \brief Create a new kind on a fixed size map
 /// \note STANDARD API
-/// \param addr address of the map
-/// \param size size of the map for kind
+/// \param addr address of the mapping
+/// \param size size of the mapping
 /// \param kind pointer to kind which will be created
 /// \return Memkind operation status, MEMKIND_SUCCESS on success, other values
 ///         on failure
@@ -531,7 +531,8 @@ int memkind_check_available(memkind_t kind);
 /// \param kind specified memory kind
 /// \return Capacity on nodes from which a given kind could allocate
 ///         (file size or filesystem capacity in case of a file-backed PMEM
-///         kind) in bytes on success, -1 on failure
+///         kind; memory area size for fixed kind) in bytes on success, -1
+///         on failure
 ///
 ssize_t memkind_get_capacity(memkind_t kind);
 

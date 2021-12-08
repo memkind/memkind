@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright (C) 2019 - 2021 Intel Corporation. */
+/* Copyright (C) 2021 Intel Corporation. */
 
 #include "fixed_allocator.h"
 
 #include <cassert>
-// #include <cstdlib>
 #include <deque>
 #include <forward_list>
 #include <iostream>
@@ -23,7 +22,6 @@
 
 int main(int argc, char *argv[])
 {
-    // TODO create
     std::cout << "TEST SCOPE: HELLO" << std::endl;
 
     void *addr = mmap(NULL, FIXED_MAP_SIZE, PROT_READ | PROT_WRITE,

@@ -19,7 +19,7 @@
  * heap management is based on memkind_malloc, refer to the memkind(3) man page
  * for more information.
  *
- * Functionality defined in this header is considered as experimental API
+ * Functionality defined in this header is a part of stable API
  * (STANDARD API). API standards are described in memkind(3) man page.
  */
 namespace libmemkind

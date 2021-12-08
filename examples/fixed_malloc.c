@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright (C) 2015 - 2021 Intel Corporation. */
+/* Copyright (C) 2021 Intel Corporation. */
 
 #include <assert.h>
 #include <memkind.h>
@@ -88,6 +88,8 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout, "Memory was successfully allocated and released.\n");
+
+    munmap(addr, FIXED_MAP_SIZE);
 
     return 0;
 }

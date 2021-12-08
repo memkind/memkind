@@ -461,6 +461,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind_hugetlb.3 \
                  man/memkind_memtier.3 \
                  man/memkind_pmem.3 \
+                 man/memkind_fixed.3 \
                  man/memkindallocator.3 \
                  man/memtier.7 \
                  man/pmemallocator.3 \

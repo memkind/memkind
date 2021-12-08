@@ -6,16 +6,24 @@
 extern "C" {
 #endif
 
+#include "memkind.h"
 #include "memkind_arena.h"
 #include "memkind_default.h"
-#include <memkind.h>
 
-#include <pthread.h>
+#include "pthread.h"
+
+/*
+ * Header file for the operations on user-supplied memory.
+ * More details in memkind_fixed(3) man page.
+ *
+ * Functionality defined in this header is a part of EXPERIMENTAL API.
+ * API standards are described in memkind(3) man page.
+ */
 
 int memkind_fixed_create(struct memkind *kind, struct memkind_ops *ops,
                          const char *name);
 int memkind_fixed_destroy(struct memkind *kind);
-int memkind_fixed_get_mmap_flags(struct memkind *kind, int *flags);
+/// @warning In contrast to POSIX mmap, does **not** align memory
 void *memkind_fixed_mmap(struct memkind *kind, void *addr, size_t size);
 struct memkind_fixed {
     void *addr;

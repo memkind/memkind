@@ -25,7 +25,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_FIXED_OPS = {
     .realloc = memkind_arena_realloc,
     .free = memkind_arena_free,
     .mmap = memkind_fixed_mmap,
-    .get_mmap_flags = memkind_fixed_get_mmap_flags,
+    .get_mmap_flags = NULL,
     .get_arena = memkind_thread_get_arena,
     .malloc_usable_size = memkind_default_malloc_usable_size,
     .finalize = memkind_fixed_destroy,
@@ -33,6 +33,40 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_FIXED_OPS = {
     .get_stat = memkind_arena_get_kind_stat,
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
+
+static void *memkind_fixed_mmap_aligned(struct memkind *kind, size_t alignment,
+                                        size_t size)
+{
+    struct memkind_fixed *priv = kind->priv;
+    void *result;
+
+    if (pthread_mutex_lock(&priv->lock) != 0)
+        assert(0 && "failed to acquire mutex");
+
+    // calculate alignment offset
+    size_t align_offset = 0u;
+    size_t alignment_modulo = ((uintptr_t)priv->addr) % alignment;
+    if (alignment_modulo != 0) {
+        align_offset = alignment - alignment_modulo;
+    }
+
+    if ((priv->size != 0 || align_offset != 0) &&
+        priv->current + size + align_offset > priv->size) {
+        if (pthread_mutex_unlock(&priv->lock) != 0)
+            assert(0 && "failed to release mutex");
+        return MAP_FAILED;
+    }
+
+    priv->addr += align_offset;
+    result = priv->addr;
+    priv->addr += size;
+    priv->current += size + align_offset;
+
+    if (pthread_mutex_unlock(&priv->lock) != 0)
+        assert(0 && "failed to release mutex");
+
+    return result;
+}
 
 static void *fixed_extent_alloc(extent_hooks_t *extent_hooks, void *new_addr,
                                 size_t size, size_t alignment, bool *zero,
@@ -43,6 +77,7 @@ static void *fixed_extent_alloc(extent_hooks_t *extent_hooks, void *new_addr,
 
     if (new_addr != NULL) {
         /* not supported */
+        log_err("fixed_extent_alloc only supports new_addr == NULL");
         goto exit;
     }
 
@@ -56,13 +91,11 @@ static void *fixed_extent_alloc(extent_hooks_t *extent_hooks, void *new_addr,
         goto exit;
     }
 
-    addr = memkind_fixed_mmap(kind, new_addr, size);
+    addr = memkind_fixed_mmap_aligned(kind, alignment, size);
 
     if (addr != MAP_FAILED) {
         *zero = true;
         *commit = true;
-
-        /* XXX - check alignment */
     } else {
         addr = NULL;
     }
@@ -211,11 +244,4 @@ MEMKIND_EXPORT void *memkind_fixed_mmap(struct memkind *kind, void *addr,
         assert(0 && "failed to release mutex");
 
     return result;
-}
-
-MEMKIND_EXPORT int memkind_fixed_get_mmap_flags(struct memkind *kind,
-                                                int *flags)
-{
-    *flags = MAP_SHARED;
-    return 0;
 }

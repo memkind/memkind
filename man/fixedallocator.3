@@ -7,7 +7,7 @@ libmemkind::fixed::allocator<T> \- The C++ allocator compatible with the C++ sta
 .br
 .BR Note:
 .I fixed_allocator.h
-functionality is considered as experimental API (EXPERIMENTAL API).
+is a part of stable API (STANDARD API).
 .SH "SYNOPSIS"
 .nf
 .B #include <fixed_allocator.h>
@@ -18,7 +18,7 @@ functionality is considered as experimental API (EXPERIMENTAL API).
 .br
 .BI "template <typename U> libmemkind::fixed::allocator<T>::allocator(const libmemkind::fixed::allocator<U>&)" " "noexcept;
 .br
-.BI "template <typename U> libmemkind::fixed::allocator(const allocator<U>&& " "other" ) " "noexcept;
+.BI "template <typename U> libmemkind::fixed::allocator<T>::allocator(allocator<U>&& " "other" ) " "noexcept;
 .br
 .BI "libmemkind::fixed::allocator<T>::~allocator();
 .br
@@ -26,18 +26,18 @@ functionality is considered as experimental API (EXPERIMENTAL API).
 .br
 .BI "void libmemkind::fixed::allocator<T>::deallocate(T " "*p" ", std::size_t " "n" ) " "const;
 .br
-.BI "template <class U, class... Args> void libmemkind::fixed::allocator<T>::construct(U " "*p" ", Args... " "args" ) " "const;
+.BI "template <class U, class... Args> void libmemkind::fixed::allocator<T>::construct(U " "*p" ", Args... " "&&args" ) " "const;
 .br
 .BI "void libmemkind::fixed::allocator<T>::destroy(T " "*p" ) " "const;
 .fi
 .SH "DESCRIPTION"
 The
 .BR libmemkind::fixed::allocator<T>
-is intended to be used with STL containers to allocate memory on specific area. Memory management done by jemalloc on the supplied area. Refer
+is intended to be used with STL containers to allocate memory on specific area. Memory management is handled by jemalloc on the supplied area. Refer
 .BR memkind (3)
 man page for more details.
 .PP
-All public member types and functions corresponds to standard library allocator concepts and definitions. The current implementation supports C++11 standard.
+All public member types and functions correspond to standard library allocator concepts and definitions. The current implementation supports C++11 standard.
 .PP
 Template arguments:
 .br
@@ -52,9 +52,9 @@ is an object type.
 .BI "T *libmemkind::fixed::allocator<T>::allocate(std::size_t " "n")
 allocates memory using
 .BR memkind_malloc ()
-on area supplied to
+on the area supplied to
 .BR libmemkind::fixed::allocator ().
-Throw
+Throws
 .I std::bad_alloc
 when:
 .br
@@ -74,6 +74,6 @@ using
 .BR memkind_free ().
 
 .SH "COPYRIGHT"
-Copyright (C) 2018 - 2021 Intel Corporation. All rights reserved.
+Copyright (C) 2021 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
 .BR memkind (3)

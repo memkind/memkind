@@ -33,6 +33,7 @@ examples/pmem_and_default_kind.c
 examples/pmem_and_dax_kmem.c
 examples/pmem_config.c
 examples/pmem_cpp_allocator.cpp
+examples/fixed_cpp_allocator.cpp
 examples/pmem_detect_kind.c
 examples/pmem_free_with_unknown_kind.c
 examples/pmem_kinds.c
@@ -405,6 +406,7 @@ man/memkind_hbw.3
 man/memkind_hugetlb.3
 man/memkind_memtier.3
 man/memkind_pmem.3
+man/memkind_fixed.3
 man/memkindallocator.3
 man/memtier.7
 man/pmemallocator.3
@@ -549,7 +551,6 @@ test/performance/perf_tests.hpp
 test/pmem_alloc_performance_tests.cpp
 test/pmem_allocator_tests.cpp
 test/fixed_allocator_tests.cpp
-test/fixed_cpp_allocator.cpp
 test/proc_stat.h
 test/python_framework/__init__.py
 test/python_framework/cmd_helper.py

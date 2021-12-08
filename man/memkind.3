@@ -558,13 +558,13 @@ section if it is not.
 .BR memkind_get_capacity ()
 returns memory capacity of nodes available to a given
 .I kind
-(file size or filesystem capacity in case of a file-backed PMEM kind) or -1 in case of an error.
+(file size or filesystem capacity in case of a file-backed PMEM kind; total area size in the case of fixed-kind) or -1 in case of an error.
 Supported kinds are:
 .B MEMKIND_DEFAULT, MEMKIND_HIGHEST_CAPACITY, MEMKIND_HIGHEST_CAPACITY_LOCAL, MEMKIND_LOWEST_LATENCY_LOCAL,
 .B MEMKIND_HIGHEST_BANDWIDTH_LOCAL, MEMKIND_HUGETLB, MEMKIND_INTERLEAVE, MEMKIND_HBW,
 .B MEMKIND_HBW_ALL, MEMKIND_HBW_INTERLEAVE, MEMKIND_DAX_KMEM, MEMKIND_DAX_KMEM_ALL,
 .B MEMKIND_DAX_KMEM_INTERLEAVE, MEMKIND_REGULAR
-and file-backed PMEM
+, file-backed PMEM and fixed-kind.
 .I kind.
 For
 .B MEMKIND_HUGETLB
