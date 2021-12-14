@@ -98,9 +98,13 @@ public:
     memtier_bench_alloc()
     {
         m_tier_builder = memtier_builder_new(MEMTIER_POLICY_STATIC_RATIO);
+        assert(m_tier_builder != NULL &&
+               "m_tier_builder parameter is not defined");
         memtier_builder_add_tier(m_tier_builder, MEMKIND_DEFAULT, 1);
         m_tier_memory =
             memtier_builder_construct_memtier_memory(m_tier_builder);
+        assert(m_tier_memory != NULL &&
+               "m_tier_memory parameter is not defined");
     }
 
     ~memtier_bench_alloc()
@@ -131,10 +135,16 @@ public:
     memtier_multiple_bench_alloc(memtier_policy_t policy)
     {
         m_tier_builder = memtier_builder_new(policy);
+        assert(m_tier_builder != NULL &&
+               "m_tier_builder parameter is not defined");
         memtier_builder_add_tier(m_tier_builder, MEMKIND_DEFAULT, 1);
         memtier_builder_add_tier(m_tier_builder, MEMKIND_REGULAR, 1);
-        m_tier_memory =
-            memtier_builder_construct_memtier_memory(m_tier_builder);
+        if (m_tier_builder) {
+            m_tier_memory =
+                memtier_builder_construct_memtier_memory(m_tier_builder);
+        } else {
+            m_tier_memory = NULL;
+        }
     }
 
     ~memtier_multiple_bench_alloc()
