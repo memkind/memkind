@@ -420,22 +420,24 @@ static int builder_static_ctl_set(struct memtier_builder *builder,
 static int builder_dynamic_ctl_set(struct memtier_builder *builder,
                                    const char *name, const void *val)
 {
+    const int CHR_READ_MAX = 256;
     const char *query = name;
-    char name_substr[256] = {0};
+    char name_substr[CHR_READ_MAX];
+    memset(name_substr, 0, CHR_READ_MAX * sizeof(char));
     int chr_read = 0;
 
     sscanf(query, "policy.dynamic_threshold.%n", &chr_read);
     if (chr_read == sizeof("policy.dynamic_threshold.") - 1) {
         query += chr_read;
-
-        int ret = sscanf(query, "%[^\[]%n", name_substr, &chr_read);
-        if (ret && strcmp(name_substr, "thresholds") == 0) {
+        int ret = sscanf(query, "%255[^\[]%n", name_substr, &chr_read);
+        if (ret && (strcmp(name_substr, "thresholds") == 0) &&
+            chr_read < CHR_READ_MAX && chr_read > 0) {
             query += chr_read;
 
             int th_indx = -1;
             ret = sscanf(query, "[%d]%n", &th_indx, &chr_read);
-            if (th_indx >= 0) {
-                if (th_indx + 1 >= builder->cfg_size) {
+            if (th_indx >= 0 && chr_read < CHR_READ_MAX) {
+                if ((unsigned)th_indx + 1 >= builder->cfg_size) {
                     log_err("Too small tiers defined %d, for tier index %d",
                             builder->cfg_size, th_indx);
                     return -1;
@@ -443,7 +445,7 @@ static int builder_dynamic_ctl_set(struct memtier_builder *builder,
                 query += chr_read;
                 struct memtier_threshold_cfg *thres = &builder->thres[th_indx];
 
-                ret = sscanf(query, ".%s", name_substr);
+                ret = sscanf(query, ".%255s", name_substr);
                 if (ret && strcmp(name_substr, "val") == 0) {
                     thres->val = *(size_t *)val;
                     return 0;
