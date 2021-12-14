@@ -212,22 +212,27 @@ static int ctl_parse_tier_query(char *qbuf, memkind_t *kind, unsigned *ratio)
                 return -1;
             }
             char *kind_name = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
-            if (!strcmp(kind_name, "DRAM")) {
-                *kind = MEMKIND_DEFAULT;
-            } else if (!strcmp(kind_name, "KMEM_DAX")) {
-                *kind = MEMKIND_DAX_KMEM;
-                void *ptr = memkind_malloc(*kind, 32);
-                if (!ptr) {
-                    log_err("Allocation to DAX KMEM nodes failed!");
+            if (kind_name) {
+                if (!strcmp(kind_name, "DRAM")) {
+                    *kind = MEMKIND_DEFAULT;
+                } else if (!strcmp(kind_name, "KMEM_DAX")) {
+                    *kind = MEMKIND_DAX_KMEM;
+                    void *ptr = memkind_malloc(*kind, 32);
+                    if (!ptr) {
+                        log_err("Allocation to DAX KMEM nodes failed!");
+                        return -1;
+                    }
+                    memkind_free(*kind, ptr);
+                } else if (!strcmp(kind_name, "FS_DAX")) {
+                    // for FS_DAX we have to collect all parameteres before
+                    // initialization
+                    is_fsdax = 1;
+                } else {
+                    log_err("Unsupported kind: %s", kind_name);
                     return -1;
                 }
-                memkind_free(*kind, ptr);
-            } else if (!strcmp(kind_name, "FS_DAX")) {
-                // for FS_DAX we have to collect all parameteres before
-                // initialization
-                is_fsdax = 1;
             } else {
-                log_err("Unsupported kind: %s", kind_name);
+                log_err("KIND param not found");
                 return -1;
             }
             kind_set = 1;
@@ -237,6 +242,10 @@ static int ctl_parse_tier_query(char *qbuf, memkind_t *kind, unsigned *ratio)
                 return -1;
             }
             fsdax_path = strtok_r(NULL, CTL_PARAM_SEPARATOR, &sptr);
+            if (fsdax_path == NULL) {
+                log_err("PATH param not found");
+                return -1;
+            }
             fsdax_path_set = 1;
         } else if (!strcmp(param_str, "PMEM_SIZE_LIMIT")) {
             if (fsdax_size_set) {
@@ -278,11 +287,14 @@ static int ctl_parse_tier_query(char *qbuf, memkind_t *kind, unsigned *ratio)
             return -1;
         }
 
-        ret = memkind_check_dax_path(fsdax_path);
+        if (fsdax_path) {
+            ret = memkind_check_dax_path(fsdax_path);
+        }
         if (ret)
             log_info("%s don't point to DAX device", fsdax_path);
 
         size_t fsdax_max_size = 0;
+
         if (fsdax_size_set) {
             ret = ctl_parse_size(&fsdax_size_str, &fsdax_max_size);
             if (ret != 0) {
@@ -290,7 +302,10 @@ static int ctl_parse_tier_query(char *qbuf, memkind_t *kind, unsigned *ratio)
             }
         }
 
-        ret = memkind_create_pmem(fsdax_path, fsdax_max_size, kind);
+        if (fsdax_path &&
+            (fsdax_max_size == 0 || fsdax_max_size >= MEMKIND_PMEM_MIN_SIZE)) {
+            ret = memkind_create_pmem(fsdax_path, fsdax_max_size, kind);
+        }
         if (ret || ctl_add_pmem_kind_to_fs_dax_reg(*kind)) {
             return -1;
         }
@@ -321,7 +336,7 @@ static int ctl_set_thr_cfg(char **sptr, unsigned ctl_id, int th_id,
 {
     char buf[MAX_CTL_NAME] = {0};
 
-    const char *ctl_cmd[][2] = {
+    const char *ctl_cmd[MAX_CTL_NAME][2] = {
         {"policy.dynamic_threshold.thresholds[%d].val", "VAL"},
         {"policy.dynamic_threshold.thresholds[%d].min", "MIN"},
         {"policy.dynamic_threshold.thresholds[%d].max", "MAX"}};
@@ -345,7 +360,9 @@ static int ctl_set_thr_cfg(char **sptr, unsigned ctl_id, int th_id,
         return -1;
     }
 
-    snprintf(buf, MAX_CTL_NAME, ctl_cmd[ctl_id][0], th_id);
+    const char *cmd = ctl_cmd[ctl_id][0];
+    snprintf(buf, MAX_CTL_NAME, cmd, th_id);
+
     *ctl_opts |= (1U << ctl_id);
     return memtier_ctl_set(builder, buf, &val);
 }
@@ -447,7 +464,7 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
     }
 
     qbuf = strtok_r(qbuf, CTL_VALUE_SEPARATOR, &sptr);
-    if (!strcmp(qbuf, "POLICY")) {
+    if (qbuf && !strcmp(qbuf, "POLICY")) {
         ret = ctl_parse_policy(sptr, &policy);
         if (ret != 0) {
             goto cleanup_after_failure;
