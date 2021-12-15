@@ -11,6 +11,7 @@
 #include <memkind/internal/memkind_capacity.h>
 #include <memkind/internal/memkind_dax_kmem.h>
 #include <memkind/internal/memkind_default.h>
+#include <memkind/internal/memkind_fixed.h>
 #include <memkind/internal/memkind_gbtlb.h>
 #include <memkind/internal/memkind_hbw.h>
 #include <memkind/internal/memkind_hugetlb.h>
@@ -802,6 +803,9 @@ MEMKIND_EXPORT ssize_t memkind_get_capacity(struct memkind *kind)
             }
             capacity = buf.f_blocks * buf.f_frsize;
         }
+    } else if (kind->ops == &MEMKIND_FIXED_OPS) {
+        struct memkind_fixed *fixed_priv = kind->priv;
+        capacity = fixed_priv->size;
     } else if (kind == MEMKIND_HUGETLB) {
         size_t nr_hugepages_cached, nr_overcommit_hugepages_cached,
             total_hugepages;
@@ -1042,6 +1046,25 @@ MEMKIND_EXPORT int memkind_create_pmem_with_config(struct memkind_config *cfg,
     }
 
     return status;
+}
+
+MEMKIND_EXPORT int memkind_create_fixed(void *addr, size_t size,
+                                        memkind_t *kind)
+{
+    char name[80];
+    snprintf(name, sizeof(name), "fixed%p", addr);
+
+    int err = memkind_create(&MEMKIND_FIXED_OPS, name, kind);
+    if (err)
+        return err;
+
+    struct memkind_fixed *priv = (*kind)->priv;
+
+    priv->addr = addr;
+    priv->current = 0;
+    priv->size = size;
+
+    return MEMKIND_SUCCESS;
 }
 
 static int memkind_get_kind_by_partition_internal(int partition,

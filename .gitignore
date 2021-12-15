@@ -42,10 +42,12 @@
 /examples/pmem_and_default_kind
 /examples/pmem_config
 /examples/pmem_cpp_allocator
+/examples/fixed_cpp_allocator
 /examples/pmem_detect_kind
 /examples/pmem_free_with_unknown_kind
 /examples/pmem_kinds
 /examples/pmem_malloc
+/examples/fixed_malloc
 /examples/pmem_malloc_unlimited
 /examples/pmem_multithreads
 /examples/pmem_multithreads_onekind
@@ -117,6 +119,7 @@
 /test/pmem_and_default_kind
 /test/pmem_config
 /test/pmem_cpp_allocator
+/test/fixed_cpp_allocator
 /test/pmem_detect_kind
 /test/pmem_free_with_unknown_kind
 /test/pmem_kinds

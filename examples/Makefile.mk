@@ -15,6 +15,7 @@ noinst_PROGRAMS += examples/autohbw_candidates \
                    examples/pmem_free_with_unknown_kind \
                    examples/pmem_kinds \
                    examples/pmem_malloc \
+                   examples/fixed_malloc \
                    examples/pmem_malloc_unlimited \
                    examples/pmem_multithreads \
                    examples/pmem_multithreads_onekind \
@@ -24,6 +25,7 @@ if HAVE_CXX11
 noinst_PROGRAMS += examples/memkind_allocated
 noinst_PROGRAMS += examples/memkind_cpp_allocator
 noinst_PROGRAMS += examples/pmem_cpp_allocator
+noinst_PROGRAMS += examples/fixed_cpp_allocator
 endif
 
 examples_autohbw_candidates_LDADD = libmemkind.la
@@ -40,6 +42,7 @@ examples_pmem_detect_kind_LDADD = libmemkind.la
 examples_pmem_free_with_unknown_kind_LDADD = libmemkind.la
 examples_pmem_kinds_LDADD = libmemkind.la
 examples_pmem_malloc_LDADD = libmemkind.la
+examples_fixed_malloc_LDADD = libmemkind.la
 examples_pmem_malloc_unlimited_LDADD = libmemkind.la
 examples_pmem_multithreads_LDADD = libmemkind.la
 examples_pmem_multithreads_onekind_LDADD = libmemkind.la
@@ -49,6 +52,7 @@ if HAVE_CXX11
 examples_memkind_allocated_LDADD = libmemkind.la
 examples_memkind_cpp_allocator_LDADD  = libmemkind.la
 examples_pmem_cpp_allocator_LDADD = libmemkind.la
+examples_fixed_cpp_allocator_LDADD = libmemkind.la
 endif
 
 examples_autohbw_candidates_SOURCES = examples/autohbw_candidates.c
@@ -64,6 +68,7 @@ examples_pmem_detect_kind_SOURCES = examples/pmem_detect_kind.c
 examples_pmem_free_with_unknown_kind_SOURCES = examples/pmem_free_with_unknown_kind.c
 examples_pmem_kinds_SOURCES = examples/pmem_kinds.c
 examples_pmem_malloc_SOURCES = examples/pmem_malloc.c
+examples_fixed_malloc_SOURCES = examples/fixed_malloc.c
 examples_pmem_malloc_unlimited_SOURCES = examples/pmem_malloc_unlimited.c
 examples_pmem_multithreads_SOURCES = examples/pmem_multithreads.c
 examples_pmem_multithreads_onekind_SOURCES = examples/pmem_multithreads_onekind.c
@@ -72,6 +77,7 @@ if HAVE_CXX11
 examples_memkind_allocated_SOURCES = examples/memkind_allocated_example.cpp examples/memkind_allocated.hpp
 examples_memkind_cpp_allocator_SOURCES = examples/memkind_cpp_allocator.cpp
 examples_pmem_cpp_allocator_SOURCES = examples/pmem_cpp_allocator.cpp
+examples_fixed_cpp_allocator_SOURCES = examples/fixed_cpp_allocator.cpp
 endif
 
 clean-local:

@@ -18,6 +18,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_capacity.c \
                         src/memkind_dax_kmem.c \
                         src/memkind_default.c \
+                        src/memkind_fixed.c \
                         src/memkind_gbtlb.c \
                         src/memkind_hbw.c \
                         src/memkind_hugetlb.c \
@@ -40,6 +41,7 @@ include_HEADERS = include/hbw_allocator.h \
                   include/memkind_allocator.h \
                   include/memkind_deprecated.h \
                   include/pmem_allocator.h \
+                  include/fixed_allocator.h \
                   # end
 
 noinst_HEADERS =  include/memkind/internal/heap_manager.h \
@@ -48,6 +50,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_capacity.h \
                   include/memkind/internal/memkind_dax_kmem.h \
                   include/memkind/internal/memkind_default.h \
+                  include/memkind/internal/memkind_fixed.h \
                   include/memkind/internal/memkind_gbtlb.h \
                   include/memkind/internal/memkind_hbw.h \
                   include/memkind/internal/memkind_hugetlb.h \
@@ -446,6 +449,7 @@ EXTRA_DIST = CONTRIBUTING \
 
 dist_doc_DATA = COPYING README VERSION
 dist_man_MANS =  man/autohbw.7 \
+                 man/fixedallocator.3 \
                  man/hbwallocator.3 \
                  man/hbwmalloc.3 \
                  man/memkind-auto-dax-kmem-nodes.1 \
@@ -454,6 +458,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind_arena.3 \
                  man/memkind_dax_kmem.3 \
                  man/memkind_default.3 \
+                 man/memkind_fixed.3 \
                  man/memkind_hbw.3 \
                  man/memkind_hugetlb.3 \
                  man/memkind_memtier.3 \
@@ -496,6 +501,7 @@ html-local:
 	$(MAN2HTML) man/memkind.3 > man/memkind.html
 	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
 	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
+	$(MAN2HTML) man/fixedallocator.3 > man/fixedallocator.html
 	$(MAN2HTML) man/memtier.7 > man/memtier.html
 
 clean-jemalloc_deps:

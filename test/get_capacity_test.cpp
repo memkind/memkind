@@ -3,6 +3,7 @@
 
 #include <memkind.h>
 #include <memkind/internal/memkind_private.h>
+#include <sys/mman.h>
 
 #include "TestPrereq.hpp"
 #include "common.h"
@@ -32,6 +33,15 @@ protected:
     TestPrereq tp;
 };
 
+class MemkindGetCapacityTestsFixedKindParam
+    : public ::testing::Test,
+      public ::testing::WithParamInterface<size_t>
+{
+};
+
+INSTANTIATE_TEST_CASE_P(MmappedTest, MemkindGetCapacityTestsFixedKindParam,
+                        ::testing::Values(1024 * 1024 * 512, 0, 1024, 25, 87));
+
 INSTANTIATE_TEST_CASE_P(
     KindParam, MemkindGetCapacityTestsPreferredParam,
     ::testing::Values(MEMKIND_HBW_PREFERRED, MEMKIND_HBW_PREFERRED_HUGETLB,
@@ -55,6 +65,19 @@ TEST_F(MemkindGetCapacityTests, test_tc_memkind_verify_capacity_fsdax)
     ASSERT_GT(memkind_get_capacity(kind), 0);
 
     memkind_destroy_kind(kind);
+}
+
+TEST_P(MemkindGetCapacityTestsFixedKindParam,
+       test_tc_memkind_verify_capacity_mmapped)
+{
+    const size_t MMAPPED_SIZE = GetParam();
+    void *addr = mmap(NULL, MMAPPED_SIZE, PROT_READ | PROT_WRITE,
+                      MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    struct memkind *kind = NULL;
+    memkind_create_fixed(addr, MMAPPED_SIZE, &kind);
+    ASSERT_EQ((const ssize_t)MMAPPED_SIZE, memkind_get_capacity(kind));
+    memkind_destroy_kind(kind);
+    munmap(addr, MMAPPED_SIZE);
 }
 
 TEST_F(MemkindGetCapacityTests, test_tc_memkind_verify_capacity_default)

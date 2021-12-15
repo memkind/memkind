@@ -33,6 +33,7 @@ examples/pmem_and_default_kind.c
 examples/pmem_and_dax_kmem.c
 examples/pmem_config.c
 examples/pmem_cpp_allocator.cpp
+examples/fixed_cpp_allocator.cpp
 examples/pmem_detect_kind.c
 examples/pmem_free_with_unknown_kind.c
 examples/pmem_kinds.c
@@ -59,6 +60,7 @@ include/memkind/internal/memkind_log.h
 include/memkind/internal/memkind_mem_attributes.h
 include/memkind/internal/memkind_memtier.h
 include/memkind/internal/memkind_pmem.h
+include/memkind/internal/memkind_fixed.h
 include/memkind/internal/memkind_private.h
 include/memkind/internal/memkind_regular.h
 include/memkind/internal/tbb_mem_pool_policy.h
@@ -67,6 +69,7 @@ include/memkind/internal/vec.h
 include/memkind_allocator.h
 include/memkind_deprecated.h
 include/pmem_allocator.h
+include/fixed_allocator.h
 jemalloc/.appveyor.yml
 jemalloc/.autom4te.cfg
 jemalloc/.gitattributes
@@ -403,9 +406,11 @@ man/memkind_hbw.3
 man/memkind_hugetlb.3
 man/memkind_memtier.3
 man/memkind_pmem.3
+man/memkind_fixed.3
 man/memkindallocator.3
 man/memtier.7
 man/pmemallocator.3
+man/fixedallocator.3
 memkind.pc.in
 memkind.spec.mk
 src/Makefile.mk
@@ -428,6 +433,7 @@ src/memkind_log.c
 src/memkind_mem_attributes.c
 src/memkind_memtier.c
 src/memkind_pmem.c
+src/memkind_fixed.c
 src/memkind_regular.c
 src/tbb_wrapper.c
 test/Allocator.hpp
@@ -544,6 +550,8 @@ test/performance/perf_tests.cpp
 test/performance/perf_tests.hpp
 test/pmem_alloc_performance_tests.cpp
 test/pmem_allocator_tests.cpp
+test/fixed_allocator_tests.cpp
+test/fixed_cpp_allocator.cpp
 test/proc_stat.h
 test/python_framework/__init__.py
 test/python_framework/cmd_helper.py
