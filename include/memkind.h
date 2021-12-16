@@ -9,7 +9,9 @@ extern "C" {
 #include <stdbool.h>
 #include <sys/types.h>
 
-#include "config.h"
+#ifndef MEMKIND_MALLOC_USABLE_SIZE_CONST
+#define MEMKIND_MALLOC_USABLE_SIZE_CONST
+#endif
 
 /**
  * Header file for the memkind heap manager.
