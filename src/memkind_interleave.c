@@ -6,7 +6,7 @@
 #include <memkind/internal/memkind_interleave.h>
 #include <memkind/internal/memkind_private.h>
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
+struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
