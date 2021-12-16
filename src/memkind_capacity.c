@@ -146,7 +146,7 @@ static int memkind_hi_cap_preferred_finalize(memkind_t kind)
     return memkind_arena_finalize(kind);
 }
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_OPS = {
+struct memkind_ops MEMKIND_HIGHEST_CAPACITY_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -167,7 +167,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_PREFERRED_OPS = {
+struct memkind_ops MEMKIND_HIGHEST_CAPACITY_PREFERRED_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,

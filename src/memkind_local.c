@@ -264,7 +264,7 @@ static void memkind_hi_bw_loc_preferred_init_once(void)
     memkind_init(MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED, true);
 }
 // clang-format off
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_OPS = {
+struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -285,7 +285,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_OPS = {
+struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -306,7 +306,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_OPS =
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_OPS = {
+struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -327,7 +327,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_OPS = {
+struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -348,7 +348,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_BANDWIDTH_LOCAL_OPS = {
+struct memkind_ops MEMKIND_HIGHEST_BANDWIDTH_LOCAL_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -369,7 +369,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_BANDWIDTH_LOCAL_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_OPS = {
+struct memkind_ops MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,

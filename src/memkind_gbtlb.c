@@ -15,7 +15,7 @@ static void memkind_gbtlb_init_once(void);
 
 static void *gbtlb_mmap(struct memkind *kind, void *addr, size_t size);
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
+struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -37,7 +37,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_GBTLB_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
+struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -59,7 +59,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_GBTLB_OPS = {
+struct memkind_ops MEMKIND_GBTLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,

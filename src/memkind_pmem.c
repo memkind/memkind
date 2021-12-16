@@ -24,7 +24,7 @@ extern void memtier_reset_size(unsigned id);
 #define MAP_SHARED_VALIDATE 0x03
 #endif
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
+struct memkind_ops MEMKIND_PMEM_OPS = {
     .create = memkind_pmem_create,
     .destroy = memkind_pmem_destroy,
     .malloc = memkind_arena_malloc,

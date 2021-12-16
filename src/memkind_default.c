@@ -27,7 +27,7 @@ static int memkind_default_get_kind_stat(struct memkind *kind,
     return memkind_arena_get_stat_with_check_init(kind, stat, true, value);
 }
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_DEFAULT_OPS = {
+struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .create = memkind_default_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_default_malloc,

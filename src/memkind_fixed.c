@@ -16,7 +16,7 @@
 
 extern void memtier_reset_size(unsigned id);
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_FIXED_OPS = {
+struct memkind_ops MEMKIND_FIXED_OPS = {
     .create = memkind_fixed_create,
     .destroy = memkind_fixed_destroy,
     .malloc = memkind_arena_malloc,

@@ -64,7 +64,7 @@ static int memkind_regular_finalize(memkind_t kind)
     return memkind_arena_finalize(kind);
 }
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_REGULAR_OPS = {
+struct memkind_ops MEMKIND_REGULAR_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
