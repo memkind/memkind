@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2021 Intel Corporation. */
+/* Copyright (C) 2021-2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_fixed.h>
@@ -16,7 +16,7 @@
 
 extern void memtier_reset_size(unsigned id);
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_FIXED_OPS = {
+struct memkind_ops MEMKIND_FIXED_OPS = {
     .create = memkind_fixed_create,
     .destroy = memkind_fixed_destroy,
     .malloc = memkind_arena_malloc,
