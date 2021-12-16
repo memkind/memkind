@@ -193,7 +193,7 @@ static void memkind_dax_kmem_interleave_init_once(void)
     memkind_init(MEMKIND_DAX_KMEM_INTERLEAVE, true);
 }
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
+struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -214,7 +214,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_ALL_OPS = {
+struct memkind_ops MEMKIND_DAX_KMEM_ALL_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -235,7 +235,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_ALL_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_PREFERRED_OPS = {
+struct memkind_ops MEMKIND_DAX_KMEM_PREFERRED_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -256,7 +256,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_PREFERRED_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_DAX_KMEM_INTERLEAVE_OPS = {
+struct memkind_ops MEMKIND_DAX_KMEM_INTERLEAVE_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
