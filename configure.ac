@@ -365,10 +365,11 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 size_t malloc_usable_size(const void *ptr);
 ]])], [memkind_malloc_usable_size_const="1"], [memkind_malloc_usable_size_const="0"])
 if test "x$memkind_malloc_usable_size_const" = "x1" ; then
-  AC_DEFINE([MEMKIND_MALLOC_USABLE_SIZE_CONST], [const], [malloc_usable_size accepts const ptr])
+  AC_DEFINE([MEMKIND_MALLOC_USABLE_SIZE_CONST], [const], [malloc_usable_size() accepts const ptr])
 else
-  AC_DEFINE([MEMKIND_MALLOC_USABLE_SIZE_CONST], [], [malloc_usable_size doesn't accept const ptr])
+  AC_DEFINE([MEMKIND_MALLOC_USABLE_SIZE_CONST], [], [malloc_usable_size() doesn't accept const ptr])
 fi
+AC_DEFINE([MEMKIND_MALLOC_USABLE_SIZE_CONST_DEFINED], [], [Checked if malloc_usable_size() accepts const ptr])
 
 #============================cxx11=============================================
 AX_CXX_COMPILE_STDCXX_11([noext], [optional])
