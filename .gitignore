@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.so
+*~
 .cproject
 .deps/
 .dirstamp
