@@ -590,3 +590,4 @@ include src/Makefile.mk
 include tiering/Makefile.mk
 include utils/memory_matrix/Makefile.mk
 include utils/memtier_counter_bench/Makefile.mk
+include utils/memtier/Makefile.mk
