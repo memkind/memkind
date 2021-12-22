@@ -1,3 +1,13 @@
+* Wed Dec 22 2021 Patryk Kaminski <patryk.kaminski@intel.com> v1.13.0
+- Added fixed kind for static maps (along with the C++ allocator)
+- Provided a function memkind_get_capacity() to get the memory capacity of nodes available
+  to a given kind
+- Optimized PMEM kind (allocating metadata from main memory)
+- Added logging to file mechanism (enabled with an --enable-logging-to-file configure parameter)
+- Updated ax_pthread.m4 to a new version from autoconf-archive
+- Fixed wrong NUMA nodes masks for some of static kinds
+- Fixed building when malloc_usable_size() requires a "const void*" argument
+
 * Wed Sep 1 2021 Patryk Kaminski <patryk.kaminski@intel.com> v1.12.0
 - Added memory tiering intercept library
 - Optimized hog memory
