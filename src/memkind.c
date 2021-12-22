@@ -2,7 +2,7 @@
 /* Copyright (C) 2014 - 2021 Intel Corporation. */
 
 #define MEMKIND_VERSION_MAJOR 1
-#define MEMKIND_VERSION_MINOR 12
+#define MEMKIND_VERSION_MINOR 13
 #define MEMKIND_VERSION_PATCH 0
 
 #include <memkind.h>
