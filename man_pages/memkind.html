@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Feb 25 12:49:23 2021 -->
+<!-- Creator     : groff version 1.22.4 -->
+<!-- CreationDate: Thu Dec 23 07:55:38 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -122,6 +122,9 @@ memkind_mem_usage_policy</b> <i>policy</i><b>);</b></p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>KIND
 MANAGEMENT: <br>
+int memkind_create_fixed(void</b> <i>*addr</i><b>,
+size_t</b> <i>size</i><b>, memkind_t</b> <i>*kind</i><b>);
+<br>
 int memkind_create_pmem(const char</b> <i>*dir</i><b>,
 size_t</b> <i>max_size</i><b>, memkind_t</b>
 <i>*kind</i><b>); <br>
@@ -130,6 +133,8 @@ memkind_config</b> <i>*cfg</i><b>, memkind_t</b>
 <i>*kind</i><b>); <br>
 int memkind_destroy_kind(memkind_t</b> <i>kind</i><b>); <br>
 int memkind_check_available(memkind_t</b> <i>kind</i><b>);
+<br>
+ssize_t memkind_get_capacity(memkind_t</b> <i>kind</i><b>);
 <br>
 int memkind_check_dax_path(const char</b>
 <i>*pmem_dir</i><b>);</b></p>
@@ -201,7 +206,9 @@ API&rsquo;s, except that the user must specify the
 function. See the <b>KINDS</b> section below for a full
 description of the implemented kinds. For file-backed kind
 of memory see <b>memkind_create_pmem</b>() or
-<b>memkind_create_pmem_with_config</b>().</p>
+<b>memkind_create_pmem_with_config</b>(). For memory kind
+created on user-specified area, please check
+<b>memkind_create_fixed</b>().</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_malloc</b>()
@@ -391,6 +398,20 @@ different kinds of memory and determining their
 properties.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_create_fixed</b>()
+is a function used to create a kind under user-specified
+area of memory. The memory can be allocated in any possible
+way, e.g. it might be a static array or an mmapped area.
+User can specify any properties using functions such as
+mbind. User is also responsible for de-allocation of memory
+after the kind destruction. The memory area must remain
+valid until fixed_kind is destroyed. The area starts at
+address <i>addr</i> and has size <i>size.</i> When heap
+manager runs out of memory (located under user-specified
+area), a call to <b>memkind_malloc</b>() returns <i>NULL</i>
+and <b>errno</b> is set to <b>ENOMEM.</b></p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_create_pmem</b>()
 is a convenient function used to create a file-backed kind
 of memory. It allocates a temporary file in the given
@@ -462,6 +483,23 @@ memory will be freed after kind will be destroyed.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_check_available</b>()
 returns zero if the specified <i>kind</i> is available or an
 error code from the <b>ERRORS</b> section if it is not.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind_get_capacity</b>()
+returns memory capacity of nodes available to a given
+<i>kind</i> (file size or filesystem capacity in case of a
+file-backed PMEM kind; total area size in the case of
+fixed-kind) or -1 in case of an error. Supported kinds are:
+<b>MEMKIND_DEFAULT, MEMKIND_HIGHEST_CAPACITY,
+MEMKIND_HIGHEST_CAPACITY_LOCAL,
+MEMKIND_LOWEST_LATENCY_LOCAL,
+MEMKIND_HIGHEST_BANDWIDTH_LOCAL, MEMKIND_HUGETLB,
+MEMKIND_INTERLEAVE, MEMKIND_HBW, MEMKIND_HBW_ALL,
+MEMKIND_HBW_INTERLEAVE, MEMKIND_DAX_KMEM,
+MEMKIND_DAX_KMEM_ALL, MEMKIND_DAX_KMEM_INTERLEAVE,
+MEMKIND_REGULAR</b> , file-backed PMEM and fixed-kind.
+<i>kind.</i> For <b>MEMKIND_HUGETLB</b> only pages with a
+default size of 2MB are supported.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>memkind_check_dax_path</b>()
@@ -1359,9 +1397,9 @@ extra huge pages (e.g. 8 huge pages).</p>
 <b>hwloc</b>(3), <b>numactl</b>(8), <b>mbind</b>(2),
 <b>mmap</b>(2), <b>move_pages</b>(2), <b>jemalloc</b>(3),
 <b>memkind_dax_kmem</b>(3), <b>memkind_default</b>(3),
-<b>memkind_arena</b>(3), <b>memkind_hbw</b>(3),
-<b>memkind_hugetlb</b>(3), <b>memkind_pmem</b>(3),
-<b>syscall(2), write(2)</b></p>
+<b>memkind_arena</b>(3), <b>memkind_fixed</b>(3),
+<b>memkind_hbw</b>(3), <b>memkind_hugetlb</b>(3),
+<b>memkind_pmem</b>(3), <b>syscall(2), write(2)</b></p>
 <hr>
 </body>
 </html>

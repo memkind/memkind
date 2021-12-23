@@ -1,0 +1,133 @@
+<!-- Creator     : groff version 1.22.4 -->
+<!-- CreationDate: Thu Dec 23 07:55:38 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>FIXEDALLOCATOR</title>
+
+</head>
+<body>
+
+<h1 align="center">FIXEDALLOCATOR</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">libmemkind::fixed::allocator&lt;T&gt;
+- The C++ allocator compatible with the C++ standard library
+allocator concepts <b><br>
+Note:</b> <i>fixed_allocator.h</i> is a part of stable API
+(STANDARD API).</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>#include
+&lt;fixed_allocator.h&gt;</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Link with
+-lmemkind</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>libmemkind::fixed::allocator(void</b>
+<i>*addr</i><b>, size_t</b> <i>size</i><b>); <br>
+template &lt;typename U&gt;
+libmemkind::fixed::allocator&lt;T&gt;::allocator(const
+libmemkind::fixed::allocator&lt;U&gt;&amp;) noexcept; <br>
+template &lt;typename U&gt;
+libmemkind::fixed::allocator&lt;T&gt;::allocator(allocator&lt;U&gt;&amp;&amp;</b>
+<i>other</i><b>) noexcept; <br>
+libmemkind::fixed::allocator&lt;T&gt;::~allocator(); <br>
+T
+*libmemkind::fixed::allocator&lt;T&gt;::allocate(std::size_t</b>
+<i>n</i><b>) const; <br>
+void libmemkind::fixed::allocator&lt;T&gt;::deallocate(T</b>
+<i>*p</i><b>, std::size_t</b> <i>n</i><b>) const; <br>
+template &lt;class U, class... Args&gt; void
+libmemkind::fixed::allocator&lt;T&gt;::construct(U</b>
+<i>*p</i><b>, Args...</b> <i>&amp;&amp;args</i><b>) const;
+<br>
+void libmemkind::fixed::allocator&lt;T&gt;::destroy(T</b>
+<i>*p</i><b>) const;</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+<b>libmemkind::fixed::allocator&lt;T&gt;</b> is intended to
+be used with STL containers to allocate memory on specific
+area. Memory management is handled by jemalloc on the
+supplied area. Refer <b>memkind</b>(3) man page for more
+details.</p>
+
+<p style="margin-left:11%; margin-top: 1em">All public
+member types and functions correspond to standard library
+allocator concepts and definitions. The current
+implementation supports C++11 standard.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Template
+arguments: <i><br>
+T</i> is an object type aliased by value_type. <i><br>
+U</i> is an object type.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Note: <br>
+T
+*libmemkind::fixed::allocator&lt;T&gt;::allocate(std::size_t</b>
+<i>n</i><b>)</b> allocates memory using
+<b>memkind_malloc</b>() on the area supplied to
+<b>libmemkind::fixed::allocator</b>(). Throws
+<i>std::bad_alloc</i> when:</p>
+
+<p style="margin-left:22%;"><i>n</i> = 0 <br>
+or there is not enough memory to satisfy the request.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>libmemkind::fixed::allocator&lt;T&gt;::deallocate(T</b>
+<i>*p</i><b>, std::size_t</b> <i>n</i><b>)</b> deallocates
+memory associated with pointer returned by <b>allocate</b>()
+using <b>memkind_free</b>().</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright (C)
+2021 Intel Corporation. All rights reserved.</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memkind</b>(3)</p>
+<hr>
+</body>
+</html>

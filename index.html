@@ -93,6 +93,24 @@ Memkind is hosted on <a href="https://github.com/memkind">GitHub</a>
           <h1 class="page-header">
             Blog
           </h1>
+<p class="lead">Release 1.13.0 is available</p><span class="post-date">Thu Dec 23 2021</span><p>I would like to announce memkind release <strong>1.13.0</strong>. Changes since 1.12.0:</p>
+<ul>
+<li>Thu Dec 23 2021 Patryk Kaminski <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#x3a;&#112;&#97;&#116;&#114;&#121;&#107;&#x2e;&#107;&#97;&#109;&#105;&#110;&#115;&#107;&#105;&#64;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;">&#112;&#97;&#116;&#114;&#121;&#107;&#x2e;&#107;&#97;&#109;&#105;&#110;&#115;&#107;&#105;&#64;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;</a> v1.13.0</li>
+</ul>
+<ul>
+<li>Added fixed kind for user-supplied memory area (along with the C++ allocator)</li>
+<li>Provided a function memkind_get_capacity() to get the memory capacity of nodes available
+to a given kind</li>
+<li>Optimized PMEM kind (allocating metadata from main memory)</li>
+<li>Added logging to file mechanism (enabled with an --enable-logging-to-file configure parameter)</li>
+<li>Fixed wrong NUMA nodes masks for some of static kinds</li>
+<li>Fixed building for different malloc_usable_size() implementations</li>
+</ul>
+<p>Sources are available on:
+<a href="https://github.com/memkind/memkind/releases/tag/v1.13.0">https://github.com/memkind/memkind/releases/tag/v1.13.0</a></p>
+<p>Best Regards,</p>
+<p><em>Patryk Kaminski</em></p>
+
 <p class="lead">Release 1.12.0 is available</p><span class="post-date">Wed Sep 01 2021</span><p>I would like to announce memkind release <strong>1.12.0</strong>. Changes since 1.11.0:</p>
 <ul>
 <li>Wed Sep 01 2021 Patryk Kaminski <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#x3a;&#112;&#97;&#116;&#114;&#121;&#107;&#x2e;&#107;&#97;&#109;&#105;&#110;&#115;&#107;&#105;&#64;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;">&#112;&#97;&#116;&#114;&#121;&#107;&#x2e;&#107;&#97;&#109;&#105;&#110;&#115;&#107;&#105;&#64;&#105;&#110;&#116;&#101;&#108;&#x2e;&#99;&#111;&#109;</a> v1.12.0</li>
