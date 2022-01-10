@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2021 Intel Corporation.
+# Copyright (C) 2021-2022 Intel Corporation.
 
 bin_PROGRAMS += memtier
 
