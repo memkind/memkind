@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (C) 2022 Intel Corporation.
+
 #define _GNU_SOURCE
 #include <getopt.h>
 #include <stdarg.h>
@@ -130,7 +133,8 @@ endarg:
 
     if (guess_ratio) {
         // a dummy malloc to force initialization of kinds
-        memkind_free(MEMKIND_REGULAR, memkind_malloc(MEMKIND_REGULAR, 1));
+        if (!getenv("FAKE_REGULAR"))
+            memkind_free(MEMKIND_REGULAR, memkind_malloc(MEMKIND_REGULAR, 1));
         ssize_t dram = memkind_get_capacity(MEMKIND_REGULAR);
         if (dram < 0)
             dram = 0;
