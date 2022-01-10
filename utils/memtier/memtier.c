@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (C) 2022 Intel Corporation.
+
 #define _GNU_SOURCE
 #include <getopt.h>
 #include <stdarg.h>
