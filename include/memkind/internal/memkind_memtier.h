@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2021 Intel Corporation. */
+/* Copyright (C) 2021-2022 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -31,6 +31,11 @@ typedef enum memtier_policy_t
      * Dynamic Threshold policy
      */
     MEMTIER_POLICY_DYNAMIC_THRESHOLD = 1,
+
+    /**
+     * Hotness data movement policy
+     */
+    MEMTIER_POLICY_DATA_MOVEMENT = 2,
 
     /**
      * Max policy value.
