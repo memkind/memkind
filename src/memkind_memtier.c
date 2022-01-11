@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2021 Intel Corporation. */
+/* Copyright (C) 2021-2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_memtier.h>
 
@@ -229,6 +229,14 @@ memtier_policy_dynamic_threshold_get_kind(struct memtier_memory *memory,
     return memory->cfg[i].kind;
 }
 
+static memkind_t
+memtier_policy_data_movement_get_kind(struct memtier_memory *memory,
+                                      size_t size)
+{
+    // TODO: add an implementation
+    return MEMKIND_DEFAULT;
+}
+
 static void print_memtier_memory(struct memtier_memory *memory)
 {
     int i;
@@ -349,8 +357,14 @@ memtier_policy_dynamic_threshold_update_config(struct memtier_memory *memory)
     memory->thres_check_cnt = memory->thres_init_check_cnt;
 }
 
+static void
+memtier_policy_data_movement_update_config(struct memtier_memory *memory)
+{
+    // Unsupported
+}
+
 static inline struct memtier_memory *
-memtier_memory_init(size_t tier_size, bool is_dynamic_threshold)
+memtier_memory_init(size_t tier_size, memtier_policy_t policy)
 {
     if (tier_size == 0) {
         log_err("No tier in builder.");
@@ -369,36 +383,44 @@ memtier_memory_init(size_t tier_size, bool is_dynamic_threshold)
         jemk_free(memory);
         return NULL;
     }
-    if (is_dynamic_threshold) {
-        memory->get_kind = memtier_policy_dynamic_threshold_get_kind;
-        memory->update_cfg = memtier_policy_dynamic_threshold_update_config;
-        memory->thres_check_cnt = THRESHOLD_CHECK_CNT;
-    } else {
-        if (tier_size == 1)
-            memory->get_kind = memtier_single_get_kind;
-        else {
-            memory->get_kind = memtier_policy_static_ratio_get_kind;
-        }
-        memory->update_cfg = memtier_policy_static_ratio_update_config;
+
+    switch (policy) {
+        case MEMTIER_POLICY_STATIC_RATIO:
+            if (tier_size == 1)
+                memory->get_kind = memtier_single_get_kind;
+            else {
+                memory->get_kind = memtier_policy_static_ratio_get_kind;
+            }
+            memory->update_cfg = memtier_policy_static_ratio_update_config;
+            break;
+        case MEMTIER_POLICY_DYNAMIC_THRESHOLD:
+            memory->get_kind = memtier_policy_dynamic_threshold_get_kind;
+            memory->update_cfg = memtier_policy_dynamic_threshold_update_config;
+            memory->thres_check_cnt = THRESHOLD_CHECK_CNT;
+            break;
+        case MEMTIER_POLICY_DATA_MOVEMENT:
+            memory->get_kind = memtier_policy_data_movement_get_kind;
+            memory->update_cfg = memtier_policy_data_movement_update_config;
+            break;
+        default:
+            log_err(
+                "Memtier memory initialization failed. Unrecognized memory policy %u",
+                policy);
+            jemk_free(memory->cfg);
+            jemk_free(memory);
+            return NULL;
     }
+
     memory->thres = NULL;
     memory->cfg_size = tier_size;
 
     return memory;
 }
 
-static struct memtier_memory *
-builder_static_create_memory(struct memtier_builder *builder)
+static void create_memory_common(struct memtier_builder *builder,
+                                 struct memtier_memory *memory)
 {
     int i;
-    struct memtier_memory *memory =
-        memtier_memory_init(builder->cfg_size, false);
-
-    if (!memory) {
-        log_err("memtier_memory_init failed.");
-        return NULL;
-    }
-
     for (i = 1; i < memory->cfg_size; ++i) {
         memory->cfg[i].kind = builder->cfg[i].kind;
         memory->cfg[i].kind_ratio =
@@ -406,6 +428,20 @@ builder_static_create_memory(struct memtier_builder *builder)
     }
     memory->cfg[0].kind = builder->cfg[0].kind;
     memory->cfg[0].kind_ratio = 1.0;
+}
+
+static struct memtier_memory *
+builder_static_create_memory(struct memtier_builder *builder)
+{
+    struct memtier_memory *memory =
+        memtier_memory_init(builder->cfg_size, MEMTIER_POLICY_STATIC_RATIO);
+
+    if (!memory) {
+        log_err("memtier_memory_init failed.");
+        return NULL;
+    }
+
+    create_memory_common(builder, memory);
 
     return memory;
 }
@@ -471,6 +507,14 @@ static int builder_dynamic_ctl_set(struct memtier_builder *builder,
     return -1;
 }
 
+static int builder_movement_ctl_set(struct memtier_builder *builder,
+                                    const char *name, const void *val)
+{
+    // Unsupported
+    log_err("Invalid name: %s", name);
+    return -1;
+}
+
 static struct memtier_memory *
 builder_dynamic_create_memory(struct memtier_builder *builder)
 {
@@ -490,7 +534,8 @@ builder_dynamic_create_memory(struct memtier_builder *builder)
         return NULL;
     }
 
-    memory = memtier_memory_init(builder->cfg_size, true);
+    memory = memtier_memory_init(builder->cfg_size,
+                                 MEMTIER_POLICY_DYNAMIC_THRESHOLD);
     if (!memory) {
         jemk_free(thres);
         log_err("memtier_memory_init failed.");
@@ -551,13 +596,7 @@ builder_dynamic_create_memory(struct memtier_builder *builder)
         goto failure;
     }
 
-    for (i = 1; i < memory->cfg_size; ++i) {
-        memory->cfg[i].kind = builder->cfg[i].kind;
-        memory->cfg[i].kind_ratio =
-            builder->cfg[0].kind_ratio / builder->cfg[i].kind_ratio;
-    }
-    memory->cfg[0].kind = builder->cfg[0].kind;
-    memory->cfg[0].kind_ratio = 1.0;
+    create_memory_common(builder, memory);
 
     return memory;
 
@@ -566,6 +605,28 @@ failure:
     jemk_free(memory->cfg);
     jemk_free(memory);
     return NULL;
+}
+
+static struct memtier_memory *
+builder_movement_create_memory(struct memtier_builder *builder)
+{
+    if (builder->cfg_size < 2) {
+        log_err("There should be at least 2 tiers added to builder "
+                "to use POLICY_DATA_MOVEMENT");
+        return NULL;
+    }
+
+    struct memtier_memory *memory =
+        memtier_memory_init(builder->cfg_size, MEMTIER_POLICY_DATA_MOVEMENT);
+
+    if (!memory) {
+        log_err("memtier_memory_init failed.");
+        return NULL;
+    }
+
+    create_memory_common(builder, memory);
+
+    return memory;
 }
 
 static int builder_dynamic_update(struct memtier_builder *builder)
@@ -610,6 +671,13 @@ memtier_builder_new(memtier_policy_t policy)
                 b->check_cnt = THRESHOLD_CHECK_CNT;
                 b->trigger = THRESHOLD_TRIGGER;
                 b->degree = THRESHOLD_DEGREE;
+                return b;
+            case MEMTIER_POLICY_DATA_MOVEMENT:
+                b->create_mem = builder_movement_create_memory;
+                b->update_builder = NULL;
+                b->ctl_set = builder_movement_ctl_set;
+                b->cfg = NULL;
+                b->thres = NULL;
                 return b;
             default:
                 log_err("Unrecognized memory policy %u", policy);
