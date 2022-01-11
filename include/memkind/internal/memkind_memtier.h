@@ -33,6 +33,11 @@ typedef enum memtier_policy_t
     MEMTIER_POLICY_DYNAMIC_THRESHOLD = 1,
 
     /**
+     * Hotness data movement policy
+     */
+    MEMTIER_POLICY_DATA_MOVEMENT = 2,
+
+    /**
      * Max policy value.
      */
     MEMTIER_POLICY_MAX_VALUE
