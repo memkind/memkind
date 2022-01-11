@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2021 Intel Corporation. */
+/* Copyright (C) 2021-2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_memtier.h>
 #include <tiering/memtier_log.h>
@@ -161,6 +161,8 @@ static int ctl_parse_policy(char *qbuf, memtier_policy_t *policy)
         *policy = MEMTIER_POLICY_STATIC_RATIO;
     } else if (strcmp(qbuf, "DYNAMIC_THRESHOLD") == 0) {
         *policy = MEMTIER_POLICY_DYNAMIC_THRESHOLD;
+    } else if (strcmp(qbuf, "DATA_MOVEMENT") == 0) {
+        *policy = MEMTIER_POLICY_DATA_MOVEMENT;
     } else {
         log_err("Unknown policy: %s", qbuf);
         return -1;
