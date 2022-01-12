@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2021 Intel Corporation.
+# Copyright (C) 2014 - 2022 Intel Corporation.
 
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
@@ -563,6 +563,7 @@ unit_tests_dax_kmem: checkprogs
 	test/test_dax_kmem.sh
 
 unit_tests_tiering: tiering/libmemtier.la checkprogs
+	test/memkind_memtier_data_movement_test
 	test/memkind_memtier_dax_kmem_test
 	test/memkind_memtier_test
 	PMEM_PATH=$(PMEM_PATH) @pytest@ -rs test/tiering_tests.py
