@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2021 Intel Corporation.
+# Copyright (C) 2014 - 2022 Intel Corporation.
 
 # targets for building rpm
 version ?= 0.0.0
@@ -204,6 +204,7 @@ $(memkind_test_dir)/memkind_allocated
 $(memkind_test_dir)/memkind_cpp_allocator
 $(memkind_test_dir)/memkind_get_stat
 ${memkind_test_dir}/memkind_highcapacity_test
+${memkind_test_dir}/memkind_memtier_data_movement_test
 ${memkind_test_dir}/memkind_memtier_dax_kmem_test
 ${memkind_test_dir}/memkind_memtier_test
 $(memkind_test_dir)/memkind_stat_test
