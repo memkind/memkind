@@ -170,6 +170,7 @@ which are using the memkind library for dynamic linking at run time:
 | MEMKIND_DAX_KMEM_PREFERRED                | X     |             |           | X          |                                     |      |          |
 | MEMKIND_DAX_KMEM_INTERLEAVE               | X     |             |           | X          |                                     |      |          |
 | PMEM kind                                 |       |             |           |            | X                                   |      |          |
+| Fixed kind                                |       |             |           |            |                                     |      |          |
 
 *not needed for Intel's 2nd generation Intel(R) Xeon Phi(TM)
 
