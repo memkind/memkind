@@ -354,7 +354,7 @@ MEMKIND_HBW_THRESHOLD is in MB/s. For example, to set to 100 GB/s:
 ## Projects
 The following software use memkind library:
 
-* [MemKeyDB](https://github.com/memKeyDB/memKeyDB)
+* [TieredMemDB](https://tieredmemdb.github.io/)
 
 ## Testing
 All existing tests pass. For more information on how to execute tests
