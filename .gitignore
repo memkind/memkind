@@ -110,6 +110,7 @@
 /test/memkind_get_stat
 /test/memkind_highcapacity_test
 /test/memkind_stat_test
+/test/memkind_memtier_data_movement_test
 /test/memkind_memtier_dax_kmem_test
 /test/memkind_memtier_test
 /test/perf_tool
