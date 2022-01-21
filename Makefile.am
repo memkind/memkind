@@ -475,7 +475,7 @@ pkgconfig_DATA = memkind.pc
 CLEANFILES = memkind-$(VERSION).spec $(libmemkind_la_LIBADD)
 DISTCLEANFILES = VERSION configure pkgconfig_DATA
 
-bin_PROGRAMS = memkind-auto-dax-kmem-nodes memkind-hbw-nodes
+bin_PROGRAMS = memkind-auto-dax-kmem-nodes memkind-hbw-nodes memtier
 
 memkind_auto_dax_kmem_nodes_SOURCES = src/memkind-auto-dax-kmem-nodes.c
 memkind_auto_dax_kmem_nodes_LDADD = libmemkind.la
