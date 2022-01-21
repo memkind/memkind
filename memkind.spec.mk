@@ -156,6 +156,7 @@ rm -f %{buildroot}/%{_libdir}/libmemtier.{l,}a
 %{_libdir}/libmemtier.so.*
 %{_bindir}/%{namespace}-auto-dax-kmem-nodes
 %{_bindir}/%{namespace}-hbw-nodes
+%{_bindir}/memtier
 
 %files devel
 %defattr(-,root,root,-)
