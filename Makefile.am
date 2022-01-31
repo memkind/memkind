@@ -32,6 +32,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/tbb_wrapper.c \
                         src/bigary.c \
                         src/slab_allocator.c \
+                        src/hasher.c \
                         # end
 
 
@@ -69,6 +70,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/vec.h \
                   include/memkind/internal/bigary.h \
                   include/memkind/internal/slab_allocator.h \
+                  include/memkind/internal/hasher.h \
                   # end
 
 EXTRA_DIST = CONTRIBUTING \

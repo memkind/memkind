@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2021-2022 Intel Corporation. */
 
+#include <memkind/internal/hasher.h>
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/slab_allocator.h>
 
 #include <gtest/gtest.h>
+#include <mutex>
 
 class MemkindMemtierDataMovementTest: public ::testing::Test
 {
@@ -230,5 +232,56 @@ TEST(SlabAlloc, Alignment)
     test_slab_alloc_alignment(7, 291);
 }
 
-// TODO add a test for SLAB_ALLOC where we handle allocations of total
-// size bigger than init mapping
+static uint16_t calculate_hash_with_stack_variation(size_t size_rank,
+                                                    size_t added_stack)
+{
+    // prevent optimisations
+    static std::mutex mut;
+    std::unique_lock<std::mutex> lock(mut);
+    volatile uint8_t buffer[added_stack];
+    for (size_t i = 0; i < added_stack; ++i)
+        buffer[i] = 0;
+    (void)buffer;
+    lock.unlock();
+    return hasher_calculate_hash(size_rank);
+}
+
+TEST(Hasher, Basic)
+{
+#define SIZE_RANK(hash)       ((hash)&0b1111111)
+#define LSB_9(val)            ((val)&0b111111111)
+#define STACK_SIZE_HASH(hash) ((uint16_t)(LSB_9((hash) >> 7)))
+
+    ASSERT_EQ(SIZE_RANK(hasher_calculate_hash(0)), 0);
+    ASSERT_EQ(SIZE_RANK(hasher_calculate_hash(16)), 16);
+    ASSERT_EQ(SIZE_RANK(hasher_calculate_hash(127)), 127);
+
+    const size_t MIN_DIFF = 128u; // multiple of a cacheline
+    std::vector<std::pair<size_t, size_t>> vals = {
+        {127, 0},
+        {127, MIN_DIFF},
+        {127, MIN_DIFF * 2},
+        {127, MIN_DIFF * 3},
+        {127, MIN_DIFF * 2},
+        {127, 0},
+        {28, 0},
+        {28, MIN_DIFF},
+        {128, 0},
+    };
+    // hash, expected offset
+    std::vector<std::pair<uint16_t, uint16_t>> hashes;
+    hashes.reserve(vals.size());
+    for (auto &val : vals) {
+        auto size_rank = val.first;
+        auto expected_offset = val.second;
+        uint16_t hash_temp =
+            calculate_hash_with_stack_variation(size_rank, expected_offset);
+        hashes.push_back(std::make_pair((uint16_t)hash_temp, expected_offset));
+    }
+    for (auto &thash : hashes) {
+        auto hash = thash.first;
+        auto expected_offset = thash.second;
+        ASSERT_EQ(LSB_9(STACK_SIZE_HASH(hash) + expected_offset),
+                  STACK_SIZE_HASH(hashes[0].first));
+    }
+}
