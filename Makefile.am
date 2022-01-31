@@ -30,6 +30,8 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_pmem.c \
                         src/memkind_regular.c \
                         src/tbb_wrapper.c \
+                        src/bigary.c \
+                        src/slab_allocator.c \
                         # end
 
 
@@ -65,6 +67,8 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/tbb_mem_pool_policy.h \
                   include/memkind/internal/tbb_wrapper.h \
                   include/memkind/internal/vec.h \
+                  include/memkind/internal/bigary.h \
+                  include/memkind/internal/slab_allocator.h \
                   # end
 
 EXTRA_DIST = CONTRIBUTING \
@@ -491,7 +495,7 @@ TESTS =
 
 req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DJE_PREFIX=@memkind_prefix@ -DMEMTIER_ALLOC_PREFIX=@memtier_prefix@
 
-AM_CFLAGS = $(req_flags)
+AM_CFLAGS = $(req_flags) -std=gnu11
 AM_CXXFLAGS = $(req_flags)
 
 clean-local: clean-jemalloc_deps
