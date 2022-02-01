@@ -5,10 +5,13 @@
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/pool_allocator.h>
 #include <memkind/internal/slab_allocator.h>
+#include <mtt_allocator.h>
 
 #include <gtest/gtest.h>
 #include <mutex>
 #include <set>
+
+#include <test/proc_stat.h>
 
 class MemkindMemtierDataMovementTest: public ::testing::Test
 {
@@ -350,4 +353,24 @@ TEST_F(PoolAllocTest, Basic)
     pool_allocator_free(a33);
 
     pool_allocator_destroy(&pool);
+}
+
+TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
+{
+    ProcStat proc_stat;
+    MTTAllocator mtt_allocator;
+
+    unsigned threads_count = proc_stat.get_threads_count();
+    ASSERT_EQ(threads_count, 1U);
+
+    mtt_allocator_create(&mtt_allocator);
+
+    threads_count = proc_stat.get_threads_count();
+    ASSERT_EQ(threads_count, 2U);
+
+    mtt_allocator_destroy(&mtt_allocator);
+
+    sleep(1);
+    threads_count = proc_stat.get_threads_count();
+    ASSERT_EQ(threads_count, 1U);
 }
