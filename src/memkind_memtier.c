@@ -2,6 +2,7 @@
 /* Copyright (C) 2021-2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_memtier.h>
+#include <memkind/internal/memkind_memtier_mtt_allocator.h>
 
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_log.h>
@@ -626,6 +627,8 @@ builder_movement_create_memory(struct memtier_builder *builder)
 
     create_memory_common(builder, memory);
 
+    memkind_mtt_create();
+
     return memory;
 }
 
@@ -743,6 +746,11 @@ memtier_builder_construct_memtier_memory(struct memtier_builder *builder)
 MEMKIND_EXPORT void memtier_delete_memtier_memory(struct memtier_memory *memory)
 {
     print_memtier_memory(memory);
+
+    if (memory->get_kind == memtier_policy_data_movement_get_kind) {
+        memkind_mtt_destroy();
+    }
+
     jemk_free(memory->thres);
     jemk_free(memory->cfg);
     jemk_free(memory);

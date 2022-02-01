@@ -4,6 +4,7 @@
 #include <memkind/internal/memkind_memtier.h>
 
 #include <gtest/gtest.h>
+#include <test/proc_stat.h>
 
 class MemkindMemtierDataMovementTest: public ::testing::Test
 {
@@ -58,4 +59,35 @@ TEST_F(MemkindMemtierDataMovementTest,
     ASSERT_EQ(0, res);
     m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
     ASSERT_EQ(nullptr, m_tier_memory);
+}
+
+TEST(MemkindMemtierDataMovementBgThreadTest, test_bg_thread_lifecycle)
+{
+    struct memtier_memory *m_tier_memory = nullptr;
+    ProcStat proc_stat;
+
+    struct memtier_builder *m_builder =
+        memtier_builder_new(MEMTIER_POLICY_DATA_MOVEMENT);
+    ASSERT_NE(nullptr, m_builder);
+    int res = memtier_builder_add_tier(m_builder, MEMKIND_DEFAULT, 1);
+    ASSERT_EQ(0, res);
+    res = memtier_builder_add_tier(m_builder, MEMKIND_REGULAR, 2);
+    ASSERT_EQ(0, res);
+
+    unsigned old_threads_count = proc_stat.get_threads_count();
+    m_tier_memory = memtier_builder_construct_memtier_memory(m_builder);
+    ASSERT_NE(nullptr, m_tier_memory);
+    memtier_builder_delete(m_builder);
+
+    unsigned new_threads_count = proc_stat.get_threads_count();
+    ASSERT_GT(new_threads_count,
+              old_threads_count); // check if there are more threads now
+
+    if (m_tier_memory) {
+        memtier_delete_memtier_memory(m_tier_memory);
+    }
+
+    sleep(2);
+    new_threads_count = proc_stat.get_threads_count();
+    ASSERT_EQ(old_threads_count, new_threads_count);
 }
