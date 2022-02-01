@@ -4,9 +4,11 @@
 #include <memkind/internal/hasher.h>
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/slab_allocator.h>
+#include <mtt_allocator.h>
 
 #include <gtest/gtest.h>
 #include <mutex>
+#include <test/proc_stat.h>
 
 class MemkindMemtierDataMovementTest: public ::testing::Test
 {
@@ -284,4 +286,24 @@ TEST(Hasher, Basic)
         ASSERT_EQ(LSB_9(STACK_SIZE_HASH(hash) + expected_offset),
                   STACK_SIZE_HASH(hashes[0].first));
     }
+}
+
+TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
+{
+    ProcStat proc_stat;
+    MTTAllocator mtt_allocator;
+
+    unsigned threads_count = proc_stat.get_threads_count();
+    ASSERT_EQ(threads_count, 1U);
+
+    mtt_allocator_create(&mtt_allocator);
+
+    threads_count = proc_stat.get_threads_count();
+    ASSERT_EQ(threads_count, 2U);
+
+    int ret = mtt_allocator_destroy(&mtt_allocator);
+    ASSERT_EQ(ret, 0);
+
+    threads_count = proc_stat.get_threads_count();
+    ASSERT_EQ(threads_count, 1U);
 }
