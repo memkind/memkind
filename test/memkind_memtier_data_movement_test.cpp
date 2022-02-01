@@ -3,8 +3,10 @@
 
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/slab_allocator.h>
+#include <mtt_allocator.h>
 
 #include <gtest/gtest.h>
+#include <test/proc_stat.h>
 
 class MemkindMemtierDataMovementTest: public ::testing::Test
 {
@@ -232,3 +234,23 @@ TEST(SlabAlloc, Alignment)
 
 // TODO add a test for SLAB_ALLOC where we handle allocations of total
 // size bigger than init mapping
+
+TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
+{
+    ProcStat proc_stat;
+    MTTAllocator mtt_allocator;
+
+    unsigned threads_count = proc_stat.get_threads_count();
+    ASSERT_EQ(threads_count, 1U);
+
+    mtt_allocator_create(&mtt_allocator);
+
+    threads_count = proc_stat.get_threads_count();
+    ASSERT_EQ(threads_count, 2U);
+
+    int ret = mtt_allocator_destroy(&mtt_allocator);
+    ASSERT_EQ(ret, 0);
+
+    threads_count = proc_stat.get_threads_count();
+    ASSERT_EQ(threads_count, 1U);
+}
