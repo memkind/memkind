@@ -5,6 +5,7 @@
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/pebs.h>
 #include <memkind/internal/pool_allocator.h>
+#include <memkind/internal/ranking.h>
 #include <memkind/internal/slab_allocator.h>
 #include <mtt_allocator.h>
 
