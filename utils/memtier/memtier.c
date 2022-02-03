@@ -40,7 +40,8 @@ static void help(void)
         "                    defaults to amount of memory installed on this system.\n"
         "                    1:3 means 1 byte of DRAM will be used per 3 bytes of PMEM.\n"
         "    -t/--threshold  alloc size threshold configurations, see the man page\n"
-        "    -v/--verbose    display generated configuration\n");
+        "    -v/--verbose    display generated configuration\n"
+        "    -h/--help       this message\n");
 }
 
 // Require the approximation to be within 10%.
@@ -94,7 +95,7 @@ int main(int argc, char **argv)
         switch (getopt_long(argc, argv, "+r:t:vh", long_options, 0)) {
             case -1:
                 goto endarg;
-            case 'r':; // ancient gcc requires an empty statement here
+            case 'r':; // ancient gcc (Centos 7) requires an empty statement here
                 char *br;
                 ratio[0] = strtoul(optarg, &br, 0);
                 if (*br != ':')
@@ -125,7 +126,8 @@ int main(int argc, char **argv)
 endarg:
 
     if (guess_ratio) {
-        free(malloc(1)); // a dummy malloc to force initialization of kinds
+        // a dummy malloc to force initialization of kinds
+        memkind_free(MEMKIND_REGULAR, memkind_malloc(MEMKIND_REGULAR, 1));
         ssize_t dram = memkind_get_capacity(MEMKIND_REGULAR);
         if (dram < 0)
             dram = 0;
@@ -136,7 +138,7 @@ endarg:
         size_t d = human_friendly_ratio(dram, pmem);
         ratio[0] = dram / d;
         ratio[1] = pmem / d;
-        vmsg("Using ratio of DRAM:KMEM %zu:%zu\n", ratio[0], ratio[1]);
+        vmsg("Using ratio of DRAM:KMEM_DAX %zu:%zu\n", ratio[0], ratio[1]);
     }
 
     if (!ratio[0] && !ratio[1])
@@ -145,8 +147,11 @@ endarg:
     if (thresh && (!ratio[0] || !ratio[1]))
         die(PN ": --threshold requires multiple tiers with non-zero ratios.\n");
 
-    if (optind >= argc)
-        die("Usage: " PN " [options] command [args]\n");
+    if (optind >= argc) {
+        fprintf(stderr, "Usage: " PN " [options] command [args]\n");
+        help();
+        return 1;
+    }
 
     printf("\e[31:1m$0=｢\e[22m%s\e[1m｣\e[0m\n", argv[0]);
     char libpath[4096];
