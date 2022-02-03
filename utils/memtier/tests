@@ -1,0 +1,29 @@
+#!/bin/sh
+set -e
+
+err=0
+MEMTIER=../../memtier
+
+gcc -Wall -shared fakecap.c -fPIC -o fakecap.so
+
+$MEMTIER -r 1:0 /bin/true
+
+calc_ratio()
+{
+    ratio=$(FAKE_REGULAR=$1 FAKE_DAX_KMEM=$2 LD_PRELOAD=$(pwd)/fakecap.so $MEMTIER -v none 2>&1|
+        grep 'Using ratio'|cut -d' ' -f5)
+    if [ "x$3" = "x$ratio" ]; then
+        printf '\e[32m✓\e[0m %s %s → %s\n' $1 $2 "$ratio";
+    else
+        printf '\e[31m✗\e[0m %s %s → %s\n' $1 $2 "$ratio";
+        err=1
+    fi
+}
+
+calc_ratio 1 1 1:1
+calc_ratio 512 4096 1:8
+calc_ratio 512G 4T 1:8
+calc_ratio 1000017 3000000 1:3
+calc_ratio 20G 50G 2:5
+
+exit $err
