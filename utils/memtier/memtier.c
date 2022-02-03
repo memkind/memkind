@@ -112,7 +112,7 @@ int main(int argc, char **argv)
                 }
                 if (ratio[0] > PETA || ratio[1] > PETA) // overflow somewhere?
                     die(PN
-                        ": the number to --ratio doesn't seem to be sane.\n");
+                        ": the number to --ratio doesn't seem to be plausible.\n");
                 guess_ratio = false;
                 break;
             case 't':
