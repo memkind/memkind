@@ -35,6 +35,8 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/slab_allocator.c \
                         src/hasher.c \
                         src/pool_allocator.c \
+                        src/ranking.cpp \
+                        src/ranking_internals.cpp \
                         # end
 
 
@@ -75,6 +77,8 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/slab_allocator.h \
                   include/memkind/internal/hasher.h \
                   include/memkind/internal/pool_allocator.h \
+                  include/memkind/internal/ranking.h \
+                  include/memkind/internal/ranking_internals.hpp \
                   # end
 
 EXTRA_DIST = CONTRIBUTING \
