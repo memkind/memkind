@@ -2,6 +2,7 @@
 /* Copyright (C) 2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/pebs.h>
 #include <mtt_allocator.h>
 
 #include <stdlib.h>
@@ -13,6 +14,13 @@ static void *mtt_run_bg_thread(void *mtt_alloc)
     MTTAllocator *mtt_allocator = mtt_alloc;
     pthread_mutex_t *bg_thread_cond_mutex =
         &mtt_allocator->bg_thread_cond_mutex;
+
+    // set low priority
+    int policy;
+    struct sched_param param;
+    pthread_getschedparam(pthread_self(), &policy, &param);
+    param.sched_priority = sched_get_priority_min(policy);
+    pthread_setschedparam(pthread_self(), policy, &param);
 
     pthread_mutex_lock(bg_thread_cond_mutex);
     mtt_allocator->bg_thread_state = THREAD_RUNNING;
@@ -26,6 +34,8 @@ static void *mtt_run_bg_thread(void *mtt_alloc)
             run = false;
         }
         pthread_mutex_unlock(bg_thread_cond_mutex);
+
+        pebs_monitor();
     }
 
     return NULL;
@@ -37,6 +47,8 @@ static void *mtt_run_bg_thread(void *mtt_alloc)
 
 MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator)
 {
+    pebs_create();
+
     pthread_mutex_init(&mtt_allocator->bg_thread_cond_mutex, NULL);
     pthread_cond_init(&mtt_allocator->bg_thread_cond, NULL);
 
@@ -67,4 +79,6 @@ MEMKIND_EXPORT void mtt_allocator_destroy(MTTAllocator *mtt_allocator)
 
     pthread_mutex_destroy(bg_thread_cond_mutex);
     pthread_cond_destroy(&mtt_allocator->bg_thread_cond);
+
+    pebs_destroy();
 }
