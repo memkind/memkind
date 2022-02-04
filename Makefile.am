@@ -34,11 +34,12 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/bigary.c \
                         src/slab_allocator.c \
                         src/hasher.c \
+                        src/pebs.c \
                         # end
 
 
 libmemkind_la_LIBADD = jemalloc/lib/libjemalloc_pic.a
-libmemkind_la_LDFLAGS = -version-info 0:1:0 -ldl -lrt
+libmemkind_la_LDFLAGS = -version-info 0:1:0 -ldl -lrt -lpfm
 include_HEADERS = include/hbw_allocator.h \
                   include/hbwmalloc.h \
                   include/memkind.h \
@@ -67,6 +68,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
                   include/memkind/internal/memkind_regular.h \
+                  include/memkind/internal/pebs.h \
                   include/memkind/internal/tbb_mem_pool_policy.h \
                   include/memkind/internal/tbb_wrapper.h \
                   include/memkind/internal/vec.h \
@@ -497,7 +499,8 @@ noinst_PROGRAMS =
 noinst_LTLIBRARIES =
 TESTS =
 
-req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DJE_PREFIX=@memkind_prefix@ -DMEMTIER_ALLOC_PREFIX=@memtier_prefix@
+req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DJE_PREFIX=@memkind_prefix@ \
+-DMEMTIER_ALLOC_PREFIX=@memtier_prefix@ -DCPU_LOGICAL_CORES_NUMBER=`nproc --all`
 
 AM_CFLAGS = $(req_flags) -std=gnu11
 AM_CXXFLAGS = $(req_flags)

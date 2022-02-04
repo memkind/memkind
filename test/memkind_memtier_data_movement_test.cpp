@@ -3,6 +3,7 @@
 
 #include <memkind/internal/hasher.h>
 #include <memkind/internal/memkind_memtier.h>
+#include <memkind/internal/pebs.h>
 #include <memkind/internal/slab_allocator.h>
 #include <mtt_allocator.h>
 
@@ -306,4 +307,31 @@ TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
 
     threads_count = proc_stat.get_threads_count();
     ASSERT_EQ(threads_count, 1U);
+}
+
+TEST(PEBS, Basic)
+{
+    // PEBS is enabled during MTT allocator creation
+    MTTAllocator mtt_allocator;
+    mtt_allocator_create(&mtt_allocator);
+
+    // do some copying - L3 misses are expected here
+    const int s = 1024 * 1024 * 1024;
+    int a = 0;
+    int *t = (int *)malloc(s * sizeof(int));
+    for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < s / 2; i++) {
+            t[i] += t[i * 2] + j;
+            a += t[i];
+        }
+    }
+
+    // this is done to avoid compiler optimizations
+    ASSERT_EQ(a, a);
+
+    // check debug value defined in pebs.c
+    ASSERT_GT(pebs_all_samples, 0);
+
+    int ret = mtt_allocator_destroy(&mtt_allocator);
+    ASSERT_EQ(ret, 0);
 }

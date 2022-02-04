@@ -2,6 +2,7 @@
 /* Copyright (C) 2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/pebs.h>
 #include <mtt_allocator.h>
 
 #include <stdlib.h>
@@ -15,15 +16,20 @@ static void *mtt_run_bg_thread(void *mtt_alloc)
     pthread_mutex_t *bg_thread_cond_mutex =
         &mtt_allocator->bg_thread_cond_mutex;
 
+    // set low priority
+    int policy;
+    struct sched_param param;
+    pthread_getschedparam(pthread_self(), &policy, &param);
+    param.sched_priority = sched_get_priority_min(policy);
+    pthread_setschedparam(pthread_self(), policy, &param);
+
     pthread_mutex_lock(bg_thread_cond_mutex);
     *bg_thread_state = THREAD_RUNNING;
     pthread_cond_signal(&mtt_allocator->bg_thread_cond);
     pthread_mutex_unlock(bg_thread_cond_mutex);
 
-    while (1) {
-        if (*bg_thread_state == THREAD_FINISHED) {
-            break;
-        }
+    while (*bg_thread_state != THREAD_FINISHED) {
+        pebs_monitor();
     }
 
     return NULL;
@@ -35,6 +41,8 @@ static void *mtt_run_bg_thread(void *mtt_alloc)
 
 MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator)
 {
+    pebs_create();
+
     pthread_mutex_init(&mtt_allocator->bg_thread_cond_mutex, NULL);
     pthread_cond_init(&mtt_allocator->bg_thread_cond, NULL);
 
@@ -62,6 +70,8 @@ MEMKIND_EXPORT int mtt_allocator_destroy(MTTAllocator *mtt_allocator)
 
     pthread_join(mtt_allocator->bg_thread, NULL);
     log_info("MTT background thread closed");
+
+    pebs_destroy();
 
     return 0;
 }
