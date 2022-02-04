@@ -3,6 +3,7 @@
 
 #include <memkind/internal/hasher.h>
 #include <memkind/internal/memkind_memtier.h>
+#include <memkind/internal/pebs.h>
 #include <memkind/internal/pool_allocator.h>
 #include <memkind/internal/slab_allocator.h>
 #include <mtt_allocator.h>
@@ -373,4 +374,42 @@ TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
     sleep(1);
     threads_count = proc_stat.get_threads_count();
     ASSERT_EQ(threads_count, 1U);
+}
+
+TEST(PEBS, Basic)
+{
+    // do some copying - L3 misses are expected here
+    const int size = 1024 * 1024 * 1024;
+    volatile int total_sum = 0;
+    volatile int *tab = (int *)malloc(size * sizeof(int));
+    for (int i = 0; i < size; i++) {
+        tab[i] = i;
+    }
+
+    pebs_debug_check_low = (void *)&tab[0];
+    pebs_debug_check_hi = (void *)&tab[size - 1];
+
+    // TODO remove after POC - debug only
+    // fprintf(stderr, "array start - end: %p - %p\n", pebs_debug_check_low,
+    //    pebs_debug_check_hi);
+
+    // PEBS is enabled during MTT allocator creation
+    MTTAllocator mtt_allocator;
+    mtt_allocator_create(&mtt_allocator);
+
+    for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < size / 2; i++) {
+            tab[i] += tab[i * 2] + j;
+            total_sum += tab[i];
+        }
+    }
+
+    // this is done to avoid compiler optimizations
+    ASSERT_EQ(total_sum, total_sum);
+
+    // check debug value defined in pebs.c
+    ASSERT_GT(pebs_debug_num_samples, 0);
+    fprintf(stderr, "got %d samples\n", pebs_debug_num_samples);
+
+    mtt_allocator_destroy(&mtt_allocator);
 }
