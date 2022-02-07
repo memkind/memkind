@@ -25,6 +25,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     libkmod-dev \
     libnuma-dev \
     libpciaccess-dev \
+    libpfm4-dev \
     libpixman-1-dev \
     libtirpc-dev \
     libtool \

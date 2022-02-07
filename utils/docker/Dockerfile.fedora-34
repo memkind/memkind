@@ -24,6 +24,7 @@ RUN dnf update -y && dnf install -y \
     libattr-devel \
     libcap-ng-devel \
     libpciaccess-devel \
+    libpfm-devel \
     libtirpc-devel \
     libtool \
     libudev-devel \
