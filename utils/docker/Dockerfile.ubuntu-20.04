@@ -6,6 +6,9 @@ FROM ubuntu:20.04
 
 LABEL maintainer="patryk.kaminski@intel.com"
 
+# Set apt-get proxy
+RUN echo "Acquire::http::proxy \"$HTTP_PROXY\";\nAcquire::https::proxy \"$HTTPS_PROXY\";" > /etc/apt/apt.conf
+
 # Update the Apt cache and install basic tools
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     asciidoctor \
