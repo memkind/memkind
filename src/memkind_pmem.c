@@ -227,9 +227,8 @@ exit:
     return err;
 }
 
-MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
-                                       struct memkind_ops *ops,
-                                       const char *name)
+int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops,
+                        const char *name)
 {
     struct memkind_pmem *priv;
     int err;

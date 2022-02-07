@@ -170,9 +170,8 @@ static extent_hooks_t fixed_extent_hooks = {
 };
 // clang-format on
 
-MEMKIND_EXPORT int memkind_fixed_create(struct memkind *kind,
-                                        struct memkind_ops *ops,
-                                        const char *name)
+int memkind_fixed_create(struct memkind *kind, struct memkind_ops *ops,
+                         const char *name)
 {
     struct memkind_fixed *priv;
     int err;
