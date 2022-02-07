@@ -42,9 +42,8 @@ struct memkind_ops MEMKIND_DEFAULT_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT int memkind_default_create(struct memkind *kind,
-                                          struct memkind_ops *ops,
-                                          const char *name)
+int memkind_default_create(struct memkind *kind, struct memkind_ops *ops,
+                           const char *name)
 {
     int err = 0;
 
