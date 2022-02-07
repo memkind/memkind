@@ -4,7 +4,7 @@
 # Pull base image
 FROM centos:7
 
-LABEL maintainer="michal.biesek@intel.com"
+LABEL maintainer="patryk.kaminski@intel.com"
 
 # Update the yum cache and install basic tools
 RUN yum install -y epel-release
