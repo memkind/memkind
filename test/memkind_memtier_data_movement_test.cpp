@@ -3,10 +3,12 @@
 
 #include <memkind/internal/hasher.h>
 #include <memkind/internal/memkind_memtier.h>
+#include <memkind/internal/pool_allocator.h>
 #include <memkind/internal/slab_allocator.h>
 
 #include <gtest/gtest.h>
 #include <mutex>
+#include <set>
 
 class MemkindMemtierDataMovementTest: public ::testing::Test
 {
@@ -284,4 +286,68 @@ TEST(Hasher, Basic)
         ASSERT_EQ(LSB_9(STACK_SIZE_HASH(hash) + expected_offset),
                   STACK_SIZE_HASH(hashes[0].first));
     }
+}
+
+class PoolAllocTest: public ::testing::Test
+{
+protected:
+    static void check_add(std::map<slab_alloc_t *, size_t> &slabs,
+                          PoolAllocator &pool, size_t expected_size)
+    {
+        for (volatile size_t i = 0; i < UINT16_MAX; ++i) {
+            volatile slab_alloc_t *slab = pool.pool[i];
+            if (slab) {
+                auto temp = slabs.find((slab_alloc_t *)slab);
+                volatile bool found = temp != slabs.end();
+                if (!found || (temp->first->used != temp->second)) {
+                    ASSERT_EQ(slab->elementSize, expected_size);
+                    slabs[(slab_alloc_t *)slab] = slab->used;
+                    return;
+                }
+            }
+        }
+        ASSERT_TRUE(false && "element was not found");
+    }
+};
+
+TEST_F(PoolAllocTest, Basic)
+{
+    PoolAllocator pool;
+    int ret = pool_allocator_create(&pool);
+    ASSERT_EQ(ret, 0);
+    for (size_t i = 0; i < UINT16_MAX; ++i)
+        ASSERT_EQ(pool.pool[i], nullptr);
+
+    std::map<slab_alloc_t *, size_t> created_slabs;
+
+    uint8_t *a16 = (uint8_t *)pool_allocator_malloc(&pool, 16);
+    check_add(created_slabs, pool, 16 + sizeof(freelist_node_meta_t));
+
+    uint8_t *a8 = (uint8_t *)pool_allocator_malloc(&pool, 8);
+    check_add(created_slabs, pool, 16 + sizeof(freelist_node_meta_t));
+
+    uint8_t *a17 = (uint8_t *)pool_allocator_malloc(&pool, 17);
+    check_add(created_slabs, pool, 24 + sizeof(freelist_node_meta_t));
+
+    uint8_t *a24 = (uint8_t *)pool_allocator_malloc(&pool, 24);
+    check_add(created_slabs, pool, 24 + sizeof(freelist_node_meta_t));
+
+    uint8_t *a25 = (uint8_t *)pool_allocator_malloc(&pool, 25);
+    check_add(created_slabs, pool, 32 + sizeof(freelist_node_meta_t));
+
+    uint8_t *a32 = (uint8_t *)pool_allocator_malloc(&pool, 32);
+    check_add(created_slabs, pool, 32 + sizeof(freelist_node_meta_t));
+
+    uint8_t *a33 = (uint8_t *)pool_allocator_malloc(&pool, 33);
+    check_add(created_slabs, pool, 48 + sizeof(freelist_node_meta_t));
+
+    pool_allocator_free(a16);
+    pool_allocator_free(a8);
+    pool_allocator_free(a17);
+    pool_allocator_free(a24);
+    pool_allocator_free(a25);
+    pool_allocator_free(a32);
+    pool_allocator_free(a33);
+
+    pool_allocator_destroy(&pool);
 }

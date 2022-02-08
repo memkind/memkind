@@ -2,6 +2,11 @@
 /* Copyright (C) 2021-2022 Intel Corporation. */
 
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pthread.h"
 #include "stdlib.h" // size_t
 #include "sys/mman.h"
@@ -26,3 +31,7 @@ extern void bigary_init(bigary *restrict m_bigary, int fd, int flags,
                         size_t max);
 extern void bigary_alloc(bigary *restrict m_bigary, size_t top);
 extern void bigary_destroy(bigary *restrict m_bigary);
+
+#ifdef __cplusplus
+}
+#endif
