@@ -99,43 +99,43 @@ MEMKIND_EXPORT void *pool_allocator_malloc(PoolAllocator *pool, size_t size)
         return NULL;
     size_t size_rank = size_to_size_rank(size);
     uint16_t hash = hasher_calculate_hash(size_rank);
-    slab_alloc_t *slab = pool->pool[hash];
+    SlabAllocator *slab = pool->pool[hash];
     if (!slab) {
         atomic_slab_alloc_ptr_t null_slab = slab;
         // TODO initialize the slab in a lockless way
-        slab = slab_alloc_malloc(&pool->slabSlabAllocator);
+        slab = slab_allocator_malloc(&pool->slabSlabAllocator);
         size_t slab_size = size_rank_to_size(size_rank);
-        int ret = slab_alloc_init(slab, slab_size, 0);
+        int ret = slab_allocator_init(slab, slab_size, 0);
         if (ret != 0)
             return NULL;
         // TODO atomic compare exchange WARNING HACK NOT THREAD SAFE NOW !!!!
         bool exchanged =
             atomic_compare_exchange_strong(&pool->pool[hash], &null_slab, slab);
         if (!exchanged) {
-            slab_alloc_destroy(slab);
+            slab_allocator_destroy(slab);
             slab = atomic_load(&pool->pool[hash]);
         }
     }
 
-    return slab_alloc_malloc(slab);
+    return slab_allocator_malloc(slab);
 }
 
 MEMKIND_EXPORT void *pool_allocator_realloc(PoolAllocator *pool, void *ptr,
                                             size_t size)
 {
-    slab_alloc_free(ptr);
+    slab_allocator_free(ptr);
     return pool_allocator_malloc(pool, size);
 }
 
 MEMKIND_EXPORT void pool_allocator_free(void *ptr)
 {
-    slab_alloc_free(ptr);
+    slab_allocator_free(ptr);
 }
 
 MEMKIND_EXPORT int pool_allocator_create(PoolAllocator *pool)
 {
-    int ret = slab_alloc_init(&pool->slabSlabAllocator, sizeof(slab_alloc_t),
-                              UINT16_MAX);
+    int ret = slab_allocator_init(&pool->slabSlabAllocator,
+                                  sizeof(SlabAllocator), UINT16_MAX);
     if (ret == 0)
         (void)memset(pool->pool, 0, sizeof(pool->pool));
 
@@ -145,6 +145,6 @@ MEMKIND_EXPORT int pool_allocator_create(PoolAllocator *pool)
 MEMKIND_EXPORT void pool_allocator_destroy(PoolAllocator *pool)
 {
     for (size_t i = 0; i < UINT16_MAX; ++i)
-        slab_alloc_free(pool->pool[i]);
-    slab_alloc_destroy(&pool->slabSlabAllocator);
+        slab_allocator_free(pool->pool[i]);
+    slab_allocator_destroy(&pool->slabSlabAllocator);
 }

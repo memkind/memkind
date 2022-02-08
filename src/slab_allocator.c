@@ -48,7 +48,7 @@ static void *slab_alloc_node_meta_to_addr_(freelist_node_meta_t *meta)
 static void slab_alloc_glob_freelist_push_(void *addr)
 {
     freelist_node_meta_t *meta = slab_alloc_addr_to_node_meta_(addr);
-    slab_alloc_t *alloc = meta->allocator;
+    SlabAllocator *alloc = meta->allocator;
     do {
         meta->next = alloc->globFreelist.freelist;
     } while (false ==
@@ -56,7 +56,7 @@ static void slab_alloc_glob_freelist_push_(void *addr)
                                           &meta->next, meta));
 }
 
-static void *slab_alloc_glob_freelist_pop_(slab_alloc_t *alloc)
+static void *slab_alloc_glob_freelist_pop_(SlabAllocator *alloc)
 {
     freelist_node_meta_t *meta = NULL;
     do {
@@ -107,13 +107,13 @@ static void *slab_alloc_glob_freelist_pop_(slab_alloc_t *alloc)
 
 #endif
 
-static size_t slab_alloc_fetch_increment_used_(slab_alloc_t *alloc)
+static size_t slab_alloc_fetch_increment_used_(SlabAllocator *alloc)
 {
     // the value is never atomically decreased, only thing we need is
     return atomic_fetch_add_explicit(&alloc->used, 1u, memory_order_relaxed);
 }
 
-static freelist_node_meta_t *slab_alloc_create_meta_(slab_alloc_t *alloc)
+static freelist_node_meta_t *slab_alloc_create_meta_(SlabAllocator *alloc)
 {
     size_t free_idx = slab_alloc_fetch_increment_used_(alloc);
     size_t meta_offset = alloc->elementSize * free_idx;
@@ -130,8 +130,8 @@ static freelist_node_meta_t *slab_alloc_create_meta_(slab_alloc_t *alloc)
 
 // -------- public functions --------------------------------------------------
 
-MEMKIND_EXPORT int slab_alloc_init(slab_alloc_t *alloc, size_t element_size,
-                                   size_t max_elements)
+MEMKIND_EXPORT int slab_allocator_init(SlabAllocator *alloc,
+                                       size_t element_size, size_t max_elements)
 {
     // TODO handle failure gracefully instead of die - in biary_alloc
     alloc->elementSize = sizeof(freelist_node_meta_t) + element_size;
@@ -145,14 +145,14 @@ MEMKIND_EXPORT int slab_alloc_init(slab_alloc_t *alloc, size_t element_size,
     return ret;
 }
 
-MEMKIND_EXPORT void slab_alloc_destroy(slab_alloc_t *alloc)
+MEMKIND_EXPORT void slab_allocator_destroy(SlabAllocator *alloc)
 {
     int ret = pthread_mutex_destroy(&alloc->globFreelist.mutex);
     bigary_destroy(&alloc->mappedMemory);
     assert(ret == 0 && "mutex destruction failed");
 }
 
-MEMKIND_EXPORT void *slab_alloc_malloc(slab_alloc_t *alloc)
+MEMKIND_EXPORT void *slab_allocator_malloc(SlabAllocator *alloc)
 {
     void *ret = slab_alloc_glob_freelist_pop_(alloc);
     if (!ret) {
@@ -163,7 +163,7 @@ MEMKIND_EXPORT void *slab_alloc_malloc(slab_alloc_t *alloc)
     return ret;
 }
 
-MEMKIND_EXPORT void slab_alloc_free(void *addr)
+MEMKIND_EXPORT void slab_allocator_free(void *addr)
 {
     if (addr)
         slab_alloc_glob_freelist_push_(addr);
