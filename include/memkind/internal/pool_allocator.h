@@ -12,7 +12,7 @@
 #include <atomic>
 // HACK
 #define _Atomic(x) std::atomic<x>
-#define atomic_slab_alloc_ptr_t _Atomic(slab_alloc_t *)
+#define atomic_slab_alloc_ptr_t _Atomic(SlabAllocator *)
 extern "C" {
 #else
 
@@ -22,12 +22,12 @@ extern "C" {
 #else
 #define MEMKIND_ATOMIC
 #endif
-#define atomic_slab_alloc_ptr_t MEMKIND_ATOMIC slab_alloc_t *
+#define atomic_slab_alloc_ptr_t MEMKIND_ATOMIC SlabAllocator *
 #endif
 
 typedef struct PoolAllocator {
     atomic_slab_alloc_ptr_t pool[UINT16_MAX];
-    slab_alloc_t slabSlabAllocator;
+    SlabAllocator slabSlabAllocator;
 } PoolAllocator;
 
 extern int pool_allocator_create(PoolAllocator *pool);

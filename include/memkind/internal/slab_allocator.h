@@ -37,7 +37,7 @@ typedef struct freelist_node_meta *freelist_node_thread_safe_meta_ptr;
 
 typedef struct freelist_node_meta {
     // pointer required to know how to free and which free lists to put it on
-    struct slab_alloc *allocator;
+    struct slab_allocator *allocator;
     //     size_t size; not stored - all allocations have the same size
     struct freelist_node_meta *next;
 } freelist_node_meta_t;
@@ -47,22 +47,22 @@ typedef struct glob_free_list {
     pthread_mutex_t mutex;
 } glob_free_list_t;
 
-typedef struct slab_alloc {
+typedef struct slab_allocator {
     glob_free_list_t globFreelist;
     bigary mappedMemory;
     size_t elementSize;
     // TODO stdatomic would poses issues to c++,
     // a wrapper might be necessary
     atomic_size_t used;
-} slab_alloc_t;
+} SlabAllocator;
 
 // -------- public functions --------------------------------------------------
 
-extern int slab_alloc_init(slab_alloc_t *alloc, size_t element_size,
-                           size_t max_elements);
-extern void slab_alloc_destroy(slab_alloc_t *alloc);
-extern void *slab_alloc_malloc(slab_alloc_t *alloc);
-extern void slab_alloc_free(void *addr);
+extern int slab_allocator_init(SlabAllocator *alloc, size_t element_size,
+                               size_t max_elements);
+extern void slab_allocator_destroy(SlabAllocator *alloc);
+extern void *slab_allocator_malloc(SlabAllocator *alloc);
+extern void slab_allocator_free(void *addr);
 
 #ifdef __cplusplus
 }
