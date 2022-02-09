@@ -29,6 +29,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_mem_attributes.c \
                         src/memkind_pmem.c \
                         src/memkind_regular.c \
+                        src/mtt_allocator.c \
                         src/tbb_wrapper.c \
                         src/bigary.c \
                         src/slab_allocator.c \
@@ -44,6 +45,7 @@ include_HEADERS = include/hbw_allocator.h \
                   include/memkind.h \
                   include/memkind_allocator.h \
                   include/memkind_deprecated.h \
+                  include/mtt_allocator.h \
                   include/pmem_allocator.h \
                   include/fixed_allocator.h \
                   # end
