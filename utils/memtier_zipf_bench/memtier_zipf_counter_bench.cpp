@@ -2,6 +2,7 @@
 /* Copyright (C) 2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_memtier.h>
+#include <memkind/internal/pool_allocator.h>
 
 #include <argp.h>
 #include <assert.h>
@@ -10,6 +11,8 @@
 #include <iostream>
 #include <random>
 #include <thread>
+
+#define ACCESS_STRIDE 10
 
 enum class TestCase
 {
@@ -41,6 +44,70 @@ static uint64_t clock_bench_time_ms()
     assert(ret == 0);
     return tv.tv_sec * 1000 + tv.tv_nsec / 1000000;
 }
+
+/// dependency inversion for memkind and other allocators
+class Allocator
+{
+public:
+    virtual void *malloc(size_t size_bytes) = 0;
+    virtual void free(void *ptr) = 0;
+};
+
+class StaticRatioAllocator: public Allocator
+{
+    std::shared_ptr<memtier_memory> memory;
+
+public:
+    StaticRatioAllocator(memtier_policy_t policy,
+                         std::pair<size_t, size_t> dram_pmem_ratio)
+    {
+        struct memtier_builder *m_tier_builder = memtier_builder_new(policy);
+        memtier_builder_add_tier(m_tier_builder, MEMKIND_DEFAULT,
+                                 dram_pmem_ratio.first);
+        //     memtier_builder_add_tier(m_tier_builder, MEMKIND_DAX_KMEM,
+        memtier_builder_add_tier(m_tier_builder, MEMKIND_REGULAR,
+                                 dram_pmem_ratio.second);
+        memory = std::shared_ptr<memtier_memory>(
+            memtier_builder_construct_memtier_memory(m_tier_builder),
+            [](struct memtier_memory *m) { memtier_delete_memtier_memory(m); });
+        memtier_builder_delete(m_tier_builder);
+    }
+    void *malloc(size_t size_bytes)
+    {
+        return memtier_malloc(memory.get(), size_bytes);
+    }
+
+    void free(void *ptr)
+    {
+        memtier_free(ptr);
+    }
+};
+
+class PoolAllocatorWrapper: public Allocator
+{
+    PoolAllocator allocator;
+
+public:
+    PoolAllocatorWrapper()
+    {
+        pool_allocator_create(&allocator);
+    }
+
+    ~PoolAllocatorWrapper()
+    {
+        pool_allocator_destroy(&allocator);
+    }
+
+    void *malloc(size_t size_bytes)
+    {
+        return pool_allocator_malloc(&allocator, size_bytes);
+    }
+
+    void free(void *ptr)
+    {
+        pool_allocator_free(ptr);
+    }
+};
 
 struct RunInfo {
     /* total operations: types_count * iterations_minor * iterations_major
@@ -109,12 +176,14 @@ class Loader
     std::mt19937 generator;
     TestCase test_case;
     /// 2D array: uint64_t data[nof_allocations][allocation_size]
-    std::shared_ptr<void> data;
+    volatile uint64_t **data;
     size_t allocation_size;
+    size_t nof_done_allocations = 0;
     size_t nof_allocations;
     size_t iterations;
     std::shared_ptr<std::thread> this_thread;
     uint64_t execution_time_millis = 0;
+    std::shared_ptr<Allocator> allocator;
 
     // clang-format off
     /// @return time in milliseconds per whole data access
@@ -128,42 +197,50 @@ class Loader
 
         switch (test_case) {
             case (TestCase::RANDOM_INC):
-                for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size; ++intra_allocation_it) {
-                    for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
-                        size_t index_alloc = distr_alloc(generator);
-                        size_t index_internal = distr_internal(generator);
-                        static_cast<uint64_t **>(data.get())[index_alloc][index_internal]++;
+                for (size_t i=0; i<iterations; ++i) {
+                    for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size; intra_allocation_it += ACCESS_STRIDE) {
+                        for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
+                            size_t index_alloc = distr_alloc(generator);
+                            size_t index_internal = distr_internal(generator);
+                            data[index_alloc][index_internal]++;
+                        }
                     }
                 }
                 break;
             case (TestCase::SEQ_INC):
-                for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size; ++intra_allocation_it) {
-                    for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
-                        static_cast<uint64_t **>(data.get())[allocation_it][intra_allocation_it]++;
+                for (size_t i=0; i<iterations; ++i) {
+                    for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size; intra_allocation_it += ACCESS_STRIDE) {
+                        for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
+                            data[allocation_it][intra_allocation_it]++;
+                        }
                     }
                 }
                 break;
             case (TestCase::RANDOM_COPY):
-                for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size; ++intra_allocation_it) {
-                    for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
-                        size_t index_alloc_from = distr_alloc(generator);
-                        size_t index_internal_from = distr_internal(generator);
-                        size_t index_alloc_to = distr_alloc(generator);
-                        size_t index_internal_to = distr_internal(generator);
-                        static_cast<volatile uint64_t **>(data.get())[index_alloc_to][index_internal_to] =
-                        static_cast<volatile uint64_t **>(data.get())[index_alloc_from][index_internal_from];
+                for (size_t i=0; i<iterations; ++i) {
+                    for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size; intra_allocation_it += ACCESS_STRIDE) {
+                        for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
+                            size_t index_alloc_from = distr_alloc(generator);
+                            size_t index_internal_from = distr_internal(generator);
+                            size_t index_alloc_to = distr_alloc(generator);
+                            size_t index_internal_to = distr_internal(generator);
+                            data[index_alloc_to][index_internal_to] =
+                            data[index_alloc_from][index_internal_from];
+                        }
                     }
                 }
                 break;
             case (TestCase::SEQ_COPY):
-                for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size-5; ++intra_allocation_it) {
-                    for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
-                        size_t index_alloc_to = allocation_it;
-                        size_t index_internal_to = intra_allocation_it+5;
-                        size_t index_alloc_from = allocation_it;
-                        size_t index_internal_from = intra_allocation_it;
-                        static_cast<volatile uint64_t **>(data.get())[index_alloc_to][index_internal_to] =
-                        static_cast<volatile uint64_t **>(data.get())[index_alloc_from][index_internal_from];
+                for (size_t i=0; i<iterations; ++i) {
+                    for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size-5; intra_allocation_it += ACCESS_STRIDE) {
+                        for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
+                            size_t index_alloc_to = allocation_it;
+                            size_t index_internal_to = intra_allocation_it+5;
+                            size_t index_alloc_from = allocation_it;
+                            size_t index_internal_from = intra_allocation_it;
+                            data[index_alloc_to][index_internal_to] =
+                            data[index_alloc_from][index_internal_from];
+                        }
                     }
                 }
                 break;
@@ -173,15 +250,26 @@ class Loader
     // clang-format on
 
 public:
-    Loader(TestCase test_case, std::shared_ptr<void> data,
+    Loader(TestCase test_case, std::shared_ptr<Allocator> allocator,
            size_t nof_allocations, size_t allocation_size, size_t iterations)
         : generator(dev()),
           test_case(test_case),
-          data(data),
           nof_allocations(nof_allocations),
           allocation_size(allocation_size),
-          iterations(iterations)
-    {}
+          iterations(iterations),
+          allocator(allocator)
+    {
+        data = (volatile uint64_t **)allocator->malloc(sizeof(void *) *
+                                                       nof_allocations);
+        assert(data && "allocation failed!");
+    }
+
+    ~Loader()
+    {
+        for (size_t i = 0; i < nof_done_allocations; ++i)
+            allocator->free((void *)data[i]);
+        allocator->free(data);
+    }
 
     void PrepareOnce(std::shared_ptr<Fence> fence)
     {
@@ -199,26 +287,22 @@ public:
         this_thread->join();
         return this->execution_time_millis;
     }
+
+    /// @return true if all allocated
+    bool AllocateNext()
+    {
+        if (nof_done_allocations < nof_allocations) {
+            data[nof_done_allocations] = (volatile uint64_t *)allocator->malloc(
+                sizeof(uint64_t) * allocation_size);
+            assert(data[nof_done_allocations] && "allocation failed!");
+            ++nof_done_allocations;
+        }
+
+        return nof_done_allocations >= nof_allocations;
+    }
 };
 
 std::random_device Loader::dev;
-
-static std::shared_ptr<memtier_memory>
-create_memory(memtier_policy_t policy,
-              std::pair<size_t, size_t> dram_pmem_ratio)
-{
-    struct memtier_builder *m_tier_builder = memtier_builder_new(policy);
-    memtier_builder_add_tier(m_tier_builder, MEMKIND_DEFAULT,
-                             dram_pmem_ratio.first);
-    memtier_builder_add_tier(m_tier_builder, MEMKIND_DAX_KMEM,
-                             dram_pmem_ratio.second);
-    auto memory = std::shared_ptr<memtier_memory>(
-        memtier_builder_construct_memtier_memory(m_tier_builder),
-        [](struct memtier_memory *m) { memtier_delete_memtier_memory(m); });
-    memtier_builder_delete(m_tier_builder);
-
-    return memory;
-}
 
 class LoaderCreator
 {
@@ -227,50 +311,24 @@ class LoaderCreator
     size_t allocation_size;
     size_t additional_stack;
     size_t iterations;
-    std::shared_ptr<memtier_memory> memory;
+    //     std::shared_ptr<memtier_memory> memory;
+    std::shared_ptr<Allocator> allocator;
 
     std::shared_ptr<Loader> CreateLoader_()
     {
-        // c++11 way of capturing class member variables by value
-        size_t allocation_size = this->allocation_size;
-        size_t nof_allocations = this->nof_allocations;
-
-        void **allocated_memory = (void **)memtier_malloc(
-            memory.get(), nof_allocations * sizeof(void *));
-        assert(allocated_memory && "memtier malloc failed");
-
-        for (size_t alloc_it = 0; alloc_it < nof_allocations; ++alloc_it) {
-            allocated_memory[alloc_it] = memtier_malloc(
-                memory.get(), allocation_size * sizeof(uint64_t));
-            assert(allocated_memory[alloc_it] && "memtier malloc failed");
-        }
-
-        // create shared pointer with custom deleter
-        std::shared_ptr<void> allocated_memory_ptr(
-            allocated_memory, [nof_allocations, allocation_size](void *mem) {
-                void **mem_to_free = (void **)mem;
-                for (size_t alloc_it = 0; alloc_it < nof_allocations;
-                     ++alloc_it) {
-                    memtier_free(mem_to_free[alloc_it]);
-                }
-                memtier_free(mem_to_free);
-            });
-
-        return std::make_shared<Loader>(test_case, allocated_memory_ptr,
-                                        nof_allocations, allocation_size,
-                                        iterations);
+        return std::make_shared<Loader>(test_case, allocator, nof_allocations,
+                                        allocation_size, iterations);
     }
 
 public:
     LoaderCreator(TestCase test_case, size_t nof_allocations,
                   size_t allocation_size, size_t iterations,
-                  std::shared_ptr<memtier_memory> memory,
-                  size_t additional_stack)
+                  std::shared_ptr<Allocator> allocator, size_t additional_stack)
         : test_case(test_case),
           nof_allocations(nof_allocations),
           allocation_size(allocation_size),
           iterations(iterations),
-          memory(memory),
+          allocator(allocator),
           additional_stack(additional_stack)
     {}
 
@@ -295,9 +353,27 @@ create_and_run_loaders(std::vector<LoaderCreator> &creators)
     auto fence = std::make_shared<Fence>(creators.size());
     loaders.reserve(creators.size());
 
-    uint64_t start_mallocs_timestamp = clock_bench_time_ms();
     for (auto &creator : creators) {
         loaders.push_back(creator.CreateLoader());
+    }
+    uint64_t start_mallocs_timestamp = clock_bench_time_ms();
+    bool all_finished = false;
+    // allocate so that fields interleave on common allocators
+    while (!all_finished) {
+        all_finished = true;
+        // use creators like
+        size_t first = 0;
+        size_t last = loaders.size() - 1;
+        // make one allocation per each loader
+        // order of allocations:
+        // hottest -> coldest -> second hottest -> second coldest -> ...
+        // made to assure that each pair of allocations has ~ same average place
+        // in ranking
+        while (first <= last) {
+            all_finished &= loaders[first++]->AllocateNext();
+            if (first <= last)
+                all_finished &= loaders[last--]->AllocateNext();
+        }
     }
     uint64_t malloc_time = clock_bench_time_ms() - start_mallocs_timestamp;
 
@@ -348,7 +424,16 @@ create_loader_creators(TestCase test_case, size_t nof_allocations,
     const double s = 2.0;
     std::vector<LoaderCreator> creators;
 
-    auto memory = create_memory(policy, pmem_dram_ratio);
+    std::shared_ptr<Allocator> allocator;
+    switch (policy) {
+        case MEMTIER_POLICY_STATIC_RATIO:
+            allocator =
+                std::make_shared<StaticRatioAllocator>(policy, pmem_dram_ratio);
+            break;
+        default:
+            assert(false && "case not handled");
+            break;
+    }
     creators.reserve(types_count);
     double zipf_denominator = calculate_zipf_denominator(types_count, s);
 
@@ -362,7 +447,7 @@ create_loader_creators(TestCase test_case, size_t nof_allocations,
         std::cout << "Type " << k << " iterations count: " << iterations
                   << std::endl;
         creators.push_back(LoaderCreator(test_case, nof_allocations,
-                                         allocation_size, iterations, memory,
+                                         allocation_size, iterations, allocator,
                                          type_idx));
     }
     assert(abs(probability_sum - 1.0) < 0.0001 &&
@@ -453,15 +538,15 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
             std::string delimiter = ":";
             std::string ratio_string = arg;
             size_t char_count = ratio_string.find(delimiter);
-            const char *dram_ratio_part_str =
-                ratio_string.substr(0, char_count).c_str();
+            std::string dram_ratio_part_str =
+                ratio_string.substr(0, char_count);
             args->dram_ratio_part =
-                std::strtoul(dram_ratio_part_str, nullptr, 10);
+                std::strtoul(dram_ratio_part_str.c_str(), nullptr, 10);
             ratio_string.erase(0, char_count + delimiter.length());
-            const char *pmem_ratio_part_str =
-                ratio_string.substr(0, ratio_string.find(delimiter)).c_str();
+            std::string pmem_ratio_part_str =
+                ratio_string.substr(0, ratio_string.find(delimiter));
             args->pmem_ratio_part =
-                std::strtoul(pmem_ratio_part_str, nullptr, 10);
+                std::strtoul(pmem_ratio_part_str.c_str(), nullptr, 10);
             break;
         }
         default:
@@ -487,7 +572,7 @@ static struct argp argp = {options, parse_opt, nullptr, nullptr};
 
 int main(int argc, char *argv[])
 {
-    size_t ALLOCATION_SIZE_U64 = 1024 / 8; // 1 kB
+    size_t ALLOCATION_SIZE_U64 = 1024 / 8 * 3 / 2; // 1.5 kB
     size_t NOF_ALLOCATIONS = 512 * 1024;
 
     struct BenchArgs args = {.policy = MEMTIER_POLICY_STATIC_RATIO,
