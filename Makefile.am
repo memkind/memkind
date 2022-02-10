@@ -3,6 +3,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
+AUTOMAKE_OPTIONS = serial-tests
 MAN2HTML = groff -mandoc -Thtml
 CLANG_FORMAT = @clang_format@ --style=file
 CLANG_FORMAT_FILES = . -path "./jemalloc" -prune -false -o -path "./test/gtest_fused" -prune -false -o \
