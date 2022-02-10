@@ -31,6 +31,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_pmem.c \
                         src/memkind_regular.c \
                         src/mtt_allocator.c \
+                        src/ranking_utils.c \
                         src/tbb_wrapper.c \
                         src/bigary.c \
                         src/slab_allocator.c \
@@ -75,6 +76,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_private.h \
                   include/memkind/internal/memkind_regular.h \
                   include/memkind/internal/pebs.h \
+                  include/memkind/internal/ranking_utils.h \
                   include/memkind/internal/tbb_mem_pool_policy.h \
                   include/memkind/internal/tbb_wrapper.h \
                   include/memkind/internal/vec.h \
