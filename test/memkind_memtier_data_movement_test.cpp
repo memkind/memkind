@@ -379,7 +379,7 @@ TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
 TEST(PEBS, Basic)
 {
     // do some copying - L3 misses are expected here
-    const int size = 1024 * 1024 * 1024;
+    const int size = 1024 * 1024;
     volatile int total_sum = 0;
     volatile int *tab = (int *)malloc(size * sizeof(int));
     for (int i = 0; i < size; i++) {

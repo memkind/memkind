@@ -30,18 +30,21 @@ MEMKIND_EXPORT int pebs_debug_num_samples = 0;
 
 void pebs_monitor()
 {
-    // must call this before read from data head
-    asm volatile("lfence" ::: "memory");
-
     int all_cpu_samples = 0;
 
     for (size_t cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx) {
         perf_event_mmap_page_t *pebs_metadata =
             (perf_event_mmap_page_t *)pebs_mmap[cpu_idx];
 
+        if (pebs_metadata == NULL)
+            continue;
+
         __u64 timestamp = 0;
         __u64 addr = 0;
         int samples = 0;
+
+        // must call this before read from data head
+        asm volatile("lfence" ::: "memory");
         while (last_head[cpu_idx] < pebs_metadata->data_head) {
             char *data_mmap = pebs_mmap[cpu_idx] + getpagesize() +
                 last_head[cpu_idx] % (MMAP_DATA_SIZE * getpagesize());
@@ -115,9 +118,9 @@ void pebs_create()
     // check if we have access to perf events
     int pf = 0;
     FILE *f = fopen("/proc/sys/kernel/perf_event_paranoid", "r");
-    if (fscanf(f, "%d", &pf) == 0 || pf > 0) {
+    if (fscanf(f, "%d", &pf) == 0 || pf > 3) {
         log_fatal("PEBS: /proc/sys/kernel/perf_event_paranoid is set to %d "
-                  "while it should be set to 0!",
+                  "while it should be set to 3 or less!",
                   pf);
         exit(-1);
     }
