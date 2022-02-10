@@ -5,9 +5,12 @@
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/pebs.h>
 #include <memkind/internal/pool_allocator.h>
+#include <memkind/internal/ranking.h>
+#include <memkind/internal/ranking_internals.hpp>
 #include <memkind/internal/slab_allocator.h>
 #include <mtt_allocator.h>
 
+#include <cmath>
 #include <gtest/gtest.h>
 #include <mutex>
 #include <set>
@@ -412,4 +415,545 @@ TEST(PEBS, Basic)
     fprintf(stderr, "got %d samples\n", pebs_debug_num_samples);
 
     mtt_allocator_destroy(&mtt_allocator);
+}
+
+TEST(HotnessCoeffTest, Basic)
+{
+    HotnessCoeff c0(0, 0, 0.5);
+    ASSERT_EQ(c0.Get(), 0.0);
+    c0.Update(3.0, 0.0);
+    ASSERT_EQ(c0.Get(), 1.5);
+    c0.Update(5.0, 0.0);
+    ASSERT_EQ(c0.Get(), 4.0);
+    c0.Update(5.0, 1.0);
+    ASSERT_EQ(c0.Get(), 2.5);
+
+    HotnessCoeff c1(10, 0.3, 2.0);
+    ASSERT_EQ(c1.Get(), 10.0);
+    c1.Update(0.0, 0.0);
+    ASSERT_EQ(c1.Get(), 10.0);
+    c1.Update(45.0, 0.0);
+    ASSERT_EQ(c1.Get(), 100.0);
+    c1.Update(0.0, 0.0);
+    ASSERT_EQ(c1.Get(), 100.0);
+    c1.Update(0.0, 1.0);
+    ASSERT_EQ(c1.Get(), 30.0);
+    c1.Update(3.0, 2.0);
+    ASSERT_EQ(c1.Get(), 2.7 + 6.0);
+
+    // check double overflow
+    c1.Update(std::numeric_limits<double>::max() / 2, 0.5);
+    c1.Update(std::numeric_limits<double>::max() / 2, 0.1);
+    c1.Update(std::numeric_limits<double>::max() / 2, 0.2);
+    c1.Update(std::numeric_limits<double>::max() / 2, 0.01);
+    c1.Update(std::numeric_limits<double>::max() / 2, 0.02);
+    ASSERT_EQ(c1.Get(), std::numeric_limits<double>::max());
+
+    // check if value still decreases with time
+    c1.Update(0, 2);
+    ASSERT_LT(c1.Get(), std::numeric_limits<double>::max());
+    ASSERT_GT(c1.Get(), 0);
+}
+
+TEST(HotnessTest, Basic)
+{
+    const double ACCURACY = 1e-9;
+    const uint64_t SECOND = 1000000000u;
+    Hotness hotness0_0(0, 0);
+    Hotness hotness1_0(1, 0);
+    Hotness hotness3_2(3, 2 * SECOND);
+    Hotness hotness10_10_0(10, 10 * SECOND);
+    Hotness hotness10_10_1(10, 10 * SECOND);
+    Hotness hotness10_10_2(10, 10 * SECOND);
+    Hotness hotness10_10_3(10, 10 * SECOND);
+    Hotness hotness10_10_4(10, 10 * SECOND);
+
+    // instead of checking exact values, we are checking some properties
+
+    // check initialized values
+    ASSERT_EQ(hotness0_0.GetTotalHotness(), 0.0);
+    ASSERT_EQ(hotness1_0.GetTotalHotness(), 1.0);
+    ASSERT_EQ(hotness3_2.GetTotalHotness(), 3.0);
+    ASSERT_EQ(hotness10_10_0.GetTotalHotness(), 10.0);
+    ASSERT_EQ(hotness10_10_1.GetTotalHotness(), 10.0);
+    ASSERT_EQ(hotness10_10_2.GetTotalHotness(), 10.0);
+    ASSERT_EQ(hotness10_10_3.GetTotalHotness(), 10.0);
+    ASSERT_EQ(hotness10_10_4.GetTotalHotness(), 10.0);
+
+    // check proportions
+    ASSERT_EQ(hotness0_0.GetTotalHotness(), 0.0);
+    ASSERT_EQ(hotness1_0.GetTotalHotness(), 1.0);
+    ASSERT_EQ(hotness3_2.GetTotalHotness() / hotness1_0.GetTotalHotness(), 3.0);
+    ASSERT_EQ(hotness10_10_0.GetTotalHotness() / hotness3_2.GetTotalHotness(),
+              10.0 / 3.0);
+
+    // check add
+    hotness0_0.Update(1.0, 0);
+    double nhotness0_0_0 = hotness0_0.GetTotalHotness();
+    ASSERT_GT(nhotness0_0_0, 0.0);
+    hotness0_0.Update(2.0, 0);
+    double nhotness0_0_1 = hotness0_0.GetTotalHotness();
+    ASSERT_LT(abs(3.0 * nhotness0_0_0 - nhotness0_0_1), ACCURACY);
+
+    // check if hotness decreases with time
+    hotness3_2.Update(0, 4 * SECOND);
+    ASSERT_LT(hotness3_2.GetTotalHotness(), 3.0);
+    ASSERT_GT(hotness3_2.GetTotalHotness(), 0.0);
+
+    // cross-check with hotness coeffs
+    hotness10_10_0.Update(0, 12 * SECOND);
+    ASSERT_LT(
+        abs(hotness10_10_0.GetTotalHotness() / hotness3_2.GetTotalHotness() -
+            10.0 / 3.0),
+        ACCURACY);
+    hotness10_10_1.Update(0, 14 * SECOND);
+    hotness10_10_2.Update(0, 16 * SECOND);
+    hotness10_10_3.Update(7, 19 * SECOND);
+
+    HotnessCoeff c0(2.5, EXPONENTIAL_COEFFS_VALS[0],
+                    EXPONENTIAL_COEFFS_CONMPENSATION_COEFFS[0]);
+    HotnessCoeff c1(2.5, EXPONENTIAL_COEFFS_VALS[1],
+                    EXPONENTIAL_COEFFS_CONMPENSATION_COEFFS[1]);
+    HotnessCoeff c2(2.5, EXPONENTIAL_COEFFS_VALS[2],
+                    EXPONENTIAL_COEFFS_CONMPENSATION_COEFFS[2]);
+    HotnessCoeff c3(2.5, EXPONENTIAL_COEFFS_VALS[3],
+                    EXPONENTIAL_COEFFS_CONMPENSATION_COEFFS[3]);
+    double hotness_0 = c0.Get() + c1.Get() + c2.Get() + c3.Get();
+    ASSERT_EQ(10.0, hotness_0);
+    c0.Update(0, 2);
+    c1.Update(0, 2);
+    c2.Update(0, 2);
+    c3.Update(0, 2);
+    double hotness_1 = c0.Get() + c1.Get() + c2.Get() + c3.Get();
+    ASSERT_EQ(hotness10_10_0.GetTotalHotness(), hotness_1);
+    c0.Update(0, 2);
+    c1.Update(0, 2);
+    c2.Update(0, 2);
+    c3.Update(0, 2);
+    double hotness_2 = c0.Get() + c1.Get() + c2.Get() + c3.Get();
+    ASSERT_LE(abs(hotness10_10_1.GetTotalHotness() - hotness_2), ACCURACY);
+    c0.Update(0, 2);
+    c1.Update(0, 2);
+    c2.Update(0, 2);
+    c3.Update(0, 2);
+    double hotness_3 = c0.Get() + c1.Get() + c2.Get() + c3.Get();
+    ASSERT_LE(abs(hotness10_10_2.GetTotalHotness() - hotness_3), ACCURACY);
+    c0.Update(7, 3);
+    c1.Update(7, 3);
+    c2.Update(7, 3);
+    c3.Update(7, 3);
+    double hotness_4 = c0.Get() + c1.Get() + c2.Get() + c3.Get();
+    ASSERT_LE(abs(hotness10_10_3.GetTotalHotness() - hotness_4), ACCURACY);
+
+    // check for double overflow
+    hotness10_10_4.Update(std::numeric_limits<double>::max() / 5, 20 * SECOND);
+    ASSERT_LT(hotness10_10_4.GetTotalHotness(),
+              std::numeric_limits<double>::max());
+    ASSERT_GT(hotness10_10_4.GetTotalHotness(), 0);
+    hotness10_10_4.Update(std::numeric_limits<double>::max() / 5, 21 * SECOND);
+    hotness10_10_4.Update(std::numeric_limits<double>::max() / 5, 22 * SECOND);
+    hotness10_10_4.Update(std::numeric_limits<double>::max() / 5, 23 * SECOND);
+    hotness10_10_4.Update(std::numeric_limits<double>::max() / 5, 24 * SECOND);
+    hotness10_10_4.Update(std::numeric_limits<double>::max() / 5, 25 * SECOND);
+    hotness10_10_4.Update(std::numeric_limits<double>::max() / 5, 26 * SECOND);
+    ASSERT_EQ(hotness10_10_4.GetTotalHotness(),
+              std::numeric_limits<double>::max());
+    // check if the value still decreases afterwards
+    hotness10_10_4.Update(0.0, 30 * SECOND);
+    ASSERT_LT(hotness10_10_4.GetTotalHotness(),
+              std::numeric_limits<double>::max());
+    ASSERT_GT(hotness10_10_4.GetTotalHotness(), 0);
+}
+
+TEST(PageTest, Basic)
+{
+    const double ACCURACY = 1e-9;
+    PageMetadata page(0XFFFF, 10.0, 0);
+    ASSERT_EQ(page.GetHotness(), 10.0);
+    page.Touch();
+    page.Touch();
+    page.Touch();
+    page.Touch();
+    page.Touch();
+    page.Touch();
+    page.Touch();
+    ASSERT_EQ(page.GetHotness(), 10.0);
+    page.UpdateHotness(0);
+    double hotness_p7 = page.GetHotness() - 10.0;
+    ASSERT_GT(hotness_p7, 0.0);
+    ASSERT_EQ(page.GetHotness(), hotness_p7 + 10.0);
+    page.UpdateHotness(0);
+    ASSERT_EQ(page.GetHotness(), hotness_p7 + 10.0);
+    page.UpdateHotness(10);
+    ASSERT_LT(page.GetHotness(), hotness_p7 + 10.0);
+    double temp = page.GetHotness();
+    page.Touch();
+    ASSERT_EQ(page.GetHotness(), temp);
+    page.UpdateHotness(10);
+    double hotness_p1 = page.GetHotness() - temp;
+    ASSERT_LT(abs(7 * hotness_p1 - hotness_p7), ACCURACY);
+}
+
+TEST(RankingTest, Basic)
+{
+    Ranking ranking;
+    Ranking ranking2;
+
+    // check empty hotness
+
+    double hotness0 = -1.0;
+    double hotness1 = -1.0;
+    bool success0 = ranking.GetHottest(hotness0);
+    bool success1 = ranking.GetColdest(hotness1);
+
+    ASSERT_FALSE(success0);
+    ASSERT_FALSE(success1);
+
+    // check non-empty hotness
+    ranking.AddPages(0xFFFF0000, 2, 0);
+    ranking.AddPages(2 * 0xFFFF0000, 3, 0);
+    ranking.AddPages(3 * 0xFFFF0000, 3, 2);
+
+    double hotness_hottest0 = -1.0;
+    double hotness_coldest0 = -1.0;
+    bool success2 = ranking.GetHottest(hotness_hottest0);
+    bool success3 = ranking.GetColdest(hotness_coldest0);
+
+    ASSERT_TRUE(success2);
+    ASSERT_TRUE(success3);
+
+    // check touch without update
+    ASSERT_EQ(hotness_hottest0, hotness_coldest0);
+    ASSERT_EQ(hotness_hottest0, 0.0);
+
+    ranking.Touch(0xFFFF0000);
+    ranking.Touch(0xFFFF0000);
+
+    double hotness_hottest1 = -1.0;
+    double hotness_coldest1 = -1.0;
+    (void)ranking.GetHottest(hotness_hottest1);
+    (void)ranking.GetColdest(hotness_coldest1);
+
+    ASSERT_EQ(hotness_coldest1, hotness_hottest1);
+    ASSERT_EQ(hotness_coldest1, 0.0);
+
+    // check touch with update
+    ranking.Update(1000000000);
+
+    double hotness_hottest2 = -1.0;
+    double hotness_coldest2 = -1.0;
+    (void)ranking.GetHottest(hotness_hottest2);
+    (void)ranking.GetColdest(hotness_coldest2);
+
+    ASSERT_LT(hotness_coldest2, hotness_hottest2);
+    ASSERT_EQ(hotness_coldest2, 0.0);
+
+    // check moving pages between rankings
+    // check new ranking is empty
+    double hottest_r2_0_hotness = -1.0;
+    double coldest_r2_0_hotness = -1.0;
+    bool success4 = ranking2.GetHottest(hottest_r2_0_hotness);
+    bool success5 = ranking2.GetColdest(coldest_r2_0_hotness);
+
+    ASSERT_FALSE(success4);
+    ASSERT_FALSE(success5);
+
+    // move hottest page to the new ranking
+    ranking2.AddPage(ranking.PopHottest());
+
+    double hottest_r2_1_hotness = -1.0;
+    double coldest_r2_1_hotness = -1.0;
+    bool success6 = ranking2.GetHottest(hottest_r2_1_hotness);
+    bool success7 = ranking2.GetColdest(coldest_r2_1_hotness);
+
+    ASSERT_TRUE(success6);
+    ASSERT_TRUE(success7);
+
+    ASSERT_EQ(hottest_r2_1_hotness, coldest_r2_1_hotness);
+    ASSERT_EQ(hottest_r2_1_hotness, hotness_hottest2);
+    ASSERT_GT(hottest_r2_1_hotness, 0.0);
+
+    // move second hottest page to the new ranking
+    ranking2.AddPage(ranking.PopHottest());
+
+    double hottest_r2_2_hotness = -1.0;
+    double coldest_r2_2_hotness = -1.0;
+    (void)ranking2.GetHottest(hottest_r2_2_hotness);
+    (void)ranking2.GetColdest(coldest_r2_2_hotness);
+
+    double hottest_3_hotness = -1.0;
+    bool success8 = ranking.GetHottest(hottest_3_hotness);
+
+    ASSERT_TRUE(success8);
+    ASSERT_GT(hottest_r2_2_hotness, coldest_r2_2_hotness);
+    ASSERT_GT(hottest_r2_2_hotness, hottest_3_hotness);
+    ASSERT_GT(hottest_r2_2_hotness, 0.0);
+
+    double hottest_4_hotness = -1.0;
+    double coldest_4_hotness = -1.0;
+    (void)ranking.GetHottest(hottest_4_hotness);
+    (void)ranking.GetColdest(coldest_4_hotness);
+
+    ASSERT_LT(hottest_4_hotness, hottest_r2_2_hotness);
+    ASSERT_EQ(coldest_4_hotness, hottest_4_hotness);
+    ASSERT_EQ(coldest_4_hotness, 0.0);
+
+    // Add new pages to the new ranking
+    ranking2.AddPage(ranking.PopColdest());
+    ranking2.AddPages(5 * 0xFFFF0000, 1, 2000000000);
+
+    double hottest_r2_3_hotness = -1.0;
+    double coldest_r2_3_hotness = -1.0;
+    (void)ranking2.GetHottest(hottest_r2_3_hotness);
+    (void)ranking2.GetColdest(coldest_r2_3_hotness);
+
+    ASSERT_GT(hottest_r2_3_hotness, coldest_r2_3_hotness);
+    ASSERT_EQ(hottest_r2_2_hotness, hottest_r2_3_hotness);
+
+    // remove two hottest page from the new ranking
+    (void)ranking2.PopHottest();
+
+    // check the newly added page is the hottest
+    double hottest_r2_4_hotness = -1.0;
+    bool success9 = ranking2.GetHottest(hottest_r2_4_hotness);
+
+    ASSERT_TRUE(success9);
+    ASSERT_EQ(hottest_r2_2_hotness, hottest_r2_4_hotness);
+
+    // pop all pages except for two - hottest and coldest
+    (void)ranking2.PopColdest();
+
+    double hottest_r2_5_hotness = -1.0;
+    double coldest_r2_5_hotness = -1.0;
+    bool success10 = ranking2.GetHottest(hottest_r2_5_hotness);
+    bool success11 = ranking2.GetColdest(coldest_r2_5_hotness);
+
+    ASSERT_TRUE(success10);
+    ASSERT_TRUE(success11);
+
+    ASSERT_EQ(hottest_r2_5_hotness, hottest_r2_3_hotness);
+    ASSERT_EQ(coldest_r2_5_hotness, coldest_r2_3_hotness);
+    ASSERT_GT(hottest_r2_5_hotness, coldest_r2_5_hotness);
+
+    // pop hottest, add new page and check if hottest value was updated
+    (void)ranking2.PopHottest();
+    ranking2.AddPages(6 * 0xFFFF0000, 1, 2500000000);
+
+    double hottest_r2_6_hotness = -1.0;
+    double coldest_r2_6_hotness = -1.0;
+    bool success12 = ranking2.GetHottest(hottest_r2_6_hotness);
+    bool success13 = ranking2.GetColdest(coldest_r2_6_hotness);
+
+    ASSERT_TRUE(success12);
+    ASSERT_TRUE(success13);
+
+    ASSERT_EQ(hottest_r2_6_hotness, coldest_r2_6_hotness);
+    ASSERT_EQ(coldest_r2_6_hotness, coldest_r2_3_hotness);
+
+    // pop all pages
+    (void)ranking2.PopColdest();
+    double hottest_r2_7_hotness = -1.0;
+    bool success14 = ranking2.GetHottest(hottest_r2_7_hotness);
+    ASSERT_TRUE(success14);
+    ASSERT_EQ(hottest_r2_7_hotness, 0.0);
+
+    (void)ranking2.PopColdest();
+    double hottest_r2_8_hotness = -1.0;
+    bool success15 = ranking2.GetHottest(hottest_r2_8_hotness);
+    ASSERT_FALSE(success15);
+}
+
+class RankingBindingsTest: public ::testing::Test
+{
+protected:
+    ranking_handle ranking1;
+    ranking_handle ranking2;
+    metadata_handle temp;
+    const uint64_t SECOND = 1000000000u;
+
+private:
+    void SetUp()
+    {
+        ranking_create(&ranking1);
+        ranking_create(&ranking2);
+        ranking_metadata_create(&temp);
+    }
+
+    void TearDown()
+    {
+        ranking_destroy(ranking1);
+        ranking_destroy(ranking2);
+        ranking_metadata_destroy(temp);
+    }
+};
+
+TEST_F(RankingBindingsTest, Basic)
+{
+    // the same as RankingTest, but uses C bindings instead of c++ functions
+    // check empty hotness
+
+    double hotness0 = -1.0;
+    double hotness1 = -1.0;
+
+    bool success0 = ranking_get_hottest(ranking1, &hotness0);
+    bool success1 = ranking_get_coldest(ranking1, &hotness1);
+
+    ASSERT_FALSE(success0);
+    ASSERT_FALSE(success1);
+
+    // check non-empty hotness
+    ranking_add_pages(ranking1, 0xFFFF0000, 2, 0);
+    ranking_add_pages(ranking1, 2 * 0xFFFF0000, 3, 0);
+    ranking_add_pages(ranking1, 3 * 0xFFFF0000, 3, 2);
+
+    double hotness_hottest0 = -1.0;
+    double hotness_coldest0 = -1.0;
+    bool success2 = ranking_get_hottest(ranking1, &hotness_hottest0);
+    bool success3 = ranking_get_coldest(ranking1, &hotness_coldest0);
+
+    ASSERT_TRUE(success2);
+    ASSERT_TRUE(success3);
+
+    // check touch without update
+    ASSERT_EQ(hotness_hottest0, hotness_coldest0);
+    ASSERT_EQ(hotness_hottest0, 0.0);
+
+    ranking_touch(ranking1, 0xFFFF0000);
+    ranking_touch(ranking1, 0xFFFF0000);
+
+    double hotness_hottest1 = -1.0;
+    double hotness_coldest1 = -1.0;
+    (void)ranking_get_hottest(ranking1, &hotness_hottest1);
+    (void)ranking_get_coldest(ranking1, &hotness_coldest1);
+
+    ASSERT_EQ(hotness_coldest1, hotness_hottest1);
+    ASSERT_EQ(hotness_coldest1, 0.0);
+
+    // check touch with update
+    ranking_update(ranking1, 1000000000);
+
+    double hotness_hottest2 = -1.0;
+    double hotness_coldest2 = -1.0;
+    (void)ranking_get_hottest(ranking1, &hotness_hottest2);
+    (void)ranking_get_coldest(ranking1, &hotness_coldest2);
+
+    ASSERT_LT(hotness_coldest2, hotness_hottest2);
+    ASSERT_EQ(hotness_coldest2, 0.0);
+
+    // check moving pages between rankings
+    // check new ranking is empty
+    double hottest_r2_0_hotness = -1.0;
+    double coldest_r2_0_hotness = -1.0;
+    bool success4 = ranking_get_hottest(ranking2, &hottest_r2_0_hotness);
+    bool success5 = ranking_get_coldest(ranking2, &coldest_r2_0_hotness);
+
+    ASSERT_FALSE(success4);
+    ASSERT_FALSE(success5);
+
+    // move hottest page to the new ranking
+    ranking_pop_hottest(ranking1, temp);
+    ranking_add_page(ranking2, temp);
+
+    double hottest_r2_1_hotness = -1.0;
+    double coldest_r2_1_hotness = -1.0;
+    bool success6 = ranking_get_hottest(ranking2, &hottest_r2_1_hotness);
+    bool success7 = ranking_get_coldest(ranking2, &coldest_r2_1_hotness);
+
+    ASSERT_TRUE(success6);
+    ASSERT_TRUE(success7);
+
+    ASSERT_EQ(hottest_r2_1_hotness, coldest_r2_1_hotness);
+    ASSERT_EQ(hottest_r2_1_hotness, hotness_hottest2);
+    ASSERT_GT(hottest_r2_1_hotness, 0.0);
+
+    // move second hottest page to the new ranking
+    ranking_pop_hottest(ranking1, temp);
+    ranking_add_page(ranking2, temp);
+
+    double hottest_r2_2_hotness = -1.0;
+    double coldest_r2_2_hotness = -1.0;
+    (void)ranking_get_hottest(ranking2, &hottest_r2_2_hotness);
+    (void)ranking_get_coldest(ranking2, &coldest_r2_2_hotness);
+
+    double hottest_3_hotness = -1.0;
+    bool success8 = ranking_get_hottest(ranking1, &hottest_3_hotness);
+
+    ASSERT_TRUE(success8);
+    ASSERT_GT(hottest_r2_2_hotness, coldest_r2_2_hotness);
+    ASSERT_GT(hottest_r2_2_hotness, hottest_3_hotness);
+    ASSERT_GT(hottest_r2_2_hotness, 0.0);
+
+    double hottest_4_hotness = -1.0;
+    double coldest_4_hotness = -1.0;
+    (void)ranking_get_hottest(ranking1, &hottest_4_hotness);
+    (void)ranking_get_coldest(ranking1, &coldest_4_hotness);
+
+    ASSERT_LT(hottest_4_hotness, hottest_r2_2_hotness);
+    ASSERT_EQ(coldest_4_hotness, hottest_4_hotness);
+    ASSERT_EQ(coldest_4_hotness, 0.0);
+
+    // Add new pages to the new ranking
+    ranking_pop_coldest(ranking1, temp);
+    ranking_add_page(ranking2, temp);
+    ranking_add_pages(ranking2, 5 * 0xFFFF0000, 1, 2000000000);
+
+    double hottest_r2_3_hotness = -1.0;
+    double coldest_r2_3_hotness = -1.0;
+    (void)ranking_get_hottest(ranking2, &hottest_r2_3_hotness);
+    (void)ranking_get_coldest(ranking2, &coldest_r2_3_hotness);
+
+    ASSERT_GT(hottest_r2_3_hotness, coldest_r2_3_hotness);
+    ASSERT_EQ(hottest_r2_2_hotness, hottest_r2_3_hotness);
+
+    // remove two hottest page from the new ranking
+    (void)ranking_pop_hottest(ranking2, temp);
+
+    // check the newly added page is the hottest
+    double hottest_r2_4_hotness = -1.0;
+    bool success9 = ranking_get_hottest(ranking2, &hottest_r2_4_hotness);
+
+    ASSERT_TRUE(success9);
+    ASSERT_EQ(hottest_r2_2_hotness, hottest_r2_4_hotness);
+
+    // pop all pages except for two - hottest and coldest
+    ranking_pop_coldest(ranking2, temp);
+
+    double hottest_r2_5_hotness = -1.0;
+    double coldest_r2_5_hotness = -1.0;
+    bool success10 = ranking_get_hottest(ranking2, &hottest_r2_5_hotness);
+    bool success11 = ranking_get_coldest(ranking2, &coldest_r2_5_hotness);
+
+    ASSERT_TRUE(success10);
+    ASSERT_TRUE(success11);
+
+    ASSERT_EQ(hottest_r2_5_hotness, hottest_r2_3_hotness);
+    ASSERT_EQ(coldest_r2_5_hotness, coldest_r2_3_hotness);
+    ASSERT_GT(hottest_r2_5_hotness, coldest_r2_5_hotness);
+
+    // pop hottest, add new page and check if hottest value was updated
+    ranking_pop_hottest(ranking2, temp);
+    ranking_add_pages(ranking2, 6 * 0xFFFF0000, 1, 2500000000);
+
+    double hottest_r2_6_hotness = -1.0;
+    double coldest_r2_6_hotness = -1.0;
+    bool success12 = ranking_get_hottest(ranking2, &hottest_r2_6_hotness);
+    bool success13 = ranking_get_coldest(ranking2, &coldest_r2_6_hotness);
+
+    ASSERT_TRUE(success12);
+    ASSERT_TRUE(success13);
+
+    ASSERT_EQ(hottest_r2_6_hotness, coldest_r2_6_hotness);
+    ASSERT_EQ(coldest_r2_6_hotness, coldest_r2_3_hotness);
+
+    // pop all pages
+    ranking_pop_coldest(ranking2, temp);
+    double hottest_r2_7_hotness = -1.0;
+    bool success14 = ranking_get_hottest(ranking2, &hottest_r2_7_hotness);
+    ASSERT_TRUE(success14);
+    ASSERT_EQ(hottest_r2_7_hotness, 0.0);
+
+    ranking_pop_coldest(ranking2, temp);
+    double hottest_r2_8_hotness = -1.0;
+    bool success15 = ranking_get_hottest(ranking2, &hottest_r2_8_hotness);
+    ASSERT_FALSE(success15);
 }
