@@ -12,8 +12,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#define BIGARY_DEFAULT_MAX (4 * 1024 * 1024 * 1024ULL)
-#define BIGARY_PAGESIZE    2097152
+#define BIGARY_DEFAULT_MAX (64 * 1024 * 1024 * 1024ULL)
+#define BIGARY_PAGESIZE    (2 * 1024 * 1024ULL)
 
 static void die(const char *fmt, ...)
 {
@@ -73,11 +73,11 @@ void bigary_alloc(bigary *restrict m_bigary, size_t top)
         goto done;
     top = (top + BIGARY_PAGESIZE - 1) & ~(BIGARY_PAGESIZE - 1); // align up
     if (top > m_bigary->declared)
-        die("bigary's max is %zd, %zd requested.\n", m_bigary->declared, top);
+        die("bigary's max is %zu, %zu requested.\n", m_bigary->declared, top);
     if (mmap(m_bigary->area + m_bigary->top, top - m_bigary->top,
              PROT_READ | PROT_WRITE, MAP_FIXED | m_bigary->flags, m_bigary->fd,
              m_bigary->top) == MAP_FAILED) {
-        die("in-bigary alloc of %zd to %zd failed: %m\n", top - m_bigary->top,
+        die("in-bigary alloc of %zu to %zu failed: %m\n", top - m_bigary->top,
             top);
     }
     m_bigary->top = top;
