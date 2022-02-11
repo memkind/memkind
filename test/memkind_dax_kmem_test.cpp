@@ -399,9 +399,11 @@ TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
     auto closest_numa_ids =
         tp.get_closest_numa_nodes(process_node, dax_kmem_nodes);
 
-    numa_size = numa_node_size64(numa_id, nullptr);
+    long long numa_free_size;
+    numa_size = numa_node_size64(numa_id, &numa_free_size);
+    ASSERT_GT(numa_size, 0U);
 
-    while (0.99 * numa_size > alloc_size * allocations.size()) {
+    while ((size_t)numa_free_size > alloc_size * allocations.size()) {
         ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
         ASSERT_NE(nullptr, ptr);
         memset(ptr, 'a', alloc_size);
