@@ -21,7 +21,7 @@ protected:
 
     void TearDown()
     {
-        free(decorators_state);
+        delete decorators_state;
     }
 };
 
