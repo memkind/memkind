@@ -8,12 +8,16 @@
 #include <memkind/internal/pool_allocator.h>
 #include <memkind/internal/ranking.h>
 #include <memkind/internal/ranking_internals.hpp>
+#include <memkind/internal/ranking_utils.h>
 #include <memkind/internal/slab_allocator.h>
 #include <mtt_allocator.h>
+
+#include "TestPrereq.hpp"
 
 #include <cmath>
 #include <gtest/gtest.h>
 #include <mutex>
+#include <numaif.h>
 #include <set>
 
 #include <test/proc_stat.h>
@@ -1216,4 +1220,48 @@ TEST(MmapTracingQueueTest, Basic)
     ASSERT_FALSE(ok);
 
     mmap_tracing_queue_destroy(&queue);
+}
+
+TEST(RankingTest, page_movement)
+{
+    TestPrereq tp;
+    int page_obj_node = -1;
+
+    void *start_addr = mmap(NULL, TRACED_PAGESIZE, PROT_READ | PROT_WRITE,
+                            MAP_PRIVATE | MAP_ANONYMOUS | MAP_POPULATE, -1, 0);
+    ASSERT_NE(start_addr, nullptr);
+
+    // Page object should be allocated on DRAM node
+    auto dram_nodes = tp.get_regular_numa_nodes();
+    get_mempolicy(&page_obj_node, nullptr, 0, start_addr,
+                  MPOL_F_NODE | MPOL_F_ADDR);
+    int process_cpu = sched_getcpu();
+    int process_node = numa_node_of_cpu(process_cpu);
+    ASSERT_TRUE(dram_nodes.find(page_obj_node) != dram_nodes.end());
+
+    // Get the closest DAX_KMEM NUMA nodes
+    auto dax_kmem_nodes = tp.get_memory_only_numa_nodes();
+    auto closest_numa_ids =
+        tp.get_closest_numa_nodes(process_node, dax_kmem_nodes);
+
+    // Move page object to PMEM
+    int ret = move_page_metadata((uintptr_t)start_addr, DAX_KMEM);
+    ASSERT_EQ(ret, 0);
+
+    // Verify that the object has the right NUMA node policy
+    get_mempolicy(&page_obj_node, nullptr, 0, start_addr,
+                  MPOL_F_NODE | MPOL_F_ADDR);
+    ASSERT_NE(process_node, page_obj_node);
+    ASSERT_TRUE(closest_numa_ids.find(page_obj_node) != closest_numa_ids.end());
+
+    // Move page object to DRAM
+    ret = move_page_metadata((uintptr_t)start_addr, DRAM);
+    ASSERT_EQ(ret, 0);
+
+    // Verify that the object has the right NUMA node policy
+    get_mempolicy(&page_obj_node, nullptr, 0, start_addr,
+                  MPOL_F_NODE | MPOL_F_ADDR);
+    ASSERT_EQ(process_node, page_obj_node);
+
+    munmap(start_addr, TRACED_PAGESIZE);
 }
