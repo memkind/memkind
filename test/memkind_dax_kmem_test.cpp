@@ -428,11 +428,12 @@ TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
 TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
        test_TC_MEMKIND_MEMKIND_DAX_KMEM_PREFFERED_check_prerequisities)
 {
-    if (tp.is_preferred_supported()) {
+    if (!tp.is_preferred_supported()) {
         GTEST_SKIP() << "More than one closest DAX KMEM nodes are required."
                      << std::endl;
     }
     const size_t alloc_size = 100 * MB;
     void *ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
-    ASSERT_EQ(nullptr, ptr);
+    ASSERT_NE(nullptr, ptr);
+    memkind_free(MEMKIND_DAX_KMEM_PREFERRED, ptr);
 }
