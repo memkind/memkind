@@ -7,12 +7,16 @@
 #include <memkind/internal/pool_allocator.h>
 #include <memkind/internal/ranking.h>
 #include <memkind/internal/ranking_internals.hpp>
+#include <memkind/internal/ranking_utils.h>
 #include <memkind/internal/slab_allocator.h>
 #include <mtt_allocator.h>
+
+#include "TestPrereq.hpp"
 
 #include <cmath>
 #include <gtest/gtest.h>
 #include <mutex>
+#include <numaif.h>
 #include <set>
 
 #include <test/proc_stat.h>
@@ -956,4 +960,64 @@ TEST_F(RankingBindingsTest, Basic)
     double hottest_r2_8_hotness = -1.0;
     bool success15 = ranking_get_hottest(ranking2, &hottest_r2_8_hotness);
     ASSERT_FALSE(success15);
+}
+
+TEST(RankingTest, page_movement)
+{
+    TestPrereq tp;
+    int page_obj_node = -1;
+    long long free_space_dram_1 = -1, free_space_dram_2 = -1;
+
+    PageMetadata page(0XFFFF, 10.0, 0);
+
+    // Page object should be allocated on DRAM node
+    get_mempolicy(&page_obj_node, nullptr, 0, &page, MPOL_F_NODE | MPOL_F_ADDR);
+    int process_cpu = sched_getcpu();
+    int process_node = numa_node_of_cpu(process_cpu);
+    ASSERT_EQ(page_obj_node, process_node);
+
+    // Get the free space on the closest DAX_KMEM NUMA nodes
+    auto dax_kmem_nodes = tp.get_memory_only_numa_nodes();
+    auto closest_numa_ids =
+        tp.get_closest_numa_nodes(process_node, dax_kmem_nodes);
+    size_t starting_free_space = tp.get_free_space(closest_numa_ids);
+
+    // Move page object to PMEM
+    int ret = move_page_metadata(&page, sizeof(PageMetadata), DAX_KMEM);
+    ASSERT_EQ(ret, 0);
+
+    // Verify that the object has the right NUMA node policy
+    get_mempolicy(&page_obj_node, nullptr, 0, &page, MPOL_F_NODE | MPOL_F_ADDR);
+    ASSERT_NE(process_node, page_obj_node);
+    ASSERT_TRUE(closest_numa_ids.find(page_obj_node) != closest_numa_ids.end());
+
+    // Wait for the page to be moved
+    sleep(1);
+
+    // There should be less free space on the closest DAX_KMEM NUMA nodes now
+    volatile size_t free_space = tp.get_free_space(closest_numa_ids);
+    ASSERT_LT(free_space, starting_free_space);
+
+    // Get the free space on DRAM NUMA node
+    long long result = numa_node_size64(page_obj_node, &free_space_dram_1);
+    ASSERT_GT(result, 0);
+    ASSERT_GT(free_space_dram_1, 0);
+
+    // Move page object to DRAM
+    ret = move_page_metadata(&page, sizeof(PageMetadata), DRAM);
+    ASSERT_EQ(ret, 0);
+
+    // Verify that the object has the right NUMA node policy
+    get_mempolicy(&page_obj_node, nullptr, 0, &page, MPOL_F_NODE | MPOL_F_ADDR);
+    ASSERT_EQ(process_node, page_obj_node);
+
+    // Wait for the page to be moved
+    sleep(1);
+
+    // There should be less free space on the DRAM NUMA node now
+    result = numa_node_size64(page_obj_node, &free_space_dram_2);
+    ASSERT_GT(result, 0);
+    ASSERT_GT(free_space_dram_2, 0);
+
+    ASSERT_LT(free_space_dram_2, free_space_dram_1);
 }
