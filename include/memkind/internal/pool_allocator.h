@@ -34,6 +34,8 @@ extern int pool_allocator_create(PoolAllocator *pool);
 extern void pool_allocator_destroy(PoolAllocator *pool);
 
 extern void *pool_allocator_malloc(PoolAllocator *pool, size_t size);
+extern void *pool_allocator_malloc_pages(PoolAllocator *pool, size_t size,
+                                         uintptr_t *addr, size_t *nof_pages);
 extern void *pool_allocator_realloc(PoolAllocator *pool, void *ptr,
                                     size_t size);
 extern void pool_allocator_free(void *ptr);
