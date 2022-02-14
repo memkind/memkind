@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 #include "pthread.h"
+#include "stdint.h"
 #include "stdlib.h" // size_t
 #include "sys/mman.h"
 
@@ -30,6 +31,8 @@ typedef struct bigary bigary;
 extern void bigary_init(bigary *restrict m_bigary, int fd, int flags,
                         size_t max);
 extern void bigary_alloc(bigary *restrict m_bigary, size_t top);
+extern void bigary_alloc_pages(bigary *restrict m_bigary, size_t top,
+                               uintptr_t *address, size_t *nof_pages);
 extern void bigary_destroy(bigary *restrict m_bigary);
 
 #ifdef __cplusplus

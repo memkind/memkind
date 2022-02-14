@@ -128,6 +128,25 @@ static freelist_node_meta_t *slab_alloc_create_meta_(SlabAllocator *alloc)
     return ret;
 }
 
+static freelist_node_meta_t *
+slab_alloc_create_meta_pages_(SlabAllocator *alloc, uintptr_t *page_start,
+                              size_t *nof_pages)
+{
+    size_t free_idx = slab_alloc_fetch_increment_used_(alloc);
+    size_t meta_offset = alloc->elementSize * free_idx;
+
+    // TODO handle failure gracefully instead of die - in biary_alloc
+    bigary_alloc_pages(&alloc->mappedMemory,
+                       (free_idx + 1) * alloc->elementSize, page_start,
+                       nof_pages);
+    void *ret_ = ((uint8_t *)alloc->mappedMemory.area) + meta_offset;
+    freelist_node_meta_t *ret = ret_;
+    ret->allocator = alloc;
+    ret->next = NULL;
+
+    return ret;
+}
+
 // -------- public functions --------------------------------------------------
 
 MEMKIND_EXPORT int slab_allocator_init(SlabAllocator *alloc,
@@ -157,6 +176,20 @@ MEMKIND_EXPORT void *slab_allocator_malloc(SlabAllocator *alloc)
     void *ret = slab_alloc_glob_freelist_pop_(alloc);
     if (!ret) {
         freelist_node_meta_t *meta = slab_alloc_create_meta_(alloc);
+        if (meta) // defensive programming
+            ret = slab_alloc_node_meta_to_addr_(meta);
+    }
+    return ret;
+}
+
+MEMKIND_EXPORT void *slab_allocator_malloc_pages(SlabAllocator *alloc,
+                                                 uintptr_t *page_start,
+                                                 size_t *nof_pages)
+{
+    void *ret = slab_alloc_glob_freelist_pop_(alloc);
+    if (!ret) {
+        freelist_node_meta_t *meta =
+            slab_alloc_create_meta_pages_(alloc, page_start, nof_pages);
         if (meta) // defensive programming
             ret = slab_alloc_node_meta_to_addr_(meta);
     }
