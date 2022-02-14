@@ -15,6 +15,9 @@
 #define BIGARY_DEFAULT_MAX (4 * 1024 * 1024 * 1024ULL)
 #define BIGARY_PAGESIZE    2097152
 
+// TODO make it global!!!
+#define TRACED_PAGESIZE (4 * 1024)
+
 static void die(const char *fmt, ...)
 {
     va_list args;
@@ -80,6 +83,34 @@ void bigary_alloc(bigary *restrict m_bigary, size_t top)
         die("in-bigary alloc of %zd to %zd failed: %m\n", top - m_bigary->top,
             top);
     }
+    m_bigary->top = top;
+done:
+    pthread_mutex_unlock(&m_bigary->enlargement);
+}
+
+/********************************************************************/
+/* ensure there's at least X space allocated                        */
+/* (you may want MAP_POPULATE to ensure the space is actually there */
+/********************************************************************/
+void bigary_alloc_pages(bigary *restrict m_bigary, size_t top,
+                        uintptr_t *address, size_t *nof_pages)
+{
+    if (m_bigary->top >= top)
+        return;
+    pthread_mutex_lock(&m_bigary->enlargement);
+    if (m_bigary->top >= top) // re-check
+        goto done;
+    top = (top + BIGARY_PAGESIZE - 1) & ~(BIGARY_PAGESIZE - 1); // align up
+    if (top > m_bigary->declared)
+        die("bigary's max is %zd, %zd requested.\n", m_bigary->declared, top);
+    if (mmap(m_bigary->area + m_bigary->top, top - m_bigary->top,
+             PROT_READ | PROT_WRITE, MAP_FIXED | m_bigary->flags, m_bigary->fd,
+             m_bigary->top) == MAP_FAILED) {
+        die("in-bigary alloc of %zd to %zd failed: %m\n", top - m_bigary->top,
+            top);
+    }
+    *address = (uintptr_t)(m_bigary->area + m_bigary->top);
+    *nof_pages = (top - m_bigary->top) / TRACED_PAGESIZE;
     m_bigary->top = top;
 done:
     pthread_mutex_unlock(&m_bigary->enlargement);
