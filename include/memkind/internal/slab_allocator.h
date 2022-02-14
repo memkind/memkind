@@ -7,6 +7,7 @@
 
 #include "pthread.h"
 #include "stddef.h"
+#include "stdint.h"
 
 #ifdef __cplusplus
 #include <atomic>
@@ -62,6 +63,9 @@ extern int slab_allocator_init(SlabAllocator *alloc, size_t element_size,
                                size_t max_elements);
 extern void slab_allocator_destroy(SlabAllocator *alloc);
 extern void *slab_allocator_malloc(SlabAllocator *alloc);
+extern void *slab_allocator_malloc_pages(SlabAllocator *alloc,
+                                         uintptr_t *page_start,
+                                         size_t *nof_pages);
 extern void slab_allocator_free(void *addr);
 
 #ifdef __cplusplus
