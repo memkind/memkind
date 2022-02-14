@@ -152,8 +152,17 @@ MEMKIND_EXPORT void *pool_allocator_malloc_pages(PoolAllocator *pool,
 MEMKIND_EXPORT void *pool_allocator_realloc(PoolAllocator *pool, void *ptr,
                                             size_t size)
 {
-    slab_allocator_free(ptr);
+    pool_allocator_free(ptr);
     return pool_allocator_malloc(pool, size);
+}
+
+MEMKIND_EXPORT void *pool_allocator_realloc_pages(PoolAllocator *pool,
+                                                  void *ptr, size_t size,
+                                                  uintptr_t *addr,
+                                                  size_t *nof_pages)
+{
+    pool_allocator_free(ptr);
+    return pool_allocator_malloc_pages(pool, size, addr, nof_pages);
 }
 
 MEMKIND_EXPORT void pool_allocator_free(void *ptr)
