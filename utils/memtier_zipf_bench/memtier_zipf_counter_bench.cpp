@@ -2,13 +2,17 @@
 /* Copyright (C) 2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_memtier.h>
+#include <memkind/internal/pool_allocator.h>
 
 #include <argp.h>
 #include <assert.h>
+#include <atomic>
 #include <condition_variable>
 #include <iostream>
 #include <random>
 #include <thread>
+
+#define ACCESS_STRIDE 10
 
 enum class TestCase
 {
@@ -33,6 +37,32 @@ enum class TestCase
     SEQ_COPY
 };
 
+enum class RawAllocator
+{
+    /// PoolAllocator
+    POOL,
+};
+
+struct GeneralPolicy {
+    enum class GeneralType
+    {
+        /// Use memtier_policy_t
+        Memtier,
+        /// Use RawAllocator
+        RawAllocator
+    } generalType;
+    union {
+        memtier_policy_t policy;
+        RawAllocator allocator;
+    };
+};
+
+enum NonAsciiKeys
+{
+    KEY_NOF_ALLOCATIONS = 0x100,
+    KEY_ALLOCATION_SIZE = 0x101,
+};
+
 static uint64_t clock_bench_time_ms()
 {
     struct timespec tv;
@@ -40,6 +70,70 @@ static uint64_t clock_bench_time_ms()
     assert(ret == 0);
     return tv.tv_sec * 1000 + tv.tv_nsec / 1000000;
 }
+
+/// dependency inversion for memkind and other allocators
+class Allocator
+{
+public:
+    virtual void *malloc(size_t size_bytes) = 0;
+    virtual void free(void *ptr) = 0;
+};
+
+class MemtierAllocator: public Allocator
+{
+    std::shared_ptr<memtier_memory> memory;
+
+public:
+    MemtierAllocator(memtier_policy_t policy,
+                     std::pair<size_t, size_t> dram_pmem_ratio)
+    {
+        struct memtier_builder *m_tier_builder = memtier_builder_new(policy);
+        memtier_builder_add_tier(m_tier_builder, MEMKIND_DEFAULT,
+                                 dram_pmem_ratio.first);
+        //     memtier_builder_add_tier(m_tier_builder, MEMKIND_DAX_KMEM,
+        memtier_builder_add_tier(m_tier_builder, MEMKIND_REGULAR,
+                                 dram_pmem_ratio.second);
+        memory = std::shared_ptr<memtier_memory>(
+            memtier_builder_construct_memtier_memory(m_tier_builder),
+            [](struct memtier_memory *m) { memtier_delete_memtier_memory(m); });
+        memtier_builder_delete(m_tier_builder);
+    }
+    void *malloc(size_t size_bytes)
+    {
+        return memtier_malloc(memory.get(), size_bytes);
+    }
+
+    void free(void *ptr)
+    {
+        memtier_free(ptr);
+    }
+};
+
+class PoolAllocatorWrapper: public Allocator
+{
+    PoolAllocator allocator;
+
+public:
+    PoolAllocatorWrapper()
+    {
+        pool_allocator_create(&allocator);
+    }
+
+    ~PoolAllocatorWrapper()
+    {
+        pool_allocator_destroy(&allocator);
+    }
+
+    void *malloc(size_t size_bytes)
+    {
+        return pool_allocator_malloc(&allocator, size_bytes);
+    }
+
+    void free(void *ptr)
+    {
+        pool_allocator_free(ptr);
+    }
+};
 
 struct RunInfo {
     /* total operations: types_count * iterations_minor * iterations_major
@@ -51,11 +145,12 @@ struct RunInfo {
      *          access()
      */
     TestCase test_case;
-    size_t min_size;
+    size_t nof_allocations;
+    size_t allocation_size;
     size_t types_count;
     size_t iterations_major;
     size_t iterations_minor;
-    memtier_policy_t policy;
+    GeneralPolicy policy;
     std::pair<size_t, size_t> dram_pmem_ratio;
 };
 
@@ -70,20 +165,31 @@ class Fence
 {
     bool ready = false;
     std::mutex m;
-    std::condition_variable cv;
+    std::condition_variable clientToFenceReady;
+    size_t readyClients = 0;
+    size_t nofClients;
+    std::condition_variable fenceToClientsStart;
 
 public:
+    Fence(size_t nof_clients = 0) : nofClients(nof_clients)
+    {}
     void Start()
     {
-        std::lock_guard<std::mutex> lock(m);
+        std::unique_lock<std::mutex> lock(m);
+        // await until all threads are prepared
+        clientToFenceReady.wait(lock,
+                                [&] { return readyClients >= nofClients; });
         ready = true;
-        cv.notify_all();
+        fenceToClientsStart.notify_all();
     }
 
     void Await()
     {
         std::unique_lock<std::mutex> lock(m);
-        cv.wait(lock, [&] { return ready; });
+        if (++readyClients >= nofClients)
+            clientToFenceReady.notify_one();
+
+        fenceToClientsStart.wait(lock, [&] { return ready; });
     }
 };
 
@@ -94,11 +200,16 @@ class Loader
     static std::random_device dev;
     std::mt19937 generator;
     TestCase test_case;
-    std::shared_ptr<void> data;
-    size_t data_size;
+    /// 2D array: uint64_t data[nof_allocations][allocation_size]
+    volatile uint64_t **data;
+    size_t allocation_size;
+    size_t nof_done_allocations = 0;
+    size_t nof_allocations;
     size_t iterations;
+    size_t additional_stack;
     std::shared_ptr<std::thread> this_thread;
     uint64_t execution_time_millis = 0;
+    std::shared_ptr<Allocator> allocator;
 
     // clang-format off
     /// @return time in milliseconds per whole data access
@@ -106,43 +217,55 @@ class Loader
     {
         const int CACHE_LINE_LEAP = 5;
         uint64_t timestamp_start = clock_bench_time_ms();
-        const size_t data_size_u64 = data_size / sizeof(uint64_t);
-        std::uniform_int_distribution<uint64_t> distr(0, data_size_u64);
+        std::uniform_int_distribution<uint64_t> distr_alloc(0, nof_allocations);
+        std::uniform_int_distribution<uint64_t> distr_internal(0, allocation_size);
 
         switch (test_case) {
             case (TestCase::RANDOM_INC):
-                for (size_t it = 0; it < iterations; ++it) {
-                    for (size_t i = 0; i < data_size_u64; i += CACHE_LINE_SIZE_U64) {
-                        size_t index = distr(generator);
-                        static_cast<uint64_t *>(data.get())[index]++;
+                for (size_t i=0; i<iterations; ++i) {
+                    for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size; intra_allocation_it += ACCESS_STRIDE) {
+                        for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
+                            size_t index_alloc = distr_alloc(generator);
+                            size_t index_internal = distr_internal(generator);
+                            data[index_alloc][index_internal]++;
+                        }
                     }
                 }
                 break;
             case (TestCase::SEQ_INC):
-                for (size_t it = 0; it < iterations; ++it) {
-                    for (size_t i = 0; i < data_size_u64; i += CACHE_LINE_SIZE_U64) {
-                        static_cast<uint64_t *>(data.get())[i]++;
+                for (size_t i=0; i<iterations; ++i) {
+                    for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size; intra_allocation_it += ACCESS_STRIDE) {
+                        for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
+                            data[allocation_it][intra_allocation_it]++;
+                        }
                     }
                 }
                 break;
             case (TestCase::RANDOM_COPY):
-                for (size_t it = 0; it < iterations; ++it) {
-                    for (size_t i = 0; i < data_size_u64; i += CACHE_LINE_SIZE_U64) {
-                        // TODO: consider using a table with prepared random
-                        // values in case of a CPU-bottleneck
-                        size_t index_from = distr(generator);
-                        size_t index_to = distr(generator);
-                        static_cast<volatile uint64_t *>(data.get())[index_to] =
-                            static_cast<volatile uint64_t *>(data.get())[index_from];
+                for (size_t i=0; i<iterations; ++i) {
+                    for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size; intra_allocation_it += ACCESS_STRIDE) {
+                        for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
+                            size_t index_alloc_from = distr_alloc(generator);
+                            size_t index_internal_from = distr_internal(generator);
+                            size_t index_alloc_to = distr_alloc(generator);
+                            size_t index_internal_to = distr_internal(generator);
+                            data[index_alloc_to][index_internal_to] =
+                            data[index_alloc_from][index_internal_from];
+                        }
                     }
                 }
                 break;
             case (TestCase::SEQ_COPY):
-                for (size_t it = 0; it < iterations; ++it) {
-                    for (size_t i = 0; i < data_size_u64 - CACHE_LINE_LEAP * CACHE_LINE_SIZE_U64;
-                            i += CACHE_LINE_SIZE_U64) {
-                        static_cast<volatile uint64_t *>(data.get())[i] =
-                            static_cast<volatile uint64_t *>(data.get())[i + 5 * CACHE_LINE_SIZE_U64];
+                for (size_t i=0; i<iterations; ++i) {
+                    for (size_t intra_allocation_it=0; intra_allocation_it<allocation_size-5; intra_allocation_it += ACCESS_STRIDE) {
+                        for (size_t allocation_it=0; allocation_it<nof_allocations; ++allocation_it) {
+                            size_t index_alloc_to = allocation_it;
+                            size_t index_internal_to = intra_allocation_it+5;
+                            size_t index_alloc_from = allocation_it;
+                            size_t index_internal_from = intra_allocation_it;
+                            data[index_alloc_to][index_internal_to] =
+                            data[index_alloc_from][index_internal_from];
+                        }
                     }
                 }
                 break;
@@ -152,14 +275,28 @@ class Loader
     // clang-format on
 
 public:
-    Loader(TestCase test_case, std::shared_ptr<void> data, size_t data_size,
-           size_t iterations)
+    Loader(TestCase test_case, std::shared_ptr<Allocator> allocator,
+           size_t nof_allocations, size_t allocation_size, size_t iterations,
+           size_t additional_stack)
         : generator(dev()),
           test_case(test_case),
-          data(data),
-          data_size(data_size),
-          iterations(iterations)
-    {}
+          nof_allocations(nof_allocations),
+          allocation_size(allocation_size),
+          iterations(iterations),
+          allocator(allocator),
+          additional_stack(additional_stack)
+    {
+        data = (volatile uint64_t **)allocator->malloc(sizeof(void *) *
+                                                       nof_allocations);
+        assert(data && "allocation failed!");
+    }
+
+    ~Loader()
+    {
+        for (size_t i = 0; i < nof_done_allocations; ++i)
+            allocator->free((void *)data[i]);
+        allocator->free(data);
+    }
 
     void PrepareOnce(std::shared_ptr<Fence> fence)
     {
@@ -177,51 +314,70 @@ public:
         this_thread->join();
         return this->execution_time_millis;
     }
+
+    /// @return true if all allocated
+    bool AllocateNext()
+    {
+        // modify stack size - type control
+        volatile uint8_t DATA[16 * additional_stack];
+        DATA[0] = 0;
+        // stride 16 was necessary - lower changes were not always reflected in
+        // stack size TODO investigate and modify stack size hash to avoid
+        // unused types
+        DATA[16 * additional_stack - 1] = 0;
+        // avoid moving reads and writes before and after this fence
+        std::atomic_thread_fence(std::memory_order_seq_cst);
+
+        if (nof_done_allocations < nof_allocations) {
+            data[nof_done_allocations] = (volatile uint64_t *)allocator->malloc(
+                sizeof(uint64_t) * allocation_size);
+            assert(data[nof_done_allocations] && "allocation failed!");
+            ++nof_done_allocations;
+        }
+
+        return nof_done_allocations >= nof_allocations;
+    }
 };
 
 std::random_device Loader::dev;
 
-static std::shared_ptr<memtier_memory>
-create_memory(memtier_policy_t policy,
-              std::pair<size_t, size_t> dram_pmem_ratio)
-{
-    struct memtier_builder *m_tier_builder = memtier_builder_new(policy);
-    memtier_builder_add_tier(m_tier_builder, MEMKIND_DEFAULT,
-                             dram_pmem_ratio.first);
-    memtier_builder_add_tier(m_tier_builder, MEMKIND_DAX_KMEM,
-                             dram_pmem_ratio.second);
-    auto memory = std::shared_ptr<memtier_memory>(
-        memtier_builder_construct_memtier_memory(m_tier_builder),
-        [](struct memtier_memory *m) { memtier_delete_memtier_memory(m); });
-    memtier_builder_delete(m_tier_builder);
-
-    return memory;
-}
-
 class LoaderCreator
 {
     TestCase test_case;
-    size_t size, iterations;
-    std::shared_ptr<memtier_memory> memory;
+    size_t nof_allocations;
+    size_t allocation_size;
+    size_t additional_stack;
+    size_t iterations;
+    std::shared_ptr<Allocator> allocator;
+
+    std::shared_ptr<Loader> CreateLoader_()
+    {
+        return std::make_shared<Loader>(test_case, allocator, nof_allocations,
+                                        allocation_size, iterations,
+                                        additional_stack);
+    }
 
 public:
-    LoaderCreator(TestCase test_case, size_t size, size_t iterations,
-                  std::shared_ptr<memtier_memory> memory)
+    LoaderCreator(TestCase test_case, size_t nof_allocations,
+                  size_t allocation_size, size_t iterations,
+                  std::shared_ptr<Allocator> allocator, size_t additional_stack)
         : test_case(test_case),
-          size(size),
+          nof_allocations(nof_allocations),
+          allocation_size(allocation_size),
           iterations(iterations),
-          memory(memory)
+          allocator(allocator),
+          additional_stack(additional_stack)
     {}
 
     std::shared_ptr<Loader> CreateLoader()
     {
-        void *allocated_memory = memtier_malloc(memory.get(), size);
-        assert(allocated_memory && "memtier malloc failed");
-        std::shared_ptr<void> allocated_memory_ptr(allocated_memory,
-                                                   memtier_free);
-
-        return std::make_shared<Loader>(test_case, allocated_memory_ptr, size,
-                                        iterations);
+        // create array on stack and avoid optimising it out
+        volatile uint8_t DATA[16 * additional_stack];
+        DATA[0] = 0;
+        DATA[16 * additional_stack - 1] = 0;
+        // avoid moving reads and writes before and after this fence
+        std::atomic_thread_fence(std::memory_order_seq_cst);
+        return this->CreateLoader_();
     }
 };
 
@@ -231,12 +387,30 @@ create_and_run_loaders(std::vector<LoaderCreator> &creators)
 {
     std::vector<std::shared_ptr<Loader>> loaders;
 
-    auto fence = std::make_shared<Fence>();
+    auto fence = std::make_shared<Fence>(creators.size());
     loaders.reserve(creators.size());
 
-    uint64_t start_mallocs_timestamp = clock_bench_time_ms();
     for (auto &creator : creators) {
         loaders.push_back(creator.CreateLoader());
+    }
+    uint64_t start_mallocs_timestamp = clock_bench_time_ms();
+    bool all_finished = false;
+    // allocate so that fields interleave on common allocators
+    while (!all_finished) {
+        all_finished = true;
+        // use creators like
+        size_t first = 0;
+        size_t last = loaders.size() - 1;
+        // make one allocation per each loader
+        // order of allocations:
+        // hottest -> coldest -> second hottest -> second coldest -> ...
+        // made to assure that each pair of allocations has ~ same average place
+        // in ranking
+        while (first <= last) {
+            all_finished &= loaders[first++]->AllocateNext();
+            if (first <= last)
+                all_finished &= loaders[last--]->AllocateNext();
+        }
     }
     uint64_t malloc_time = clock_bench_time_ms() - start_mallocs_timestamp;
 
@@ -279,27 +453,48 @@ static double calculate_zipf_denominator(int N, double s)
 ///     - N: total number of elements
 ///
 static std::vector<LoaderCreator>
-create_loader_creators(TestCase test_case, size_t min_size, size_t types_count,
-                       size_t total_iterations, memtier_policy_t policy,
+create_loader_creators(TestCase test_case, size_t nof_allocations,
+                       size_t allocation_size, size_t types_count,
+                       size_t total_iterations, GeneralPolicy policy,
                        std::pair<size_t, size_t> pmem_dram_ratio)
 {
     const double s = 2.0;
     std::vector<LoaderCreator> creators;
 
-    auto memory = create_memory(policy, pmem_dram_ratio);
+    std::shared_ptr<Allocator> allocator;
+    switch (policy.generalType) {
+        case GeneralPolicy::GeneralType::Memtier:
+        {
+            allocator = std::make_shared<MemtierAllocator>(policy.policy,
+                                                           pmem_dram_ratio);
+            break;
+        }
+        case GeneralPolicy::GeneralType::RawAllocator:
+        {
+            switch (policy.allocator) {
+                case RawAllocator::POOL:
+                    allocator = std::make_shared<PoolAllocatorWrapper>();
+                    break;
+            }
+        }
+    }
     creators.reserve(types_count);
     double zipf_denominator = calculate_zipf_denominator(types_count, s);
 
     // create loader creators that share memory
     double probability_sum = 0;
-    for (size_t size = min_size, k = 1u; size < min_size + types_count;
-         ++size, ++k) {
+    // k reverses - coldest data is allocated first
+    // the order of allocs and it's effect might be investigated in the future
+    for (size_t type_idx = 0, k = types_count; type_idx < types_count;
+         ++type_idx, --k) {
         double probability = 1 / pow(k, s) / zipf_denominator;
         probability_sum += probability;
         size_t iterations = (size_t)(total_iterations * probability);
         std::cout << "Type " << k << " iterations count: " << iterations
                   << std::endl;
-        creators.push_back(LoaderCreator(test_case, size, iterations, memory));
+        creators.push_back(LoaderCreator(test_case, nof_allocations,
+                                         allocation_size, iterations, allocator,
+                                         type_idx));
     }
     assert(abs(probability_sum - 1.0) < 0.0001 &&
            "probabilities do not sum to 100% !");
@@ -312,8 +507,9 @@ BenchResults run_test(const RunInfo &info)
 {
 
     std::vector<LoaderCreator> loader_creators = create_loader_creators(
-        info.test_case, info.min_size, info.types_count, info.iterations_minor,
-        info.policy, info.dram_pmem_ratio);
+        info.test_case, info.nof_allocations, info.allocation_size,
+        info.types_count, info.iterations_minor, info.policy,
+        info.dram_pmem_ratio);
 
     std::vector<uint64_t> malloc_times;
     std::vector<uint64_t> access_times;
@@ -338,13 +534,15 @@ BenchResults run_test(const RunInfo &info)
 }
 
 struct BenchArgs {
-    memtier_policy_t policy;
+    GeneralPolicy policy;
     TestCase test_case;
     size_t test_iterations;
     size_t access_iterations;
     size_t threads_count;
     size_t dram_ratio_part;
     size_t pmem_ratio_part;
+    size_t nof_allocations;
+    size_t allocation_size;
 };
 
 static int parse_opt(int key, char *arg, struct argp_state *state)
@@ -352,10 +550,16 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
     auto args = (BenchArgs *)state->input;
     switch (key) {
         case 's':
-            args->policy = MEMTIER_POLICY_STATIC_RATIO;
+            args->policy.generalType = GeneralPolicy::GeneralType::Memtier;
+            args->policy.policy = MEMTIER_POLICY_STATIC_RATIO;
             break;
         case 'm':
-            args->policy = MEMTIER_POLICY_DATA_MOVEMENT;
+            args->policy.generalType = GeneralPolicy::GeneralType::Memtier;
+            args->policy.policy = MEMTIER_POLICY_DATA_MOVEMENT;
+            break;
+        case 'p':
+            args->policy.generalType = GeneralPolicy::GeneralType::RawAllocator;
+            args->policy.allocator = RawAllocator::POOL;
             break;
         case 'A':
             args->test_case = TestCase::RANDOM_INC;
@@ -370,33 +574,54 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
             args->test_case = TestCase::SEQ_COPY;
             break;
         case 'i':
-            assert((size_t)arg > 0 &&
-                   "test iterations must be greater than zero");
+            assert(arg && "argument for test iterations not supplied");
             args->test_iterations = std::strtoul(arg, nullptr, 10);
+            assert(args->test_iterations > 0 &&
+                   "test iterations must be greater than zero");
             break;
         case 'a':
-            assert((size_t)arg > 0 &&
-                   "access iterations must be greater than zero");
+            assert(arg && "argument for access iterations not supplied");
             args->access_iterations = std::strtoul(arg, nullptr, 10);
+            assert(args->access_iterations > 0 &&
+                   "access iterations must be greater than zero");
             break;
         case 't':
-            assert((size_t)arg > 0 && "at least one thread is required");
+            assert(arg && "argument for threads not supplied");
             args->threads_count = std::strtoul(arg, nullptr, 10);
+            assert(args->threads_count > 0 &&
+                   "at least one thread is required");
             break;
         case 'r':
         {
             std::string delimiter = ":";
             std::string ratio_string = arg;
             size_t char_count = ratio_string.find(delimiter);
-            const char *dram_ratio_part_str =
-                ratio_string.substr(0, char_count).c_str();
+            std::string dram_ratio_part_str =
+                ratio_string.substr(0, char_count);
             args->dram_ratio_part =
-                std::strtoul(dram_ratio_part_str, nullptr, 10);
+                std::strtoul(dram_ratio_part_str.c_str(), nullptr, 10);
             ratio_string.erase(0, char_count + delimiter.length());
-            const char *pmem_ratio_part_str =
-                ratio_string.substr(0, ratio_string.find(delimiter)).c_str();
+            std::string pmem_ratio_part_str =
+                ratio_string.substr(0, ratio_string.find(delimiter));
             args->pmem_ratio_part =
-                std::strtoul(pmem_ratio_part_str, nullptr, 10);
+                std::strtoul(pmem_ratio_part_str.c_str(), nullptr, 10);
+            break;
+        }
+        case KEY_NOF_ALLOCATIONS:
+        {
+            assert(arg &&
+                   "argument for the number of allocations not supplied");
+            args->nof_allocations = std::strtoul(arg, nullptr, 10);
+            assert(args->nof_allocations > 0 &&
+                   "at least one allocation per type is required");
+            break;
+        }
+        case KEY_ALLOCATION_SIZE:
+        {
+            assert(arg && "argument for allocation size not supplied");
+            args->allocation_size = std::strtoul(arg, nullptr, 10);
+            assert(args->allocation_size > 0 &&
+                   "allocation size has to be > 0");
             break;
         }
         default:
@@ -407,6 +632,7 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
 
 static struct argp_option options[] = {
     {"static", 's', 0, 0, "Benchmark static ratio policy.", 0},
+    {"pool", 'p', 0, 0, "Benchmark pool allocator.", 0},
     {"movement", 'm', 0, 0, "Benchmark data movement policy.", 0},
     {0, 'A', 0, 0, "Benchmark test case Random Incrementation.", 1},
     {0, 'B', 0, 0, "Benchmark test case Sequential Incrementation.", 1},
@@ -416,31 +642,48 @@ static struct argp_option options[] = {
     {"access", 'a', "size_t", 0, "Number of accesses done for each thread.", 2},
     {"threads", 't', "size_t", 0, "Threads count.", 2},
     {"ratio", 'r', "dram:pmem", 0, "DRAM to PMEM ratio.", 2},
+    {"nof_allocs", KEY_NOF_ALLOCATIONS, "size_t", 0,
+     "Number of allocations per type", 3},
+    {"alloc_size", KEY_ALLOCATION_SIZE, "size_t", 0,
+     "Size of each allocation - size of uint64_t buffer", 3},
     {0}};
 
 static struct argp argp = {options, parse_opt, nullptr, nullptr};
 
 int main(int argc, char *argv[])
 {
-    size_t LOADER_SIZE = 1024 * 1024 * 512; // 512 MB
+    // buffer with 1.5*128 uint64_t entries - > 1.5 kB
+    size_t ALLOCATION_SIZE_U64 = 1024 / sizeof(uint64_t) * 3 / 2;
+    size_t NOF_ALLOCATIONS = 512 * 1024;
 
-    struct BenchArgs args = {.policy = MEMTIER_POLICY_STATIC_RATIO,
-                             .test_case = TestCase::SEQ_INC,
-                             .test_iterations = 1,
-                             .access_iterations = 500,
-                             .threads_count = 1,
-                             .dram_ratio_part = 1,
-                             .pmem_ratio_part = 8};
+    struct BenchArgs args = {
+        .policy =
+            {
+                .generalType = GeneralPolicy::GeneralType::Memtier,
+                .policy = MEMTIER_POLICY_STATIC_RATIO,
+            },
+        .test_case = TestCase::SEQ_INC,
+        .test_iterations = 1,
+        .access_iterations = 500,
+        .threads_count = 1,
+        .dram_ratio_part = 1,
+        .pmem_ratio_part = 8,
+        .nof_allocations = NOF_ALLOCATIONS,
+        .allocation_size = ALLOCATION_SIZE_U64,
+    };
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
-    RunInfo info = {.test_case = args.test_case,
-                    .min_size = LOADER_SIZE,
-                    .types_count = args.threads_count,
-                    .iterations_major = args.test_iterations,
-                    .iterations_minor = args.access_iterations,
-                    .policy = args.policy,
-                    .dram_pmem_ratio = std::make_pair(args.dram_ratio_part,
-                                                      args.pmem_ratio_part)};
+    RunInfo info = {
+        .test_case = args.test_case,
+        .nof_allocations = args.nof_allocations,
+        .allocation_size = args.allocation_size,
+        .types_count = args.threads_count,
+        .iterations_major = args.test_iterations,
+        .iterations_minor = args.access_iterations,
+        .policy = args.policy,
+        .dram_pmem_ratio =
+            std::make_pair(args.dram_ratio_part, args.pmem_ratio_part),
+    };
 
     BenchResults stats = run_test(info);
 
