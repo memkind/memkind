@@ -3,6 +3,18 @@ on: [push, pull_request]
 
 jobs:
 
+  shellcheck:
+    runs-on: ubuntu-20.04
+    name: Code Linting - Shellcheck
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - uses: ludeeus/action-shellcheck@master
+      with:
+        ignore_paths: 'jemalloc'
+
   linting:
     runs-on: ubuntu-20.04
     name: Code Linting - clang-format
