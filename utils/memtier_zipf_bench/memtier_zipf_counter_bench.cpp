@@ -13,6 +13,7 @@
 #include <thread>
 
 #define ACCESS_STRIDE 10
+#define USE_DAX_KMEM  1
 
 enum class TestCase
 {
@@ -49,7 +50,9 @@ struct GeneralPolicy {
         /// Use memtier_policy_t
         Memtier,
         /// Use RawAllocator
-        RawAllocator
+        RawAllocator,
+        /// Use standard library allocator: std::malloc and std::free
+        StdAllocator
     } generalType;
     union {
         memtier_policy_t policy;
@@ -79,6 +82,20 @@ public:
     virtual void free(void *ptr) = 0;
 };
 
+class StdAllocator: public Allocator
+{
+public:
+    void *malloc(size_t size_bytes)
+    {
+        return std::malloc(size_bytes);
+    }
+
+    void free(void *ptr)
+    {
+        return std::free(ptr);
+    }
+};
+
 class MemtierAllocator: public Allocator
 {
     std::shared_ptr<memtier_memory> memory;
@@ -90,14 +107,23 @@ public:
         struct memtier_builder *m_tier_builder = memtier_builder_new(policy);
         memtier_builder_add_tier(m_tier_builder, MEMKIND_DEFAULT,
                                  dram_pmem_ratio.first);
-        //     memtier_builder_add_tier(m_tier_builder, MEMKIND_DAX_KMEM,
+
+#if USE_DAX_KMEM
+        memtier_builder_add_tier(m_tier_builder, MEMKIND_DAX_KMEM,
+                                 dram_pmem_ratio.second);
+#else
+        std::cerr << "NOTE: second tier is defined as MEMKIND_REGULAR"
+                  << std::endl;
         memtier_builder_add_tier(m_tier_builder, MEMKIND_REGULAR,
                                  dram_pmem_ratio.second);
+#endif
+
         memory = std::shared_ptr<memtier_memory>(
             memtier_builder_construct_memtier_memory(m_tier_builder),
             [](struct memtier_memory *m) { memtier_delete_memtier_memory(m); });
         memtier_builder_delete(m_tier_builder);
     }
+
     void *malloc(size_t size_bytes)
     {
         return memtier_malloc(memory.get(), size_bytes);
@@ -469,6 +495,11 @@ create_loader_creators(TestCase test_case, size_t nof_allocations,
                                                            pmem_dram_ratio);
             break;
         }
+        case GeneralPolicy::GeneralType::StdAllocator:
+        {
+            allocator = std::make_shared<StdAllocator>();
+            break;
+        }
         case GeneralPolicy::GeneralType::RawAllocator:
         {
             switch (policy.allocator) {
@@ -561,6 +592,9 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
             args->policy.generalType = GeneralPolicy::GeneralType::RawAllocator;
             args->policy.allocator = RawAllocator::POOL;
             break;
+        case 'g':
+            args->policy.generalType = GeneralPolicy::GeneralType::StdAllocator;
+            break;
         case 'A':
             args->test_case = TestCase::RANDOM_INC;
             break;
@@ -634,6 +668,7 @@ static struct argp_option options[] = {
     {"static", 's', 0, 0, "Benchmark static ratio policy.", 0},
     {"pool", 'p', 0, 0, "Benchmark pool allocator.", 0},
     {"movement", 'm', 0, 0, "Benchmark data movement policy.", 0},
+    {"std", 'g', 0, 0, "Benchmark std glibc allocator.", 0},
     {0, 'A', 0, 0, "Benchmark test case Random Incrementation.", 1},
     {0, 'B', 0, 0, "Benchmark test case Sequential Incrementation.", 1},
     {0, 'C', 0, 0, "Benchmark test case Random Copy.", 1},
@@ -656,21 +691,19 @@ int main(int argc, char *argv[])
     size_t ALLOCATION_SIZE_U64 = 1024 / sizeof(uint64_t) * 3 / 2;
     size_t NOF_ALLOCATIONS = 512 * 1024;
 
-    struct BenchArgs args = {
-        .policy =
-            {
-                .generalType = GeneralPolicy::GeneralType::Memtier,
-                .policy = MEMTIER_POLICY_STATIC_RATIO,
-            },
-        .test_case = TestCase::SEQ_INC,
-        .test_iterations = 1,
-        .access_iterations = 500,
-        .threads_count = 1,
-        .dram_ratio_part = 1,
-        .pmem_ratio_part = 8,
-        .nof_allocations = NOF_ALLOCATIONS,
-        .allocation_size = ALLOCATION_SIZE_U64,
-    };
+    struct BenchArgs args;
+
+    args.policy.generalType = GeneralPolicy::GeneralType::Memtier;
+    args.policy.policy = MEMTIER_POLICY_STATIC_RATIO;
+    args.test_case = TestCase::SEQ_INC;
+    args.test_iterations = 1;
+    args.access_iterations = 500;
+    args.threads_count = 1;
+    args.dram_ratio_part = 1;
+    args.pmem_ratio_part = 8;
+    args.nof_allocations = NOF_ALLOCATIONS;
+    args.allocation_size = ALLOCATION_SIZE_U64;
+
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
     RunInfo info = {
