@@ -582,6 +582,9 @@ void memkind_init(memkind_t kind, bool check_numa)
             abort();
         }
     }
+    void *t = memkind_malloc(kind, 8);
+    *(char *)t = 0;
+    memkind_free(kind, t);
 }
 
 char *memkind_get_env(const char *name)
