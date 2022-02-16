@@ -101,11 +101,11 @@ MEMKIND_EXPORT void *pool_allocator_malloc(PoolAllocator *pool, size_t size)
     uint16_t hash = hasher_calculate_hash(size_rank);
     SlabAllocator *slab = pool->pool[hash];
     if (!slab) {
-        atomic_slab_alloc_ptr_t null_slab = slab;
+        SlabAllocator *null_slab = slab;
         // TODO initialize the slab in a lockless way
         slab = slab_allocator_malloc(&pool->slabSlabAllocator);
         size_t slab_size = size_rank_to_size(size_rank);
-        int ret = slab_allocator_init(slab, slab_size, 0);
+        int ret = slab_allocator_init((SlabAllocator *)slab, slab_size, 0);
         if (ret != 0)
             return NULL;
         bool exchanged =
@@ -130,7 +130,7 @@ MEMKIND_EXPORT void *pool_allocator_malloc_pages(PoolAllocator *pool,
     uint16_t hash = hasher_calculate_hash(size_rank);
     SlabAllocator *slab = pool->pool[hash];
     if (!slab) {
-        atomic_slab_alloc_ptr_t null_slab = slab;
+        SlabAllocator *null_slab = slab;
         // TODO initialize the slab in a lockless way
         slab = slab_allocator_malloc(&pool->slabSlabAllocator);
         size_t slab_size = size_rank_to_size(size_rank);

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "config.h"
 #include "memkind/internal/bigary.h"
 
 #include "pthread.h"
