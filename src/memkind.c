@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2021 Intel Corporation. */
+/* Copyright (C) 2014 - 2022 Intel Corporation. */
 
 #define MEMKIND_VERSION_MAJOR 1
 #define MEMKIND_VERSION_MINOR 13
@@ -581,6 +581,14 @@ void memkind_init(memkind_t kind, bool check_numa)
                       err);
             abort();
         }
+    }
+
+    // pre-fault memory used by this kind to allow user operate on it
+    // immediately
+    void *ptr = kind_mmap(kind, NULL, 8);
+    if (ptr) {
+        *(char *)ptr = 0;
+        munmap(ptr, 8);
     }
 }
 
