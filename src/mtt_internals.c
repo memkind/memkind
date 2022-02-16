@@ -4,6 +4,8 @@
 #include "memkind/internal/mtt_internals.h"
 #include "memkind/internal/memkind_private.h"
 
+#include "assert.h"
+
 MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
                                         uint64_t timestamp)
 {
@@ -38,6 +40,7 @@ MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
 {
     // TODO this is more complicated: realloc might call malloc, so we actually
     // need to extend pool
+    assert(false);
     return NULL;
 }
 
