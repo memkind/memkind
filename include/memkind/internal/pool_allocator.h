@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "config.h"
 #include "memkind/internal/slab_allocator.h"
 
 #include "stddef.h"
@@ -22,7 +23,7 @@ extern "C" {
 #else
 #define MEMKIND_ATOMIC
 #endif
-#define atomic_slab_alloc_ptr_t MEMKIND_ATOMIC SlabAllocator *
+#define atomic_slab_alloc_ptr_t MEMKIND_ATOMIC(SlabAllocator *)
 #endif
 
 typedef struct PoolAllocator {

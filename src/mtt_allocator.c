@@ -2,13 +2,16 @@
 /* Copyright (C) 2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_private.h>
 #include <memkind/internal/pebs.h>
+
 #include <mtt_allocator.h>
 
 #include <stdlib.h>
 
 // Function required for pthread_create()
 // TODO: move it to a separate module and add an implementation
+// TODO handle touches and ranking updates from this branch
 static void *mtt_run_bg_thread(void *mtt_alloc)
 {
     MTTAllocator *mtt_allocator = mtt_alloc;
@@ -47,6 +50,9 @@ static void *mtt_run_bg_thread(void *mtt_alloc)
 
 MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator)
 {
+    // TODO get timestamp from somewhere!!! (bg thread? PEBS?)
+    uint64_t timestamp = 0;
+    mtt_internals_create(&mtt_allocator->internals, timestamp);
     pebs_create();
 
     pthread_mutex_init(&mtt_allocator->bg_thread_cond_mutex, NULL);
@@ -81,4 +87,22 @@ MEMKIND_EXPORT void mtt_allocator_destroy(MTTAllocator *mtt_allocator)
     pthread_cond_destroy(&mtt_allocator->bg_thread_cond);
 
     pebs_destroy();
+    mtt_internals_destroy(&mtt_allocator->internals);
+}
+
+MEMKIND_EXPORT void *mtt_allocator_malloc(MTTAllocator *mtt_allocator,
+                                          size_t size)
+{
+    return mtt_internals_malloc(&mtt_allocator->internals, size);
+}
+
+MEMKIND_EXPORT void *mtt_allocator_realloc(MTTAllocator *mtt_allocator,
+                                           void *ptr, size_t size)
+{
+    return mtt_internals_realloc(&mtt_allocator->internals, ptr, size);
+}
+
+MEMKIND_EXPORT void mtt_allocator_free(void *ptr)
+{
+    mtt_internals_free(ptr);
 }

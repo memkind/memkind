@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "config.h"
 #include "memkind/internal/pool_allocator.h"
 #include "memkind/internal/ranking.h"
 
