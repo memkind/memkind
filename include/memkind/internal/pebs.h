@@ -7,6 +7,7 @@
 
 #include <linux/hw_breakpoint.h> // definition of HW_* constants
 #include <linux/perf_event.h>    // definition of PERF_* constants
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,14 +31,11 @@ extern "C" {
 typedef struct perf_event_mmap_page perf_event_mmap_page_t;
 typedef struct perf_event_header perf_event_header_t;
 
+typedef void (*touch_cb)(uintptr_t address, uint64_t timestamp);
+
 void pebs_create();
 void pebs_destroy();
-void pebs_monitor();
-
-// TODO remove debug only
-extern void *pebs_debug_check_low;
-extern void *pebs_debug_check_hi;
-extern int pebs_debug_num_samples;
+void pebs_monitor(touch_cb cb);
 
 #ifdef __cplusplus
 }

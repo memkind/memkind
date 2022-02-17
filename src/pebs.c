@@ -28,7 +28,7 @@ MEMKIND_EXPORT void *pebs_debug_check_low;
 MEMKIND_EXPORT void *pebs_debug_check_hi;
 MEMKIND_EXPORT int pebs_debug_num_samples = 0;
 
-void pebs_monitor()
+void pebs_monitor(touch_cb cb)
 {
     // must call this before read from data head
     asm volatile("lfence" ::: "memory");
@@ -58,19 +58,7 @@ void pebs_monitor()
                 timestamp = *(__u64 *)read_ptr;
                 read_ptr += sizeof(__u64);
                 addr = *(__u64 *)read_ptr;
-
-                // TODO do something useful with this data!!!
-                log_info("PEBS: cpu %lu, timestamp %llu, addr %llx", cpu_idx,
-                         timestamp, addr);
-
-                // TODO remove after POC - debug only
-                if ((pebs_debug_check_low <= (void *)addr) &&
-                    ((void *)addr <= pebs_debug_check_hi)) {
-                    pebs_debug_num_samples++;
-
-                    // log_fatal("PEBS: FOUND!!! head %lld, ns %d, addr %llx",
-                    //    last_head[cpu_idx], pebs_debug_num_samples, addr);
-                }
+                cb(addr, timestamp);
             } else if ((event->type >= PERF_RECORD_MAX) || (event->size == 0)) {
                 log_fatal("PEBS buffer corrupted!!!");
                 last_head[cpu_idx] = pebs_metadata->data_head;

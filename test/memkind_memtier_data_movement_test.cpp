@@ -3,6 +3,7 @@
 
 #include <memkind/internal/hasher.h>
 #include <memkind/internal/memkind_memtier.h>
+#include <memkind/internal/pagesizes.h>
 #include <memkind/internal/pebs.h>
 #include <memkind/internal/pool_allocator.h>
 #include <memkind/internal/ranking.h>
@@ -367,7 +368,12 @@ TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
     unsigned threads_count = proc_stat.get_threads_count();
     ASSERT_EQ(threads_count, 1U);
 
-    mtt_allocator_create(&mtt_allocator);
+    MTTInternalsLimits limits;
+    limits.lowLimit = 1024u * 1024u * 1024u * 1024u;
+    limits.softLimit = 1024u * 1024u * 1024u * 1024u;
+    limits.hardLimit = 1024u * 1024u * 1024u * 1024u;
+
+    mtt_allocator_create(&mtt_allocator, &limits);
 
     threads_count = proc_stat.get_threads_count();
     ASSERT_EQ(threads_count, 2U);
@@ -379,40 +385,58 @@ TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
     ASSERT_EQ(threads_count, 1U);
 }
 
-TEST(PEBS, Basic)
+class PEBSTest: public ::testing::Test
+{
+protected:
+    static bool get_highest_hotness(MTTAllocator *alloc, double &hotness)
+    {
+        // 1. Find a ranking with pages
+        // 2. Check page hotness and distribution TODO
+        return ranking_get_hottest(alloc->internals.dramRanking, &hotness);
+    }
+};
+
+TEST_F(PEBSTest, Basic)
 {
     // do some copying - L3 misses are expected here
     const int size = 1024 * 1024;
     volatile int total_sum = 0;
-    volatile int *tab = (int *)malloc(size * sizeof(int));
+
+    MTTInternalsLimits limits;
+    limits.lowLimit = 1024 * 1024 * 1024;
+    limits.softLimit = 1024 * 1024 * 1024;
+    limits.hardLimit = 1024 * 1024 * 1024;
+    // PEBS is enabled during MTT allocator creation
+    MTTAllocator mtt_allocator;
+    mtt_allocator_create(&mtt_allocator, &limits);
+
+    volatile int *tab =
+        (int *)mtt_allocator_malloc(&mtt_allocator, size * sizeof(int));
+
+    double hotness = -1.0;
+    bool success = get_highest_hotness(&mtt_allocator, hotness);
+
     for (int i = 0; i < size; i++) {
         tab[i] = i;
     }
 
-    pebs_debug_check_low = (void *)&tab[0];
-    pebs_debug_check_hi = (void *)&tab[size - 1];
+    ASSERT_TRUE(success);
+    ASSERT_EQ(hotness, 0.0);
 
-    // TODO remove after POC - debug only
-    // fprintf(stderr, "array start - end: %p - %p\n", pebs_debug_check_low,
-    //    pebs_debug_check_hi);
-
-    // PEBS is enabled during MTT allocator creation
-    MTTAllocator mtt_allocator;
-    mtt_allocator_create(&mtt_allocator);
-
-    for (int j = 0; j < 10; j++) {
+    for (int j = 0; j < 30; j++) {
         for (int i = 0; i < size / 2; i++) {
             tab[i] += tab[i * 2] + j;
             total_sum += tab[i];
         }
     }
 
-    // this is done to avoid compiler optimizations
-    ASSERT_EQ(total_sum, total_sum);
+    success = get_highest_hotness(&mtt_allocator, hotness);
 
-    // check debug value defined in pebs.c
-    ASSERT_GT(pebs_debug_num_samples, 0);
-    fprintf(stderr, "got %d samples\n", pebs_debug_num_samples);
+    ASSERT_TRUE(success);
+    ASSERT_GT(hotness, 0.0);
+
+    // compiler optimizations
+    ASSERT_EQ(total_sum, total_sum);
 
     mtt_allocator_destroy(&mtt_allocator);
 }
@@ -801,10 +825,19 @@ TEST_F(RankingBindingsTest, Basic)
     ASSERT_FALSE(success0);
     ASSERT_FALSE(success1);
 
+    size_t total_size = ranking_get_total_size(ranking1);
+    ASSERT_EQ(total_size, 0u);
+
     // check non-empty hotness
     ranking_add_pages(ranking1, 0xFFFF0000, 2, 0);
+    total_size = ranking_get_total_size(ranking1);
+    ASSERT_EQ(total_size, 2u * TRACED_PAGESIZE);
     ranking_add_pages(ranking1, 2 * 0xFFFF0000, 3, 0);
+    total_size = ranking_get_total_size(ranking1);
+    ASSERT_EQ(total_size, 5 * TRACED_PAGESIZE);
     ranking_add_pages(ranking1, 3 * 0xFFFF0000, 3, 2);
+    total_size = ranking_get_total_size(ranking1);
+    ASSERT_EQ(total_size, 8 * TRACED_PAGESIZE);
 
     double hotness_hottest0 = -1.0;
     double hotness_coldest0 = -1.0;
@@ -854,6 +887,12 @@ TEST_F(RankingBindingsTest, Basic)
     ranking_pop_hottest(ranking1, temp);
     ranking_add_page(ranking2, temp);
 
+    total_size = ranking_get_total_size(ranking1);
+    ASSERT_EQ(total_size, 7 * TRACED_PAGESIZE);
+
+    total_size = ranking_get_total_size(ranking2);
+    ASSERT_EQ(total_size, 1 * TRACED_PAGESIZE);
+
     double hottest_r2_1_hotness = -1.0;
     double coldest_r2_1_hotness = -1.0;
     bool success6 = ranking_get_hottest(ranking2, &hottest_r2_1_hotness);
@@ -869,6 +908,12 @@ TEST_F(RankingBindingsTest, Basic)
     // move second hottest page to the new ranking
     ranking_pop_hottest(ranking1, temp);
     ranking_add_page(ranking2, temp);
+
+    total_size = ranking_get_total_size(ranking1);
+    ASSERT_EQ(total_size, 6 * TRACED_PAGESIZE);
+
+    total_size = ranking_get_total_size(ranking2);
+    ASSERT_EQ(total_size, 2 * TRACED_PAGESIZE);
 
     double hottest_r2_2_hotness = -1.0;
     double coldest_r2_2_hotness = -1.0;
@@ -897,6 +942,12 @@ TEST_F(RankingBindingsTest, Basic)
     ranking_add_page(ranking2, temp);
     ranking_add_pages(ranking2, 5 * 0xFFFF0000, 1, 2000000000);
 
+    total_size = ranking_get_total_size(ranking1);
+    ASSERT_EQ(total_size, 5 * TRACED_PAGESIZE);
+
+    total_size = ranking_get_total_size(ranking2);
+    ASSERT_EQ(total_size, 4 * TRACED_PAGESIZE);
+
     double hottest_r2_3_hotness = -1.0;
     double coldest_r2_3_hotness = -1.0;
     (void)ranking_get_hottest(ranking2, &hottest_r2_3_hotness);
@@ -908,6 +959,9 @@ TEST_F(RankingBindingsTest, Basic)
     // remove two hottest page from the new ranking
     (void)ranking_pop_hottest(ranking2, temp);
 
+    total_size = ranking_get_total_size(ranking2);
+    ASSERT_EQ(total_size, 3 * TRACED_PAGESIZE);
+
     // check the newly added page is the hottest
     double hottest_r2_4_hotness = -1.0;
     bool success9 = ranking_get_hottest(ranking2, &hottest_r2_4_hotness);
@@ -917,6 +971,9 @@ TEST_F(RankingBindingsTest, Basic)
 
     // pop all pages except for two - hottest and coldest
     ranking_pop_coldest(ranking2, temp);
+
+    total_size = ranking_get_total_size(ranking2);
+    ASSERT_EQ(total_size, 2 * TRACED_PAGESIZE);
 
     double hottest_r2_5_hotness = -1.0;
     double coldest_r2_5_hotness = -1.0;
@@ -933,6 +990,9 @@ TEST_F(RankingBindingsTest, Basic)
     // pop hottest, add new page and check if hottest value was updated
     ranking_pop_hottest(ranking2, temp);
     ranking_add_pages(ranking2, 6 * 0xFFFF0000, 1, 2500000000);
+
+    total_size = ranking_get_total_size(ranking2);
+    ASSERT_EQ(total_size, 2 * TRACED_PAGESIZE);
 
     double hottest_r2_6_hotness = -1.0;
     double coldest_r2_6_hotness = -1.0;
@@ -952,8 +1012,14 @@ TEST_F(RankingBindingsTest, Basic)
     ASSERT_TRUE(success14);
     ASSERT_EQ(hottest_r2_7_hotness, 0.0);
 
+    total_size = ranking_get_total_size(ranking2);
+    ASSERT_EQ(total_size, 1 * TRACED_PAGESIZE);
+
     ranking_pop_coldest(ranking2, temp);
     double hottest_r2_8_hotness = -1.0;
     bool success15 = ranking_get_hottest(ranking2, &hottest_r2_8_hotness);
     ASSERT_FALSE(success15);
+
+    total_size = ranking_get_total_size(ranking2);
+    ASSERT_EQ(total_size, 0u);
 }
