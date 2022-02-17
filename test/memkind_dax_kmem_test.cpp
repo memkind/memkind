@@ -403,7 +403,8 @@ TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
     numa_size = numa_node_size64(numa_id, &numa_free_size);
     ASSERT_GT(numa_size, 0U);
 
-    while ((size_t)numa_free_size > alloc_size * allocations.size()) {
+    int allocations_no = (size_t)numa_free_size / alloc_size;
+    for (int i = 0; i < allocations_no; ++i) {
         ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
         ASSERT_NE(nullptr, ptr);
         memset(ptr, 'a', alloc_size);
@@ -418,6 +419,9 @@ TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
         ASSERT_NE(nullptr, ptr);
         memset(ptr, 'a', alloc_size);
         allocations.insert(ptr);
+
+        get_mempolicy(&numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
+        ASSERT_TRUE(closest_numa_ids.find(numa_id) == closest_numa_ids.end());
     }
 
     ASSERT_EQ(stat.get_used_swap_space_size_bytes(), 0U);
