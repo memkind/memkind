@@ -384,7 +384,6 @@ TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
     std::set<void *> allocations;
     size_t numa_size;
     int numa_id = -1;
-    const int n_swap_alloc = 20;
 
     void *ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
     ASSERT_NE(nullptr, ptr);
@@ -403,7 +402,12 @@ TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
     numa_size = numa_node_size64(numa_id, &numa_free_size);
     ASSERT_GT(numa_size, 0U);
 
-    while ((size_t)numa_free_size > alloc_size * allocations.size()) {
+    size_t free_size_limit = 0.99 * (size_t)numa_free_size;
+    const int allocs_no = free_size_limit / alloc_size;
+    const int extra_allocs_no =
+        ((size_t)numa_free_size - free_size_limit) / alloc_size + 1;
+
+    for (int i = 0; i < allocs_no; ++i) {
         ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
         ASSERT_NE(nullptr, ptr);
         memset(ptr, 'a', alloc_size);
@@ -413,12 +417,15 @@ TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
         ASSERT_TRUE(closest_numa_ids.find(numa_id) != closest_numa_ids.end());
     }
 
-    for (int i = 0; i < n_swap_alloc; ++i) {
+    for (int i = 0; i < extra_allocs_no; ++i) {
         ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
         ASSERT_NE(nullptr, ptr);
         memset(ptr, 'a', alloc_size);
         allocations.insert(ptr);
     }
+
+    get_mempolicy(&numa_id, nullptr, 0, ptr, MPOL_F_NODE | MPOL_F_ADDR);
+    ASSERT_TRUE(closest_numa_ids.find(numa_id) == closest_numa_ids.end());
 
     ASSERT_EQ(stat.get_used_swap_space_size_bytes(), 0U);
 
