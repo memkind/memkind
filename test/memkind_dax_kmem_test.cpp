@@ -403,7 +403,8 @@ TEST_F(MemkindDaxKmemFunctionalTestsPreferred,
     numa_size = numa_node_size64(numa_id, &numa_free_size);
     ASSERT_GT(numa_size, 0U);
 
-    while ((size_t)numa_free_size > alloc_size * allocations.size()) {
+    while ((size_t)numa_free_size - alloc_size >
+           alloc_size * allocations.size()) {
         ptr = memkind_malloc(MEMKIND_DAX_KMEM_PREFERRED, alloc_size);
         ASSERT_NE(nullptr, ptr);
         memset(ptr, 'a', alloc_size);
