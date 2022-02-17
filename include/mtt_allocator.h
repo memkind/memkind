@@ -28,7 +28,8 @@ typedef struct MTTAllocator {
     MttInternals internals;
 } MTTAllocator;
 
-extern void mtt_allocator_create(MTTAllocator *mtt_allocator);
+extern void mtt_allocator_create(MTTAllocator *mtt_allocator,
+                                 MTTInternalsLimits *limits);
 extern void mtt_allocator_destroy(MTTAllocator *mtt_allocator);
 
 extern void *mtt_allocator_malloc(MTTAllocator *mtt_allocator, size_t size);
