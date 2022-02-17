@@ -16,8 +16,6 @@
 
 static const double EXPONENTIAL_COEFFS_VALS[] = {0.9, 0.99, 0.999, 0.9999};
 
-#define PAGE_SIZE (4u * 1024u)
-
 #define TIMESTAMP_TO_SECONDS_COEFF (1e-9)
 #define EXPONENTIAL_COEFFS_NUMBER                                              \
     ((size_t)(sizeof(EXPONENTIAL_COEFFS_VALS) /                                \
@@ -100,6 +98,7 @@ class Ranking
     std::unordered_map<uintptr_t, PageMetadata> pageAddrToPage;
     std::vector<PageMetadata *> pagesToUpdate;
     double highestHotness = 0;
+    size_t totalSize = 0;
 
 public:
     void AddPages(uintptr_t start_addr, size_t nof_pages, uint64_t timestamp);
@@ -116,4 +115,5 @@ public:
     PageMetadata PopColdest();
     PageMetadata PopHottest();
     void AddPage(PageMetadata page);
+    size_t GetTotalSize();
 };

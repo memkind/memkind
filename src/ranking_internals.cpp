@@ -3,6 +3,7 @@
 
 #include "memkind/internal/ranking_internals.hpp"
 #include "memkind/internal/memkind_private.h"
+#include "memkind/internal/traced_pagesize_defs.h"
 
 #include <algorithm>
 #include <cassert>
@@ -137,7 +138,7 @@ MEMKIND_EXPORT double PageMetadata::GetStartAddr()
 MEMKIND_EXPORT void Ranking::AddPages(uintptr_t start_addr, size_t nof_pages,
                                       uint64_t timestamp)
 {
-    uint64_t end_addr = start_addr + nof_pages * PAGE_SIZE;
+    uint64_t end_addr = start_addr + nof_pages * TRACED_PAGESIZE;
     while (start_addr != end_addr) {
         // the 3 lines that follow could be handled by:
         // auto [page_it, inserted] = this->pageAddrToPage.emplace(...)
@@ -150,14 +151,15 @@ MEMKIND_EXPORT void Ranking::AddPages(uintptr_t start_addr, size_t nof_pages,
         assert(inserted && "page not constructed!");
         PageMetadata *page = &page_it->second;
         this->hotnessToPages.insert(std::make_pair(page->GetHotness(), page));
-        start_addr += PAGE_SIZE;
+        start_addr += TRACED_PAGESIZE;
     }
+    totalSize += nof_pages * TRACED_PAGESIZE;
 }
 
 MEMKIND_EXPORT void Ranking::Touch(uintptr_t addr)
 {
     // calculate start address of page
-    addr = (addr / PAGE_SIZE) * PAGE_SIZE;
+    addr = (addr / TRACED_PAGESIZE) * TRACED_PAGESIZE;
     auto page_ptr_it = this->pageAddrToPage.find(addr);
     if (page_ptr_it != this->pageAddrToPage.end()) {
         PageMetadata *temp = &page_ptr_it->second;
@@ -212,6 +214,7 @@ MEMKIND_EXPORT PageMetadata Ranking::PopColdest()
     this->hotnessToPages.erase(coldest);
     PageMetadata ret = *coldest_page;
     this->pageAddrToPage.erase(coldest_page->GetStartAddr());
+    totalSize -= TRACED_PAGESIZE;
 
     return ret;
 }
@@ -227,6 +230,8 @@ MEMKIND_EXPORT PageMetadata Ranking::PopHottest()
     if (hottest != this->hotnessToPages.rend())
         this->highestHotness = hottest->first;
     this->hotnessToPages.erase(hottest.base());
+    totalSize -= TRACED_PAGESIZE;
+
     return ret;
 }
 
@@ -245,4 +250,10 @@ MEMKIND_EXPORT void Ranking::AddPage(PageMetadata page)
     PageMetadata *inserted_page = &page_it->second;
     this->hotnessToPages.insert(
         std::make_pair(inserted_page->GetHotness(), inserted_page));
+    totalSize += TRACED_PAGESIZE;
+}
+
+MEMKIND_EXPORT size_t Ranking::GetTotalSize()
+{
+    return this->totalSize;
 }

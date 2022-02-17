@@ -7,9 +7,20 @@
 #include "assert.h"
 
 MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
-                                        uint64_t timestamp)
+                                        uint64_t timestamp,
+                                        MTTInternalsLimits *limits)
 {
     internals->lastTimestamp = timestamp;
+    assert(limits->lowLimit <= limits->softLimit &&
+           "low limit (movement PMEM -> DRAM occurs below) "
+           " has to be lower than "
+           " soft limit (movement DRAM -> PMEM occurs above)");
+    assert(limits->softLimit <= limits->hardLimit &&
+           "soft limit (movement DRAM -> PMEM occurs above) "
+           " has to be lower than "
+           " hard limit (any allocation that surpasses this limit "
+           " should be placed on PMEM TODO not implemeneted)");
+    internals->limits = *limits;
     ranking_create(&internals->dramRanking);
     ranking_create(&internals->pmemRanking);
     return pool_allocator_create(&internals->pool);

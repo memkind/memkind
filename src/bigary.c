@@ -3,6 +3,7 @@
 
 #include "memkind/internal/bigary.h"
 #include "memkind/internal/memkind_log.h"
+#include "memkind/internal/traced_pagesize_defs.h"
 
 #include <assert.h>
 #include <pthread.h>
@@ -14,9 +15,6 @@
 
 #define BIGARY_DEFAULT_MAX (64 * 1024 * 1024 * 1024ULL)
 #define BIGARY_PAGESIZE    (2 * 1024 * 1024ULL)
-
-// TODO make it global!!!
-#define TRACED_PAGESIZE (4 * 1024)
 
 static void die(const char *fmt, ...)
 {
@@ -32,6 +30,9 @@ static void die(const char *fmt, ...)
 /***************************/
 void bigary_init(bigary *restrict m_bigary, int fd, int flags, size_t max)
 {
+    assert((BIGARY_PAGESIZE % TRACED_PAGESIZE) == 0 &&
+           "bigary pagesize and traced pagesize are not aligned! "
+           "BIGARY_PAGESIZE should be a multiply of TRACED_PAGESIZE");
     if (!max)
         max = BIGARY_DEFAULT_MAX;
     // round *max* up to pagesize
