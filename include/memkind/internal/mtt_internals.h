@@ -7,14 +7,30 @@
 #include "memkind/internal/pool_allocator.h"
 #include "memkind/internal/ranking.h"
 
+/// Limits to be used for PMEM vs DRAM distribution
+///
+/// @pre The following property must be met lowLimit <= softLimit <= hardLimit
+typedef struct MTTInternalsLimits {
+    /// soft limit of used dram, data movement DRAM -> PMEM will occur when
+    /// surpassed
+    size_t softLimit;
+    /// hard limit of used dram, this limit will not be surpassed by the
+    /// allocator TODO @warning not implemented
+    size_t hardLimit;
+    /// value below which movement from PMEM -> DRAM occurs
+    size_t lowLimit;
+} MTTInternalsLimits;
+
 typedef struct MttInternals {
     ranking_handle dramRanking;
     ranking_handle pmemRanking;
     PoolAllocator pool;
     uint64_t lastTimestamp;
+    MTTInternalsLimits limits;
 } MttInternals;
 
-extern int mtt_internals_create(MttInternals *internals, uint64_t timestamp);
+extern int mtt_internals_create(MttInternals *internals, uint64_t timestamp,
+                                MTTInternalsLimits *limits);
 extern void mtt_internals_destroy(MttInternals *internals);
 
 extern void *mtt_internals_malloc(MttInternals *internals, size_t size);
