@@ -39,11 +39,10 @@ static void unregister_mtt_allocator(MTTAllocator *mtt_allocator);
 // Function required for pthread_create()
 // TODO: move it to a separate module and add an implementation
 // TODO handle touches and ranking updates from this branch
-static void *mtt_run_bg_thread(void *mtt_alloc)
+static void *mtt_run_bg_thread(void *bg_thread_ptr)
 {
-    MTTAllocator *mtt_allocator = mtt_alloc;
-    pthread_mutex_t *bg_thread_cond_mutex =
-        &mtt_allocator->bg_thread_cond_mutex;
+    BackgroundThread *bg_thread = bg_thread_ptr;
+    pthread_mutex_t *bg_thread_cond_mutex = &bg_thread->bg_thread_cond_mutex;
 
     // set low priority
     int policy;
@@ -53,20 +52,20 @@ static void *mtt_run_bg_thread(void *mtt_alloc)
     pthread_setschedparam(pthread_self(), policy, &param);
 
     pthread_mutex_lock(bg_thread_cond_mutex);
-    mtt_allocator->bg_thread_state = THREAD_RUNNING;
-    pthread_cond_signal(&mtt_allocator->bg_thread_cond);
+    bg_thread->bg_thread_state = THREAD_RUNNING;
+    pthread_cond_signal(&bg_thread->bg_thread_cond);
     pthread_mutex_unlock(bg_thread_cond_mutex);
 
     bool run = true;
     while (run) {
         pthread_mutex_lock(bg_thread_cond_mutex);
-        if (mtt_allocator->bg_thread_state == THREAD_FINISHED) {
+        if (bg_thread->bg_thread_state == THREAD_FINISHED) {
             run = false;
         }
         pthread_mutex_unlock(bg_thread_cond_mutex);
 
         pthread_mutex_lock(&allocatorsMutex);
-        pebs_monitor(touch_callback);
+        pebs_monitor(&bg_thread->pebs);
         update_rankings();
         pthread_mutex_unlock(&allocatorsMutex);
     }
@@ -132,6 +131,39 @@ static void unregister_mtt_allocator(MTTAllocator *mtt_allocator)
     pthread_mutex_unlock(&allocatorsMutex);
 }
 
+void background_thread_init(BackgroundThread *bg_thread)
+{
+    pthread_mutex_init(&bg_thread->bg_thread_cond_mutex, NULL);
+    pthread_cond_init(&bg_thread->bg_thread_cond, NULL);
+    pebs_create(&bg_thread->pebs, touch_callback);
+
+    bg_thread->bg_thread_state = THREAD_INIT;
+    int ret = pthread_create(&bg_thread->bg_thread, NULL, mtt_run_bg_thread,
+                             (void *)bg_thread);
+    if (ret) {
+        log_fatal("Creating MTT allocator background thread failed!");
+        abort();
+    }
+}
+
+void background_thread_fini(BackgroundThread *bg_thread)
+{
+    pthread_mutex_t *bg_thread_cond_mutex = &bg_thread->bg_thread_cond_mutex;
+    pthread_mutex_lock(bg_thread_cond_mutex);
+    while (bg_thread->bg_thread_state == THREAD_INIT) {
+        pthread_cond_wait(&bg_thread->bg_thread_cond, bg_thread_cond_mutex);
+    }
+    bg_thread->bg_thread_state = THREAD_FINISHED;
+    pthread_mutex_unlock(bg_thread_cond_mutex);
+
+    pthread_join(bg_thread->bg_thread, NULL);
+    log_info("MTT background thread closed");
+
+    pebs_destroy(&bg_thread->pebs);
+    pthread_mutex_destroy(bg_thread_cond_mutex);
+    pthread_cond_destroy(&bg_thread->bg_thread_cond);
+}
+
 //--------------------------------------------------------------------------
 // ----------------------------- Public API --------------------------------
 //--------------------------------------------------------------------------
@@ -142,42 +174,17 @@ MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator,
     // TODO get timestamp from somewhere!!! (bg thread? PEBS?)
     uint64_t timestamp = 0;
     mtt_internals_create(&mtt_allocator->internals, timestamp, limits);
-    pebs_create();
-
-    pthread_mutex_init(&mtt_allocator->bg_thread_cond_mutex, NULL);
-    pthread_cond_init(&mtt_allocator->bg_thread_cond, NULL);
-
-    mtt_allocator->bg_thread_state = THREAD_INIT;
-    int ret = pthread_create(&mtt_allocator->bg_thread, NULL, mtt_run_bg_thread,
-                             (void *)mtt_allocator);
-    if (ret) {
-        log_fatal("Creating MTT allocator background thread failed!");
-        abort();
-    }
+    background_thread_init(&mtt_allocator->bgThread);
+    // TODO registering should not be global, but per bg thread !
     register_mtt_allocator(mtt_allocator);
     log_info("MTT background thread created");
 }
 
 MEMKIND_EXPORT void mtt_allocator_destroy(MTTAllocator *mtt_allocator)
 {
+    // TODO registering should not be global, but per bg thread
     unregister_mtt_allocator(mtt_allocator);
-    pthread_mutex_t *bg_thread_cond_mutex =
-        &mtt_allocator->bg_thread_cond_mutex;
-
-    pthread_mutex_lock(bg_thread_cond_mutex);
-    while (mtt_allocator->bg_thread_state == THREAD_INIT) {
-        pthread_cond_wait(&mtt_allocator->bg_thread_cond, bg_thread_cond_mutex);
-    }
-    mtt_allocator->bg_thread_state = THREAD_FINISHED;
-    pthread_mutex_unlock(bg_thread_cond_mutex);
-
-    pthread_join(mtt_allocator->bg_thread, NULL);
-    log_info("MTT background thread closed");
-
-    pthread_mutex_destroy(bg_thread_cond_mutex);
-    pthread_cond_destroy(&mtt_allocator->bg_thread_cond);
-
-    pebs_destroy();
+    background_thread_fini(&mtt_allocator->bgThread);
     mtt_internals_destroy(&mtt_allocator->internals);
 }
 
