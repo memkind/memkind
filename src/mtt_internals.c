@@ -19,7 +19,7 @@ MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
            "soft limit (movement DRAM -> PMEM occurs above) "
            " has to be lower than "
            " hard limit (any allocation that surpasses this limit "
-           " should be placed on PMEM TODO not implemeneted)");
+           " should be placed on PMEM TODO not implemented)");
     internals->limits = *limits;
     ranking_create(&internals->dramRanking);
     ranking_create(&internals->pmemRanking);
