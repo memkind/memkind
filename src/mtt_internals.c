@@ -14,13 +14,13 @@ MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
     internals->lastTimestamp = timestamp;
     assert(limits->lowLimit <= limits->softLimit &&
            "low limit (movement PMEM -> DRAM occurs below) "
-           " has to be lower or equal to "
+           " has to be lower than or equal to "
            " soft limit (movement DRAM -> PMEM occurs above)");
     assert(limits->softLimit <= limits->hardLimit &&
            "soft limit (movement DRAM -> PMEM occurs above) "
-           " has to be lower or equal to "
+           " has to be lower than or equal to "
            " hard limit (any allocation that surpasses this limit "
-           " should be placed on PMEM TODO not implemeneted)");
+           " should be placed on PMEM TODO not implemented)");
     internals->limits = *limits;
     ranking_create(&internals->dramRanking);
     ranking_create(&internals->pmemRanking);
