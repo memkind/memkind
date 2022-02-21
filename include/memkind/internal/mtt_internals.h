@@ -13,17 +13,22 @@
 typedef struct MTTInternalsLimits {
     /// soft limit of used dram, data movement DRAM -> PMEM will occur when
     /// surpassed
+    /// @pre must be a multiple of TRACED_PAGESIZE
     size_t softLimit;
     /// hard limit of used dram, this limit will not be surpassed by the
     /// allocator TODO @warning not implemented
+    /// @pre must be a multiple of TRACED_PAGESIZE
     size_t hardLimit;
     /// value below which movement from PMEM -> DRAM occurs
+    /// @pre must be a multiple of TRACED_PAGESIZE
     size_t lowLimit;
 } MTTInternalsLimits;
 
 typedef struct MttInternals {
     ranking_handle dramRanking;
     ranking_handle pmemRanking;
+    /// Used as temporary variable for some internal operations
+    metadata_handle tempMetadataHandle;
     PoolAllocator pool;
     uint64_t lastTimestamp;
     MTTInternalsLimits limits;
