@@ -35,6 +35,7 @@ extern bool ranking_get_coldest(ranking_handle handle, double *hotness);
 extern void ranking_pop_coldest(ranking_handle handle, metadata_handle page);
 extern void ranking_pop_hottest(ranking_handle handle, metadata_handle page);
 extern void ranking_add_page(ranking_handle handle, metadata_handle page);
+/// @return traced size, in bytes
 extern size_t ranking_get_total_size(ranking_handle handle);
 
 #ifdef __cplusplus
