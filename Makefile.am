@@ -465,6 +465,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind_pmem.3 \
                  man/memkindallocator.3 \
                  man/libmemtier.7 \
+                 man/memtier.7 \
                  man/pmemallocator.3 \
                  # end
 
