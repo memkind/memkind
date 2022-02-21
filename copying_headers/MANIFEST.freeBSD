@@ -57,7 +57,7 @@ man/memkind_memtier.3
 man/memkind_pmem.3
 man/memkind_fixed.3
 man/memkindallocator.3
-man/memtier.7
+man/libmemtier.7
 man/pmemallocator.3
 man/fixedallocator.3
 memkind.spec.mk
