@@ -3,8 +3,24 @@
 
 #include "memkind/internal/mtt_internals.h"
 #include "memkind/internal/memkind_private.h"
+#include "memkind/internal/pagesizes.h"
 
 #include "assert.h"
+
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+
+static void move_ranking_from_to(ranking_handle restrict from,
+                                 ranking_handle restrict to, size_t nof_pages)
+{
+    // TODO handle actual bitmasks!
+    metadata_handle handle;
+    ranking_metadata_create(&handle);
+    for (size_t i = 0; i < nof_pages; ++i) {
+        ranking_pop_coldest(from, handle);
+        ranking_add_page(to, handle);
+    }
+    ranking_metadata_destroy(handle);
+}
 
 MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
                                         uint64_t timestamp,
@@ -21,6 +37,12 @@ MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
            " has to be lower or equal to "
            " hard limit (any allocation that surpasses this limit "
            " should be placed on PMEM TODO not implemented)");
+    assert(limits->hardLimit % TRACED_PAGESIZE == 0 &&
+           "hard limit is not a multiple of TRACED_PAGESIZE");
+    assert(limits->softLimit % TRACED_PAGESIZE == 0 &&
+           "soft limit is not a multiple of TRACED_PAGESIZE");
+    assert(limits->lowLimit % TRACED_PAGESIZE == 0 &&
+           "low limit is not a multiple of TRACED_PAGESIZE");
     internals->limits = *limits;
     ranking_create(&internals->dramRanking);
     ranking_create(&internals->pmemRanking);
@@ -80,5 +102,26 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
     // update both rankings
     ranking_update(internals->dramRanking, timestamp);
     ranking_update(internals->pmemRanking, timestamp);
-    // TODO compare hottest on pmem and coldest on dram!
+    // 1. Handle soft and hard limit - move pages dram vs pmem
+    size_t dram_size = ranking_get_total_size(internals->dramRanking);
+    if (dram_size < internals->limits.lowLimit) {
+        // move PMEM to DRAM
+        size_t pmem_size = ranking_get_total_size(internals->pmemRanking);
+        size_t size_gap_dram = internals->limits.lowLimit - dram_size;
+        size_t size_to_move = min(size_gap_dram, pmem_size);
+        assert(size_to_move / TRACED_PAGESIZE == 0 &&
+               "ranking size is not a multiply of TRACED_PAGESIZE");
+        size_t nof_pages_to_move = size_to_move / TRACED_PAGESIZE;
+        move_ranking_from_to(internals->pmemRanking, internals->dramRanking,
+                             nof_pages_to_move);
+    } else if (internals->limits.softLimit < dram_size) {
+        // move DRAM to PMEM
+        size_t size_to_move = dram_size - internals->limits.softLimit;
+        assert(size_to_move / TRACED_PAGESIZE == 0 &&
+               "ranking size is not a multiply of TRACED_PAGESIZE");
+        size_t nof_pages_to_move = size_to_move / TRACED_PAGESIZE;
+        move_ranking_from_to(internals->dramRanking, internals->pmemRanking,
+                             nof_pages_to_move);
+    }
+    // 2. Handle hottest on PMEM vs coldest on dram page movement TODO
 }
