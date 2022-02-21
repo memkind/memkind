@@ -115,5 +115,6 @@ public:
     PageMetadata PopColdest();
     PageMetadata PopHottest();
     void AddPage(PageMetadata page);
+    /// @return traced size, in bytes
     size_t GetTotalSize();
 };
