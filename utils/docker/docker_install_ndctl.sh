@@ -8,8 +8,8 @@
 
 set -e
 
-git clone --branch="$NDCTL_LIBRARY_VERSION" https://github.com/pmem/ndctl.git $HOME/ndctl/
-cd $HOME/ndctl/
+git clone --branch="$NDCTL_LIBRARY_VERSION" https://github.com/pmem/ndctl.git "$HOME"/ndctl/
+cd "$HOME"/ndctl/
 
 if [[ $(cat /etc/os-release) = *"fedora"* ]]; then
 
@@ -20,7 +20,6 @@ if [[ $(cat /etc/os-release) = *"fedora"* ]]; then
 
   rpmdev-setuptree
 
-  SPEC=./rhel/ndctl.spec
   VERSION=$(./git-version)
   RPMDIR=$HOME/rpmbuild/
 
@@ -31,7 +30,7 @@ if [[ $(cat /etc/os-release) = *"fedora"* ]]; then
   make -j "$(nproc)"
   ./rpmbuild.sh
   RPM_ARCH=$(uname -m)
-  sudo rpm -i $RPMDIR/RPMS/$RPM_ARCH/*.rpm
+  sudo rpm -i "$RPMDIR"/RPMS/"$RPM_ARCH"/*.rpm
 
 else
   ./autogen.sh
@@ -43,4 +42,4 @@ fi
 sudo ldconfig
 # return to previous directory
 cd -
-rm -rf $HOME/ndctl
+rm -rf "$HOME"/ndctl

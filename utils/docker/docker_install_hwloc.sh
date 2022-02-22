@@ -38,8 +38,8 @@ if [[ $(cat /etc/os-release) = *"fedora"* ]]; then
 
     cp "$HWLOC_LOCAL_TAR_GZ" "$RPMDIR/SOURCES/${HWLOC_TAR_GZ}"
 
-    rpmbuild -ba $SPEC
-    sudo rpm -i $RPMDIR/RPMS/$RPM_ARCH/*.rpm
+    rpmbuild -ba "$SPEC"
+    sudo rpm -i "$RPMDIR"/RPMS/"$RPM_ARCH"/*.rpm
 else
     # go to hwloc directory, build and install library
     cd "$HWLOC_LOCAL_DIR"

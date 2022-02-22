@@ -16,14 +16,14 @@ export KMP_AFFINITY=scatter,granularity=fine
 # For each algorithm
 for alloc in $ALLOCATOR
 do
-    rm -f alloctest_$alloc.txt
+    rm -f alloctest_"$alloc".txt
     echo "# Number of threads, allocation size [kB], average malloc and free time [ms], average allocation time [ms], \
-average free time [ms], first allocation time [ms], first free time [ms]" >> alloctest_$alloc.txt
+average free time [ms], first allocation time [ms], first free time [ms]" >> alloctest_"$alloc".txt
     # For each number of threads
-    for nthr in ${THREADS[*]}
+    for nthr in "${THREADS[@]}"
     do
         # For each amount of memory
-        for mem in ${MEMORY[*]}
+        for mem in "${MEMORY[@]}"
         do
             if [ $alloc == "pmem" ]; then
                 DIR=$1
