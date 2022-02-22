@@ -36,4 +36,5 @@ make -j "$(nproc)" --directory="$TBB_LOCAL_DIR"
 TBB_RELEASE_DIR=$(ls -d "$TBB_LOCAL_DIR"/build/*release)
 
 # set environment variables regarding TBB package
+# shellcheck source=/dev/null
 source "$TBB_RELEASE_DIR"/"$TBB_VARS_SH"

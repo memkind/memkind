@@ -1,3 +1,4 @@
+#!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
 # Copyright (C) 2021 Intel Corporation.
 
@@ -15,4 +16,4 @@ wget "$LINUX_HDR"
 wget "$LINUX_IMG"
 wget "$LINUX_MODULE"
 
-sudo dpkg -i *.deb
+sudo dpkg -i -- *.deb

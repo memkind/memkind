@@ -3,7 +3,7 @@
 # Copyright (C) 2019 - 2021 Intel Corporation.
 
 basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PROGNAME=`basename $0`
+PROGNAME=$(basename "$0")
 
 # Default path (to installation dir of memkind-tests RPM)
 TEST_PATH="$basedir/"
@@ -15,13 +15,13 @@ GTEST_BINARIES=(dax_kmem_test get_capacity_test)
 PYTEST_FILES=(dax_kmem_env_var_test.py)
 
 PYTEST=py.test
-which $PYTEST || PYTEST=py.test-3
-which $PYTEST || { echo >&2 "py.test not found"; exit 1; }
+command -v $PYTEST || PYTEST=py.test-3
+command -v $PYTEST || { echo >&2 "py.test not found"; exit 1; }
 
-red=`tput setaf 1`
-green=`tput setaf 2`
-yellow=`tput setaf 3`
-default=`tput sgr0`
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+default=$(tput sgr0)
 
 err=0
 
@@ -38,7 +38,7 @@ EOF
 
 function emit() {
     if [ "$LOG_FILE" != "" ]; then
-        echo "$@" 2>&1 | tee -a $LOG_FILE;
+        echo "$@" 2>&1 | tee -a "$LOG_FILE";
     else
         echo "$@"
     fi
@@ -46,16 +46,16 @@ function emit() {
 
 function normalize_path {
     local PATH=$1
-    if [ ! -d $PATH ];
+    if [ ! -d "$PATH" ];
     then
         echo "Not a directory: '$PATH'"
         usage
         exit 1
     fi
     if [[ $PATH != /* ]]; then
-        PATH=`pwd`/$PATH
+        path=$(pwd)/$PATH
     fi
-    echo $PATH
+    echo "$path"
 }
 
 function show_skipped_tests()
@@ -81,11 +81,11 @@ function show_skipped_tests()
     for i in ${!PYTEST_FILES[*]}; do
         PTEST_BINARY_PATH=$TEST_PATH${PYTEST_FILES[$i]}
         IFS=$'\n'
-        for LINE in $($PYTEST $PTEST_BINARY_PATH --collect-only); do
+        for LINE in $($PYTEST "$PTEST_BINARY_PATH" --collect-only); do
             if [[ $LINE == *"<Class "* ]]; then
-                TEST_SUITE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
+                TEST_SUITE="${LINE//^.*'\(.*\)'.*$/\1}"
             elif [[ $LINE == *"<Function "* ]]; then
-                LINE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
+                LINE="${LINE//^.*'\(.*\)'.*$/\1}"
                 if [[ "$TEST_SUITE.$LINE" == *"$SKIP_PATTERN"* ]]; then
                     emit "$TEST_SUITE.$LINE,${yellow}SKIPPED${default}"
                 fi
@@ -104,17 +104,17 @@ function execute_gtest()
     TEST=$2
     # Apply filter (if provided)
     if [ "$TEST_FILTER" != "" ]; then
-        if [[ $TEST != $TEST_FILTER ]]; then
+        if [[ $TEST != "$TEST_FILTER" ]]; then
             return
         fi
     fi
     # Concatenate test command
-    TESTCMD=$(printf "$TESTCMD" "$TEST""$SKIPPED_GTESTS""$RUN_DISABLED_GTEST")
+    TESTCMD=$(printf "%s%s" "$TESTCMD" "$TEST""$SKIPPED_GTESTS""$RUN_DISABLED_GTEST")
     # And test prefix if applicable
     if [ "$TEST_PREFIX" != "" ]; then
-        TESTCMD=$(printf "$TEST_PREFIX" "$TESTCMD")
+        TESTCMD=$(printf "%s%s" "$TEST_PREFIX" "$TESTCMD")
     fi
-    OUTPUT=`eval $TESTCMD`
+    OUTPUT=$(eval "$TESTCMD")
     PATOK='.*OK ].*'
     PATFAILED='.*FAILED  ].*'
         PATSKIPPED='.*PASSED  ] 0.*'
@@ -131,9 +131,9 @@ function execute_gtest()
     fi
     if [ "$CSV" != "" ]; then
         emit "$OUTPUT"
-        echo $RESULT >> $CSV
+        echo "$RESULT" >> "$CSV"
     else
-        echo $RESULT
+        echo "$RESULT"
     fi
     return $ret_val
 }
@@ -146,17 +146,17 @@ function execute_pytest()
     TEST=$3
     # Apply filter (if provided)
     if [ "$TEST_FILTER" != "" ]; then
-        if [[ $TEST_SUITE.$TEST != $TEST_FILTER ]]; then
+        if [[ $TEST_SUITE.$TEST != "$TEST_FILTER" ]]; then
             return
         fi
     fi
     # Concatenate test command
-    TESTCMD=$(printf "$TESTCMD" "$TEST$SKIPPED_PYTESTS")
+    TESTCMD=$(printf "%s%s" "$TESTCMD" "$TEST$SKIPPED_PYTESTS")
     # And test prefix if applicable
     if [ "$TEST_PREFIX" != "" ]; then
-        TESTCMD=$(printf "$TEST_PREFIX" "$TESTCMD")
+        TESTCMD=$(printf "%s%s" "$TEST_PREFIX" "$TESTCMD")
     fi
-    OUTPUT=`eval $TESTCMD`
+    OUTPUT=$(eval "$TESTCMD")
     PATOK='.*1 passed.*'
     PATFAILED='.*1 failed.*'
     PATSKIPPED='.*deselected.*'
@@ -172,9 +172,9 @@ function execute_pytest()
     fi
     if [ "$CSV" != "" ]; then
         emit "$OUTPUT"
-        echo $RESULT >> $CSV
+        echo "$RESULT" >> "$CSV"
     else
-        echo $RESULT
+        echo "$RESULT"
     fi
     return $ret
 }
@@ -182,8 +182,7 @@ function execute_pytest()
 #Check support for numa nodes (at least two)
 function check_numa()
 {
-    numactl --hardware | grep "^node 1" > /dev/null
-    if [ $? -ne 0 ]; then
+    if ! numactl --hardware | grep "^node 1" > /dev/null; then
         echo "ERROR: $0 requires a NUMA enabled system with more than one node."
         exit 1
     fi
@@ -222,14 +221,18 @@ while getopts ":h" opt; do
             usage;
             exit 0;
             ;;
+        *)
+            usage;
+            exit 0;
+            ;;
     esac
 done
 
-TEST_PATH=`normalize_path "$TEST_PATH"`
+TEST_PATH=$(normalize_path "$TEST_PATH")
 
 # Clear any remnants of previous execution(s)
-rm -rf $CSV
-rm -rf $LOG_FILE
+rm -rf "$CSV"
+rm -rf "$LOG_FILE"
 
 # Run tests written in gtest
 for i in ${!GTEST_BINARIES[*]}; do
@@ -254,11 +257,11 @@ for i in ${!PYTEST_FILES[*]}; do
     emit
     emit "### Processing pytest file '$PTEST_BINARY_PATH' ###"
     IFS=$'\n'
-    for LINE in $($PYTEST $PTEST_BINARY_PATH --collect-only); do
+    for LINE in $($PYTEST "$PTEST_BINARY_PATH" --collect-only); do
         if [[ $LINE == *"<Class "* ]]; then
-            TEST_SUITE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
+             TEST_SUITE="${LINE//^.*'\(.*\)'.*$/\1}"
         elif [[ $LINE == *"<Function "* ]]; then
-            LINE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
+            LINE="${LINE//^.*'\(.*\)'.*$/\1}"
             TEST_CMD="$PYTEST $PTEST_BINARY_PATH -k='%s' 2>&1"
             execute_pytest "$TEST_CMD" "$TEST_SUITE" "$LINE"
             ret=$?

@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2086,SC2154
 # SPDX-License-Identifier: BSD-2-Clause
 # Copyright (C) 2019 - 2021 Intel Corporation.
 
@@ -15,7 +16,7 @@ DOCKER_IMAGE_NAME="$1"
 export PMEM_HOST_PATH=${PMEM_HOST_PATH:-/tmp/}
 
 if [[ ! -f "$DOCKER_IMAGE_NAME" ]]; then
-    echo "Docker image "$DOCKER_IMAGE_NAME" does not exist."
+    echo "Docker image $DOCKER_IMAGE_NAME does not exist."
     exit 1
 fi
 
@@ -32,14 +33,14 @@ PMEM_CONTAINER_PATH=/home/memkinduser/mnt_pmem/
 
 docker build --tag memkind_cont \
              --file "$DOCKER_IMAGE_NAME" \
-             --build-arg http_proxy=$http_proxy \
-             --build-arg https_proxy=$https_proxy \
+             --build-arg http_proxy="$http_proxy" \
+             --build-arg https_proxy="$https_proxy" \
              .
 docker run --rm \
            --privileged=true \
            --tty=true \
-           --env http_proxy=$http_proxy \
-           --env https_proxy=$https_proxy \
+           --env http_proxy="$http_proxy" \
+           --env https_proxy="$https_proxy" \
            --env CODECOV_TOKEN="$CODECOV_TOKEN" \
            --env TEST_SUITE_NAME="$TEST_SUITE_NAME" \
            --env TBB_LIBRARY_VERSION="$TBB_LIBRARY_VERSION" \

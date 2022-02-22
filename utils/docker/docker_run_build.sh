@@ -48,6 +48,7 @@ else
     # if TBB library version is specified install library and use it
     # as MEMKIND_HEAP_MANAGER
     if [ -n "$TBB_LIBRARY_VERSION" ]; then
+        # shellcheck source=/dev/null
         source "$UTILS_PREFIX"/docker_install_tbb.sh
         HEAP_MANAGER="TBB"
     fi

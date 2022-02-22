@@ -18,7 +18,7 @@ if [ "$TEST_SUITE_NAME" = "HBW" ]; then
 elif [ "$TEST_SUITE_NAME" = "PMEM" ]; then
     MEMKIND_HOG_MEMORY=$HOG_MEMORY make PMEM_PATH="$PMEM_CONTAINER_PATH" unit_tests_pmem
     # running pmem examples
-    find examples/.libs -name "pmem*" -executable -type f -exec sh -c "MEMKIND_HEAP_MANAGER=$HEAP_MANAGER "{}" $PMEM_CONTAINER_PATH" \;
+    find examples/.libs -name "pmem*" -executable -type f -exec sh -c "MEMKIND_HEAP_MANAGER=$HEAP_MANAGER $1 $PMEM_CONTAINER_PATH" shell {} \;
 elif [ "$TEST_SUITE_NAME" = "DAX_KMEM" ]; then
     make unit_tests_dax_kmem
 else

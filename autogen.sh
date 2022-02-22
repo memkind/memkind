@@ -15,12 +15,11 @@ if [ ! -f VERSION ]; then
         sha=$(git describe --long | awk -F- '{print $(NF)}')
         release=$(git describe --long | awk -F- '{print $(NF-1)}')
         version=$(git describe --long | sed -e "s|\(.*\)-$release-$sha|\1|" -e "s|-|+|g" -e "s|^v||")
-        if [ ${release} != "0" ]; then
+        if [ "${release}" != "0" ]; then
             echo "WARNING: No annotated tag referring to this commit was found, setting version to development build " 2>&1
             version=${version}+dev${release}+${sha}
         else
             echo "Annotated tag referring to this commit was found, setting version as an official release" 2>&1
-            version=${version}
         fi
     else
         echo "WARNING: VERSION file does not exist and working directory is not a git repository, setting version to 0.0.0" 2>&1
