@@ -7,6 +7,7 @@
 
 #include <linux/hw_breakpoint.h> // definition of HW_* constants
 #include <linux/perf_event.h>    // definition of PERF_* constants
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,14 +31,24 @@ extern "C" {
 typedef struct perf_event_mmap_page perf_event_mmap_page_t;
 typedef struct perf_event_header perf_event_header_t;
 
-void pebs_create();
-void pebs_destroy();
-void pebs_monitor();
+typedef void (*touch_cb)(uintptr_t address, uint64_t timestamp);
 
-// TODO remove debug only
-extern void *pebs_debug_check_low;
-extern void *pebs_debug_check_hi;
-extern int pebs_debug_num_samples;
+// to avoid VSCode editor errors
+// TODO remove after POC (generate this define with ./configure)
+#ifndef CPU_LOGICAL_CORES_NUMBER
+#define CPU_LOGICAL_CORES_NUMBER 1
+#endif
+
+typedef struct PebsMetadata {
+    int pebs_fd[CPU_LOGICAL_CORES_NUMBER];
+    char *pebs_mmap[CPU_LOGICAL_CORES_NUMBER];
+    __u64 last_head[CPU_LOGICAL_CORES_NUMBER];
+    touch_cb cb;
+} PebsMetadata;
+
+void pebs_create(PebsMetadata *pebs, touch_cb cb);
+void pebs_destroy(PebsMetadata *pebs);
+void pebs_monitor(PebsMetadata *pebs);
 
 #ifdef __cplusplus
 }

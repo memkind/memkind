@@ -74,3 +74,8 @@ MEMKIND_EXPORT void ranking_add_page(ranking_handle handle,
 {
     static_cast<Ranking *>(handle)->AddPage(*static_cast<PageMetadata *>(page));
 }
+
+MEMKIND_EXPORT size_t ranking_get_total_size(ranking_handle handle)
+{
+    return static_cast<Ranking *>(handle)->GetTotalSize();
+}

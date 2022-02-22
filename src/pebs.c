@@ -8,27 +8,12 @@
 
 #include <assert.h>
 
-// to avoid VSCode editor errors
-// TODO remove after POC (generate this define with ./configure)
-#ifndef CPU_LOGICAL_CORES_NUMBER
-#define CPU_LOGICAL_CORES_NUMBER 1
-#endif
-
-int pebs_fd[CPU_LOGICAL_CORES_NUMBER];
-static char *pebs_mmap[CPU_LOGICAL_CORES_NUMBER];
-__u64 last_head[CPU_LOGICAL_CORES_NUMBER] = {0};
-
 #define PEBS_SAMPLING_INTERVAL        1000
 #define MMAP_DATA_SIZE                8
 #define MMAP_PAGES_NUM                1 + MMAP_DATA_SIZE
 #define HOTNESS_PEBS_THREAD_FREQUENCY 10.0
 
-// TODO remove after POC - debug only
-MEMKIND_EXPORT void *pebs_debug_check_low;
-MEMKIND_EXPORT void *pebs_debug_check_hi;
-MEMKIND_EXPORT int pebs_debug_num_samples = 0;
-
-void pebs_monitor()
+void pebs_monitor(PebsMetadata *pebs)
 {
     // must call this before read from data head
     asm volatile("lfence" ::: "memory");
@@ -37,15 +22,15 @@ void pebs_monitor()
 
     for (size_t cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx) {
         perf_event_mmap_page_t *pebs_metadata =
-            (perf_event_mmap_page_t *)pebs_mmap[cpu_idx];
+            (perf_event_mmap_page_t *)pebs->pebs_mmap[cpu_idx];
         assert(pebs_metadata);
 
         __u64 timestamp = 0;
         __u64 addr = 0;
         int samples = 0;
-        while (last_head[cpu_idx] < pebs_metadata->data_head) {
-            char *data_mmap = pebs_mmap[cpu_idx] + getpagesize() +
-                last_head[cpu_idx] % (MMAP_DATA_SIZE * getpagesize());
+        while (pebs->last_head[cpu_idx] < pebs_metadata->data_head) {
+            char *data_mmap = pebs->pebs_mmap[cpu_idx] + getpagesize() +
+                pebs->last_head[cpu_idx] % (MMAP_DATA_SIZE * getpagesize());
 
             perf_event_header_t *event = (perf_event_header_t *)data_mmap;
 
@@ -58,23 +43,11 @@ void pebs_monitor()
                 timestamp = *(__u64 *)read_ptr;
                 read_ptr += sizeof(__u64);
                 addr = *(__u64 *)read_ptr;
-
-                // TODO do something useful with this data!!!
-                log_info("PEBS: cpu %lu, timestamp %llu, addr %llx", cpu_idx,
-                         timestamp, addr);
-
-                // TODO remove after POC - debug only
-                if ((pebs_debug_check_low <= (void *)addr) &&
-                    ((void *)addr <= pebs_debug_check_hi)) {
-                    pebs_debug_num_samples++;
-
-                    // log_fatal("PEBS: FOUND!!! head %lld, ns %d, addr %llx",
-                    //    last_head[cpu_idx], pebs_debug_num_samples, addr);
-                }
+                pebs->cb(addr, timestamp);
             } else if ((event->type >= PERF_RECORD_MAX) || (event->size == 0)) {
                 log_fatal("PEBS buffer corrupted!!!");
-                last_head[cpu_idx] = pebs_metadata->data_head;
-                ioctl(pebs_fd[cpu_idx], PERF_EVENT_IOC_REFRESH, 0);
+                pebs->last_head[cpu_idx] = pebs_metadata->data_head;
+                ioctl(pebs->pebs_fd[cpu_idx], PERF_EVENT_IOC_REFRESH, 0);
                 break;
             }
 
@@ -83,36 +56,38 @@ void pebs_monitor()
             //    last_head[cpu_idx], pebs_metadata->data_head, event->size,
             //    event->type);
 
-            last_head[cpu_idx] += event->size;
+            pebs->last_head[cpu_idx] += event->size;
             data_mmap += event->size;
             samples++;
         }
 
         if (samples > 0) {
-            pebs_metadata->data_tail = last_head[cpu_idx];
+            pebs_metadata->data_tail = pebs->last_head[cpu_idx];
             all_cpu_samples += samples;
 
             // TODO remove after POC - debug only
             // log_fatal("PEBS: cpu %ld samples %d", cpu_idx, samples);
         }
 
-        ioctl(pebs_fd[cpu_idx], PERF_EVENT_IOC_REFRESH, 0);
+        ioctl(pebs->pebs_fd[cpu_idx], PERF_EVENT_IOC_REFRESH, 0);
     }
 
     log_info("PEBS: processed %d samples", all_cpu_samples);
 }
 
-void pebs_unmap_all_cpus()
+void pebs_unmap_all_cpus(PebsMetadata *pebs)
 {
     for (size_t cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx) {
-        munmap(pebs_mmap[cpu_idx], MMAP_PAGES_NUM * getpagesize());
-        pebs_mmap[cpu_idx] = 0;
-        close(pebs_fd[cpu_idx]);
+        munmap(pebs->pebs_mmap[cpu_idx], MMAP_PAGES_NUM * getpagesize());
+        pebs->pebs_mmap[cpu_idx] = 0;
+        close(pebs->pebs_fd[cpu_idx]);
     }
 }
 
-void pebs_create()
+void pebs_create(PebsMetadata *pebs, touch_cb cb)
 {
+    pebs->cb = cb;
+    memset(&pebs->last_head[0], 0, sizeof(pebs->last_head));
     // check if we have access to perf events
     int pf = 0;
     FILE *f = fopen("/proc/sys/kernel/perf_event_paranoid", "r");
@@ -174,40 +149,35 @@ void pebs_create()
     int map_size = MMAP_PAGES_NUM * getpagesize();
     pid_t pid = getpid();
 
-    // fprintf(stderr, "pid %d", pid);
-    pebs_debug_num_samples = 0;
-
     // our event data need to be accessed via memory from mmap() -
     // in this case we can't use "any" cpu binding, so we have to monitor
     // all cpus
     for (cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx) {
         if ((fd = syscall(SYS_perf_event_open, &pe, pid, cpu_idx, group_fd,
                           flags)) == -1) {
-            pebs_unmap_all_cpus();
+            pebs_unmap_all_cpus(pebs);
             log_err("PEBS: PEBS NOT SUPPORTED! continuing without pebs!");
             return;
         }
 
-        pebs_fd[cpu_idx] = fd;
-        pebs_mmap[cpu_idx] = mmap(NULL, map_size, PROT_READ | PROT_WRITE,
-                                  MAP_SHARED, pebs_fd[cpu_idx], 0);
+        pebs->pebs_fd[cpu_idx] = fd;
+        pebs->pebs_mmap[cpu_idx] = mmap(NULL, map_size, PROT_READ | PROT_WRITE,
+                                        MAP_SHARED, pebs->pebs_fd[cpu_idx], 0);
     }
 
     for (cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx) {
-        ioctl(pebs_fd[cpu_idx], PERF_EVENT_IOC_RESET, 0);
-        ioctl(pebs_fd[cpu_idx], PERF_EVENT_IOC_ENABLE, 0);
+        ioctl(pebs->pebs_fd[cpu_idx], PERF_EVENT_IOC_RESET, 0);
+        ioctl(pebs->pebs_fd[cpu_idx], PERF_EVENT_IOC_ENABLE, 0);
     }
 
     log_info("PEBS enabled");
 }
 
-void pebs_destroy()
+void pebs_destroy(PebsMetadata *pebs)
 {
     for (size_t cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx)
-        ioctl(pebs_fd[cpu_idx], PERF_EVENT_IOC_DISABLE, 0);
+        ioctl(pebs->pebs_fd[cpu_idx], PERF_EVENT_IOC_DISABLE, 0);
 
-    pebs_unmap_all_cpus();
-
-    log_info("PEBS: pebs_debug_num_samples = %d", pebs_debug_num_samples);
+    pebs_unmap_all_cpus(pebs);
     log_info("PEBS disabled");
 }
