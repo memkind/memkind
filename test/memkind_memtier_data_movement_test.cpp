@@ -360,6 +360,30 @@ TEST_F(PoolAllocTest, Basic)
     pool_allocator_destroy(&pool);
 }
 
+TEST_F(PoolAllocTest, BigAllocationTest)
+{
+    size_t alloc_size = 512 * 1024 * 1024 * sizeof(int); // 512*sizeof(int) MB
+    size_t big_alloc_size = 16u * 1024u * 1024u * 1024u; // 16 GB
+    PoolAllocator pool;
+    int ret = pool_allocator_create(&pool);
+    ASSERT_EQ(ret, 0);
+    for (size_t i = 0; i < UINT16_MAX; ++i)
+        ASSERT_EQ(pool.pool[i], nullptr);
+
+    std::map<SlabAllocator *, size_t> created_slabs;
+
+    uint8_t *temp1 = (uint8_t *)pool_allocator_malloc(&pool, alloc_size);
+    check_add(created_slabs, pool, alloc_size + sizeof(freelist_node_meta_t));
+
+    uint8_t *temp2 = (uint8_t *)pool_allocator_malloc(&pool, big_alloc_size);
+    check_add(created_slabs, pool,
+              big_alloc_size + sizeof(freelist_node_meta_t));
+
+    pool_allocator_free(temp1);
+    pool_allocator_free(temp2);
+    pool_allocator_destroy(&pool);
+}
+
 TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
 {
     ProcStat proc_stat;
@@ -403,9 +427,9 @@ TEST_F(PEBSTest, Basic)
     volatile int total_sum = 0;
 
     MTTInternalsLimits limits;
-    limits.lowLimit = 1024 * 1024 * 1024;
-    limits.softLimit = 1024 * 1024 * 1024;
-    limits.hardLimit = 1024 * 1024 * 1024;
+    limits.lowLimit = 1024u * 1024u * 1024u;
+    limits.softLimit = 1024u * 1024u * 1024u;
+    limits.hardLimit = 1024u * 1024u * 1024u;
     // PEBS is enabled during MTT allocator creation
     MTTAllocator mtt_allocator;
     mtt_allocator_create(&mtt_allocator, &limits);
@@ -434,6 +458,11 @@ TEST_F(PEBSTest, Basic)
 
     ASSERT_TRUE(success);
     ASSERT_GT(hotness, 0.0);
+
+    // check that there are no pages on pmem
+    success =
+        ranking_get_hottest(mtt_allocator.internals.pmemRanking, &hotness);
+    ASSERT_FALSE(success);
 
     // compiler optimizations
     ASSERT_EQ(total_sum, total_sum);
