@@ -399,7 +399,7 @@ protected:
 TEST_F(PEBSTest, Basic)
 {
     // do some copying - L3 misses are expected here
-    const int size = 1024 * 1024;
+    const size_t size = 1024 * 1024;
     volatile int total_sum = 0;
 
     MTTInternalsLimits limits;
@@ -419,12 +419,12 @@ TEST_F(PEBSTest, Basic)
     ASSERT_TRUE(success);
     ASSERT_EQ(hotness, 0.0);
 
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         tab[i] = i;
     }
 
-    for (int j = 0; j < 30; j++) {
-        for (int i = 0; i < size / 2; i++) {
+    for (size_t j = 0; j < 30u; j++) {
+        for (size_t i = 0; i < size / 2u; i++) {
             tab[i] += tab[i * 2] + j;
             total_sum += tab[i];
         }
@@ -434,6 +434,77 @@ TEST_F(PEBSTest, Basic)
 
     ASSERT_TRUE(success);
     ASSERT_GT(hotness, 0.0);
+
+    // check that there are no pages on pmem - none of the limits were reached
+    success =
+        ranking_get_hottest(mtt_allocator.internals.pmemRanking, &hotness);
+    ASSERT_FALSE(success);
+
+    // compiler optimizations
+    ASSERT_EQ(total_sum, total_sum);
+
+    mtt_allocator_destroy(&mtt_allocator);
+}
+
+TEST_F(PEBSTest, SoftLimitMovementLogic)
+{
+    // do some copying - L3 misses are expected here
+    const size_t size = 512 * 1024 * 1024; // 512 MB
+    volatile int total_sum = 0;
+
+    MTTInternalsLimits limits;
+    limits.lowLimit = 16 * 1024 * 1024;    // 16 MB
+    limits.softLimit = 1024 * 1024 * 1024; // 1GB
+    // WARNING hard limit not tested TODO test before productisation
+    limits.hardLimit = 1024 * 1024 * 1024; // 1GB
+    // PEBS is enabled during MTT allocator creation
+    MTTAllocator mtt_allocator;
+    mtt_allocator_create(&mtt_allocator, &limits);
+
+    volatile int *tab =
+        (int *)mtt_allocator_malloc(&mtt_allocator, size * sizeof(int));
+
+    double hotness = -1.0;
+    bool success = get_highest_hotness(&mtt_allocator, hotness);
+
+    for (size_t i = 0; i < size; i++) {
+        tab[i] = i;
+    }
+
+    ASSERT_TRUE(success);
+    ASSERT_EQ(hotness, 0.0);
+
+    for (size_t j = 0; j < 2u; j++) {
+        for (size_t i = 0; i < size / 2u / 10u; i++) {
+            tab[i] += tab[i * 2] + j;
+            total_sum += tab[i];
+        }
+    }
+
+    success = get_highest_hotness(&mtt_allocator, hotness);
+
+    ASSERT_TRUE(success);
+    ASSERT_GT(hotness, 0.0);
+
+    // Get sizes of dram and pmem rankings to make sure the soft limit was
+    // respected
+    size_t dram_size =
+        ranking_get_total_size(mtt_allocator.internals.dramRanking);
+    size_t pmem_size =
+        ranking_get_total_size(mtt_allocator.internals.pmemRanking);
+
+    ASSERT_LE(dram_size, limits.lowLimit);
+    ASSERT_LE(dram_size, 16 * 1024 * 1024u);
+
+    ASSERT_GE(dram_size, limits.lowLimit - TRACED_PAGESIZE);
+    ASSERT_GE(dram_size, 16 * 1024 * 1024u - TRACED_PAGESIZE);
+
+    ASSERT_GT(pmem_size, size - limits.lowLimit);
+    ASSERT_GT(pmem_size, 512 * 1024 * 1024u - 16 * 1024 * 1024u);
+
+    ASSERT_LT(pmem_size, size - limits.lowLimit + TRACED_PAGESIZE);
+    ASSERT_LT(pmem_size,
+              512 * 1024 * 1024 - 16 * 1024 * 1024u + TRACED_PAGESIZE);
 
     // compiler optimizations
     ASSERT_EQ(total_sum, total_sum);
