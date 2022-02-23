@@ -58,15 +58,16 @@ static size_t size_to_size_rank(size_t size)
     if (msb == lsb) {
         bool msb_calculations = msb > MIN_RANK_SIZE_POW_2;
         uint64_t pow = msb - MIN_RANK_SIZE_POW_2;
-        return msb_calculations * (pow << 1u);
+        return msb_calculations * (pow << (size_t)1u);
     } else {
-        size_t msb_full = msb + 1;
+        size_t msb_full = msb + (size_t)1u;
         if (msb_full < MIN_RANK_SIZE_POW_2)
             return 0;
-        bool mid_is_enough = (!(size & (1 << (msb - 1))) ||
-                              (lsb == msb - 1)); // second msb is set
-        size_t ranks_to_add = !mid_is_enough;    // 0 if is enough, 1 otherwise
-        return ((msb - MIN_RANK_SIZE_POW_2) << 1u) + 1 + ranks_to_add;
+        bool mid_is_enough = (!(size & (((size_t)1u) << (msb - (size_t)1u))) ||
+                              (lsb == msb - (size_t)1u)); // second msb is set
+        size_t ranks_to_add = !mid_is_enough; // 0 if is enough, 1 otherwise
+        return ((msb - MIN_RANK_SIZE_POW_2) << (size_t)1u) + (size_t)1u +
+            ranks_to_add;
     }
     // not reachable, all paths should have already returned
 }
@@ -80,12 +81,12 @@ static size_t size_to_size_rank(size_t size)
 static size_t size_rank_to_size(size_t size_rank)
 {
     // calculate hash without any conditional statements
-    size_t min_pow2 = (size_rank >> 1u) + MIN_RANK_SIZE_POW_2;
-    size_t min_size = 1u << min_pow2;
-    bool rank_is_pow_2 = (size_rank & 1u) == 0u;
+    size_t min_pow2 = (size_rank >> (size_t)1u) + MIN_RANK_SIZE_POW_2;
+    size_t min_size = ((size_t)1u) << min_pow2;
+    bool rank_is_pow_2 = (size_rank & (size_t)1u) == 0u;
     // cast bool to int directly - write optimised, branchless code
     size_t size_to_add_pow2 = !rank_is_pow_2; // rank is pow 2 -> nothing to add
-    size_t size_to_add = size_to_add_pow2 << (min_pow2 - 1);
+    size_t size_to_add = size_to_add_pow2 << (min_pow2 - (size_t)1u);
     size_t size = min_size + size_to_add;
 
     return size;

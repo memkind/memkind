@@ -362,8 +362,9 @@ TEST_F(PoolAllocTest, Basic)
 
 TEST_F(PoolAllocTest, BigAllocationTest)
 {
-    size_t alloc_size = 512 * 1024 * 1024 * sizeof(int); // 512*sizeof(int) MB
-    size_t big_alloc_size = 16u * 1024u * 1024u * 1024u; // 16 GB
+    size_t alloc_size =
+        ((size_t)512) * 1024 * 1024 * sizeof(int); // 512*sizeof(int) MB
+    size_t big_alloc_size = ((size_t)16u) * 1024u * 1024u * 1024u; // 16 GB
     PoolAllocator pool;
     int ret = pool_allocator_create(&pool);
     ASSERT_EQ(ret, 0);
