@@ -176,6 +176,8 @@ MEMKIND_EXPORT void Ranking::Update(uint64_t timestamp)
         const double hotness = page->GetHotness();
         auto pages_entry = this->hotnessToPages.find(hotness);
         // find correct entry in multimap
+        assert(pages_entry != this->hotnessToPages.end() &&
+               "page with hotness not correctly registered!");
         while (pages_entry != this->hotnessToPages.end() &&
                pages_entry->first == hotness && pages_entry->second != page)
             ++pages_entry;
@@ -186,6 +188,7 @@ MEMKIND_EXPORT void Ranking::Update(uint64_t timestamp)
         page->UpdateHotness(timestamp);
         this->hotnessToPages.insert(std::make_pair(page->GetHotness(), page));
     }
+    this->pagesToUpdate.clear();
 }
 
 MEMKIND_EXPORT bool Ranking::GetHottest(double &hotness)
