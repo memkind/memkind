@@ -204,7 +204,8 @@ MEMKIND_EXPORT int memkind_fixed_create(struct memkind *kind,
 exit:
     /* err is set, please don't overwrite it with result of
      * pthread_mutex_destroy */
-    pthread_mutex_destroy(&priv->lock);
+    int pthread_check = pthread_mutex_destroy(&priv->lock);
+    assert(pthread_check == 0 && "pthread_mutex_destroy error");
     jemk_free(priv);
     return err;
 }
@@ -215,7 +216,8 @@ MEMKIND_EXPORT int memkind_fixed_destroy(struct memkind *kind)
 
     memkind_arena_destroy(kind);
     memtier_reset_size(kind->partition);
-    pthread_mutex_destroy(&priv->lock);
+    int pthread_check = pthread_mutex_destroy(&priv->lock);
+    assert(pthread_check == 0 && "pthread_mutex_destroy error");
 
     jemk_free(priv);
 
