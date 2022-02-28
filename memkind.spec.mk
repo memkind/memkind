@@ -173,6 +173,7 @@ rm -f %{buildroot}/%{_libdir}/libmemtier.{l,}a
 %{_includedir}/%{namespace}.h
 %{_mandir}/man1/memkind-auto-dax-kmem-nodes.1.*
 %{_mandir}/man1/memkind-hbw-nodes.1.*
+%{_mandir}/man1/*memtier.1.*
 %{_mandir}/man3/hbwmalloc.3.*
 %{_mandir}/man3/hbwallocator.3.*
 %{_mandir}/man3/pmemallocator.3.*
