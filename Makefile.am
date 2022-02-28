@@ -41,6 +41,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/ranking.cpp \
                         src/ranking_internals.cpp \
                         src/pagesizes.c \
+                        src/mmap_tracing_queue.c \
                         # end
 
 
@@ -86,6 +87,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/ranking.h \
                   include/memkind/internal/ranking_internals.hpp \
                   include/memkind/internal/pagesizes.h \
+                  include/memkind/internal/mmap_tracing_queue.h \
                   # end
 
 EXTRA_DIST = CONTRIBUTING \
