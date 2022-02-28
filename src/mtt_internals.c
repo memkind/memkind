@@ -33,18 +33,18 @@ MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
     internals->limits = *limits;
     ranking_create(&internals->dramRanking);
     ranking_create(&internals->pmemRanking);
-    pthread_mutex_init(&internals->rankingMutex, NULL);
     ranking_metadata_create(&internals->tempMetadataHandle);
+    mmap_tracing_queue_create(&internals->mmapTracingQueue);
 
     return pool_allocator_create(&internals->pool);
 }
 
 MEMKIND_EXPORT void mtt_internals_destroy(MttInternals *internals)
 {
-    pthread_mutex_destroy(&internals->rankingMutex);
     ranking_metadata_destroy(internals->tempMetadataHandle);
     ranking_destroy(internals->pmemRanking);
     ranking_destroy(internals->dramRanking);
+    mmap_tracing_queue_destroy(&internals->mmapTracingQueue);
     pool_allocator_destroy(&internals->pool);
 }
 
@@ -55,10 +55,8 @@ MEMKIND_EXPORT void *mtt_internals_malloc(MttInternals *internals, size_t size)
     void *ret =
         pool_allocator_malloc_pages(&internals->pool, size, &addr, &nof_pages);
     if (addr) {
-        pthread_mutex_lock(&internals->rankingMutex);
-        ranking_add_pages(internals->dramRanking, addr, nof_pages,
-                          internals->lastTimestamp);
-        pthread_mutex_unlock(&internals->rankingMutex);
+        mmap_tracing_queue_multithreaded_push(&internals->mmapTracingQueue,
+                                              addr, nof_pages);
     }
     return ret;
 }
@@ -86,16 +84,21 @@ MEMKIND_EXPORT void mtt_internals_touch(MttInternals *internals,
     // the touch will be ignored
     //
     // touch on unknown address is immediately dropped in O(1) time
-    pthread_mutex_lock(&internals->rankingMutex);
     ranking_touch(internals->dramRanking, address);
-    pthread_mutex_unlock(&internals->rankingMutex);
     ranking_touch(internals->pmemRanking, address);
 }
 
 MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
                                                  uint64_t timestamp)
 {
-    pthread_mutex_lock(&internals->rankingMutex);
+    MMapTracingNode *node =
+        mmap_tracing_queue_multithreaded_take_all(&internals->mmapTracingQueue);
+    uintptr_t start_addr;
+    size_t nof_pages;
+    while (mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages)) {
+        ranking_add_pages(internals->dramRanking, start_addr, nof_pages,
+                          internals->lastTimestamp);
+    }
 
     // update both rankings
     ranking_update(internals->dramRanking, timestamp);
@@ -157,5 +160,4 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
         success_pmem =
             ranking_get_hottest(internals->pmemRanking, &hottest_pmem);
     }
-    pthread_mutex_unlock(&internals->rankingMutex);
 }

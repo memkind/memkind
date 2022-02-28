@@ -15,6 +15,7 @@ extern "C" {
 typedef enum
 {
     THREAD_INIT,
+    THREAD_AWAITING_FLUSH,
     THREAD_RUNNING,
     THREAD_FINISHED
 } ThreadState_t;
@@ -42,6 +43,13 @@ extern void *mtt_allocator_malloc(MTTAllocator *mtt_allocator, size_t size);
 extern void *mtt_allocator_realloc(MTTAllocator *mtt_allocator, void *ptr,
                                    size_t size);
 extern void mtt_allocator_free(void *ptr);
+
+/// @brief Waits until all formerly mmaped pages become visible in the
+/// rankings
+///
+/// @warning DO NOT destroy background thread/mtt_allocator while calling this
+/// function
+extern void mtt_allocator_await_flush(MTTAllocator *mtt_allocator);
 
 #ifdef __cplusplus
 }

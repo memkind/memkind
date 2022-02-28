@@ -438,6 +438,8 @@ TEST_F(PEBSTest, Basic)
     volatile int *tab =
         (int *)mtt_allocator_malloc(&mtt_allocator, size * sizeof(int));
 
+    mtt_allocator_await_flush(&mtt_allocator);
+
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
 
@@ -487,6 +489,8 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     mtt_allocator_create(&mtt_allocator, &limits);
 
     volatile int *tab = (int *)mtt_allocator_malloc(&mtt_allocator, size);
+
+    mtt_allocator_await_flush(&mtt_allocator);
 
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
