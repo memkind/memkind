@@ -53,14 +53,19 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
 
     pthread_mutex_lock(bg_thread_cond_mutex);
     bg_thread->bg_thread_state = THREAD_RUNNING;
-    pthread_cond_signal(&bg_thread->bg_thread_cond);
+    pthread_cond_broadcast(&bg_thread->bg_thread_cond);
     pthread_mutex_unlock(bg_thread_cond_mutex);
 
     bool run = true;
     while (run) {
+        bool flushing_rankings = false;
         pthread_mutex_lock(bg_thread_cond_mutex);
         if (bg_thread->bg_thread_state == THREAD_FINISHED) {
             run = false;
+        } else if (bg_thread->bg_thread_state == THREAD_AWAITING_FLUSH) {
+            // we need to inform the awaiting function that we processed
+            // rankings, right after update_rankings() function call returns
+            flushing_rankings = true;
         }
         pthread_mutex_unlock(bg_thread_cond_mutex);
 
@@ -68,6 +73,14 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
         pebs_monitor(&bg_thread->pebs);
         update_rankings();
         pthread_mutex_unlock(&allocatorsMutex);
+        if (flushing_rankings) {
+            // inform all awaiting threads - reset bg_thread_state
+            pthread_mutex_lock(bg_thread_cond_mutex);
+            bg_thread->bg_thread_state = THREAD_RUNNING;
+            // broadcast bg_thread_state change to all awaiting threads
+            pthread_cond_broadcast(&bg_thread->bg_thread_cond);
+            pthread_mutex_unlock(bg_thread_cond_mutex);
+        }
     }
 
     return NULL;
@@ -144,6 +157,12 @@ void background_thread_init(BackgroundThread *bg_thread)
         log_fatal("Creating MTT allocator background thread failed!");
         abort();
     }
+    pthread_mutex_lock(&bg_thread->bg_thread_cond_mutex);
+    while (bg_thread->bg_thread_state == THREAD_INIT) {
+        pthread_cond_wait(&bg_thread->bg_thread_cond,
+                          &bg_thread->bg_thread_cond_mutex);
+    }
+    pthread_mutex_unlock(&bg_thread->bg_thread_cond_mutex);
 }
 
 void background_thread_fini(BackgroundThread *bg_thread)
@@ -174,9 +193,8 @@ MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator,
     // TODO get timestamp from somewhere!!! (bg thread? PEBS?)
     uint64_t timestamp = 0;
     mtt_internals_create(&mtt_allocator->internals, timestamp, limits);
-    background_thread_init(&mtt_allocator->bgThread);
-    // TODO registering should not be global, but per bg thread !
     register_mtt_allocator(mtt_allocator);
+    background_thread_init(&mtt_allocator->bgThread);
     log_info("MTT background thread created");
 }
 
@@ -203,4 +221,17 @@ MEMKIND_EXPORT void *mtt_allocator_realloc(MTTAllocator *mtt_allocator,
 MEMKIND_EXPORT void mtt_allocator_free(void *ptr)
 {
     mtt_internals_free(ptr);
+}
+
+MEMKIND_EXPORT void mtt_allocator_await_flush(MTTAllocator *mtt_allocator)
+{
+    pthread_mutex_lock(&mtt_allocator->bgThread.bg_thread_cond_mutex);
+    mtt_allocator->bgThread.bg_thread_state = THREAD_AWAITING_FLUSH;
+    // broadcast bg_thread_state update
+    pthread_cond_broadcast(&mtt_allocator->bgThread.bg_thread_cond);
+    while (mtt_allocator->bgThread.bg_thread_state == THREAD_AWAITING_FLUSH) {
+        pthread_cond_wait(&mtt_allocator->bgThread.bg_thread_cond,
+                          &mtt_allocator->bgThread.bg_thread_cond_mutex);
+    }
+    pthread_mutex_unlock(&mtt_allocator->bgThread.bg_thread_cond_mutex);
 }

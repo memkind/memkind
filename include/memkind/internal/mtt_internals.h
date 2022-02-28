@@ -4,10 +4,9 @@
 #pragma once
 
 #include "config.h"
+#include "memkind/internal/mmap_tracing_queue.h"
 #include "memkind/internal/pool_allocator.h"
 #include "memkind/internal/ranking.h"
-
-#include "pthread.h"
 
 /// Limits to be used for PMEM vs DRAM distribution
 ///
@@ -34,8 +33,7 @@ typedef struct MttInternals {
     PoolAllocator pool;
     uint64_t lastTimestamp;
     MTTInternalsLimits limits;
-    pthread_mutex_t
-        rankingMutex; // TODO get rid of before benchmarking malloc time
+    MMapTracingQueue mmapTracingQueue;
 } MttInternals;
 
 extern int mtt_internals_create(MttInternals *internals, uint64_t timestamp,
