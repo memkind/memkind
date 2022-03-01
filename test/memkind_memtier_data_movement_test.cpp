@@ -438,6 +438,8 @@ TEST_F(PEBSTest, Basic)
     volatile int *tab =
         (int *)mtt_allocator_malloc(&mtt_allocator, size * sizeof(int));
 
+    mtt_allocator_await_flush(&mtt_allocator);
+
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
 
@@ -487,6 +489,8 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     mtt_allocator_create(&mtt_allocator, &limits);
 
     volatile int *tab = (int *)mtt_allocator_malloc(&mtt_allocator, size);
+
+    mtt_allocator_await_flush(&mtt_allocator);
 
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
@@ -1121,4 +1125,95 @@ TEST_F(RankingBindingsTest, Basic)
 
     total_size = ranking_get_total_size(ranking2);
     ASSERT_EQ(total_size, 0u);
+}
+
+#include "memkind/internal/mmap_tracing_queue.h"
+
+TEST(MmapTracingQueueTest, Basic)
+{
+    MMapTracingQueue queue;
+    mmap_tracing_queue_create(&queue);
+
+    // check initial conditions
+    ASSERT_EQ(queue.head, nullptr);
+    ASSERT_EQ(queue.tail, nullptr);
+
+    // add 1 element, check correctness
+    mmap_tracing_queue_multithreaded_push(&queue, 0xABCDul, 1);
+    ASSERT_NE(queue.head, nullptr);
+    ASSERT_NE(queue.tail, nullptr);
+    ASSERT_EQ(queue.tail, queue.head);
+    ASSERT_EQ(queue.tail->startAddr, 0xABCDul);
+    ASSERT_EQ(queue.tail->nofPages, 1ul);
+    ASSERT_EQ(queue.tail->next, nullptr);
+    ASSERT_EQ(queue.alloc.used, 1ul);
+
+    // take one element and process, check correctness
+    MMapTracingNode *node = mmap_tracing_queue_multithreaded_take_all(&queue);
+    ASSERT_EQ(queue.head, nullptr);
+    ASSERT_EQ(queue.tail, nullptr);
+    ASSERT_EQ(queue.alloc.used, 1ul); // 1 element on free list
+    ASSERT_EQ(node->startAddr, 0xABCDul);
+    ASSERT_EQ(node->nofPages, 1ul);
+    ASSERT_EQ(node->next, nullptr);
+
+    uintptr_t start_addr = 0ul;
+    size_t nof_pages = 0ul;
+    bool ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    ASSERT_TRUE(ok);
+    ASSERT_EQ(start_addr, 0xABCDul);
+    ASSERT_EQ(nof_pages, 1ul);
+
+    // add 3 elements, repeat the process above
+    mmap_tracing_queue_multithreaded_push(&queue, 0xBCDEul, 3);
+    mmap_tracing_queue_multithreaded_push(&queue, 0xCDEFul, 2);
+    mmap_tracing_queue_multithreaded_push(&queue, 0xDDEFul, 4);
+    ASSERT_NE(queue.head, nullptr);
+    ASSERT_NE(queue.tail, nullptr);
+    ASSERT_NE(queue.tail, queue.head);
+    ASSERT_EQ(queue.tail->startAddr, 0xDDEFul);
+    ASSERT_EQ(queue.tail->nofPages, 4ul);
+    ASSERT_EQ(queue.tail->next, nullptr);
+    ASSERT_EQ(queue.head->startAddr, 0xBCDEul);
+    ASSERT_EQ(queue.head->nofPages, 3ul);
+    ASSERT_NE(queue.head->next, nullptr);
+    ASSERT_EQ(queue.head->next->startAddr, 0xCDEFul);
+    ASSERT_EQ(queue.head->next->nofPages, 2ul);
+    ASSERT_NE(queue.head->next->next, nullptr);
+    ASSERT_EQ(queue.head->next->next, queue.tail);
+    ASSERT_EQ(queue.head->next->next->startAddr, 0xDDEFul);
+    ASSERT_EQ(queue.head->next->next->nofPages, 4ul);
+    ASSERT_EQ(queue.head->next->next->next, nullptr);
+    ASSERT_EQ(queue.alloc.used, 3ul);
+
+    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+
+    ASSERT_FALSE(ok);
+
+    // take all nodes and check their values
+    node = mmap_tracing_queue_multithreaded_take_all(&queue);
+    ASSERT_EQ(queue.head, nullptr);
+    ASSERT_EQ(queue.tail, nullptr);
+    ASSERT_EQ(queue.tail, queue.head);
+    ASSERT_EQ(queue.alloc.used, 3ul); // 3 elements used
+
+    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    ASSERT_TRUE(ok);
+    ASSERT_EQ(start_addr, 0xBCDEul);
+    ASSERT_EQ(nof_pages, 3ul);
+
+    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    ASSERT_TRUE(ok);
+    ASSERT_EQ(start_addr, 0xCDEFul);
+    ASSERT_EQ(nof_pages, 2ul);
+
+    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    ASSERT_TRUE(ok);
+    ASSERT_EQ(start_addr, 0xDDEFul);
+    ASSERT_EQ(nof_pages, 4ul);
+
+    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    ASSERT_FALSE(ok);
+
+    mmap_tracing_queue_destroy(&queue);
 }
