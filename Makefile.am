@@ -34,6 +34,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/tbb_wrapper.c \
                         src/bigary.c \
                         src/slab_allocator.c \
+                        src/fast_slab_allocator.c \
                         src/hasher.c \
                         src/pebs.c \
                         src/pool_allocator.c \
@@ -81,6 +82,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/vec.h \
                   include/memkind/internal/bigary.h \
                   include/memkind/internal/slab_allocator.h \
+                  include/memkind/internal/fast_slab_allocator.h \
                   include/memkind/internal/hasher.h \
                   include/memkind/internal/pool_allocator.h \
                   include/memkind/internal/mtt_internals.h \

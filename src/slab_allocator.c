@@ -164,6 +164,24 @@ MEMKIND_EXPORT int slab_allocator_init(SlabAllocator *alloc,
     return ret;
 }
 
+MEMKIND_EXPORT int slab_allocator_init_pages(SlabAllocator *alloc,
+                                             size_t element_size,
+                                             size_t max_elements,
+                                             uintptr_t *addr, size_t *nof_pages)
+{
+    // TODO handle failure gracefully instead of die - in biary_alloc
+    alloc->elementSize = sizeof(freelist_node_meta_t) + element_size;
+    size_t max_elements_size = max_elements * alloc->elementSize;
+    bigary_init_pages(&alloc->mappedMemory, BIGARY_DRAM, max_elements_size,
+                      addr, nof_pages);
+    alloc->used = 0u;
+
+    int ret = pthread_mutex_init(&alloc->globFreelist.mutex, NULL);
+    alloc->globFreelist.freelist = NULL;
+
+    return ret;
+}
+
 MEMKIND_EXPORT void slab_allocator_destroy(SlabAllocator *alloc)
 {
     int ret = pthread_mutex_destroy(&alloc->globFreelist.mutex);

@@ -68,6 +68,8 @@ include/memkind/internal/pebs.h
 include/memkind/internal/tbb_mem_pool_policy.h
 include/memkind/internal/tbb_wrapper.h
 include/memkind/internal/vec.h
+include/memkind/internal/fast_slab_allocator.h
+include/memkind/internal/slab_allocator.h
 include/memkind/internal/mmap_tracing_queue.h
 include/memkind_allocator.h
 include/memkind_deprecated.h
@@ -439,6 +441,8 @@ src/mtt_allocator.c
 src/memkind_pmem.c
 src/memkind_fixed.c
 src/memkind_regular.c
+src/slab_allocator.c
+src/fast_slab_allocator.c
 src/mmap_tracing_queue.c
 src/tbb_wrapper.c
 test/Allocator.hpp
