@@ -60,8 +60,15 @@ typedef struct slab_allocator {
 
 // -------- public functions --------------------------------------------------
 
+/// @brief Initialize slab_allocator
+/// @note only one initializer should be called!
 extern int slab_allocator_init(SlabAllocator *alloc, size_t element_size,
                                size_t max_elements);
+/// @brief Initialize slab_allocator and return mmapped pages
+/// @note only one initializer should be called!
+extern int slab_allocator_init_pages(SlabAllocator *alloc, size_t element_size,
+                                     size_t max_elements, uintptr_t *addr,
+                                     size_t *nof_pages);
 extern void slab_allocator_destroy(SlabAllocator *alloc);
 extern void *slab_allocator_malloc(SlabAllocator *alloc);
 extern void *slab_allocator_malloc_pages(SlabAllocator *alloc,
