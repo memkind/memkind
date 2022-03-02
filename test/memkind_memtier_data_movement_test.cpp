@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2021-2022 Intel Corporation. */
 
+#include <memkind/internal/fast_pool_allocator.h>
 #include <memkind/internal/fast_slab_allocator.h>
 #include <memkind/internal/hasher.h>
 #include <memkind/internal/memkind_memtier.h>
@@ -542,6 +543,101 @@ TEST_F(PoolAllocTest, BigAllocationTest)
     pool_allocator_free(temp1);
     pool_allocator_free(temp2);
     pool_allocator_destroy(&pool);
+}
+
+class FastPoolAllocTest: public ::testing::Test
+{
+protected:
+    static void check_add(std::map<FastSlabAllocator *, size_t> &slabs,
+                          FastPoolAllocator &pool, size_t expected_size)
+    {
+        for (volatile size_t i = 0; i < UINT16_MAX; ++i) {
+            volatile FastSlabAllocator *slab = pool.pool[i];
+            if (slab) {
+                auto temp = slabs.find((FastSlabAllocator *)slab);
+                volatile bool found = temp != slabs.end();
+                if (!found || (temp->first->used != temp->second)) {
+                    ASSERT_EQ(slab->elementSize, expected_size);
+                    slabs[(FastSlabAllocator *)slab] = slab->used;
+                    return;
+                }
+            }
+        }
+        ASSERT_TRUE(false && "element was not found");
+    }
+};
+
+TEST_F(FastPoolAllocTest, Basic)
+{
+    FastPoolAllocator pool;
+    uintptr_t dummy_address = 0ul;
+    size_t dummy_nof_pages = 0ul;
+    int ret =
+        fast_pool_allocator_create(&pool, &dummy_address, &dummy_nof_pages);
+    ASSERT_EQ(ret, 0);
+    for (size_t i = 0; i < UINT16_MAX; ++i)
+        ASSERT_EQ(pool.pool[i], nullptr);
+
+    std::map<FastSlabAllocator *, size_t> created_slabs;
+
+    uint8_t *a16 = (uint8_t *)fast_pool_allocator_malloc(&pool, 16);
+    check_add(created_slabs, pool, 16);
+
+    uint8_t *a8 = (uint8_t *)fast_pool_allocator_malloc(&pool, 8);
+    check_add(created_slabs, pool, 16);
+
+    uint8_t *a17 = (uint8_t *)fast_pool_allocator_malloc(&pool, 17);
+    check_add(created_slabs, pool, 24);
+
+    uint8_t *a24 = (uint8_t *)fast_pool_allocator_malloc(&pool, 24);
+    check_add(created_slabs, pool, 24);
+
+    uint8_t *a25 = (uint8_t *)fast_pool_allocator_malloc(&pool, 25);
+    check_add(created_slabs, pool, 32);
+
+    uint8_t *a32 = (uint8_t *)fast_pool_allocator_malloc(&pool, 32);
+    check_add(created_slabs, pool, 32);
+
+    uint8_t *a33 = (uint8_t *)fast_pool_allocator_malloc(&pool, 33);
+    check_add(created_slabs, pool, 48);
+
+    fast_pool_allocator_free(&pool, a16);
+    fast_pool_allocator_free(&pool, a8);
+    fast_pool_allocator_free(&pool, a17);
+    fast_pool_allocator_free(&pool, a24);
+    fast_pool_allocator_free(&pool, a25);
+    fast_pool_allocator_free(&pool, a32);
+    fast_pool_allocator_free(&pool, a33);
+
+    fast_pool_allocator_destroy(&pool);
+}
+
+TEST_F(FastPoolAllocTest, BigAllocationTest)
+{
+    size_t alloc_size =
+        512ul * 1024ul * 1024ul * sizeof(int); // 512*sizeof(int) MB
+    size_t big_alloc_size = 16ul * 1024ul * 1024ul * 1024ul; // 16 GB
+    FastPoolAllocator pool;
+    uintptr_t dummy_address = 0ul;
+    size_t dummy_nof_pages = 0ul;
+    int ret =
+        fast_pool_allocator_create(&pool, &dummy_address, &dummy_nof_pages);
+    ASSERT_EQ(ret, 0);
+    for (size_t i = 0; i < UINT16_MAX; ++i)
+        ASSERT_EQ(pool.pool[i], nullptr);
+
+    std::map<FastSlabAllocator *, size_t> created_slabs;
+
+    uint8_t *temp1 = (uint8_t *)fast_pool_allocator_malloc(&pool, alloc_size);
+    check_add(created_slabs, pool, alloc_size);
+
+    uint8_t *temp2 =
+        (uint8_t *)fast_pool_allocator_malloc(&pool, big_alloc_size);
+    check_add(created_slabs, pool, big_alloc_size);
+
+    fast_pool_allocator_free(&pool, temp1);
+    fast_pool_allocator_free(&pool, temp2);
+    fast_pool_allocator_destroy(&pool);
 }
 
 TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
