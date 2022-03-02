@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2022 Intel Corporation. */
 
+#include <memkind/internal/fast_pool_allocator.h>
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/pool_allocator.h>
 
@@ -42,6 +43,7 @@ enum class RawAllocator
 {
     /// PoolAllocator
     POOL,
+    FAST_POOL,
 };
 
 struct GeneralPolicy {
@@ -158,6 +160,35 @@ public:
     void free(void *ptr)
     {
         pool_allocator_free(ptr);
+    }
+};
+
+class FastPoolAllocatorWrapper: public Allocator
+{
+    FastPoolAllocator allocator;
+
+public:
+    FastPoolAllocatorWrapper()
+    {
+        uintptr_t dummy_address = 0ul;
+        size_t dummy_nof_pages = 0ul;
+        fast_pool_allocator_create(&allocator, &dummy_address,
+                                   &dummy_nof_pages);
+    }
+
+    ~FastPoolAllocatorWrapper()
+    {
+        fast_pool_allocator_destroy(&allocator);
+    }
+
+    void *malloc(size_t size_bytes)
+    {
+        return fast_pool_allocator_malloc(&allocator, size_bytes);
+    }
+
+    void free(void *ptr)
+    {
+        fast_pool_allocator_free(&allocator, ptr);
     }
 };
 
@@ -506,6 +537,9 @@ create_loader_creators(TestCase test_case, size_t nof_allocations,
                 case RawAllocator::POOL:
                     allocator = std::make_shared<PoolAllocatorWrapper>();
                     break;
+                case RawAllocator::FAST_POOL:
+                    allocator = std::make_shared<FastPoolAllocatorWrapper>();
+                    break;
             }
         }
     }
@@ -592,6 +626,10 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
             args->policy.generalType = GeneralPolicy::GeneralType::RawAllocator;
             args->policy.allocator = RawAllocator::POOL;
             break;
+        case 'f':
+            args->policy.generalType = GeneralPolicy::GeneralType::RawAllocator;
+            args->policy.allocator = RawAllocator::FAST_POOL;
+            break;
         case 'g':
             args->policy.generalType = GeneralPolicy::GeneralType::StdAllocator;
             break;
@@ -667,6 +705,7 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
 static struct argp_option options[] = {
     {"static", 's', 0, 0, "Benchmark static ratio policy.", 0},
     {"pool", 'p', 0, 0, "Benchmark pool allocator.", 0},
+    {"fast_pool", 'f', 0, 0, "Benchmark fast pool allocator.", 0},
     {"movement", 'm', 0, 0, "Benchmark data movement policy.", 0},
     {"std", 'g', 0, 0, "Benchmark std glibc allocator.", 0},
     {0, 'A', 0, 0, "Benchmark test case Random Incrementation.", 1},
