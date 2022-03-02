@@ -31,7 +31,13 @@ typedef struct PoolAllocator {
     SlabAllocator slabSlabAllocator;
 } PoolAllocator;
 
+/// @brief Initialize slab_allocator
+/// @note only one initializer should be called!
 extern int pool_allocator_create(PoolAllocator *pool);
+/// @brief Initialize slab_allocator and return mmapped pages
+/// @note only one initializer should be called!
+extern int pool_allocator_create_pages(PoolAllocator *pool, uintptr_t *addr,
+                                       size_t *nof_pages);
 extern void pool_allocator_destroy(PoolAllocator *pool);
 
 extern void *pool_allocator_malloc(PoolAllocator *pool, size_t size);
