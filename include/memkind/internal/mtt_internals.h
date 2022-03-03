@@ -37,7 +37,7 @@ typedef struct MttInternals {
 } MttInternals;
 
 extern int mtt_internals_create(MttInternals *internals, uint64_t timestamp,
-                                MTTInternalsLimits *limits);
+                                const MTTInternalsLimits *limits);
 extern void mtt_internals_destroy(MttInternals *internals);
 
 extern void *mtt_internals_malloc(MttInternals *internals, size_t size);
