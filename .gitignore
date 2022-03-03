@@ -64,6 +64,7 @@
 /memkind-auto-dax-kmem-nodes
 /memkind-hbw-nodes
 /memkind-memory-matrix
+/memtier
 /missing
 /src/memkind_defines.h.in
 /stamp-h1

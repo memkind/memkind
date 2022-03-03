@@ -465,6 +465,8 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind_memtier.3 \
                  man/memkind_pmem.3 \
                  man/memkindallocator.3 \
+                 man/libmemtier.7 \
+                 man/memtier.1 \
                  man/memtier.7 \
                  man/pmemallocator.3 \
                  # end
@@ -475,7 +477,7 @@ pkgconfig_DATA = memkind.pc
 CLEANFILES = memkind-$(VERSION).spec $(libmemkind_la_LIBADD)
 DISTCLEANFILES = VERSION configure pkgconfig_DATA
 
-bin_PROGRAMS = memkind-auto-dax-kmem-nodes memkind-hbw-nodes
+bin_PROGRAMS = memkind-auto-dax-kmem-nodes memkind-hbw-nodes memtier
 
 memkind_auto_dax_kmem_nodes_SOURCES = src/memkind-auto-dax-kmem-nodes.c
 memkind_auto_dax_kmem_nodes_LDADD = libmemkind.la
@@ -503,7 +505,7 @@ html-local:
 	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
 	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
 	$(MAN2HTML) man/fixedallocator.3 > man/fixedallocator.html
-	$(MAN2HTML) man/memtier.7 > man/memtier.html
+	$(MAN2HTML) man/libmemtier.7 > man/libmemtier.html
 
 clean-jemalloc_deps:
 	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
@@ -591,3 +593,4 @@ include src/Makefile.mk
 include tiering/Makefile.mk
 include utils/memory_matrix/Makefile.mk
 include utils/memtier_counter_bench/Makefile.mk
+include utils/memtier/Makefile.mk

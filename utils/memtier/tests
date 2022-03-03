@@ -1,0 +1,48 @@
+#!/bin/sh
+set -e
+
+err=0
+MEMTIER=../../memtier
+
+gcc -Wall -shared fakecap.c -fPIC -o fakecap.so
+
+$MEMTIER -r 1:0 /bin/true
+
+calc_ratio()
+{
+    ratio=$(FAKE_REGULAR=$1 FAKE_DAX_KMEM=$2 LD_PRELOAD=$(pwd)/fakecap.so $MEMTIER -v none 2>&1|
+        grep 'Using ratio'|cut -d' ' -f5)
+    if [ "x$3" = "x$ratio" ]; then
+        printf '\e[32m✓\e[0m %s %s → %s\n' $1 $2 "$ratio"
+    else
+        printf '\e[31m✗\e[0m %s %s → %s\n' $1 $2 "$ratio"
+        err=1
+    fi
+}
+
+calc_ratio 1 1 1:1
+calc_ratio 512 4096 1:8
+calc_ratio 512G 4T 1:8
+calc_ratio 1000017 3000000 1:3
+calc_ratio 20G 50G 2:5
+calc_ratio 740 500 3:2
+
+bad_r()
+{
+    ratio=$(LD_PRELOAD=$(pwd)/fakecap.so $MEMTIER -r $1 -v none 2>&1) || ret=$?
+    if [ $ret -eq 1 ] && echo "$ratio"|grep -q "$2"; then
+        printf '\e[32m✓\e[0m -r %s → %s\n' "$1" "$2"
+    else
+        printf '\e[31m✗\e[0m -r %s ↛ %s\n%s\n' "$1" "$2" "$ratio"
+        err=1
+    fi
+}
+
+bad_r 1.1:1 integer
+bad_r 1:1.1 integer
+bad_r -1:1 plausible
+bad_r 18446744073709551615:1 plausible
+bad_r 9223372036854775807:1 plausible
+bad_r 0:0 empty
+
+exit $err
