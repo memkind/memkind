@@ -128,7 +128,7 @@ MEMKIND_EXPORT double PageMetadata::GetHotness()
     return this->hotness.GetTotalHotness();
 }
 
-MEMKIND_EXPORT double PageMetadata::GetStartAddr()
+MEMKIND_EXPORT uintptr_t PageMetadata::GetStartAddr()
 {
     return this->startAddr;
 }
