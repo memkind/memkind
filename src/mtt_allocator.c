@@ -188,7 +188,7 @@ void background_thread_fini(BackgroundThread *bg_thread)
 //--------------------------------------------------------------------------
 
 MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator,
-                                         MTTInternalsLimits *limits)
+                                         const MTTInternalsLimits *limits)
 {
     // TODO get timestamp from somewhere!!! (bg thread? PEBS?)
     uint64_t timestamp = 0;

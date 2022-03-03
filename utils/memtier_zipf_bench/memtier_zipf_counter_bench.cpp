@@ -5,6 +5,8 @@
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/pool_allocator.h>
 
+#include <mtt_allocator.h>
+
 #include <argp.h>
 #include <assert.h>
 #include <atomic>
@@ -44,6 +46,7 @@ enum class RawAllocator
     /// PoolAllocator
     POOL,
     FAST_POOL,
+    MTT_ALLOCATOR,
 };
 
 struct GeneralPolicy {
@@ -66,6 +69,9 @@ enum NonAsciiKeys
 {
     KEY_NOF_ALLOCATIONS = 0x100,
     KEY_ALLOCATION_SIZE = 0x101,
+    KEY_LOW_LIMIT = 0x102,
+    KEY_SOFT_LIMIT = 0x103,
+    KEY_HARD_LIMIT = 0x104,
 };
 
 static uint64_t clock_bench_time_ms()
@@ -192,6 +198,32 @@ public:
     }
 };
 
+class MTTAllocatorWrapper: public Allocator
+{
+    MTTAllocator allocator;
+
+public:
+    MTTAllocatorWrapper(const MTTInternalsLimits &limits)
+    {
+        mtt_allocator_create(&allocator, &limits);
+    }
+
+    ~MTTAllocatorWrapper()
+    {
+        mtt_allocator_destroy(&allocator);
+    }
+
+    void *malloc(size_t size_bytes)
+    {
+        return mtt_allocator_malloc(&allocator, size_bytes);
+    }
+
+    void free(void *ptr)
+    {
+        mtt_allocator_free(ptr);
+    }
+};
+
 struct RunInfo {
     /* total operations: types_count * iterations_minor * iterations_major
      *
@@ -209,6 +241,7 @@ struct RunInfo {
     size_t iterations_minor;
     GeneralPolicy policy;
     std::pair<size_t, size_t> dram_pmem_ratio;
+    MTTInternalsLimits limits;
 };
 
 struct BenchResults {
@@ -509,11 +542,10 @@ static double calculate_zipf_denominator(int N, double s)
 ///     - s: distribution parameter,
 ///     - N: total number of elements
 ///
-static std::vector<LoaderCreator>
-create_loader_creators(TestCase test_case, size_t nof_allocations,
-                       size_t allocation_size, size_t types_count,
-                       size_t total_iterations, GeneralPolicy policy,
-                       std::pair<size_t, size_t> pmem_dram_ratio)
+static std::vector<LoaderCreator> create_loader_creators(
+    TestCase test_case, size_t nof_allocations, size_t allocation_size,
+    size_t types_count, size_t total_iterations, GeneralPolicy policy,
+    std::pair<size_t, size_t> pmem_dram_ratio, const MTTInternalsLimits *limits)
 {
     const double s = 2.0;
     std::vector<LoaderCreator> creators;
@@ -539,6 +571,11 @@ create_loader_creators(TestCase test_case, size_t nof_allocations,
                     break;
                 case RawAllocator::FAST_POOL:
                     allocator = std::make_shared<FastPoolAllocatorWrapper>();
+                    break;
+                case RawAllocator::MTT_ALLOCATOR:
+                    assert(limits && limits->lowLimit && limits->softLimit &&
+                           limits->hardLimit && "limits not initialized!");
+                    allocator = std::make_shared<MTTAllocatorWrapper>(*limits);
                     break;
             }
         }
@@ -574,7 +611,7 @@ BenchResults run_test(const RunInfo &info)
     std::vector<LoaderCreator> loader_creators = create_loader_creators(
         info.test_case, info.nof_allocations, info.allocation_size,
         info.types_count, info.iterations_minor, info.policy,
-        info.dram_pmem_ratio);
+        info.dram_pmem_ratio, &info.limits);
 
     std::vector<uint64_t> malloc_times;
     std::vector<uint64_t> access_times;
@@ -608,6 +645,7 @@ struct BenchArgs {
     size_t pmem_ratio_part;
     size_t nof_allocations;
     size_t allocation_size;
+    MTTInternalsLimits limits;
 };
 
 static int parse_opt(int key, char *arg, struct argp_state *state)
@@ -619,8 +657,8 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
             args->policy.policy = MEMTIER_POLICY_STATIC_RATIO;
             break;
         case 'm':
-            args->policy.generalType = GeneralPolicy::GeneralType::Memtier;
-            args->policy.policy = MEMTIER_POLICY_DATA_MOVEMENT;
+            args->policy.generalType = GeneralPolicy::GeneralType::RawAllocator;
+            args->policy.allocator = RawAllocator::MTT_ALLOCATOR;
             break;
         case 'p':
             args->policy.generalType = GeneralPolicy::GeneralType::RawAllocator;
@@ -696,6 +734,27 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
                    "allocation size has to be > 0");
             break;
         }
+        case KEY_LOW_LIMIT:
+        {
+            assert(arg && "argument for allocation size not supplied");
+            args->limits.lowLimit = std::strtoul(arg, nullptr, 10);
+            assert(args->limits.lowLimit > 0 && "limit has to be > 0");
+            break;
+        }
+        case KEY_SOFT_LIMIT:
+        {
+            assert(arg && "argument for allocation size not supplied");
+            args->limits.softLimit = std::strtoul(arg, nullptr, 10);
+            assert(args->limits.softLimit > 0 && "limit has to be > 0");
+            break;
+        }
+        case KEY_HARD_LIMIT:
+        {
+            assert(arg && "argument for allocation size not supplied");
+            args->limits.hardLimit = std::strtoul(arg, nullptr, 10);
+            assert(args->limits.hardLimit > 0 && "limit has to be > 0");
+            break;
+        }
         default:
             return ARGP_ERR_UNKNOWN;
     }
@@ -707,6 +766,15 @@ static struct argp_option options[] = {
     {"pool", 'p', 0, 0, "Benchmark pool allocator.", 0},
     {"fast_pool", 'f', 0, 0, "Benchmark fast pool allocator.", 0},
     {"movement", 'm', 0, 0, "Benchmark data movement policy.", 0},
+    {"low-limit", KEY_LOW_LIMIT, "size_t", 0,
+     "value below which movement from PMEM -> DRAM occurs, must be a multiple of TRACED_PAGESIZE",
+     4},
+    {"soft-limit", KEY_SOFT_LIMIT, "size_t", 0,
+     "soft limit of used dram, data movement DRAM -> PMEM will occur when surpassed, must be a multiple of TRACED_PAGESIZE",
+     4},
+    {"hard-limit", KEY_HARD_LIMIT, "size_t", 0,
+     "hard limit of used dram, this limit will not be surpassed by the allocator TODO @warning not implemented, must be a multiple of TRACED_PAGESIZE",
+     4},
     {"std", 'g', 0, 0, "Benchmark std glibc allocator.", 0},
     {0, 'A', 0, 0, "Benchmark test case Random Incrementation.", 1},
     {0, 'B', 0, 0, "Benchmark test case Sequential Incrementation.", 1},
@@ -742,6 +810,9 @@ int main(int argc, char *argv[])
     args.pmem_ratio_part = 8;
     args.nof_allocations = NOF_ALLOCATIONS;
     args.allocation_size = ALLOCATION_SIZE_U64;
+    args.limits.lowLimit = 0ul;
+    args.limits.softLimit = 0ul;
+    args.limits.hardLimit = 0ul;
 
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
@@ -755,6 +826,7 @@ int main(int argc, char *argv[])
         .policy = args.policy,
         .dram_pmem_ratio =
             std::make_pair(args.dram_ratio_part, args.pmem_ratio_part),
+        .limits = args.limits,
     };
 
     BenchResults stats = run_test(info);
