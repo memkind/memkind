@@ -63,16 +63,23 @@ MEMKIND_EXPORT void ranking_pop_coldest(ranking_handle handle,
     *static_cast<PageMetadata *>(page) =
         static_cast<Ranking *>(handle)->PopColdest();
 }
+
 MEMKIND_EXPORT void ranking_pop_hottest(ranking_handle handle,
                                         metadata_handle page)
 {
     *static_cast<PageMetadata *>(page) =
         static_cast<Ranking *>(handle)->PopHottest();
 }
+
 MEMKIND_EXPORT void ranking_add_page(ranking_handle handle,
                                      metadata_handle page)
 {
     static_cast<Ranking *>(handle)->AddPage(*static_cast<PageMetadata *>(page));
+}
+
+MEMKIND_EXPORT uintptr_t ranking_get_page_address(metadata_handle page)
+{
+    return static_cast<PageMetadata *>(page)->GetStartAddr();
 }
 
 MEMKIND_EXPORT size_t ranking_get_total_size(ranking_handle handle)
