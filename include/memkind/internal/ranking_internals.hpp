@@ -89,7 +89,7 @@ public:
     bool Touch();
     void UpdateHotness(uint64_t timestamp);
     double GetHotness();
-    double GetStartAddr();
+    uintptr_t GetStartAddr();
 };
 
 class Ranking
