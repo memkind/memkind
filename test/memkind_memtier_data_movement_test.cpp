@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2021-2022 Intel Corporation. */
 
+#include <memkind/internal/fast_pool_allocator.h>
+#include <memkind/internal/fast_slab_allocator.h>
 #include <memkind/internal/hasher.h>
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/pagesizes.h>
@@ -246,6 +248,164 @@ TEST(SlabAlloc, Alignment)
     test_slab_allocator_alignment(7, 291);
 }
 
+// TODO refactor this test to use gtest functionality instead of macros
+
+#define test_fast_slab_alloc(size, nof_elements)                               \
+    do {                                                                       \
+        struct_bar(size);                                                      \
+        FastSlabAllocator temp;                                                \
+        int ret = fast_slab_allocator_init(&temp, size, nof_elements);         \
+        ASSERT_TRUE(ret == 0 && "mutex creation failed!");                     \
+        fast_slab_allocator_destroy(&temp);                                    \
+        ret = fast_slab_allocator_init(&temp, size, nof_elements);             \
+        ASSERT_TRUE(ret == 0 && "mutex creation failed!");                     \
+        bar##size *elements[nof_elements];                                     \
+        for (size_t i = 0; i < nof_elements; ++i) {                            \
+            elements[i] = (bar##size *)fast_slab_allocator_malloc(&temp);      \
+            ASSERT_TRUE(elements[i] && "slab returned NULL!");                 \
+            memset(elements[i], i, size);                                      \
+        }                                                                      \
+        for (int i = 0; i < nof_elements; ++i) {                               \
+            for (size_t j = 0; j < size; j++)                                  \
+                ASSERT_TRUE(elements[i]->boo[j] ==                             \
+                            (char)((unsigned)(i)) % 255);                      \
+        }                                                                      \
+        ASSERT_TRUE(temp.used == nof_elements);                                \
+        for (int i = 0; i < nof_elements; ++i) {                               \
+            fast_slab_allocator_free(&temp, elements[i]);                      \
+        }                                                                      \
+        ASSERT_TRUE(temp.used == nof_elements);                                \
+        for (size_t i = 0; i < nof_elements; ++i) {                            \
+            elements[i] = (bar##size *)fast_slab_allocator_malloc(&temp);      \
+            ASSERT_TRUE(elements[i] && "slab returned NULL!");                 \
+            memset(elements[i], i + 15, size);                                 \
+        }                                                                      \
+        for (int i = 0; i < nof_elements; ++i) {                               \
+            for (size_t j = 0; j < size; j++)                                  \
+                ASSERT_TRUE(elements[i]->boo[j] ==                             \
+                            (char)((unsigned)(i + 15)) % 255);                 \
+        }                                                                      \
+        ASSERT_TRUE(temp.used == nof_elements);                                \
+        for (int i = 0; i < nof_elements; ++i) {                               \
+            fast_slab_allocator_free(&temp, elements[i]);                      \
+        }                                                                      \
+        ASSERT_TRUE(temp.used == nof_elements);                                \
+        fast_slab_allocator_destroy(&temp);                                    \
+    } while (0)
+
+#define test_fast_slab_allocator_alignment(size, nof_elements)                 \
+    do {                                                                       \
+        struct_bar_align(size);                                                \
+        size_t bar_align_size = sizeof(bar_align##size);                       \
+        FastSlabAllocator temp;                                                \
+        int ret =                                                              \
+            fast_slab_allocator_init(&temp, bar_align_size, nof_elements);     \
+        ASSERT_TRUE(ret == 0 && "mutex creation failed!");                     \
+        bar_align##size *elements[nof_elements];                               \
+        for (size_t i = 0; i < nof_elements; ++i) {                            \
+            elements[i] =                                                      \
+                (bar_align##size *)fast_slab_allocator_malloc(&temp);          \
+            ASSERT_TRUE(elements[i] && "slab returned NULL!");                 \
+            for (size_t j = 0; j < size; ++j)                                  \
+                elements[i]->boo[j] = i * nof_elements + j;                    \
+        }                                                                      \
+        for (size_t i = 0; i < nof_elements; ++i) {                            \
+            for (size_t j = 0; j < size; j++)                                  \
+                ASSERT_TRUE(elements[i]->boo[j] == i * nof_elements + j);      \
+        }                                                                      \
+        ASSERT_TRUE(temp.used == nof_elements);                                \
+        for (size_t i = 0; i < nof_elements; ++i) {                            \
+            fast_slab_allocator_free(&temp, elements[i]);                      \
+        }                                                                      \
+        ASSERT_TRUE(temp.used == nof_elements);                                \
+        for (size_t i = 0; i < nof_elements; ++i) {                            \
+            elements[i] =                                                      \
+                (bar_align##size *)fast_slab_allocator_malloc(&temp);          \
+            ASSERT_TRUE(elements[i] && "slab returned NULL!");                 \
+            for (size_t j = 0; j < size; ++j)                                  \
+                elements[i]->boo[j] = 7 * i * nof_elements + j + 5;            \
+        }                                                                      \
+        for (size_t i = 0; i < nof_elements; ++i) {                            \
+            for (size_t j = 0; j < size; j++)                                  \
+                ASSERT_TRUE(elements[i]->boo[j] ==                             \
+                            7 * i * nof_elements + j + 5);                     \
+        }                                                                      \
+        ASSERT_TRUE(temp.used == nof_elements);                                \
+        for (size_t i = 0; i < nof_elements; ++i) {                            \
+            fast_slab_allocator_free(&temp, elements[i]);                      \
+        }                                                                      \
+        ASSERT_TRUE(temp.used == nof_elements);                                \
+        fast_slab_allocator_destroy(&temp);                                    \
+    } while (0)
+
+static void test_fast_slab_allocator_static3(void)
+{
+    struct_bar(3);
+    size_t NOF_ELEMENTS = 1024;
+    size_t SIZE = 3;
+    FastSlabAllocator temp;
+    int ret = fast_slab_allocator_init(&temp, SIZE, NOF_ELEMENTS);
+    ASSERT_TRUE(ret == 0 && "slab alloc init failed!");
+    fast_slab_allocator_destroy(&temp);
+    ret = fast_slab_allocator_init(&temp, SIZE, NOF_ELEMENTS);
+    ASSERT_TRUE(ret == 0 && "slab alloc init failed!");
+    bar3 *elements[NOF_ELEMENTS];
+    for (size_t i = 0; i < NOF_ELEMENTS; ++i) {
+        elements[i] = (bar3 *)fast_slab_allocator_malloc(&temp);
+        ASSERT_TRUE(elements[i] && "slab returned NULL!");
+        memset(elements[i], i, SIZE);
+    }
+    for (size_t i = 0; i < NOF_ELEMENTS; ++i) {
+        for (size_t j = 0; j < SIZE; j++)
+            ASSERT_TRUE(elements[i]->boo[j] == (char)((unsigned)(i)) % 255);
+    }
+    ASSERT_TRUE(temp.used == NOF_ELEMENTS);
+    for (size_t i = 0; i < NOF_ELEMENTS; ++i) {
+        fast_slab_allocator_free(&temp, elements[i]);
+    }
+    ASSERT_TRUE(temp.used == NOF_ELEMENTS);
+    for (size_t i = 0; i < NOF_ELEMENTS; ++i) {
+        elements[i] = (bar3 *)fast_slab_allocator_malloc(&temp);
+        ASSERT_TRUE(elements[i] && "slab returned NULL!");
+        memset(elements[i], i + 15, SIZE);
+    }
+    for (size_t i = 0; i < NOF_ELEMENTS; ++i) {
+        for (size_t j = 0; j < SIZE; j++)
+            ASSERT_TRUE(elements[i]->boo[j] ==
+                        (char)((unsigned)(i + 15)) % 255);
+    }
+    ASSERT_TRUE(temp.used == NOF_ELEMENTS);
+    for (size_t i = 0; i < NOF_ELEMENTS; ++i) {
+        fast_slab_allocator_free(&temp, elements[i]);
+    }
+    ASSERT_TRUE(temp.used == NOF_ELEMENTS);
+    fast_slab_allocator_destroy(&temp);
+}
+
+TEST(FastSlabAlloc, Basic)
+{
+    test_fast_slab_allocator_static3();
+    test_fast_slab_alloc(1, 1000000);
+    test_fast_slab_alloc(2, 1002300);
+    test_fast_slab_alloc(4, 798341);
+    test_fast_slab_alloc(8, 714962);
+    test_fast_slab_alloc(8, 1000000);
+    test_fast_slab_alloc(7, 942883);
+    test_fast_slab_alloc(17, 71962);
+    test_fast_slab_alloc(58, 214662);
+}
+
+TEST(FastSlabAlloc, Alignment)
+{
+    test_fast_slab_allocator_alignment(1, 100000);
+    test_fast_slab_allocator_alignment(1, 213299);
+    test_fast_slab_allocator_alignment(2, 912348);
+    test_fast_slab_allocator_alignment(4, 821429);
+    test_fast_slab_allocator_alignment(8, 814322);
+    test_fast_slab_allocator_alignment(7, 291146);
+    test_fast_slab_allocator_alignment(7, 291);
+}
+
 static uint16_t calculate_hash_with_stack_variation(size_t size_rank,
                                                     size_t added_stack)
 {
@@ -387,6 +547,101 @@ TEST_F(PoolAllocTest, BigAllocationTest)
     pool_allocator_free(temp1);
     pool_allocator_free(temp2);
     pool_allocator_destroy(&pool);
+}
+
+class FastPoolAllocTest: public ::testing::Test
+{
+protected:
+    static void check_add(std::map<FastSlabAllocator *, size_t> &slabs,
+                          FastPoolAllocator &pool, size_t expected_size)
+    {
+        for (volatile size_t i = 0; i < UINT16_MAX; ++i) {
+            volatile FastSlabAllocator *slab = pool.pool[i];
+            if (slab) {
+                auto temp = slabs.find((FastSlabAllocator *)slab);
+                volatile bool found = temp != slabs.end();
+                if (!found || (temp->first->used != temp->second)) {
+                    ASSERT_EQ(slab->elementSize, expected_size);
+                    slabs[(FastSlabAllocator *)slab] = slab->used;
+                    return;
+                }
+            }
+        }
+        ASSERT_TRUE(false && "element was not found");
+    }
+};
+
+TEST_F(FastPoolAllocTest, Basic)
+{
+    FastPoolAllocator pool;
+    uintptr_t dummy_address = 0ul;
+    size_t dummy_nof_pages = 0ul;
+    int ret =
+        fast_pool_allocator_create(&pool, &dummy_address, &dummy_nof_pages);
+    ASSERT_EQ(ret, 0);
+    for (size_t i = 0; i < UINT16_MAX; ++i)
+        ASSERT_EQ(pool.pool[i], nullptr);
+
+    std::map<FastSlabAllocator *, size_t> created_slabs;
+
+    uint8_t *a16 = (uint8_t *)fast_pool_allocator_malloc(&pool, 16);
+    check_add(created_slabs, pool, 16);
+
+    uint8_t *a8 = (uint8_t *)fast_pool_allocator_malloc(&pool, 8);
+    check_add(created_slabs, pool, 16);
+
+    uint8_t *a17 = (uint8_t *)fast_pool_allocator_malloc(&pool, 17);
+    check_add(created_slabs, pool, 24);
+
+    uint8_t *a24 = (uint8_t *)fast_pool_allocator_malloc(&pool, 24);
+    check_add(created_slabs, pool, 24);
+
+    uint8_t *a25 = (uint8_t *)fast_pool_allocator_malloc(&pool, 25);
+    check_add(created_slabs, pool, 32);
+
+    uint8_t *a32 = (uint8_t *)fast_pool_allocator_malloc(&pool, 32);
+    check_add(created_slabs, pool, 32);
+
+    uint8_t *a33 = (uint8_t *)fast_pool_allocator_malloc(&pool, 33);
+    check_add(created_slabs, pool, 48);
+
+    fast_pool_allocator_free(&pool, a16);
+    fast_pool_allocator_free(&pool, a8);
+    fast_pool_allocator_free(&pool, a17);
+    fast_pool_allocator_free(&pool, a24);
+    fast_pool_allocator_free(&pool, a25);
+    fast_pool_allocator_free(&pool, a32);
+    fast_pool_allocator_free(&pool, a33);
+
+    fast_pool_allocator_destroy(&pool);
+}
+
+TEST_F(FastPoolAllocTest, BigAllocationTest)
+{
+    size_t alloc_size =
+        512ul * 1024ul * 1024ul * sizeof(int); // 512*sizeof(int) MB
+    size_t big_alloc_size = 16ul * 1024ul * 1024ul * 1024ul; // 16 GB
+    FastPoolAllocator pool;
+    uintptr_t dummy_address = 0ul;
+    size_t dummy_nof_pages = 0ul;
+    int ret =
+        fast_pool_allocator_create(&pool, &dummy_address, &dummy_nof_pages);
+    ASSERT_EQ(ret, 0);
+    for (size_t i = 0; i < UINT16_MAX; ++i)
+        ASSERT_EQ(pool.pool[i], nullptr);
+
+    std::map<FastSlabAllocator *, size_t> created_slabs;
+
+    uint8_t *temp1 = (uint8_t *)fast_pool_allocator_malloc(&pool, alloc_size);
+    check_add(created_slabs, pool, alloc_size);
+
+    uint8_t *temp2 =
+        (uint8_t *)fast_pool_allocator_malloc(&pool, big_alloc_size);
+    check_add(created_slabs, pool, big_alloc_size);
+
+    fast_pool_allocator_free(&pool, temp1);
+    fast_pool_allocator_free(&pool, temp2);
+    fast_pool_allocator_destroy(&pool);
 }
 
 TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)

@@ -55,6 +55,38 @@ void bigary_init(bigary *restrict m_bigary, int fd, int flags, size_t max)
     m_bigary->top = BIGARY_PAGESIZE;
 }
 
+void bigary_init_pages(bigary *restrict m_bigary, int fd, int flags, size_t max,
+                       uintptr_t *address, size_t *nof_pages)
+{
+    assert((BIGARY_PAGESIZE % TRACED_PAGESIZE) == 0 &&
+           "bigary pagesize and traced pagesize are not aligned! "
+           "BIGARY_PAGESIZE should be a multiply of TRACED_PAGESIZE");
+    if (!max)
+        max = BIGARY_DEFAULT_MAX;
+    // round *max* up to pagesize
+    size_t last_page_size = max % BIGARY_PAGESIZE;
+    if (last_page_size) {
+        size_t pages = max / BIGARY_PAGESIZE + 1;
+        max = pages * BIGARY_PAGESIZE;
+    }
+    int ret = pthread_mutex_init(&m_bigary->enlargement, NULL);
+    if (ret != 0)
+        die("mutex init failed\n");
+    m_bigary->declared = max;
+    m_bigary->fd = fd;
+    m_bigary->flags = flags;
+    if ((m_bigary->area = mmap(0, max, PROT_NONE, flags, fd, 0)) == MAP_FAILED)
+        die("mmapping bigary(%zd) failed: %m\n", max);
+    if (mmap(m_bigary->area, BIGARY_PAGESIZE, PROT_READ | PROT_WRITE,
+             MAP_FIXED | flags, fd, 0) == MAP_FAILED) {
+        die("bigary alloc of %zd failed: %m\n", BIGARY_PAGESIZE);
+    }
+    *address = (uintptr_t)(m_bigary->area);
+    *nof_pages = BIGARY_PAGESIZE /
+        TRACED_PAGESIZE; // we mmapped exactly one BIGARY_PAGESIZE
+    m_bigary->top = BIGARY_PAGESIZE;
+}
+
 void bigary_destroy(bigary *restrict m_bigary)
 {
     int ret1 = pthread_mutex_destroy(&m_bigary->enlargement);
