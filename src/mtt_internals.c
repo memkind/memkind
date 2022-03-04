@@ -4,10 +4,37 @@
 #include "memkind/internal/mtt_internals.h"
 #include "memkind/internal/memkind_private.h"
 #include "memkind/internal/pagesizes.h"
+#include "memkind/internal/ranking_utils.h"
 
 #include "assert.h"
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
+
+// static functions -----------------------------------------------------------
+
+static void promote_hottest_pmem(MttInternals *internals)
+{
+    // promote (PMEM->DRAM)
+    ranking_pop_hottest(internals->pmemRanking, internals->tempMetadataHandle);
+    uintptr_t start_addr =
+        ranking_get_page_address(internals->tempMetadataHandle);
+    ranking_add_page(internals->dramRanking, internals->tempMetadataHandle);
+    int ret = move_page_metadata(start_addr, DRAM);
+    assert(ret == MEMKIND_SUCCESS && "mbind data movement failed");
+}
+
+static void demote_coldest_dram(MttInternals *internals)
+{
+    // demote (DRAM->PMEM)
+    ranking_pop_coldest(internals->dramRanking, internals->tempMetadataHandle);
+    uintptr_t start_addr =
+        ranking_get_page_address(internals->tempMetadataHandle);
+    ranking_add_page(internals->pmemRanking, internals->tempMetadataHandle);
+    int ret = move_page_metadata(start_addr, DAX_KMEM);
+    assert(ret == MEMKIND_SUCCESS && "mbind data movement failed");
+}
+
+// global functions -----------------------------------------------------------
 
 MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
                                         uint64_t timestamp,
@@ -114,11 +141,7 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
                "ranking size is not a multiply of TRACED_PAGESIZE");
         size_t nof_pages_to_move = size_to_move / TRACED_PAGESIZE;
         for (size_t i = 0; i < nof_pages_to_move; ++i) {
-            ranking_pop_hottest(internals->pmemRanking,
-                                internals->tempMetadataHandle);
-            ranking_add_page(internals->dramRanking,
-                             internals->tempMetadataHandle);
-            // TODO move actual pages!
+            promote_hottest_pmem(internals);
         }
     } else if (internals->limits.softLimit < dram_size) {
         // move (demote) DRAM to PMEM
@@ -127,11 +150,7 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
                "ranking size is not a multiply of TRACED_PAGESIZE");
         size_t nof_pages_to_move = size_to_move / TRACED_PAGESIZE;
         for (size_t i = 0; i < nof_pages_to_move; ++i) {
-            ranking_pop_coldest(internals->dramRanking,
-                                internals->tempMetadataHandle);
-            ranking_add_page(internals->pmemRanking,
-                             internals->tempMetadataHandle);
-            // TODO move actual pages!
+            demote_coldest_dram(internals);
         }
     }
     // 2. Handle hottest on PMEM vs coldest on dram page movement
@@ -147,14 +166,8 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
         ranking_get_hottest(internals->pmemRanking, &hottest_pmem);
 
     while (success_dram && success_pmem && (hottest_pmem > coldest_dram)) {
-        // demote (DRAM->PMEM)
-        ranking_pop_coldest(internals->dramRanking,
-                            internals->tempMetadataHandle);
-        ranking_add_page(internals->pmemRanking, internals->tempMetadataHandle);
-        // promote
-        ranking_pop_hottest(internals->pmemRanking,
-                            internals->tempMetadataHandle);
-        ranking_add_page(internals->dramRanking, internals->tempMetadataHandle);
+        demote_coldest_dram(internals);
+        promote_hottest_pmem(internals);
         success_dram =
             ranking_get_coldest(internals->dramRanking, &coldest_dram);
         success_pmem =
