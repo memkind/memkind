@@ -30,8 +30,9 @@ typedef struct bigary bigary;
 
 extern void bigary_init(bigary *restrict m_bigary, int fd, int flags,
                         size_t max);
-void bigary_init_pages(bigary *restrict m_bigary, int fd, int flags, size_t max,
-                       uintptr_t *address, size_t *nof_pages);
+extern void bigary_init_pages(bigary *restrict m_bigary, int fd, int flags,
+                              size_t max, uintptr_t *address,
+                              size_t *nof_pages);
 extern void bigary_alloc(bigary *restrict m_bigary, size_t top);
 extern void bigary_alloc_pages(bigary *restrict m_bigary, size_t top,
                                uintptr_t *address, size_t *nof_pages);
