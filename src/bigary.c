@@ -27,6 +27,7 @@ static void die(const char *fmt, ...)
 /***************************/
 /* initialize a new bigary */
 /***************************/
+
 void bigary_init(bigary *restrict m_bigary, int fd, int flags, size_t max)
 {
     assert((BIGARY_PAGESIZE % TRACED_PAGESIZE) == 0 &&
@@ -48,6 +49,7 @@ void bigary_init(bigary *restrict m_bigary, int fd, int flags, size_t max)
     m_bigary->flags = flags;
     if ((m_bigary->area = mmap(0, max, PROT_NONE, flags, fd, 0)) == MAP_FAILED)
         die("mmapping bigary(%zd) failed: %m\n", max);
+
     if (mmap(m_bigary->area, BIGARY_PAGESIZE, PROT_READ | PROT_WRITE,
              MAP_FIXED | flags, fd, 0) == MAP_FAILED) {
         die("bigary alloc of %zd failed: %m\n", BIGARY_PAGESIZE);
@@ -70,13 +72,24 @@ void bigary_init_pages(bigary *restrict m_bigary, int fd, int flags, size_t max,
         max = pages * BIGARY_PAGESIZE;
     }
     int ret = pthread_mutex_init(&m_bigary->enlargement, NULL);
+    max += TRACED_PAGESIZE; // required to handle start address alignment
     if (ret != 0)
         die("mutex init failed\n");
+    if ((m_bigary->area = mmap(0, max, PROT_NONE, flags, fd, 0)) == MAP_FAILED)
+        die("mmapping bigary(%zd) failed: %m\n", max);
+
+    // align start address to TRACED_PAGESIZE
+    size_t traced_page_offset = ((uintptr_t)m_bigary->area) % TRACED_PAGESIZE;
+    if (traced_page_offset) {
+        size_t to_unmap = TRACED_PAGESIZE - traced_page_offset;
+        munmap(m_bigary->area, to_unmap);
+        m_bigary->area = ((uint8_t *)m_bigary->area) + to_unmap;
+        max -= to_unmap;
+    }
     m_bigary->declared = max;
     m_bigary->fd = fd;
     m_bigary->flags = flags;
-    if ((m_bigary->area = mmap(0, max, PROT_NONE, flags, fd, 0)) == MAP_FAILED)
-        die("mmapping bigary(%zd) failed: %m\n", max);
+
     if (mmap(m_bigary->area, BIGARY_PAGESIZE, PROT_READ | PROT_WRITE,
              MAP_FIXED | flags, fd, 0) == MAP_FAILED) {
         die("bigary alloc of %zd failed: %m\n", BIGARY_PAGESIZE);
