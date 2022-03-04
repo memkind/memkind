@@ -77,13 +77,15 @@ MEMKIND_EXPORT void mtt_internals_destroy(MttInternals *internals)
 
 MEMKIND_EXPORT void *mtt_internals_malloc(MttInternals *internals, size_t size)
 {
-    uintptr_t addr = 0;
-    size_t nof_pages = 0;
-    void *ret =
-        pool_allocator_malloc_pages(&internals->pool, size, &addr, &nof_pages);
-    if (addr) {
-        mmap_tracing_queue_multithreaded_push(&internals->mmapTracingQueue,
-                                              addr, nof_pages);
+    uintptr_t addr[3] = {0ul};
+    size_t nof_pages[3] = {0ul};
+    void *ret = pool_allocator_malloc_pages(&internals->pool, size, &addr[0],
+                                            &nof_pages[0]);
+    for (size_t i = 0ul; i < 3; ++i) {
+        if (addr[i]) {
+            mmap_tracing_queue_multithreaded_push(&internals->mmapTracingQueue,
+                                                  addr[i], nof_pages[i]);
+        }
     }
     return ret;
 }
