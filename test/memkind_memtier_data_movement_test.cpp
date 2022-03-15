@@ -683,7 +683,8 @@ protected:
 TEST_F(PEBSTest, Basic)
 {
     // do some copying - L3 misses are expected here
-    const size_t size = 1024 * 1024;
+    const size_t size = 1024 * 1024 * sizeof(int);
+    size_t actual_size = -1;
     volatile int total_sum = 0;
 
     MTTInternalsLimits limits;
@@ -694,10 +695,17 @@ TEST_F(PEBSTest, Basic)
     MTTAllocator mtt_allocator;
     mtt_allocator_create(&mtt_allocator, &limits);
 
-    volatile int *tab =
-        (int *)mtt_allocator_malloc(&mtt_allocator, size * sizeof(int));
+    mtt_allocator_await_flush(&mtt_allocator);
+
+    actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
+    ASSERT_EQ(actual_size, 0u);
+
+    volatile int *tab = (int *)mtt_allocator_malloc(&mtt_allocator, size);
 
     mtt_allocator_await_flush(&mtt_allocator);
+    actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
+    ASSERT_EQ(actual_size,
+              size + BIGARY_PAGESIZE); // additional page for metadata
 
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
@@ -705,12 +713,12 @@ TEST_F(PEBSTest, Basic)
     ASSERT_TRUE(success);
     ASSERT_EQ(hotness, 0.0);
 
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size / sizeof(int); i++) {
         tab[i] = i;
     }
 
     for (size_t j = 0; j < 30u; j++) {
-        for (size_t i = 0; i < size / 2u; i++) {
+        for (size_t i = 0; i < size / 2u / sizeof(int); i++) {
             tab[i] += tab[i * 2] + j;
             total_sum += tab[i];
         }
@@ -728,6 +736,8 @@ TEST_F(PEBSTest, Basic)
 
     // compiler optimizations
     ASSERT_EQ(total_sum, total_sum);
+
+    mtt_allocator_free((void *)tab);
 
     mtt_allocator_destroy(&mtt_allocator);
 }
@@ -780,7 +790,8 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     size_t pmem_size =
         ranking_get_total_size(mtt_allocator.internals.pmemRanking);
 
-    ASSERT_EQ(dram_size + pmem_size, size);
+    ASSERT_EQ(dram_size + pmem_size,
+              size + BIGARY_PAGESIZE); // additional page for metadata
 
     ASSERT_LE(dram_size, limits.softLimit);
     ASSERT_LE(dram_size, 16ul * 1024ul * 1024ul);
@@ -791,10 +802,13 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     ASSERT_GE(pmem_size, size - limits.softLimit);
     ASSERT_GE(pmem_size, 512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul);
 
-    ASSERT_LE(pmem_size, size - limits.softLimit + TRACED_PAGESIZE);
+    ASSERT_LE(pmem_size,
+              size - limits.softLimit + TRACED_PAGESIZE +
+                  BIGARY_PAGESIZE); // additional page for metadata
     ASSERT_LE(pmem_size,
               512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul +
-                  TRACED_PAGESIZE);
+                  TRACED_PAGESIZE +
+                  BIGARY_PAGESIZE); // additional page for metadata
 
     // compiler optimizations
     ASSERT_EQ(total_sum, total_sum);
