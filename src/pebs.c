@@ -163,6 +163,10 @@ void pebs_create(PebsMetadata *pebs, touch_cb cb)
         pebs->pebs_fd[cpu_idx] = fd;
         pebs->pebs_mmap[cpu_idx] = mmap(NULL, map_size, PROT_READ | PROT_WRITE,
                                         MAP_SHARED, pebs->pebs_fd[cpu_idx], 0);
+        if (pebs->pebs_mmap[cpu_idx] == MAP_FAILED) {
+            log_err("PEBS: mmapping pebs_fd failed: %m");
+            return;
+        }
     }
 
     for (cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx) {
