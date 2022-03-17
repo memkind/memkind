@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2021-2022 Intel Corporation. */
 
-#include <memkind/internal/memkind_memtier.h>
-
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_log.h>
+#include <memkind/internal/memkind_memtier.h>
+#include <mtt_allocator.h>
 
 #include "config.h"
 #include <assert.h>
@@ -123,6 +123,9 @@ struct memtier_memory {
     float thres_trigger;                 // Difference between ratios to update
                                          // threshold
     float thres_degree; // % of threshold change in case of update
+
+    memtier_policy_t policy;
+
     // memtier_memory operations
     memkind_t (*get_kind)(struct memtier_memory *memory, size_t size);
     void (*update_cfg)(struct memtier_memory *memory);
@@ -134,6 +137,7 @@ struct memtier_memory {
 
 static MEMKIND_ATOMIC long long t_alloc_size[MEMKIND_MAX_KIND][THREAD_BUCKETS];
 static MEMKIND_ATOMIC size_t g_alloc_size[MEMKIND_MAX_KIND];
+static MTTAllocator *g_mtt_allocator = NULL;
 
 /* Declare weak symbols for allocator decorators */
 extern void memtier_kind_malloc_post(struct memkind *, size_t, void **)
@@ -227,14 +231,6 @@ memtier_policy_dynamic_threshold_get_kind(struct memtier_memory *memory,
         }
     }
     return memory->cfg[i].kind;
-}
-
-static memkind_t
-memtier_policy_data_movement_get_kind(struct memtier_memory *memory,
-                                      size_t size)
-{
-    // TODO: add an implementation
-    return MEMKIND_DEFAULT;
 }
 
 static void print_memtier_memory(struct memtier_memory *memory)
@@ -399,7 +395,7 @@ memtier_memory_init(size_t tier_size, memtier_policy_t policy)
             memory->thres_check_cnt = THRESHOLD_CHECK_CNT;
             break;
         case MEMTIER_POLICY_DATA_MOVEMENT:
-            memory->get_kind = memtier_policy_data_movement_get_kind;
+            memory->get_kind = NULL;
             memory->update_cfg = memtier_policy_data_movement_update_config;
             break;
         default:
@@ -413,6 +409,7 @@ memtier_memory_init(size_t tier_size, memtier_policy_t policy)
 
     memory->thres = NULL;
     memory->cfg_size = tier_size;
+    memory->policy = policy;
 
     return memory;
 }
@@ -626,6 +623,16 @@ builder_movement_create_memory(struct memtier_builder *builder)
 
     create_memory_common(builder, memory);
 
+    // TODO add limits to env parameters
+    MTTInternalsLimits limits;
+    limits.lowLimit = 1ul * 1024ul * 1024ul;     // 1 MB
+    limits.softLimit = 16ul * 1024ul * 1024ul;   // 16 MB
+    limits.hardLimit = 1024ul * 1024ul * 1024ul; // 1GB
+
+    assert(g_mtt_allocator == NULL);
+    g_mtt_allocator = jemk_malloc(sizeof(struct MTTAllocator));
+    mtt_allocator_create(g_mtt_allocator, &limits);
+
     return memory;
 }
 
@@ -742,6 +749,12 @@ memtier_builder_construct_memtier_memory(struct memtier_builder *builder)
 
 MEMKIND_EXPORT void memtier_delete_memtier_memory(struct memtier_memory *memory)
 {
+    if (memory->policy == MEMTIER_POLICY_DATA_MOVEMENT) {
+        mtt_allocator_destroy(g_mtt_allocator);
+        jemk_free(g_mtt_allocator);
+        g_mtt_allocator = NULL;
+    }
+
     print_memtier_memory(memory);
     jemk_free(memory->thres);
     jemk_free(memory->cfg);
@@ -760,6 +773,10 @@ MEMKIND_EXPORT int memtier_ctl_set(struct memtier_builder *builder,
 
 MEMKIND_EXPORT void *memtier_malloc(struct memtier_memory *memory, size_t size)
 {
+    if (memory->policy == MEMTIER_POLICY_DATA_MOVEMENT) {
+        return mtt_allocator_malloc(g_mtt_allocator, size);
+    }
+
     void *ptr = memtier_kind_malloc(memory->get_kind(memory, size), size);
     memory->update_cfg(memory);
 
@@ -780,6 +797,13 @@ MEMKIND_EXPORT void *memtier_kind_malloc(memkind_t kind, size_t size)
 MEMKIND_EXPORT void *memtier_calloc(struct memtier_memory *memory, size_t num,
                                     size_t size)
 {
+    if (memory->policy == MEMTIER_POLICY_DATA_MOVEMENT) {
+        // TODO add mtt_allocator_calloc
+        void *ptr = mtt_allocator_malloc(g_mtt_allocator, num * size);
+        memset(ptr, 0, num * size);
+        return ptr;
+    }
+
     void *ptr = memtier_kind_calloc(memory->get_kind(memory, size), num, size);
     memory->update_cfg(memory);
 
@@ -802,6 +826,10 @@ MEMKIND_EXPORT void *memtier_kind_calloc(memkind_t kind, size_t num,
 MEMKIND_EXPORT void *memtier_realloc(struct memtier_memory *memory, void *ptr,
                                      size_t size)
 {
+    if (memory->policy == MEMTIER_POLICY_DATA_MOVEMENT) {
+        return mtt_allocator_realloc(g_mtt_allocator, ptr, size);
+    }
+
     // reallocate inside same kind
     if (ptr) {
         struct memkind *kind = memkind_detect_kind(ptr);
@@ -846,6 +874,11 @@ MEMKIND_EXPORT int memtier_posix_memalign(struct memtier_memory *memory,
                                           void **memptr, size_t alignment,
                                           size_t size)
 {
+    if (memory->policy == MEMTIER_POLICY_DATA_MOVEMENT) {
+        // TODO - implement me
+        abort();
+    }
+
     int ret = memtier_kind_posix_memalign(memory->get_kind(memory, size),
                                           memptr, alignment, size);
     memory->update_cfg(memory);
@@ -881,7 +914,14 @@ MEMKIND_EXPORT void memtier_kind_free(memkind_t kind, void *ptr)
     if (memtier_kind_free_pre)
         memtier_kind_free_pre(&ptr);
 #endif
+
     if (!kind) {
+        // TODO: checking policicy this way is a really ugly hack
+        if (g_mtt_allocator) {
+            mtt_allocator_free(ptr);
+            return;
+        }
+
         kind = memkind_detect_kind(ptr);
         if (!kind)
             return;
