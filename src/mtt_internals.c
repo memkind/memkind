@@ -38,7 +38,7 @@ static void demote_coldest_dram(MttInternals *internals)
 
 MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
                                         uint64_t timestamp,
-                                        MTTInternalsLimits *limits)
+                                        const MTTInternalsLimits *limits)
 {
     // TODO think about default limits value
     internals->lastTimestamp = timestamp;
