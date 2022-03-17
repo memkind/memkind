@@ -7,8 +7,12 @@
 #include <tiering/ctl.h>
 #include <tiering/memtier_log.h>
 
+#include <dlfcn.h>
 #include <pthread.h>
 #include <string.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define MEMTIER_EXPORT __attribute__((visibility("default")))
 #define MEMTIER_INIT   __attribute__((constructor))
@@ -79,6 +83,13 @@ MEMTIER_EXPORT void memtier_kind_usable_size_post(void **ptr, size_t size)
 }
 #endif
 
+// TODO add other functions
+void *(*g_malloc)(size_t);
+void *(*g_realloc)(void *, size_t);
+void *(*g_calloc)(size_t, size_t);
+void (*g_free)(void *);
+bool inside_wrappers;
+
 static int destructed;
 
 static struct memtier_memory *current_memory;
@@ -86,7 +97,14 @@ static struct memtier_memory *current_memory;
 MEMTIER_EXPORT void *malloc(size_t size)
 {
     if (MEMTIER_LIKELY(current_memory)) {
-        return memtier_malloc(current_memory, size);
+        if (inside_wrappers) {
+            return g_malloc(size);
+        }
+
+        inside_wrappers = true;
+        void *ret = memtier_malloc(current_memory, size);
+        inside_wrappers = false;
+        return ret;
     } else if (destructed == 0) {
         return memkind_malloc(MEMKIND_DEFAULT, size);
     }
@@ -96,7 +114,15 @@ MEMTIER_EXPORT void *malloc(size_t size)
 MEMTIER_EXPORT void *calloc(size_t num, size_t size)
 {
     if (MEMTIER_LIKELY(current_memory)) {
-        return memtier_calloc(current_memory, num, size);
+        if (inside_wrappers) {
+            return g_calloc(num, size);
+        }
+
+        inside_wrappers = true;
+        void *ret = memtier_calloc(current_memory, num, size);
+        inside_wrappers = false;
+
+        return ret;
     } else if (destructed == 0) {
         return memkind_calloc(MEMKIND_DEFAULT, num, size);
     }
@@ -106,7 +132,15 @@ MEMTIER_EXPORT void *calloc(size_t num, size_t size)
 MEMTIER_EXPORT void *realloc(void *ptr, size_t size)
 {
     if (MEMTIER_LIKELY(current_memory)) {
-        return memtier_realloc(current_memory, ptr, size);
+        if (inside_wrappers) {
+            return g_realloc(ptr, size);
+        }
+
+        inside_wrappers = true;
+        void *ret = memtier_realloc(current_memory, ptr, size);
+        inside_wrappers = false;
+
+        return ret;
     } else if (destructed == 0) {
         return memkind_realloc(MEMKIND_DEFAULT, ptr, size);
     }
@@ -130,7 +164,13 @@ MEMTIER_EXPORT int posix_memalign(void **memptr, size_t alignment, size_t size)
 MEMTIER_EXPORT void free(void *ptr)
 {
     if (MEMTIER_LIKELY(current_memory)) {
+        if (inside_wrappers) {
+            return g_free(ptr);
+        }
+
+        inside_wrappers = true;
         memtier_realloc(current_memory, ptr, 0);
+        inside_wrappers = false;
     } else if (destructed == 0) {
         memkind_free(MEMKIND_DEFAULT, ptr);
     }
@@ -147,6 +187,12 @@ static MEMTIER_INIT void memtier_init(void)
 {
     pthread_once(&init_once, log_init_once);
     log_info("Memkind memtier lib loaded!");
+
+    g_realloc = dlsym(RTLD_NEXT, "realloc");
+    g_calloc = dlsym(RTLD_NEXT, "calloc");
+    g_malloc = dlsym(RTLD_NEXT, "malloc");
+    g_free = dlsym(RTLD_NEXT, "free");
+    inside_wrappers = false;
 
     char *env_var = utils_get_env("MEMKIND_MEM_TIERS");
     if (env_var) {
