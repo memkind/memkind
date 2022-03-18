@@ -7,6 +7,7 @@
 #include <memkind/internal/pebs.h>
 
 #include <assert.h>
+#include <unistd.h>
 
 #define PEBS_SAMPLING_INTERVAL        1000
 #define MMAP_DATA_SIZE                8
@@ -20,7 +21,7 @@ void pebs_monitor(PebsMetadata *pebs)
 
     int all_cpu_samples = 0;
 
-    for (size_t cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx) {
+    for (size_t cpu_idx = 0u; cpu_idx < pebs->nof_cpus; ++cpu_idx) {
         perf_event_mmap_page_t *pebs_metadata =
             (perf_event_mmap_page_t *)pebs->pebs_mmap[cpu_idx];
         assert(pebs_metadata);
@@ -77,7 +78,7 @@ void pebs_monitor(PebsMetadata *pebs)
 
 void pebs_unmap_all_cpus(PebsMetadata *pebs)
 {
-    for (size_t cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx) {
+    for (size_t cpu_idx = 0u; cpu_idx < pebs->nof_cpus; ++cpu_idx) {
         munmap(pebs->pebs_mmap[cpu_idx], MMAP_PAGES_NUM * getpagesize());
         pebs->pebs_mmap[cpu_idx] = 0;
         close(pebs->pebs_fd[cpu_idx]);
@@ -86,8 +87,18 @@ void pebs_unmap_all_cpus(PebsMetadata *pebs)
 
 void pebs_create(PebsMetadata *pebs, touch_cb cb)
 {
+    pebs->nof_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    pebs->pebs_fd = malloc(pebs->nof_cpus * sizeof(*pebs->pebs_fd));
+    pebs->pebs_mmap = malloc(pebs->nof_cpus * sizeof(*pebs->pebs_mmap));
+    pebs->last_head = malloc(pebs->nof_cpus * sizeof(*pebs->last_head));
     pebs->cb = cb;
-    memset(&pebs->last_head[0], 0, sizeof(pebs->last_head));
+    if (pebs->pebs_fd == NULL || pebs->pebs_mmap == NULL ||
+        pebs->last_head == NULL) {
+        log_fatal("malloc failed, out of memory, aborting");
+        // TODO add better out of memory handling
+        exit(-1);
+    }
+    memset(pebs->last_head, 0, pebs->nof_cpus * sizeof(*pebs->last_head));
     // check if we have access to perf events
     int pf = 0;
     FILE *f = fopen("/proc/sys/kernel/perf_event_paranoid", "r");
@@ -152,7 +163,7 @@ void pebs_create(PebsMetadata *pebs, touch_cb cb)
     // our event data need to be accessed via memory from mmap() -
     // in this case we can't use "any" cpu binding, so we have to monitor
     // all cpus
-    for (cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx) {
+    for (cpu_idx = 0u; cpu_idx < pebs->nof_cpus; ++cpu_idx) {
         if ((fd = syscall(SYS_perf_event_open, &pe, pid, cpu_idx, group_fd,
                           flags)) == -1) {
             pebs_unmap_all_cpus(pebs);
@@ -169,7 +180,7 @@ void pebs_create(PebsMetadata *pebs, touch_cb cb)
         }
     }
 
-    for (cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx) {
+    for (cpu_idx = 0u; cpu_idx < pebs->nof_cpus; ++cpu_idx) {
         ioctl(pebs->pebs_fd[cpu_idx], PERF_EVENT_IOC_RESET, 0);
         ioctl(pebs->pebs_fd[cpu_idx], PERF_EVENT_IOC_ENABLE, 0);
     }
@@ -179,9 +190,12 @@ void pebs_create(PebsMetadata *pebs, touch_cb cb)
 
 void pebs_destroy(PebsMetadata *pebs)
 {
-    for (size_t cpu_idx = 0u; cpu_idx < CPU_LOGICAL_CORES_NUMBER; ++cpu_idx)
+    for (size_t cpu_idx = 0u; cpu_idx < pebs->nof_cpus; ++cpu_idx)
         ioctl(pebs->pebs_fd[cpu_idx], PERF_EVENT_IOC_DISABLE, 0);
 
     pebs_unmap_all_cpus(pebs);
+    free(pebs->pebs_fd);
+    free(pebs->pebs_mmap);
+    free(pebs->last_head);
     log_info("PEBS disabled");
 }

@@ -523,7 +523,7 @@ noinst_LTLIBRARIES =
 TESTS =
 
 req_flags = -fvisibility=hidden -Wall -Werror -D_GNU_SOURCE -DJE_PREFIX=@memkind_prefix@ \
--DMEMTIER_ALLOC_PREFIX=@memtier_prefix@ -DCPU_LOGICAL_CORES_NUMBER=`nproc --all`
+-DMEMTIER_ALLOC_PREFIX=@memtier_prefix@
 
 AM_CFLAGS = $(req_flags) -std=gnu11
 AM_CXXFLAGS = $(req_flags)
