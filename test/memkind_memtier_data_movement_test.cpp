@@ -828,6 +828,15 @@ TEST(HotnessCoeffTest, Basic)
     c0.Update(5.0, 1.0);
     ASSERT_EQ(c0.Get(), 2.5);
 
+    SlimHotnessCoeff sc0(0);
+    ASSERT_EQ(sc0.Get(), 0.0);
+    sc0.Update(3.0, 0.0, 0, 0.5);
+    ASSERT_EQ(sc0.Get(), 1.5);
+    sc0.Update(5.0, 0.0, 0, 0.5);
+    ASSERT_EQ(sc0.Get(), 4.0);
+    sc0.Update(5.0, 1.0, 0, 0.5);
+    ASSERT_EQ(sc0.Get(), 2.5);
+
     HotnessCoeff c1(10, 0.3, 2.0);
     ASSERT_EQ(c1.Get(), 10.0);
     c1.Update(0.0, 0.0);
@@ -841,6 +850,19 @@ TEST(HotnessCoeffTest, Basic)
     c1.Update(3.0, 2.0);
     ASSERT_EQ(c1.Get(), 2.7 + 6.0);
 
+    SlimHotnessCoeff sc1(10);
+    ASSERT_EQ(sc1.Get(), 10.0);
+    sc1.Update(0.0, 0.0, 0.3, 2.0);
+    ASSERT_EQ(sc1.Get(), 10.0);
+    sc1.Update(45.0, 0.0, 0.3, 2.0);
+    ASSERT_EQ(sc1.Get(), 100.0);
+    sc1.Update(0.0, 0.0, 0.3, 2.0);
+    ASSERT_EQ(sc1.Get(), 100.0);
+    sc1.Update(0.0, 1.0, 0.3, 2.0);
+    ASSERT_EQ(sc1.Get(), 30.0);
+    sc1.Update(3.0, 2.0, 0.3, 2.0);
+    ASSERT_EQ(sc1.Get(), 2.7 + 6.0);
+
     // check double overflow
     c1.Update(std::numeric_limits<double>::max() / 2, 0.5);
     c1.Update(std::numeric_limits<double>::max() / 2, 0.1);
@@ -849,10 +871,21 @@ TEST(HotnessCoeffTest, Basic)
     c1.Update(std::numeric_limits<double>::max() / 2, 0.02);
     ASSERT_EQ(c1.Get(), std::numeric_limits<double>::max());
 
+    sc1.Update(std::numeric_limits<double>::max() / 2, 0.5, 0.3, 2.0);
+    sc1.Update(std::numeric_limits<double>::max() / 2, 0.1, 0.3, 2.0);
+    sc1.Update(std::numeric_limits<double>::max() / 2, 0.2, 0.3, 2.0);
+    sc1.Update(std::numeric_limits<double>::max() / 2, 0.01, 0.3, 2.0);
+    sc1.Update(std::numeric_limits<double>::max() / 2, 0.02, 0.3, 2.0);
+    ASSERT_EQ(sc1.Get(), std::numeric_limits<double>::max());
+
     // check if value still decreases with time
     c1.Update(0, 2);
     ASSERT_LT(c1.Get(), std::numeric_limits<double>::max());
     ASSERT_GT(c1.Get(), 0);
+
+    sc1.Update(0, 2, 0.3, 2.0);
+    ASSERT_LT(sc1.Get(), std::numeric_limits<double>::max());
+    ASSERT_GT(sc1.Get(), 0);
 }
 
 TEST(HotnessTest, Basic)
