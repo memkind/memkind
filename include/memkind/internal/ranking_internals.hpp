@@ -63,9 +63,20 @@ public:
     double Get();
 };
 
+class SlimHotnessCoeff
+{
+    double value_;
+
+public:
+    SlimHotnessCoeff(double init_hotness);
+    void Update(double hotness_to_add, double timediff,
+                double exponential_coeff, double compensation_coeff);
+    double Get();
+};
+
 class Hotness
 {
-    HotnessCoeff coeffs[EXPONENTIAL_COEFFS_NUMBER];
+    SlimHotnessCoeff coeffs[EXPONENTIAL_COEFFS_NUMBER];
     uint64_t previousTimestamp;
 
 public:
