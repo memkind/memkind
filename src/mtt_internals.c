@@ -63,7 +63,15 @@ MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
     ranking_metadata_create(&internals->tempMetadataHandle);
     mmap_tracing_queue_create(&internals->mmapTracingQueue);
 
-    return pool_allocator_create(&internals->pool);
+    uintptr_t addr = 0ul;
+    size_t nof_pages = 0ul;
+
+    int ret = fast_pool_allocator_create(&internals->pool, &addr, &nof_pages);
+    if (addr)
+        mmap_tracing_queue_multithreaded_push(&internals->mmapTracingQueue,
+                                              addr, nof_pages);
+
+    return ret;
 }
 
 MEMKIND_EXPORT void mtt_internals_destroy(MttInternals *internals)
@@ -72,14 +80,14 @@ MEMKIND_EXPORT void mtt_internals_destroy(MttInternals *internals)
     ranking_destroy(internals->pmemRanking);
     ranking_destroy(internals->dramRanking);
     mmap_tracing_queue_destroy(&internals->mmapTracingQueue);
-    pool_allocator_destroy(&internals->pool);
+    fast_pool_allocator_destroy(&internals->pool);
 }
 
 MEMKIND_EXPORT void *mtt_internals_malloc(MttInternals *internals, size_t size)
 {
     uintptr_t addr[2] = {0ul};
     size_t nof_pages[2] = {0ul};
-    void *ret = pool_allocator_malloc_pages(
+    void *ret = fast_pool_allocator_malloc_pages(
         &internals->pool, size, (uintptr_t *)addr, (size_t *)nof_pages);
     for (size_t i = 0ul; i < 2u; ++i) {
         if (addr[i]) {
@@ -99,11 +107,11 @@ MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
     return NULL;
 }
 
-MEMKIND_EXPORT void mtt_internals_free(void *ptr)
+MEMKIND_EXPORT void mtt_internals_free(MttInternals *internals, void *ptr)
 {
     // TODO add & handle unmap during productization stage!
     // we don't unmap pages, the data is not handled
-    pool_allocator_free(ptr);
+    fast_pool_allocator_free(&internals->pool, ptr);
 }
 
 MEMKIND_EXPORT void mtt_internals_touch(MttInternals *internals,

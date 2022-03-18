@@ -220,7 +220,7 @@ public:
 
     void free(void *ptr)
     {
-        mtt_allocator_free(ptr);
+        mtt_allocator_free(&allocator, ptr);
     }
 };
 

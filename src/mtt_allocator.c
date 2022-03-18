@@ -218,9 +218,9 @@ MEMKIND_EXPORT void *mtt_allocator_realloc(MTTAllocator *mtt_allocator,
     return mtt_internals_realloc(&mtt_allocator->internals, ptr, size);
 }
 
-MEMKIND_EXPORT void mtt_allocator_free(void *ptr)
+MEMKIND_EXPORT void mtt_allocator_free(MTTAllocator *mtt_allocator, void *ptr)
 {
-    mtt_internals_free(ptr);
+    mtt_internals_free(&mtt_allocator->internals, ptr);
 }
 
 MEMKIND_EXPORT void mtt_allocator_await_flush(MTTAllocator *mtt_allocator)

@@ -42,7 +42,7 @@ extern void mtt_allocator_destroy(MTTAllocator *mtt_allocator);
 extern void *mtt_allocator_malloc(MTTAllocator *mtt_allocator, size_t size);
 extern void *mtt_allocator_realloc(MTTAllocator *mtt_allocator, void *ptr,
                                    size_t size);
-extern void mtt_allocator_free(void *ptr);
+extern void mtt_allocator_free(MTTAllocator *mtt_allocator, void *ptr);
 
 /// @brief Waits until all formerly mmapped pages become visible in the
 /// rankings
