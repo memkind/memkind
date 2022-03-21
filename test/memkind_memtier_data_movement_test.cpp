@@ -698,14 +698,13 @@ TEST_F(PEBSTest, Basic)
     mtt_allocator_await_flush(&mtt_allocator);
 
     actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
-    ASSERT_EQ(actual_size, 0u);
+    ASSERT_EQ(actual_size, BIGARY_PAGESIZE); // metadata for allocator
 
     volatile int *tab = (int *)mtt_allocator_malloc(&mtt_allocator, size);
 
     mtt_allocator_await_flush(&mtt_allocator);
     actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
-    ASSERT_EQ(actual_size,
-              size + BIGARY_PAGESIZE); // additional page for metadata
+    ASSERT_EQ(actual_size, size);
 
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
@@ -737,7 +736,7 @@ TEST_F(PEBSTest, Basic)
     // compiler optimizations
     ASSERT_EQ(total_sum, total_sum);
 
-    mtt_allocator_free((void *)tab);
+    mtt_allocator_free(&mtt_allocator, (void *)tab);
 
     mtt_allocator_destroy(&mtt_allocator);
 }
@@ -790,8 +789,7 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     size_t pmem_size =
         ranking_get_total_size(mtt_allocator.internals.pmemRanking);
 
-    ASSERT_EQ(dram_size + pmem_size,
-              size + BIGARY_PAGESIZE); // additional page for metadata
+    ASSERT_EQ(dram_size + pmem_size, size);
 
     ASSERT_LE(dram_size, limits.softLimit);
     ASSERT_LE(dram_size, 16ul * 1024ul * 1024ul);
@@ -813,7 +811,7 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     // compiler optimizations
     ASSERT_EQ(total_sum, total_sum);
 
-    mtt_allocator_free((void *)tab);
+    mtt_allocator_free(&mtt_allocator, (void *)tab);
     mtt_allocator_destroy(&mtt_allocator);
 }
 
