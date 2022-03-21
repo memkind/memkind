@@ -107,13 +107,6 @@ TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HUGETLB)
     post_test(stat);
 }
 
-TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_GBTLB)
-{
-    AllocatorFactory::initialization_stat stat =
-        allocator_factory.initialize_allocator(AllocatorTypes::MEMKIND_GBTLB);
-    post_test(stat);
-}
-
 TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_libinit_HBW_HUGETLB)
 {
     HugePageOrganizer huge_page_organizer(16);
@@ -130,22 +123,5 @@ TEST_F(HeapManagerInitPerfTest,
     AllocatorFactory::initialization_stat stat =
         allocator_factory.initialize_allocator(
             AllocatorTypes::MEMKIND_HBW_PREFERRED_HUGETLB);
-    post_test(stat);
-}
-
-TEST_F(HeapManagerInitPerfTest, test_TC_MEMKIND_perf_ext_libinit_HBW_GBTLB)
-{
-    AllocatorFactory::initialization_stat stat =
-        allocator_factory.initialize_allocator(
-            AllocatorTypes::MEMKIND_HBW_GBTLB);
-    post_test(stat);
-}
-
-TEST_F(HeapManagerInitPerfTest,
-       test_TC_MEMKIND_perf_libinit_HBW_PREFERRED_GBTLB)
-{
-    AllocatorFactory::initialization_stat stat =
-        allocator_factory.initialize_allocator(
-            AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB);
     post_test(stat);
 }

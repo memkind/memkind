@@ -20,7 +20,6 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/memkind_dax_kmem.c \
                         src/memkind_default.c \
                         src/memkind_fixed.c \
-                        src/memkind_gbtlb.c \
                         src/memkind_hbw.c \
                         src/memkind_hugetlb.c \
                         src/memkind_interleave.c \
@@ -52,7 +51,6 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_dax_kmem.h \
                   include/memkind/internal/memkind_default.h \
                   include/memkind/internal/memkind_fixed.h \
-                  include/memkind/internal/memkind_gbtlb.h \
                   include/memkind/internal/memkind_hbw.h \
                   include/memkind/internal/memkind_hugetlb.h \
                   include/memkind/internal/memkind_interleave.h \

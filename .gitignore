@@ -98,7 +98,6 @@
 /test/filter_memkind
 /test/fragmentation_benchmark_pmem
 /test/freeing_memory_segfault_test
-/test/gb_page_tests_bind_policy
 /test/get_capacity_test
 /test/hello_hbw
 /test/hello_memkind
