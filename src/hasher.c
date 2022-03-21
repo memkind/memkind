@@ -5,15 +5,17 @@
 #define _GNU_SOURCE
 #endif
 
+#include "config.h"
+
 #include <memkind/internal/hasher.h>
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_private.h>
 
-#include "assert.h"
-#include "pthread.h"
-#include "stdbool.h"
+#include <assert.h>
+#include <pthread.h>
+#include <stdbool.h>
 
-#ifdef HAVE_STDATOMIC_H
+#ifdef HAVE_THREADS_H
 #include <threads.h>
 #else
 #ifndef __cplusplus

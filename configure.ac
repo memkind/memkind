@@ -28,6 +28,7 @@ AM_PROG_CC_C_O
 
 #============================tls===============================================
 # Check for thread local storage support
+AC_CHECK_HEADERS(threads.h)
 AC_ARG_ENABLE([tls],
   [AS_HELP_STRING([--enable-tls], [Enable thread-local storage (__thread keyword)])],
 [if test "x$enable_tls" = "xyes" ; then

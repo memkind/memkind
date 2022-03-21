@@ -5,6 +5,7 @@
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/pebs.h>
+#include <mtt_allocator.h>
 
 #include <assert.h>
 #include <unistd.h>
@@ -85,12 +86,15 @@ void pebs_unmap_all_cpus(PebsMetadata *pebs)
     }
 }
 
-void pebs_create(PebsMetadata *pebs, touch_cb cb)
+void pebs_create(MTTAllocator *mtt_allocator, PebsMetadata *pebs, touch_cb cb)
 {
     pebs->nof_cpus = sysconf(_SC_NPROCESSORS_ONLN);
-    pebs->pebs_fd = malloc(pebs->nof_cpus * sizeof(*pebs->pebs_fd));
-    pebs->pebs_mmap = malloc(pebs->nof_cpus * sizeof(*pebs->pebs_mmap));
-    pebs->last_head = malloc(pebs->nof_cpus * sizeof(*pebs->last_head));
+    pebs->pebs_fd = mtt_allocator_malloc(
+        mtt_allocator, pebs->nof_cpus * sizeof(*pebs->pebs_fd));
+    pebs->pebs_mmap = mtt_allocator_malloc(
+        mtt_allocator, pebs->nof_cpus * sizeof(*pebs->pebs_mmap));
+    pebs->last_head = mtt_allocator_malloc(
+        mtt_allocator, pebs->nof_cpus * sizeof(*pebs->last_head));
     pebs->cb = cb;
     if (pebs->pebs_fd == NULL || pebs->pebs_mmap == NULL ||
         pebs->last_head == NULL) {
@@ -188,14 +192,14 @@ void pebs_create(PebsMetadata *pebs, touch_cb cb)
     log_info("PEBS enabled");
 }
 
-void pebs_destroy(PebsMetadata *pebs)
+void pebs_destroy(MTTAllocator *mtt_allocator, PebsMetadata *pebs)
 {
     for (size_t cpu_idx = 0u; cpu_idx < pebs->nof_cpus; ++cpu_idx)
         ioctl(pebs->pebs_fd[cpu_idx], PERF_EVENT_IOC_DISABLE, 0);
 
     pebs_unmap_all_cpus(pebs);
-    free(pebs->pebs_fd);
-    free(pebs->pebs_mmap);
-    free(pebs->last_head);
+    mtt_allocator_free(mtt_allocator, pebs->pebs_fd);
+    mtt_allocator_free(mtt_allocator, pebs->pebs_mmap);
+    mtt_allocator_free(mtt_allocator, pebs->last_head);
     log_info("PEBS disabled");
 }
