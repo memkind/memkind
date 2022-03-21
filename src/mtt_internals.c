@@ -103,8 +103,10 @@ MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
 {
     // TODO this is more complicated: realloc might call malloc, so we actually
     // need to extend pool
-    assert(false);
-    return NULL;
+
+    // FIXME!!
+    mtt_internals_free(internals, ptr);
+    return mtt_internals_malloc(internals, size);
 }
 
 MEMKIND_EXPORT void mtt_internals_free(MttInternals *internals, void *ptr)
