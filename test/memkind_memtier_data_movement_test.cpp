@@ -760,15 +760,9 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
 
     mtt_allocator_await_flush(&mtt_allocator);
 
-    double hotness = -1.0;
-    bool success = get_highest_hotness(&mtt_allocator, hotness);
-
     for (size_t i = 0; i < size / sizeof(int); i++) {
         tab[i] = i;
     }
-
-    ASSERT_TRUE(success);
-    ASSERT_EQ(hotness, 0.0);
 
     for (size_t j = 0; j < 2u; j++) {
         for (size_t i = 0; i < size / 2u / 10u; i++) {
@@ -777,7 +771,8 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
         }
     }
 
-    success = get_highest_hotness(&mtt_allocator, hotness);
+    double hotness = -1.0;
+    bool success = get_highest_hotness(&mtt_allocator, hotness);
 
     ASSERT_TRUE(success);
     ASSERT_GT(hotness, 0.0);
