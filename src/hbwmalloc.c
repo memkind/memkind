@@ -60,10 +60,6 @@ static memkind_t hbw_choose_kind(hbw_pagesize_t pagesize)
                     result = MEMKIND_HBW_HUGETLB;
                 }
                 break;
-            case HBW_PAGESIZE_1GB:
-            case HBW_PAGESIZE_1GB_STRICT:
-                result = MEMKIND_HBW_GBTLB;
-                break;
             default:
                 if (policy == HBW_POLICY_BIND) {
                     result = MEMKIND_HBW;
@@ -79,10 +75,6 @@ static memkind_t hbw_choose_kind(hbw_pagesize_t pagesize)
             case HBW_PAGESIZE_2MB:
                 result = MEMKIND_HBW_PREFERRED_HUGETLB;
                 break;
-            case HBW_PAGESIZE_1GB:
-            case HBW_PAGESIZE_1GB_STRICT:
-                result = MEMKIND_HBW_PREFERRED_GBTLB;
-                break;
             default:
                 result = MEMKIND_HBW_PREFERRED;
                 break;
@@ -91,10 +83,6 @@ static memkind_t hbw_choose_kind(hbw_pagesize_t pagesize)
         switch (pagesize) {
             case HBW_PAGESIZE_2MB:
                 result = MEMKIND_HUGETLB;
-                break;
-            case HBW_PAGESIZE_1GB:
-            case HBW_PAGESIZE_1GB_STRICT:
-                result = MEMKIND_GBTLB;
                 break;
             default:
                 result = MEMKIND_DEFAULT;
@@ -250,12 +238,7 @@ MEMKIND_EXPORT int hbw_posix_memalign_psize(void **memptr, size_t alignment,
                                             size_t size,
                                             hbw_pagesize_t pagesize)
 {
-    if (pagesize == HBW_PAGESIZE_1GB_STRICT && size % (1 << 30)) {
-        return EINVAL;
-    }
-
-    if ((pagesize == HBW_PAGESIZE_2MB || pagesize == HBW_PAGESIZE_1GB_STRICT ||
-         pagesize == HBW_PAGESIZE_1GB) &&
+    if (pagesize == HBW_PAGESIZE_2MB &&
         hbw_get_policy() == HBW_POLICY_INTERLEAVE) {
 
         log_err("HBW_POLICY_INTERLEAVE is unsupported with used page size!");

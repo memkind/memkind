@@ -10,7 +10,7 @@ TEST_PATH="$basedir/"
 
 # Gtest binaries executed by Berta
 # TODO add allocator_perf_tool_tests binary to independent sh script
-GTEST_BINARIES=(all_tests decorator_test gb_page_tests_bind_policy \
+GTEST_BINARIES=(all_tests decorator_test \
                 memkind_stat_test defrag_reallocate background_threads_test memkind_highcapacity_test)
 
 # Pytest files executed by Berta
