@@ -20,10 +20,6 @@
 
 // Hotness coeff ------------
 
-double value_;
-double exponentialCoeff_;
-double compensationCoeff_;
-
 MEMKIND_EXPORT HotnessCoeff::HotnessCoeff(double init_hotness,
                                           double exponential_coeff,
                                           double compensation_coeff)
@@ -51,21 +47,41 @@ MEMKIND_EXPORT double HotnessCoeff::Get()
     return this->value_;
 }
 
+// Slim Hotness coeff -------
+
+MEMKIND_EXPORT SlimHotnessCoeff::SlimHotnessCoeff(double init_hotness)
+    : value_(init_hotness)
+{}
+
+MEMKIND_EXPORT void SlimHotnessCoeff::Update(double hotness_to_add,
+                                             double timediff,
+                                             double exponential_coeff,
+                                             double compensation_coeff)
+{
+    double temp = pow(exponential_coeff, timediff);
+    assert(temp <= 1 && temp >= 0 && "exponential coeff is incorrect!");
+    value_ *= temp;
+    double add = compensation_coeff * hotness_to_add;
+    assert(add >= 0);
+    // check for double overflow
+    if (std::numeric_limits<double>::max() - this->value_ >= add)
+        this->value_ += add;
+    else
+        this->value_ = std::numeric_limits<double>::max();
+}
+
+MEMKIND_EXPORT double SlimHotnessCoeff::Get()
+{
+    return this->value_;
+}
+
 // Hotness ------------------
 MEMKIND_EXPORT Hotness::Hotness(double init_hotness, uint64_t init_timestamp)
     : coeffs{
-          HotnessCoeff(init_hotness / EXPONENTIAL_COEFFS_NUMBER,
-                       EXPONENTIAL_COEFFS_VALS[0],
-                       EXPONENTIAL_COEFFS_CONMPENSATION_COEFFS[0]),
-          HotnessCoeff(init_hotness / EXPONENTIAL_COEFFS_NUMBER,
-                       EXPONENTIAL_COEFFS_VALS[1],
-                       EXPONENTIAL_COEFFS_CONMPENSATION_COEFFS[1]),
-          HotnessCoeff(init_hotness / EXPONENTIAL_COEFFS_NUMBER,
-                       EXPONENTIAL_COEFFS_VALS[2],
-                       EXPONENTIAL_COEFFS_CONMPENSATION_COEFFS[2]),
-          HotnessCoeff(init_hotness / EXPONENTIAL_COEFFS_NUMBER,
-                       EXPONENTIAL_COEFFS_VALS[3],
-                       EXPONENTIAL_COEFFS_CONMPENSATION_COEFFS[3]),
+          SlimHotnessCoeff(init_hotness / EXPONENTIAL_COEFFS_NUMBER),
+          SlimHotnessCoeff(init_hotness / EXPONENTIAL_COEFFS_NUMBER),
+          SlimHotnessCoeff(init_hotness / EXPONENTIAL_COEFFS_NUMBER),
+          SlimHotnessCoeff(init_hotness / EXPONENTIAL_COEFFS_NUMBER),
       },
       previousTimestamp(init_timestamp)
 {
@@ -83,7 +99,9 @@ MEMKIND_EXPORT void Hotness::Update(double hotness_to_add, uint64_t timestamp)
 
     // TODO check simd optimisations
     for (size_t i = 0; i < EXPONENTIAL_COEFFS_NUMBER; ++i) {
-        coeffs[i].Update(hotness_to_add, seconds_diff);
+        coeffs[i].Update(hotness_to_add, seconds_diff,
+                         EXPONENTIAL_COEFFS_VALS[i],
+                         EXPONENTIAL_COEFFS_CONMPENSATION_COEFFS[i]);
     }
     this->previousTimestamp = timestamp;
 }
