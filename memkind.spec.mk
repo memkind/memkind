@@ -195,7 +195,6 @@ ${memkind_test_dir}/dax_kmem_test
 $(memkind_test_dir)/decorator_test
 $(memkind_test_dir)/locality_test
 $(memkind_test_dir)/freeing_memory_segfault_test
-$(memkind_test_dir)/gb_page_tests_bind_policy
 ${memkind_test_dir}/get_capacity_test
 $(memkind_test_dir)/filter_memkind
 $(memkind_test_dir)/hello_hbw

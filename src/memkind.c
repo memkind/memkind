@@ -12,7 +12,6 @@
 #include <memkind/internal/memkind_dax_kmem.h>
 #include <memkind/internal/memkind_default.h>
 #include <memkind/internal/memkind_fixed.h>
-#include <memkind/internal/memkind_gbtlb.h>
 #include <memkind/internal/memkind_hbw.h>
 #include <memkind/internal/memkind_hugetlb.h>
 #include <memkind/internal/memkind_interleave.h>
@@ -69,10 +68,6 @@
 
 /* Clear bits in x, but only this specified in mask. */
 #define CLEAR_BIT(x, mask) ((x) &= (~(mask)))
-
-extern struct memkind_ops MEMKIND_HBW_GBTLB_OPS;
-extern struct memkind_ops MEMKIND_HBW_PREFERRED_GBTLB_OPS;
-extern struct memkind_ops MEMKIND_GBTLB_OPS;
 
 static struct memkind MEMKIND_DEFAULT_STATIC = {
     .ops = &MEMKIND_DEFAULT_OPS,
@@ -136,27 +131,6 @@ static struct memkind MEMKIND_HBW_PREFERRED_HUGETLB_STATIC = {
     .ops = &MEMKIND_HBW_PREFERRED_HUGETLB_OPS,
     .partition = MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB,
     .name = "memkind_hbw_preferred_hugetlb",
-    .init_once = PTHREAD_ONCE_INIT,
-};
-
-static struct memkind MEMKIND_HBW_GBTLB_STATIC = {
-    .ops = &MEMKIND_HBW_GBTLB_OPS,
-    .partition = MEMKIND_PARTITION_HBW_GBTLB,
-    .name = "memkind_hbw_gbtlb",
-    .init_once = PTHREAD_ONCE_INIT,
-};
-
-static struct memkind MEMKIND_HBW_PREFERRED_GBTLB_STATIC = {
-    .ops = &MEMKIND_HBW_PREFERRED_GBTLB_OPS,
-    .partition = MEMKIND_PARTITION_HBW_PREFERRED_GBTLB,
-    .name = "memkind_hbw_preferred_gbtlb",
-    .init_once = PTHREAD_ONCE_INIT,
-};
-
-static struct memkind MEMKIND_GBTLB_STATIC = {
-    .ops = &MEMKIND_GBTLB_OPS,
-    .partition = MEMKIND_PARTITION_GBTLB,
-    .name = "memkind_gbtlb",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
@@ -268,9 +242,6 @@ MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED = &MEMKIND_HBW_PREFERRED_ST
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_HUGETLB = &MEMKIND_HBW_HUGETLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_ALL_HUGETLB = &MEMKIND_HBW_ALL_HUGETLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED_HUGETLB = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HBW_GBTLB = &MEMKIND_HBW_GBTLB_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_HBW_PREFERRED_GBTLB = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC;
-MEMKIND_EXPORT struct memkind *MEMKIND_GBTLB = &MEMKIND_GBTLB_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_HBW_INTERLEAVE = &MEMKIND_HBW_INTERLEAVE_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_REGULAR = &MEMKIND_REGULAR_STATIC;
 MEMKIND_EXPORT struct memkind *MEMKIND_DAX_KMEM = &MEMKIND_DAX_KMEM_STATIC;
@@ -300,9 +271,6 @@ static struct memkind_registry memkind_registry_g = {
         [MEMKIND_PARTITION_HBW_HUGETLB] = &MEMKIND_HBW_HUGETLB_STATIC,
         [MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB] = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
         [MEMKIND_PARTITION_HUGETLB] = &MEMKIND_HUGETLB_STATIC,
-        [MEMKIND_PARTITION_HBW_GBTLB] = &MEMKIND_HBW_GBTLB_STATIC,
-        [MEMKIND_PARTITION_HBW_PREFERRED_GBTLB] = &MEMKIND_HBW_PREFERRED_GBTLB_STATIC,
-        [MEMKIND_PARTITION_GBTLB] = &MEMKIND_GBTLB_STATIC,
         [MEMKIND_PARTITION_HBW_INTERLEAVE] = &MEMKIND_HBW_INTERLEAVE_STATIC,
         [MEMKIND_PARTITION_INTERLEAVE] = &MEMKIND_INTERLEAVE_STATIC,
         [MEMKIND_PARTITION_REGULAR] = &MEMKIND_REGULAR_STATIC,

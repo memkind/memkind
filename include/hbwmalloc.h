@@ -70,17 +70,6 @@ typedef enum
      * The two megabyte page size option.
      */
     HBW_PAGESIZE_2MB = 2,
-    /*
-     * This option is deprecated.
-     * Allocate high bandwidth memory using 1GB chunks backed by huge pages.
-     */
-    HBW_PAGESIZE_1GB_STRICT = 3,
-
-    /*
-     * This option is deprecated.
-     * Allocate high bandwidth memory using 1GB chunks backed by huge pages.
-     */
-    HBW_PAGESIZE_1GB = 4,
 
     /*
      * Helper representing value of the last enum element incremented by 1.
