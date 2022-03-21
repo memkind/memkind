@@ -33,16 +33,11 @@ typedef struct perf_event_header perf_event_header_t;
 
 typedef void (*touch_cb)(uintptr_t address, uint64_t timestamp);
 
-// to avoid VSCode editor errors
-// TODO remove after POC (generate this define with ./configure)
-#ifndef CPU_LOGICAL_CORES_NUMBER
-#define CPU_LOGICAL_CORES_NUMBER 1
-#endif
-
 typedef struct PebsMetadata {
-    int pebs_fd[CPU_LOGICAL_CORES_NUMBER];
-    char *pebs_mmap[CPU_LOGICAL_CORES_NUMBER];
-    __u64 last_head[CPU_LOGICAL_CORES_NUMBER];
+    int *pebs_fd;
+    void **pebs_mmap;
+    __u64 *last_head;
+    size_t nof_cpus;
     touch_cb cb;
 } PebsMetadata;
 
