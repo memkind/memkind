@@ -52,9 +52,6 @@ public:
         memkind_allocators[AllocatorTypes::MEMKIND_HUGETLB] =
             MemkindAllocatorWithTimer(MEMKIND_HUGETLB,
                                       AllocatorTypes::MEMKIND_HUGETLB);
-        memkind_allocators[AllocatorTypes::MEMKIND_GBTLB] =
-            MemkindAllocatorWithTimer(MEMKIND_GBTLB,
-                                      AllocatorTypes::MEMKIND_GBTLB);
         memkind_allocators[AllocatorTypes::MEMKIND_HBW_HUGETLB] =
             MemkindAllocatorWithTimer(MEMKIND_HBW_HUGETLB,
                                       AllocatorTypes::MEMKIND_HBW_HUGETLB);
@@ -62,13 +59,6 @@ public:
             MemkindAllocatorWithTimer(
                 MEMKIND_HBW_PREFERRED_HUGETLB,
                 AllocatorTypes::MEMKIND_HBW_PREFERRED_HUGETLB);
-        memkind_allocators[AllocatorTypes::MEMKIND_HBW_GBTLB] =
-            MemkindAllocatorWithTimer(MEMKIND_HBW_GBTLB,
-                                      AllocatorTypes::MEMKIND_HBW_GBTLB);
-        memkind_allocators[AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB] =
-            MemkindAllocatorWithTimer(
-                MEMKIND_HBW_PREFERRED_GBTLB,
-                AllocatorTypes::MEMKIND_HBW_PREFERRED_GBTLB);
         memkind_allocators[AllocatorTypes::MEMKIND_PMEM] =
             MemkindAllocatorWithTimer(MEMKIND_PMEM_MOCKUP,
                                       AllocatorTypes::MEMKIND_PMEM);

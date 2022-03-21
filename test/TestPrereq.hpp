@@ -122,8 +122,7 @@ private:
         return (kind == MEMKIND_HBW || kind == MEMKIND_HBW_ALL ||
                 kind == MEMKIND_HBW_INTERLEAVE ||
                 kind == MEMKIND_HBW_PREFERRED ||
-                kind == MEMKIND_HBW_PREFERRED_HUGETLB ||
-                kind == MEMKIND_HBW_PREFERRED_GBTLB);
+                kind == MEMKIND_HBW_PREFERRED_HUGETLB);
     }
 
 public:
@@ -332,11 +331,8 @@ public:
             {"MEMKIND_HBW_HUGETLB", MEMKIND_HBW_HUGETLB},
             {"MEMKIND_HBW_ALL_HUGETLB", MEMKIND_HBW_ALL_HUGETLB},
             {"MEMKIND_HBW_PREFERRED_HUGETLB", MEMKIND_HBW_PREFERRED_HUGETLB},
-            {"MEMKIND_HBW_GBTLB", MEMKIND_HBW_GBTLB},
-            {"MEMKIND_HBW_PREFERRED_GBTLB", MEMKIND_HBW_PREFERRED_GBTLB},
             {"MEMKIND_HBW_INTERLEAVE", MEMKIND_HBW_INTERLEAVE},
             {"MEMKIND_REGULAR", MEMKIND_REGULAR},
-            {"MEMKIND_GBTLB", MEMKIND_GBTLB},
             {"MEMKIND_DAX_KMEM", MEMKIND_DAX_KMEM},
             {"MEMKIND_DAX_KMEM_ALL", MEMKIND_DAX_KMEM_ALL},
             {"MEMKIND_DAX_KMEM_PREFERRED", MEMKIND_DAX_KMEM_PREFERRED},
@@ -362,7 +358,6 @@ public:
     {
         return (kind == MEMKIND_HBW_PREFERRED ||
                 kind == MEMKIND_HBW_PREFERRED_HUGETLB ||
-                kind == MEMKIND_HBW_PREFERRED_GBTLB ||
                 kind == MEMKIND_DAX_KMEM_PREFERRED ||
                 kind == MEMKIND_HIGHEST_CAPACITY_PREFERRED ||
                 kind == MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED ||

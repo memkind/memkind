@@ -45,7 +45,7 @@ INSTANTIATE_TEST_CASE_P(MmappedTest, MemkindGetCapacityTestsFixedKindParam,
 INSTANTIATE_TEST_CASE_P(
     KindParam, MemkindGetCapacityTestsPreferredParam,
     ::testing::Values(MEMKIND_HBW_PREFERRED, MEMKIND_HBW_PREFERRED_HUGETLB,
-                      MEMKIND_HBW_PREFERRED_GBTLB, MEMKIND_DAX_KMEM_PREFERRED,
+                      MEMKIND_DAX_KMEM_PREFERRED,
                       MEMKIND_HIGHEST_CAPACITY_PREFERRED,
                       MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED,
                       MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED,
