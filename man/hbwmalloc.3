@@ -132,29 +132,9 @@ promoted by the operating system to two megabyte pages.
 The two megabyte page size option.
 \f[B]Note:\f[R] This page size requires huge pages configuration
 described in the SYSTEM CONFIGURATION section.
-.IP \[bu] 2
-\f[B]HBW_PAGESIZE_1GB (DEPRECATED)\f[R]
-.PD 0
-.P
-.PD
-This option allows the user to specify arbitrary sizes backed by 1GB
-chunks of huge pages.
-Huge pages are allocated even if the size is not a modulo of 1GB.
-\f[B]Note:\f[R] This page size requires huge pages configuration
-described in the SYSTEM CONFIGURATION section.
-.IP \[bu] 2
-\f[B]HBW_PAGESIZE_1GB_STRICT (DEPRECATED)\f[R]
-.PD 0
-.P
-.PD
-The total size of the allocation must be a multiple of 1GB with this
-option, otherwise the allocation will fail.
-\f[B]Note:\f[R] This page size requires huge pages configuration
-described in the SYSTEM CONFIGURATION section.
 .PP
-\f[B]Note:\f[R] \f[B]HBW_PAGESIZE_2MB\f[R], \f[B]HBW_PAGESIZE_1GB\f[R]
-and \f[B]HBW_PAGESIZE_1GB_STRICT\f[R] options are not supported with the
-\f[B]HBW_POLICY_INTERLEAVE\f[R] policy which is described below.
+\f[B]Note:\f[R] \f[B]HBW_PAGESIZE_2MB\f[R], option is not supported with
+the \f[B]HBW_POLICY_INTERLEAVE\f[R] policy which is described below.
 .TP
 \f[B]\f[CB]hbw_set_policy()\f[B]\f[R]
 sets the current fallback policy.

@@ -480,11 +480,6 @@ MEMKIND_HUGETLB
     **Note:** This kind requires huge pages configuration described in the
     [SYSTEM CONFIGURATION](#system-configuration) section.
 
-MEMKIND_GBTLB (DEPRECATED)
-:   Allocate from standard memory using 1GB chunks backed by huge pages.
-    **Note:** This kind requires huge pages configuration described in
-    the [SYSTEM CONFIGURATION](#system-configuration) section.
-
 MEMKIND_INTERLEAVE
 :   Allocate pages interleaved across all NUMA nodes with transparent
     huge pages disabled.
@@ -522,22 +517,6 @@ MEMKIND_HBW_PREFERRED_HUGETLB
 :   Same as **MEMKIND_HBW_PREFERRED** except the allocation is backed by huge pages.
     **Note:** This kind requires huge pages configuration described in the
     [SYSTEM CONFIGURATION](#system-configuration) section.
-
-MEMKIND_HBW_GBTLB (DEPRECATED)
-:   Same as **MEMKIND_HBW** except the allocation is backed by 1GB chunks of
-    huge pages. Note that size can take on any value, but full gigabyte pages will
-    be allocated for each request, so the remainder of the last page will be wasted.
-    This kind requires huge pages configuration described in the
-    [SYSTEM CONFIGURATION](#system-configuration) section.
-
-MEMKIND_HBW_PREFERRED_GBTLB (DEPRECATED)
-:   Same as **MEMKIND_HBW_GBTLB** except that if there is not enough high bandwidth
-    memory to satisfy the request, the allocation will fall back on standard memory.
-    **Note:** This kind requires huge pages configuration described in the
-    [SYSTEM CONFIGURATION](#system-configuration) section. For this kind,
-    the allocation will not succeed if two or more high bandwidth memory NUMA
-    nodes are in the same shortest distance to the same CPU on which process
-    is eligible to run. Check on that eligibility is done upon starting the application.
 
 MEMKIND_HBW_INTERLEAVE
 :   Same as **MEMKIND_HBW** except that the pages that support the allocation are
