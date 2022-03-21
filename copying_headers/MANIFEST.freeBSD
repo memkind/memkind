@@ -24,7 +24,6 @@ include/memkind/internal/memkind_bitmask.h
 include/memkind/internal/memkind_capacity.h
 include/memkind/internal/memkind_dax_kmem.h
 include/memkind/internal/memkind_default.h
-include/memkind/internal/memkind_gbtlb.h
 include/memkind/internal/memkind_hbw.h
 include/memkind/internal/memkind_hugetlb.h
 include/memkind/internal/memkind_interleave.h
@@ -73,7 +72,6 @@ src/memkind_bitmask.c
 src/memkind_capacity.c
 src/memkind_dax_kmem.c
 src/memkind_default.c
-src/memkind_gbtlb.c
 src/memkind_hbw.c
 src/memkind_hugetlb.c
 src/memkind_interleave.c
@@ -152,7 +150,6 @@ test/environ_max_bg_threads_test.cpp
 test/error_message_tests.cpp
 test/fragmentation_benchmark_pmem.cpp
 test/freeing_memory_segfault_test.cpp
-test/gb_page_tests_bind_policy.cpp
 test/get_arena_test.cpp
 test/get_capacity_test.cpp
 test/hbw_allocator_performance_tests.cpp

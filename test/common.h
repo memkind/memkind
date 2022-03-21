@@ -41,16 +41,10 @@ static const char *kind_name(memkind_t kind)
         return "MEMKIND_HBW_ALL_HUGETLB";
     else if (kind == MEMKIND_HBW_PREFERRED_HUGETLB)
         return "MEMKIND_HBW_PREFERRED_HUGETLB";
-    else if (kind == MEMKIND_HBW_GBTLB)
-        return "MEMKIND_HBW_GBTLB";
-    else if (kind == MEMKIND_HBW_PREFERRED_GBTLB)
-        return "MEMKIND_HBW_PREFERRED_GBTLB";
     else if (kind == MEMKIND_HBW_INTERLEAVE)
         return "MEMKIND_HBW_INTERLEAVE";
     else if (kind == MEMKIND_REGULAR)
         return "MEMKIND_REGULAR";
-    else if (kind == MEMKIND_GBTLB)
-        return "MEMKIND_GBTLB";
     else if (kind == MEMKIND_DAX_KMEM)
         return "MEMKIND_DAX_KMEM";
     else if (kind == MEMKIND_DAX_KMEM_ALL)

@@ -218,29 +218,9 @@ This page size requires huge pages configuration described in
 .BR "SYSTEM CONFIGURATION"
 section.
 .TP
-.B HBW_PAGESIZE_1GB (DEPRECATED)
-This option allows the user to specify arbitrary sizes backed by
-1GB chunks of huge pages. Huge pages are allocated even if the
-size is not a modulo of 1GB.
 .BR Note:
-This page size requires huge pages configuration described in
-.BR "SYSTEM CONFIGURATION"
-section.
-.TP
-.B HBW_PAGESIZE_1GB_STRICT (DEPRECATED)
-The total size of the allocation must be a multiple of 1GB with
-this option, otherwise the allocation will fail.
-.BR Note:
-This page size requires huge pages configuration described in
-.BR "SYSTEM CONFIGURATION"
-section.
-.PP
-.BR Note:
-.BR HBW_PAGESIZE_2MB ,
-.BR HBW_PAGESIZE_1GB
-and
-.BR HBW_PAGESIZE_1GB_STRICT
-options are not supported with
+.BR HBW_PAGESIZE_2MB
+option is not supported with
 .BR HBW_POLICY_INTERLEAVE
 policy.
 .PP

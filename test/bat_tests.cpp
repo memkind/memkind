@@ -400,13 +400,6 @@ TEST_F(BATest,
     memkind_free(NULL, ptr);
 }
 
-TEST_F(BATest, test_TC_MEMKIND_free_ext_MEMKIND_GBTLB_4096_bytes)
-{
-    HugePageOrganizer huge_page_organizer(1000);
-    MemkindAllocator memkind_allocator(MEMKIND_GBTLB);
-    BasicAllocTest(&memkind_allocator).free(4096);
-}
-
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_CheckAvailable)
 {
     ASSERT_EQ(0, hbw_check_available());
