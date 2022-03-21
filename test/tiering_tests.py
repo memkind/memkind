@@ -304,14 +304,18 @@ class Test_tiering_config_env(Helper):
             "KIND:DRAM,RATIO:" + ratio + ";" + policy,
             log_level="2")
 
-    def test_KMEM_DAX(self):
+    @pytest.mark.parametrize("policy", ["POLICY:STATIC_RATIO",
+                                        "POLICY:DYNAMIC_THRESHOLD",
+                                        "POLICY:DATA_MOVEMENT"])
+    def test_KMEM_DAX(self, policy):
         if not self.check_kmem_dax_support():
             pytest.skip("KMEM DAX is not configured")
         self.get_ld_preload_cmd_output(
-            "KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:100;" + self.default_policy)
+            "KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:100;" + policy)
 
     @pytest.mark.parametrize("policy", ["POLICY:STATIC_RATIO",
-                                        "POLICY:DYNAMIC_THRESHOLD"])
+                                        "POLICY:DYNAMIC_THRESHOLD",
+                                        "POLICY:DATA_MOVEMENT"])
     def test_KMEM_DAX_multiple(self, policy):
         self.get_ld_preload_cmd_output(
             "KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:10;KIND:KMEM_DAX,RATIO:8;"
