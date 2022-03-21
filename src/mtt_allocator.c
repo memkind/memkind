@@ -201,8 +201,8 @@ MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator,
 MEMKIND_EXPORT void mtt_allocator_destroy(MTTAllocator *mtt_allocator)
 {
     // TODO registering should not be global, but per bg thread
-    unregister_mtt_allocator(mtt_allocator);
     background_thread_fini(&mtt_allocator->bgThread);
+    unregister_mtt_allocator(mtt_allocator);
     mtt_internals_destroy(&mtt_allocator->internals);
 }
 
