@@ -247,6 +247,7 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
                                                  uint64_t timestamp,
                                                  atomic_size_t *used_dram)
 {
+    internals->lastTimestamp = timestamp;
     // 1. Add new mappings to rankings
     mtt_internals_process_queued(internals);
     // 2. Update both rankings - hotness
