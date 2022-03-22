@@ -102,6 +102,11 @@ MEMKIND_EXPORT void pool_allocator_free(void *ptr)
     slab_allocator_free(ptr);
 }
 
+MEMKIND_EXPORT size_t pool_allocator_usable_size(void *ptr)
+{
+    return slab_allocator_usable_size(ptr);
+}
+
 MEMKIND_EXPORT int pool_allocator_create(PoolAllocator *pool)
 {
     int ret = slab_allocator_init(&pool->slabSlabAllocator,
