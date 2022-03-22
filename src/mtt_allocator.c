@@ -227,6 +227,12 @@ MEMKIND_EXPORT void mtt_allocator_free(MTTAllocator *mtt_allocator, void *ptr)
     mtt_internals_free(&mtt_allocator->internals, ptr);
 }
 
+MEMKIND_EXPORT size_t mtt_allocator_usable_size(MTTAllocator *mtt_allocator,
+                                                void *ptr)
+{
+    return mtt_internals_usable_size(&mtt_allocator->internals, ptr);
+}
+
 MEMKIND_EXPORT void mtt_allocator_await_flush(MTTAllocator *mtt_allocator)
 {
     pthread_mutex_lock(&mtt_allocator->bgThread.bg_thread_cond_mutex);

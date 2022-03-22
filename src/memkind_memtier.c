@@ -905,7 +905,14 @@ MEMKIND_EXPORT int memtier_kind_posix_memalign(memkind_t kind, void **memptr,
 
 MEMKIND_EXPORT size_t memtier_usable_size(void *ptr)
 {
-    size_t size = jemk_malloc_usable_size(ptr);
+    size_t size = 0;
+    // TODO: checking policy this way is a really ugly hack
+    if (g_mtt_allocator) {
+        size = mtt_allocator_usable_size(g_mtt_allocator, ptr);
+    } else {
+        size = jemk_malloc_usable_size(ptr);
+    }
+
 #ifdef MEMKIND_DECORATION_ENABLED
     if (memtier_kind_usable_size_post)
         memtier_kind_usable_size_post(&ptr, size);

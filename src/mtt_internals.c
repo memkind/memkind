@@ -7,6 +7,7 @@
 #include "memkind/internal/ranking_utils.h"
 
 #include "assert.h"
+#include "string.h"
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -112,6 +113,11 @@ MEMKIND_EXPORT void mtt_internals_free(MttInternals *internals, void *ptr)
     // TODO add & handle unmap during productization stage!
     // we don't unmap pages, the data is not handled
     fast_pool_allocator_free(&internals->pool, ptr);
+}
+
+MEMKIND_EXPORT size_t mtt_internals_usable_size(MttInternals *internals, void *ptr)
+{
+    return fast_pool_allocator_usable_size(&internals->pool, ptr);
 }
 
 MEMKIND_EXPORT void mtt_internals_touch(MttInternals *internals,
