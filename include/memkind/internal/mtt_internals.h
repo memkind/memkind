@@ -44,6 +44,7 @@ extern void *mtt_internals_malloc(MttInternals *internals, size_t size);
 extern void *mtt_internals_realloc(MttInternals *internals, void *ptr,
                                    size_t size);
 extern void mtt_internals_free(MttInternals *internals, void *ptr);
+extern size_t mtt_internals_usable_size(MttInternals *internals, void *ptr);
 
 extern void mtt_internals_touch(MttInternals *internals, uintptr_t address);
 extern void mtt_internals_ranking_update(MttInternals *internals,

@@ -75,6 +75,7 @@ extern void *slab_allocator_malloc_pages(SlabAllocator *alloc,
                                          uintptr_t *page_start,
                                          size_t *nof_pages);
 extern void slab_allocator_free(void *addr);
+extern size_t slab_allocator_usable_size(void *addr);
 
 #ifdef __cplusplus
 }
