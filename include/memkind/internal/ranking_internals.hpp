@@ -82,8 +82,10 @@ class Hotness
 
 public:
     Hotness(double init_hotness, uint64_t init_timestamp);
+    Hotness(Hotness *hotness_source, uint64_t init_timestamp);
     void Update(double hotness_to_add, uint64_t timestamp);
     double GetTotalHotness();
+    uint64_t GetLastTouchTimestamp() const;
     friend class HotnessTest;
 };
 
@@ -93,29 +95,45 @@ class PageMetadata
     uintptr_t startAddr;
     size_t touches = 0u;
     Hotness hotness;
+    bool touched = false;
 
 public:
     PageMetadata(uintptr_t start_addr, double init_hotness,
                  uint64_t init_timestamp);
+    PageMetadata(uintptr_t start_addr, PageMetadata *hotness_source,
+                 uint64_t init_timestamp);
     /// @return true if first touch since last update
     bool Touch();
+    /// @brief Touch without increasing hotness
+    /// @return true if first touch since last update
+    bool TouchEmpty();
     void UpdateHotness(uint64_t timestamp);
     double GetHotness();
     uintptr_t GetStartAddr();
+    uint64_t GetLastTouchTimestamp() const;
 };
 
 class Ranking
 {
     std::map<double, std::set<PageMetadata *>> hotnessToPages;
+    std::map<uint64_t, std::set<PageMetadata *>> leastRecentlyUsed;
     std::unordered_map<uintptr_t, PageMetadata> pageAddrToPage;
-    std::vector<PageMetadata *> pagesToUpdate;
-    double highestHotness = 0;
+    std::set<PageMetadata *> pagesToUpdate;
     size_t totalSize = 0;
 
+    void RemoveLRU_(PageMetadata *page);
+    void RemoveHotnessToPages_(PageMetadata *page);
+    void AddLRU_(PageMetadata *page);
+    void AddLRU_(std::set<PageMetadata *> &&pages);
+    void AddHotnessToPages_(PageMetadata *page);
+    void AddHotnessToPages_(std::set<PageMetadata *> &&pages);
+
 public:
-    void AddPages(uintptr_t start_addr, size_t nof_pages, uint64_t timestamp);
-    void Touch(uintptr_t addr);
-    void Update(uint64_t timestamp);
+    void AddPage(PageMetadata page);
+    void AddPages(uintptr_t start_addr, size_t nof_pages,
+                  uint64_t timestamp); // TODO add handling LRU
+    bool Touch(uintptr_t addr);
+    void Update(uint64_t timestamp, uint64_t oldest_timestamp = 0ul);
     /// @param[out] hotness highest hotness value in Ranking
     /// @return
     ///     bool: true if not empty (hotness valid)
@@ -126,7 +144,6 @@ public:
     bool GetColdest(double &hotness);
     PageMetadata PopColdest();
     PageMetadata PopHottest();
-    void AddPage(PageMetadata page);
     /// @return traced size, in bytes
     size_t GetTotalSize();
 };
