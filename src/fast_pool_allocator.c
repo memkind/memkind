@@ -104,9 +104,8 @@ MEMKIND_EXPORT void *fast_pool_allocator_realloc_pages(FastPoolAllocator *pool,
 
 MEMKIND_EXPORT void fast_pool_allocator_free(FastPoolAllocator *pool, void *ptr)
 {
-    if (ptr == NULL) {
+    if (ptr == NULL)
         return;
-    }
 
     uintptr_t address = (uintptr_t)ptr;
     // TODO microoptimisation possible !
