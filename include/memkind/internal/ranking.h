@@ -20,7 +20,7 @@ extern void ranking_destroy(ranking_handle handle);
 extern void ranking_metadata_create(metadata_handle *handle);
 extern void ranking_metadata_destroy(metadata_handle handle);
 
-extern void ranking_touch(ranking_handle handle, uintptr_t address);
+extern bool ranking_touch(ranking_handle handle, uintptr_t address);
 extern void ranking_update(ranking_handle handle, uint64_t timestamp);
 extern void ranking_add_pages(ranking_handle handle, uintptr_t start_address,
                               size_t nof_pages, uint64_t timestamp);
