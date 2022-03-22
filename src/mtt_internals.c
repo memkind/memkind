@@ -104,8 +104,26 @@ MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
 {
     // TODO this is more complicated: realloc might call malloc, so we actually
     // need to extend pool
-    mtt_internals_free(internals, ptr);
-    return mtt_internals_malloc(internals, size);
+
+    if (size == 0) {
+        mtt_internals_free(internals, ptr);
+        return NULL;
+    } else if (ptr == NULL) {
+        return mtt_internals_malloc(internals, size);
+    }
+
+    size_t old_size = mtt_internals_usable_size(internals, ptr);
+    if (size == old_size) {
+        return ptr;
+    }
+
+    void *ret = mtt_internals_malloc(internals, size);
+    if (ret) {
+        memcpy(ret, ptr, old_size);
+        mtt_internals_free(internals, ptr);
+    }
+
+    return ret;
 }
 
 MEMKIND_EXPORT void mtt_internals_free(MttInternals *internals, void *ptr)
@@ -115,7 +133,8 @@ MEMKIND_EXPORT void mtt_internals_free(MttInternals *internals, void *ptr)
     fast_pool_allocator_free(&internals->pool, ptr);
 }
 
-MEMKIND_EXPORT size_t mtt_internals_usable_size(MttInternals *internals, void *ptr)
+MEMKIND_EXPORT size_t mtt_internals_usable_size(MttInternals *internals,
+                                                void *ptr)
 {
     return fast_pool_allocator_usable_size(&internals->pool, ptr);
 }
