@@ -989,14 +989,14 @@ TEST(HotnessTest, Basic)
 {
     const double ACCURACY = 1e-9;
     const uint64_t SECOND = 1000000000u;
-    Hotness hotness0_0(0, 0);
-    Hotness hotness1_0(1, 0);
-    Hotness hotness3_2(3, 2 * SECOND);
-    Hotness hotness10_10_0(10, 10 * SECOND);
-    Hotness hotness10_10_1(10, 10 * SECOND);
-    Hotness hotness10_10_2(10, 10 * SECOND);
-    Hotness hotness10_10_3(10, 10 * SECOND);
-    Hotness hotness10_10_4(10, 10 * SECOND);
+    Hotness hotness0_0(0., 0);
+    Hotness hotness1_0(1., 0);
+    Hotness hotness3_2(3., 2 * SECOND);
+    Hotness hotness10_10_0(10., 10 * SECOND);
+    Hotness hotness10_10_1(10., 10 * SECOND);
+    Hotness hotness10_10_2(10., 10 * SECOND);
+    Hotness hotness10_10_3(10., 10 * SECOND);
+    Hotness hotness10_10_4(10., 10 * SECOND);
 
     // instead of checking exact values, we are checking some properties
 
