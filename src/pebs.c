@@ -102,12 +102,18 @@ void pebs_create(PebsMetadata *pebs, touch_cb cb)
     // check if we have access to perf events
     int pf = 0;
     FILE *f = fopen("/proc/sys/kernel/perf_event_paranoid", "r");
+    if (!f) {
+        log_fatal(
+            "PEBS: can't open /proc/sys/kernel/perf_event_paranoid -- /proc not mounted?");
+        exit(-1);
+    }
     if (fscanf(f, "%d", &pf) == 0 || pf > 3) {
         log_fatal("PEBS: /proc/sys/kernel/perf_event_paranoid is set to %d "
                   "while it should be set to 3 or less!",
                   pf);
         exit(-1);
     }
+    fclose(f);
 
     struct perf_event_attr pe;
     memset(&pe, 0, sizeof(struct perf_event_attr));
