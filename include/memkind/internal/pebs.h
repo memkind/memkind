@@ -3,8 +3,6 @@
 
 #pragma once
 
-#define USE_LIBPFM 0
-
 #include <linux/hw_breakpoint.h> // definition of HW_* constants
 #include <linux/perf_event.h>    // definition of PERF_* constants
 #include <stdint.h>
@@ -16,11 +14,6 @@
 #include <sys/syscall.h> // definition of SYS_* constants
 #include <sys/types.h>
 #include <unistd.h>
-
-#if USE_LIBPFM
-#include <perfmon/pfmlib.h> // pfm_get_os_event_encoding
-#include <perfmon/pfmlib_perf_event.h>
-#endif
 
 #include <memkind/internal/memkind_private.h>
 

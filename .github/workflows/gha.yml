@@ -115,7 +115,7 @@ jobs:
         restore-keys: ccache-${{ env.CC_BUILD_ID }}-static-build-
 
     - name: Install basic dependencies
-      run: sudo apt install autoconf ccache libnuma-dev libpfm4-dev
+      run: sudo apt install autoconf ccache libnuma-dev
 
     - name: Install daxctl dependency
       run: |
