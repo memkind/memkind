@@ -38,6 +38,8 @@ struct MTTAllocator;
 
 void pebs_create(struct MTTAllocator *mtt_allocator, PebsMetadata *pebs,
                  touch_cb cb);
+void pebs_enable(struct MTTAllocator *mtt_allocator, PebsMetadata *pebs);
+void pebs_disable(struct MTTAllocator *mtt_allocator, PebsMetadata *pebs);
 void pebs_destroy(struct MTTAllocator *mtt_allocator, PebsMetadata *pebs);
 void pebs_monitor(PebsMetadata *pebs);
 
