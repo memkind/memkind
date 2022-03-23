@@ -19,7 +19,6 @@ RUN yum update -y && yum install -y \
     json-c-devel \
     keyutils-libs-devel \
     kmod-devel \
-    libpfm-devel \
     libtool \
     libudev-devel \
     libuuid-devel \
