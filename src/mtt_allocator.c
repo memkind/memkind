@@ -144,11 +144,13 @@ static void unregister_mtt_allocator(MTTAllocator *mtt_allocator)
     pthread_mutex_unlock(&allocatorsMutex);
 }
 
-void background_thread_init(BackgroundThread *bg_thread)
+void background_thread_init(MTTAllocator *mtt_allocator)
 {
+    BackgroundThread *bg_thread = &mtt_allocator->bgThread;
+
     pthread_mutex_init(&bg_thread->bg_thread_cond_mutex, NULL);
     pthread_cond_init(&bg_thread->bg_thread_cond, NULL);
-    pebs_create(&bg_thread->pebs, touch_callback);
+    pebs_create(mtt_allocator, &bg_thread->pebs, touch_callback);
 
     bg_thread->bg_thread_state = THREAD_INIT;
     int ret = pthread_create(&bg_thread->bg_thread, NULL, mtt_run_bg_thread,
@@ -165,8 +167,10 @@ void background_thread_init(BackgroundThread *bg_thread)
     pthread_mutex_unlock(&bg_thread->bg_thread_cond_mutex);
 }
 
-void background_thread_fini(BackgroundThread *bg_thread)
+void background_thread_fini(MTTAllocator *mtt_allocator)
 {
+    BackgroundThread *bg_thread = &mtt_allocator->bgThread;
+
     pthread_mutex_t *bg_thread_cond_mutex = &bg_thread->bg_thread_cond_mutex;
     pthread_mutex_lock(bg_thread_cond_mutex);
     while (bg_thread->bg_thread_state == THREAD_INIT) {
@@ -178,7 +182,7 @@ void background_thread_fini(BackgroundThread *bg_thread)
     pthread_join(bg_thread->bg_thread, NULL);
     log_info("MTT background thread closed");
 
-    pebs_destroy(&bg_thread->pebs);
+    pebs_destroy(mtt_allocator, &bg_thread->pebs);
     pthread_mutex_destroy(bg_thread_cond_mutex);
     pthread_cond_destroy(&bg_thread->bg_thread_cond);
 }
@@ -194,15 +198,15 @@ MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator,
     uint64_t timestamp = 0;
     mtt_internals_create(&mtt_allocator->internals, timestamp, limits);
     register_mtt_allocator(mtt_allocator);
-    background_thread_init(&mtt_allocator->bgThread);
+    background_thread_init(mtt_allocator);
     log_info("MTT background thread created");
 }
 
 MEMKIND_EXPORT void mtt_allocator_destroy(MTTAllocator *mtt_allocator)
 {
     // TODO registering should not be global, but per bg thread
+    background_thread_fini(mtt_allocator);
     unregister_mtt_allocator(mtt_allocator);
-    background_thread_fini(&mtt_allocator->bgThread);
     mtt_internals_destroy(&mtt_allocator->internals);
 }
 
