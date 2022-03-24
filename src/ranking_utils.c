@@ -12,10 +12,21 @@
 #include <numaif.h>
 #include <unistd.h>
 
-static nodemask_t dram_nodemask;
-static nodemask_t dax_kmem_nodemask;
-static pthread_once_t dram_init = PTHREAD_ONCE_INIT;
-static pthread_once_t dax_kmem_init = PTHREAD_ONCE_INIT;
+#define MAX_RETRIES 5
+
+_Static_assert(DRAM == 0 && DAX_KMEM == 1, "Check values in ranking_utils.h");
+
+static nodemask_t nodemasks[2];
+static const char *MEMORY_TYPE_NAMES[2] = {"DRAM", "DAX_KMEM"};
+
+static pthread_once_t nodemask_inits[2] = {PTHREAD_ONCE_INIT,
+                                           PTHREAD_ONCE_INIT};
+
+static void init_dram_nodemask_once();
+static void init_dax_kmem_nodemask_once();
+
+void (*init_routines[2])(void) = {init_dram_nodemask_once,
+                                  init_dax_kmem_nodemask_once};
 
 static void init_dram_nodemask_once()
 {
@@ -38,7 +49,7 @@ static void init_dram_nodemask_once()
     }
     numa_bitmask_free(node_cpus);
 
-    copy_bitmask_to_nodemask(dram_nodes_bm, &dram_nodemask);
+    copy_bitmask_to_nodemask(dram_nodes_bm, &nodemasks[DRAM]);
 }
 
 static void init_dax_kmem_nodemask_once()
@@ -54,7 +65,7 @@ static void init_dax_kmem_nodemask_once()
     bitmask = numa_allocate_nodemask();
 
     int status = memkind_dax_kmem_all_get_mbind_nodemask(
-        NULL, dax_kmem_nodemask.n, NUMA_NUM_NODES);
+        NULL, nodemasks[DAX_KMEM].n, NUMA_NUM_NODES);
     if (status == MEMKIND_ERROR_OPERATION_FAILED) {
         log_fatal(
             "memkind wasn't build with a minimum required libdaxctl-devel version");
@@ -64,7 +75,7 @@ static void init_dax_kmem_nodemask_once()
         abort();
     }
 
-    copy_nodemask_to_bitmask(&dax_kmem_nodemask, bitmask);
+    copy_nodemask_to_bitmask(&nodemasks[DAX_KMEM], bitmask);
     bm_weight = numa_bitmask_weight(bitmask);
     if (bm_weight == 0) {
         log_fatal(
@@ -86,32 +97,22 @@ MEMKIND_EXPORT int move_page_metadata(uintptr_t start_addr,
         abort();
     }
 
-    switch (memory_type) {
-        case DRAM:
-            pthread_once(&dram_init, init_dram_nodemask_once);
+    pthread_once(&nodemask_inits[memory_type], init_routines[memory_type]);
 
-            ret = mbind((void *)start_addr, TRACED_PAGESIZE, MPOL_BIND,
-                        dram_nodemask.n, NUMA_NUM_NODES,
-                        MPOL_MF_MOVE | MPOL_MF_STRICT);
-            if (ret) {
-                log_err("Page movement to DRAM failed with mbind() errno=%d",
-                        errno);
-                ret = MEMKIND_ERROR_MBIND;
-            }
+    size_t retry_idx = 0;
+    for (retry_idx = 0; retry_idx < MAX_RETRIES; ++retry_idx) {
+        ret = mbind((void *)start_addr, TRACED_PAGESIZE, MPOL_BIND,
+                    nodemasks[memory_type].n, NUMA_NUM_NODES,
+                    MPOL_MF_MOVE | MPOL_MF_STRICT);
+        if (ret == 0)
             break;
-        case DAX_KMEM:
-            pthread_once(&dax_kmem_init, init_dax_kmem_nodemask_once);
-
-            ret = mbind((void *)start_addr, TRACED_PAGESIZE, MPOL_BIND,
-                        dax_kmem_nodemask.n, NUMA_NUM_NODES,
-                        MPOL_MF_MOVE | MPOL_MF_STRICT);
-            if (ret) {
-                log_err(
-                    "Page movement to DAX_KMEM failed with mbind() errno=%d",
-                    errno);
-                ret = MEMKIND_ERROR_MBIND;
-            }
-            break;
+        log_info("Page movement to %s failed with mbind() errno=%d",
+                 MEMORY_TYPE_NAMES[memory_type], errno);
+    }
+    if (ret) {
+        log_err("Page movement to %s totally failed after %lu retries",
+                MEMORY_TYPE_NAMES[memory_type], retry_idx);
+        ret = MEMKIND_ERROR_MBIND;
     }
 
     errno = prev_errno;
