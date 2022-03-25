@@ -68,12 +68,14 @@ extern int slab_allocator_init(SlabAllocator *alloc, size_t element_size,
 /// @note only one initializer should be called!
 extern int slab_allocator_init_pages(SlabAllocator *alloc, size_t element_size,
                                      size_t max_elements, uintptr_t *addr,
-                                     size_t *nof_pages);
+                                     size_t *nof_pages,
+                                     const MmapCallback *user_mmap);
 extern void slab_allocator_destroy(SlabAllocator *alloc);
 extern void *slab_allocator_malloc(SlabAllocator *alloc);
 extern void *slab_allocator_malloc_pages(SlabAllocator *alloc,
                                          uintptr_t *page_start,
-                                         size_t *nof_pages);
+                                         size_t *nof_pages,
+                                         const MmapCallback *user_mmap);
 extern void slab_allocator_free(void *addr);
 extern size_t slab_allocator_usable_size(void *addr);
 

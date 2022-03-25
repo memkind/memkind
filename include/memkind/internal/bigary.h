@@ -28,14 +28,35 @@ struct bigary {
 };
 typedef struct bigary bigary;
 
+typedef void *(mmap_wrapper)(void *arg, void *__addr, size_t __len, int __prot,
+                             int __flags, int __fd, __off_t __offset);
+
+typedef struct mmap_callback {
+    void *arg;
+    mmap_wrapper *wrapped_mmap;
+} MmapCallback;
+
+static void *wrapped_stdmmap(void *arg, void *__addr, size_t __len, int __prot,
+                             int __flags, int __fd, __off_t __offset)
+{
+    (void)arg;
+    return mmap(__addr, __len, __prot, __flags, __fd, __offset);
+}
+
+static const MmapCallback gStandardMmapCallback = {
+    .arg = NULL,
+    .wrapped_mmap = wrapped_stdmmap,
+};
+
 extern void bigary_init(bigary *restrict m_bigary, int fd, int flags,
                         size_t max);
 extern void bigary_init_pages(bigary *restrict m_bigary, int fd, int flags,
-                              size_t max, uintptr_t *address,
-                              size_t *nof_pages);
+                              size_t max, uintptr_t *address, size_t *nof_pages,
+                              const MmapCallback *m_mmap);
 extern void bigary_alloc(bigary *restrict m_bigary, size_t top);
 extern void bigary_alloc_pages(bigary *restrict m_bigary, size_t top,
-                               uintptr_t *address, size_t *nof_pages);
+                               uintptr_t *address, size_t *nof_pages,
+                               const MmapCallback *m_mmap);
 extern void bigary_destroy(bigary *restrict m_bigary);
 
 #ifdef __cplusplus
