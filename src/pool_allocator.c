@@ -63,8 +63,9 @@ MEMKIND_EXPORT void *pool_allocator_malloc_pages(PoolAllocator *pool,
         // TODO initialize the slab in a lockless way
         slab = slab_allocator_malloc(&pool->slabSlabAllocator);
         size_t slab_size = rank_size_to_size(size_rank);
-        int ret = slab_allocator_init_pages(slab, slab_size, 0, &address[0],
-                                            &nof_pages[0]);
+        int ret =
+            slab_allocator_init_pages(slab, slab_size, 0, &address[0],
+                                      &nof_pages[0], &gStandardMmapCallback);
         if (ret != 0)
             return NULL;
         // TODO atomic compare exchange WARNING HACK NOT THREAD SAFE NOW !!!!
@@ -78,7 +79,8 @@ MEMKIND_EXPORT void *pool_allocator_malloc_pages(PoolAllocator *pool,
         }
     }
 
-    return slab_allocator_malloc_pages(slab, &address[1], &nof_pages[1]);
+    return slab_allocator_malloc_pages(slab, &address[1], &nof_pages[1],
+                                       &gStandardMmapCallback);
 }
 
 MEMKIND_EXPORT void *pool_allocator_realloc(PoolAllocator *pool, void *ptr,

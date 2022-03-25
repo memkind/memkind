@@ -36,17 +36,22 @@ typedef struct FastPoolAllocator {
 /// @brief Initialize slab_allocator and return mmapped pages
 /// @note only one initializer should be called!
 extern int fast_pool_allocator_create(FastPoolAllocator *pool, uintptr_t *addr,
-                                      size_t *nof_pages);
+                                      size_t *nof_pages,
+                                      const MmapCallback *user_mmap);
 extern void fast_pool_allocator_destroy(FastPoolAllocator *pool);
 
 extern void *fast_pool_allocator_malloc(FastPoolAllocator *pool, size_t size);
 extern void *fast_pool_allocator_realloc_pages(FastPoolAllocator *pool,
                                                void *ptr, size_t size,
                                                uintptr_t *addr,
-                                               size_t *nof_pages);
+                                               size_t *nof_pages,
+                                               const MmapCallback *user_mmap);
+/// @pre @p addr and @p nof_pages should point to arrays of size equal to at
+/// least two
 extern void *fast_pool_allocator_malloc_pages(FastPoolAllocator *pool,
                                               size_t size, uintptr_t *addr,
-                                              size_t *nof_pages);
+                                              size_t *nof_pages,
+                                              const MmapCallback *user_mmap);
 extern void *fast_pool_allocator_realloc(FastPoolAllocator *pool, void *ptr,
                                          size_t size);
 extern void fast_pool_allocator_free(FastPoolAllocator *pool, void *ptr);
