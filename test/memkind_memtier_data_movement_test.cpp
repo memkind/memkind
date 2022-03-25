@@ -576,8 +576,8 @@ TEST_F(FastPoolAllocTest, Basic)
     FastPoolAllocator pool;
     uintptr_t dummy_address = 0ul;
     size_t dummy_nof_pages = 0ul;
-    int ret =
-        fast_pool_allocator_create(&pool, &dummy_address, &dummy_nof_pages);
+    int ret = fast_pool_allocator_create(
+        &pool, &dummy_address, &dummy_nof_pages, &gStandardMmapCallback);
     ASSERT_EQ(ret, 0);
     for (size_t i = 0; i < UINT16_MAX; ++i)
         ASSERT_EQ(pool.pool[i], nullptr);
@@ -624,8 +624,8 @@ TEST_F(FastPoolAllocTest, BigAllocationTest)
     FastPoolAllocator pool;
     uintptr_t dummy_address = 0ul;
     size_t dummy_nof_pages = 0ul;
-    int ret =
-        fast_pool_allocator_create(&pool, &dummy_address, &dummy_nof_pages);
+    int ret = fast_pool_allocator_create(
+        &pool, &dummy_address, &dummy_nof_pages, &gStandardMmapCallback);
     ASSERT_EQ(ret, 0);
     for (size_t i = 0; i < UINT16_MAX; ++i)
         ASSERT_EQ(pool.pool[i], nullptr);
@@ -653,9 +653,9 @@ TEST(DataMovementBgThreadTest, test_bg_thread_lifecycle)
     ASSERT_EQ(threads_count, 1U);
 
     MTTInternalsLimits limits;
-    limits.lowLimit = 1024u * 1024u * 1024u * 1024u;
-    limits.softLimit = 1024u * 1024u * 1024u * 1024u;
-    limits.hardLimit = 1024u * 1024u * 1024u * 1024u;
+    limits.lowLimit = 1024ul * 1024u * 1024u * 1024u;
+    limits.softLimit = 1024ul * 1024u * 1024u * 1024u;
+    limits.hardLimit = 1024ul * 1024u * 1024u * 1024u;
 
     mtt_allocator_create(&mtt_allocator, &limits);
 
@@ -693,24 +693,25 @@ TEST_F(PEBSTest, Basic)
     limits.hardLimit = 1024u * 1024u * 1024u;
     // PEBS is enabled during MTT allocator creation
     MTTAllocator mtt_allocator;
+    // metadata overhead for mtt allocator: 3 types created at startup: 1
+    // internal slab and 2 types in background thread - dynamic allocation of
+    // tables at init
+    const size_t allocator_metadata = 3 * BIGARY_PAGESIZE;
+
     mtt_allocator_create(&mtt_allocator, &limits);
 
     mtt_allocator_await_flush(&mtt_allocator);
 
     actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
-    ASSERT_EQ(actual_size, BIGARY_PAGESIZE); // metadata for allocator
+    ASSERT_EQ(actual_size, allocator_metadata); // metadata for allocator
 
     volatile int *tab = (int *)mtt_allocator_malloc(&mtt_allocator, size);
 
     mtt_allocator_await_flush(&mtt_allocator);
     actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
-    ASSERT_EQ(actual_size, size);
+    ASSERT_EQ(actual_size, size + allocator_metadata);
 
-    double hotness = -1.0;
-    bool success = get_highest_hotness(&mtt_allocator, hotness);
-
-    ASSERT_TRUE(success);
-    ASSERT_EQ(hotness, 0.0);
+    // do not check hotness before touching - metadata might already be touched
 
     for (size_t i = 0; i < size / sizeof(int); i++) {
         tab[i] = i;
@@ -723,7 +724,8 @@ TEST_F(PEBSTest, Basic)
         }
     }
 
-    success = get_highest_hotness(&mtt_allocator, hotness);
+    double hotness = -1.0;
+    bool success = get_highest_hotness(&mtt_allocator, hotness);
 
     ASSERT_TRUE(success);
     ASSERT_GT(hotness, 0.0);
@@ -748,17 +750,31 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     volatile int total_sum = 0;
 
     MTTInternalsLimits limits;
-    limits.lowLimit = 1ul * 1024ul * 1024ul;   // 16 MB
-    limits.softLimit = 16ul * 1024ul * 1024ul; // 1GB
-    // WARNING hard limit not tested TODO test before productisation
+    limits.lowLimit = 1ul * 1024ul * 1024ul;     // 1 MB
+    limits.softLimit = 16ul * 1024ul * 1024ul;   // 16 MB
     limits.hardLimit = 1024ul * 1024ul * 1024ul; // 1GB
     // PEBS is enabled during MTT allocator creation
     MTTAllocator mtt_allocator;
     mtt_allocator_create(&mtt_allocator, &limits);
+    // metadata overhead for mtt allocator: 3 types created at startup: 1
+    // internal slab and 2 types in background thread - dynamic allocation of
+    // tables at init
+
+    const size_t metadata_size = 3 * BIGARY_PAGESIZE;
+
+    // check DRAM size
+    mtt_allocator_await_flush(&mtt_allocator);
+    size_t dram_size =
+        ranking_get_total_size(mtt_allocator.internals.dramRanking);
+    ASSERT_EQ(dram_size, mtt_allocator.internals.usedDram);
+    ASSERT_EQ(dram_size, metadata_size);
 
     volatile int *tab = (int *)mtt_allocator_malloc(&mtt_allocator, size);
 
+    // check DRAM size
     mtt_allocator_await_flush(&mtt_allocator);
+    dram_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
+    ASSERT_EQ(dram_size, mtt_allocator.internals.usedDram);
 
     for (size_t i = 0; i < size / sizeof(int); i++) {
         tab[i] = i;
@@ -779,12 +795,12 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
 
     // Get sizes of dram and pmem rankings to make sure the soft limit was
     // respected
-    size_t dram_size =
-        ranking_get_total_size(mtt_allocator.internals.dramRanking);
+    dram_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
     size_t pmem_size =
         ranking_get_total_size(mtt_allocator.internals.pmemRanking);
 
-    ASSERT_EQ(dram_size + pmem_size, size);
+    ASSERT_EQ(dram_size + pmem_size, size + metadata_size);
+    ASSERT_EQ(dram_size, mtt_allocator.internals.usedDram);
 
     ASSERT_LE(dram_size, limits.softLimit);
     ASSERT_LE(dram_size, 16ul * 1024ul * 1024ul);
@@ -792,14 +808,15 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     ASSERT_GE(dram_size, limits.softLimit - TRACED_PAGESIZE);
     ASSERT_GE(dram_size, 16ul * 1024ul * 1024ul - TRACED_PAGESIZE);
 
-    ASSERT_GE(pmem_size, size - limits.softLimit);
-    ASSERT_GE(pmem_size, 512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul);
+    ASSERT_GE(pmem_size, size + metadata_size - limits.softLimit);
+    ASSERT_GE(pmem_size,
+              metadata_size + 512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul);
 
     ASSERT_LE(pmem_size,
-              size - limits.softLimit + TRACED_PAGESIZE +
+              size + metadata_size - limits.softLimit + TRACED_PAGESIZE +
                   BIGARY_PAGESIZE); // additional page for metadata
     ASSERT_LE(pmem_size,
-              512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul +
+              metadata_size + 512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul +
                   TRACED_PAGESIZE +
                   BIGARY_PAGESIZE); // additional page for metadata
 
@@ -807,6 +824,76 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     ASSERT_EQ(total_sum, total_sum);
 
     mtt_allocator_free(&mtt_allocator, (void *)tab);
+    mtt_allocator_destroy(&mtt_allocator);
+}
+
+TEST_F(PEBSTest, HardLimitMovementLogic)
+{
+    // do some copying - L3 misses are expected here
+    const size_t size = 16ul * 1024ul * 1024ul; // 16 MB
+    size_t nof_allocations = 256;               // 4 GB in total
+    volatile int total_sum = 0;
+
+    MTTInternalsLimits limits;
+    limits.lowLimit = 1ul * 1024ul * 1024ul;   // 1 MB
+    limits.softLimit = 16ul * 1024ul * 1024ul; // 16 MB
+    limits.hardLimit = 17ul * 1024ul * 1024ul; // 17 MB
+    // PEBS is enabled during MTT allocator creation
+    MTTAllocator mtt_allocator;
+    mtt_allocator_create(&mtt_allocator, &limits);
+    // metadata overhead for mtt allocator: 3 types created at startup: 1
+    // internal slab and 2 types in background thread - dynamic allocation of
+    // tables at init
+    const size_t metadata_size = 3 * BIGARY_PAGESIZE;
+
+    // check DRAM size
+    mtt_allocator_await_flush(&mtt_allocator);
+    size_t dram_size =
+        ranking_get_total_size(mtt_allocator.internals.dramRanking);
+    ASSERT_EQ(dram_size, mtt_allocator.internals.usedDram);
+    ASSERT_EQ(dram_size, metadata_size);
+    ASSERT_LE(mtt_allocator.internals.usedDram, limits.hardLimit);
+
+    volatile int *tab[nof_allocations];
+    for (size_t i = 0; i < nof_allocations; ++i)
+        tab[i] = (int *)mtt_allocator_malloc(&mtt_allocator, size);
+
+    size_t dram_ranking_size =
+        ranking_get_total_size(mtt_allocator.internals.dramRanking);
+    ASSERT_LE(dram_ranking_size, limits.hardLimit);
+    ASSERT_LE(mtt_allocator.internals.usedDram, limits.hardLimit);
+
+    // check DRAM size
+    mtt_allocator_await_flush(&mtt_allocator);
+    dram_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
+    ASSERT_EQ(dram_size, mtt_allocator.internals.usedDram);
+
+    for (size_t k = 0; k < nof_allocations; ++k) {
+        for (size_t i = 0; i < size / sizeof(int); i++) {
+            tab[k][i] = i;
+        }
+
+        for (size_t j = 0; j < 2u; j++) {
+            for (size_t i = 0; i < size / 2u / 10u; i++) {
+                tab[k][i] += tab[k][i * 2] + j;
+                total_sum += tab[k][i];
+            }
+        }
+        dram_ranking_size =
+            ranking_get_total_size(mtt_allocator.internals.dramRanking);
+        ASSERT_LE(dram_ranking_size, limits.hardLimit);
+        ASSERT_LE(mtt_allocator.internals.usedDram, limits.hardLimit);
+    }
+    double hotness = -1.0;
+    bool success = get_highest_hotness(&mtt_allocator, hotness);
+
+    ASSERT_TRUE(success);
+    ASSERT_GT(hotness, 0.0);
+    // compiler optimizations
+    ASSERT_EQ(total_sum, total_sum);
+
+    for (size_t i = 0; i < nof_allocations; ++i)
+        mtt_allocator_free(&mtt_allocator, (void *)tab[i]);
     mtt_allocator_destroy(&mtt_allocator);
 }
 

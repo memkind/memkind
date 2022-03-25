@@ -58,7 +58,8 @@ void bigary_init(bigary *restrict m_bigary, int fd, int flags, size_t max)
 }
 
 void bigary_init_pages(bigary *restrict m_bigary, int fd, int flags, size_t max,
-                       uintptr_t *address, size_t *nof_pages)
+                       uintptr_t *address, size_t *nof_pages,
+                       const MmapCallback *m_mmap)
 {
     assert((BIGARY_PAGESIZE % TRACED_PAGESIZE) == 0 &&
            "bigary pagesize and traced pagesize are not aligned! "
@@ -75,6 +76,7 @@ void bigary_init_pages(bigary *restrict m_bigary, int fd, int flags, size_t max,
     max += TRACED_PAGESIZE; // required to handle start address alignment
     if (ret != 0)
         die("mutex init failed\n");
+    // use regular mmap instead of user_mmap - only address space reservation
     if ((m_bigary->area = mmap(0, max, PROT_NONE, flags, fd, 0)) == MAP_FAILED)
         die("mmapping bigary(%zd) failed: %m\n", max);
 
@@ -90,8 +92,9 @@ void bigary_init_pages(bigary *restrict m_bigary, int fd, int flags, size_t max,
     m_bigary->fd = fd;
     m_bigary->flags = flags;
 
-    if (mmap(m_bigary->area, BIGARY_PAGESIZE, PROT_READ | PROT_WRITE,
-             MAP_FIXED | flags, fd, 0) == MAP_FAILED) {
+    if (m_mmap->wrapped_mmap(m_mmap->arg, m_bigary->area, BIGARY_PAGESIZE,
+                             PROT_READ | PROT_WRITE, MAP_FIXED | flags, fd,
+                             0) == MAP_FAILED) {
         die("bigary alloc of %zd failed: %m\n", BIGARY_PAGESIZE);
     }
     *address = (uintptr_t)(m_bigary->area);
@@ -138,7 +141,8 @@ done:
 /* (you may want MAP_POPULATE to ensure the space is actually there */
 /********************************************************************/
 void bigary_alloc_pages(bigary *restrict m_bigary, size_t top,
-                        uintptr_t *address, size_t *nof_pages)
+                        uintptr_t *address, size_t *nof_pages,
+                        const MmapCallback *m_mmap)
 {
     if (m_bigary->top >= top)
         return;
@@ -148,9 +152,10 @@ void bigary_alloc_pages(bigary *restrict m_bigary, size_t top,
     top = (top + BIGARY_PAGESIZE - 1) & ~(BIGARY_PAGESIZE - 1); // align up
     if (top > m_bigary->declared)
         die("bigary's max is %zd, %zd requested.\n", m_bigary->declared, top);
-    if (mmap(m_bigary->area + m_bigary->top, top - m_bigary->top,
-             PROT_READ | PROT_WRITE, MAP_FIXED | m_bigary->flags, m_bigary->fd,
-             m_bigary->top) == MAP_FAILED) {
+    if (m_mmap->wrapped_mmap(m_mmap->arg, m_bigary->area + m_bigary->top,
+                             top - m_bigary->top, PROT_READ | PROT_WRITE,
+                             MAP_FIXED | m_bigary->flags, m_bigary->fd,
+                             m_bigary->top) == MAP_FAILED) {
         die("in-bigary alloc of %zd to %zd failed: %m\n", top - m_bigary->top,
             top);
     }
