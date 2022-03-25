@@ -130,7 +130,7 @@ static freelist_node_meta_t *slab_alloc_create_meta_(SlabAllocator *alloc)
 
 static freelist_node_meta_t *
 slab_alloc_create_meta_pages_(SlabAllocator *alloc, uintptr_t *page_start,
-                              size_t *nof_pages)
+                              size_t *nof_pages, const MmapCallback *user_mmap)
 {
     size_t free_idx = slab_alloc_fetch_increment_used_(alloc);
     size_t meta_offset = alloc->elementSize * free_idx;
@@ -138,7 +138,7 @@ slab_alloc_create_meta_pages_(SlabAllocator *alloc, uintptr_t *page_start,
     // TODO handle failure gracefully instead of die - in biary_alloc
     bigary_alloc_pages(&alloc->mappedMemory,
                        (free_idx + 1) * alloc->elementSize, page_start,
-                       nof_pages);
+                       nof_pages, user_mmap);
     void *ret_ = ((uint8_t *)alloc->mappedMemory.area) + meta_offset;
     freelist_node_meta_t *ret = ret_;
     ret->allocator = alloc;
@@ -167,13 +167,14 @@ MEMKIND_EXPORT int slab_allocator_init(SlabAllocator *alloc,
 MEMKIND_EXPORT int slab_allocator_init_pages(SlabAllocator *alloc,
                                              size_t element_size,
                                              size_t max_elements,
-                                             uintptr_t *addr, size_t *nof_pages)
+                                             uintptr_t *addr, size_t *nof_pages,
+                                             const MmapCallback *user_mmap)
 {
     // TODO handle failure gracefully instead of die - in biary_alloc
     alloc->elementSize = sizeof(freelist_node_meta_t) + element_size;
     size_t max_elements_size = max_elements * alloc->elementSize;
     bigary_init_pages(&alloc->mappedMemory, BIGARY_DRAM, max_elements_size,
-                      addr, nof_pages);
+                      addr, nof_pages, user_mmap);
     alloc->used = 0u;
 
     int ret = pthread_mutex_init(&alloc->globFreelist.mutex, NULL);
@@ -202,12 +203,13 @@ MEMKIND_EXPORT void *slab_allocator_malloc(SlabAllocator *alloc)
 
 MEMKIND_EXPORT void *slab_allocator_malloc_pages(SlabAllocator *alloc,
                                                  uintptr_t *page_start,
-                                                 size_t *nof_pages)
+                                                 size_t *nof_pages,
+                                                 const MmapCallback *user_mmap)
 {
     void *ret = slab_alloc_glob_freelist_pop_(alloc);
     if (!ret) {
-        freelist_node_meta_t *meta =
-            slab_alloc_create_meta_pages_(alloc, page_start, nof_pages);
+        freelist_node_meta_t *meta = slab_alloc_create_meta_pages_(
+            alloc, page_start, nof_pages, user_mmap);
         if (meta) // defensive programming
             ret = slab_alloc_node_meta_to_addr_(meta);
     }

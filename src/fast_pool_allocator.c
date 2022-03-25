@@ -27,10 +27,10 @@
 // TODO in the future, reducing code duplication with pool_allocator.h would be
 // a good idea
 
-MEMKIND_EXPORT void *fast_pool_allocator_malloc_pages(FastPoolAllocator *pool,
-                                                      size_t size,
-                                                      uintptr_t *address,
-                                                      size_t *nof_pages)
+MEMKIND_EXPORT void *
+fast_pool_allocator_malloc_pages(FastPoolAllocator *pool, size_t size,
+                                 uintptr_t *address, size_t *nof_pages,
+                                 const MmapCallback *user_mmap)
 {
     if (size == 0)
         return NULL;
@@ -39,14 +39,17 @@ MEMKIND_EXPORT void *fast_pool_allocator_malloc_pages(FastPoolAllocator *pool,
     FastSlabAllocator *slab = pool->pool[hash];
     void *ret = NULL;
 
+    size_t mmap_idx = 0ul;
     if (!slab) {
         FastSlabAllocator *null_slab = slab;
         // TODO initialize the slab in a lockless way
         slab = fast_slab_allocator_malloc(&pool->slabSlabAllocator);
         size_t slab_size = rank_size_to_size(size_rank);
-        *nof_pages = 0ul;
-        int ret1 = fast_slab_allocator_init_pages(slab, slab_size, 0, address,
-                                                  nof_pages);
+        nof_pages[mmap_idx] = 0ul;
+        int ret1 = fast_slab_allocator_init_pages(
+            slab, slab_size, 0, &address[mmap_idx], &nof_pages[mmap_idx],
+            user_mmap);
+        ++mmap_idx;
         if (ret1 != 0)
             return NULL;
         // TODO atomic compare exchange WARNING HACK NOT THREAD SAFE NOW !!!!
@@ -64,8 +67,9 @@ MEMKIND_EXPORT void *fast_pool_allocator_malloc_pages(FastPoolAllocator *pool,
     }
 
     uintptr_t page_start = 0ul;
-    *nof_pages = 0ul;
-    ret = fast_slab_allocator_malloc_pages(slab, address, nof_pages);
+    nof_pages[mmap_idx] = 0ul;
+    ret = fast_slab_allocator_malloc_pages(slab, &address[mmap_idx],
+                                           &nof_pages[mmap_idx], user_mmap);
 
     page_start = *address;
 
@@ -79,10 +83,10 @@ MEMKIND_EXPORT void *fast_pool_allocator_malloc_pages(FastPoolAllocator *pool,
 MEMKIND_EXPORT void *fast_pool_allocator_malloc(FastPoolAllocator *pool,
                                                 size_t size)
 {
-    uintptr_t dummy_address = 0ul;
-    size_t dummy_size = 0ul;
-    return fast_pool_allocator_malloc_pages(pool, size, &dummy_address,
-                                            &dummy_size);
+    uintptr_t dummy_address[2] = {0ul};
+    size_t dummy_size[2] = {0ul};
+    return fast_pool_allocator_malloc_pages(pool, size, dummy_address,
+                                            dummy_size, &gStandardMmapCallback);
 }
 
 MEMKIND_EXPORT void *fast_pool_allocator_realloc(FastPoolAllocator *pool,
@@ -93,13 +97,15 @@ MEMKIND_EXPORT void *fast_pool_allocator_realloc(FastPoolAllocator *pool,
     return fast_pool_allocator_malloc(pool, size);
 }
 
-MEMKIND_EXPORT void *fast_pool_allocator_realloc_pages(FastPoolAllocator *pool,
-                                                       void *ptr, size_t size,
-                                                       uintptr_t *addr,
-                                                       size_t *nof_pages)
+MEMKIND_EXPORT void *fast_pool_allocator_realloc_pages(
+    FastPoolAllocator *pool, void *ptr, size_t size, uintptr_t *addr,
+    size_t *nof_pages, const MmapCallback *user_mmap)
 {
+    // FIXME this function does not conform to the standard
+    // if allocation fails, previous allocation should not be freed
     fast_pool_allocator_free(pool, ptr);
-    return fast_pool_allocator_malloc_pages(pool, size, addr, nof_pages);
+    return fast_pool_allocator_malloc_pages(pool, size, addr, nof_pages,
+                                            user_mmap);
 }
 
 MEMKIND_EXPORT void fast_pool_allocator_free(FastPoolAllocator *pool, void *ptr)
@@ -134,11 +140,12 @@ MEMKIND_EXPORT size_t fast_pool_allocator_usable_size(FastPoolAllocator *pool,
 
 MEMKIND_EXPORT int fast_pool_allocator_create(FastPoolAllocator *pool,
                                               uintptr_t *addr,
-                                              size_t *nof_pages)
+                                              size_t *nof_pages,
+                                              const MmapCallback *user_mmap)
 {
-    int ret = fast_slab_allocator_init_pages(&pool->slabSlabAllocator,
-                                             sizeof(FastSlabAllocator),
-                                             UINT16_MAX, addr, nof_pages);
+    int ret = fast_slab_allocator_init_pages(
+        &pool->slabSlabAllocator, sizeof(FastSlabAllocator), UINT16_MAX, addr,
+        nof_pages, user_mmap);
     if (ret == 0)
         (void)memset(pool->pool, 0, sizeof(pool->pool));
     fast_slab_tracker_create(&pool->tracker);
