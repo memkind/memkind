@@ -178,8 +178,8 @@ public:
     {
         uintptr_t dummy_address = 0ul;
         size_t dummy_nof_pages = 0ul;
-        fast_pool_allocator_create(&allocator, &dummy_address,
-                                   &dummy_nof_pages);
+        fast_pool_allocator_create(&allocator, &dummy_address, &dummy_nof_pages,
+                                   &gStandardMmapCallback);
     }
 
     ~FastPoolAllocatorWrapper()

@@ -231,6 +231,8 @@ MEMKIND_EXPORT PageMetadata Ranking::PopColdest()
 {
     // pages are sorted in ascending order, lowest hotness first
     auto coldest = this->hotnessToPages.begin();
+    assert(coldest != this->hotnessToPages.end() &&
+           "Pop from an empty ranking requested!");
     PageMetadata *coldest_page = coldest->second;
     this->hotnessToPages.erase(coldest);
     PageMetadata ret = *coldest_page;
@@ -244,6 +246,8 @@ MEMKIND_EXPORT PageMetadata Ranking::PopHottest()
 {
     // pages are sorted in ascending order, lowest hotness first
     auto hottest = this->hotnessToPages.rbegin();
+    assert(hottest != this->hotnessToPages.rend() &&
+           "Pop from an empty ranking requested!");
     PageMetadata *hottest_page = hottest->second;
     PageMetadata ret = *hottest_page;
     this->pageAddrToPage.erase(hottest_page->GetStartAddr());
