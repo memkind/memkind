@@ -1035,6 +1035,18 @@ MEMKIND_EXPORT int memkind_create_fixed(void *addr, size_t size,
     return MEMKIND_SUCCESS;
 }
 
+struct memkind *memkind_kind_by_priv(void *ptr)
+{
+    int i;
+    for (i = 0; i < MEMKIND_MAX_KIND; i++) {
+        struct memkind *kind = memkind_registry_g.partition_map[i];
+        if (kind && kind->priv == ptr)
+            return kind;
+    }
+
+    return NULL;
+}
+
 static int memkind_get_kind_by_partition_internal(int partition,
                                                   struct memkind **kind)
 {
