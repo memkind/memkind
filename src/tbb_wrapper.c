@@ -176,17 +176,7 @@ struct memkind *tbb_detect_kind(void *ptr)
     if (!ptr) {
         return NULL;
     }
-    struct memkind *kind = NULL;
-    unsigned i;
-    void *pool = pool_identify(ptr);
-    for (i = 0; i < MEMKIND_MAX_KIND; ++i) {
-        int err = memkind_get_kind_by_partition(i, &kind);
-        if (!err && kind->priv == pool) {
-            break;
-        }
-    }
-
-    return kind;
+    return memkind_kind_by_priv(pool_identify);
 }
 
 static int tbb_pool_posix_memalign(struct memkind *kind, void **memptr,
