@@ -35,6 +35,7 @@ static MTTAllocatorNode *root = NULL;
 static SlabAllocator nodeSlab;
 static pthread_mutex_t allocatorsMutex = PTHREAD_MUTEX_INITIALIZER;
 static uint64_t last_timestamp;
+static pthread_once_t mtt_register_atfork_once = PTHREAD_ONCE_INIT;
 
 // static function declarations -----------------------------------------------
 
@@ -49,6 +50,8 @@ static void unregister_mtt_allocator(MTTAllocator *mtt_allocator);
 static void *mtt_allocator_mmap(void *arg, void *__addr, size_t __len,
                                 int __prot, int __flags, int __fd,
                                 __off_t __offset);
+static void background_thread_start(BackgroundThread *bg_thread);
+static void background_thread_stop(MTTAllocator *mtt_allocator);
 
 // static function definitions ------------------------------------------------
 
@@ -292,6 +295,11 @@ void background_thread_init(MTTAllocator *mtt_allocator)
     pthread_cond_init(&bg_thread->bg_thread_cond, NULL);
     pebs_create(mtt_allocator, &bg_thread->pebs, touch_callback);
 
+    background_thread_start(bg_thread);
+}
+
+static void background_thread_start(BackgroundThread *bg_thread)
+{
     bg_thread->bg_thread_state = THREAD_INIT;
     int ret = pthread_create(&bg_thread->bg_thread, NULL, mtt_run_bg_thread,
                              (void *)bg_thread);
@@ -307,10 +315,9 @@ void background_thread_init(MTTAllocator *mtt_allocator)
     pthread_mutex_unlock(&bg_thread->bg_thread_cond_mutex);
 }
 
-void background_thread_fini(MTTAllocator *mtt_allocator)
+static void background_thread_stop(MTTAllocator *mtt_allocator)
 {
     BackgroundThread *bg_thread = &mtt_allocator->bgThread;
-
     pthread_mutex_t *bg_thread_cond_mutex = &bg_thread->bg_thread_cond_mutex;
     pthread_mutex_lock(bg_thread_cond_mutex);
     while (bg_thread->bg_thread_state == THREAD_INIT) {
@@ -322,10 +329,42 @@ void background_thread_fini(MTTAllocator *mtt_allocator)
     pthread_join(bg_thread->bg_thread, NULL);
     assert(mtt_allocator->internals.mmapTracingQueue.head == NULL);
     log_info("MTT background thread closed");
+}
+
+void background_thread_fini(MTTAllocator *mtt_allocator)
+{
+    BackgroundThread *bg_thread = &mtt_allocator->bgThread;
+
+    background_thread_stop(mtt_allocator);
 
     pebs_destroy(mtt_allocator, &bg_thread->pebs);
-    pthread_mutex_destroy(bg_thread_cond_mutex);
+    pthread_mutex_destroy(&bg_thread->bg_thread_cond_mutex);
     pthread_cond_destroy(&bg_thread->bg_thread_cond);
+}
+
+static void mtt_prefork(void)
+{
+    MTTAllocatorNode *cnode = root;
+    while (cnode) {
+        background_thread_stop(cnode->allocator);
+        pebs_disable(cnode->allocator, &cnode->allocator->bgThread.pebs);
+        cnode = cnode->next;
+    }
+}
+
+static void mtt_postfork(void)
+{
+    MTTAllocatorNode *cnode = root;
+    while (cnode) {
+        pebs_enable(cnode->allocator, &cnode->allocator->bgThread.pebs);
+        background_thread_start(&cnode->allocator->bgThread);
+        cnode = cnode->next;
+    }
+}
+
+static void mtt_register_atfork(void)
+{
+    pthread_atfork(mtt_prefork, mtt_postfork, mtt_postfork);
 }
 
 //--------------------------------------------------------------------------
@@ -335,6 +374,8 @@ void background_thread_fini(MTTAllocator *mtt_allocator)
 MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator,
                                          const MTTInternalsLimits *limits)
 {
+    pthread_once(&mtt_register_atfork_once, mtt_register_atfork);
+
     // TODO get timestamp from somewhere!!! (bg thread? PEBS?)
     uint64_t timestamp = 0;
     // TODO this is really super problematic... allocator requires background
