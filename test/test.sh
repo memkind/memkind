@@ -256,7 +256,7 @@ function check_auto_dax_kmem_nodes()
 function skip_hugepages_tests()
 {
     echo "Skipping tests that require huge pages due to unsatisfactory system conditions"
-    SKIP_PATTERNS=("2MBPages" "GBPages" "PAGE_SIZE_2MB" "HUGETLB" "GBTLB")
+    SKIP_PATTERNS=("2MBPages" "PAGE_SIZE_2MB" "HUGETLB")
     for pattern in ${SKIP_PATTERNS[@]}; do
         if [ -z $SKIPPED_GTESTS ]; then
             SKIPPED_GTESTS="-:*"$pattern"*"
