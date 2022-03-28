@@ -46,6 +46,10 @@ extern "C" {
 #define jemk_check_reallocatex  JE_SYMBOL(check_reallocatex)
 #define jemk_malloc_stats_print JE_SYMBOL(malloc_stats_print)
 
+// Number of static kinds.  Needs to be kept in sync with the number of
+// such kinds included in memkind_registry_g.
+#define MEMKIND_NUM_STATIC_KINDS 23
+
 enum memkind_const_private
 {
     MEMKIND_NAME_LENGTH_PRIV = 64
