@@ -71,7 +71,6 @@
 
 static struct memkind MEMKIND_DEFAULT_STATIC = {
     .ops = &MEMKIND_DEFAULT_OPS,
-    .partition = MEMKIND_PARTITION_DEFAULT,
     .name = "memkind_default",
     .init_once = PTHREAD_ONCE_INIT,
     .arena_zero = 0,
@@ -80,154 +79,132 @@ static struct memkind MEMKIND_DEFAULT_STATIC = {
 
 static struct memkind MEMKIND_HUGETLB_STATIC = {
     .ops = &MEMKIND_HUGETLB_OPS,
-    .partition = MEMKIND_PARTITION_HUGETLB,
     .name = "memkind_hugetlb",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_INTERLEAVE_STATIC = {
     .ops = &MEMKIND_INTERLEAVE_OPS,
-    .partition = MEMKIND_PARTITION_INTERLEAVE,
     .name = "memkind_interleave",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_STATIC = {
     .ops = &MEMKIND_HBW_OPS,
-    .partition = MEMKIND_PARTITION_HBW,
     .name = "memkind_hbw",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_ALL_STATIC = {
     .ops = &MEMKIND_HBW_ALL_OPS,
-    .partition = MEMKIND_PARTITION_HBW_ALL,
     .name = "memkind_hbw_all",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_PREFERRED_STATIC = {
     .ops = &MEMKIND_HBW_PREFERRED_OPS,
-    .partition = MEMKIND_PARTITION_HBW_PREFERRED,
     .name = "memkind_hbw_preferred",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_HUGETLB_STATIC = {
     .ops = &MEMKIND_HBW_HUGETLB_OPS,
-    .partition = MEMKIND_PARTITION_HBW_HUGETLB,
     .name = "memkind_hbw_hugetlb",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_ALL_HUGETLB_STATIC = {
     .ops = &MEMKIND_HBW_ALL_HUGETLB_OPS,
-    .partition = MEMKIND_PARTITION_HBW_ALL_HUGETLB,
     .name = "memkind_hbw_all_hugetlb",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_PREFERRED_HUGETLB_STATIC = {
     .ops = &MEMKIND_HBW_PREFERRED_HUGETLB_OPS,
-    .partition = MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB,
     .name = "memkind_hbw_preferred_hugetlb",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HBW_INTERLEAVE_STATIC = {
     .ops = &MEMKIND_HBW_INTERLEAVE_OPS,
-    .partition = MEMKIND_PARTITION_HBW_INTERLEAVE,
     .name = "memkind_hbw_interleave",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_REGULAR_STATIC = {
     .ops = &MEMKIND_REGULAR_OPS,
-    .partition = MEMKIND_PARTITION_REGULAR,
     .name = "memkind_regular",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_DAX_KMEM_STATIC = {
     .ops = &MEMKIND_DAX_KMEM_OPS,
-    .partition = MEMKIND_PARTITION_DAX_KMEM,
     .name = "memkind_dax_kmem",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_DAX_KMEM_ALL_STATIC = {
     .ops = &MEMKIND_DAX_KMEM_ALL_OPS,
-    .partition = MEMKIND_PARTITION_DAX_KMEM_ALL,
     .name = "memkind_dax_kmem_all",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_DAX_KMEM_PREFERRED_STATIC = {
     .ops = &MEMKIND_DAX_KMEM_PREFERRED_OPS,
-    .partition = MEMKIND_PARTITION_DAX_KMEM_PREFERRED,
     .name = "memkind_dax_kmem_preferred",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_DAX_KMEM_INTERLEAVE_STATIC = {
     .ops = &MEMKIND_DAX_KMEM_INTERLEAVE_OPS,
-    .partition = MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE,
     .name = "memkind_dax_kmem_interleave",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HIGHEST_CAPACITY_STATIC = {
     .ops = &MEMKIND_HIGHEST_CAPACITY_OPS,
-    .partition = MEMKIND_PARTITION_HIGHEST_CAPACITY,
     .name = "memkind_highest_capacity",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HIGHEST_CAPACITY_PREFERRED_STATIC = {
     .ops = &MEMKIND_HIGHEST_CAPACITY_PREFERRED_OPS,
-    .partition = MEMKIND_PARTITION_HIGHEST_CAPACITY_PREFERRED,
     .name = "memkind_highest_capacity_preferred",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HIGHEST_CAPACITY_LOCAL_STATIC = {
     .ops = &MEMKIND_HIGHEST_CAPACITY_LOCAL_OPS,
-    .partition = MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL,
     .name = "memkind_highest_capacity_local",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_STATIC = {
     .ops = &MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_OPS,
-    .partition = MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL_PREFERRED,
     .name = "memkind_highest_capacity_local_preferred",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_LOWEST_LATENCY_LOCAL_STATIC = {
     .ops = &MEMKIND_LOWEST_LATENCY_LOCAL_OPS,
-    .partition = MEMKIND_PARTITION_LOWEST_LATENCY_LOCAL,
     .name = "memkind_lowest_latency_local",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_STATIC = {
     .ops = &MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_OPS,
-    .partition = MEMKIND_PARTITION_LOWEST_LATENCY_LOCAL_PREFERRED,
     .name = "memkind_lowest_latency_local_preferred",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HIGHEST_BANDWIDTH_LOCAL_STATIC = {
     .ops = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_OPS,
-    .partition = MEMKIND_PARTITION_HIGHEST_BANDWIDTH_LOCAL,
     .name = "memkind_highest_bandwidth_local",
     .init_once = PTHREAD_ONCE_INIT,
 };
 
 static struct memkind MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC = {
     .ops = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_OPS,
-    .partition = MEMKIND_PARTITION_HIGHEST_BANDWIDTH_LOCAL_PREFERRED,
     .name = "memkind_highest_bandwidth_local_preferred",
     .init_once = PTHREAD_ONCE_INIT,
 };
@@ -265,31 +242,31 @@ struct memkind_registry {
 
 static struct memkind_registry memkind_registry_g = {
     {
-        [MEMKIND_PARTITION_DEFAULT] = &MEMKIND_DEFAULT_STATIC,
-        [MEMKIND_PARTITION_HBW] = &MEMKIND_HBW_STATIC,
-        [MEMKIND_PARTITION_HBW_PREFERRED] = &MEMKIND_HBW_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_HBW_HUGETLB] = &MEMKIND_HBW_HUGETLB_STATIC,
-        [MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB] = &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
-        [MEMKIND_PARTITION_HUGETLB] = &MEMKIND_HUGETLB_STATIC,
-        [MEMKIND_PARTITION_HBW_INTERLEAVE] = &MEMKIND_HBW_INTERLEAVE_STATIC,
-        [MEMKIND_PARTITION_INTERLEAVE] = &MEMKIND_INTERLEAVE_STATIC,
-        [MEMKIND_PARTITION_REGULAR] = &MEMKIND_REGULAR_STATIC,
-        [MEMKIND_PARTITION_HBW_ALL] = &MEMKIND_HBW_ALL_STATIC,
-        [MEMKIND_PARTITION_HBW_ALL_HUGETLB] = &MEMKIND_HBW_ALL_HUGETLB_STATIC,
-        [MEMKIND_PARTITION_DAX_KMEM] = &MEMKIND_DAX_KMEM_STATIC,
-        [MEMKIND_PARTITION_DAX_KMEM_ALL] = &MEMKIND_DAX_KMEM_ALL_STATIC,
-        [MEMKIND_PARTITION_DAX_KMEM_PREFERRED] = &MEMKIND_DAX_KMEM_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_DAX_KMEM_INTERLEAVE] = &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_CAPACITY] = &MEMKIND_HIGHEST_CAPACITY_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_CAPACITY_PREFERRED] = &MEMKIND_HIGHEST_CAPACITY_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL] =  &MEMKIND_HIGHEST_CAPACITY_LOCAL_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_CAPACITY_LOCAL_PREFERRED] = &MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_LOWEST_LATENCY_LOCAL] = &MEMKIND_LOWEST_LATENCY_LOCAL_STATIC,
-        [MEMKIND_PARTITION_LOWEST_LATENCY_LOCAL_PREFERRED] = &MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_BANDWIDTH_LOCAL] = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_STATIC,
-        [MEMKIND_PARTITION_HIGHEST_BANDWIDTH_LOCAL_PREFERRED] = &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC,
+        &MEMKIND_DEFAULT_STATIC,
+        &MEMKIND_HBW_STATIC,
+        &MEMKIND_HBW_PREFERRED_STATIC,
+        &MEMKIND_HBW_HUGETLB_STATIC,
+        &MEMKIND_HBW_PREFERRED_HUGETLB_STATIC,
+        &MEMKIND_HUGETLB_STATIC,
+        &MEMKIND_HBW_INTERLEAVE_STATIC,
+        &MEMKIND_INTERLEAVE_STATIC,
+        &MEMKIND_REGULAR_STATIC,
+        &MEMKIND_HBW_ALL_STATIC,
+        &MEMKIND_HBW_ALL_HUGETLB_STATIC,
+        &MEMKIND_DAX_KMEM_STATIC,
+        &MEMKIND_DAX_KMEM_ALL_STATIC,
+        &MEMKIND_DAX_KMEM_PREFERRED_STATIC,
+        &MEMKIND_DAX_KMEM_INTERLEAVE_STATIC,
+        &MEMKIND_HIGHEST_CAPACITY_STATIC,
+        &MEMKIND_HIGHEST_CAPACITY_PREFERRED_STATIC,
+        &MEMKIND_HIGHEST_CAPACITY_LOCAL_STATIC,
+        &MEMKIND_HIGHEST_CAPACITY_LOCAL_PREFERRED_STATIC,
+        &MEMKIND_LOWEST_LATENCY_LOCAL_STATIC,
+        &MEMKIND_LOWEST_LATENCY_LOCAL_PREFERRED_STATIC,
+        &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_STATIC,
+        &MEMKIND_HIGHEST_BANDWIDTH_LOCAL_PREFERRED_STATIC,
     },
-    MEMKIND_NUM_BASE_KIND,
+    MEMKIND_NUM_STATIC_KINDS,
     PTHREAD_MUTEX_INITIALIZER
 };
 // clang-format on
@@ -408,7 +385,7 @@ MEMKIND_EXPORT int memkind_create_kind(memkind_memtype_t memtype_flags,
 static void memkind_destroy_dynamic_kind_from_register(unsigned int i,
                                                        memkind_t kind)
 {
-    if (i >= MEMKIND_NUM_BASE_KIND) {
+    if (i >= MEMKIND_NUM_STATIC_KINDS) {
         memkind_registry_g.partition_map[i] = NULL;
         --memkind_registry_g.num_kind;
         jemk_free(kind);
@@ -422,7 +399,7 @@ MEMKIND_EXPORT int memkind_destroy_kind(memkind_t kind)
         assert(0 && "failed to acquire mutex");
     unsigned i;
     int err = kind->ops->destroy(kind);
-    for (i = MEMKIND_NUM_BASE_KIND; i < MEMKIND_MAX_KIND; ++i) {
+    for (i = MEMKIND_NUM_STATIC_KINDS; i < MEMKIND_MAX_KIND; ++i) {
         if (memkind_registry_g.partition_map[i] &&
             strcmp(kind->name, memkind_registry_g.partition_map[i]->name) ==
                 0) {
@@ -644,6 +621,10 @@ __attribute__((constructor))
 static void
 memkind_construct(void)
 {
+    // Verify the number of base kinds.
+    assert(memkind_registry_g.partition_map[MEMKIND_NUM_STATIC_KINDS - 1]);
+    assert(!memkind_registry_g.partition_map[MEMKIND_NUM_STATIC_KINDS]);
+
     if (!memkind_use_other_heap_manager()) {
         const char *env = memkind_get_env("MEMKIND_BACKGROUND_THREAD_LIMIT");
         if (env) {
@@ -685,7 +666,7 @@ memkind_finalize(void)
             memkind_destroy_dynamic_kind_from_register(i, kind);
         }
     }
-    assert(memkind_registry_g.num_kind == MEMKIND_NUM_BASE_KIND);
+    assert(memkind_registry_g.num_kind == MEMKIND_NUM_STATIC_KINDS);
 
 exit:
     if (pthread_mutex_unlock(&memkind_registry_g.lock) != 0)

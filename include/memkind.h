@@ -398,8 +398,6 @@ int memkind_destroy_kind(memkind_t kind);
 ///
 memkind_t memkind_detect_kind(void *ptr);
 
-#include "memkind_deprecated.h"
-
 /// \warning EXPERIMENTAL API
 extern memkind_t MEMKIND_REGULAR;
 
