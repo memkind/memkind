@@ -116,32 +116,10 @@ void pebs_create(MTTAllocator *mtt_allocator, PebsMetadata *pebs, touch_cb cb)
     struct perf_event_attr pe;
     memset(&pe, 0, sizeof(struct perf_event_attr));
 
-#if USE_LIBPFM
-    int ret = pfm_initialize();
-    if (ret != PFM_SUCCESS) {
-        log_fatal("PEBS: pfm_initialize() failed!");
-        exit(-1);
-    }
-
-    pfm_perf_encode_arg_t arg;
-    memset(&arg, 0, sizeof(arg));
-    arg.attr = &pe;
-    char event[] = "MEM_LOAD_RETIRED:L3_MISS";
-    ret =
-        pfm_get_os_event_encoding(event, PFM_PLM3, PFM_OS_PERF_EVENT_EXT, &arg);
-    if (ret != PFM_SUCCESS) {
-        log_err("PEBS: pfm_get_os_event_encoding() failed - "
-                "using magic numbers!");
-        pe.type = PERF_TYPE_RAW;
-        pe.config = 0x5120D1;
-    }
-
-#else // USE_LIBPFM == 0
     // monitor last-level cache read misses
     pe.type = PERF_TYPE_HW_CACHE;
     pe.config = PERF_COUNT_HW_CACHE_LL | PERF_COUNT_HW_CACHE_OP_READ |
         PERF_COUNT_HW_CACHE_RESULT_MISS;
-#endif
 
     pe.size = sizeof(struct perf_event_attr);
     pe.sample_period = PEBS_SAMPLING_INTERVAL;
