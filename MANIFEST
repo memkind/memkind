@@ -66,7 +66,6 @@ include/memkind/internal/tbb_mem_pool_policy.h
 include/memkind/internal/tbb_wrapper.h
 include/memkind/internal/vec.h
 include/memkind_allocator.h
-include/memkind_deprecated.h
 include/pmem_allocator.h
 include/fixed_allocator.h
 jemalloc/.appveyor.yml
