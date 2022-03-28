@@ -112,6 +112,8 @@ void *kind_mmap(struct memkind *kind, void *addr, size_t size);
 
 char *memkind_get_env(const char *name);
 
+struct memkind *memkind_kind_by_priv(void *ptr);
+
 #ifdef __cplusplus
 }
 #endif

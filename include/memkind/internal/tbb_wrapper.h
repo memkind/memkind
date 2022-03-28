@@ -3,7 +3,6 @@
 
 #pragma once
 #include <memkind.h>
-#include <memkind_deprecated.h>
 
 #ifdef __cplusplus
 extern "C" {
