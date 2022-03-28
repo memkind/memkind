@@ -50,6 +50,7 @@ extern void *pool_allocator_malloc_pages(PoolAllocator *pool, size_t size,
 extern void *pool_allocator_realloc(PoolAllocator *pool, void *ptr,
                                     size_t size);
 extern void pool_allocator_free(void *ptr);
+extern size_t pool_allocator_usable_size(void *ptr);
 
 #ifdef __cplusplus
 }

@@ -117,6 +117,21 @@ MEMKIND_EXPORT void fast_pool_allocator_free(FastPoolAllocator *pool, void *ptr)
     fast_slab_allocator_free(alloc, ptr);
 }
 
+MEMKIND_EXPORT size_t fast_pool_allocator_usable_size(FastPoolAllocator *pool,
+                                                      void *ptr)
+{
+    if (ptr == NULL)
+        return 0;
+
+    uintptr_t address = (uintptr_t)ptr;
+    // TODO microoptimisation possible !
+    uintptr_t address_aligned = (address / TRACED_PAGESIZE) * TRACED_PAGESIZE;
+    FastSlabAllocator *alloc =
+        fast_slab_tracker_get_fast_slab(pool->tracker, address_aligned);
+    assert(alloc && "allocator not registered!");
+    return alloc->elementSize;
+}
+
 MEMKIND_EXPORT int fast_pool_allocator_create(FastPoolAllocator *pool,
                                               uintptr_t *addr,
                                               size_t *nof_pages)

@@ -43,6 +43,7 @@ extern void *mtt_allocator_malloc(MTTAllocator *mtt_allocator, size_t size);
 extern void *mtt_allocator_realloc(MTTAllocator *mtt_allocator, void *ptr,
                                    size_t size);
 extern void mtt_allocator_free(MTTAllocator *mtt_allocator, void *ptr);
+extern size_t mtt_allocator_usable_size(MTTAllocator *mtt_allocator, void *ptr);
 
 /// @brief Waits until all formerly mmapped pages become visible in the
 /// rankings
