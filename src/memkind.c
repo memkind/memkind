@@ -1047,27 +1047,6 @@ struct memkind *memkind_kind_by_priv(void *ptr)
     return NULL;
 }
 
-static int memkind_get_kind_by_partition_internal(int partition,
-                                                  struct memkind **kind)
-{
-    int err = MEMKIND_SUCCESS;
-
-    if (MEMKIND_LIKELY(partition >= 0 && partition < MEMKIND_MAX_KIND &&
-                       memkind_registry_g.partition_map[partition] != NULL)) {
-        *kind = memkind_registry_g.partition_map[partition];
-    } else {
-        *kind = NULL;
-        err = MEMKIND_ERROR_UNAVAILABLE;
-    }
-    return err;
-}
-
-MEMKIND_EXPORT int memkind_get_kind_by_partition(int partition,
-                                                 struct memkind **kind)
-{
-    return memkind_get_kind_by_partition_internal(partition, kind);
-}
-
 MEMKIND_EXPORT int memkind_update_cached_stats(void)
 {
     return m_update_cached_stats();

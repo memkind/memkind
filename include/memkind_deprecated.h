@@ -18,23 +18,6 @@
 extern "C" {
 #endif
 
-#ifndef MEMKIND_DEPRECATED
-
-#ifdef __GNUC__
-#define MEMKIND_DEPRECATED(func) func __attribute__((deprecated))
-#elif defined(_MSC_VER)
-#define MEMKIND_DEPRECATED(func) __declspec(deprecated) func
-#else
-#pragma message(                                                               \
-    "WARNING: You need to implement MEMKIND_DEPRECATED for this compiler")
-#define MEMKIND_DEPRECATED(func) func
-#endif
-
-#endif
-
-int MEMKIND_DEPRECATED(memkind_get_kind_by_partition(int partition,
-                                                     memkind_t *kind));
-
 enum memkind_base_partition
 {
     MEMKIND_PARTITION_DEFAULT = 0,
