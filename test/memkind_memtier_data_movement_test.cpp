@@ -24,6 +24,26 @@
 
 #include <test/proc_stat.h>
 
+std::chrono::duration<double> bench(size_t bench_num, size_t alloc_size,
+                                    void *start_addr)
+{
+    auto start = std::chrono::steady_clock::now();
+
+    long int temp = 0;
+    for (size_t i = 0; i < bench_num; i++) {
+        for (size_t j = 0; j < (alloc_size - 1) / sizeof(int); j++) {
+            volatile int *p = &((volatile int *)(start_addr))[j];
+            *p = *(p + 1) * 4 - temp;
+            temp += *p;
+        }
+    }
+
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << "bench elapsed time: " << elapsed_seconds.count() << "s\n";
+    return elapsed_seconds;
+}
+
 class MemkindMemtierDataMovementTest: public ::testing::Test
 {
 protected:
@@ -1521,10 +1541,14 @@ TEST(RankingTest, page_movement)
 {
     TestPrereq tp;
     int page_obj_node = -1;
+    size_t alloc_size = TRACED_PAGESIZE * 1024 * 100;
+    size_t bench_num = 10;
+    int ret;
 
-    void *start_addr = mmap(NULL, TRACED_PAGESIZE, PROT_READ | PROT_WRITE,
+    void *start_addr = mmap(NULL, alloc_size, PROT_READ | PROT_WRITE,
                             MAP_PRIVATE | MAP_ANONYMOUS | MAP_POPULATE, -1, 0);
     ASSERT_NE(start_addr, nullptr);
+    memset(start_addr, 0, alloc_size);
 
     // Page object should be allocated on DRAM node
     auto dram_nodes = tp.get_regular_numa_nodes();
@@ -1533,30 +1557,53 @@ TEST(RankingTest, page_movement)
     int process_cpu = sched_getcpu();
     int process_node = numa_node_of_cpu(process_cpu);
     ASSERT_TRUE(dram_nodes.find(page_obj_node) != dram_nodes.end());
+    std::cout << "process_cpu: " << process_cpu << std::endl;
+    std::cout << "process_node: " << process_node << std::endl;
+
+    // Measure access times on DRAM
+    std::cout << "page_obj_node: " << page_obj_node << std::endl;
+    auto dram_time1 = bench(bench_num, alloc_size, start_addr);
 
     // Get the closest DAX_KMEM NUMA nodes
     auto dax_kmem_nodes = tp.get_memory_only_numa_nodes();
     auto closest_numa_ids =
         tp.get_closest_numa_nodes(process_node, dax_kmem_nodes);
 
-    // Move page object to PMEM
-    int ret = move_page_metadata((uintptr_t)start_addr, DAX_KMEM);
-    ASSERT_EQ(ret, 0);
+    // Move object's pages to PMEM
+    for (size_t i = 0; i < alloc_size / TRACED_PAGESIZE; i++) {
+        uintptr_t ptr = (uintptr_t)start_addr + i * TRACED_PAGESIZE;
+        ret = move_page_metadata(ptr, DAX_KMEM);
+        ASSERT_EQ(ret, 0);
 
-    // Verify that the object has the right NUMA node policy
-    get_mempolicy(&page_obj_node, nullptr, 0, start_addr,
-                  MPOL_F_NODE | MPOL_F_ADDR);
-    ASSERT_NE(process_node, page_obj_node);
-    ASSERT_TRUE(closest_numa_ids.find(page_obj_node) != closest_numa_ids.end());
+        // Verify that the object has the right NUMA node policy
+        get_mempolicy(&page_obj_node, nullptr, 0, (void *)ptr,
+                      MPOL_F_NODE | MPOL_F_ADDR);
+        ASSERT_NE(process_node, page_obj_node);
+        ASSERT_TRUE(closest_numa_ids.find(page_obj_node) !=
+                    closest_numa_ids.end());
+    }
+
+    // Measure access times on PMEM
+    std::cout << "page_obj_node: " << page_obj_node << std::endl;
+    auto pmem_time = bench(bench_num, alloc_size, start_addr);
+    ASSERT_TRUE(dram_time1 < pmem_time);
 
     // Move page object to DRAM
-    ret = move_page_metadata((uintptr_t)start_addr, DRAM);
-    ASSERT_EQ(ret, 0);
+    for (size_t i = 0; i < alloc_size / TRACED_PAGESIZE; i++) {
+        uintptr_t ptr = (uintptr_t)start_addr + i * TRACED_PAGESIZE;
+        ret = move_page_metadata(ptr, DRAM);
+        ASSERT_EQ(ret, 0);
 
-    // Verify that the object has the right NUMA node policy
-    get_mempolicy(&page_obj_node, nullptr, 0, start_addr,
-                  MPOL_F_NODE | MPOL_F_ADDR);
-    ASSERT_EQ(process_node, page_obj_node);
+        // Verify that the object has the right NUMA node policy
+        get_mempolicy(&page_obj_node, nullptr, 0, (void *)ptr,
+                      MPOL_F_NODE | MPOL_F_ADDR);
+        ASSERT_EQ(process_node, page_obj_node);
+    }
+
+    // Measure access times on DRAM
+    std::cout << "page_obj_node: " << page_obj_node << std::endl;
+    auto dram_time2 = bench(bench_num, alloc_size, start_addr);
+    ASSERT_TRUE(dram_time2 < pmem_time);
 
     munmap(start_addr, TRACED_PAGESIZE);
 }
