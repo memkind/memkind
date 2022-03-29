@@ -1517,46 +1517,93 @@ TEST(MmapTracingQueueTest, Basic)
     mmap_tracing_queue_destroy(&queue);
 }
 
-TEST(RankingTest, page_movement)
+class RankingPerfTest: public ::testing::Test
 {
-    TestPrereq tp;
-    int page_obj_node = -1;
+protected:
+    const size_t m_alloc_size = TRACED_PAGESIZE * 1024 * 100;
+    const size_t m_bench_num = 10;
+    void *m_start_addr;
 
-    void *start_addr = mmap(NULL, TRACED_PAGESIZE, PROT_READ | PROT_WRITE,
+    std::chrono::duration<double> bench(size_t bench_num, size_t alloc_size,
+                                        void *start_addr)
+    {
+        auto start = std::chrono::steady_clock::now();
+
+        long int temp = 0;
+        for (size_t i = 0; i < bench_num; i++) {
+            for (size_t j = 0; j < (alloc_size - 1) / sizeof(int); j += 32) {
+                volatile int *p = &((volatile int *)(start_addr))[j];
+                *p = *(p + 1) * 4 - temp;
+                temp += *p;
+            }
+        }
+
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        return elapsed_seconds;
+    }
+
+private:
+    void SetUp()
+    {
+        m_start_addr = mmap(NULL, m_alloc_size, PROT_READ | PROT_WRITE,
                             MAP_PRIVATE | MAP_ANONYMOUS | MAP_POPULATE, -1, 0);
-    ASSERT_NE(start_addr, nullptr);
+        ASSERT_NE(m_start_addr, nullptr);
+        memset(m_start_addr, 0, m_alloc_size);
+    }
 
-    // Page object should be allocated on DRAM node
+    void TearDown()
+    {
+        munmap(m_start_addr, TRACED_PAGESIZE);
+    }
+};
+
+TEST_F(RankingPerfTest, PageMovement)
+{
+    int page_obj_node = -1;
+    int ret;
+    TestPrereq tp;
+
     auto dram_nodes = tp.get_regular_numa_nodes();
-    get_mempolicy(&page_obj_node, nullptr, 0, start_addr,
+    auto dax_kmem_nodes = tp.get_memory_only_numa_nodes();
+
+    // All object's pages should be allocated on DRAM node
+    get_mempolicy(&page_obj_node, nullptr, 0, m_start_addr,
                   MPOL_F_NODE | MPOL_F_ADDR);
-    int process_cpu = sched_getcpu();
-    int process_node = numa_node_of_cpu(process_cpu);
     ASSERT_TRUE(dram_nodes.find(page_obj_node) != dram_nodes.end());
 
-    // Get the closest DAX_KMEM NUMA nodes
-    auto dax_kmem_nodes = tp.get_memory_only_numa_nodes();
-    auto closest_numa_ids =
-        tp.get_closest_numa_nodes(process_node, dax_kmem_nodes);
+    // Measure access times on DRAM
+    auto dram_time1 = bench(m_bench_num, m_alloc_size, m_start_addr);
 
-    // Move page object to PMEM
-    int ret = move_page_metadata((uintptr_t)start_addr, DAX_KMEM);
-    ASSERT_EQ(ret, 0);
+    // Move object's pages to PMEM
+    for (size_t i = 0; i < m_alloc_size / TRACED_PAGESIZE; i++) {
+        uintptr_t ptr = (uintptr_t)m_start_addr + i * TRACED_PAGESIZE;
+        ret = move_page_metadata(ptr, DAX_KMEM);
+        ASSERT_EQ(ret, 0);
 
-    // Verify that the object has the right NUMA node policy
-    get_mempolicy(&page_obj_node, nullptr, 0, start_addr,
-                  MPOL_F_NODE | MPOL_F_ADDR);
-    ASSERT_NE(process_node, page_obj_node);
-    ASSERT_TRUE(closest_numa_ids.find(page_obj_node) != closest_numa_ids.end());
+        // Verify that the object has the right NUMA node policy
+        get_mempolicy(&page_obj_node, nullptr, 0, (void *)ptr,
+                      MPOL_F_NODE | MPOL_F_ADDR);
+        ASSERT_TRUE(dax_kmem_nodes.find(page_obj_node) != dax_kmem_nodes.end());
+    }
+
+    // Measure access times on PMEM
+    auto pmem_time = bench(m_bench_num, m_alloc_size, m_start_addr);
+    ASSERT_TRUE(dram_time1 * 2 < pmem_time);
 
     // Move page object to DRAM
-    ret = move_page_metadata((uintptr_t)start_addr, DRAM);
-    ASSERT_EQ(ret, 0);
+    for (size_t i = 0; i < m_alloc_size / TRACED_PAGESIZE; i++) {
+        uintptr_t ptr = (uintptr_t)m_start_addr + i * TRACED_PAGESIZE;
+        ret = move_page_metadata(ptr, DRAM);
+        ASSERT_EQ(ret, 0);
 
-    // Verify that the object has the right NUMA node policy
-    get_mempolicy(&page_obj_node, nullptr, 0, start_addr,
-                  MPOL_F_NODE | MPOL_F_ADDR);
-    ASSERT_EQ(process_node, page_obj_node);
+        // Verify that the object has the right NUMA node policy
+        get_mempolicy(&page_obj_node, nullptr, 0, (void *)ptr,
+                      MPOL_F_NODE | MPOL_F_ADDR);
+        ASSERT_TRUE(dram_nodes.find(page_obj_node) != dram_nodes.end());
+    }
 
-    munmap(start_addr, TRACED_PAGESIZE);
+    // Measure access times on DRAM
+    auto dram_time2 = bench(m_bench_num, m_alloc_size, m_start_addr);
+    ASSERT_TRUE(dram_time2 * 2 < pmem_time);
 }
