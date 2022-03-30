@@ -13,12 +13,42 @@
 #define PEBS_SAMPLING_INTERVAL        1000
 #define MMAP_DATA_SIZE                8
 #define MMAP_PAGES_NUM                1 + MMAP_DATA_SIZE
-#define HOTNESS_PEBS_THREAD_FREQUENCY 10.0
+#define HOTNESS_PEBS_THREAD_FREQUENCY 2.0
+
+static void timespec_add(struct timespec *modified,
+                         const struct timespec *toadd)
+{
+    const uint64_t S_TO_NS = 1000000000u;
+    modified->tv_sec += toadd->tv_sec;
+    modified->tv_nsec += toadd->tv_nsec;
+    modified->tv_sec += (modified->tv_nsec / S_TO_NS);
+    modified->tv_nsec %= S_TO_NS;
+}
+
+static void timespec_millis_to_timespec(double millis, struct timespec *out)
+{
+    out->tv_sec = (uint64_t)(millis / 1000u);
+    double ms_to_convert = millis - out->tv_sec * 1000;
+    out->tv_nsec = (uint64_t)(ms_to_convert * 1000000);
+}
 
 void pebs_monitor(PebsMetadata *pebs)
 {
     // must call this before read from data head
     asm volatile("lfence" ::: "memory");
+
+    double pebs_freq_hz = HOTNESS_PEBS_THREAD_FREQUENCY;
+    double period_ms = 1000 / pebs_freq_hz;
+    struct timespec tv_period;
+    timespec_millis_to_timespec(period_ms, &tv_period);
+
+    struct timespec ntime;
+    int ret = clock_gettime(CLOCK_MONOTONIC, &ntime);
+    if (ret != 0) {
+        log_fatal("ASSERT PEBS Monitor CLOCK_GETTIME_FAILURE!");
+        exit(-1);
+    }
+    timespec_add(&ntime, &tv_period);
 
     int all_cpu_samples = 0;
 
@@ -75,6 +105,9 @@ void pebs_monitor(PebsMetadata *pebs)
     }
 
     log_info("PEBS: processed %d samples", all_cpu_samples);
+
+    (void)clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ntime, NULL);
+    timespec_add(&ntime, &tv_period);
 }
 
 void pebs_unmap_all_cpus(PebsMetadata *pebs)

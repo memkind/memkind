@@ -706,6 +706,8 @@ TEST_F(PEBSTest, Basic)
     actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
     ASSERT_EQ(actual_size, size);
 
+    // Wait a little to allow PEBS thread do its work
+    sleep(2);
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
 
@@ -723,6 +725,8 @@ TEST_F(PEBSTest, Basic)
         }
     }
 
+    // Wait a little to allow PEBS thread do its work
+    sleep(2);
     success = get_highest_hotness(&mtt_allocator, hotness);
 
     ASSERT_TRUE(success);
@@ -771,6 +775,8 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
         }
     }
 
+    // Wait a little to allow PEBS thread do its work
+    sleep(2);
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
 
