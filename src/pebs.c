@@ -10,10 +10,9 @@
 #include <assert.h>
 #include <unistd.h>
 
-#define PEBS_SAMPLING_INTERVAL        1000
-#define MMAP_DATA_SIZE                8
-#define MMAP_PAGES_NUM                1 + MMAP_DATA_SIZE
-#define HOTNESS_PEBS_THREAD_FREQUENCY 10.0
+#define PEBS_SAMPLING_INTERVAL 1000
+#define MMAP_DATA_SIZE         8
+#define MMAP_PAGES_NUM         1 + MMAP_DATA_SIZE
 
 void pebs_monitor(PebsMetadata *pebs)
 {
@@ -46,6 +45,8 @@ void pebs_monitor(PebsMetadata *pebs)
                 read_ptr += sizeof(__u64);
                 addr = *(__u64 *)read_ptr;
                 pebs->cb(addr, timestamp);
+
+                samples++;
             } else if ((event->type >= PERF_RECORD_MAX) || (event->size == 0)) {
                 log_fatal("PEBS buffer corrupted!!!");
                 pebs->last_head[cpu_idx] = pebs_metadata->data_head;
@@ -60,7 +61,6 @@ void pebs_monitor(PebsMetadata *pebs)
 
             pebs->last_head[cpu_idx] += event->size;
             data_mmap += event->size;
-            samples++;
         }
 
         if (samples > 0) {
