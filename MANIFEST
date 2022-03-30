@@ -76,6 +76,7 @@ include/memkind/internal/fast_slab_allocator.h
 include/memkind/internal/slab_allocator.h
 include/memkind/internal/mmap_tracing_queue.h
 include/memkind/internal/slab_tracker.h
+include/memkind/internal/timespec_ops.h
 include/memkind_allocator.h
 include/memkind_deprecated.h
 include/pmem_allocator.h
@@ -455,6 +456,7 @@ src/mmap_tracing_queue.c
 src/ranking_utils.c
 src/slab_tracker.cpp
 src/tbb_wrapper.c
+src/timespec_ops.c
 test/Allocator.hpp
 test/Makefile.mk
 test/TestPolicy.hpp
