@@ -708,7 +708,6 @@ TEST_F(PEBSTest, Basic)
 
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
-
     ASSERT_TRUE(success);
     ASSERT_EQ(hotness, 0.0);
 
@@ -723,6 +722,8 @@ TEST_F(PEBSTest, Basic)
         }
     }
 
+    // call a flush to get and process PEBS data
+    mtt_allocator_await_flush(&mtt_allocator);
     success = get_highest_hotness(&mtt_allocator, hotness);
 
     ASSERT_TRUE(success);
@@ -758,8 +759,6 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
 
     volatile int *tab = (int *)mtt_allocator_malloc(&mtt_allocator, size);
 
-    mtt_allocator_await_flush(&mtt_allocator);
-
     for (size_t i = 0; i < size / sizeof(int); i++) {
         tab[i] = i;
     }
@@ -771,6 +770,8 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
         }
     }
 
+    // call a flush to get and process PEBS data
+    mtt_allocator_await_flush(&mtt_allocator);
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
 
