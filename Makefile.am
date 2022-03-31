@@ -47,6 +47,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/pagesizes.c \
                         src/mmap_tracing_queue.c \
                         src/slab_tracker.cpp \
+                        src/timespec.c
                         # end
 
 
@@ -98,6 +99,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/pagesizes.h \
                   include/memkind/internal/mmap_tracing_queue.h \
                   include/memkind/internal/slab_tracker.h \
+                  include/memkind/internal/timespec.h \
                   # end
 
 EXTRA_DIST = CONTRIBUTING \
