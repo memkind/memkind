@@ -167,8 +167,17 @@ MEMKIND_EXPORT void Ranking::AddPages(uintptr_t start_addr, size_t nof_pages,
         auto page_it = page_it_inserted.first;
         bool inserted = page_it_inserted.second;
         assert(inserted && "page not constructed!");
+        
+        // add page to the hotnessToPages map
         PageMetadata *page = &page_it->second;
-        this->hotnessToPages.insert(std::make_pair(page->GetHotness(), page));
+        std::set<PageMetadata *> same_hotness_pages;
+        same_hotness_pages.insert(page);
+        auto res = this->hotnessToPages.insert(std::make_pair(page->GetHotness(), same_hotness_pages));
+        inserted = res.second;
+        if (!inserted) {
+            auto hotness_it = res.first;
+            hotness_it->second.insert(page);
+        }
         start_addr += TRACED_PAGESIZE;
     }
     totalSize += nof_pages * TRACED_PAGESIZE;
@@ -190,21 +199,29 @@ MEMKIND_EXPORT void Ranking::Touch(uintptr_t addr)
 MEMKIND_EXPORT void Ranking::Update(uint64_t timestamp)
 {
     for (PageMetadata *page : this->pagesToUpdate) {
-        // find the page entry in hotnessToPages
+        // find the set of page entries in hotnessToPages
         const double hotness = page->GetHotness();
-        auto pages_entry = this->hotnessToPages.find(hotness);
-        // find correct entry in multimap
-        assert(pages_entry != this->hotnessToPages.end() &&
+        auto hotness_it = this->hotnessToPages.find(hotness);
+        assert(hotness_it != this->hotnessToPages.end() &&
                "page with hotness not correctly registered!");
-        while (pages_entry != this->hotnessToPages.end() &&
-               pages_entry->first == hotness && pages_entry->second != page)
-            ++pages_entry;
-        assert(pages_entry != this->hotnessToPages.end() &&
-               "page with hotness not correctly registered!");
-        // remove the entry from multimap, update hotness and add again
-        this->hotnessToPages.erase(pages_entry);
+        
+        // remove page entry from the set related to the old hotness
+        // remove the entry from the map if the last one has been removed
+        hotness_it->second.erase(page);
+        if (hotness_it->second.empty()) {
+            this->hotnessToPages.erase(hotness_it);
+        }
+
+        // update the hotness and add the page entry again to the hotnessToPages map
         page->UpdateHotness(timestamp);
-        this->hotnessToPages.insert(std::make_pair(page->GetHotness(), page));
+        std::set<PageMetadata *> same_hotness_pages;
+        same_hotness_pages.insert(page);
+        auto res = this->hotnessToPages.insert(std::make_pair(page->GetHotness(), same_hotness_pages));
+        bool inserted = res.second;
+        if (!inserted) {
+            auto hotness_it = res.first;
+            hotness_it->second.insert(page);
+        }
     }
     this->pagesToUpdate.clear();
 }
@@ -231,9 +248,12 @@ MEMKIND_EXPORT PageMetadata Ranking::PopColdest()
 {
     // pages are sorted in ascending order, lowest hotness first
     auto coldest = this->hotnessToPages.begin();
-    PageMetadata *coldest_page = coldest->second;
-    this->hotnessToPages.erase(coldest);
+    PageMetadata *coldest_page = *(coldest->second.begin());
     PageMetadata ret = *coldest_page;
+    coldest->second.erase(coldest_page);
+    if (coldest->second.empty()) {
+        this->hotnessToPages.erase(coldest);
+    }
     this->pageAddrToPage.erase(coldest_page->GetStartAddr());
     totalSize -= TRACED_PAGESIZE;
 
@@ -244,13 +264,19 @@ MEMKIND_EXPORT PageMetadata Ranking::PopHottest()
 {
     // pages are sorted in ascending order, lowest hotness first
     auto hottest = this->hotnessToPages.rbegin();
-    PageMetadata *hottest_page = hottest->second;
+    PageMetadata *hottest_page = *(hottest->second.rbegin());
     PageMetadata ret = *hottest_page;
     this->pageAddrToPage.erase(hottest_page->GetStartAddr());
-    ++hottest;
-    if (hottest != this->hotnessToPages.rend())
-        this->highestHotness = hottest->first;
-    this->hotnessToPages.erase(hottest.base());
+    
+    // remove the page entry from the hotnessToPage map
+    hottest->second.erase(hottest_page);
+    if (hottest->second.empty()) {
+        ++hottest;
+        if (hottest != this->hotnessToPages.rend())
+            this->highestHotness = hottest->first;
+        this->hotnessToPages.erase(hottest.base());
+    }
+
     totalSize -= TRACED_PAGESIZE;
 
     return ret;
@@ -266,11 +292,20 @@ MEMKIND_EXPORT void Ranking::AddPage(PageMetadata page)
     auto page_it_inserted =
         this->pageAddrToPage.emplace(std::make_pair(page.GetStartAddr(), page));
     auto page_it = page_it_inserted.first;
+    assert(page_it != this->pageAddrToPage.end() && "page not constructed!");
     bool inserted = page_it_inserted.second;
-    assert(inserted && "page not constructed!");
+    assert(inserted && "page already exists!");
+    
+    // add the page entry to the hotnessToPages map
     PageMetadata *inserted_page = &page_it->second;
-    this->hotnessToPages.insert(
-        std::make_pair(inserted_page->GetHotness(), inserted_page));
+    std::set<PageMetadata *> same_hotness_pages;
+    same_hotness_pages.insert(inserted_page);
+    auto res = this->hotnessToPages.insert(std::make_pair(inserted_page->GetHotness(), same_hotness_pages));
+    inserted = res.second;
+    if (!inserted) {
+        auto hotness_it = res.first;
+        hotness_it->second.insert(inserted_page);
+    }
     totalSize += TRACED_PAGESIZE;
 }
 
