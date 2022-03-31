@@ -455,6 +455,7 @@ src/mmap_tracing_queue.c
 src/ranking_utils.c
 src/slab_tracker.cpp
 src/tbb_wrapper.c
+src/timespec.c
 test/Allocator.hpp
 test/Makefile.mk
 test/TestPolicy.hpp

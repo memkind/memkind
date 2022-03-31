@@ -4,10 +4,16 @@
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/pebs.h>
+#include <memkind/internal/timespec.h>
 
 #include <mtt_allocator.h>
 
+#include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
+#include <unistd.h>
+
+#define BG_THREAD_FREQUENCY 2.0
 
 // typedefs -------------------------------------------------------------------
 
@@ -44,6 +50,12 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
     BackgroundThread *bg_thread = bg_thread_ptr;
     pthread_mutex_t *bg_thread_cond_mutex = &bg_thread->bg_thread_cond_mutex;
 
+    struct timespec start_time, end_time;
+    // calculate time period to wait
+    double period_ms = 1000 / BG_THREAD_FREQUENCY;
+    struct timespec tv_period;
+    timespec_millis_to_timespec(period_ms, &tv_period);
+
     // set low priority
     int policy;
     struct sched_param param;
@@ -59,6 +71,7 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
     bool run = true;
     while (run) {
         bool flushing_rankings = false;
+
         pthread_mutex_lock(bg_thread_cond_mutex);
         if (bg_thread->bg_thread_state == THREAD_FINISHED) {
             run = false;
@@ -69,16 +82,32 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
         }
         pthread_mutex_unlock(bg_thread_cond_mutex);
 
+        // calculate time to wait
+        timespec_get_time(&start_time);
+        timespec_add(&start_time, &tv_period);
+
         pthread_mutex_lock(&allocatorsMutex);
         pebs_monitor(&bg_thread->pebs);
         update_rankings();
         pthread_mutex_unlock(&allocatorsMutex);
+
         if (flushing_rankings) {
             // inform all awaiting threads - reset bg_thread_state
             pthread_mutex_lock(bg_thread_cond_mutex);
             bg_thread->bg_thread_state = THREAD_RUNNING;
             // broadcast bg_thread_state change to all awaiting threads
             pthread_cond_broadcast(&bg_thread->bg_thread_cond);
+            pthread_mutex_unlock(bg_thread_cond_mutex);
+        }
+
+        timespec_get_time(&end_time);
+        struct timespec wait_time = timespec_diff(&start_time, &end_time);
+        if (timespec_not_zero(&wait_time)) {
+            // wait until next occurrence (according to frequency) or interrupt
+            pthread_mutex_lock(bg_thread_cond_mutex);
+            pthread_cond_clockwait(&bg_thread->bg_thread_cond,
+                                   &bg_thread->bg_thread_cond_mutex,
+                                   CLOCK_MONOTONIC, &wait_time);
             pthread_mutex_unlock(bg_thread_cond_mutex);
         }
     }

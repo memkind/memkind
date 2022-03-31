@@ -47,6 +47,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/pagesizes.c \
                         src/mmap_tracing_queue.c \
                         src/slab_tracker.cpp \
+                        src/timespec.c
                         # end
 
 
