@@ -10,10 +10,9 @@
 #include <assert.h>
 #include <unistd.h>
 
-#define PEBS_SAMPLING_INTERVAL        1000
-#define MMAP_DATA_SIZE                8
-#define MMAP_PAGES_NUM                1 + MMAP_DATA_SIZE
-#define HOTNESS_PEBS_THREAD_FREQUENCY 10.0
+#define PEBS_SAMPLING_INTERVAL 1000
+#define MMAP_DATA_SIZE         8
+#define MMAP_PAGES_NUM         1 + MMAP_DATA_SIZE
 
 void pebs_monitor(PebsMetadata *pebs)
 {
