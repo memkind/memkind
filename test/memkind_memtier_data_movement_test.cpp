@@ -1527,8 +1527,8 @@ class RankingPerfTest: public ::testing::Test
 {
 protected:
     const size_t m_alloc_size = TRACED_PAGESIZE * 1024 * 100;
-    const size_t m_bench_num = 10;
     void *m_start_addr;
+    MTTAllocator m_mtt_allocator;
 
     std::chrono::duration<double> bench(size_t bench_num, size_t alloc_size,
                                         void *start_addr)
@@ -1549,6 +1549,31 @@ protected:
         return elapsed_seconds;
     }
 
+    std::chrono::duration<double> bench_vector(std::vector<void *> *data,
+                                               size_t objs_num,
+                                               size_t alloc_size,
+                                               size_t iters_num)
+    {
+        size_t t = 0;
+        auto start = std::chrono::steady_clock::now();
+        for (size_t a = 0; a < iters_num; a++) {
+            for (size_t it = 0; it < objs_num; it++) {
+                for (size_t i = 0; i < (alloc_size - 1) / sizeof(int);
+                     i += 32) {
+                    volatile int *p = &((volatile int *)((*data)[it]))[i];
+                    *p = *(p + 1) * 4 - t;
+                    t += *p;
+                }
+            }
+        }
+        auto end = std::chrono::steady_clock::now();
+
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        std::cout << "elapsed time: " << elapsed_seconds.count() << "s"
+                  << std::endl;
+        return elapsed_seconds;
+    }
+
 private:
     void SetUp()
     {
@@ -1566,6 +1591,7 @@ private:
 
 TEST_F(RankingPerfTest, PageMovement)
 {
+    const size_t bench_num = 10;
     int page_obj_node = -1;
     int ret;
     TestPrereq tp;
@@ -1579,7 +1605,7 @@ TEST_F(RankingPerfTest, PageMovement)
     ASSERT_TRUE(dram_nodes.find(page_obj_node) != dram_nodes.end());
 
     // Measure access times on DRAM
-    auto dram_time1 = bench(m_bench_num, m_alloc_size, m_start_addr);
+    auto dram_time1 = bench(bench_num, m_alloc_size, m_start_addr);
 
     // Move object's pages to PMEM
     for (size_t i = 0; i < m_alloc_size / TRACED_PAGESIZE; i++) {
@@ -1594,7 +1620,7 @@ TEST_F(RankingPerfTest, PageMovement)
     }
 
     // Measure access times on PMEM
-    auto pmem_time = bench(m_bench_num, m_alloc_size, m_start_addr);
+    auto pmem_time = bench(bench_num, m_alloc_size, m_start_addr);
     ASSERT_TRUE(dram_time1 * 2 < pmem_time);
 
     // Move page object to DRAM
@@ -1610,6 +1636,141 @@ TEST_F(RankingPerfTest, PageMovement)
     }
 
     // Measure access times on DRAM
-    auto dram_time2 = bench(m_bench_num, m_alloc_size, m_start_addr);
+    auto dram_time2 = bench(bench_num, m_alloc_size, m_start_addr);
     ASSERT_TRUE(dram_time2 * 2 < pmem_time);
+}
+
+TEST_F(RankingPerfTest, PEBS)
+{
+    const size_t alloc_size = 256;
+    const size_t iters_num = 1000;
+
+    TestPrereq tp;
+    auto dax_kmem_nodes = tp.get_memory_only_numa_nodes();
+    auto dram_nodes = tp.get_regular_numa_nodes();
+
+    std::vector<void *> allocs, dram_allocs, pmem_allocs;
+    int numa_id;
+
+    MTTInternalsLimits limits;
+    limits.lowLimit = TRACED_PAGESIZE;
+    limits.softLimit = 50ul * 1024ul * 1024ul;
+    limits.hardLimit = limits.softLimit;
+
+    mtt_allocator_create(&m_mtt_allocator, &limits);
+
+    // Allocate 2x time more data than soft limit so MTT will start moving data
+    // to PMEM
+    for (size_t i = 0; i < limits.softLimit * 2; i += alloc_size) {
+        void *ptr = mtt_allocator_malloc(&m_mtt_allocator, alloc_size);
+        memset(ptr, 1, alloc_size);
+        allocs.push_back(ptr);
+    }
+    std::cerr << "allocated " << allocs.size() << " objs" << std::endl;
+
+    // Wait for MTT to demote some pages to PMEM
+    sleep(5);
+
+    // Collect pages on DRAM and PMEM
+    for (auto it = allocs.begin(); it != allocs.end(); it++) {
+        get_mempolicy(&numa_id, nullptr, 0, (*it), MPOL_F_NODE | MPOL_F_ADDR);
+        if (dax_kmem_nodes.find(numa_id) != dax_kmem_nodes.end()) {
+            pmem_allocs.push_back((*it));
+        } else {
+            dram_allocs.push_back((*it));
+        }
+    }
+    std::cout << "dram_allocs.size() " << dram_allocs.size() << std::endl;
+    std::cout << "pmem_allocs.size() " << pmem_allocs.size() << std::endl;
+
+    // Check that that DRAM and PMEM contains similar number of pages
+    ASSERT_TRUE(dram_allocs.size() * 0.9 < pmem_allocs.size());
+    ASSERT_TRUE(pmem_allocs.size() * 0.9 < dram_allocs.size());
+
+    // Shuffle allocations to decrease caching effect
+    // NOTE that pages promotion/demotion is quite random
+    std::random_shuffle(dram_allocs.begin(), dram_allocs.end());
+    std::random_shuffle(pmem_allocs.begin(), pmem_allocs.end());
+
+    // We have to iterate over the same num of objects so choose min val to
+    // avoid overflows
+    const size_t num_objs = std::min(dram_allocs.size(), pmem_allocs.size());
+
+    // Wait for MTT to demote some pages to PMEM
+    std::cout << "sleep(5)" << std::endl;
+    sleep(5);
+
+    // Do some operations on DRAM memory, measure time
+    std::cout << "bench dram_allocs" << std::endl;
+    auto dram_time =
+        bench_vector(&dram_allocs, num_objs, alloc_size, iters_num);
+
+    // Do some operations on PMEM memory, measure time
+    std::cout << "bench pmem_allocs" << std::endl;
+    auto pmem_time1 =
+        bench_vector(&pmem_allocs, num_objs, alloc_size, iters_num);
+
+    ASSERT_TRUE(dram_time < pmem_time1);
+
+    // Wait for MTT to promote some pages to DRAM
+    std::cout << "sleep(5)" << std::endl;
+    sleep(5);
+
+    // Check, how many pages were promoted to DRAM
+    int num_moved = 0;
+    for (size_t it = 0; it < num_objs; it++) {
+        get_mempolicy(&numa_id, nullptr, 0, pmem_allocs[it],
+                      MPOL_F_NODE | MPOL_F_ADDR);
+        if (dram_nodes.find(numa_id) != dram_nodes.end())
+            num_moved++;
+    }
+    std::cout << "num_moved: " << num_moved << " "
+              << (float)num_moved / num_objs * 100.0 << "%" << std::endl;
+
+    // Check that at least 25% of pages were promoted to DRAM
+    ASSERT_GT((float)num_moved / num_objs, 0.25);
+
+    std::cout << "bench pmem_allocs" << std::endl;
+    auto pmem_time2 =
+        bench_vector(&pmem_allocs, num_objs, alloc_size, iters_num);
+
+    // Check that newer results should be better
+    ASSERT_TRUE(dram_time < pmem_time2);
+    ASSERT_TRUE(pmem_time2 < pmem_time1);
+
+    // Check, how many pages were promoted to DRAM
+    num_moved = 0;
+    for (size_t it = 0; it < num_objs; it++) {
+        get_mempolicy(&numa_id, nullptr, 0, pmem_allocs[it],
+                      MPOL_F_NODE | MPOL_F_ADDR);
+        if (dram_nodes.find(numa_id) != dram_nodes.end())
+            num_moved++;
+    }
+    std::cout << "num_moved: " << num_moved << " "
+              << (float)num_moved / num_objs * 100.0 << "%" << std::endl;
+
+    std::cout << "sleep(5)" << std::endl;
+    sleep(5);
+
+    std::cout << "bench pmem_allocs" << std::endl;
+    auto pmem_time3 =
+        bench_vector(&pmem_allocs, num_objs, alloc_size, iters_num);
+
+    // Check that newer results should be better
+    ASSERT_TRUE(dram_time < pmem_time3);
+    ASSERT_TRUE(pmem_time3 < pmem_time2);
+
+    // Check, how many pages were promoted to DRAM
+    num_moved = 0;
+    for (size_t it = 0; it < num_objs; it++) {
+        get_mempolicy(&numa_id, nullptr, 0, pmem_allocs[it],
+                      MPOL_F_NODE | MPOL_F_ADDR);
+        if (dram_nodes.find(numa_id) != dram_nodes.end())
+            num_moved++;
+    }
+    std::cout << "num_moved: " << num_moved << " "
+              << (float)num_moved / num_objs * 100.0 << "%" << std::endl;
+
+    for (auto it = allocs.begin(); it != allocs.end(); it++)
+        mtt_allocator_free(&m_mtt_allocator, (*it));
 }
