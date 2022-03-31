@@ -7,7 +7,11 @@
 
 #include <mtt_allocator.h>
 
+#include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
+
+#define BG_THREAD_FREQUENCY 2.0
 
 // typedefs -------------------------------------------------------------------
 
@@ -34,6 +38,13 @@ static void update_rankings();
 static void register_mtt_allocator(MTTAllocator *mtt_allocator);
 static void unregister_mtt_allocator(MTTAllocator *mtt_allocator);
 
+static void timespec_add(struct timespec *modified,
+                         const struct timespec *toadd);
+static struct timespec timespec_diff(const struct timespec *time1,
+                                     const struct timespec *time0);
+static void timespec_millis_to_timespec(double millis, struct timespec *out);
+static void timespec_get_time(struct timespec *time);
+
 // static function definitions ------------------------------------------------
 
 // Function required for pthread_create()
@@ -43,6 +54,13 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
 {
     BackgroundThread *bg_thread = bg_thread_ptr;
     pthread_mutex_t *bg_thread_cond_mutex = &bg_thread->bg_thread_cond_mutex;
+
+    struct timespec start_time, end_time;
+    // calculate time period to wait
+    double bg_freq_hz = BG_THREAD_FREQUENCY;
+    double period_ms = 1000 / bg_freq_hz;
+    struct timespec tv_period;
+    timespec_millis_to_timespec(period_ms, &tv_period);
 
     // set low priority
     int policy;
@@ -59,6 +77,7 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
     bool run = true;
     while (run) {
         bool flushing_rankings = false;
+
         pthread_mutex_lock(bg_thread_cond_mutex);
         if (bg_thread->bg_thread_state == THREAD_FINISHED) {
             run = false;
@@ -69,10 +88,15 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
         }
         pthread_mutex_unlock(bg_thread_cond_mutex);
 
+        // calculate time to wait
+        timespec_get_time(&start_time);
+        timespec_add(&start_time, &tv_period);
+
         pthread_mutex_lock(&allocatorsMutex);
         pebs_monitor(&bg_thread->pebs);
         update_rankings();
         pthread_mutex_unlock(&allocatorsMutex);
+
         if (flushing_rankings) {
             // inform all awaiting threads - reset bg_thread_state
             pthread_mutex_lock(bg_thread_cond_mutex);
@@ -80,6 +104,15 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
             // broadcast bg_thread_state change to all awaiting threads
             pthread_cond_broadcast(&bg_thread->bg_thread_cond);
             pthread_mutex_unlock(bg_thread_cond_mutex);
+        }
+
+        timespec_get_time(&end_time);
+        struct timespec wait_time = timespec_diff(&start_time, &end_time);
+        if ((wait_time.tv_sec > 0) ||
+            ((wait_time.tv_sec == 0) && (wait_time.tv_nsec > 0))) {
+            pthread_cond_clockwait(&bg_thread->bg_thread_cond,
+                                   &bg_thread->bg_thread_cond_mutex,
+                                   CLOCK_MONOTONIC, &wait_time);
         }
     }
 
@@ -185,6 +218,52 @@ void background_thread_fini(MTTAllocator *mtt_allocator)
     pebs_destroy(mtt_allocator, &bg_thread->pebs);
     pthread_mutex_destroy(bg_thread_cond_mutex);
     pthread_cond_destroy(&bg_thread->bg_thread_cond);
+}
+
+static void timespec_add(struct timespec *modified,
+                         const struct timespec *toadd)
+{
+    const uint64_t S_TO_NS = 1e9;
+    modified->tv_sec += toadd->tv_sec;
+    modified->tv_nsec += toadd->tv_nsec;
+    modified->tv_sec += (modified->tv_nsec / S_TO_NS);
+    modified->tv_nsec %= S_TO_NS;
+}
+
+static struct timespec timespec_diff(const struct timespec *time1,
+                                     const struct timespec *time0)
+{
+    struct timespec diff;
+
+    assert(time1 && time1->tv_nsec < 1000000000);
+    assert(time0 && time0->tv_nsec < 1000000000);
+    diff.tv_sec = time1->tv_sec - time0->tv_sec;
+    diff.tv_nsec = time1->tv_nsec - time0->tv_nsec;
+
+    if (diff.tv_nsec < 0) {
+        diff.tv_nsec += 1000000000;
+        diff.tv_sec--;
+    }
+
+    return diff;
+}
+
+static void timespec_get_time(struct timespec *time)
+{
+    // calculate time to wait
+    int ret = clock_gettime(CLOCK_MONOTONIC, time);
+    if (ret != 0) {
+        log_fatal("ASSERT PEBS Monitor clock_gettime() FAILURE: %s",
+                  strerror(errno));
+        exit(-1);
+    }
+}
+
+static void timespec_millis_to_timespec(double millis, struct timespec *out)
+{
+    out->tv_sec = (uint64_t)(millis / 1e3);
+    double ms_to_convert = millis - out->tv_sec * 1000ul;
+    out->tv_nsec = (uint64_t)(ms_to_convert * 1e6);
 }
 
 //--------------------------------------------------------------------------
