@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <map>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -105,7 +106,7 @@ public:
 
 class Ranking
 {
-    std::multimap<double, PageMetadata *> hotnessToPages;
+    std::map<double, std::set<PageMetadata *>> hotnessToPages;
     std::unordered_map<uintptr_t, PageMetadata> pageAddrToPage;
     std::vector<PageMetadata *> pagesToUpdate;
     double highestHotness = 0;
