@@ -10,7 +10,7 @@ extern "C" {
 
 int ctl_parse_u(const char *str, unsigned *dest);
 int ctl_parse_size_t(const char *str, size_t *dest);
-int ctl_parse_size(char **sptr, size_t *sizep);
+int ctl_parse_size(char **sptr, size_t *sizep, const char *CTL_VALUE_SEPARATOR);
 
 #ifdef __cplusplus
 }

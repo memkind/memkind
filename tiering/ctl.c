@@ -187,7 +187,8 @@ static int ctl_parse_tier_query(char *qbuf, memkind_t *kind, unsigned *ratio)
 
         size_t fsdax_max_size = 0;
         if (fsdax_size_set) {
-            ret = ctl_parse_size(&fsdax_size_str, &fsdax_max_size);
+            ret = ctl_parse_size(&fsdax_size_str, &fsdax_max_size,
+                                 CTL_VALUE_SEPARATOR);
             if (ret != 0) {
                 return -1;
             }
@@ -242,7 +243,7 @@ static int ctl_set_thr_cfg(char **sptr, unsigned ctl_id, int th_id,
 
     char *val_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, sptr);
 
-    int ret = ctl_parse_size(&val_str, &val);
+    int ret = ctl_parse_size(&val_str, &val, CTL_VALUE_SEPARATOR);
     if (ret != 0) {
         log_err("Failed to parse value: %s", val_str);
         return -1;

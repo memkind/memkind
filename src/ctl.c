@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CTL_VALUE_SEPARATOR ":"
-
 /*
  * ctl_parse_u -- parses and returns an unsigned integer
  */
@@ -63,7 +61,7 @@ int ctl_parse_size_t(const char *str, size_t *dest)
 /*
  * ctl_parse_size -- parse size (with optional suffix) from string
  */
-int ctl_parse_size(char **sptr, size_t *sizep)
+int ctl_parse_size(char **sptr, size_t *sizep, const char *CTL_VALUE_SEPARATOR)
 {
     struct suff {
         const char *suff;
