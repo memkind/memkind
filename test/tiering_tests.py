@@ -31,6 +31,7 @@ class Helper(object):
 
     mem_tiers_env_var = "MEMKIND_MEM_TIERS"
     mem_thresholds_env_var = "MEMKIND_MEM_THRESHOLDS"
+    mtt_limits_env_var = "MEMKIND_MTT_LIMITS"
 
     # POLICY_STATIC_RATIO is a policy used in tests that have to set a
     # valid policy but don't test anything related to allocation policies
@@ -64,14 +65,16 @@ class Helper(object):
         else:
             return True
 
-    def get_ld_preload_cmd_output(self, tiers_config, thresholds_config=None,
-                                  log_level=None, negative_test=False):
+    def get_ld_preload_cmd_output(self, tiers_config, mtt_limits=None,
+                                  thresholds_config=None, log_level=None,
+                                  negative_test=False):
         log_level_env = self.log_prefix + "LOG_LEVEL=" + log_level \
             if log_level else ""
+        mtt_limits_env = self.mtt_limits_env_var + '="' + mtt_limits + '"'
         tiers_env = self.mem_tiers_env_var + '="' + tiers_config + '"'
         thresholds_env = self.mem_thresholds_env_var + '="' + \
             thresholds_config + '"' if thresholds_config else ""
-        command = " ".join([self.ld_preload_env, log_level_env,
+        command = " ".join([self.ld_preload_env, log_level_env, mtt_limits_env,
                             tiers_env, thresholds_env, self.bin_path])
         output, retcode = self.cmd.execute_cmd(command)
         fail_msg = "Execution of: '" + command + \
@@ -552,3 +555,10 @@ class Test_tiering_config_env(Helper):
             + "RATIO:4;" + wrong_tier + ";" + self.default_policy,
             log_level="2",
             negative_test=True)
+
+    def test_env_var_mtt_limits(self):
+        self.get_ld_preload_cmd_output(
+            "KIND:DRAM,RATIO:1;"
+            + "KIND:FS_DAX,PATH:/tmp,PMEM_SIZE_LIMIT:100M,RATIO:4;"
+            + "POLICY:DATA_MOVEMENT",
+            mtt_limits="128M,1024M,4G", log_level="2")
