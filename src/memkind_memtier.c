@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2021-2022 Intel Corporation. */
 
+#include "memkind/internal/ctl.h"
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_memtier.h>
@@ -512,6 +513,53 @@ static int builder_movement_ctl_set(struct memtier_builder *builder,
     return -1;
 }
 
+static size_t mtt_parse_env_limit(char *limits_env, const size_t DEFAULT_LIMIT,
+                                  char **saveptr)
+{
+    const char *DELIMITER = ";";
+    char *limit_str = NULL;
+    int ret;
+    size_t size;
+
+    limit_str = strtok_r(limits_env, DELIMITER, saveptr);
+    ret = ctl_parse_size(&limit_str, &size, DELIMITER);
+    if (ret) {
+        log_err(
+            "Failed setting MTT ranking limit %s. Default value of %zu bytes will be used",
+            limit_str, DEFAULT_LIMIT);
+        return DEFAULT_LIMIT;
+    } else {
+        return size;
+    }
+}
+
+static MTTInternalsLimits mtt_get_ranking_limits()
+{
+    char *saveptr = NULL;
+    MTTInternalsLimits limits;
+    char *limits_env = memkind_get_env("MEMKIND_MTT_LIMITS");
+    const size_t LOW_LIMIT_DEFAULT = 1ul * 1024ul * 1024ul;     // 1 MB
+    const size_t SOFT_LIMIT_DEFAULT = 16ul * 1024ul * 1024ul;   // 16 MB
+    const size_t HARD_LIMIT_DEFAULT = 1024ul * 1024ul * 1024ul; // 1 GB
+
+    if (limits_env) {
+        limits.lowLimit =
+            mtt_parse_env_limit(limits_env, LOW_LIMIT_DEFAULT, &saveptr);
+        limits.softLimit =
+            mtt_parse_env_limit(NULL, SOFT_LIMIT_DEFAULT, &saveptr);
+        limits.hardLimit =
+            mtt_parse_env_limit(NULL, HARD_LIMIT_DEFAULT, &saveptr);
+    } else {
+        limits.lowLimit = LOW_LIMIT_DEFAULT;
+        limits.softLimit = SOFT_LIMIT_DEFAULT;
+        limits.hardLimit = HARD_LIMIT_DEFAULT;
+    }
+    log_info("MTT ranking low_limit = %zu", limits.lowLimit);
+    log_info("MTT ranking soft_limit = %zu", limits.softLimit);
+    log_info("MTT ranking hard_limit = %zu", limits.hardLimit);
+    return limits;
+}
+
 static struct memtier_memory *
 builder_dynamic_create_memory(struct memtier_builder *builder)
 {
@@ -628,12 +676,7 @@ builder_movement_create_memory(struct memtier_builder *builder)
 
     create_memory_common(builder, memory);
 
-    // TODO add limits to env parameters
-    MTTInternalsLimits limits;
-    limits.lowLimit = 1ul * 1024ul * 1024ul;     // 1 MB
-    limits.softLimit = 16ul * 1024ul * 1024ul;   // 16 MB
-    limits.hardLimit = 1024ul * 1024ul * 1024ul; // 1GB
-
+    MTTInternalsLimits limits = mtt_get_ranking_limits();
     assert(g_mtt_allocator == NULL);
     g_mtt_allocator = jemk_malloc(sizeof(struct MTTAllocator));
     mtt_allocator_create(g_mtt_allocator, &limits);

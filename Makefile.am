@@ -11,7 +11,8 @@ CLANG_FORMAT_FILES = . -path "./jemalloc" -prune -false -o -path "./test/gtest_f
 
 lib_LTLIBRARIES = libmemkind.la
 
-libmemkind_la_SOURCES = src/hbwmalloc.c \
+libmemkind_la_SOURCES = src/ctl.c \
+                        src/hbwmalloc.c \
                         src/heap_manager.c \
                         src/memkind.c \
                         src/memkind_arena.c \
@@ -62,7 +63,8 @@ include_HEADERS = include/hbw_allocator.h \
                   include/fixed_allocator.h \
                   # end
 
-noinst_HEADERS =  include/memkind/internal/heap_manager.h \
+noinst_HEADERS =  include/memkind/internal/ctl.h \
+                  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_arena.h \
                   include/memkind/internal/memkind_bitmask.h \
                   include/memkind/internal/memkind_capacity.h \
