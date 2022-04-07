@@ -38,25 +38,26 @@ MEMKIND_EXPORT void *fast_pool_allocator_malloc_pages(FastPoolAllocator *pool,
     uint16_t hash = hasher_calculate_hash(size_rank);
     FastSlabAllocator *slab = pool->pool[hash];
     void *ret = NULL;
+    size_t nof_pages_idx = 0ul;
 
     if (!slab) {
         FastSlabAllocator *null_slab = slab;
-        // TODO initialize the slab in a lockless way
         slab = fast_slab_allocator_malloc(&pool->slabSlabAllocator);
         size_t slab_size = rank_size_to_size(size_rank);
-        *nof_pages = 0ul;
-        int ret1 = fast_slab_allocator_init_pages(slab, slab_size, 0, address,
-                                                  nof_pages);
+        nof_pages[nof_pages_idx] = 0ul;
+        int ret1 = fast_slab_allocator_init_pages(slab, slab_size, 0,
+                                                  &address[nof_pages_idx],
+                                                  &nof_pages[nof_pages_idx]);
         if (ret1 != 0)
             return NULL;
-        // TODO atomic compare exchange WARNING HACK NOT THREAD SAFE NOW !!!!
         bool exchanged =
             atomic_compare_exchange_strong(&pool->pool[hash], &null_slab, slab);
         if (exchanged) {
-            uintptr_t page_start = *address;
-            for (size_t i = 0ul; i < *nof_pages;
+            uintptr_t page_start = address[nof_pages_idx];
+            for (size_t i = 0ul; i < nof_pages[nof_pages_idx];
                  ++i, page_start += TRACED_PAGESIZE)
                 fast_slab_tracker_register(pool->tracker, page_start, slab);
+            ++nof_pages_idx;
         } else {
             fast_slab_allocator_destroy(slab);
             slab = atomic_load(&pool->pool[hash]);
@@ -64,12 +65,14 @@ MEMKIND_EXPORT void *fast_pool_allocator_malloc_pages(FastPoolAllocator *pool,
     }
 
     uintptr_t page_start = 0ul;
-    *nof_pages = 0ul;
-    ret = fast_slab_allocator_malloc_pages(slab, address, nof_pages);
+    nof_pages[nof_pages_idx] = 0ul;
+    ret = fast_slab_allocator_malloc_pages(slab, &address[nof_pages_idx],
+                                           &nof_pages[nof_pages_idx]);
 
-    page_start = *address;
+    page_start = address[nof_pages_idx];
 
-    for (size_t i = 0ul; i < *nof_pages; ++i, page_start += TRACED_PAGESIZE) {
+    for (size_t i = 0ul; i < nof_pages[nof_pages_idx];
+         ++i, page_start += TRACED_PAGESIZE) {
         fast_slab_tracker_register(pool->tracker, page_start, slab);
     }
 
