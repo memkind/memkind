@@ -608,21 +608,18 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
     }
 
     char *limits_env = utils_get_env("MEMKIND_MTT_LIMITS");
-    MTTInternalsLimits mtt_limits;
-    mtt_limits.lowLimit = 1ul * 1024ul * 1024ul;     // 1 MB;
-    mtt_limits.softLimit = 16ul * 1024ul * 1024ul;   // 16 MB;
-    mtt_limits.hardLimit = 1024ul * 1024ul * 1024ul; // 1 GB;
     if (limits_env) {
+        MTTInternalsLimits mtt_limits;
         ret = ctl_get_mtt_ranking_limits(&mtt_limits, limits_env);
         if (ret) {
             log_err("Failed to parse MTT limits environment variable");
             goto destroy_builder;
         }
-    }
-    ret = memtier_ctl_set(builder, NULL, &mtt_limits);
-    if (ret) {
-        log_err("Failed to parse MTT limits environment variable");
-        goto destroy_builder;
+        ret = memtier_ctl_set(builder, NULL, &mtt_limits);
+        if (ret) {
+            log_err("Failed to parse MTT limits environment variable");
+            goto destroy_builder;
+        }
     }
 
     tier_memory = memtier_builder_construct_memtier_memory(builder);
