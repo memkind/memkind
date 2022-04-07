@@ -111,6 +111,9 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
                                &bg_thread->bg_thread_cond_mutex, &end_time);
         pthread_mutex_unlock(bg_thread_cond_mutex);
     }
+    pthread_mutex_lock(&allocatorsMutex);
+    update_rankings(); // flush mmapTracingQueue
+    pthread_mutex_unlock(&allocatorsMutex);
 
     return NULL;
 }
@@ -209,6 +212,7 @@ void background_thread_fini(MTTAllocator *mtt_allocator)
     pthread_mutex_unlock(bg_thread_cond_mutex);
 
     pthread_join(bg_thread->bg_thread, NULL);
+    assert(mtt_allocator->internals.mmapTracingQueue.head == NULL);
     log_info("MTT background thread closed");
 
     pebs_destroy(mtt_allocator, &bg_thread->pebs);
