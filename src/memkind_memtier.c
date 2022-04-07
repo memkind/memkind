@@ -107,6 +107,7 @@ struct memtier_builder {
                         // made between ratio checks
     float trigger;      // Difference between ratios to update threshold
     float degree;       // % of threshold change in case of update
+    MTTInternalsLimits *mtt_limits;  // MTT ranking limits
     // builder operations
     struct memtier_memory *(*create_mem)(struct memtier_builder *builder);
     int (*update_builder)(struct memtier_builder *builder);
@@ -507,9 +508,9 @@ static int builder_dynamic_ctl_set(struct memtier_builder *builder,
 static int builder_movement_ctl_set(struct memtier_builder *builder,
                                     const char *name, const void *val)
 {
-    // Unsupported
-    log_err("Invalid name: %s", name);
-    return -1;
+    builder->mtt_limits = (MTTInternalsLimits *)val;
+
+    return 0;
 }
 
 static struct memtier_memory *
@@ -629,10 +630,10 @@ builder_movement_create_memory(struct memtier_builder *builder)
     create_memory_common(builder, memory);
 
     // TODO add limits to env parameters
-    MTTInternalsLimits limits;
-    limits.lowLimit = 1ul * 1024ul * 1024ul;     // 1 MB
-    limits.softLimit = 16ul * 1024ul * 1024ul;   // 16 MB
-    limits.hardLimit = 1024ul * 1024ul * 1024ul; // 1GB
+    MTTInternalsLimits limits = *builder->mtt_limits;
+    log_info("MTT ranking low_limit = %zu", limits.lowLimit);
+    log_info("MTT ranking soft_limit = %zu", limits.softLimit);
+    log_info("MTT ranking hard_limit = %zu", limits.hardLimit);
 
     assert(g_mtt_allocator == NULL);
     g_mtt_allocator = jemk_malloc(sizeof(struct MTTAllocator));

@@ -2,6 +2,7 @@
 /* Copyright (C) 2021-2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_memtier.h>
+#include <memkind/internal/mtt_internals.h>
 #include <tiering/memtier_log.h>
 
 #include <errno.h>
@@ -395,6 +396,90 @@ static int ctl_parse_threshold_query(char *qbuf, int threshold_id,
     return 0;
 }
 
+static int ctl_set_mtt_limit(size_t *limit, char **saveptr)
+{
+    size_t parsed_size;
+
+    char *limit_str = strtok_r(NULL, CTL_VALUE_SEPARATOR, saveptr);
+    if (limit_str == NULL) {
+        return -1;
+    }
+
+    int ret = ctl_parse_size(&limit_str, &parsed_size);
+    if (ret) {
+        log_err(
+            "Parsing of MTT limit value of %s failed. The default value of %zu bytes is set instead.",
+            limit_str, limit);
+    } else {
+        *limit = parsed_size;
+    }
+
+    return 0;
+}
+
+static void ctl_parse_mtt_limit_query(char *limit_str,
+                                      MTTInternalsLimits *limits)
+{
+    char *saveptr = NULL;
+    int ret;
+
+    char *limit_name = strtok_r(limit_str, CTL_VALUE_SEPARATOR, &saveptr);
+    if (!strcmp(limit_name, "LOW")) {
+        ret = ctl_set_mtt_limit(&limits->lowLimit, &saveptr);
+        if (ret) {
+            log_err("MTT ranking low limit not defined. Default value used.");
+        }
+    } else if (!strcmp(limit_name, "SOFT")) {
+        ret = ctl_set_mtt_limit(&limits->softLimit, &saveptr);
+        if (ret) {
+            log_err("MTT ranking soft limit not defined. Default value used.");
+        }
+    } else if (!strcmp(limit_name, "HARD")) {
+        ret = ctl_set_mtt_limit(&limits->hardLimit, &saveptr);
+        if (ret) {
+            log_err("MTT ranking hard limit not defined. Default value used.");
+        }
+    } else {
+        log_err(
+            "Unrecognized MTT limit name: %s. Available are: LOW, SOFT, HARD");
+    }
+}
+
+static void ctl_parse_mtt_env_limits(char *limits_env,
+                                     MTTInternalsLimits *limits)
+{
+    char *saveptr = NULL;
+
+    char *limit_str = strtok_r(limits_env, CTL_PARAM_SEPARATOR, &saveptr);
+    if (limit_str == NULL) {
+        log_err("No valid MTT ranking limits defined. Default values used.");
+        return;
+    }
+
+    while (limit_str != NULL) {
+        ctl_parse_mtt_limit_query(limit_str, limits);
+        limit_str = strtok_r(NULL, CTL_PARAM_SEPARATOR, &saveptr);
+    }
+}
+
+static MTTInternalsLimits ctl_get_mtt_ranking_limits(char *limits_env)
+{
+    const size_t LOW_LIMIT_DEFAULT = 1ul * 1024ul * 1024ul;     // 1 MB
+    const size_t SOFT_LIMIT_DEFAULT = 16ul * 1024ul * 1024ul;   // 16 MB
+    const size_t HARD_LIMIT_DEFAULT = 1024ul * 1024ul * 1024ul; // 1 GB
+    MTTInternalsLimits limits = {
+        .lowLimit = LOW_LIMIT_DEFAULT,
+        .softLimit = SOFT_LIMIT_DEFAULT,
+        .hardLimit = HARD_LIMIT_DEFAULT,
+    };
+
+    if (limits_env) {
+        ctl_parse_mtt_env_limits(limits_env, &limits);
+    }
+
+    return limits;
+}
+
 struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
 {
     char env_var_local[MAX_ENV_STRING] = {0};
@@ -515,6 +600,16 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
             }
 
             qbuf = strtok_r(NULL, CTL_STRING_QUERY_SEPARATOR, &sptr);
+        }
+    }
+
+    char *limits_env = utils_get_env("MEMKIND_MTT_LIMITS");
+    if (limits_env) {
+        MTTInternalsLimits mtt_limits = ctl_get_mtt_ranking_limits(limits_env);
+        ret = memtier_ctl_set(builder, NULL, &mtt_limits);
+        if (ret) {
+            log_err("Failed to parse MTT limits environment variable");
+            goto destroy_builder;
         }
     }
 
