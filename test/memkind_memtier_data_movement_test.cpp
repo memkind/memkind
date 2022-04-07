@@ -698,13 +698,14 @@ TEST_F(PEBSTest, Basic)
     mtt_allocator_await_flush(&mtt_allocator);
 
     actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
-    ASSERT_EQ(actual_size, BIGARY_PAGESIZE); // metadata for allocator
+    ASSERT_EQ(actual_size, 3 * BIGARY_PAGESIZE); // metadata & overhead
 
     volatile int *tab = (int *)mtt_allocator_malloc(&mtt_allocator, size);
 
     mtt_allocator_await_flush(&mtt_allocator);
     actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
-    ASSERT_EQ(actual_size, size);
+    ASSERT_EQ(actual_size,
+              size + 3 * BIGARY_PAGESIZE /* metadata & overhead */);
 
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
@@ -786,7 +787,8 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     size_t pmem_size =
         ranking_get_total_size(mtt_allocator.internals.pmemRanking);
 
-    ASSERT_EQ(dram_size + pmem_size, size);
+    ASSERT_EQ(dram_size + pmem_size,
+              size + 3 * BIGARY_PAGESIZE /* metadata & overhead */);
 
     ASSERT_LE(dram_size, limits.softLimit);
     ASSERT_LE(dram_size, 16ul * 1024ul * 1024ul);
@@ -797,13 +799,14 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     ASSERT_GE(pmem_size, size - limits.softLimit);
     ASSERT_GE(pmem_size, 512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul);
 
-    ASSERT_LE(pmem_size,
-              size - limits.softLimit + TRACED_PAGESIZE +
-                  BIGARY_PAGESIZE); // additional page for metadata
-    ASSERT_LE(pmem_size,
-              512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul +
-                  TRACED_PAGESIZE +
-                  BIGARY_PAGESIZE); // additional page for metadata
+    ASSERT_LE(
+        pmem_size,
+        size - limits.softLimit + TRACED_PAGESIZE +
+            3 * BIGARY_PAGESIZE); // 3 additional pages: metadata and overhead
+    ASSERT_LE(
+        pmem_size,
+        512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul + TRACED_PAGESIZE +
+            3 * BIGARY_PAGESIZE); // 3 additional pages: metadata and overhead
 
     // compiler optimizations
     ASSERT_EQ(total_sum, total_sum);
