@@ -209,7 +209,7 @@ endarg:
         }
     }
 
-    execvpe(argv[optind], argv + optind, environ);
+    execve(argv[optind], argv + optind, environ);
     // We land here only on error.
     die(PN ": couldn't exec ｢%s｣: %m\n", argv[optind]);
 }
