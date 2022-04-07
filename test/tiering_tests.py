@@ -23,6 +23,7 @@ class Helper(object):
     log_debug_prefix = log_prefix + "LOG_DEBUG: "
     log_error_prefix = log_prefix + "LOG_ERROR: "
     log_info_prefix = log_prefix + "LOG_INFO: "
+    memkind_log_prefix = "MEMKIND_INFO:"
 
     kind_name_dict = {
         'DRAM': 'memkind_default',
@@ -31,6 +32,7 @@ class Helper(object):
 
     mem_tiers_env_var = "MEMKIND_MEM_TIERS"
     mem_thresholds_env_var = "MEMKIND_MEM_THRESHOLDS"
+    mtt_limits_env_var = "MEMKIND_MTT_LIMITS"
 
     # POLICY_STATIC_RATIO is a policy used in tests that have to set a
     # valid policy but don't test anything related to allocation policies
@@ -64,14 +66,19 @@ class Helper(object):
         else:
             return True
 
-    def get_ld_preload_cmd_output(self, tiers_config, thresholds_config=None,
+    def get_ld_preload_cmd_output(self, tiers_config, memkind_log=False,
+                                  mtt_limits=None, thresholds_config=None,
                                   log_level=None, negative_test=False):
+        memkind_log_env = "MEMKIND_DEBUG=1" if memkind_log else ""
         log_level_env = self.log_prefix + "LOG_LEVEL=" + log_level \
             if log_level else ""
+        mtt_limits_env = self.mtt_limits_env_var + \
+            '="' + mtt_limits + '"' if mtt_limits else ""
         tiers_env = self.mem_tiers_env_var + '="' + tiers_config + '"'
         thresholds_env = self.mem_thresholds_env_var + '="' + \
             thresholds_config + '"' if thresholds_config else ""
-        command = " ".join([self.ld_preload_env, log_level_env,
+        command = " ".join([self.ld_preload_env, memkind_log_env,
+                            log_level_env, mtt_limits_env,
                             tiers_env, thresholds_env, self.bin_path])
         output, retcode = self.cmd.execute_cmd(command)
         fail_msg = "Execution of: '" + command + \
@@ -552,3 +559,30 @@ class Test_tiering_config_env(Helper):
             + "RATIO:4;" + wrong_tier + ";" + self.default_policy,
             log_level="2",
             negative_test=True)
+
+    def test_env_var_mtt_limits(self):
+        out = self.get_ld_preload_cmd_output(
+            "KIND:DRAM,RATIO:1;"
+            + "KIND:FS_DAX,PATH:/tmp,PMEM_SIZE_LIMIT:100M,RATIO:4;"
+            + "POLICY:DATA_MOVEMENT",
+            memkind_log=True,
+            mtt_limits="LOW:128M,SOFT:1024M,HARD:4G",
+            log_level="2")
+        low_limit_in_bytes = 128 * (1 << 20)
+        soft_limit_in_bytes = 1024 * (1 << 20)
+        hard_limit_in_bytes = 4 * (1 << 30)
+        msg_low_limit = (
+            f"{self.memkind_log_prefix} MTT ranking low_limit"
+            f" = {low_limit_in_bytes}"
+        )
+        msg_soft_limit = (
+            f"{self.memkind_log_prefix} MTT ranking soft_limit"
+            f" = {soft_limit_in_bytes}"
+        )
+        msg_hard_limit = (
+            f"{self.memkind_log_prefix} MTT ranking hard_limit"
+            f" = {hard_limit_in_bytes}"
+        )
+        assert msg_low_limit in out
+        assert msg_soft_limit in out
+        assert msg_hard_limit in out
