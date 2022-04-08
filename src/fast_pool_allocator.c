@@ -22,6 +22,18 @@
                               __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST)
 #endif
 
+// -------- private functions -------------------------------------------------
+
+static FastSlabAllocator *fast_pool_allocator_get_slab(FastPoolAllocator *pool,
+                                                       void *ptr)
+{
+    uintptr_t address = (uintptr_t)ptr;
+    // TRACED_PAGESIZE is required to be a power of 2,
+    // hence the optimization below is possible
+    uintptr_t address_aligned = (address) & ~(TRACED_PAGESIZE - 1);
+    return fast_slab_tracker_get_fast_slab(pool->tracker, address_aligned);
+}
+
 // -------- public functions --------------------------------------------------
 
 // TODO in the future, reducing code duplication with pool_allocator.h would be
@@ -89,23 +101,34 @@ MEMKIND_EXPORT void *fast_pool_allocator_malloc(FastPoolAllocator *pool,
                                             dummy_size, &gStandardMmapCallback);
 }
 
-MEMKIND_EXPORT void *fast_pool_allocator_realloc(FastPoolAllocator *pool,
-                                                 void *ptr, size_t size)
-{
-    fast_pool_allocator_free(pool, ptr);
-
-    return fast_pool_allocator_malloc(pool, size);
-}
-
 MEMKIND_EXPORT void *fast_pool_allocator_realloc_pages(
     FastPoolAllocator *pool, void *ptr, size_t size, uintptr_t *addr,
     size_t *nof_pages, const MmapCallback *user_mmap)
 {
-    // FIXME this function does not conform to the standard
-    // if allocation fails, previous allocation should not be freed
-    fast_pool_allocator_free(pool, ptr);
-    return fast_pool_allocator_malloc_pages(pool, size, addr, nof_pages,
-                                            user_mmap);
+    if (size == 0) {
+        fast_pool_allocator_free(pool, ptr);
+        return NULL;
+    }
+    if (ptr == NULL) {
+        return fast_pool_allocator_malloc_pages(pool, size, addr, nof_pages,
+                                                user_mmap);
+    }
+
+    FastSlabAllocator *alloc = fast_pool_allocator_get_slab(pool, ptr);
+    if (size_to_rank_size(size) == alloc->elementSize) {
+        return ptr;
+    }
+
+    void *ret = fast_pool_allocator_malloc_pages(pool, size, addr, nof_pages,
+                                                 user_mmap);
+    if (ret) {
+        size_t to_copy = size < alloc->elementSize ? size : alloc->elementSize;
+        memcpy(ret, ptr, to_copy);
+        // use alloc directly to avoid double lookup
+        fast_slab_allocator_free(alloc, ptr);
+    }
+
+    return ret;
 }
 
 MEMKIND_EXPORT void fast_pool_allocator_free(FastPoolAllocator *pool, void *ptr)
@@ -114,11 +137,7 @@ MEMKIND_EXPORT void fast_pool_allocator_free(FastPoolAllocator *pool, void *ptr)
         return;
     }
 
-    uintptr_t address = (uintptr_t)ptr;
-    // TODO microoptimisation possible !
-    uintptr_t address_aligned = (address / TRACED_PAGESIZE) * TRACED_PAGESIZE;
-    FastSlabAllocator *alloc =
-        fast_slab_tracker_get_fast_slab(pool->tracker, address_aligned);
+    FastSlabAllocator *alloc = fast_pool_allocator_get_slab(pool, ptr);
     assert(alloc && "allocator not registered!");
     fast_slab_allocator_free(alloc, ptr);
 }
@@ -128,12 +147,7 @@ MEMKIND_EXPORT size_t fast_pool_allocator_usable_size(FastPoolAllocator *pool,
 {
     if (ptr == NULL)
         return 0;
-
-    uintptr_t address = (uintptr_t)ptr;
-    // TODO microoptimisation possible !
-    uintptr_t address_aligned = (address / TRACED_PAGESIZE) * TRACED_PAGESIZE;
-    FastSlabAllocator *alloc =
-        fast_slab_tracker_get_fast_slab(pool->tracker, address_aligned);
+    FastSlabAllocator *alloc = fast_pool_allocator_get_slab(pool, ptr);
     assert(alloc && "allocator not registered!");
     return alloc->elementSize;
 }
