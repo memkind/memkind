@@ -185,7 +185,8 @@ MEMKIND_EXPORT int memkind_fixed_create(struct memkind *kind,
 
     if (pthread_mutex_init(&priv->lock, NULL) != 0) {
         err = MEMKIND_ERROR_RUNTIME;
-        goto exit;
+        jemk_free(priv);
+        return err;
     }
 
     err = memkind_default_create(kind, ops, name);
@@ -204,7 +205,7 @@ MEMKIND_EXPORT int memkind_fixed_create(struct memkind *kind,
 exit:
     /* err is set, please don't overwrite it with result of
      * pthread_mutex_destroy */
-    pthread_mutex_destroy(&priv->lock);
+    (void)pthread_mutex_destroy(&priv->lock);
     jemk_free(priv);
     return err;
 }
@@ -215,11 +216,11 @@ MEMKIND_EXPORT int memkind_fixed_destroy(struct memkind *kind)
 
     memkind_arena_destroy(kind);
     memtier_reset_size(kind->partition);
-    pthread_mutex_destroy(&priv->lock);
+    int ret = pthread_mutex_destroy(&priv->lock);
 
     jemk_free(priv);
 
-    return 0;
+    return ret;
 }
 
 MEMKIND_EXPORT void *memkind_fixed_mmap(struct memkind *kind, void *addr,
