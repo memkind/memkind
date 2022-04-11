@@ -77,7 +77,7 @@ void pebs_monitor(PebsMetadata *pebs)
     log_info("PEBS: processed %d samples", all_cpu_samples);
 }
 
-void pebs_unmap_all_cpus(PebsMetadata *pebs)
+static void pebs_unmap_all_cpus(PebsMetadata *pebs)
 {
     for (size_t cpu_idx = 0u; cpu_idx < pebs->nof_cpus; ++cpu_idx) {
         munmap(pebs->pebs_mmap[cpu_idx], MMAP_PAGES_NUM * getpagesize());
@@ -119,6 +119,13 @@ void pebs_create(MTTAllocator *mtt_allocator, PebsMetadata *pebs, touch_cb cb)
     }
     fclose(f);
 
+    log_info("PEBS created");
+
+    pebs_enable(mtt_allocator, pebs);
+}
+
+void pebs_enable(MTTAllocator *mtt_allocator, PebsMetadata *pebs)
+{
     struct perf_event_attr pe;
     memset(&pe, 0, sizeof(struct perf_event_attr));
 
@@ -126,7 +133,6 @@ void pebs_create(MTTAllocator *mtt_allocator, PebsMetadata *pebs, touch_cb cb)
     pe.type = PERF_TYPE_HW_CACHE;
     pe.config = PERF_COUNT_HW_CACHE_LL | PERF_COUNT_HW_CACHE_OP_READ |
         PERF_COUNT_HW_CACHE_RESULT_MISS;
-
     pe.size = sizeof(struct perf_event_attr);
     pe.sample_period = PEBS_SAMPLING_INTERVAL;
     pe.sample_type = PERF_SAMPLE_ADDR | PERF_SAMPLE_TIME;
@@ -176,14 +182,23 @@ void pebs_create(MTTAllocator *mtt_allocator, PebsMetadata *pebs, touch_cb cb)
     log_info("PEBS enabled");
 }
 
-void pebs_destroy(MTTAllocator *mtt_allocator, PebsMetadata *pebs)
+void pebs_disable(MTTAllocator *mtt_allocator, PebsMetadata *pebs)
 {
     for (size_t cpu_idx = 0u; cpu_idx < pebs->nof_cpus; ++cpu_idx)
         ioctl(pebs->pebs_fd[cpu_idx], PERF_EVENT_IOC_DISABLE, 0);
 
     pebs_unmap_all_cpus(pebs);
+
+    log_info("PEBS disabled");
+}
+
+void pebs_destroy(MTTAllocator *mtt_allocator, PebsMetadata *pebs)
+{
+    pebs_disable(mtt_allocator, pebs);
+
     mtt_allocator_free(mtt_allocator, pebs->pebs_fd);
     mtt_allocator_free(mtt_allocator, pebs->pebs_mmap);
     mtt_allocator_free(mtt_allocator, pebs->last_head);
-    log_info("PEBS disabled");
+
+    log_info("PEBS destroyed");
 }
