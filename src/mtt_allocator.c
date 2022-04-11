@@ -150,6 +150,8 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
     pthread_getschedparam(pthread_self(), &policy, &param);
     param.sched_priority = sched_get_priority_min(policy);
     pthread_setschedparam(pthread_self(), policy, &param);
+    // no sleep on first iteration
+    timespec_get_time(CLOCK_MONOTONIC, &end_time);
 
     pthread_mutex_lock(bg_thread_cond_mutex);
     bg_thread->bg_thread_state = THREAD_RUNNING;
@@ -160,10 +162,16 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
     while (bg_thread_state != THREAD_FINISHED) {
         pthread_mutex_lock(bg_thread_cond_mutex);
         bg_thread_state = bg_thread->bg_thread_state;
+        // perform sleep only if no sleep interrupt was scheduled
+        if (bg_thread_state == THREAD_RUNNING) {
+            // wait until next occurrence (according to frequency) or interrupt
+            pthread_cond_timedwait(&bg_thread->bg_thread_cond,
+                                   &bg_thread->bg_thread_cond_mutex, &end_time);
+        }
         pthread_mutex_unlock(bg_thread_cond_mutex);
 
-        // calculate time to wait
-        timespec_get_time(CLOCK_REALTIME, &end_time);
+        // calculate time to wait - only what remains after current iteration
+        timespec_get_time(CLOCK_MONOTONIC, &end_time);
         timespec_add(&end_time, &tv_period);
 
         pthread_mutex_lock(&allocatorsMutex);
@@ -195,12 +203,6 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
             pthread_cond_broadcast(&bg_thread->bg_thread_cond);
             pthread_mutex_unlock(bg_thread_cond_mutex);
         }
-
-        // wait until next occurrence (according to frequency) or interrupt
-        pthread_mutex_lock(bg_thread_cond_mutex);
-        pthread_cond_timedwait(&bg_thread->bg_thread_cond,
-                               &bg_thread->bg_thread_cond_mutex, &end_time);
-        pthread_mutex_unlock(bg_thread_cond_mutex);
     }
     pthread_mutex_lock(&allocatorsMutex);
     update_rankings(); // flush mmapTracingQueue
