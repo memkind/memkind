@@ -26,6 +26,7 @@ calc_ratio 512G 4T 1:8
 calc_ratio 1000017 3000000 1:3
 calc_ratio 20G 50G 2:5
 calc_ratio 740 500 3:2
+calc_ratio 259872501760 128835989504 2:1
 
 bad_r()
 {

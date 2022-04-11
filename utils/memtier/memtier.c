@@ -67,7 +67,11 @@ static size_t human_friendly_ratio(size_t x, size_t y)
             continue;
         if (a * y * ACCURACY < x * b) // too little?
             continue;
-        return x / a;
+        // The ratios are 𝑎𝑙𝑚𝑜𝑠𝑡 equal, we need to round up here.
+        if (x / a < y / b)
+            return x / a;
+        else
+            return y / b;
     }
 }
 
