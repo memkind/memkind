@@ -32,7 +32,7 @@ jobs:
 
     - uses: codespell-project/actions-codespell@master
       with:
-        skip: ./jemalloc,./test/gtest_fused/gtest,./.github/workflows/gha.yml
+        skip: ./jemalloc,./test/gtest_fused/gtest,./.github/workflows/gha.yml,./test/tiering_tests.py
         ignore_words_list: "ue"
 
   docker-build:
