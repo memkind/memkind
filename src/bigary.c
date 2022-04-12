@@ -127,7 +127,7 @@ void bigary_alloc(bigary *restrict m_bigary, size_t top)
         die("bigary's max is %zu, %zu requested.\n", m_bigary->declared, top);
     if (mmap(m_bigary->area + m_bigary->top, top - m_bigary->top,
              PROT_READ | PROT_WRITE, MAP_FIXED | m_bigary->flags, m_bigary->fd,
-             m_bigary->top) == MAP_FAILED) {
+             0ul) == MAP_FAILED) {
         die("in-bigary alloc of %zu to %zu failed: %m\n", top - m_bigary->top,
             top);
     }
@@ -155,7 +155,7 @@ void bigary_alloc_pages(bigary *restrict m_bigary, size_t top,
     if (m_mmap->wrapped_mmap(m_mmap->arg, m_bigary->area + m_bigary->top,
                              top - m_bigary->top, PROT_READ | PROT_WRITE,
                              MAP_FIXED | m_bigary->flags, m_bigary->fd,
-                             m_bigary->top) == MAP_FAILED) {
+                             0ul) == MAP_FAILED) {
         die("in-bigary alloc of %zd to %zd failed: %m\n", top - m_bigary->top,
             top);
     }
