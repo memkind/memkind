@@ -176,10 +176,7 @@ class FastPoolAllocatorWrapper: public Allocator
 public:
     FastPoolAllocatorWrapper()
     {
-        uintptr_t dummy_address = 0ul;
-        size_t dummy_nof_pages = 0ul;
-        fast_pool_allocator_create(&allocator, &dummy_address, &dummy_nof_pages,
-                                   &gStandardMmapCallback);
+        fast_pool_allocator_create(&allocator, &gStandardMmapCallback);
     }
 
     ~FastPoolAllocatorWrapper()
