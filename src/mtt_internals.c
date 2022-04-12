@@ -214,22 +214,16 @@ MEMKIND_EXPORT void *mtt_internals_malloc(MttInternals *internals, size_t size,
 MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
                                            size_t size, MmapCallback *user_mmap)
 {
-    if (size == 0) {
-        mtt_internals_free(internals, ptr);
-        return NULL;
-    } else if (ptr == NULL) {
-        return mtt_internals_malloc(internals, size, user_mmap);
-    }
-
-    size_t old_size = mtt_internals_usable_size(internals, ptr);
-    if (size == old_size) {
-        return ptr;
-    }
-
-    void *ret = mtt_internals_malloc(internals, size, user_mmap);
-    if (ret) {
-        memcpy(ret, ptr, old_size);
-        mtt_internals_free(internals, ptr);
+    uintptr_t addr[2] = {0ul};
+    size_t nof_pages[2] = {0ul};
+    void *ret = fast_pool_allocator_realloc_pages(
+        &internals->pool, ptr, size, (uintptr_t *)addr, (size_t *)nof_pages,
+        user_mmap);
+    for (size_t i = 0ul; i < 2u; ++i) {
+        if (addr[i]) {
+            mmap_tracing_queue_multithreaded_push(&internals->mmapTracingQueue,
+                                                  addr[i], nof_pages[i]);
+        }
     }
 
     return ret;
