@@ -153,8 +153,13 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
     pthread_getschedparam(pthread_self(), &policy, &param);
     param.sched_priority = sched_get_priority_min(policy);
     pthread_setschedparam(pthread_self(), policy, &param);
+
     // no sleep on first iteration
-    timespec_get_time(CLOCK_MONOTONIC, &end_time);
+    // TODO: we use CLOCK_REALTIME here only because pthread_cond_timedwait
+    // waits using this clock. CLOCK_MONOTONIC would be better here, but not
+    // all Linux distros implements pthread_cond_clockwait that could wait on
+    // arbitrary type of CLOCK
+    timespec_get_time(CLOCK_REALTIME, &end_time);
 
     pthread_mutex_lock(bg_thread_cond_mutex);
     bg_thread->bg_thread_state = THREAD_RUNNING;
@@ -174,7 +179,7 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
         pthread_mutex_unlock(bg_thread_cond_mutex);
 
         // calculate time to wait - only what remains after current iteration
-        timespec_get_time(CLOCK_MONOTONIC, &end_time);
+        timespec_get_time(CLOCK_REALTIME, &end_time);
         timespec_add(&end_time, &tv_period);
 
         pthread_mutex_lock(&allocatorsMutex);
