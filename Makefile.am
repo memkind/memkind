@@ -102,7 +102,6 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/slab_tracker.h \
                   include/memkind/internal/timespec_ops.h \
                   include/memkind/internal/critnib.h \
-                  include/memkind/internal/pmdk-compat.h \
                   # end
 
 EXTRA_DIST = CONTRIBUTING \

@@ -78,7 +78,6 @@ include/memkind/internal/mmap_tracing_queue.h
 include/memkind/internal/slab_tracker.h
 include/memkind/internal/timespec_ops.h
 include/memkind/internal/critnib.h
-include/memkind/internal/pmdk-compat.h
 include/memkind_allocator.h
 include/memkind_deprecated.h
 include/pmem_allocator.h

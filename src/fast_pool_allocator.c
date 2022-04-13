@@ -27,11 +27,8 @@
 static FastSlabAllocator *fast_pool_allocator_get_slab(FastPoolAllocator *pool,
                                                        void *ptr)
 {
-    uintptr_t address = (uintptr_t)ptr;
-    // TRACED_PAGESIZE is required to be a power of 2,
-    // hence the optimization below is possible
-    uintptr_t address_aligned = (address) & ~((uintptr_t)TRACED_PAGESIZE - 1);
-    return fast_slab_tracker_get_fast_slab(pool->tracker, address_aligned);
+    // since critnib is used, the address does not have to be aligned
+    return fast_slab_tracker_get_fast_slab(pool->tracker, (uintptr_t)ptr);
 }
 
 // -------- public functions --------------------------------------------------
