@@ -1819,4 +1819,6 @@ TEST_F(RankingPerfTest, PEBS)
 
     for (auto &it : allocs)
         mtt_allocator_free(&m_mtt_allocator, it);
+
+    mtt_allocator_destroy(&m_mtt_allocator);
 }
