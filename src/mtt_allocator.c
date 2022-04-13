@@ -5,15 +5,19 @@
 #define _GNU_SOURCE
 #endif
 
+#include <memkind/internal/memkind_dax_kmem.h>
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/pebs.h>
+#include <memkind/internal/ranking_utils.h>
 #include <memkind/internal/timespec_ops.h>
 
 #include <mtt_allocator.h>
 
 #include <assert.h>
 #include <errno.h>
+#include <numa.h>
+#include <numaif.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdlib.h>
@@ -37,7 +41,17 @@ static pthread_mutex_t allocatorsMutex = PTHREAD_MUTEX_INITIALIZER;
 static uint64_t last_timestamp;
 static pthread_once_t mtt_register_atfork_once = PTHREAD_ONCE_INIT;
 
+extern nodemask_t nodemasks[2];
+static pthread_once_t nodemask_inits[2] = {PTHREAD_ONCE_INIT,
+                                           PTHREAD_ONCE_INIT};
+
 // static function declarations -----------------------------------------------
+
+static void init_dram_nodemask_once();
+static void init_dax_kmem_nodemask_once();
+
+void (*init_routines[2])(void) = {init_dram_nodemask_once,
+                                  init_dax_kmem_nodemask_once};
 
 static void *mtt_run_bg_thread(void *mtt_alloc);
 /// @pre allocatorsMutex must be acquired before calling
@@ -54,6 +68,62 @@ static void background_thread_start(BackgroundThread *bg_thread);
 static void background_thread_stop(MTTAllocator *mtt_allocator);
 
 // static function definitions ------------------------------------------------
+
+static void init_dram_nodemask_once()
+{
+    unsigned i;
+
+    int err = numa_available();
+    if (err) {
+        log_fatal("NUMA is not supported (error code:%d)", err);
+        abort();
+    }
+
+    unsigned nodes_num = (unsigned)numa_max_node() + 1;
+    struct bitmask *node_cpus = numa_allocate_cpumask();
+    struct bitmask *dram_nodes_bm = numa_allocate_nodemask();
+
+    for (i = 0; i < nodes_num; i++) {
+        int ret = numa_node_to_cpus(i, node_cpus);
+        if (ret == 0 && numa_bitmask_weight(node_cpus))
+            numa_bitmask_setbit(dram_nodes_bm, i);
+    }
+    numa_bitmask_free(node_cpus);
+
+    copy_bitmask_to_nodemask(dram_nodes_bm, &nodemasks[DRAM]);
+}
+
+static void init_dax_kmem_nodemask_once()
+{
+    struct bitmask *bitmask = NULL;
+    int bm_weight = 0;
+
+    int err = numa_available();
+    if (err) {
+        log_fatal("NUMA is not supported (error code:%d)", err);
+        abort();
+    }
+    bitmask = numa_allocate_nodemask();
+
+    int status = memkind_dax_kmem_all_get_mbind_nodemask(
+        NULL, nodemasks[DAX_KMEM].n, NUMA_NUM_NODES);
+    if (status == MEMKIND_ERROR_OPERATION_FAILED) {
+        log_fatal(
+            "memkind wasn't build with a minimum required libdaxctl-devel version");
+        abort();
+    } else if (status != MEMKIND_SUCCESS) {
+        log_fatal("Failed to get DAX KMEM nodes nodemask");
+        abort();
+    }
+
+    copy_nodemask_to_bitmask(&nodemasks[DAX_KMEM], bitmask);
+    bm_weight = numa_bitmask_weight(bitmask);
+    if (bm_weight == 0) {
+        log_fatal(
+            "Page movement to DAX_KMEM failed: no DAX_KMEM nodes detected");
+        abort();
+    }
+}
 
 /// @brief Wrapper for mmap with PMEM/DRAM balancing
 ///
@@ -377,6 +447,8 @@ MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator,
                                          const MTTInternalsLimits *limits)
 {
     pthread_once(&mtt_register_atfork_once, mtt_register_atfork);
+    pthread_once(&nodemask_inits[DRAM], init_routines[DRAM]);
+    pthread_once(&nodemask_inits[DAX_KMEM], init_routines[DAX_KMEM]);
 
     // TODO get timestamp from somewhere!!! (bg thread? PEBS?)
     uint64_t timestamp = 0;
