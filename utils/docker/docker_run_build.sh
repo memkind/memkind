@@ -30,6 +30,9 @@ else
         "$UTILS_PREFIX"/docker_install_hwloc.sh "$PWD"/"$UTILS_PREFIX"
     fi
 
+    # allow git operations
+    git config --global --add safe.directory $PWD
+
     # building memkind sources and tests
     ./autogen.sh
     ./configure --prefix=/usr $GCOV_OPTION
