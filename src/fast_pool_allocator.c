@@ -49,47 +49,32 @@ fast_pool_allocator_malloc_pages(FastPoolAllocator *pool, size_t size,
     uint16_t hash = hasher_calculate_hash(size_rank);
     FastSlabAllocator *slab = pool->pool[hash];
     void *ret = NULL;
-    size_t nof_pages_idx = 0ul;
     // TODO get rid of the arrays below
-    size_t address[2] = {0ul};
-    size_t nof_pages[2] = {0ul};
+    size_t dummy_address = 0ul;
+    size_t dummy_nof_pages = 0ul;
 
     if (!slab) {
         FastSlabAllocator *null_slab = slab;
         slab = fast_slab_allocator_malloc(&pool->slabSlabAllocator);
         size_t slab_size = rank_size_to_size(size_rank);
-        nof_pages[nof_pages_idx] = 0ul;
+        // TODO remove the "pages"
         int ret1 = fast_slab_allocator_init_pages(
-            slab, slab_size, 0, &address[nof_pages_idx],
-            &nof_pages[nof_pages_idx], user_mmap);
+            slab, slab_size, 0, &dummy_address, &dummy_nof_pages, user_mmap);
         if (ret1 != 0)
             return NULL;
         bool exchanged =
             atomic_compare_exchange_strong(&pool->pool[hash], &null_slab, slab);
         if (exchanged) {
-            uintptr_t page_start = address[nof_pages_idx];
-            for (size_t i = 0ul; i < nof_pages[nof_pages_idx];
-                 ++i, page_start += TRACED_PAGESIZE) {
-                fast_slab_tracker_register(pool->tracker, page_start, slab);
-            }
-            ++nof_pages_idx;
+            fast_slab_tracker_register(
+                pool->tracker, (uintptr_t)slab->mappedMemory.area, slab);
         } else {
             fast_slab_allocator_destroy(slab);
             slab = atomic_load(&pool->pool[hash]);
         }
     }
 
-    uintptr_t page_start = 0ul;
-    nof_pages[nof_pages_idx] = 0ul;
-    ret = fast_slab_allocator_malloc_pages(
-        slab, &address[nof_pages_idx], &nof_pages[nof_pages_idx], user_mmap);
-
-    page_start = address[nof_pages_idx];
-
-    for (size_t i = 0ul; i < nof_pages[nof_pages_idx];
-         ++i, page_start += TRACED_PAGESIZE) {
-        fast_slab_tracker_register(pool->tracker, page_start, slab);
-    }
+    ret = fast_slab_allocator_malloc_pages(slab, &dummy_address,
+                                           &dummy_nof_pages, user_mmap);
 
     return ret;
 }
