@@ -39,12 +39,12 @@ extern int fast_pool_allocator_create(FastPoolAllocator *pool,
                                       const MmapCallback *user_mmap);
 extern void fast_pool_allocator_destroy(FastPoolAllocator *pool);
 extern void *fast_pool_allocator_malloc(FastPoolAllocator *pool, size_t size);
-extern void *fast_pool_allocator_realloc_pages(FastPoolAllocator *pool,
-                                               void *ptr, size_t size,
-                                               const MmapCallback *user_mmap);
-extern void *fast_pool_allocator_malloc_pages(FastPoolAllocator *pool,
-                                              size_t size,
+extern void *fast_pool_allocator_realloc_mmap(FastPoolAllocator *pool,
+                                              void *ptr, size_t size,
                                               const MmapCallback *user_mmap);
+extern void *fast_pool_allocator_malloc_mmap(FastPoolAllocator *pool,
+                                             size_t size,
+                                             const MmapCallback *user_mmap);
 extern void *fast_pool_allocator_realloc(FastPoolAllocator *pool, void *ptr,
                                          size_t size);
 extern void fast_pool_allocator_free(FastPoolAllocator *pool, void *ptr);
