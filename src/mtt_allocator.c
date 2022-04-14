@@ -8,6 +8,7 @@
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_private.h>
 #include <memkind/internal/pebs.h>
+#include <memkind/internal/ranking_utils.h>
 #include <memkind/internal/timespec_ops.h>
 
 #include <mtt_allocator.h>
@@ -36,6 +37,7 @@ static SlabAllocator nodeSlab;
 static pthread_mutex_t allocatorsMutex = PTHREAD_MUTEX_INITIALIZER;
 static uint64_t last_timestamp;
 static pthread_once_t mtt_register_atfork_once = PTHREAD_ONCE_INIT;
+static pthread_once_t nodemasks_init_once = PTHREAD_ONCE_INIT;
 
 // static function declarations -----------------------------------------------
 
@@ -377,6 +379,7 @@ MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator,
                                          const MTTInternalsLimits *limits)
 {
     pthread_once(&mtt_register_atfork_once, mtt_register_atfork);
+    pthread_once(&nodemasks_init_once, init_nodemasks);
 
     // TODO get timestamp from somewhere!!! (bg thread? PEBS?)
     uint64_t timestamp = 0;

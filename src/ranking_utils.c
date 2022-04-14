@@ -17,18 +17,11 @@
 _Static_assert(DRAM == 0 && DAX_KMEM == 1, "Check values in ranking_utils.h");
 
 static nodemask_t nodemasks[2];
+static bool nodemasks_initialized = false;
+
 static const char *MEMORY_TYPE_NAMES[2] = {"DRAM", "DAX_KMEM"};
 
-static pthread_once_t nodemask_inits[2] = {PTHREAD_ONCE_INIT,
-                                           PTHREAD_ONCE_INIT};
-
-static void init_dram_nodemask_once();
-static void init_dax_kmem_nodemask_once();
-
-void (*init_routines[2])(void) = {init_dram_nodemask_once,
-                                  init_dax_kmem_nodemask_once};
-
-static void init_dram_nodemask_once()
+static void init_dram_nodemask()
 {
     unsigned i;
 
@@ -52,7 +45,7 @@ static void init_dram_nodemask_once()
     copy_bitmask_to_nodemask(dram_nodes_bm, &nodemasks[DRAM]);
 }
 
-static void init_dax_kmem_nodemask_once()
+static void init_dax_kmem_nodemask()
 {
     struct bitmask *bitmask = NULL;
     int bm_weight = 0;
@@ -84,6 +77,13 @@ static void init_dax_kmem_nodemask_once()
     }
 }
 
+void init_nodemasks()
+{
+    init_dram_nodemask();
+    init_dax_kmem_nodemask();
+    nodemasks_initialized = true;
+}
+
 MEMKIND_EXPORT int move_page_metadata(uintptr_t start_addr,
                                       memory_type_t memory_type)
 {
@@ -97,7 +97,10 @@ MEMKIND_EXPORT int move_page_metadata(uintptr_t start_addr,
         abort();
     }
 
-    pthread_once(&nodemask_inits[memory_type], init_routines[memory_type]);
+    if (!nodemasks_initialized) {
+        log_fatal("DRAM and KMEM_DAX nodemasks are not initialized");
+        abort();
+    }
 
     size_t retry_idx = 0;
     for (retry_idx = 0; retry_idx < MAX_RETRIES; ++retry_idx) {
