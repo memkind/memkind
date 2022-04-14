@@ -15,6 +15,7 @@ typedef enum
 } memory_type_t;
 
 int move_page_metadata(uintptr_t page, memory_type_t memory_type);
+void init_nodemasks();
 
 #ifdef __cplusplus
 }
