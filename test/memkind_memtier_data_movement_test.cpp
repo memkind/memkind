@@ -24,6 +24,11 @@
 
 #include <test/proc_stat.h>
 
+// metadata overhead for mtt allocator: 3 types created at startup: 1
+// internal slab and 2 types in background thread - dynamic allocation of
+// tables at init
+#define MTT_ALLOCATOR_METADATA_SIZE (3lu * BIGARY_PAGESIZE)
+
 class MemkindMemtierDataMovementTest: public ::testing::Test
 {
 protected:
@@ -763,14 +768,12 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     // internal slab and 2 types in background thread - dynamic allocation of
     // tables at init
 
-    const size_t metadata_size = 3 * BIGARY_PAGESIZE;
-
     // check DRAM size
     mtt_allocator_await_flush(&mtt_allocator);
     size_t dram_size =
         ranking_get_total_size(mtt_allocator.internals.dramRanking);
     ASSERT_EQ(dram_size, mtt_allocator.internals.usedDram);
-    ASSERT_EQ(dram_size, metadata_size);
+    ASSERT_EQ(dram_size, MTT_ALLOCATOR_METADATA_SIZE);
 
     volatile int *tab = (int *)mtt_allocator_malloc(&mtt_allocator, size);
 
@@ -805,7 +808,7 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     size_t pmem_size =
         ranking_get_total_size(mtt_allocator.internals.pmemRanking);
 
-    ASSERT_EQ(dram_size + pmem_size, size + metadata_size);
+    ASSERT_EQ(dram_size + pmem_size, size + MTT_ALLOCATOR_METADATA_SIZE);
     ASSERT_EQ(dram_size, mtt_allocator.internals.usedDram);
 
     ASSERT_LE(dram_size, limits.softLimit);
@@ -814,9 +817,10 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     ASSERT_GE(dram_size, limits.softLimit - TRACED_PAGESIZE);
     ASSERT_GE(dram_size, 16ul * 1024ul * 1024ul - TRACED_PAGESIZE);
 
-    ASSERT_GE(pmem_size, size + metadata_size - limits.softLimit);
+    ASSERT_GE(pmem_size, size + MTT_ALLOCATOR_METADATA_SIZE - limits.softLimit);
     ASSERT_GE(pmem_size,
-              metadata_size + 512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul);
+              MTT_ALLOCATOR_METADATA_SIZE + 512ul * 1024ul * 1024ul -
+                  16ul * 1024ul * 1024ul);
 
     ASSERT_LE(
         pmem_size,
@@ -849,17 +853,13 @@ TEST_F(PEBSTest, HardLimitMovementLogic)
     // PEBS is enabled during MTT allocator creation
     MTTAllocator mtt_allocator;
     mtt_allocator_create(&mtt_allocator, &limits);
-    // metadata overhead for mtt allocator: 3 types created at startup: 1
-    // internal slab and 2 types in background thread - dynamic allocation of
-    // tables at init
-    const size_t metadata_size = 3 * BIGARY_PAGESIZE;
 
     // check DRAM size
     mtt_allocator_await_flush(&mtt_allocator);
     size_t dram_size =
         ranking_get_total_size(mtt_allocator.internals.dramRanking);
     ASSERT_EQ(dram_size, mtt_allocator.internals.usedDram);
-    ASSERT_EQ(dram_size, metadata_size);
+    ASSERT_EQ(dram_size, MTT_ALLOCATOR_METADATA_SIZE);
     ASSERT_LE(mtt_allocator.internals.usedDram, limits.hardLimit);
 
     volatile int *tab[nof_allocations];
@@ -1736,16 +1736,18 @@ TEST_F(RankingPerfTest, PEBS)
     std::vector<void *> allocs, dram_allocs, pmem_allocs;
     int numa_id;
 
+    size_t dram_data_size = 50ul * 1024ul * 1024ul;
     MTTInternalsLimits limits;
     limits.lowLimit = TRACED_PAGESIZE;
-    limits.softLimit = 50ul * 1024ul * 1024ul;
+    // assume that metadata is hot and will reside in DRAM
+    limits.softLimit = dram_data_size + MTT_ALLOCATOR_METADATA_SIZE;
     limits.hardLimit = limits.softLimit;
 
     mtt_allocator_create(&m_mtt_allocator, &limits);
 
     // Allocate 2x more data than soft limit so MTT will start moving data
     // to PMEM
-    for (size_t i = 0; i < limits.softLimit * 2; i += alloc_size) {
+    for (size_t i = 0; i < dram_data_size * 2; i += alloc_size) {
         void *ptr = mtt_allocator_malloc(&m_mtt_allocator, alloc_size);
         memset(ptr, 1, alloc_size);
         allocs.push_back(ptr);
@@ -1765,10 +1767,8 @@ TEST_F(RankingPerfTest, PEBS)
     }
 
     // Check that DRAM and PMEM contains similar number of pages
-    // TODO: after implementation of "hard limit" this check may be more
-    // restrictive
     EXPECT_NEAR(dram_allocs.size(), pmem_allocs.size(),
-                dram_allocs.size() * 0.2);
+                dram_allocs.size() * 0.05);
 
     // Shuffle allocations to decrease caching effect
     // NOTE that pages promotion/demotion is quite random
