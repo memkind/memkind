@@ -191,15 +191,15 @@ MEMKIND_EXPORT void *mtt_internals_malloc(MttInternals *internals, size_t size,
                                           MmapCallback *user_mmap)
 {
     void *ret =
-        fast_pool_allocator_malloc_pages(&internals->pool, size, user_mmap);
+        fast_pool_allocator_malloc_mmap(&internals->pool, size, user_mmap);
     return ret;
 }
 
 MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
                                            size_t size, MmapCallback *user_mmap)
 {
-    void *ret = fast_pool_allocator_realloc_pages(&internals->pool, ptr, size,
-                                                  user_mmap);
+    void *ret = fast_pool_allocator_realloc_mmap(&internals->pool, ptr, size,
+                                                 user_mmap);
     return ret;
 }
 
