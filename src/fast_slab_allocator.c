@@ -65,18 +65,15 @@ static size_t slab_alloc_fetch_increment_used_(FastSlabAllocator *alloc)
     return atomic_fetch_add_explicit(&alloc->used, 1u, memory_order_relaxed);
 }
 
-static void *fast_slab_alloc_malloc_pages_(FastSlabAllocator *alloc,
-                                           uintptr_t *page_start,
-                                           size_t *nof_pages,
-                                           const MmapCallback *user_mmap)
+static void *fast_slab_alloc_malloc_mmap_(FastSlabAllocator *alloc,
+                                          const MmapCallback *user_mmap)
 {
     size_t free_idx = slab_alloc_fetch_increment_used_(alloc);
     size_t offset = alloc->elementSize * free_idx;
 
     // TODO handle failure gracefully instead of die - in biary_alloc
-    bigary_alloc_pages(&alloc->mappedMemory,
-                       (free_idx + 1) * alloc->elementSize, page_start,
-                       nof_pages, user_mmap);
+    bigary_alloc_mmap(&alloc->mappedMemory, (free_idx + 1) * alloc->elementSize,
+                      user_mmap);
 
     return ((uint8_t *)alloc->mappedMemory.area) + offset;
 }
@@ -111,16 +108,16 @@ MEMKIND_EXPORT int fast_slab_allocator_init(FastSlabAllocator *alloc,
     return ret;
 }
 
-MEMKIND_EXPORT int
-fast_slab_allocator_init_pages(FastSlabAllocator *alloc, size_t element_size,
-                               size_t max_elements, uintptr_t *addr,
-                               size_t *nof_pages, const MmapCallback *user_mmap)
+MEMKIND_EXPORT int fast_slab_allocator_init_mmap(FastSlabAllocator *alloc,
+                                                 size_t element_size,
+                                                 size_t max_elements,
+                                                 const MmapCallback *user_mmap)
 {
     // TODO handle failure gracefully instead of die - in biary_alloc
     alloc->elementSize = element_size;
     size_t max_elements_size = max_elements * alloc->elementSize;
-    bigary_init_pages(&alloc->mappedMemory, BIGARY_DRAM, max_elements_size,
-                      addr, nof_pages, user_mmap);
+    bigary_init_mmap(&alloc->mappedMemory, BIGARY_DRAM, max_elements_size,
+                     user_mmap);
     alloc->used = 0u;
 
     int ret = slab_allocator_init(&alloc->freelistNodeAllocator,
@@ -147,14 +144,12 @@ MEMKIND_EXPORT void *fast_slab_allocator_malloc(FastSlabAllocator *alloc)
 }
 
 MEMKIND_EXPORT void *
-fast_slab_allocator_malloc_pages(FastSlabAllocator *alloc,
-                                 uintptr_t *page_start, size_t *nof_pages,
-                                 const MmapCallback *user_mmap)
+fast_slab_allocator_malloc_mmap(FastSlabAllocator *alloc,
+                                const MmapCallback *user_mmap)
 {
     void *ret = fast_slab_alloc_glob_freelist_pop_(alloc);
     if (!ret) {
-        ret = fast_slab_alloc_malloc_pages_(alloc, page_start, nof_pages,
-                                            user_mmap);
+        ret = fast_slab_alloc_malloc_mmap_(alloc, user_mmap);
     }
 
     return ret;

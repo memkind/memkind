@@ -40,8 +40,8 @@ static FastSlabAllocator *fast_pool_allocator_get_slab(FastPoolAllocator *pool,
 // a good idea
 
 MEMKIND_EXPORT void *
-fast_pool_allocator_malloc_pages(FastPoolAllocator *pool, size_t size,
-                                 const MmapCallback *user_mmap)
+fast_pool_allocator_malloc_mmap(FastPoolAllocator *pool, size_t size,
+                                const MmapCallback *user_mmap)
 {
     if (size == 0)
         return NULL;
@@ -49,17 +49,12 @@ fast_pool_allocator_malloc_pages(FastPoolAllocator *pool, size_t size,
     uint16_t hash = hasher_calculate_hash(size_rank);
     FastSlabAllocator *slab = pool->pool[hash];
     void *ret = NULL;
-    // TODO get rid of the arrays below
-    size_t dummy_address = 0ul;
-    size_t dummy_nof_pages = 0ul;
 
     if (!slab) {
         FastSlabAllocator *null_slab = slab;
         slab = fast_slab_allocator_malloc(&pool->slabSlabAllocator);
         size_t slab_size = rank_size_to_size(size_rank);
-        // TODO remove the "pages"
-        int ret1 = fast_slab_allocator_init_pages(
-            slab, slab_size, 0, &dummy_address, &dummy_nof_pages, user_mmap);
+        int ret1 = fast_slab_allocator_init_mmap(slab, slab_size, 0, user_mmap);
         if (ret1 != 0)
             return NULL;
         bool exchanged =
@@ -73,8 +68,7 @@ fast_pool_allocator_malloc_pages(FastPoolAllocator *pool, size_t size,
         }
     }
 
-    ret = fast_slab_allocator_malloc_pages(slab, &dummy_address,
-                                           &dummy_nof_pages, user_mmap);
+    ret = fast_slab_allocator_malloc_mmap(slab, user_mmap);
 
     return ret;
 }
@@ -82,19 +76,19 @@ fast_pool_allocator_malloc_pages(FastPoolAllocator *pool, size_t size,
 MEMKIND_EXPORT void *fast_pool_allocator_malloc(FastPoolAllocator *pool,
                                                 size_t size)
 {
-    return fast_pool_allocator_malloc_pages(pool, size, &gStandardMmapCallback);
+    return fast_pool_allocator_malloc_mmap(pool, size, &gStandardMmapCallback);
 }
 
 MEMKIND_EXPORT void *
-fast_pool_allocator_realloc_pages(FastPoolAllocator *pool, void *ptr,
-                                  size_t size, const MmapCallback *user_mmap)
+fast_pool_allocator_realloc_mmap(FastPoolAllocator *pool, void *ptr,
+                                 size_t size, const MmapCallback *user_mmap)
 {
     if (size == 0) {
         fast_pool_allocator_free(pool, ptr);
         return NULL;
     }
     if (ptr == NULL) {
-        return fast_pool_allocator_malloc_pages(pool, size, user_mmap);
+        return fast_pool_allocator_malloc_mmap(pool, size, user_mmap);
     }
 
     FastSlabAllocator *alloc = fast_pool_allocator_get_slab(pool, ptr);
@@ -102,7 +96,7 @@ fast_pool_allocator_realloc_pages(FastPoolAllocator *pool, void *ptr,
         return ptr;
     }
 
-    void *ret = fast_pool_allocator_malloc_pages(pool, size, user_mmap);
+    void *ret = fast_pool_allocator_malloc_mmap(pool, size, user_mmap);
     if (ret) {
         size_t to_copy = size < alloc->elementSize ? size : alloc->elementSize;
         memcpy(ret, ptr, to_copy);
@@ -137,11 +131,9 @@ MEMKIND_EXPORT size_t fast_pool_allocator_usable_size(FastPoolAllocator *pool,
 MEMKIND_EXPORT int fast_pool_allocator_create(FastPoolAllocator *pool,
                                               const MmapCallback *user_mmap)
 {
-    uintptr_t addr = 0ul;
-    size_t nof_pages = 0ul;
-    int ret = fast_slab_allocator_init_pages(
-        &pool->slabSlabAllocator, sizeof(FastSlabAllocator), UINT16_MAX, &addr,
-        &nof_pages, user_mmap);
+    int ret = fast_slab_allocator_init_mmap(&pool->slabSlabAllocator,
+                                            sizeof(FastSlabAllocator),
+                                            UINT16_MAX, user_mmap);
     if (ret == 0)
         (void)memset(pool->pool, 0, sizeof(pool->pool));
     fast_slab_tracker_create(&pool->tracker);
