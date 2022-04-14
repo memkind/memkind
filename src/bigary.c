@@ -57,9 +57,8 @@ void bigary_init(bigary *restrict m_bigary, int fd, int flags, size_t max)
     m_bigary->top = BIGARY_PAGESIZE;
 }
 
-void bigary_init_pages(bigary *restrict m_bigary, int fd, int flags, size_t max,
-                       uintptr_t *address, size_t *nof_pages,
-                       const MmapCallback *m_mmap)
+void bigary_init_mmap(bigary *restrict m_bigary, int fd, int flags, size_t max,
+                      const MmapCallback *m_mmap)
 {
     assert((BIGARY_PAGESIZE % TRACED_PAGESIZE) == 0 &&
            "bigary pagesize and traced pagesize are not aligned! "
@@ -97,9 +96,6 @@ void bigary_init_pages(bigary *restrict m_bigary, int fd, int flags, size_t max,
                              0) == MAP_FAILED) {
         die("bigary alloc of %zd failed: %m\n", BIGARY_PAGESIZE);
     }
-    *address = (uintptr_t)(m_bigary->area);
-    *nof_pages = BIGARY_PAGESIZE /
-        TRACED_PAGESIZE; // we mmapped exactly one BIGARY_PAGESIZE
     m_bigary->top = BIGARY_PAGESIZE;
 }
 
@@ -140,9 +136,8 @@ done:
 /* ensure there's at least X space allocated                        */
 /* (you may want MAP_POPULATE to ensure the space is actually there */
 /********************************************************************/
-void bigary_alloc_pages(bigary *restrict m_bigary, size_t top,
-                        uintptr_t *address, size_t *nof_pages,
-                        const MmapCallback *m_mmap)
+void bigary_alloc_mmap(bigary *restrict m_bigary, size_t top,
+                       const MmapCallback *m_mmap)
 {
     if (m_bigary->top >= top)
         return;
@@ -159,8 +154,6 @@ void bigary_alloc_pages(bigary *restrict m_bigary, size_t top,
         die("in-bigary alloc of %zd to %zd failed: %m\n", top - m_bigary->top,
             top);
     }
-    *address = (uintptr_t)(m_bigary->area + m_bigary->top);
-    *nof_pages = (top - m_bigary->top) / TRACED_PAGESIZE;
     m_bigary->top = top;
 done:
     pthread_mutex_unlock(&m_bigary->enlargement);

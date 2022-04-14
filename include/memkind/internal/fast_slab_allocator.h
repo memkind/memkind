@@ -45,17 +45,14 @@ typedef struct fast_slab_allocator {
 
 extern int fast_slab_allocator_init(FastSlabAllocator *alloc,
                                     size_t element_size, size_t max_elements);
-extern int fast_slab_allocator_init_pages(FastSlabAllocator *alloc,
-                                          size_t element_size,
-                                          size_t max_elements, uintptr_t *addr,
-                                          size_t *nof_pages,
-                                          const MmapCallback *user_mmap);
+extern int fast_slab_allocator_init_mmap(FastSlabAllocator *alloc,
+                                         size_t element_size,
+                                         size_t max_elements,
+                                         const MmapCallback *user_mmap);
 extern void fast_slab_allocator_destroy(FastSlabAllocator *alloc);
 extern void *fast_slab_allocator_malloc(FastSlabAllocator *alloc);
-extern void *fast_slab_allocator_malloc_pages(FastSlabAllocator *alloc,
-                                              uintptr_t *page_start,
-                                              size_t *nof_pages,
-                                              const MmapCallback *user_mmap);
+extern void *fast_slab_allocator_malloc_mmap(FastSlabAllocator *alloc,
+                                             const MmapCallback *user_mmap);
 extern void fast_slab_allocator_free(FastSlabAllocator *alloc, void *addr);
 
 #ifdef __cplusplus
