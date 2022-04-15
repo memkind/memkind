@@ -1826,3 +1826,32 @@ TEST_F(RankingPerfTest, PEBS)
     for (auto &it : allocs)
         mtt_allocator_free(&m_mtt_allocator, it);
 }
+
+TEST(MttAllocator, calloc)
+{
+    MTTInternalsLimits limits;
+    limits.lowLimit = 1024u * 1024u * 1024u;
+    limits.softLimit = limits.lowLimit;
+    limits.hardLimit = limits.lowLimit;
+    MTTAllocator mtt_allocator;
+
+    mtt_allocator_create(&mtt_allocator, &limits);
+
+    std::vector<char *> ptr_vec;
+    int callocs_no = 1000;
+    size_t num = 2000;
+    size_t size = 4;
+    size_t calloc_size = num * size;
+    for (int i = 0; i < callocs_no; ++i) {
+        char *ptr = (char *)mtt_allocator_calloc(&mtt_allocator, num, size);
+        ASSERT_TRUE(ptr != nullptr);
+        for (size_t j = 0; j < calloc_size; ++j) {
+            ASSERT_EQ(ptr[j], 0);
+        }
+        ptr_vec.push_back(ptr);
+    }
+
+    for (auto const &ptr : ptr_vec) {
+        mtt_allocator_free(&mtt_allocator, ptr);
+    }
+}
