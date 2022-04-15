@@ -85,6 +85,7 @@ test_defrag_reallocate_LDADD = libmemkind.la
 test_hmat_test_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS)
 test_background_threads_test_SOURCES = $(fused_gtest) test/background_threads_test.cpp
 test_background_threads_test_LDADD = libmemkind.la
+test_memkind_memtier_data_movement_test_CXXFLAGS = $(AM_CXXFLAGS) $(CXXFLAGS) $(OPENMP_CFLAGS)
 test_memkind_memtier_data_movement_test_SOURCES = $(fused_gtest) test/memkind_memtier_data_movement_test.cpp
 test_memkind_memtier_data_movement_test_LDADD = libmemkind.la
 test_memkind_memtier_dax_kmem_test_SOURCES = $(fused_gtest) test/memkind_memtier_dax_kmem_test.cpp
