@@ -1762,7 +1762,7 @@ TEST_F(RankingPerfTest, PEBS)
 
     // Check that DRAM and PMEM contains similar number of pages
     EXPECT_NEAR(dram_allocs.size(), pmem_allocs.size(),
-                dram_allocs.size() * 0.12);
+                dram_allocs.size() * 0.2);
 
     // Shuffle allocations to decrease caching effect
     // NOTE that pages promotion/demotion is quite random
