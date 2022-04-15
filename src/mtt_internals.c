@@ -173,14 +173,7 @@ MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
     ranking_metadata_create(&internals->tempMetadataHandle);
     mmap_tracing_queue_create(&internals->mmapTracingQueue);
 
-    uintptr_t addr = 0ul;
-    size_t nof_pages = 0ul;
-
-    int ret = fast_pool_allocator_create(&internals->pool, &addr, &nof_pages,
-                                         user_mmap);
-    if (addr)
-        mmap_tracing_queue_multithreaded_push(&internals->mmapTracingQueue,
-                                              addr, nof_pages);
+    int ret = fast_pool_allocator_create(&internals->pool, user_mmap);
 
     return ret;
 }
@@ -197,35 +190,16 @@ MEMKIND_EXPORT void mtt_internals_destroy(MttInternals *internals)
 MEMKIND_EXPORT void *mtt_internals_malloc(MttInternals *internals, size_t size,
                                           MmapCallback *user_mmap)
 {
-    uintptr_t addr[2] = {0ul};
-    size_t nof_pages[2] = {0ul};
-    void *ret = fast_pool_allocator_malloc_pages(
-        &internals->pool, size, (uintptr_t *)addr, (size_t *)nof_pages,
-        user_mmap);
-    for (size_t i = 0ul; i < 2u; ++i) {
-        if (addr[i]) {
-            mmap_tracing_queue_multithreaded_push(&internals->mmapTracingQueue,
-                                                  addr[i], nof_pages[i]);
-        }
-    }
+    void *ret =
+        fast_pool_allocator_malloc_pages(&internals->pool, size, user_mmap);
     return ret;
 }
 
 MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
                                            size_t size, MmapCallback *user_mmap)
 {
-    uintptr_t addr[2] = {0ul};
-    size_t nof_pages[2] = {0ul};
-    void *ret = fast_pool_allocator_realloc_pages(
-        &internals->pool, ptr, size, (uintptr_t *)addr, (size_t *)nof_pages,
-        user_mmap);
-    for (size_t i = 0ul; i < 2u; ++i) {
-        if (addr[i]) {
-            mmap_tracing_queue_multithreaded_push(&internals->mmapTracingQueue,
-                                                  addr[i], nof_pages[i]);
-        }
-    }
-
+    void *ret = fast_pool_allocator_realloc_pages(&internals->pool, ptr, size,
+                                                  user_mmap);
     return ret;
 }
 
@@ -282,4 +256,12 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
                  surplus);
     // 4. Handle hottest on PMEM vs coldest on dram page movement
     mtt_internals_tiers_juggle(internals);
+}
+
+MEMKIND_EXPORT void
+mtt_internals_tracing_multithreaded_push(MttInternals *internals,
+                                         uintptr_t addr, size_t nof_pages)
+{
+    mmap_tracing_queue_multithreaded_push(&internals->mmapTracingQueue, addr,
+                                          nof_pages);
 }

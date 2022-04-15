@@ -579,10 +579,7 @@ protected:
 TEST_F(FastPoolAllocTest, Basic)
 {
     FastPoolAllocator pool;
-    uintptr_t dummy_address = 0ul;
-    size_t dummy_nof_pages = 0ul;
-    int ret = fast_pool_allocator_create(
-        &pool, &dummy_address, &dummy_nof_pages, &gStandardMmapCallback);
+    int ret = fast_pool_allocator_create(&pool, &gStandardMmapCallback);
     ASSERT_EQ(ret, 0);
     for (size_t i = 0; i < UINT16_MAX; ++i)
         ASSERT_EQ(pool.pool[i], nullptr);
@@ -627,10 +624,7 @@ TEST_F(FastPoolAllocTest, BigAllocationTest)
         512ul * 1024ul * 1024ul * sizeof(int); // 512*sizeof(int) MB
     size_t big_alloc_size = 16ul * 1024ul * 1024ul * 1024ul; // 16 GB
     FastPoolAllocator pool;
-    uintptr_t dummy_address = 0ul;
-    size_t dummy_nof_pages = 0ul;
-    int ret = fast_pool_allocator_create(
-        &pool, &dummy_address, &dummy_nof_pages, &gStandardMmapCallback);
+    int ret = fast_pool_allocator_create(&pool, &gStandardMmapCallback);
     ASSERT_EQ(ret, 0);
     for (size_t i = 0; i < UINT16_MAX; ++i)
         ASSERT_EQ(pool.pool[i], nullptr);

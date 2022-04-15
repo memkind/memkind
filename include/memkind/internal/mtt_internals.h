@@ -72,6 +72,10 @@ extern size_t mtt_internals_ranking_balance(MttInternals *internals,
 extern void mtt_internals_ranking_update(MttInternals *internals,
                                          uint64_t timestamp,
                                          atomic_size_t *used_dram);
+/// @note Thread safe
+extern void mtt_internals_tracing_multithreaded_push(MttInternals *internals,
+                                                     uintptr_t addr,
+                                                     size_t nof_pages);
 
 #ifdef __cplusplus
 }

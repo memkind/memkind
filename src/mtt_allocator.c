@@ -7,6 +7,7 @@
 
 #include <memkind/internal/memkind_log.h>
 #include <memkind/internal/memkind_private.h>
+#include <memkind/internal/pagesizes.h>
 #include <memkind/internal/pebs.h>
 #include <memkind/internal/timespec_ops.h>
 
@@ -47,9 +48,9 @@ static void update_rankings();
 static void balance_rankings();
 static void register_mtt_allocator(MTTAllocator *mtt_allocator);
 static void unregister_mtt_allocator(MTTAllocator *mtt_allocator);
-static void *mtt_allocator_mmap(void *arg, void *__addr, size_t __len,
-                                int __prot, int __flags, int __fd,
-                                __off_t __offset);
+static void *mtt_allocator_mmap_cb_wrapper(void *arg, void *addr, size_t len,
+                                           int prot, int flags, int fd,
+                                           __off_t offset);
 static void background_thread_start(BackgroundThread *bg_thread);
 static void background_thread_stop(MTTAllocator *mtt_allocator);
 
@@ -58,56 +59,12 @@ static void background_thread_stop(MTTAllocator *mtt_allocator);
 /// @brief Wrapper for mmap with PMEM/DRAM balancing
 ///
 /// @note At the function exit, we should have at most hardLimit data in DRAM
-static void *mtt_allocator_mmap(void *arg, void *__addr, size_t __len,
-                                int __prot, int __flags, int __fd,
-                                __off_t __offset)
+static void *mtt_allocator_mmap_cb_wrapper(void *arg, void *addr, size_t len,
+                                           int prot, int flags, int fd,
+                                           __off_t offset)
 {
-    MTTAllocator *allocator = arg;
-    // TODO assert that the same area is not mmapped twice !!!
-    // TODO assert that the allocator is initialized
-    assert(allocator->internals.limits.hardLimit && "hard limit cannot be 0!");
-    assert(allocator->internals.limits.softLimit && "soft limit cannot be 0!");
-    assert(allocator->internals.limits.lowLimit <=
-               allocator->internals.limits.softLimit &&
-           "soft limit has to be higher than or equal low limit!");
-    assert(allocator->internals.limits.softLimit <=
-               allocator->internals.limits.hardLimit &&
-           "hard limit has to be higher than or equal soft limit!");
-    // TODO assert that the allocator is not called recursively
-    size_t temp_used_dram = 0ul, ndram_size = 0ul;
-
-    // pmem_thresh must be lower than hardLimit for the code to work correctly
-    const size_t pmem_thresh = allocator->internals.limits.hardLimit - 1;
-
-    // add an assert for any person who might possibly change pmem_thresh
-    // without reading the comments
-    assert(pmem_thresh < allocator->internals.limits.hardLimit &&
-           "pmem_thresh was modified and set to value >= hardLimit; "
-           "the code will not work correctly "
-           "for hardLimit <= __len < pmem_thresh!");
-    if (__len >= pmem_thresh) {
-        // TODO make an mmap directly on PMEM
-        assert(false && "not implemented");
-        return NULL;
-    }
-    do {
-        temp_used_dram = atomic_load(&allocator->internals.usedDram);
-        ndram_size = temp_used_dram + __len;
-        if (temp_used_dram > allocator->internals.limits.hardLimit) {
-            // await until previous operations that surpass the hard_limit are
-            // balanced before queuing this one, to prevent hard limit overflow
-            // in a manageable case
-            mtt_allocator_await_balance(allocator);
-        }
-    } while (!atomic_compare_exchange_weak(
-        &allocator->internals.usedDram, &temp_used_dram,
-        allocator->internals.usedDram + __len));
-
-    if (ndram_size > allocator->internals.limits.hardLimit) {
-        mtt_allocator_await_balance(allocator);
-    }
-
-    return mmap(__addr, __len, __prot, __flags, __fd, __offset);
+    return mtt_allocator_mmap((MTTAllocator *)arg, addr, len, prot, flags, fd,
+                              offset);
 }
 
 /// @brief Wrapper for mmap
@@ -115,22 +72,26 @@ static void *mtt_allocator_mmap(void *arg, void *__addr, size_t __len,
 /// @pre @p arg (MTTAllocator*) should have the following fields initialized:
 ///     - allocator->internals.usedDram,
 ///     - allocator->internals.limits.hardLimit
-static void *mtt_allocator_mmap_init_once(void *arg, void *__addr, size_t __len,
-                                          int __prot, int __flags, int __fd,
-                                          __off_t __offset)
+static void *mtt_allocator_mmap_init_once(void *arg, void *addr, size_t len,
+                                          int prot, int flags, int fd,
+                                          __off_t offset)
 {
     MTTAllocator *allocator = arg;
     // TODO assert that the same area is not mmapped twice !!!
     // TODO assert that the allocator is initialized
     // TODO assert that the allocator is not called recursively
     size_t prev_used_dram =
-        atomic_fetch_add(&allocator->internals.usedDram, __len);
+        atomic_fetch_add(&allocator->internals.usedDram, len);
 
     assert(prev_used_dram == 0ul &&
            "This wrapper is only supposed to be used once, at init time!");
-    assert(__len < allocator->internals.limits.hardLimit &&
+    assert(len < allocator->internals.limits.hardLimit &&
            "Balancing not available at init time, increase hard limit!");
-    return mmap(__addr, __len, __prot, __flags, __fd, __offset);
+    void *ret = mmap(addr, len, prot, flags, fd, offset);
+    if (ret) // TODO make sure nothing is broken during final refactoring!
+        mtt_internals_tracing_multithreaded_push(
+            &allocator->internals, (uintptr_t)ret, len / TRACED_PAGESIZE);
+    return ret;
 }
 
 // Function required for pthread_create()
@@ -409,7 +370,7 @@ MEMKIND_EXPORT void *mtt_allocator_malloc(MTTAllocator *mtt_allocator,
 {
     MmapCallback mmap_callback;
     mmap_callback.arg = mtt_allocator;
-    mmap_callback.wrapped_mmap = mtt_allocator_mmap;
+    mmap_callback.wrapped_mmap = mtt_allocator_mmap_cb_wrapper;
     void *ret =
         mtt_internals_malloc(&mtt_allocator->internals, size, &mmap_callback);
     return ret;
@@ -420,7 +381,7 @@ MEMKIND_EXPORT void *mtt_allocator_realloc(MTTAllocator *mtt_allocator,
 {
     MmapCallback mmap_callback;
     mmap_callback.arg = mtt_allocator;
-    mmap_callback.wrapped_mmap = mtt_allocator_mmap;
+    mmap_callback.wrapped_mmap = mtt_allocator_mmap_cb_wrapper;
     void *ret = mtt_internals_realloc(&mtt_allocator->internals, ptr, size,
                                       &mmap_callback);
     return ret;
@@ -473,4 +434,86 @@ MEMKIND_EXPORT void mtt_allocator_await_balance(MTTAllocator *mtt_allocator)
                           &mtt_allocator->bgThread.bg_thread_cond_mutex);
     }
     pthread_mutex_unlock(&mtt_allocator->bgThread.bg_thread_cond_mutex);
+}
+
+MEMKIND_EXPORT void *mtt_allocator_mmap(MTTAllocator *mtt_allocator, void *addr,
+                                        size_t length, int prot, int flags,
+                                        int fd, off_t offset)
+{
+    assert(length % TRACED_PAGESIZE == 0ul &&
+           "Length is not a multiply of traced pagesize");
+    //     assert(prot == PROT_NONE);
+    assert(fd == -1 && "Handling of file-backed pages is not supported");
+    assert((flags == (MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED)) &&
+           "Handling of file-backed/shared memory/ is not supported, "
+           "address has to be fixed");
+    assert(((uintptr_t)addr) % TRACED_PAGESIZE == 0ul && "Incorrect alignment");
+    assert(offset == 0 && "Offset not supported");
+
+    // TODO assert that the same area is not mmapped twice !!!
+    // TODO assert that the allocator is initialized
+    assert(mtt_allocator->internals.limits.hardLimit &&
+           "hard limit cannot be 0!");
+    assert(mtt_allocator->internals.limits.softLimit &&
+           "soft limit cannot be 0!");
+    assert(mtt_allocator->internals.limits.lowLimit <=
+               mtt_allocator->internals.limits.softLimit &&
+           "soft limit has to be higher than or equal low limit!");
+    assert(mtt_allocator->internals.limits.softLimit <=
+               mtt_allocator->internals.limits.hardLimit &&
+           "hard limit has to be higher than or equal soft limit!");
+    // TODO assert that the allocator is not called recursively
+    size_t temp_used_dram = 0ul, ndram_size = 0ul;
+
+    // pmem_thresh must be lower than hardLimit for the code to work correctly
+    const size_t pmem_thresh = mtt_allocator->internals.limits.hardLimit - 1;
+
+    // add an assert for any person who might possibly change pmem_thresh
+    // without reading the comments
+    assert(pmem_thresh < mtt_allocator->internals.limits.hardLimit &&
+           "pmem_thresh was modified and set to value >= hardLimit; "
+           "the code will not work correctly "
+           "for hardLimit <= __len < pmem_thresh!");
+    if (length >= pmem_thresh) {
+        // TODO make an mmap directly on PMEM
+        assert(false &&
+               "Single allocation greater than or equal to hard limit "
+               "is not implemented");
+        return NULL;
+    }
+    do {
+        temp_used_dram = atomic_load(&mtt_allocator->internals.usedDram);
+        ndram_size = temp_used_dram + length;
+        if (temp_used_dram > mtt_allocator->internals.limits.hardLimit) {
+            // await until previous operations that surpass the hard_limit are
+            // balanced before queuing this one, to prevent hard limit overflow
+            // in a manageable case
+            mtt_allocator_await_balance(mtt_allocator);
+        }
+    } while (!atomic_compare_exchange_weak(
+        &mtt_allocator->internals.usedDram, &temp_used_dram,
+        mtt_allocator->internals.usedDram + length));
+
+    if (ndram_size > mtt_allocator->internals.limits.hardLimit) {
+        mtt_allocator_await_balance(mtt_allocator);
+    }
+
+    void *ret = mmap(addr, length, prot, flags, fd, offset);
+    if (ret) {
+        mtt_internals_tracing_multithreaded_push(&mtt_allocator->internals,
+                                                 (uintptr_t)addr,
+                                                 length / TRACED_PAGESIZE);
+    }
+
+    return ret;
+}
+
+MEMKIND_EXPORT int mtt_allocator_unmmap(MTTAllocator *mtt_allocator, void *addr,
+                                        size_t length)
+{
+    // TODO handle - wrap, unregister and unmap
+    // TODO cannot be async - the pages have to be unregistered before returning
+    // from this function!!!
+    assert(false && "Not implemented!");
+    return -1;
 }
