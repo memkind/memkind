@@ -415,6 +415,15 @@ MEMKIND_EXPORT void *mtt_allocator_malloc(MTTAllocator *mtt_allocator,
     return ret;
 }
 
+MEMKIND_EXPORT void *mtt_allocator_calloc(MTTAllocator *mtt_allocator,
+                                          size_t num, size_t size)
+{
+    size_t alloc_size = num * size;
+    void *ret = mtt_allocator_malloc(mtt_allocator, alloc_size);
+    memset(ret, 0, alloc_size);
+    return ret;
+}
+
 MEMKIND_EXPORT void *mtt_allocator_realloc(MTTAllocator *mtt_allocator,
                                            void *ptr, size_t size)
 {

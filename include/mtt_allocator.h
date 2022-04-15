@@ -41,6 +41,8 @@ extern void mtt_allocator_create(MTTAllocator *mtt_allocator,
 extern void mtt_allocator_destroy(MTTAllocator *mtt_allocator);
 
 extern void *mtt_allocator_malloc(MTTAllocator *mtt_allocator, size_t size);
+extern void *mtt_allocator_calloc(MTTAllocator *mtt_allocator, size_t num,
+                                  size_t size);
 extern void *mtt_allocator_realloc(MTTAllocator *mtt_allocator, void *ptr,
                                    size_t size);
 extern void mtt_allocator_free(MTTAllocator *mtt_allocator, void *ptr);

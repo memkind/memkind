@@ -816,9 +816,7 @@ MEMKIND_EXPORT void *memtier_calloc(struct memtier_memory *memory, size_t num,
                                     size_t size)
 {
     if (memory->policy == MEMTIER_POLICY_DATA_MOVEMENT) {
-        // TODO add mtt_allocator_calloc
-        void *ptr = mtt_allocator_malloc(g_mtt_allocator, num * size);
-        memset(ptr, 0, num * size);
+        void *ptr = mtt_allocator_calloc(g_mtt_allocator, num, size);
         return ptr;
     }
 
