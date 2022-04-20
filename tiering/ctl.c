@@ -609,8 +609,11 @@ struct memtier_memory *ctl_create_tier_memory_from_env(char *env_var_string)
 
     char *limits_env = utils_get_env("MEMKIND_MTT_LIMITS");
     if (limits_env) {
+        char limits_env_local[MAX_ENV_STRING] = {0};
+        strncpy(limits_env_local, limits_env, MAX_ENV_STRING - 1);
+
         MTTInternalsLimits mtt_limits;
-        ret = ctl_get_mtt_ranking_limits(&mtt_limits, limits_env);
+        ret = ctl_get_mtt_ranking_limits(&mtt_limits, limits_env_local);
         if (ret) {
             log_err("Failed to parse MTT limits environment variable");
             goto destroy_builder;
