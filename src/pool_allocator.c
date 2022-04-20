@@ -48,55 +48,12 @@ MEMKIND_EXPORT void *pool_allocator_malloc(PoolAllocator *pool, size_t size)
     return slab_allocator_malloc(slab);
 }
 
-MEMKIND_EXPORT void *pool_allocator_malloc_pages(PoolAllocator *pool,
-                                                 size_t size,
-                                                 uintptr_t address[2],
-                                                 size_t nof_pages[2])
-{
-    if (size == 0)
-        return NULL;
-    size_t size_rank = size_to_rank_size(size);
-    uint16_t hash = hasher_calculate_hash(size_rank);
-    SlabAllocator *slab = pool->pool[hash];
-    if (!slab) {
-        SlabAllocator *null_slab = slab;
-        // TODO initialize the slab in a lockless way
-        slab = slab_allocator_malloc(&pool->slabSlabAllocator);
-        size_t slab_size = rank_size_to_size(size_rank);
-        int ret =
-            slab_allocator_init_pages(slab, slab_size, 0, &address[0],
-                                      &nof_pages[0], &gStandardMmapCallback);
-        if (ret != 0)
-            return NULL;
-        // TODO atomic compare exchange WARNING HACK NOT THREAD SAFE NOW !!!!
-        bool exchanged =
-            atomic_compare_exchange_strong(&pool->pool[hash], &null_slab, slab);
-        if (!exchanged) {
-            slab_allocator_destroy(slab);
-            slab = atomic_load(&pool->pool[hash]);
-            address[0] = 0ul;
-            nof_pages[0] = 0ul;
-        }
-    }
-
-    return slab_allocator_malloc_pages(slab, &address[1], &nof_pages[1],
-                                       &gStandardMmapCallback);
-}
-
 MEMKIND_EXPORT void *pool_allocator_realloc(PoolAllocator *pool, void *ptr,
                                             size_t size)
 {
+    // TODO this needs fixing, please check fast_pool_allocator_realloc
     pool_allocator_free(ptr);
     return pool_allocator_malloc(pool, size);
-}
-
-MEMKIND_EXPORT void *pool_allocator_realloc_pages(PoolAllocator *pool,
-                                                  void *ptr, size_t size,
-                                                  uintptr_t addr[2],
-                                                  size_t nof_pages[2])
-{
-    pool_allocator_free(ptr);
-    return pool_allocator_malloc_pages(pool, size, addr, nof_pages);
 }
 
 MEMKIND_EXPORT void pool_allocator_free(void *ptr)
