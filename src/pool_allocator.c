@@ -51,9 +51,27 @@ MEMKIND_EXPORT void *pool_allocator_malloc(PoolAllocator *pool, size_t size)
 MEMKIND_EXPORT void *pool_allocator_realloc(PoolAllocator *pool, void *ptr,
                                             size_t size)
 {
-    // TODO this needs fixing, please check fast_pool_allocator_realloc
-    pool_allocator_free(ptr);
-    return pool_allocator_malloc(pool, size);
+    if (size == 0) {
+        pool_allocator_free(ptr);
+        return NULL;
+    }
+    if (ptr == NULL) {
+        return pool_allocator_malloc(pool, size);
+    }
+
+    size_t current_size = slab_allocator_usable_size(ptr);
+    if (size_to_rank_size(size) == current_size) {
+        return ptr;
+    }
+
+    void *ret = pool_allocator_malloc(pool, size);
+    if (ret) {
+        size_t to_copy = size < current_size ? size : current_size;
+        memcpy(ret, ptr, to_copy);
+        pool_allocator_free(ptr);
+    }
+
+    return ret;
 }
 
 MEMKIND_EXPORT void pool_allocator_free(void *ptr)
