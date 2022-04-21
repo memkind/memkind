@@ -647,8 +647,9 @@ builder_movement_create_memory(struct memtier_builder *builder)
     log_info("MTT ranking hard_limit = %zu", limits.hardLimit);
 
     assert(g_mtt_allocator == NULL);
-    g_mtt_allocator = jemk_malloc(sizeof(struct MTTAllocator));
-    mtt_allocator_create(g_mtt_allocator, &limits);
+    MTTAllocator *temp_alloc = jemk_malloc(sizeof(struct MTTAllocator));
+    mtt_allocator_create(temp_alloc, &limits);
+    g_mtt_allocator = temp_alloc;
 
     return memory;
 }
@@ -768,9 +769,10 @@ memtier_builder_construct_memtier_memory(struct memtier_builder *builder)
 MEMKIND_EXPORT void memtier_delete_memtier_memory(struct memtier_memory *memory)
 {
     if (memory->policy == MEMTIER_POLICY_DATA_MOVEMENT) {
-        mtt_allocator_destroy(g_mtt_allocator);
-        jemk_free(g_mtt_allocator);
+        MTTAllocator *temp_alloc = g_mtt_allocator;
         g_mtt_allocator = NULL;
+        mtt_allocator_destroy(temp_alloc);
+        jemk_free(temp_alloc);
     }
 
     print_memtier_memory(memory);
