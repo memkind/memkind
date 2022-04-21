@@ -20,7 +20,9 @@
 #include <gtest/gtest.h>
 #include <mutex>
 #include <numaif.h>
+#include <omp.h>
 #include <set>
+#include <sys/sysinfo.h>
 
 #include <test/proc_stat.h>
 
@@ -1821,4 +1823,50 @@ TEST_F(RankingPerfTest, PEBS)
         mtt_allocator_free(&m_mtt_allocator, it);
 
     mtt_allocator_destroy(&m_mtt_allocator);
+}
+
+TEST(MttAllocator, calloc)
+{
+    MTTInternalsLimits limits;
+    limits.lowLimit = 1024u * 1024u * 1024u;
+    limits.softLimit = limits.lowLimit;
+    limits.hardLimit = limits.lowLimit;
+    MTTAllocator mtt_allocator;
+
+    mtt_allocator_create(&mtt_allocator, &limits);
+
+    int callocs_no = 1000;
+    size_t num = 2000;
+    size_t size = 4;
+    size_t calloc_size = num * size;
+    int threads_num = get_nprocs();
+
+#pragma omp parallel for num_threads(threads_num)
+    for (int thread_id = 0; thread_id < threads_num; ++thread_id) {
+        std::set<char *> ptr_set;
+        cpu_set_t cpu_set;
+        CPU_ZERO(&cpu_set);
+        CPU_SET(thread_id, &cpu_set);
+        sched_setaffinity(0, sizeof(cpu_set_t), &cpu_set);
+
+        for (int i = 0; i < callocs_no; ++i) {
+            char *ptr = (char *)mtt_allocator_calloc(&mtt_allocator, num, size);
+            if (ptr == nullptr) {
+                ADD_FAILURE();
+                continue;
+            }
+            for (size_t j = 0; j < calloc_size; ++j) {
+                if (ptr[j] != 0) {
+                    ADD_FAILURE();
+                }
+            }
+            ptr_set.insert(ptr);
+        }
+
+        for (auto const &ptr : ptr_set) {
+            mtt_allocator_free(&mtt_allocator, ptr);
+        }
+    }
+
+    mtt_allocator_destroy(&mtt_allocator);
 }
