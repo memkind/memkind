@@ -22,7 +22,7 @@ extern "C" {
 #endif
 #endif
 
-#define USE_FAST_POOL 1 // TODO move elsewhere
+#define USE_FAST_POOL 0 // TODO move elsewhere
 
 #if USE_FAST_POOL
 #include "memkind/internal/fast_pool_allocator.h"

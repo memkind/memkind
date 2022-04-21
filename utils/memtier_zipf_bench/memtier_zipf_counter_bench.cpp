@@ -150,7 +150,7 @@ class PoolAllocatorWrapper: public Allocator
 public:
     PoolAllocatorWrapper()
     {
-        pool_allocator_create(&allocator);
+        pool_allocator_create(&allocator, &gStandardMmapCallback);
     }
 
     ~PoolAllocatorWrapper()
@@ -165,7 +165,7 @@ public:
 
     void free(void *ptr)
     {
-        pool_allocator_free(ptr);
+        pool_allocator_free(&allocator, ptr);
     }
 };
 
