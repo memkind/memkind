@@ -205,7 +205,7 @@ MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
                                            size_t size, MmapCallback *user_mmap)
 {
     void *ret = POOL_ALLOCATOR_TYPE(realloc_mmap)(&internals->pool, ptr, size,
-                                                 user_mmap);
+                                                  user_mmap);
     return ret;
 }
 

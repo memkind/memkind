@@ -26,10 +26,19 @@
 
 #include <test/proc_stat.h>
 
+#define ROUND_UP_TO_BIGARY_PAGESIZE(x)                                         \
+    (((((size_t)x) + BIGARY_PAGESIZE - 1) / BIGARY_PAGESIZE) * BIGARY_PAGESIZE)
+
+#if USE_FAST_POOL
 // metadata overhead for mtt allocator: 3 types created at startup: 1
 // internal slab and 2 types in background thread - dynamic allocation of
 // tables at init
-#define MTT_ALLOCATOR_METADATA_SIZE (3lu * BIGARY_PAGESIZE)
+#define MTT_ALLOCATOR_METADATA_SIZE           (3lu * BIGARY_PAGESIZE)
+#define MTT_ALLOCATOR_METADATA_PER_ALLOC_SIZE (0lu)
+#else
+#define MTT_ALLOCATOR_METADATA_SIZE           (3lu * BIGARY_PAGESIZE)
+#define MTT_ALLOCATOR_METADATA_PER_ALLOC_SIZE (sizeof(freelist_node_meta))
+#endif
 
 class MemkindMemtierDataMovementTest: public ::testing::Test
 {
@@ -492,7 +501,7 @@ protected:
 TEST_F(PoolAllocTest, Basic)
 {
     PoolAllocator pool;
-    int ret = pool_allocator_create(&pool);
+    int ret = pool_allocator_create(&pool, &gStandardMmapCallback);
     ASSERT_EQ(ret, 0);
     for (size_t i = 0; i < UINT16_MAX; ++i)
         ASSERT_EQ(pool.pool[i], nullptr);
@@ -520,13 +529,13 @@ TEST_F(PoolAllocTest, Basic)
     uint8_t *a33 = (uint8_t *)pool_allocator_malloc(&pool, 33);
     check_add(created_slabs, pool, 48 + sizeof(freelist_node_meta_t));
 
-    pool_allocator_free(a16);
-    pool_allocator_free(a8);
-    pool_allocator_free(a17);
-    pool_allocator_free(a24);
-    pool_allocator_free(a25);
-    pool_allocator_free(a32);
-    pool_allocator_free(a33);
+    pool_allocator_free(&pool, a16);
+    pool_allocator_free(&pool, a8);
+    pool_allocator_free(&pool, a17);
+    pool_allocator_free(&pool, a24);
+    pool_allocator_free(&pool, a25);
+    pool_allocator_free(&pool, a32);
+    pool_allocator_free(&pool, a33);
 
     pool_allocator_destroy(&pool);
 }
@@ -537,7 +546,7 @@ TEST_F(PoolAllocTest, BigAllocationTest)
         512ul * 1024ul * 1024ul * sizeof(int); // 512*sizeof(int) MB
     size_t big_alloc_size = 16ul * 1024ul * 1024ul * 1024ul; // 16 GB
     PoolAllocator pool;
-    int ret = pool_allocator_create(&pool);
+    int ret = pool_allocator_create(&pool, &gStandardMmapCallback);
     ASSERT_EQ(ret, 0);
     for (size_t i = 0; i < UINT16_MAX; ++i)
         ASSERT_EQ(pool.pool[i], nullptr);
@@ -551,8 +560,8 @@ TEST_F(PoolAllocTest, BigAllocationTest)
     check_add(created_slabs, pool,
               big_alloc_size + sizeof(freelist_node_meta_t));
 
-    pool_allocator_free(temp1);
-    pool_allocator_free(temp2);
+    pool_allocator_free(&pool, temp1);
+    pool_allocator_free(&pool, temp2);
     pool_allocator_destroy(&pool);
 }
 
@@ -694,23 +703,21 @@ TEST_F(PEBSTest, Basic)
     limits.hardLimit = 1024u * 1024u * 1024u;
     // PEBS is enabled during MTT allocator creation
     MTTAllocator mtt_allocator;
-    // metadata overhead for mtt allocator: 3 types created at startup: 1
-    // internal slab and 2 types in background thread - dynamic allocation of
-    // tables at init
-    const size_t allocator_metadata = 3 * BIGARY_PAGESIZE;
-
     mtt_allocator_create(&mtt_allocator, &limits);
 
     mtt_allocator_await_flush(&mtt_allocator);
 
     actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
-    ASSERT_EQ(actual_size, allocator_metadata);
+    ASSERT_EQ(actual_size, MTT_ALLOCATOR_METADATA_SIZE);
 
     volatile int *tab = (int *)mtt_allocator_malloc(&mtt_allocator, size);
 
     mtt_allocator_await_flush(&mtt_allocator);
     actual_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
-    ASSERT_EQ(actual_size, size + allocator_metadata);
+    ASSERT_EQ(
+        actual_size,
+        size + MTT_ALLOCATOR_METADATA_SIZE +
+            ROUND_UP_TO_BIGARY_PAGESIZE(MTT_ALLOCATOR_METADATA_PER_ALLOC_SIZE));
 
     // do not check hotness before touching - metadata might already be touched
 
@@ -804,7 +811,10 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     size_t pmem_size =
         ranking_get_total_size(mtt_allocator.internals.pmemRanking);
 
-    ASSERT_EQ(dram_size + pmem_size, size + MTT_ALLOCATOR_METADATA_SIZE);
+    ASSERT_EQ(
+        dram_size + pmem_size,
+        size + MTT_ALLOCATOR_METADATA_SIZE +
+            ROUND_UP_TO_BIGARY_PAGESIZE(MTT_ALLOCATOR_METADATA_PER_ALLOC_SIZE));
     ASSERT_EQ(dram_size, mtt_allocator.internals.usedDram);
 
     ASSERT_LE(dram_size, limits.softLimit);
@@ -821,11 +831,14 @@ TEST_F(PEBSTest, SoftLimitMovementLogic)
     ASSERT_LE(
         pmem_size,
         size - limits.softLimit + TRACED_PAGESIZE +
-            3 * BIGARY_PAGESIZE); // 3 additional pages: metadata and overhead
+            MTT_ALLOCATOR_METADATA_SIZE +
+            ROUND_UP_TO_BIGARY_PAGESIZE(MTT_ALLOCATOR_METADATA_PER_ALLOC_SIZE));
+
     ASSERT_LE(
         pmem_size,
         512ul * 1024ul * 1024ul - 16ul * 1024ul * 1024ul + TRACED_PAGESIZE +
-            3 * BIGARY_PAGESIZE); // 3 additional pages: metadata and overhead
+            MTT_ALLOCATOR_METADATA_SIZE +
+            ROUND_UP_TO_BIGARY_PAGESIZE(MTT_ALLOCATOR_METADATA_PER_ALLOC_SIZE));
 
     // compiler optimizations
     ASSERT_EQ(total_sum, total_sum);
@@ -1735,8 +1748,14 @@ TEST_F(RankingPerfTest, PEBS)
     size_t dram_data_size = 50ul * 1024ul * 1024ul;
     MTTInternalsLimits limits;
     limits.lowLimit = TRACED_PAGESIZE;
+
+    size_t nof_allocations = dram_data_size * 2 / alloc_size;
     // assume that 50% of metadata is hot and will reside in DRAM
-    limits.softLimit = dram_data_size + MTT_ALLOCATOR_METADATA_SIZE / 2lu;
+    limits.softLimit = dram_data_size +
+        (ROUND_UP_TO_BIGARY_PAGESIZE(MTT_ALLOCATOR_METADATA_PER_ALLOC_SIZE *
+                                     nof_allocations) +
+         MTT_ALLOCATOR_METADATA_SIZE) /
+            2lu;
     limits.hardLimit = limits.softLimit;
 
     mtt_allocator_create(&m_mtt_allocator, &limits);

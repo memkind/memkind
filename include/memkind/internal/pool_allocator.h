@@ -33,14 +33,20 @@ typedef struct PoolAllocator {
 
 /// @brief Initialize slab_allocator
 /// @note only one initializer should be called!
-extern int pool_allocator_create(PoolAllocator *pool);
+extern int pool_allocator_create(PoolAllocator *pool,
+                                 const MmapCallback *user_mmap);
 extern void pool_allocator_destroy(PoolAllocator *pool);
 
 extern void *pool_allocator_malloc(PoolAllocator *pool, size_t size);
+extern void *pool_allocator_malloc_mmap(PoolAllocator *pool, size_t size,
+                                        const MmapCallback *user_mmap);
 extern void *pool_allocator_realloc(PoolAllocator *pool, void *ptr,
                                     size_t size);
-extern void pool_allocator_free(void *ptr);
-extern size_t pool_allocator_usable_size(void *ptr);
+extern void *pool_allocator_realloc_mmap(PoolAllocator *pool, void *ptr,
+                                         size_t size,
+                                         const MmapCallback *user_mmap);
+extern void pool_allocator_free(PoolAllocator *pool, void *ptr);
+extern size_t pool_allocator_usable_size(PoolAllocator *pool, void *ptr);
 
 #ifdef __cplusplus
 }
