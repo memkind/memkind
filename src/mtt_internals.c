@@ -12,6 +12,12 @@
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
+#if USE_FAST_POOL
+#define POOL_ALLOCATOR_TYPE(x) fast_pool_allocator_##x
+#else
+#define POOL_ALLOCATOR_TYPE(x) pool_allocator_##x
+#endif
+
 // static functions -----------------------------------------------------------
 
 static void promote_hottest_pmem(MttInternals *internals)
@@ -173,7 +179,7 @@ MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
     ranking_metadata_create(&internals->tempMetadataHandle);
     mmap_tracing_queue_create(&internals->mmapTracingQueue);
 
-    int ret = fast_pool_allocator_create(&internals->pool, user_mmap);
+    int ret = POOL_ALLOCATOR_TYPE(create)(&internals->pool, user_mmap);
 
     return ret;
 }
@@ -184,21 +190,21 @@ MEMKIND_EXPORT void mtt_internals_destroy(MttInternals *internals)
     ranking_destroy(internals->pmemRanking);
     ranking_destroy(internals->dramRanking);
     mmap_tracing_queue_destroy(&internals->mmapTracingQueue);
-    fast_pool_allocator_destroy(&internals->pool);
+    POOL_ALLOCATOR_TYPE(destroy)(&internals->pool);
 }
 
 MEMKIND_EXPORT void *mtt_internals_malloc(MttInternals *internals, size_t size,
                                           MmapCallback *user_mmap)
 {
     void *ret =
-        fast_pool_allocator_malloc_mmap(&internals->pool, size, user_mmap);
+        POOL_ALLOCATOR_TYPE(malloc_mmap)(&internals->pool, size, user_mmap);
     return ret;
 }
 
 MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
                                            size_t size, MmapCallback *user_mmap)
 {
-    void *ret = fast_pool_allocator_realloc_mmap(&internals->pool, ptr, size,
+    void *ret = POOL_ALLOCATOR_TYPE(realloc_mmap)(&internals->pool, ptr, size,
                                                  user_mmap);
     return ret;
 }
@@ -207,13 +213,13 @@ MEMKIND_EXPORT void mtt_internals_free(MttInternals *internals, void *ptr)
 {
     // TODO add & handle unmap during productization stage!
     // we don't unmap pages, the data is not handled
-    fast_pool_allocator_free(&internals->pool, ptr);
+    POOL_ALLOCATOR_TYPE(free)(&internals->pool, ptr);
 }
 
 MEMKIND_EXPORT size_t mtt_internals_usable_size(MttInternals *internals,
                                                 void *ptr)
 {
-    return fast_pool_allocator_usable_size(&internals->pool, ptr);
+    return POOL_ALLOCATOR_TYPE(usable_size)(&internals->pool, ptr);
 }
 
 MEMKIND_EXPORT void mtt_internals_touch(MttInternals *internals,
