@@ -98,9 +98,9 @@ void *(*g_calloc)(size_t, size_t);
 void (*g_free)(void *);
 static thread_local bool inside_wrappers = false;
 
-static int destructed;
+static int destructed = 0;
 
-static struct memtier_memory *current_memory;
+static struct memtier_memory *current_memory = NULL;
 
 MEMTIER_EXPORT void *malloc(size_t size)
 {
@@ -219,10 +219,26 @@ static MEMTIER_FINI void memtier_fini(void)
 {
     log_info("Unloading memkind memtier lib!");
 
-    ctl_destroy_tier_memory(current_memory);
-    current_memory = NULL;
-
+    // use standard allocator for memory allocated before full tier creation
+    struct memtier_memory *temp_memory = current_memory;
+    // memkind is already unusable
+    //
+    // Issue: memkind_free(memkind_default, ...) -> je_malloc uses thread_local
+    // data which might not be available after this point, e.g. in pthread_join
+    //
+    // Quickfix: set "destructed" to 1 before calling ctl_destroy_tier_memory
+    //
+    // FIXME this creates dirty exit, where we don't free the whole memory;
+    // the memory is freed on process exit just after calling memtier_fini, but
+    // this is not how it should be done
+    //
+    // Other tested solutions that do not work:
+    //      - g_malloc/g_free: crashes on allocation,
+    //      - mtt_allocator: not yet created at background thread initialization
+    //      and during shared libraries loading
     destructed = 1;
+    current_memory = NULL;
+    ctl_destroy_tier_memory(temp_memory);
 }
 
 MEMTIER_EXPORT void *mt_malloc(size_t size)
