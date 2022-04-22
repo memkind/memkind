@@ -4,7 +4,6 @@
 #pragma once
 
 #include "config.h"
-#include "memkind/internal/fast_pool_allocator.h"
 #include "memkind/internal/mmap_tracing_queue.h"
 #include "memkind/internal/ranking.h"
 
@@ -21,6 +20,16 @@ extern "C" {
 #define atomic_size_t size_t
 #define _Atomic(x) x
 #endif
+#endif
+
+#define USE_FAST_POOL 0 // TODO move elsewhere
+
+#if USE_FAST_POOL
+#include "memkind/internal/fast_pool_allocator.h"
+typedef FastPoolAllocator PoolAllocatorType;
+#else
+#include "memkind/internal/pool_allocator.h"
+typedef PoolAllocator PoolAllocatorType;
 #endif
 
 /// Limits to be used for PMEM vs DRAM distribution
@@ -45,7 +54,7 @@ typedef struct MttInternals {
     ranking_handle pmemRanking;
     /// Used as temporary variable for some internal operations
     metadata_handle tempMetadataHandle;
-    FastPoolAllocator pool;
+    PoolAllocatorType pool;
     uint64_t lastTimestamp;
     MTTInternalsLimits limits;
     MMapTracingQueue mmapTracingQueue;
