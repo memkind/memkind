@@ -135,6 +135,7 @@
 /test/trace_mechanism_test_helper
 /test/defrag_reallocate
 /utils/memtier_counter_bench/memtier_counter_bench
+/utils/memtier_zipf_bench/memtier_zipf_bench
 /vs
 autom4te.cache/
 memkind.pc
