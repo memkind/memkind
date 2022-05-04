@@ -23,12 +23,16 @@
 #endif
 #endif
 
-static thread_local void *stack_bottom = NULL;
-static thread_local bool stack_bottom_initialized = false;
-
 #define LSB_SET_9 (0b111111111)
 #define MSB_SET_9 (0b1111111110000000)
 #define LSB_SET_7 (0b1111111)
+
+#define USE_STACK 0
+
+#if USE_STACK
+
+static thread_local void *stack_bottom = NULL;
+static thread_local bool stack_bottom_initialized = false;
 
 /// @brief Initialize data describing stack of the calling thread
 static void initialize_stack_bottom(void)
@@ -52,9 +56,11 @@ static void initialize_stack_bottom(void)
         assert(ret == 0 && "pthread attr destroy failed!");
     }
 }
+#endif
 
 static uint16_t calculate_stack_size_hash_9_bit(void)
 {
+#if USE_STACK
     void *foo = NULL; // value irrelevant
     initialize_stack_bottom();
     // should work fine also when foo < stack bottom
@@ -65,6 +71,9 @@ static uint16_t calculate_stack_size_hash_9_bit(void)
     // return 9 least significant bits
     // this should be enough for our requirements
     return (uint16_t)(diff & LSB_SET_9);
+#else
+    return 0u;
+#endif
 }
 
 MEMKIND_EXPORT uint16_t hasher_calculate_hash(size_t size_rank)
