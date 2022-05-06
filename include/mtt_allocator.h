@@ -27,6 +27,7 @@ typedef struct BackgroundThread {
     pthread_mutex_t bg_thread_cond_mutex;
     pthread_cond_t bg_thread_cond;
     PebsMetadata pebs;
+    atomic_bool interrupt;
 } BackgroundThread;
 
 typedef struct MTTAllocator {
