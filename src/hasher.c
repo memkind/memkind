@@ -30,6 +30,9 @@ static thread_local bool stack_bottom_initialized = false;
 #define MSB_SET_9 (0b1111111110000000)
 #define LSB_SET_7 (0b1111111)
 
+#define USE_STACK 1
+
+#if USE_STACK
 /// @brief Initialize data describing stack of the calling thread
 static void initialize_stack_bottom(void)
 {
@@ -66,6 +69,12 @@ static uint16_t calculate_stack_size_hash_9_bit(void)
     // this should be enough for our requirements
     return (uint16_t)(diff & LSB_SET_9);
 }
+#else
+static uint16_t calculate_stack_size_hash_9_bit(void)
+{
+    return (uint16_t)0u;
+}
+#endif
 
 MEMKIND_EXPORT uint16_t hasher_calculate_hash(size_t size_rank)
 {
