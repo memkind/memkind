@@ -11,6 +11,7 @@
 #include <atomic>
 #define _Atomic(x) std::atomic<x>
 #define atomic_size_t _Atomic(size_t)
+#define atomic_bool   _Atomic(bool)
 extern "C" {
 #else
 
@@ -18,6 +19,7 @@ extern "C" {
 #include <stdatomic.h>
 #else
 #define atomic_size_t size_t
+#define atomic_bool   bool
 #define _Atomic(x) x
 #endif
 #endif
@@ -80,7 +82,8 @@ extern size_t mtt_internals_ranking_balance(MttInternals *internals,
                                             size_t dram_limit);
 extern void mtt_internals_ranking_update(MttInternals *internals,
                                          uint64_t timestamp,
-                                         atomic_size_t *used_dram);
+                                         atomic_size_t *used_dram,
+                                         atomic_bool *interrupt);
 /// @note Thread safe
 extern void mtt_internals_tracing_multithreaded_push(MttInternals *internals,
                                                      uintptr_t addr,

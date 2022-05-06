@@ -46,7 +46,7 @@ static void *mtt_run_bg_thread(void *mtt_alloc);
 /// @pre allocatorsMutex must be acquired before calling
 static void touch_callback(uintptr_t address, uint64_t timestamp);
 /// @pre allocatorsMutex must be acquired before calling
-static void update_rankings();
+static void update_rankings(atomic_bool *interrupt);
 static void balance_rankings();
 static void register_mtt_allocator(MTTAllocator *mtt_allocator);
 static void unregister_mtt_allocator(MTTAllocator *mtt_allocator);
@@ -130,8 +130,11 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
     pthread_mutex_unlock(bg_thread_cond_mutex);
 
     ThreadState_t bg_thread_state = THREAD_RUNNING;
+
     while (bg_thread_state != THREAD_FINISHED) {
         pthread_mutex_lock(bg_thread_cond_mutex);
+        // reset the "interrupt" flag
+        atomic_store(&bg_thread->interrupt, false);
         bg_thread_state = bg_thread->bg_thread_state;
         // perform sleep only if no sleep interrupt was scheduled
         if (bg_thread_state == THREAD_RUNNING) {
@@ -155,7 +158,7 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
             case THREAD_RUNNING:
             case THREAD_AWAITING_FLUSH:
                 pebs_monitor(&bg_thread->pebs);
-                update_rankings();
+                update_rankings(&bg_thread->interrupt);
                 break;
             case THREAD_FINISHED:
                 // do nothing
@@ -176,7 +179,7 @@ static void *mtt_run_bg_thread(void *bg_thread_ptr)
         }
     }
     pthread_mutex_lock(&allocatorsMutex);
-    update_rankings(); // flush mmapTracingQueue
+    update_rankings(&bg_thread->interrupt); // flush mmapTracingQueue
     pthread_mutex_unlock(&allocatorsMutex);
 
     return NULL;
@@ -192,13 +195,13 @@ static void touch_callback(uintptr_t address, uint64_t timestamp)
     last_timestamp = timestamp;
 }
 
-static void update_rankings()
+static void update_rankings(atomic_bool *interrupt)
 {
     MTTAllocatorNode *cnode = root;
     while (cnode) {
-        mtt_internals_ranking_update(&cnode->allocator->internals,
-                                     last_timestamp,
-                                     &cnode->allocator->internals.usedDram);
+        mtt_internals_ranking_update(
+            &cnode->allocator->internals, last_timestamp,
+            &cnode->allocator->internals.usedDram, interrupt);
         cnode = cnode->next;
     }
 }
@@ -439,6 +442,10 @@ MEMKIND_EXPORT void mtt_allocator_await_flush(MTTAllocator *mtt_allocator)
 MEMKIND_EXPORT void mtt_allocator_await_balance(MTTAllocator *mtt_allocator)
 {
     pthread_mutex_lock(&mtt_allocator->bgThread.bg_thread_cond_mutex);
+
+    // interrupt juggling
+    atomic_store(&mtt_allocator->bgThread.interrupt, true);
+
     // wait until "running" is entered
     while (mtt_allocator->bgThread.bg_thread_state != THREAD_RUNNING) {
         pthread_cond_wait(&mtt_allocator->bgThread.bg_thread_cond,
