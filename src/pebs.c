@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <unistd.h>
 
-#define PEBS_SAMPLING_INTERVAL 1000
+#define PEBS_SAMPLING_INTERVAL 100000
 #define MMAP_DATA_SIZE         8
 #define MMAP_PAGES_NUM         1 + MMAP_DATA_SIZE
 
