@@ -16,6 +16,9 @@
 #include <unordered_map>
 #include <vector>
 
+// with 4 kB TRACED_PAGESIZE, 1 MB can be touched per cycle
+#define TO_TOUCH_MAX (256ul)
+
 // type definitions -----------------------------------------------------------
 
 // Hotness coeff ------------
@@ -330,10 +333,12 @@ MEMKIND_EXPORT bool Ranking::Touch(uintptr_t addr)
 MEMKIND_EXPORT void Ranking::Update(uint64_t timestamp,
                                     uint64_t oldest_timestamp)
 {
+    size_t to_touch_i = 0ul;
     auto to_touch_it =
         this->leastRecentlyUsed
             .begin(); // TODO test begin vs rbegin (already checked)
-    while (to_touch_it != this->leastRecentlyUsed.end() &&
+    while (to_touch_i++ < TO_TOUCH_MAX &&
+           to_touch_it != this->leastRecentlyUsed.end() &&
            (to_touch_it->first) < oldest_timestamp) {
         for (auto &element : to_touch_it->second) {
             if (element->TouchEmpty())
