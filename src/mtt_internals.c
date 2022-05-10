@@ -50,7 +50,8 @@ static void demote_coldest_dram(MttInternals *internals)
 ///
 /// @note This function might temporarily increase PMEM usage, but should not
 /// increase DRAM usage and should not cause DRAM limit overflow
-static void mtt_internals_tiers_juggle(MttInternals *internals)
+static void mtt_internals_tiers_juggle(MttInternals *internals,
+                                       atomic_bool *interrupt)
 {
     // Handle hottest on PMEM vs coldest on dram page movement
     // different approaches possible, e.g.
@@ -73,6 +74,9 @@ static void mtt_internals_tiers_juggle(MttInternals *internals)
             ranking_get_coldest(internals->dramRanking, &coldest_dram);
         success_pmem =
             ranking_get_hottest(internals->pmemRanking, &hottest_pmem);
+
+        if (atomic_load(interrupt))
+            break;
     }
 }
 
@@ -245,12 +249,18 @@ MEMKIND_EXPORT size_t mtt_internals_ranking_balance(MttInternals *internals,
 
 MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
                                                  uint64_t timestamp,
-                                                 atomic_size_t *used_dram)
+                                                 atomic_size_t *used_dram,
+                                                 atomic_bool *interrupt)
 {
+    internals->lastTimestamp = timestamp;
     // 1. Add new mappings to rankings
     mtt_internals_process_queued(internals);
     // 2. Update both rankings - hotness
+    if (atomic_load(interrupt))
+        return;
     ranking_update(internals->dramRanking, timestamp);
+    if (atomic_load(interrupt))
+        return;
     ranking_update(internals->pmemRanking, timestamp);
     // 3. Handle soft and hard limit - move pages dram vs pmem
     size_t surplus = mtt_internals_ranking_balance(internals, used_dram,
@@ -260,8 +270,10 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
                  " %lu left unmoved;"
                  " was a single allocation > lowLimit requested?",
                  surplus);
+    if (atomic_load(interrupt))
+        return;
     // 4. Handle hottest on PMEM vs coldest on dram page movement
-    mtt_internals_tiers_juggle(internals);
+    mtt_internals_tiers_juggle(internals, interrupt);
 }
 
 MEMKIND_EXPORT void
