@@ -15,7 +15,7 @@
 
 /// granularity of memory tracing; should be a multiple of *sysytem_pagesize*
 /// each traced page contains some traced metadata
-#define TRACED_PAGESIZE (4 * 1024u)
+#define TRACED_PAGESIZE (4 * 4 * 1024u)
 
 /// granularity of mmap
 #define BIGARY_PAGESIZE (2 * 1024 * 1024ULL)
