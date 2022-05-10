@@ -18,6 +18,9 @@
 #define POOL_ALLOCATOR_TYPE(x) pool_allocator_##x
 #endif
 
+// with 4kB traced page, 1MB per cycle
+#define MAX_TO_JUGGLE (256ul)
+
 // static functions -----------------------------------------------------------
 
 static void promote_hottest_pmem(MttInternals *internals)
@@ -65,7 +68,9 @@ static void mtt_internals_tiers_juggle(MttInternals *internals,
     bool success_pmem =
         ranking_get_hottest(internals->pmemRanking, &hottest_pmem);
 
-    while (success_dram && success_pmem && (hottest_pmem > coldest_dram) &&
+    size_t juggle_it = 0ul;
+    while (juggle_it++ < MAX_TO_JUGGLE && success_dram && success_pmem &&
+           (hottest_pmem > coldest_dram) &&
            ranking_get_total_size(internals->dramRanking) > 0ul &&
            ranking_get_total_size(internals->pmemRanking) > 0ul) {
         demote_coldest_dram(internals);

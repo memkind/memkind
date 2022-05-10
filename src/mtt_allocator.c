@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define BG_THREAD_FREQUENCY 2.0
+#define BG_THREAD_FREQUENCY 0.1
 
 // typedefs -------------------------------------------------------------------
 
