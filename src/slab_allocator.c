@@ -58,9 +58,8 @@ static void slab_alloc_glob_freelist_push_(void *addr)
 
 static void *slab_alloc_glob_freelist_pop_(SlabAllocator *alloc)
 {
-    freelist_node_meta_t *meta = NULL;
+    freelist_node_meta_t *meta = alloc->globFreelist.freelist;
     do {
-        meta = alloc->globFreelist.freelist;
         if (!meta)
             break;
     } while (false ==
