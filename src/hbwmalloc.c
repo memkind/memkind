@@ -241,7 +241,7 @@ MEMKIND_EXPORT int hbw_posix_memalign_psize(void **memptr, size_t alignment,
     if (pagesize == HBW_PAGESIZE_2MB &&
         hbw_get_policy() == HBW_POLICY_INTERLEAVE) {
 
-        log_err("HBW_POLICY_INTERLEAVE is unsupported with used page size!");
+        log_err("HBW_POLICY_INTERLEAVE is unsupported with 2MB page size!");
         return EINVAL;
     }
 
