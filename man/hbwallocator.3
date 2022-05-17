@@ -51,8 +51,22 @@ is an object type aliased by value_type.
 .br
 .I U
 is an object type.
-.PP
-.B Note:
+
+.SH ERRORS
+The same as described in
+.B ERRORS
+section of
+.BR hbwmalloc (3)
+man page.
+.SH "NOTES"
+The
+.BR hbw::allocator<T>
+behavior depends on hbwmalloc heap management policy. To get and set the policy please use
+.BR hbw_get_policy ()
+and
+.BR hbw_set_policy ()
+respectively.
+
 .br
 .BI "hbw::allocator<T>::pointer hbw::allocator<T>::allocate(hbw::allocator<T>::size_type " "n" ", const void * = 0)"
 allocates high bandwidth memory using
@@ -82,20 +96,6 @@ deallocates memory associated with pointer returned by
 using
 .BR hbw_free ().
 
-.SH ERRORS
-The same as described in
-.B ERRORS
-section of
-.BR hbwmalloc (3)
-man page.
-.SH "NOTES"
-The
-.BR hbw::allocator<T>
-behavior depends on hbwmalloc heap management policy. To get and set the policy please use
-.BR hbw_get_policy ()
-and
-.BR hbw_set_policy ()
-respectively.
 .SH "COPYRIGHT"
 Copyright (C) 2015 - 2020 Intel Corporation. All rights reserved.
 .SH "SEE ALSO"
