@@ -27,14 +27,13 @@
 
 /* from jemalloc internals */
 struct arena_config_s {
-    /* extent hooks to be used for the arena */
-    struct extent_hooks_s *extent_hooks;
+	/* extent hooks to be used for the arena */
+	extent_hooks_t *extent_hooks;
 
-    /*
-     * Use provided hooks for metadata (base) allocations when true.
-     * Ignored if extent_hooks is NULL.
-     */
-    bool metadata_use_hooks;
+	/*
+	 * Use extent hooks for metadata (base) allocations when true.
+	 */
+	bool metadata_use_hooks;
 };
 
 typedef struct arena_config_s arena_config_t;
