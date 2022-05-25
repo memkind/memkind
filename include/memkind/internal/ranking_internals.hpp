@@ -132,6 +132,7 @@ public:
     void AddPage(PageMetadata page);
     void AddPages(uintptr_t start_addr, size_t nof_pages,
                   uint64_t timestamp); // TODO add handling LRU
+    size_t TryRemovePages(uintptr_t start_address, size_t nof_pages);
     bool Touch(uintptr_t addr);
     void Update(uint64_t timestamp, uint64_t oldest_timestamp = 0ul);
     /// @param[out] hotness highest hotness value in Ranking

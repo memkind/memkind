@@ -26,11 +26,13 @@ MEMKIND_EXPORT void mmap_tracing_queue_destroy(MMapTracingQueue *queue)
 
 MEMKIND_EXPORT void
 mmap_tracing_queue_multithreaded_push(MMapTracingQueue *queue,
-                                      uintptr_t start_addr, size_t nof_pages)
+                                      uintptr_t start_addr, size_t nof_pages,
+                                      MMapTracingEvent_e event)
 {
     MMapTracingNode *node = slab_allocator_malloc(&queue->alloc);
     node->startAddr = start_addr;
     node->nofPages = nof_pages;
+    node->event = event;
     node->next = NULL;
     pthread_mutex_lock(&queue->mutex);
     if (queue->tail) {
@@ -56,13 +58,15 @@ mmap_tracing_queue_multithreaded_take_all(MMapTracingQueue *queue)
 
 MEMKIND_EXPORT bool mmap_tracing_queue_process_one(MMapTracingNode **head,
                                                    uintptr_t *start_addr,
-                                                   size_t *nof_pages)
+                                                   size_t *nof_pages,
+                                                   MMapTracingEvent_e *event)
 {
     bool processed = false;
     if (*head) {
         MMapTracingNode *temp = *head;
         *start_addr = temp->startAddr;
         *nof_pages = temp->nofPages;
+        *event = temp->event;
         *head = temp->next;
         processed = true;
         slab_allocator_free(temp);

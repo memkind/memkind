@@ -101,8 +101,19 @@ void bigary_init_mmap(bigary *restrict m_bigary, int fd, int flags, size_t max,
 
 void bigary_destroy(bigary *restrict m_bigary)
 {
+    // TODO unmap the area!
     int ret1 = pthread_mutex_destroy(&m_bigary->enlargement);
     int ret2 = munmap(m_bigary->area, m_bigary->declared);
+    assert(ret1 == 0 && "mutex destruction failed!");
+    assert(ret2 == 0 && "unmap failed!");
+}
+
+void bigary_destroy_mmap(bigary *restrict m_bigary, const MmapCallback *m_mmap)
+{
+    // TODO unmap the area!
+    int ret1 = pthread_mutex_destroy(&m_bigary->enlargement);
+    int ret2 =
+        m_mmap->wrapped_munmap(m_mmap->arg, m_bigary->area, m_bigary->declared);
     assert(ret1 == 0 && "mutex destruction failed!");
     assert(ret2 == 0 && "unmap failed!");
 }

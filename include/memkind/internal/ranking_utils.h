@@ -14,9 +14,9 @@ typedef enum
     DAX_KMEM = 1
 } memory_type_t;
 
-int move_page_metadata(uintptr_t page, memory_type_t memory_type);
 void init_nodemasks();
-
+int move_page_metadata(uintptr_t page, memory_type_t memory_type);
+memory_type_t get_page_memory_type(uintptr_t page);
 #ifdef __cplusplus
 }
 #endif
