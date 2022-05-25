@@ -2,12 +2,16 @@
 /* Copyright (C) 2022 Intel Corporation. */
 
 #include "memkind/internal/mtt_internals.h"
+#include "memkind/internal/bigary.h"
 #include "memkind/internal/memkind_log.h"
 #include "memkind/internal/memkind_private.h"
+#include "memkind/internal/mmap_tracing_queue.h"
 #include "memkind/internal/pagesizes.h"
+#include "memkind/internal/ranking.h"
 #include "memkind/internal/ranking_utils.h"
 
 #include "assert.h"
+#include "stdint.h"
 #include "string.h"
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
@@ -138,16 +142,51 @@ static size_t mtt_internals_ranking_balance_internal(MttInternals *internals,
     return ret;
 }
 
-static void mtt_internals_process_queued(MttInternals *internals)
+static ssize_t mtt_internals_process_queued(MttInternals *internals)
 {
     MMapTracingNode *node =
         mmap_tracing_queue_multithreaded_take_all(&internals->mmapTracingQueue);
     uintptr_t start_addr;
     size_t nof_pages;
-    while (mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages)) {
-        ranking_add_pages(internals->dramRanking, start_addr, nof_pages,
-                          internals->lastTimestamp);
+    MMapTracingEvent_e event;
+    ssize_t dram_pages_added = 0l;
+    while (mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages,
+                                          &event)) {
+        switch (event) {
+            case MMAP_TRACING_EVENT_MMAP:
+                ranking_add_pages(internals->dramRanking, start_addr, nof_pages,
+                                  internals->lastTimestamp);
+                break;
+            case MMAP_TRACING_EVENT_RE_MMAP:
+                for (uintptr_t tstart_addr = start_addr;
+                     tstart_addr < start_addr + nof_pages * TRACED_PAGESIZE;
+                     tstart_addr += TRACED_PAGESIZE) {
+                    memory_type_t mem_type = get_page_memory_type(tstart_addr);
+                    ranking_handle ranking_to_add =
+                        NULL; // initialize - silence gcc warning
+                    switch (mem_type) {
+                        case DRAM:
+                            ranking_to_add = internals->dramRanking;
+                            ++dram_pages_added;
+                            break;
+                        case DAX_KMEM:
+                            ranking_to_add = internals->pmemRanking;
+                            break;
+                    }
+                    ranking_add_pages(ranking_to_add, tstart_addr, 1ul,
+                                      internals->lastTimestamp);
+                }
+                break;
+            case MMAP_TRACING_EVENT_MUNMAP:
+                dram_pages_added -= (ssize_t)ranking_try_remove_pages(
+                    internals->dramRanking, start_addr, nof_pages);
+                (void)ranking_try_remove_pages(internals->pmemRanking,
+                                               start_addr, nof_pages);
+                break;
+        }
     }
+
+    return dram_pages_added;
 }
 
 // global functions -----------------------------------------------------------
@@ -194,7 +233,8 @@ MEMKIND_EXPORT void mtt_internals_destroy(MttInternals *internals)
     ranking_destroy(internals->pmemRanking);
     ranking_destroy(internals->dramRanking);
     mmap_tracing_queue_destroy(&internals->mmapTracingQueue);
-    POOL_ALLOCATOR_TYPE(destroy)(&internals->pool);
+    // internals are already destroyed, no need to track mmap/munmap
+    POOL_ALLOCATOR_TYPE(destroy)(&internals->pool, &gStandardMmapCallback);
 }
 
 MEMKIND_EXPORT void *mtt_internals_malloc(MttInternals *internals, size_t size,
@@ -242,7 +282,13 @@ MEMKIND_EXPORT size_t mtt_internals_ranking_balance(MttInternals *internals,
                                                     size_t dram_limit)
 {
     // update dram ranking
-    mtt_internals_process_queued(internals);
+    ssize_t additional_dram_used = mtt_internals_process_queued(internals);
+    // handle issues with signed -> unsigned casting
+    if (additional_dram_used >= 0) {
+        atomic_fetch_add(used_dram, additional_dram_used);
+    } else {
+        atomic_fetch_sub(used_dram, -additional_dram_used);
+    }
     return mtt_internals_ranking_balance_internal(internals, used_dram,
                                                   dram_limit);
 }
@@ -254,7 +300,13 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
 {
     internals->lastTimestamp = timestamp;
     // 1. Add new mappings to rankings
-    mtt_internals_process_queued(internals);
+    ssize_t additional_dram_used = mtt_internals_process_queued(internals);
+    // handle issues with signed -> unsigned casting
+    if (additional_dram_used >= 0) {
+        atomic_fetch_add(used_dram, additional_dram_used);
+    } else {
+        atomic_fetch_sub(used_dram, -additional_dram_used);
+    }
     // 2. Update both rankings - hotness
     if (atomic_load(interrupt))
         return;
@@ -278,8 +330,9 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
 
 MEMKIND_EXPORT void
 mtt_internals_tracing_multithreaded_push(MttInternals *internals,
-                                         uintptr_t addr, size_t nof_pages)
+                                         uintptr_t addr, size_t nof_pages,
+                                         MMapTracingEvent_e event)
 {
     mmap_tracing_queue_multithreaded_push(&internals->mmapTracingQueue, addr,
-                                          nof_pages);
+                                          nof_pages, event);
 }
