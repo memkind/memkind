@@ -221,5 +221,5 @@ MEMKIND_EXPORT size_t slab_allocator_usable_size(void *addr)
 {
     freelist_node_meta_t *meta = slab_alloc_addr_to_node_meta_(addr);
     SlabAllocator *alloc = meta->allocator;
-    return alloc->elementSize;
+    return alloc->elementSize - sizeof(freelist_node_meta_t);
 }
