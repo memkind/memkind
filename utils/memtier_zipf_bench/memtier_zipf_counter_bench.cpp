@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2022 Intel Corporation. */
 
+#include "memkind/internal/bigary.h"
 #include <memkind/internal/fast_pool_allocator.h>
 #include <memkind/internal/memkind_memtier.h>
 #include <memkind/internal/pool_allocator.h>
@@ -155,7 +156,7 @@ public:
 
     ~PoolAllocatorWrapper()
     {
-        pool_allocator_destroy(&allocator);
+        pool_allocator_destroy(&allocator, &gStandardMmapCallback);
     }
 
     void *malloc(size_t size_bytes)

@@ -24,6 +24,11 @@ extern bool ranking_touch(ranking_handle handle, uintptr_t address);
 extern void ranking_update(ranking_handle handle, uint64_t timestamp);
 extern void ranking_add_pages(ranking_handle handle, uintptr_t start_address,
                               size_t nof_pages, uint64_t timestamp);
+/// check if each page exists in ranking; remove only those that do exist
+/// @return number of removed pages
+extern size_t ranking_try_remove_pages(ranking_handle handle,
+                                       uintptr_t start_address,
+                                       size_t nof_pages);
 /// @param[out] hotness highest hotness value in Ranking
 /// @return
 ///     bool: true if not empty (hotness valid)

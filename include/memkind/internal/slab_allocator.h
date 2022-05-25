@@ -70,6 +70,8 @@ extern int slab_allocator_init_mmap(SlabAllocator *alloc, size_t element_size,
                                     size_t max_elements,
                                     const MmapCallback *user_mmap);
 extern void slab_allocator_destroy(SlabAllocator *alloc);
+extern void slab_allocator_destroy_mmap(SlabAllocator *alloc,
+                                        const MmapCallback *user_mmap);
 extern void *slab_allocator_malloc(SlabAllocator *alloc);
 extern void *slab_allocator_malloc_mmap(SlabAllocator *alloc,
                                         const MmapCallback *user_mmap);

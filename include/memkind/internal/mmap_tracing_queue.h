@@ -13,9 +13,27 @@
 extern "C" {
 #endif
 
+typedef enum
+{
+    /// add new pages to DRAM ranking
+    /// used dram counter has to be increased before adding this event
+    MMAP_TRACING_EVENT_MMAP,
+    /// remove pages, regardless of DRAM/PMEM localization; used dram counter
+    /// is adjusted with minimal overhead (no additional syscalls)
+    MMAP_TRACING_EVENT_MUNMAP,
+    /// check dram/pmem localization and add pages to corresponding ranking
+    /// slower than MMAP_TRACING_EVENT_MMAP,
+    /// performs used dram increase only if added element is on dram; @warning
+    /// usage of MUNMAP + RE_MMAP poses risk of temporarily surpassing
+    /// HARD_LIMIT
+    MMAP_TRACING_EVENT_RE_MMAP,
+} MMapTracingEvent_e;
+
 typedef struct AllocationNode {
     uintptr_t startAddr;
     size_t nofPages;
+    MMapTracingEvent_e event;
+
     struct AllocationNode *next;
 } MMapTracingNode;
 
@@ -32,7 +50,8 @@ extern void mmap_tracing_queue_destroy(MMapTracingQueue *queue);
 /// @brief Thread safe function for pushing map tracing info
 extern void mmap_tracing_queue_multithreaded_push(MMapTracingQueue *queue,
                                                   uintptr_t start_addr,
-                                                  size_t nof_pages);
+                                                  size_t nof_pages,
+                                                  MMapTracingEvent_e event);
 
 /// @brief Thread safe function for clearing the queue and returning a list of
 /// associated nodes
@@ -63,7 +82,8 @@ mmap_tracing_queue_multithreaded_take_all(MMapTracingQueue *queue);
 /// mutex, as a part of optimisation!
 extern bool mmap_tracing_queue_process_one(MMapTracingNode **head,
                                            uintptr_t *start_addr,
-                                           size_t *nof_pages);
+                                           size_t *nof_pages,
+                                           MMapTracingEvent_e *event);
 
 #ifdef __cplusplus
 }

@@ -6,6 +6,7 @@
 #include "memkind/internal/memkind_private.h"
 #include "memkind/internal/pool_allocator_internal_utils.h"
 
+#include "memkind/internal/slab_allocator.h"
 #include "stdbool.h"
 #include "string.h"
 
@@ -69,7 +70,7 @@ MEMKIND_EXPORT void *pool_allocator_malloc_mmap(PoolAllocator *pool,
         bool exchanged =
             atomic_compare_exchange_strong(&pool->pool[hash], &null_slab, slab);
         if (!exchanged) {
-            slab_allocator_destroy(slab);
+            slab_allocator_destroy_mmap(slab, user_mmap);
             slab = atomic_load(&pool->pool[hash]);
         }
     }
@@ -153,9 +154,10 @@ MEMKIND_EXPORT int pool_allocator_create(PoolAllocator *pool,
     return ret;
 }
 
-MEMKIND_EXPORT void pool_allocator_destroy(PoolAllocator *pool)
+MEMKIND_EXPORT void pool_allocator_destroy(PoolAllocator *pool,
+                                           const MmapCallback *user_mmap)
 {
     for (size_t i = 0; i < UINT16_MAX; ++i)
         slab_allocator_free(pool->pool[i]);
-    slab_allocator_destroy(&pool->slabSlabAllocator);
+    slab_allocator_destroy_mmap(&pool->slabSlabAllocator, user_mmap);
 }

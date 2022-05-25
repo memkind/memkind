@@ -50,7 +50,7 @@ extern void mtt_allocator_free(MTTAllocator *mtt_allocator, void *ptr);
 extern void *mtt_allocator_mmap(MTTAllocator *mtt_allocator, void *addr,
                                 size_t length, int prot, int flags, int fd,
                                 off_t offset);
-extern int mtt_allocator_unmmap(MTTAllocator *mtt_allocator, void *addr,
+extern int mtt_allocator_munmap(MTTAllocator *mtt_allocator, void *addr,
                                 size_t length);
 extern size_t mtt_allocator_usable_size(MTTAllocator *mtt_allocator, void *ptr);
 
