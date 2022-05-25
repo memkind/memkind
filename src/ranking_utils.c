@@ -7,6 +7,7 @@
 #include <memkind/internal/pagesizes.h>
 #include <memkind/internal/ranking_utils.h>
 
+#include <assert.h>
 #include <errno.h>
 #include <numa.h>
 #include <numaif.h>
@@ -120,4 +121,25 @@ MEMKIND_EXPORT int move_page_metadata(uintptr_t start_addr,
 
     errno = prev_errno;
     return ret;
+}
+
+memory_type_t get_page_memory_type(uintptr_t page)
+{
+    // TODO this is a temporary implementation that assumes that
+    // nodes 0 and 1 are DRAM and nodes 2 and 3 are DAX_KMEM
+    // FIXME during productization, real type will have to be used
+    int numa_id = 0;
+    long mempolicy_ret = get_mempolicy(&numa_id, NULL, 0, (void *)page,
+                                       MPOL_F_NODE | MPOL_F_ADDR);
+    assert(mempolicy_ret == 0 && "get_mempolicy failed!");
+    switch (numa_id) {
+        case 0:
+        case 1:
+            return DRAM;
+        case 2:
+        case 3:
+            return DAX_KMEM;
+        default:
+            assert(false && "incorrect node number");
+    }
 }

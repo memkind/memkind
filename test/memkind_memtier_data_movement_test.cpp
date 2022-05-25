@@ -15,6 +15,7 @@
 #include <mtt_allocator.h>
 
 #include "TestPrereq.hpp"
+#include "memkind/internal/bigary.h"
 
 #include <cmath>
 #include <gtest/gtest.h>
@@ -537,7 +538,7 @@ TEST_F(PoolAllocTest, Basic)
     pool_allocator_free(&pool, a32);
     pool_allocator_free(&pool, a33);
 
-    pool_allocator_destroy(&pool);
+    pool_allocator_destroy(&pool, &gStandardMmapCallback);
 }
 
 TEST_F(PoolAllocTest, BigAllocationTest)
@@ -562,7 +563,7 @@ TEST_F(PoolAllocTest, BigAllocationTest)
 
     pool_allocator_free(&pool, temp1);
     pool_allocator_free(&pool, temp2);
-    pool_allocator_destroy(&pool);
+    pool_allocator_destroy(&pool, &gStandardMmapCallback);
 }
 
 class FastPoolAllocTest: public ::testing::Test
@@ -1542,7 +1543,8 @@ TEST(MmapTracingQueueTest, Basic)
     ASSERT_EQ(queue.tail, nullptr);
 
     // add 1 element, check correctness
-    mmap_tracing_queue_multithreaded_push(&queue, 0xABCDul, 1);
+    mmap_tracing_queue_multithreaded_push(&queue, 0xABCDul, 1,
+                                          MMAP_TRACING_EVENT_MMAP);
     ASSERT_NE(queue.head, nullptr);
     ASSERT_NE(queue.tail, nullptr);
     ASSERT_EQ(queue.tail, queue.head);
@@ -1562,34 +1564,44 @@ TEST(MmapTracingQueueTest, Basic)
 
     uintptr_t start_addr = 0ul;
     size_t nof_pages = 0ul;
-    bool ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    MMapTracingEvent_e event = MMAP_TRACING_EVENT_RE_MMAP;
+    bool ok =
+        mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages, &event);
     ASSERT_TRUE(ok);
     ASSERT_EQ(start_addr, 0xABCDul);
     ASSERT_EQ(nof_pages, 1ul);
+    ASSERT_EQ(event, MMAP_TRACING_EVENT_MMAP);
 
     // add 3 elements, repeat the process above
-    mmap_tracing_queue_multithreaded_push(&queue, 0xBCDEul, 3);
-    mmap_tracing_queue_multithreaded_push(&queue, 0xCDEFul, 2);
-    mmap_tracing_queue_multithreaded_push(&queue, 0xDDEFul, 4);
+    mmap_tracing_queue_multithreaded_push(&queue, 0xBCDEul, 3,
+                                          MMAP_TRACING_EVENT_RE_MMAP);
+    mmap_tracing_queue_multithreaded_push(&queue, 0xCDEFul, 2,
+                                          MMAP_TRACING_EVENT_MUNMAP);
+    mmap_tracing_queue_multithreaded_push(&queue, 0xDDEFul, 4,
+                                          MMAP_TRACING_EVENT_MMAP);
     ASSERT_NE(queue.head, nullptr);
     ASSERT_NE(queue.tail, nullptr);
     ASSERT_NE(queue.tail, queue.head);
     ASSERT_EQ(queue.tail->startAddr, 0xDDEFul);
     ASSERT_EQ(queue.tail->nofPages, 4ul);
+    ASSERT_EQ(queue.tail->event, MMAP_TRACING_EVENT_MMAP);
     ASSERT_EQ(queue.tail->next, nullptr);
     ASSERT_EQ(queue.head->startAddr, 0xBCDEul);
     ASSERT_EQ(queue.head->nofPages, 3ul);
+    ASSERT_EQ(queue.head->event, MMAP_TRACING_EVENT_RE_MMAP);
     ASSERT_NE(queue.head->next, nullptr);
     ASSERT_EQ(queue.head->next->startAddr, 0xCDEFul);
     ASSERT_EQ(queue.head->next->nofPages, 2ul);
+    ASSERT_EQ(queue.head->next->event, MMAP_TRACING_EVENT_MUNMAP);
     ASSERT_NE(queue.head->next->next, nullptr);
     ASSERT_EQ(queue.head->next->next, queue.tail);
     ASSERT_EQ(queue.head->next->next->startAddr, 0xDDEFul);
     ASSERT_EQ(queue.head->next->next->nofPages, 4ul);
+    ASSERT_EQ(queue.head->next->next->event, MMAP_TRACING_EVENT_MMAP);
     ASSERT_EQ(queue.head->next->next->next, nullptr);
     ASSERT_EQ(queue.alloc.used, 3ul);
 
-    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages, &event);
 
     ASSERT_FALSE(ok);
 
@@ -1600,22 +1612,25 @@ TEST(MmapTracingQueueTest, Basic)
     ASSERT_EQ(queue.tail, queue.head);
     ASSERT_EQ(queue.alloc.used, 3ul); // 3 elements used
 
-    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages, &event);
     ASSERT_TRUE(ok);
     ASSERT_EQ(start_addr, 0xBCDEul);
     ASSERT_EQ(nof_pages, 3ul);
+    ASSERT_EQ(event, MMAP_TRACING_EVENT_RE_MMAP);
 
-    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages, &event);
     ASSERT_TRUE(ok);
     ASSERT_EQ(start_addr, 0xCDEFul);
     ASSERT_EQ(nof_pages, 2ul);
+    ASSERT_EQ(event, MMAP_TRACING_EVENT_MUNMAP);
 
-    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages, &event);
     ASSERT_TRUE(ok);
     ASSERT_EQ(start_addr, 0xDDEFul);
     ASSERT_EQ(nof_pages, 4ul);
+    ASSERT_EQ(event, MMAP_TRACING_EVENT_MMAP);
 
-    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages);
+    ok = mmap_tracing_queue_process_one(&node, &start_addr, &nof_pages, &event);
     ASSERT_FALSE(ok);
 
     mmap_tracing_queue_destroy(&queue);

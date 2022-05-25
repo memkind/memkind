@@ -35,7 +35,8 @@ typedef struct PoolAllocator {
 /// @note only one initializer should be called!
 extern int pool_allocator_create(PoolAllocator *pool,
                                  const MmapCallback *user_mmap);
-extern void pool_allocator_destroy(PoolAllocator *pool);
+extern void pool_allocator_destroy(PoolAllocator *pool,
+                                   const MmapCallback *user_mmap);
 
 extern void *pool_allocator_malloc(PoolAllocator *pool, size_t size);
 extern void *pool_allocator_malloc_mmap(PoolAllocator *pool, size_t size,

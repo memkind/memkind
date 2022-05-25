@@ -57,6 +57,14 @@ MEMKIND_EXPORT void ranking_add_pages(ranking_handle handle,
                                              timestamp);
 }
 
+MEMKIND_EXPORT size_t ranking_try_remove_pages(ranking_handle handle,
+                                               uintptr_t start_address,
+                                               size_t nof_pages)
+{
+    return static_cast<Ranking *>(handle)->TryRemovePages(start_address,
+                                                          nof_pages);
+}
+
 MEMKIND_EXPORT bool ranking_get_hottest(ranking_handle handle, double *hotness)
 {
     return static_cast<Ranking *>(handle)->GetHottest(*hotness);

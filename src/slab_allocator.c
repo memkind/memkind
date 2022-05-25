@@ -4,6 +4,7 @@
 #include "memkind/internal/slab_allocator.h"
 
 #include "assert.h"
+#include "memkind/internal/bigary.h"
 #include "pthread.h"
 #include "stdbool.h"
 #include "stddef.h"
@@ -184,6 +185,14 @@ MEMKIND_EXPORT void slab_allocator_destroy(SlabAllocator *alloc)
 {
     int ret = pthread_mutex_destroy(&alloc->globFreelist.mutex);
     bigary_destroy(&alloc->mappedMemory);
+    assert(ret == 0 && "mutex destruction failed");
+}
+
+MEMKIND_EXPORT void slab_allocator_destroy_mmap(SlabAllocator *alloc,
+                                                const MmapCallback *user_mmap)
+{
+    int ret = pthread_mutex_destroy(&alloc->globFreelist.mutex);
+    bigary_destroy_mmap(&alloc->mappedMemory, user_mmap);
     assert(ret == 0 && "mutex destruction failed");
 }
 
