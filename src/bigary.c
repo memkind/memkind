@@ -107,6 +107,15 @@ void bigary_destroy(bigary *restrict m_bigary)
     assert(ret2 == 0 && "unmap failed!");
 }
 
+void bigary_destroy_mmap(bigary *restrict m_bigary, const MmapCallback *m_mmap)
+{
+    int ret1 = pthread_mutex_destroy(&m_bigary->enlargement);
+    int ret2 =
+        m_mmap->wrapped_munmap(m_mmap->arg, m_bigary->area, m_bigary->declared);
+    assert(ret1 == 0 && "mutex destruction failed!");
+    assert(ret2 == 0 && "unmap failed!");
+}
+
 /********************************************************************/
 /* ensure there's at least X space allocated                        */
 /* (you may want MAP_POPULATE to ensure the space is actually there */

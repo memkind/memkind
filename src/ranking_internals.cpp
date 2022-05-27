@@ -279,6 +279,27 @@ MEMKIND_EXPORT void Ranking::RemoveHotnessToPages_(PageMetadata *page)
 
 // Ranking - public ---------
 
+size_t Ranking::TryRemovePages(uintptr_t start_address, size_t nof_pages)
+{
+    size_t removed = 0ul;
+    for (uintptr_t pstart_address = start_address;
+         pstart_address < start_address + nof_pages * TRACED_PAGESIZE;
+         pstart_address += TRACED_PAGESIZE) {
+        auto addr_page_it = this->pageAddrToPage.find(pstart_address);
+        if (addr_page_it == this->pageAddrToPage.end())
+            continue;
+        // we have an entry to remove, remove from all internal structures
+        PageMetadata *metadata_ptr = &addr_page_it->second;
+        this->RemoveHotnessToPages_(metadata_ptr);
+        this->RemoveLRU_(metadata_ptr);
+        this->pagesToUpdate.erase(metadata_ptr);
+        this->pageAddrToPage.erase(addr_page_it);
+        ++removed;
+    }
+
+    return removed;
+}
+
 MEMKIND_EXPORT void Ranking::AddPages(uintptr_t start_addr, size_t nof_pages,
                                       uint64_t timestamp)
 {

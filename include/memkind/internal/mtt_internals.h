@@ -87,7 +87,8 @@ extern void mtt_internals_ranking_update(MttInternals *internals,
 /// @note Thread safe
 extern void mtt_internals_tracing_multithreaded_push(MttInternals *internals,
                                                      uintptr_t addr,
-                                                     size_t nof_pages);
+                                                     size_t nof_pages,
+                                                     MMapTracingEvent_e event);
 
 #ifdef __cplusplus
 }

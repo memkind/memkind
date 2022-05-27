@@ -3,6 +3,7 @@
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#include "memkind/internal/mmap_tracing_queue.h"
 #endif
 
 #include <memkind/internal/memkind_log.h>
@@ -53,6 +54,7 @@ static void unregister_mtt_allocator(MTTAllocator *mtt_allocator);
 static void *mtt_allocator_mmap_cb_wrapper(void *arg, void *addr, size_t len,
                                            int prot, int flags, int fd,
                                            __off_t offset);
+static int mtt_allocator_munmap_cb_wrapper(void *arg, void *addr, size_t len);
 static void background_thread_start(BackgroundThread *bg_thread);
 static void background_thread_stop(MTTAllocator *mtt_allocator);
 
@@ -67,6 +69,12 @@ static void *mtt_allocator_mmap_cb_wrapper(void *arg, void *addr, size_t len,
 {
     return mtt_allocator_mmap((MTTAllocator *)arg, addr, len, prot, flags, fd,
                               offset);
+}
+
+/// @brief Wrapper for munmap with PMEM/DRAM balancing
+static int mtt_allocator_munmap_cb_wrapper(void *arg, void *addr, size_t len)
+{
+    return mtt_allocator_munmap((MTTAllocator *)arg, addr, len);
 }
 
 /// @brief Wrapper for mmap
@@ -92,7 +100,8 @@ static void *mtt_allocator_mmap_init_once(void *arg, void *addr, size_t len,
     void *ret = mmap(addr, len, prot, flags, fd, offset);
     if (ret) // TODO make sure nothing is broken during final refactoring!
         mtt_internals_tracing_multithreaded_push(
-            &allocator->internals, (uintptr_t)ret, len / TRACED_PAGESIZE);
+            &allocator->internals, (uintptr_t)ret, len / TRACED_PAGESIZE,
+            MMAP_TRACING_EVENT_MMAP);
     return ret;
 }
 
@@ -360,6 +369,7 @@ MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator,
     MmapCallback mmap_callback;
     mmap_callback.arg = mtt_allocator;
     mmap_callback.wrapped_mmap = mtt_allocator_mmap_init_once;
+    mmap_callback.wrapped_munmap = mtt_allocator_munmap_cb_wrapper;
     mtt_internals_create(&mtt_allocator->internals, timestamp, limits,
                          &mmap_callback);
 
@@ -382,6 +392,7 @@ MEMKIND_EXPORT void *mtt_allocator_malloc(MTTAllocator *mtt_allocator,
     MmapCallback mmap_callback;
     mmap_callback.arg = mtt_allocator;
     mmap_callback.wrapped_mmap = mtt_allocator_mmap_cb_wrapper;
+    mmap_callback.wrapped_munmap = mtt_allocator_munmap_cb_wrapper;
     void *ret =
         mtt_internals_malloc(&mtt_allocator->internals, size, &mmap_callback);
     return ret;
@@ -404,6 +415,7 @@ MEMKIND_EXPORT void *mtt_allocator_realloc(MTTAllocator *mtt_allocator,
     MmapCallback mmap_callback;
     mmap_callback.arg = mtt_allocator;
     mmap_callback.wrapped_mmap = mtt_allocator_mmap_cb_wrapper;
+    mmap_callback.wrapped_munmap = mtt_allocator_munmap_cb_wrapper;
     void *ret = mtt_internals_realloc(&mtt_allocator->internals, ptr, size,
                                       &mmap_callback);
     return ret;
@@ -526,20 +538,45 @@ MEMKIND_EXPORT void *mtt_allocator_mmap(MTTAllocator *mtt_allocator, void *addr,
 
     void *ret = mmap(addr, length, prot, flags, fd, offset);
     if (ret) {
-        mtt_internals_tracing_multithreaded_push(&mtt_allocator->internals,
-                                                 (uintptr_t)addr,
-                                                 length / TRACED_PAGESIZE);
+        mtt_internals_tracing_multithreaded_push(
+            &mtt_allocator->internals, (uintptr_t)addr,
+            length / TRACED_PAGESIZE, MMAP_TRACING_EVENT_MMAP);
     }
 
     return ret;
 }
 
-MEMKIND_EXPORT int mtt_allocator_unmmap(MTTAllocator *mtt_allocator, void *addr,
+MEMKIND_EXPORT int mtt_allocator_munmap(MTTAllocator *mtt_allocator, void *addr,
                                         size_t length)
 {
-    // TODO handle - wrap, unregister and unmap
-    // TODO cannot be async - the pages have to be unregistered before returning
-    // from this function!!!
-    assert(false && "Not implemented!");
-    return -1;
+    assert(length % TRACED_PAGESIZE == 0ul &&
+           "Length is not a multiply of traced pagesize");
+    assert(((uintptr_t)addr) % TRACED_PAGESIZE == 0ul && "Incorrect alignment");
+
+    // WARNING
+    // this function cannot be simplified by only calling
+    // mtt_internals_tracing_multithreaded_push with MUNMAP on success;
+    // potential data race:
+    // another thread maps the unmapped region and adds tracking before we
+    // remove ours
+
+    // do not modify usedDram:
+    //  - the mapped area might be either on dram or on pmem,
+    //  - lowering limit should be done afterwards, once data is removed from
+    //  rankings
+    mtt_internals_tracing_multithreaded_push(
+        &mtt_allocator->internals, (uintptr_t)addr, length / TRACED_PAGESIZE,
+        MMAP_TRACING_EVENT_MUNMAP);
+    int ret = munmap(addr, length);
+
+    if (ret != 0) {
+        log_err("Unmap failure!!! dram hard limit "
+                "might be temporarily surpassed as a result");
+        // unmap failure, restore the area
+        mtt_internals_tracing_multithreaded_push(
+            &mtt_allocator->internals, (uintptr_t)addr,
+            length / TRACED_PAGESIZE, MMAP_TRACING_EVENT_RE_MMAP);
+    }
+
+    return ret;
 }
