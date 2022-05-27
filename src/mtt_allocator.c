@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define BG_THREAD_FREQUENCY 2.0
+#define BG_THREAD_FREQUENCY 0.1
 
 // typedefs -------------------------------------------------------------------
 
@@ -372,7 +372,6 @@ MEMKIND_EXPORT void mtt_allocator_create(MTTAllocator *mtt_allocator,
     mmap_callback.wrapped_munmap = mtt_allocator_munmap_cb_wrapper;
     mtt_internals_create(&mtt_allocator->internals, timestamp, limits,
                          &mmap_callback);
-
     register_mtt_allocator(mtt_allocator);
     background_thread_init(mtt_allocator);
     log_info("MTT background thread created");

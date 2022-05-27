@@ -855,6 +855,7 @@ TEST_F(PEBSTest, HardLimitMovementLogic)
     size_t nof_allocations = 256;               // 4 GB in total
     volatile int total_sum = 0;
 
+    const size_t nof_iterations = 10ul;
     MTTInternalsLimits limits;
     limits.lowLimit = 1ul * 1024ul * 1024ul;   // 1 MB
     limits.softLimit = 16ul * 1024ul * 1024ul; // 16 MB
@@ -886,21 +887,23 @@ TEST_F(PEBSTest, HardLimitMovementLogic)
     dram_size = ranking_get_total_size(mtt_allocator.internals.dramRanking);
     ASSERT_EQ(dram_size, mtt_allocator.internals.usedDram);
 
-    for (size_t k = 0; k < nof_allocations; ++k) {
-        for (size_t i = 0; i < size / sizeof(int); i++) {
-            tab[k][i] = i;
-        }
-
-        for (size_t j = 0; j < 2u; j++) {
-            for (size_t i = 0; i < size / 2u / 10u; i++) {
-                tab[k][i] += tab[k][i * 2] + j;
-                total_sum += tab[k][i];
+    for (size_t it = 0; it < nof_iterations; ++it) {
+        for (size_t k = 0; k < nof_allocations; ++k) {
+            for (size_t i = 0; i < size / sizeof(int); i++) {
+                tab[k][i] = i * it;
             }
+
+            for (size_t j = 0; j < 2u; j++) {
+                for (size_t i = 0; i < size / 2u / 10u; i++) {
+                    tab[k][i] += tab[k][i * 2] + j;
+                    total_sum += tab[k][i];
+                }
+            }
+            dram_ranking_size =
+                ranking_get_total_size(mtt_allocator.internals.dramRanking);
+            ASSERT_LE(dram_ranking_size, limits.hardLimit);
+            ASSERT_LE(mtt_allocator.internals.usedDram, limits.hardLimit);
         }
-        dram_ranking_size =
-            ranking_get_total_size(mtt_allocator.internals.dramRanking);
-        ASSERT_LE(dram_ranking_size, limits.hardLimit);
-        ASSERT_LE(mtt_allocator.internals.usedDram, limits.hardLimit);
     }
     double hotness = -1.0;
     bool success = get_highest_hotness(&mtt_allocator, hotness);
@@ -1640,7 +1643,10 @@ class RankingPerfTest: public ::testing::Test
 {
 protected:
     const size_t m_alloc_size = TRACED_PAGESIZE * 1024 * 100;
+    const size_t alloc_size = 256ul;
+
     void *m_start_addr;
+    const size_t dram_data_size = 50ul * 1024ul * 1024ul;
     MTTAllocator m_mtt_allocator;
     TestPrereq m_tp;
     std::unordered_set<int> m_dram_nodes, m_dax_kmem_nodes;
@@ -1695,10 +1701,25 @@ private:
                             MAP_PRIVATE | MAP_ANONYMOUS | MAP_POPULATE, -1, 0);
         ASSERT_NE(m_start_addr, nullptr);
         memset(m_start_addr, 0, m_alloc_size);
+
+        MTTInternalsLimits limits;
+        limits.lowLimit = TRACED_PAGESIZE;
+
+        size_t nof_allocations = dram_data_size * 2 / alloc_size;
+        // assume that 50% of metadata is hot and will reside in DRAM
+        limits.softLimit = dram_data_size +
+            (ROUND_UP_TO_BIGARY_PAGESIZE(MTT_ALLOCATOR_METADATA_PER_ALLOC_SIZE *
+                                         nof_allocations) +
+             MTT_ALLOCATOR_METADATA_SIZE) /
+                2lu;
+        limits.hardLimit = limits.softLimit;
+
+        mtt_allocator_create(&m_mtt_allocator, &limits);
     }
 
     void TearDown()
     {
+        mtt_allocator_destroy(&m_mtt_allocator);
         munmap(m_start_addr, TRACED_PAGESIZE);
     }
 };
@@ -1753,27 +1774,11 @@ TEST_F(RankingPerfTest, PageMovement)
 
 TEST_F(RankingPerfTest, PEBS)
 {
-    const size_t alloc_size = 256;
     const size_t iters_num = 1500;
-    const size_t bench_num = 20;
+    const size_t bench_num = 70;
 
     std::vector<void *> allocs, dram_allocs, pmem_allocs;
     int numa_id;
-
-    size_t dram_data_size = 50ul * 1024ul * 1024ul;
-    MTTInternalsLimits limits;
-    limits.lowLimit = TRACED_PAGESIZE;
-
-    size_t nof_allocations = dram_data_size * 2 / alloc_size;
-    // assume that 50% of metadata is hot and will reside in DRAM
-    limits.softLimit = dram_data_size +
-        (ROUND_UP_TO_BIGARY_PAGESIZE(MTT_ALLOCATOR_METADATA_PER_ALLOC_SIZE *
-                                     nof_allocations) +
-         MTT_ALLOCATOR_METADATA_SIZE) /
-            2lu;
-    limits.hardLimit = limits.softLimit;
-
-    mtt_allocator_create(&m_mtt_allocator, &limits);
 
     // Allocate 2x more data than soft limit so MTT will start moving data
     // to PMEM
@@ -1855,8 +1860,6 @@ TEST_F(RankingPerfTest, PEBS)
 
     for (auto &it : allocs)
         mtt_allocator_free(&m_mtt_allocator, it);
-
-    mtt_allocator_destroy(&m_mtt_allocator);
 }
 
 TEST(MttAllocator, calloc)
