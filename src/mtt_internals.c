@@ -24,6 +24,8 @@
 
 // with 4kB traced page, 512kB per cycle
 #define MAX_TO_JUGGLE (128ul)
+// do not juggle pages with hotness diff hotness below 10%
+#define MIN_JUGGLE_DIFF (0.10)
 
 // static functions -----------------------------------------------------------
 
@@ -74,7 +76,7 @@ static void mtt_internals_tiers_juggle(MttInternals *internals,
 
     size_t juggle_it = 0ul;
     while (juggle_it++ < MAX_TO_JUGGLE && success_dram && success_pmem &&
-           (hottest_pmem > coldest_dram) &&
+           (hottest_pmem * (1.0 - MIN_JUGGLE_DIFF) > coldest_dram) &&
            ranking_get_total_size(internals->dramRanking) > 0ul &&
            ranking_get_total_size(internals->pmemRanking) > 0ul) {
         demote_coldest_dram(internals);
