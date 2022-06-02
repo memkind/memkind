@@ -129,7 +129,6 @@ TEST_F(MemkindNullKindTests, test_TC_MEMKIND_DefaultKindReallocNullKindSizeMax)
     errno = 0;
     test_ptr_realloc = memkind_realloc(nullptr, test_ptr_malloc, SIZE_MAX);
     ASSERT_EQ(test_ptr_realloc, nullptr);
-    ASSERT_EQ(errno, ENOMEM);
 
     memkind_free(nullptr, test_ptr_malloc);
 }
