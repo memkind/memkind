@@ -98,7 +98,10 @@ MEMKIND_EXPORT void *memkind_default_realloc(struct memkind *kind, void *ptr,
         jemk_free(ptr);
         return NULL;
     }
-    return jemk_realloc(ptr, size);
+    ptr = jemk_malloc(size);
+    if (MEMKIND_UNLIKELY(!ptr))
+        errno = ENOMEM;
+    return ptr;
 }
 
 MEMKIND_EXPORT void memkind_default_free(struct memkind *kind, void *ptr)
