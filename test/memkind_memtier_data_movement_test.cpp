@@ -1828,7 +1828,7 @@ TEST_F(RankingPerfTest, PEBS)
         // Check that current bench time is close or better than previous
         if (prev_pmem_time < pmem_time)
             EXPECT_NEAR(prev_pmem_time.count(), pmem_time.count(),
-                        prev_pmem_time.count() * 0.1);
+                        prev_pmem_time.count() * 0.25);
         else
             prev_pmem_time = pmem_time;
 
@@ -1851,7 +1851,7 @@ TEST_F(RankingPerfTest, PEBS)
         prev_moved_pages = num_moved;
     }
 
-    // Check that more than 90% pages are moved to DRAM
+    // Check that more than 80% pages are moved to DRAM
     ASSERT_GT(prev_moved_pages, num_objs * 0.80);
 
     // Check that final perf is close to DRAM perf
