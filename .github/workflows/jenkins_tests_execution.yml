@@ -1,0 +1,63 @@
+name: Jenkins tests execution
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  #push:
+  #  branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+    # This workflow contains a single job called "build"
+    build:
+
+      if: >-
+        github.event.pull_request.user.login == 'user1' ||
+        github.event.pull_request.user.login == 'user2'
+
+      # The type of runner that the job will run on
+      runs-on: self-hosted
+      env:
+        WORKDIR: utils/gha-runners
+
+      # Steps represent a sequence of tasks that will be executed as part of the job
+      steps:
+        - name: Clone the git repo
+          uses: actions/checkout@v2
+
+        # Executing jenkins job
+        - name: Executing jenkins job
+          run: |
+            curlOutput=`curl -XPOST --insecure --silent --show-error -u $jenkins_user:$jenkins_token $job_address/buildWithParameters?token=$job_token`
+            if [[ "$curlOutput" == *"Error"* ]]; then
+              echo $curlOutput
+              exit 1
+            fi
+
+            sleep 10
+
+            curlJsonBuildOutput=`curl --insecure -u $jenkins_user:$jenkins_token $job_address/lastBuild/api/json | jq -r '.building'`
+
+            while [[ "$curlJsonBuildOutput" == "true" ]]
+             do
+              sleep 10
+              curlJsonBuildOutput=`curl --insecure -u $jenkins_user:$jenkins_token $job_address/lastBuild/api/json | jq -r '.building'`
+            done
+
+        - name: Show Jenkins job log
+          run: |
+            curl --insecure -u $jenkins_user:$jenkins_token $job_address/lastBuild/consoleText
+
+        - name: Validating job's status
+          run: |
+            curlJsonResultOutput=`curl --insecure -u $jenkins_user:$jenkins_token $job_address/lastBuild/api/json | jq -r '.result'`
+
+            if [[ "$curlJsonResultOutput" == "FAILURE" ]]; then
+              echo "Jenkins job failed!"
+              exit 1
+            fi
