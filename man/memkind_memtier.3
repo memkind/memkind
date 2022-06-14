@@ -1,5 +1,5 @@
 .\" SPDX-License-Identifier: BSD-2-Clause
-.\" Copyright (C) 2021 Intel Corporation.
+.\" Copyright (C) 2021-2022 Intel Corporation.
 .\"
 .TH "MEMKIND_MEMTIER" 3 "2021-03-01" "Intel Corporation" "MEMKIND_MEMTIER" \" -*- nroff -*-
 .SH "NAME"
@@ -9,11 +9,16 @@ memkind_memtier \- memory tiering interface
 .I memkind_memtier.h
 functionality is considered as stable API (STANDARD API).
 .SH "SYNOPSIS"
-.nf
 .B #include <memkind_memtier.h>
 .sp
 .B Link with -lmemkind
 .sp
+Instead of the API directly,
+environment variables can be used in order to enable the usage of memory tiering in memkind.
+See
+libmemtier (7)
+for details.
+.PP
 .B "TIER MANAGEMENT:"
 .sp
 .BI "struct memtier_builder *memtier_builder_new(memtier_policy_t " "policy" );
@@ -69,28 +74,301 @@ functionality is considered as stable API (STANDARD API).
 .B "MEMTIER PROPERTY MANAGEMENT:
 .br
 .BI "int memtier_ctl_set(struct memtier_builder " "*builder" ", const char " "*name" ", const void " "*val" );
-.sp
-.br
-.SH "CTL API"
-.B TODO
-.br
-Supported names (with type):
-policy.dynamic_threshold.thresholds[ID].val (size_t)
-policy.dynamic_threshold.thresholds[ID].min (size_t)
-policy.dynamic_threshold.thresholds[ID].max (size_t)
-policy.dynamic_threshold.check_cnt (unsigned)
-policy.dynamic_threshold.trigger (float)
-policy.dynamic_threshold.degree (float)
-.sp
-.SH "DECORATORS"
-.br
-See section
-.BR "DECORATORS"
-of
-.BR memkind (3)
-for more details about decorators.
 .SH "DESCRIPTION"
-.SH "COPYRIGHT"
-Copyright (C) 2021 Intel Corporation. All rights reserved.
-.SH "SEE ALSO"
+This library enables memory tiering mechanism. It allows to make allocations with the usage of multiple kinds keeping a
+specified ratio between them. This ratio determines how much of total allocated memory should be allocated with each kind.
+.PP
+.B "TIER MANAGEMENT:"
+.br
+The functions in this section are used to set up, create and destroy the
+.I memtier_memory
+object.
+This object is passed as an argument to the
+.BR memtier_malloc ()
+group of functions.
+It defines the way the allocations are distributed between different memory tiers.
+.PP
+.BR memtier_builder_new ()
+returns a pointer to a new
+.I memtier_builder
+object which is used for creating the
+.I memtier_memory
+object.
+.I policy
+determines the policy of allocations distribution between tiers by the
+.I memtier_memory
+object.
+.PP
+.BR memtier_builder_delete ()
+removes the
+.I builder
+object releasing the memory it used.
+Use after the
+.I memtier_memory
+object is created with the function
+.IR memtier_builder_construct_memtier_memory ().
+.PP
+.BR memtier_builder_add_tier ()
+adds memory
+.I kind
+to the
+.IR builder .
+This
+.I kind
+defines a memory tier used in the
+.B memtier_memory
+object.
+This function can be called more than once to create several different memory tiers.
+The "weight" of the tier is determined by the
+.I kind_ratio
+parameter.
+The higher it is relative to other tiers'
+.IR kind_ratio ,
+the higher the share of allocated memory on that tier.
+.PP
+.BR memtier_builder_construct_memtier_memory ()
+returns pointer to a newly allocated
+.I memtier_memory
+object. The
+.I builder
+can be safely removed after this operation using the
+.BR memtier_builder_delete ()
+function.
+.PP
+.BR memtier_delete_memtier_memory ()
+removes the
+.I memory
+tiering object releasing the memory it used.
+.PP
+.B "HEAP MANAGEMENT:
+.br
+The functions described in this section define a heap manager with an
+interface modeled on the ISO C standard API's, except that the user
+must specify either the
+.I kind
+of memory with the first argument to each function or the tiered
+.I memory
+object which defines memory tiers used for allocations.
+See the
+.B KINDS
+section in the
 .BR memkind (3)
+manual for a full description of the implemented kinds.
+.PP
+.BR memtier_malloc ()
+allocates
+.I size
+bytes of memory on one of memory tiers defined by the
+.IR memory .
+See TODO for further details on memory tiers.
+.BR memkind_malloc ()
+is used for allocations.
+For further details on it's behavior see
+.BR memkind (3).
+.PP
+.BR memtier_kind_malloc ()
+is a wrapper to the
+.BR memkind_malloc ()
+function.
+See
+.BR memkind (3)
+for further details.
+.PP
+.BR memtier_calloc ()
+allocates
+.I num
+times
+.I size
+bytes of memory on one of memory tiers defined by the
+.IR memory .
+.BR memkind_calloc ()
+is used for allocations.
+For further details on it's behavior see
+.BR memkind (3).
+.PP
+.BR memtier_kind_calloc ()
+is a wrapper to the
+.BR memkind_calloc ()
+function.
+See
+.BR memkind (3)
+for further details.
+.PP
+.BR memtier_realloc ()
+changes the size of the previously allocated memory referenced by
+.I ptr
+to
+.I size
+bytes using memory from the tier on which
+.I ptr
+is allocated.
+If
+.I ptr
+is
+.IR NULL ,
+new memory is allocated on a memory tier defined by
+.IR memory .
+.BR memkind_realloc ()
+is used for reallocation.
+See
+.BR memkind (3)
+for further details.
+.PP
+.BR memtier_kind_realloc ()
+changes the size of the previously allocated memory referenced by
+.I ptr
+to
+.I size
+bytes using specific
+.IR kind .
+If
+.I size
+is equal to zero and
+.I ptr
+is not
+.IR NULL ,
+then the call is equivalent to
+.IR "memkind_free(kind, ptr)"
+and
+.I NULL
+is returned.
+If
+.I ptr
+is
+.IR NULL ,
+.BR memtier_kind_malloc ()
+is called to allocate new memory.
+Otherwise, the
+.BR memkind_realloc ()
+function is used.
+See
+.BR memkind (3)
+for further details.
+.PP
+.BR memtier_posix_memalign ()
+is a wrapper of
+.BR memkind_posix_memalign ()
+with the main difference that the
+.I memory
+is used to determine the kind to be used for the allocation.
+See
+.BR memkind (3)
+for further details.
+.PP
+.BR memtier_kind_posix_memalign ()
+is a wrapper of
+.BR memkind_posix_memalign ()
+See
+.BR memkind (3)
+for further details.
+.PP
+.BR memtier_usable_size ()
+returns the size of the block of memory allocated with the memtier API
+at the address pointed by
+.IR ptr .
+.PP
+.BR memtier_free ()
+is a wrapper for the
+.BR memtier_kind_free ()
+function with the
+.I kind
+parameter passed as
+.IR NULL .
+.PP
+.BR memtier_kind_free ()
+frees up the memory pointed to by
+.IR ptr .
+The behavior is the same as for the
+.BR memkind_free ().
+If
+.I kind
+is
+.IR NULL ,
+the kind used to allocate
+.I ptr
+is detected automatically.
+See
+.BR memkind (3)
+for further details.
+.PP
+.BR memtier_kind_allocated_size ()
+returns the total size of memory allocated with the usage of
+.I kind
+and the memtier API.
+.PP
+.B "DECORATORS:"
+.br
+This is the set of functions used to print information on each call to the respective
+.I memtier_kind_*
+function described in the
+.B "HEAP MANAGEMENT"
+section.
+Printed information include the name of the
+.B kind
+used, parameters passed to the underlying function from the malloc family of functions
+and the address of the memory returned.
+.PP
+.B "MEMTIER PROPERTY MANAGEMENT:
+.br
+.BR memtier_ctl_set ()
+is useful for changing the default values of parameters that define the
+.I DYNAMIC_THRESHOLD
+policy.
+This function can be used in the process of creating a
+.B memtier_memory
+object with the usage of
+.IR builder .
+.I name
+can be one of the following:
+.IP
+policy.dynamic_threshold.thresholds[ID].val (size_t)
+.br
+policy.dynamic_threshold.thresholds[ID].min (size_t)
+.br
+policy.dynamic_threshold.thresholds[ID].max (size_t)
+.br
+policy.dynamic_threshold.check_cnt (unsigned)
+.br
+policy.dynamic_threshold.trigger (float)
+.br
+policy.dynamic_threshold.degree (float)
+.PP
+In the above examples,
+.I ID
+should be replaced with the ID of thresholds configuration.
+The configuration between first two tiers added to
+.B builder
+has an
+.I ID
+equal to 0.
+The configuration
+.I ID
+of the next two tiers, that is, the second and third ones,
+is equal to 1, and so on.
+The last configuration's
+.I ID
+is equal to the number of tiers minus one.
+.br
+Note that the types provided in parentheses are not part of the
+.I name
+parameter.
+They are listed here to inform to what C-type the
+.I val
+parameter is converted to (as the
+.I val
+parameter has to be provided as a string).
+
+.SH "ENVIRONMENT"
+See
+.BR libmemtier (7)
+for details on the usage of memkind tiering via environment variables.
+
+.SH "COPYRIGHT"
+Copyright (C) 2021-2022 Intel Corporation. All rights reserved.
+.SH "SEE ALSO"
+.BR memkind (3),
+.BR memkind_malloc (3),
+.BR memkind_calloc (3),
+.BR memkind_realloc (3),
+.BR memkind_free (3),
+.BR memkind_posix_memalign (3)
