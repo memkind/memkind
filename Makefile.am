@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2021 Intel Corporation.
+# Copyright (C) 2014 - 2022 Intel Corporation.
 
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
@@ -41,6 +41,7 @@ include_HEADERS = include/hbw_allocator.h \
                   include/memkind.h \
                   include/memkind_allocator.h \
                   include/memkind_deprecated.h \
+                  include/memkind_memtier.h \
                   include/pmem_allocator.h \
                   include/fixed_allocator.h \
                   # end
@@ -59,7 +60,6 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/memkind_local.h \
                   include/memkind/internal/memkind_log.h \
                   include/memkind/internal/memkind_mem_attributes.h \
-                  include/memkind/internal/memkind_memtier.h \
                   include/memkind/internal/memkind_pmem.h \
                   include/memkind/internal/memkind_private.h \
                   include/memkind/internal/memkind_regular.h \

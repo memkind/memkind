@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2021 Intel Corporation. */
+/* Copyright (C) 2021-2022 Intel Corporation. */
 
 #include "../config.h"
-#include <memkind/internal/memkind_memtier.h>
-
+#include <memkind_memtier.h>
 #include <tiering/ctl.h>
 #include <tiering/memtier_log.h>
 
