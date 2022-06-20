@@ -599,6 +599,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/fixedallocator.3 \
                  man/hbwallocator.3 \
                  man/hbwmalloc.3 \
+                 man/libmemtier.3 \
                  man/memkind-auto-dax-kmem-nodes.1 \
                  man/memkind-hbw-nodes.1 \
                  man/memkind.3 \
@@ -608,7 +609,6 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind_fixed.3 \
                  man/memkind_hbw.3 \
                  man/memkind_hugetlb.3 \
-                 man/memkind_memtier.3 \
                  man/memkind_pmem.3 \
                  man/memkindallocator.3 \
                  man/libmemtier.7 \
