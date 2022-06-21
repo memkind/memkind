@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2021 Intel Corporation. */
+/* Copyright (C) 2014 - 2022 Intel Corporation. */
 
 #define MEMKIND_VERSION_MAJOR 1
-#define MEMKIND_VERSION_MINOR 13
+#define MEMKIND_VERSION_MINOR 14
 #define MEMKIND_VERSION_PATCH 0
 
 #include <memkind.h>
