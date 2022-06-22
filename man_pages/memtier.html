@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Wed Sep  1 09:26:26 2021 -->
+<!-- CreationDate: Wed Jun 22 14:00:00 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,23 +13,17 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title>MEMTIER</title>
+<title>MEMKIND_MEMTIER</title>
 
 </head>
 <body>
 
-<h1 align="center">MEMTIER</h1>
+<h1 align="center">MEMKIND_MEMTIER</h1>
 
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
-<a href="#TIER PARAMETERS">TIER PARAMETERS</a><br>
-<a href="#POLICIES">POLICIES</a><br>
-<a href="#THRESHOLD PARAMETERS">THRESHOLD PARAMETERS</a><br>
-<a href="#DRAM FALLBACK POLICY">DRAM FALLBACK POLICY</a><br>
-<a href="#EXAMPLES">EXAMPLES</a><br>
-<a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -41,23 +35,98 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">libmemtier.so -
-interposer library which enables the memkind memory
-tiering</p>
+
+<p style="margin-left:11%; margin-top: 1em">memkind_memtier
+- memory tiering interface <b><br>
+Note:</b> <i>memkind_memtier.h</i> functionality is
+considered as stable API (STANDARD API).</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">In order to use
-the memkind memory tiering, pass the following environment
-variables along with the command:</p>
+<p style="margin-left:11%; margin-top: 1em"><b>#include
+&lt;memkind_memtier.h&gt;</b></p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>Link with
+-lmemkind</b></p>
 
-<p style="margin-left:22%; margin-top: 1em"><b>LD_PRELOAD=libmemtier.so
-MEMKIND_MEM_TIERS=&quot;...&quot;</b> command {arguments
-...}</p>
+<p style="margin-left:11%; margin-top: 1em">The API can be
+used either directly with the usage of C-functions or via
+environment variables. See also <b>ENVIRONMENT</b>
+section.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>TIER
+MANAGEMENT:</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>struct
+memtier_builder *memtier_builder_new(memtier_policy_t</b>
+<i>policy</i><b>); <br>
+void memtier_builder_delete(struct memtier_builder</b>
+<i>*builder</i><b>); <br>
+int memtier_builder_add_tier(struct memtier_builder</b>
+<i>*builder</i><b>, memkind_t</b> <i>kind</i><b>,
+unsigned</b> <i>kind_ratio</i><b>); <br>
+struct memtier_memory
+*memtier_builder_construct_memtier_memory(struct
+memtier_builder</b> <i>*builder</i><b>); <br>
+void memtier_delete_memtier_memory(struct memtier_memory</b>
+<i>*memory</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>HEAP
+MANAGEMENT: <br>
+void *memtier_malloc(struct memtier_memory</b>
+<i>*memory</i><b>, size_t</b> <i>size</i><b>); <br>
+void *memtier_kind_malloc(memkind_t</b> <i>kind</i><b>,
+size_t</b> <i>size</i><b>); <br>
+void *memtier_calloc(struct memtier_memory</b>
+<i>*memory</i><b>, size_t</b> <i>num</i><b>, size_t</b>
+<i>size</i><b>); <br>
+void *memtier_kind_calloc(memkind_t</b> <i>kind</i><b>,
+size_t</b> <i>num</i><b>, size_t</b> <i>size</i><b>); <br>
+void *memtier_realloc(struct memtier_memory</b>
+<i>*memory</i><b>, void</b> <i>*ptr</i><b>, size_t</b>
+<i>size</i><b>); <br>
+void *memtier_kind_realloc(memkind_t</b> <i>kind</i><b>,
+void</b> <i>*ptr</i><b>, size_t</b> <i>size</i><b>); <br>
+int memtier_posix_memalign(struct memtier_memory</b>
+<i>*memory</i><b>, void</b> <i>**memptr</i><b>, size_t</b>
+<i>alignment</i><b>, size_t</b> <i>size</i><b>); <br>
+int memtier_kind_posix_memalign(memkind_t</b>
+<i>kind</i><b>, void</b> <i>**memptr</i><b>, size_t</b>
+<i>alignment</i><b>, size_t</b> <i>size</i><b>); <br>
+size_t memtier_usable_size(void</b> <i>*ptr</i><b>); <br>
+void memtier_free(void</b> <i>*ptr</i><b>); <br>
+void memtier_kind_free(memkind_t</b> <i>kind</i><b>,
+void</b> <i>*ptr</i><b>); <br>
+size_t memtier_kind_allocated_size(memkind_t</b>
+<i>kind</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>DECORATORS:
+<br>
+void memtier_kind_malloc_post(memkind_t</b> <i>kind</i><b>,
+size_t</b> <i>size</i><b>, void</b> <i>**result</i><b>);
+<br>
+void memtier_kind_calloc_post(memkind_t</b> <i>kind</i><b>,
+size_t</b> <i>nmemb</i><b>, size_t</b> <i>size</i><b>,
+void</b> <i>**result</i><b>); <br>
+void memtier_kind_posix_memalign_post(memkind_t</b>
+<i>kind</i><b>, void</b> <i>**memptr</i><b>, size_t</b>
+<i>alignment</i><b>, size_t</b> <i>size</i><b>, int</b>
+<i>*err</i><b>); <br>
+void memtier_kind_realloc_post(memkind_t</b>
+<i>*kind</i><b>, void</b> <i>*ptr</i><b>, size_t</b>
+<i>size</i><b>, void</b> <i>**result</i><b>); <br>
+void memtier_kind_free_pre(void</b> <i>**ptr</i><b>); <br>
+void memtier_kind_usable_size_post(void</b> <i>**ptr</i><b>,
+size_t</b> <i>size</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>MEMTIER
+PROPERTY MANAGEMENT: <br>
+int memtier_ctl_set(struct memtier_builder</b>
+<i>*builder</i><b>, const char</b> <i>*name</i><b>, const
+void</b> <i>*val</i><b>);</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -65,294 +134,245 @@ MEMKIND_MEM_TIERS=&quot;...&quot;</b> command {arguments
 
 
 <p style="margin-left:11%; margin-top: 1em">This library
-enables the memkind memory tiering mechanism. With this
-funcionality, allocations will be split between different
-types of memory automatically. The library allows making
-allocations with the usage of multiple kinds keeping a
-specified ratio between them. This ratio determines how much
-of the total allocated memory should be allocated with each
-kind. Both <b>LD_PRELOAD</b> and <b>MEMKIND_MEM_TIERS</b>
-environment variables are mandatory for enabling the memkind
-memory tiering.</p>
+enables explicit allocation-time memory tiering. It allows
+to make allocations with the usage of multiple kinds keeping
+a specified ratio between them. This ratio determines how
+much of total allocated memory should be allocated with the
+usage of each kind.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>TIER
+MANAGEMENT:</b> <br>
+The functions in this section are used to set up, create and
+destroy the <i>memtier_memory</i> object. This object is
+passed as an argument to the <b>memtier_malloc</b>() group
+of functions. It defines the way the allocations are
+distributed between different memory tiers.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_builder_new</b>()
+returns a pointer to a new <i>memtier_builder</i> object
+which is used for creating the <i>memtier_memory</i> object,
+<i>policy</i> determines the policy of allocations
+distribution between tiers by the <i>memtier_memory</i>
+object. See the <b>POLICIES</b> section in
+<b>libmemtier</b>(7) for available options.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_builder_delete</b>()
+deletes the <i>builder</i> object releasing the memory it
+used. Use after the <i>memtier_memory</i> object is created
+with the function
+<i>memtier_builder_construct_memtier_memory</i>().</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_builder_add_tier</b>()
+adds memory <i>kind</i> to the <i>builder</i>. This
+<i>kind</i> defines a memory tier used in the
+<b>memtier_memory</b> object. This function can be called
+more than once to create several different memory tiers. The
+&quot;weight&quot; of the tier is determined by the
+<i>kind_ratio</i> parameter. The higher it is relative to
+other tiers&rsquo; <i>kind_ratio</i>, the higher the share
+of allocated memory on that tier, e.g. given that ratio
+DRAM:KMEM_DAX is 1:4:</p>
+
+<p style="margin-left:22%; margin-top: 1em">sample
+allocation size: 20 GB total, 4 GB DRAM, 16 GB KMEM_DAX</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_builder_construct_memtier_memory</b>()
+returns a pointer to a newly allocated <i>memtier_memory</i>
+object. The <i>builder</i> can be safely removed after this
+operation using the <b>memtier_builder_delete</b>()
+function.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_delete_memtier_memory</b>()
+deletes the <i>memory</i> tiering object releasing the
+memory it used.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>HEAP
+MANAGEMENT:</b> <br>
+The functions described in this section define a heap
+manager with an interface modeled on the ISO C standard
+API&rsquo;s, except that the user must specify either the
+<i>kind</i> of memory with the first argument to each
+function or the tiered <i>memory</i> object which defines
+memory tiers used for allocations. See the <b>KINDS</b>
+section in the <b>memkind</b>(3) manual for a full
+description of the implemented kinds.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_malloc</b>()
+allocates <i>size</i> bytes of memory on one of memory tiers
+defined by the <i>memory</i>. See <b>libmemtier</b>(7) for
+further details on memory tiers. <b>memkind_malloc</b>() is
+used for allocations. For further details on it&rsquo;s
+behavior see <b>memkind</b>(3).</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_malloc</b>()
+is a wrapper to the <b>memkind_malloc</b>() function. See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_calloc</b>()
+allocates <i>num</i> times <i>size</i> bytes of memory on
+one of memory tiers defined by the <i>memory</i>.
+<b>memkind_calloc</b>() is used for allocations. For further
+details on it&rsquo;s behavior see <b>memkind</b>(3).</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_calloc</b>()
+is a wrapper to the <b>memkind_calloc</b>() function. See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_realloc</b>()
+changes the size of the previously allocated memory
+referenced by <i>ptr</i> to <i>size</i> bytes using memory
+from the tier on which <i>ptr</i> is allocated. If
+<i>ptr</i> is <i>NULL</i>, new memory is allocated on a
+memory tier defined by <i>memory</i>.
+<b>memkind_realloc</b>() is used for reallocation. See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_realloc</b>()
+changes the size of the previously allocated memory
+referenced by <i>ptr</i> to <i>size</i> bytes using specific
+<i>kind</i>. If <i>size</i> is equal to zero and <i>ptr</i>
+is not <i>NULL</i>, then the call is equivalent to
+<i>memkind_free(kind, ptr)</i> and <i>NULL</i> is returned.
+If <i>ptr</i> is <i>NULL</i>, <b>memtier_kind_malloc</b>()
+is called to allocate new memory. Otherwise, the
+<b>memkind_realloc</b>() function is used. See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_posix_memalign</b>()
+is a wrapper of <b>memkind_posix_memalign</b>() with the
+main difference that the <i>memory</i> is used to determine
+the kind to be used for the allocation. See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_posix_memalign</b>()
+is a wrapper of <b>memkind_posix_memalign</b>(). See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_usable_size</b>()
+returns the size of the block of memory allocated with the
+memtier API at the address pointed by <i>ptr</i>.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_free</b>()
+is a wrapper for the <b>memtier_kind_free</b>() function
+with the <i>kind</i> parameter passed as <i>NULL</i>.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_free</b>()
+frees up the memory pointed to by <i>ptr</i>. The behavior
+is the same as for the <b>memkind_free</b>(). If <i>kind</i>
+is <i>NULL</i>, the kind used to allocate <i>ptr</i> is
+detected automatically. See <b>memkind</b>(3) for further
+details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_allocated_size</b>()
+returns the total size of memory allocated with the usage of
+<i>kind</i> and the memtier API.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>DECORATORS:</b>
+<br>
+This is the set of functions used to print information on
+each call to the respective <i>memtier_kind_*</i> function
+described in the <b>HEAP MANAGEMENT</b> section. Printed
+information include the name of the <b>kind</b> used,
+parameters passed to the underlying function from the malloc
+family of functions and the address of the memory
+returned.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>MEMTIER
+PROPERTY MANAGEMENT: <br>
+memtier_ctl_set</b>() is useful for changing the default
+values of parameters that define the
+<i>DYNAMIC_THRESHOLD</i> policy. This function can be used
+in the process of creating a <b>memtier_memory</b> object
+with the usage of <i>builder</i>. The parameter <i>name</i>
+can be one of the following: <br>
+policy.dynamic_threshold.thresholds[ID].val</p>
+
+<p style="margin-left:22%;">initial threshold level, all
+alocations of the size below this value will come from the
+<i>IDth</i> tier, greater than or equal to this value will
+come from the <i>(ID+1)th</i> tier. Provided string is
+converted to the <i>size_t</i> type. This value is modified
+automatically during the application run to keep the desired
+ratio between tiers. The default value between first two
+tiers is 1024 bytes</p>
+
+
+<p style="margin-left:11%;">policy.dynamic_threshold.thresholds[ID].min</p>
+
+<p style="margin-left:22%;">minimum value of the threshold
+level. Provided string is converted to the <i>size_t</i>
+type. The default value between first two tiers is 513
+bytes.</p>
+
+
+<p style="margin-left:11%;">policy.dynamic_threshold.thresholds[ID].max</p>
+
+<p style="margin-left:22%;">maximum value of the threshold
+level. Provided string is converted to the <i>size_t</i>
+type. The default value between first two tiers is 1536
+bytes.</p>
+
+
+<p style="margin-left:11%;">policy.dynamic_threshold.check_cnt</p>
+
+<p style="margin-left:22%;">number of allocation operations
+(i.e. malloc, realloc) after which the ratio check between
+tiers is performed. Provided string is converted to the
+<i>unsigned int</i> type. The default value is 20.</p>
+
+
+<p style="margin-left:11%;">policy.dynamic_threshold.trigger</p>
+
+<p style="margin-left:22%;">the dynamic threshold value is
+adjusted when the absolute difference between current ratio
+and expected ratio is greater than or equal to this value.
+Provided string is converted to the <i>float</i> type. The
+default value is 0.02.</p>
+
+
+<p style="margin-left:11%;">policy.dynamic_threshold.degree</p>
+
+<p style="margin-left:22%;">the threshold value is updated
+by increasing or decreasing it&rsquo;s value by
+<i>degree</i> percentage (i.e. <i>degree</i>=0.02 changes
+threshold value by 2%). Provided string is converted to the
+<i>float</i> type. The default value is 0.15.</p>
+
+<p style="margin-left:11%; margin-top: 1em">In the above
+examples, <i>ID</i> should be replaced with the ID of
+thresholds configuration. The configuration between first
+two tiers added to <b>builder</b> has an <i>ID</i> equal to
+0. The configuration <i>ID</i> of the next two tiers, that
+is, the second and third ones, is equal to 1, and so on. The
+last configuration&rsquo;s <i>ID</i> is equal to the number
+of tiers minus one.</p>
 
 <h2>ENVIRONMENT
 <a name="ENVIRONMENT"></a>
 </h2>
 
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>MEMKIND_MEM_TIERS</b></p>
-
-<p style="margin-left:22%;">A semicolon-separated list of
-tier configurations ended with a policy parameter. Each of
-the tier configurations is a comma-separated list of tier
-parameters in the format: <b>param_name:value,(...)</b> For
-the list of available tier parameters, please see the
-<b>TIER PARAMETERS</b> section below.</p>
-
-
-<p style="margin-left:11%;"><b>MEMKIND_MEM_THRESHOLDS</b></p>
-
-<p style="margin-left:22%;">Semicolon-separated list of
-threshold configurations. Each configuration consists of a
-comma-separated list of threshold parameters in the same
-format as <b>MEMKIND_MEM_TIERS</b> , where the
-<b>param_name</b> is one of the <i>INIT_VAL, MIN_VAL</i> and
-<i>MAX_VAL.</i> Each parameter can be set only once. When
-any of the parameters are missing, they will be set to a
-default value. If threshold configuration is missing,
-threshold with default configuration will be used. If any of
-the parameters is set more than once, the application will
-be aborted. Order of provided configurations is important -
-configuration of Nth threshold defines threshold between Nth
-and (N+1)th tier. Note that for N+1 tiers there should be at
-most N thresholds defined. Set this variable only when
-<b>DYNAMIC_THRESHOLD</b> policy is used. For more details
-about <b>param_name</b> see the <b>THRESHOLD PARAMETERS</b>
-section below. See also <b>EXAMPLES</b> section for the
-usage of <b>MEMKIND_MEM_THRESHOLDS</b> environment
-variable.</p>
-
-<h2>TIER PARAMETERS
-<a name="TIER PARAMETERS"></a>
-</h2>
-
-
-<table width="100%" border="0" rules="none" frame="void"
-       cellspacing="0" cellpadding="0">
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="6%">
-
-
-<p style="margin-top: 1em"><b>KIND</b></p></td>
-<td width="5%"></td>
-<td width="78%">
-
-
-<p style="margin-top: 1em">(required) - kind of memory used
-in memory tier. Allowed kind names are
-<i>&rsquo;DRAM&rsquo;, &rsquo;KMEM_DAX&rsquo;</i> and
-<i>&rsquo;FS_DAX&rsquo;.</i> There can be multiple different
-kind names provided in the <b>MEMKIND_MEM_TIERS</b>
-environment variable - one in each tier configuration.
-Additionally, in this variable more than one
-<i>&rsquo;FS_DAX&rsquo;</i> kind name is allowed. More
-information about available kinds can be found in the
-<b>memkind(3)</b> manual, where the
-<i>&rsquo;DRAM&rsquo;</i> kind name allocates memory with
-the usage of the <b>MEMKIND_DEFAULT</b> kind, the
-<i>&rsquo;KMEM_DAX&rsquo;</i> with the
-<b>MEMKIND_DAX_KMEM</b> kind and the
-<i>&rsquo;FS_DAX&rsquo;</i> with a file-backed kind of
-memory created with the <b>memkind_create_pmem()</b>
-function.</p> </td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="6%">
-
-
-<p><b>PATH</b></p></td>
-<td width="5%"></td>
-<td width="78%">
-
-
-<p>(required only for the <i>FS_DAX</i> kind) - the path to
-the location where pmem file will be created. The path has
-to exist. For other kinds, if set, will cause an error.</p></td></tr>
-</table>
-
-<p style="margin-left:11%;"><b>PMEM_SIZE_LIMIT</b></p>
-
-<p style="margin-left:22%;">(optional, only for the FS_DAX
-kind) - if set, it limits the size of pmem file and the
-maximum size of total allocations from persistent memory. By
-default, no limit is introduced. Pass this option only with
-<i>FS_DAX</i> kind. For other kinds, if set, will cause an
-error. The accepted formats are: 1, 1K, 1M, 1G. See the
-<b>memkind(3)</b> manual for information about limitations
-to this value which are the same as for the <b>max_size</b>
-value of the <b>memkind_create_pmem()</b> function.</p>
-
-<table width="100%" border="0" rules="none" frame="void"
-       cellspacing="0" cellpadding="0">
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="9%">
-
-
-<p><b>RATIO</b></p></td>
-<td width="2%"></td>
-<td width="78%">
-
-
-<p>(required) - the part of the ratio tied to the given
-kind. It&rsquo;s an <i>unsigned</i> type in a range from 1
-to <i>UINT_MAX.</i> See <b>EXAMPLES</b> section.</p></td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="9%">
-
-
-<p><b>POLICY</b></p></td>
-<td width="2%"></td>
-<td width="78%">
-
-
-<p>(required, only one in the whole environment variable) -
-determines the algorithm used to distribute allocations
-between provided memory kinds. This parameter has to be the
-last parameter in <b>MEMKIND_MEM_TIERS</b> configuration
-string. Currently only <i>STATIC_RATIO</i> and
-<i>DYNAMIC_THRESHOLD</i> policies are valid. See the
-<b>POLICIES</b> section.</p></td></tr>
-</table>
-
-<p style="margin-left:11%; margin-top: 1em"><b>NOTE:</b>
-The application will fail when provided environment variable
-string is not in the correct format.</p>
-
-<h2>POLICIES
-<a name="POLICIES"></a>
-</h2>
-
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>STATIC_RATIO</b></p>
-
-<p style="margin-left:22%;">All allocations are made in
-such a way that the ratio between memory tiers is constant.
-No threshold is used.</p>
-
-<p style="margin-left:11%;"><b>DYNAMIC_THRESHOLD</b></p>
-
-<p style="margin-left:22%;">The ratio between memory tiers
-is kept with a help of a threshold between kinds which value
-changes in time. Minimum two tiers are required for this
-policy, otherwise the application will be aborted. The
-threshold value can change in time to keep the desired ratio
-between tiers, but it will not be lesser than <i>MIN_VAL</i>
-and it will not be greater than <i>MAX_VAL.</i> For every
-allocation, if its size is greater than or equal to
-<i>INIT_VAL,</i> it will come from the (N+1)th tier.</p>
-
-<p style="margin-left:22%; margin-top: 1em">Default values
-for a threshold between first two tiers in the
-<b>MEMKIND_MEM_TIERS</b> environment variable are:</p>
-
-<p style="margin-left:22%; margin-top: 1em"><b>INIT_VAL =
-1024, MIN_VAL = 513, MAX_VAL = 1536.</b></p>
-
-<p style="margin-left:22%; margin-top: 1em">If there are
-more tiers defined, each next undefined threshold will have
-all parameters increased by 1024, so the next undefined
-threshold between the next two tiers will have:</p>
-
-<p style="margin-left:22%; margin-top: 1em"><b>INIT_VAL =
-2048, MIN_VAL = 1537, MAX_VAL = 2560.</b></p>
-
-<h2>THRESHOLD PARAMETERS
-<a name="THRESHOLD PARAMETERS"></a>
-</h2>
-
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>INIT_VAL</b></p>
-
-<p style="margin-left:22%;">(optional) - the initial value
-of the threshold between two adjacent Nth and (N+1)th tiers.
-It must be greater than or equal to <i>MIN_VAL</i> and less
-than or equal to <i>MAX_VAL.</i></p>
-
-<p style="margin-left:11%;"><b>MIN_VAL</b></p>
-
-<p style="margin-left:22%;">(optional) - the minimum value
-of the threshold.</p>
-
-<p style="margin-left:11%;"><b>MAX_VAL</b></p>
-
-<p style="margin-left:22%;">(optional) - the maximum value
-of the threshold.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>NOTE:</b>
-Because setting the above parameters is optional, they will
-be set to default values in case they are not defined.</p>
-
-<h2>DRAM FALLBACK POLICY
-<a name="DRAM FALLBACK POLICY"></a>
-</h2>
-
-
-<p style="margin-left:11%; margin-top: 1em">With the usage
-of both <i>DRAM</i> and <i>KMEM_DAX</i> tiers, if there is
-not enough memory to satisfy the <i>DRAM</i> tier memory
-allocation request, the allocation will fall back to PMEM
-memory.</p>
-
-<p style="margin-left:11%; margin-top: 1em">With the usage
-of both <i>DRAM</i> and <i>FS_DAX</i> tiers, if there is not
-enough memory to satisfy the <i>DRAM</i> tier memory
-allocation request, the allocation will fail.</p>
-
-<p style="margin-left:11%; margin-top: 1em">If there is not
-enough memory to satisfy the <i>FS_DAX</i> or
-<i>KMEM_DAX</i> tier memory allocation request, the
-allocation will fail.</p>
-
-<h2>EXAMPLES
-<a name="EXAMPLES"></a>
-</h2>
-
-
-<p style="margin-left:11%; margin-top: 1em">The following
-example will run <b>ls</b> with the memkind memory tiering
-library. Make sure that paths to both <b>libmemtier.so</b>
-and <b>libmemkind.so</b> are included in
-<b>LD_LIBRARY_PATH.</b> During the application run, 20% of
-the allocated memory will come from PMEM memory and 80% will
-come from DRAM ( <i>FS_DAX:DRAM</i> ratio is 1:4):</p>
-
-
-<p style="margin-left:22%; margin-top: 1em"><b>LD_PRELOAD=libmemtier.so
-MEMKIND_MEM_TIERS=&quot;KIND:FS_DAX,PATH:/mnt/pmem0,PMEM_SIZE_LIMIT:10G,RATIO:1;KIND:DRAM,RATIO:4;POLICY:STATIC_RATIO&quot;
-/bin/ls -l</b></p>
-
-<p style="margin-left:11%; margin-top: 1em">The example
-value of <b>MEMKIND_MEM_TIERS</b> environment variable where
-all allocations will come from PMEM memory with filesystem
-created with the path /mnt/pmem0 (PMEM file size is limited
-only by the specified filesystem):</p>
-
-
-<p style="margin-left:22%; margin-top: 1em"><b>LD_PRELOAD=libmemtier.so
-MEMKIND_MEM_TIERS=&quot;KIND:FS_DAX,PATH:/mnt/pmem0,RATIO:1;POLICY:STATIC_RATIO&quot;</b></p>
-
-<p style="margin-left:11%; margin-top: 1em">The example
-value of <b>MEMKIND_MEM_THRESHOLDS</b> environment variable.
-With <i>INIT_VAL=64,</i> on the application start all
-allocations lower than 64 bytes threshold will come from
-DRAM and equal to or greater than this value will come from
-PMEM memory NUMA nodes. The threshold value changes during
-the runtime in order to maintain the ratio. <i>MIN_VAL=1</i>
-and <i>MAX_VAL=10000</i> set the lower and upper limits of
-the threshold value. Note that the <i>DYNAMIC_THRESHOLD</i>
-policy has to be set in <b>MEMKIND_MEM_TIERS</b> environment
-variable:</p>
-
-
-<p style="margin-left:22%; margin-top: 1em"><b>LD_PRELOAD=libmemtier.so
-MEMKIND_MEM_TIERS=&quot;KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:4;POLICY:DYNAMIC_THRESHOLD&quot;
-MEMKIND_MEM_THRESHOLDS=&quot;INIT_VAL=64,MIN_VAL=1,MAX_VAL=10000&quot;</b></p>
-
-<h2>NOTES
-<a name="NOTES"></a>
-</h2>
-
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>libmemtier</b>
-works for applications that do not statically link a
-<b>malloc</b> implementation.</p>
+<p style="margin-left:11%; margin-top: 1em">See
+<b>libmemtier</b>(7) for details on the usage of memkind
+tiering via environment variables.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -360,15 +380,18 @@ works for applications that do not statically link a
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright (C)
-2021 Intel Corporation. All rights reserved.</p>
+2021-2022 Intel Corporation. All rights reserved.</p>
 
 <h2>SEE ALSO
 <a name="SEE ALSO"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>memkind(3),
-malloc(3)</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>libmemtier</b>(7),
+<b>memkind</b>(3), <b>memkind_malloc</b>(3),
+<b>memkind_calloc</b>(3), <b>memkind_realloc</b>(3),
+<b>memkind_free</b>(3), <b>memkind_posix_memalign</b>(3)</p>
 <hr>
 </body>
 </html>
