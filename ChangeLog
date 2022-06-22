@@ -1,3 +1,9 @@
+* Wed Jun 21 2022 Patryk Kaminski <patryk.kaminski@intel.com> v1.14.0-rc1
+- Provided a memtier binary for common uses of memory tiering
+- Added memtier API header file to installed headers
+- Upgraded jemalloc internal library to version 5.3.0
+- Fixes to security issues
+
 * Thu Dec 23 2021 Patryk Kaminski <patryk.kaminski@intel.com> v1.13.0
 - Added fixed kind for user-supplied memory area (along with the C++ allocator)
 - Provided a function memkind_get_capacity() to get the memory capacity of nodes available
