@@ -1,12 +1,13 @@
 .\" SPDX-License-Identifier: BSD-2-Clause
-.\" Copyright (C) 2021 Intel Corporation.
+.\" Copyright (C) 2021-2022 Intel Corporation.
 .\"
-.TH "MEMTIER" 7 "2021-03-01" "Intel Corporation" "MEMTIER" \" -*- nroff -*-
+.TH "LIBMEMTIER LD_PRELOAD API" 7 "2021-06-23" "Intel Corporation" "LIBMEMTIER LD_PRELOAD API" \" -*- nroff -*-
 .SH "NAME"
 libmemtier.so - interposer library which enables the memkind memory tiering
 
 .SH "SYNOPSIS"
-In order to use the memkind memory tiering, pass the following environment variables along with the command:
+In order to use the memkind memory tiering with pre-built binaries,
+pass the following environment variables along with the command:
 .IP
 .B LD_PRELOAD=libmemtier.so MEMKIND_MEM_TIERS="..."
 command {arguments ...}
