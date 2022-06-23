@@ -651,7 +651,8 @@ html-local:
 	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
 	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
 	$(MAN2HTML) man/fixedallocator.3 > man/fixedallocator.html
-	$(MAN2HTML) man/libmemtier.3 > man/libmemtier.html
+	$(MAN2HTML) man/libmemtier.3 > man/libmemtier3.html
+	$(MAN2HTML) man/libmemtier.7 > man/libmemtier7.html
 
 clean-jemalloc_deps:
 	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
