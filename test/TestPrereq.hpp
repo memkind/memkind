@@ -62,8 +62,6 @@ private:
 #define CPUID_FAMILY_SHIFT    (8)
 #define CPU_MODEL_KNL         (0x57)
 #define CPU_MODEL_KNM         (0x85)
-#define CPU_MODEL_CLX         (0x55)
-#define CPU_MODEL_PMEM        (0x6A)
 #define CPU_FAMILY_INTEL      (0x06)
 
     typedef struct {
@@ -109,7 +107,7 @@ private:
     {
         if (getenv(env_var) != NULL)
             return true;
-        else if (!check_cpu(mem_var))
+        else if (mem_var == HBM && !is_KN_family_supported())
             return false;
         else if (find_type(mem_var))
             return true;
@@ -144,22 +142,6 @@ public:
         hwloc_topology_destroy(topology);
     }
 #endif
-
-    bool check_cpu(memory_var variant) const
-    {
-        switch (variant) {
-            case HBM:
-                return is_KN_family_supported();
-            case PMEM:
-            {
-                cpu_model_data_t cpu = get_cpu_model_data();
-                return cpu.family == CPU_FAMILY_INTEL &&
-                    (cpu.model == CPU_MODEL_CLX || cpu.model == CPU_MODEL_PMEM);
-            }
-            default:
-                return false;
-        }
-    }
 
     std::unordered_set<int>
     get_closest_numa_nodes(int first_node, std::unordered_set<int> nodes) const
