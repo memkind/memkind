@@ -1,0 +1,396 @@
+<!-- Creator     : groff version 1.22.4 -->
+<!-- CreationDate: Thu Jun 23 12:46:34 2022 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>LIBMEMTIER C API</title>
+
+</head>
+<body>
+
+<h1 align="center">LIBMEMTIER C API</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#ENVIRONMENT">ENVIRONMENT</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">libmemtier -
+memory tiering interface <b><br>
+Note:</b> <i>memkind_memtier.h</i> functionality is
+considered as stable API (STANDARD API).</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>#include
+&lt;memkind_memtier.h&gt;</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Link with
+-lmemkind</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">The API can be
+used either directly with the usage of C-functions or via
+environment variables. See also <b>ENVIRONMENT</b>
+section.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>TIER
+MANAGEMENT:</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>struct
+memtier_builder *memtier_builder_new(memtier_policy_t</b>
+<i>policy</i><b>); <br>
+void memtier_builder_delete(struct memtier_builder</b>
+<i>*builder</i><b>); <br>
+int memtier_builder_add_tier(struct memtier_builder</b>
+<i>*builder</i><b>, memkind_t</b> <i>kind</i><b>,
+unsigned</b> <i>kind_ratio</i><b>); <br>
+struct memtier_memory
+*memtier_builder_construct_memtier_memory(struct
+memtier_builder</b> <i>*builder</i><b>); <br>
+void memtier_delete_memtier_memory(struct memtier_memory</b>
+<i>*memory</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>HEAP
+MANAGEMENT: <br>
+void *memtier_malloc(struct memtier_memory</b>
+<i>*memory</i><b>, size_t</b> <i>size</i><b>); <br>
+void *memtier_kind_malloc(memkind_t</b> <i>kind</i><b>,
+size_t</b> <i>size</i><b>); <br>
+void *memtier_calloc(struct memtier_memory</b>
+<i>*memory</i><b>, size_t</b> <i>num</i><b>, size_t</b>
+<i>size</i><b>); <br>
+void *memtier_kind_calloc(memkind_t</b> <i>kind</i><b>,
+size_t</b> <i>num</i><b>, size_t</b> <i>size</i><b>); <br>
+void *memtier_realloc(struct memtier_memory</b>
+<i>*memory</i><b>, void</b> <i>*ptr</i><b>, size_t</b>
+<i>size</i><b>); <br>
+void *memtier_kind_realloc(memkind_t</b> <i>kind</i><b>,
+void</b> <i>*ptr</i><b>, size_t</b> <i>size</i><b>); <br>
+int memtier_posix_memalign(struct memtier_memory</b>
+<i>*memory</i><b>, void</b> <i>**memptr</i><b>, size_t</b>
+<i>alignment</i><b>, size_t</b> <i>size</i><b>); <br>
+int memtier_kind_posix_memalign(memkind_t</b>
+<i>kind</i><b>, void</b> <i>**memptr</i><b>, size_t</b>
+<i>alignment</i><b>, size_t</b> <i>size</i><b>); <br>
+size_t memtier_usable_size(void</b> <i>*ptr</i><b>); <br>
+void memtier_free(void</b> <i>*ptr</i><b>); <br>
+void memtier_kind_free(memkind_t</b> <i>kind</i><b>,
+void</b> <i>*ptr</i><b>); <br>
+size_t memtier_kind_allocated_size(memkind_t</b>
+<i>kind</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>DECORATORS:
+<br>
+void memtier_kind_malloc_post(memkind_t</b> <i>kind</i><b>,
+size_t</b> <i>size</i><b>, void</b> <i>**result</i><b>);
+<br>
+void memtier_kind_calloc_post(memkind_t</b> <i>kind</i><b>,
+size_t</b> <i>nmemb</i><b>, size_t</b> <i>size</i><b>,
+void</b> <i>**result</i><b>); <br>
+void memtier_kind_posix_memalign_post(memkind_t</b>
+<i>kind</i><b>, void</b> <i>**memptr</i><b>, size_t</b>
+<i>alignment</i><b>, size_t</b> <i>size</i><b>, int</b>
+<i>*err</i><b>); <br>
+void memtier_kind_realloc_post(memkind_t</b>
+<i>*kind</i><b>, void</b> <i>*ptr</i><b>, size_t</b>
+<i>size</i><b>, void</b> <i>**result</i><b>); <br>
+void memtier_kind_free_pre(void</b> <i>**ptr</i><b>); <br>
+void memtier_kind_usable_size_post(void</b> <i>**ptr</i><b>,
+size_t</b> <i>size</i><b>);</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>MEMTIER
+PROPERTY MANAGEMENT: <br>
+int memtier_ctl_set(struct memtier_builder</b>
+<i>*builder</i><b>, const char</b> <i>*name</i><b>, const
+void</b> <i>*val</i><b>);</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">This library
+enables explicit allocation-time memory tiering. It allows
+to make allocations with the usage of multiple kinds keeping
+a specified ratio between them. This ratio determines how
+much of total allocated memory should be allocated with the
+usage of each kind.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>TIER
+MANAGEMENT:</b> <br>
+The functions in this section are used to set up, create and
+destroy the <i>memtier_memory</i> object. This object is
+passed as an argument to the <b>memtier_malloc</b>() group
+of functions. It defines the way the allocations are
+distributed between different memory tiers.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_builder_new</b>()
+returns a pointer to a new <i>memtier_builder</i> object
+which is used for creating the <i>memtier_memory</i> object,
+<i>policy</i> determines the policy of allocations
+distribution between tiers by the <i>memtier_memory</i>
+object. See the <b>POLICIES</b> section in
+<b>libmemtier</b>(7) for available options.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_builder_delete</b>()
+deletes the <i>builder</i> object releasing the memory it
+used. Use after the <i>memtier_memory</i> object is created
+with the function
+<i>memtier_builder_construct_memtier_memory</i>().</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_builder_add_tier</b>()
+adds memory <i>kind</i> to the <i>builder</i>. This
+<i>kind</i> defines a memory tier used in the
+<b>memtier_memory</b> object. This function can be called
+more than once to create several different memory tiers. The
+&quot;weight&quot; of the tier is determined by the
+<i>kind_ratio</i> parameter. The higher it is relative to
+other tiers&rsquo; <i>kind_ratio</i>, the higher the share
+of allocated memory on that tier, e.g. given that ratio
+DRAM:KMEM_DAX is 1:4:</p>
+
+<p style="margin-left:22%; margin-top: 1em">sample
+allocation size: 20 GB total, 4 GB DRAM, 16 GB KMEM_DAX</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_builder_construct_memtier_memory</b>()
+returns a pointer to a newly allocated <i>memtier_memory</i>
+object. The <i>builder</i> can be safely removed after this
+operation using the <b>memtier_builder_delete</b>()
+function.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_delete_memtier_memory</b>()
+deletes the <i>memory</i> tiering object releasing the
+memory it used.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>HEAP
+MANAGEMENT:</b> <br>
+The functions described in this section define a heap
+manager with an interface modeled on the ISO C standard
+API&rsquo;s, except that the user must specify either the
+<i>kind</i> of memory with the first argument to each
+function or the tiered <i>memory</i> object which defines
+memory tiers used for allocations. See the <b>KINDS</b>
+section in the <b>memkind</b>(3) manual for a full
+description of the implemented kinds.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_malloc</b>()
+allocates <i>size</i> bytes of memory on one of memory tiers
+defined by the <i>memory</i>. See <b>libmemtier</b>(7) for
+further details on memory tiers. <b>memkind_malloc</b>() is
+used for allocations. For further details on it&rsquo;s
+behavior see <b>memkind</b>(3).</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_malloc</b>()
+is a wrapper to the <b>memkind_malloc</b>() function. See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_calloc</b>()
+allocates <i>num</i> times <i>size</i> bytes of memory on
+one of memory tiers defined by the <i>memory</i>.
+<b>memkind_calloc</b>() is used for allocations. For further
+details on it&rsquo;s behavior see <b>memkind</b>(3).</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_calloc</b>()
+is a wrapper to the <b>memkind_calloc</b>() function. See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_realloc</b>()
+changes the size of the previously allocated memory
+referenced by <i>ptr</i> to <i>size</i> bytes using memory
+from the tier on which <i>ptr</i> is allocated. If
+<i>ptr</i> is <i>NULL</i>, new memory is allocated on a
+memory tier defined by <i>memory</i>.
+<b>memkind_realloc</b>() is used for reallocation. See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_realloc</b>()
+changes the size of the previously allocated memory
+referenced by <i>ptr</i> to <i>size</i> bytes using specific
+<i>kind</i>. If <i>size</i> is equal to zero and <i>ptr</i>
+is not <i>NULL</i>, then the call is equivalent to
+<i>memkind_free(kind, ptr)</i> and <i>NULL</i> is returned.
+If <i>ptr</i> is <i>NULL</i>, <b>memtier_kind_malloc</b>()
+is called to allocate new memory. Otherwise, the
+<b>memkind_realloc</b>() function is used. See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_posix_memalign</b>()
+is a wrapper of <b>memkind_posix_memalign</b>() with the
+main difference that the <i>memory</i> is used to determine
+the kind to be used for the allocation. See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_posix_memalign</b>()
+is a wrapper of <b>memkind_posix_memalign</b>(). See
+<b>memkind</b>(3) for further details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_usable_size</b>()
+returns the size of the block of memory allocated with the
+memtier API at the address pointed by <i>ptr</i>.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_free</b>()
+is a wrapper for the <b>memtier_kind_free</b>() function
+with the <i>kind</i> parameter passed as <i>NULL</i>.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_free</b>()
+frees up the memory pointed to by <i>ptr</i>. The behavior
+is the same as for the <b>memkind_free</b>(). If <i>kind</i>
+is <i>NULL</i>, the kind used to allocate <i>ptr</i> is
+detected automatically. See <b>memkind</b>(3) for further
+details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>memtier_kind_allocated_size</b>()
+returns the total size of memory allocated with the usage of
+<i>kind</i> and the memtier API.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>DECORATORS:</b>
+<br>
+This is the set of functions used to print information on
+each call to the respective <i>memtier_kind_*</i> function
+described in the <b>HEAP MANAGEMENT</b> section. Printed
+information include the name of the <b>kind</b> used,
+parameters passed to the underlying function from the malloc
+family of functions and the address of the memory
+returned.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>MEMTIER
+PROPERTY MANAGEMENT: <br>
+memtier_ctl_set</b>() is useful for changing the default
+values of parameters that define the
+<i>DYNAMIC_THRESHOLD</i> policy. This function can be used
+in the process of creating a <b>memtier_memory</b> object
+with the usage of <i>builder</i>. The parameter <i>name</i>
+can be one of the following: <br>
+policy.dynamic_threshold.thresholds[ID].val</p>
+
+<p style="margin-left:22%;">initial threshold level, all
+alocations of the size below this value will come from the
+<i>IDth</i> tier, greater than or equal to this value will
+come from the <i>(ID+1)th</i> tier. Provided string is
+converted to the <i>size_t</i> type. This value is modified
+automatically during the application run to keep the desired
+ratio between tiers. The default value between first two
+tiers is 1024 bytes</p>
+
+
+<p style="margin-left:11%;">policy.dynamic_threshold.thresholds[ID].min</p>
+
+<p style="margin-left:22%;">minimum value of the threshold
+level. Provided string is converted to the <i>size_t</i>
+type. The default value between first two tiers is 513
+bytes.</p>
+
+
+<p style="margin-left:11%;">policy.dynamic_threshold.thresholds[ID].max</p>
+
+<p style="margin-left:22%;">maximum value of the threshold
+level. Provided string is converted to the <i>size_t</i>
+type. The default value between first two tiers is 1536
+bytes.</p>
+
+
+<p style="margin-left:11%;">policy.dynamic_threshold.check_cnt</p>
+
+<p style="margin-left:22%;">number of allocation operations
+(i.e. malloc, realloc) after which the ratio check between
+tiers is performed. Provided string is converted to the
+<i>unsigned int</i> type. The default value is 20.</p>
+
+
+<p style="margin-left:11%;">policy.dynamic_threshold.trigger</p>
+
+<p style="margin-left:22%;">the dynamic threshold value is
+adjusted when the absolute difference between current ratio
+and expected ratio is greater than or equal to this value.
+Provided string is converted to the <i>float</i> type. The
+default value is 0.02.</p>
+
+
+<p style="margin-left:11%;">policy.dynamic_threshold.degree</p>
+
+<p style="margin-left:22%;">the threshold value is updated
+by increasing or decreasing it&rsquo;s value by
+<i>degree</i> percentage (i.e. <i>degree</i>=0.02 changes
+threshold value by 2%). Provided string is converted to the
+<i>float</i> type. The default value is 0.15.</p>
+
+<p style="margin-left:11%; margin-top: 1em">In the above
+examples, <i>ID</i> should be replaced with the ID of
+thresholds configuration. The configuration between first
+two tiers added to <b>builder</b> has an <i>ID</i> equal to
+0. The configuration <i>ID</i> of the next two tiers, that
+is, the second and third ones, is equal to 1, and so on. The
+last configuration&rsquo;s <i>ID</i> is equal to the number
+of tiers minus one.</p>
+
+<h2>ENVIRONMENT
+<a name="ENVIRONMENT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">See
+<b>libmemtier</b>(7) for details on the usage of memkind
+tiering via environment variables.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright (C)
+2021-2022 Intel Corporation. All rights reserved.</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>libmemtier</b>(7),
+<b>memkind</b>(3), <b>memkind_malloc</b>(3),
+<b>memkind_calloc</b>(3), <b>memkind_realloc</b>(3),
+<b>memkind_free</b>(3), <b>memkind_posix_memalign</b>(3)</p>
+<hr>
+</body>
+</html>
