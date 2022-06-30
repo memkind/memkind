@@ -46,6 +46,7 @@ libmemkind_la_SOURCES = src/hbwmalloc.c \
                         src/ranking_internals.cpp \
                         src/pagesizes.c \
                         src/mmap_tracing_queue.c \
+                        src/multithreaded_touch_queue.c \
                         src/slab_tracker.cpp \
                         src/timespec_ops.c \
                         src/critnib.c \
@@ -99,6 +100,7 @@ noinst_HEADERS =  include/memkind/internal/heap_manager.h \
                   include/memkind/internal/ranking_internals.hpp \
                   include/memkind/internal/pagesizes.h \
                   include/memkind/internal/mmap_tracing_queue.h \
+                  include/memkind/internal/multithreaded_touch_queue.h \
                   include/memkind/internal/slab_tracker.h \
                   include/memkind/internal/timespec_ops.h \
                   include/memkind/internal/critnib.h \
