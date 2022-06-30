@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "memkind/internal/mmap_tracing_queue.h"
+#include "memkind/internal/multithreaded_touch_queue.h"
 #include "memkind/internal/ranking.h"
 
 #ifdef __cplusplus
@@ -60,6 +61,8 @@ typedef struct MttInternals {
     uint64_t lastTimestamp;
     MTTInternalsLimits limits;
     MMapTracingQueue mmapTracingQueue;
+    MultithreadedTouchQueue touchQueue;
+
     atomic_size_t usedDram;
 } MttInternals;
 
