@@ -14,6 +14,7 @@
 #include "assert.h"
 #include "stdint.h"
 #include "string.h"
+#include "threads.h"
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -26,7 +27,19 @@
 // with 4kB traced page, 512kB per cycle
 #define MAX_TO_JUGGLE (128ul)
 
+#define MALLOC_TOUCHES_TO_SKIP (10ul)
+
 // static functions -----------------------------------------------------------
+
+static void malloc_touch(MttInternals *internals, uintptr_t address)
+{
+    static thread_local size_t g_mallocTouchCounter = 0ul;
+    if (++g_mallocTouchCounter > MALLOC_TOUCHES_TO_SKIP) {
+        multithreaded_touch_queue_multithreaded_push(&internals->touchQueue,
+                                                     address);
+        g_mallocTouchCounter = 0ul;
+    }
+}
 
 static void promote_hottest_pmem(MttInternals *internals)
 {
@@ -259,8 +272,7 @@ MEMKIND_EXPORT void *mtt_internals_malloc(MttInternals *internals, size_t size,
 {
     void *ret =
         POOL_ALLOCATOR_TYPE(malloc_mmap)(&internals->pool, size, user_mmap);
-    multithreaded_touch_queue_multithreaded_push(&internals->touchQueue,
-                                                 (uintptr_t)ret);
+    malloc_touch(internals, (uintptr_t)ret);
     return ret;
 }
 
@@ -269,8 +281,7 @@ MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
 {
     void *ret = POOL_ALLOCATOR_TYPE(realloc_mmap)(&internals->pool, ptr, size,
                                                   user_mmap);
-    multithreaded_touch_queue_multithreaded_push(&internals->touchQueue,
-                                                 (uintptr_t)ret);
+    malloc_touch(internals, (uintptr_t)ret);
     return ret;
 }
 
