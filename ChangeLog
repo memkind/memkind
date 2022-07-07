@@ -1,6 +1,7 @@
-* Wed Jun 21 2022 Patryk Kaminski <patryk.kaminski@intel.com> v1.14.0-rc1
+* Thu Jul 7 2022 Patryk Kaminski <patryk.kaminski@intel.com> v1.14.0
 - Provided a memtier binary for common uses of memory tiering
-- Added memtier API header file to installed headers
+- Added memkind memtier API header file to installed headers
+- Added missing information in memkind memtier manpages
 - Upgraded jemalloc internal library to version 5.3.0
 - Fixes to security issues
 
