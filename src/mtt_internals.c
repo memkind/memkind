@@ -6,6 +6,7 @@
 #include "memkind/internal/memkind_log.h"
 #include "memkind/internal/memkind_private.h"
 #include "memkind/internal/mmap_tracing_queue.h"
+#include "memkind/internal/multithreaded_touch_queue.h"
 #include "memkind/internal/pagesizes.h"
 #include "memkind/internal/ranking.h"
 #include "memkind/internal/ranking_utils.h"
@@ -13,6 +14,7 @@
 #include "assert.h"
 #include "stdint.h"
 #include "string.h"
+#include "threads.h"
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -27,7 +29,19 @@
 // do not juggle pages with hotness diff below 10%
 #define MIN_JUGGLE_DIFF (0.10)
 
+#define MALLOC_TOUCHES_TO_SKIP (10ul)
+
 // static functions -----------------------------------------------------------
+
+static void malloc_touch(MttInternals *internals, uintptr_t address)
+{
+    static thread_local size_t g_mallocTouchCounter = 0ul;
+    if (++g_mallocTouchCounter > MALLOC_TOUCHES_TO_SKIP) {
+        multithreaded_touch_queue_multithreaded_push(&internals->touchQueue,
+                                                     address);
+        g_mallocTouchCounter = 0ul;
+    }
+}
 
 static void promote_hottest_pmem(MttInternals *internals)
 {
@@ -151,6 +165,7 @@ static size_t mtt_internals_ranking_balance_internal(MttInternals *internals,
 
 static ssize_t mtt_internals_process_queued(MttInternals *internals)
 {
+    // process queued mmaps
     MMapTracingNode *node =
         mmap_tracing_queue_multithreaded_take_all(&internals->mmapTracingQueue);
     uintptr_t start_addr;
@@ -192,6 +207,14 @@ static ssize_t mtt_internals_process_queued(MttInternals *internals)
                 break;
         }
     }
+    // process queued touches
+    MultithreadedTouchNode *mt_node =
+        multithreaded_touch_queue_multithreaded_take_all(
+            &internals->touchQueue);
+    uintptr_t address;
+    while (multithreaded_touch_queue_process_one(&mt_node, &address)) {
+        mtt_internals_touch(internals, address);
+    }
 
     return dram_pages_added;
 }
@@ -228,6 +251,7 @@ MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
     ranking_create(&internals->pmemRanking);
     ranking_metadata_create(&internals->tempMetadataHandle);
     mmap_tracing_queue_create(&internals->mmapTracingQueue);
+    multithreaded_touch_queue_create(&internals->touchQueue);
 
     int ret = POOL_ALLOCATOR_TYPE(create)(&internals->pool, user_mmap);
 
@@ -240,6 +264,7 @@ MEMKIND_EXPORT void mtt_internals_destroy(MttInternals *internals)
     ranking_destroy(internals->pmemRanking);
     ranking_destroy(internals->dramRanking);
     mmap_tracing_queue_destroy(&internals->mmapTracingQueue);
+    multithreaded_touch_queue_destroy(&internals->touchQueue);
     // internals are already destroyed, no need to track mmap/munmap
     POOL_ALLOCATOR_TYPE(destroy)(&internals->pool, &gStandardMmapCallback);
 }
@@ -249,6 +274,7 @@ MEMKIND_EXPORT void *mtt_internals_malloc(MttInternals *internals, size_t size,
 {
     void *ret =
         POOL_ALLOCATOR_TYPE(malloc_mmap)(&internals->pool, size, user_mmap);
+    malloc_touch(internals, (uintptr_t)ret);
     return ret;
 }
 
@@ -257,6 +283,7 @@ MEMKIND_EXPORT void *mtt_internals_realloc(MttInternals *internals, void *ptr,
 {
     void *ret = POOL_ALLOCATOR_TYPE(realloc_mmap)(&internals->pool, ptr, size,
                                                   user_mmap);
+    malloc_touch(internals, (uintptr_t)ret);
     return ret;
 }
 
