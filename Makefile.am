@@ -4,7 +4,6 @@
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
 AUTOMAKE_OPTIONS = serial-tests
-MAN2HTML = groff -mandoc -Thtml
 CLANG_FORMAT = @clang_format@ --style=file
 CLANG_FORMAT_FILES = . -path "./jemalloc" -prune -false -o -path "./test/gtest_fused" -prune -false -o \
                      -iname "*.h" -o -iname "*.hpp" -o -iname "*.c" -o -iname "*.cpp"
@@ -645,20 +644,47 @@ AM_CXXFLAGS = $(req_flags)
 
 clean-local: clean-jemalloc_deps
 
-html-local:
-	$(MAN2HTML) man/hbwmalloc.3 > man/hbwmalloc.html
-	$(MAN2HTML) man/memkind.3 > man/memkind.html
-	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
-	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
-	$(MAN2HTML) man/fixedallocator.3 > man/fixedallocator.html
-	$(MAN2HTML) man/libmemtier.3 > man/libmemtier3.html
-	$(MAN2HTML) man/libmemtier.7 > man/libmemtier7.html
+man-local:
+	utils/md2man/md2man.sh \
+		doc/memkindallocator.3.md \
+		utils/md2man/default.man \
+		man/memkindallocator.3
+	
+	utils/md2man/md2man.sh \
+		doc/fixedallocator.3.md \
+		utils/md2man/default.man \
+		man/fixedallocator.3
+	
+	utils/md2man/md2man.sh \
+		doc/hbwmalloc.3.md \
+		utils/md2man/default.man \
+		man/hbwmalloc.3
+	
+	utils/md2man/md2man.sh \
+		doc/libmemtier.3.md \
+		utils/md2man/default.man \
+		man/libmemtier.3
+	
+	utils/md2man/md2man.sh \
+		doc/memkind.3.md \
+		utils/md2man/default.man \
+		man/memkind.3
+	
+	utils/md2man/md2man.sh \
+		doc/pmemallocator.3.md \
+		utils/md2man/default.man \
+		man/pmemallocator.3
+	
+	utils/md2man/md2man.sh \
+		doc/libmemtier.7.md \
+		utils/md2man/default.man \
+		man/libmemtier.7
 
 clean-jemalloc_deps:
 	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
 	[ -e jemalloc/configure ] && (cd jemalloc && rm configure) || exit 0
 
-.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps html-local \
+.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps \
 	code-style-check code-style-apply
 
 .NOTPARALLEL: static_lib
