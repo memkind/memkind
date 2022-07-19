@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2020 - 2021 Intel Corporation.
+# Copyright (C) 2020 - 2022 Intel Corporation.
 
 # Pull base image
 FROM centos:7
@@ -25,6 +25,7 @@ RUN yum update -y && yum install -y \
     make \
     numactl \
     numactl-devel \
+    pandoc \
     pkgconfig \
     python3-pip \
     rpmdevtools \
