@@ -645,14 +645,12 @@ AM_CXXFLAGS = $(req_flags)
 
 clean-local: clean-jemalloc_deps
 
-html-local:
-	$(MAN2HTML) man/hbwmalloc.3 > man/hbwmalloc.html
-	$(MAN2HTML) man/memkind.3 > man/memkind.html
-	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
-	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
-	$(MAN2HTML) man/fixedallocator.3 > man/fixedallocator.html
-	$(MAN2HTML) man/libmemtier.3 > man/libmemtier3.html
-	$(MAN2HTML) man/libmemtier.7 > man/libmemtier7.html
+man-local:
+		utils/md2man/md2man.sh \
+			doc/memkindallocator.3.md \
+			utils/md2man/default.man \
+			doc/memkindallocator.3 \
+			$(VERSION)
 
 clean-jemalloc_deps:
 	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
@@ -672,7 +670,7 @@ memkind-$(VERSION).spec:
 rpm: dist
 	$(MAKE) version="$(VERSION)" -f memkind.spec.mk $@
 
-all: jemalloc_deps static_lib
+all: jemalloc_deps static_lib man-local
 
 # the script merge memkind and jemalloc libraries into one static library.
 define ar_prog
