@@ -15,6 +15,7 @@
 #include <iostream>
 #include <random>
 #include <thread>
+#include <unistd.h>
 
 #define ACCESS_STRIDE 10
 #define USE_DAX_KMEM  1
@@ -32,7 +33,7 @@ enum class TestCase
     SEQ_INC,
 
     /**
-     * @brief read-write test, random cacheline from malloc
+    * @brief read-write test, random cacheline from malloc
      */
     RANDOM_COPY,
 
@@ -47,6 +48,7 @@ enum class RawAllocator
     /// PoolAllocator
     POOL,
     FAST_POOL,
+    MULTI_VMA,
     MTT_ALLOCATOR,
 };
 
@@ -73,6 +75,8 @@ enum NonAsciiKeys
     KEY_LOW_LIMIT = 0x102,
     KEY_SOFT_LIMIT = 0x103,
     KEY_HARD_LIMIT = 0x104,
+    KEY_VMA_INTERVAL = 0x105,
+    KEY_NOMALLOC_ITERATIONS = 0x106,
 };
 
 static uint64_t clock_bench_time_ms()
@@ -170,6 +174,140 @@ public:
     }
 };
 
+#include <map>
+#include <list>
+#include <sys/mman.h>
+
+class MultiVMAAllocator: public Allocator
+{
+    std::map<size_t, std::list<uintptr_t>> freelists;
+    std::mutex freelistMutex;
+    void *areaStart;
+    void *areaCstart;
+    const size_t pageSize;
+    size_t pageSizeLeft = 0ul;
+    const size_t TOTAL_SIZE = 1024ul * 1024ul * 1024ul * 1024ul;
+    size_t nof_vmas = 0ul;
+    size_t vmaInterval;
+    size_t vmaCounter=0ul;
+
+    bool temp_deleted_something=false;
+
+public:
+
+    MultiVMAAllocator(size_t vma_interval) : pageSize(sysconf(_SC_PAGESIZE)), vmaInterval(vma_interval)
+    {
+        areaStart = mmap(NULL, TOTAL_SIZE, PROT_NONE,
+                         MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+        areaCstart = areaStart;
+        assert(areaStart != MAP_FAILED);
+    }
+
+    ~MultiVMAAllocator()
+    {
+        int ret = munmap(areaStart, TOTAL_SIZE);
+        assert(ret == 0);
+    }
+
+    void *malloc(size_t size)
+    {
+        // the mutex scope should be the whole function, at least for now
+        std::lock_guard<std::mutex> freelistGuard(freelistMutex);
+        void *ret = NULL;
+        // check freelists
+        auto freelist_it = freelists.find(size);
+        if (freelist_it != freelists.end()) {
+            auto it = freelist_it->second.begin();
+            if (it != freelist_it->second.end()) {
+                ret = reinterpret_cast<void*>(*it);
+                freelist_it->second.pop_front();
+                return ret;
+            }
+        }
+        // nothing appropriate on freelists, new allocation
+        // check current page
+        size_t size_to_malloc = size + sizeof(size_t);
+        if (size_to_malloc <= pageSizeLeft) {
+            pageSizeLeft -= size_to_malloc;
+            ret = areaCstart;
+            areaCstart = reinterpret_cast<void*>(reinterpret_cast<uint8_t *>(areaCstart) + size_to_malloc);
+            *reinterpret_cast<size_t *>(ret) = size;
+            ret = reinterpret_cast<uint8_t *>(ret) + sizeof(size_t);
+            return ret;
+        }
+        // Add page gap, check new page
+        size_t to_add = pageSizeLeft;
+#define MULTI_VMA_ALLOCATOR
+#ifdef MULTI_VMA_ALLOCATOR
+        size_t nof_pages = ceil(static_cast<double>(size_to_malloc) / pageSize);
+        if (vmaCounter++ > vmaInterval) {
+            nof_pages++;
+            nof_vmas += 2ul;
+            vmaCounter = 0ul;
+            to_add += pageSize;
+        }
+        areaCstart = reinterpret_cast<void*>(reinterpret_cast<uint8_t *>(areaCstart) + to_add);
+        pageSizeLeft = 0ul;
+#elif defined(PACKED_VMA_ALLOCATOR)
+        size_t nof_pages = ceil(static_cast<double>(size_to_malloc-pageSizeLeft) / pageSize);
+        if (vmaCounter++ > vmaInterval) {
+            nof_pages++;
+            nof_vmas += 2ul;
+            vmaCounter = 0ul;
+            to_add += pageSize;
+            areaCstart = reinterpret_cast<void*>(reinterpret_cast<uint8_t *>(areaCstart) + to_add);
+            pageSizeLeft = 0ul;
+        }
+#else
+        size_t nof_pages = ceil(static_cast<double>(size_to_malloc) / pageSize);
+        if (vmaCounter++ > vmaInterval) {
+
+        // no-VMA allocator
+        void *tmmap_start = reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(areaCstart) + pageSizeLeft);
+        assert(reinterpret_cast<uint8_t *>(areaCstart) + pageSizeLeft + pageSize <=
+           reinterpret_cast<uint8_t *>(areaStart) + TOTAL_SIZE);
+        vmaCounter = 0ul;
+        // to_add += pageSize;
+        // auxilliary mmap
+        ret = mmap(reinterpret_cast<uint8_t*>(areaCstart)+pageSizeLeft, pageSize, PROT_READ | PROT_WRITE,
+               MAP_FIXED | MAP_ANONYMOUS | MAP_PRIVATE, -1, 0ul);
+        assert(ret != MAP_FAILED && ret == tmmap_start);
+
+
+            nof_pages++;
+            nof_vmas += 2ul;
+            vmaCounter = 0ul;
+            to_add += pageSize;
+        }
+        areaCstart = reinterpret_cast<void*>(reinterpret_cast<uint8_t *>(areaCstart) + to_add);
+        pageSizeLeft = 0ul;
+#endif
+        void *mmap_start = reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(areaCstart) + pageSizeLeft);
+        size_t pages_size = nof_pages * pageSize;
+        pageSizeLeft += pages_size - size_to_malloc;
+        assert(reinterpret_cast<uint8_t *>(areaCstart) + pages_size <=
+               reinterpret_cast<uint8_t *>(areaStart) + TOTAL_SIZE);
+        // TODO mmap with all flags
+
+        assert (!temp_deleted_something);
+        ret = mmap(mmap_start, pages_size, PROT_READ | PROT_WRITE,
+                   MAP_FIXED | MAP_ANONYMOUS | MAP_PRIVATE, -1, 0ul);
+        assert(ret != MAP_FAILED && ret == mmap_start);
+        *reinterpret_cast<size_t *>(areaCstart) = size;
+        ret = reinterpret_cast<uint8_t *>(areaCstart) + sizeof(size_t);
+        areaCstart = reinterpret_cast<void*>(reinterpret_cast<uint8_t *>(areaCstart) + size_to_malloc);
+        return ret;
+    }
+    void free(void *ptr)
+    {
+        temp_deleted_something = true;
+        void *size_ptr = reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(ptr) - sizeof(size_t));
+        size_t alloc_size = *reinterpret_cast<size_t*>(size_ptr);
+        std::lock_guard<std::mutex> freelistGuard(freelistMutex);
+        freelists[alloc_size].push_back(reinterpret_cast<uintptr_t>(ptr));
+    }
+};
+
 class FastPoolAllocatorWrapper: public Allocator
 {
     FastPoolAllocator allocator;
@@ -237,6 +375,8 @@ struct RunInfo {
     size_t types_count;
     size_t iterations_major;
     size_t iterations_minor;
+    size_t vma_interval;
+    size_t internal_repetitions;
     GeneralPolicy policy;
     std::pair<size_t, size_t> dram_pmem_ratio;
     MTTInternalsLimits limits;
@@ -400,6 +540,7 @@ public:
         assert(this_thread &&
                "Collecting results of thread that was not started");
         this_thread->join();
+        this_thread = nullptr;
         return this->execution_time_millis;
     }
 
@@ -470,8 +611,8 @@ public:
 };
 
 /// @return malloc time, access time
-static std::pair<uint64_t, uint64_t>
-create_and_run_loaders(std::vector<LoaderCreator> &creators)
+static std::vector<std::pair<uint64_t, uint64_t>>
+create_and_run_loaders(std::vector<LoaderCreator> &creators, size_t internal_repetitions)
 {
     std::vector<std::shared_ptr<Loader>> loaders;
 
@@ -502,16 +643,25 @@ create_and_run_loaders(std::vector<LoaderCreator> &creators)
     }
     uint64_t malloc_time = clock_bench_time_ms() - start_mallocs_timestamp;
 
-    for (auto &loader : loaders) {
-        loader->PrepareOnce(fence);
-    }
-    fence->Start();
-    uint64_t summed_access_time_ms = 0u;
-    for (auto &loader : loaders) {
-        summed_access_time_ms += loader->CollectResults();
+    // TODO update internal repetitions - should be configurable grom command line
+    std::vector<std::pair<uint64_t, uint64_t>> ret;
+    ret.reserve(internal_repetitions);
+
+
+    for (size_t internal_repetition = 0ul; internal_repetition < internal_repetitions; ++internal_repetition) {
+
+        for (auto &loader : loaders) {
+            loader->PrepareOnce(fence);
+        }
+        fence->Start();
+        uint64_t summed_access_time_ms = 0u;
+        for (auto &loader : loaders) {
+            summed_access_time_ms += loader->CollectResults();
+        }
+        ret.push_back(std::make_pair(malloc_time, summed_access_time_ms));
     }
 
-    return std::make_pair(malloc_time, summed_access_time_ms);
+    return ret;
 }
 
 /// @param N number of elements
@@ -543,7 +693,7 @@ static double calculate_zipf_denominator(int N, double s)
 static std::vector<LoaderCreator> create_loader_creators(
     TestCase test_case, size_t nof_allocations, size_t allocation_size,
     size_t types_count, size_t total_iterations, GeneralPolicy policy,
-    std::pair<size_t, size_t> pmem_dram_ratio, const MTTInternalsLimits *limits)
+    std::pair<size_t, size_t> pmem_dram_ratio, const MTTInternalsLimits *limits, size_t vma_interval)
 {
     const double s = 2.0;
     std::vector<LoaderCreator> creators;
@@ -570,6 +720,9 @@ static std::vector<LoaderCreator> create_loader_creators(
                 case RawAllocator::FAST_POOL:
                     allocator = std::make_shared<FastPoolAllocatorWrapper>();
                     break;
+                case RawAllocator::MULTI_VMA:
+                    allocator = std::make_shared<MultiVMAAllocator>(vma_interval);
+                    break;
                 case RawAllocator::MTT_ALLOCATOR:
                     assert(limits && limits->lowLimit && limits->softLimit &&
                            limits->hardLimit && "limits not initialized!");
@@ -585,8 +738,8 @@ static std::vector<LoaderCreator> create_loader_creators(
     double probability_sum = 0;
     // k reverses - coldest data is allocated first
     // the order of allocs and it's effect might be investigated in the future
-    for (size_t type_idx = 0, k = types_count; type_idx < types_count;
-         ++type_idx, --k) {
+    for (size_t type_idx = 0, k = 1; type_idx < types_count;
+         ++type_idx, ++k) {
         double probability = 1 / pow(k, s) / zipf_denominator;
         probability_sum += probability;
         size_t iterations = (size_t)(total_iterations * probability);
@@ -609,7 +762,7 @@ BenchResults run_test(const RunInfo &info)
     std::vector<LoaderCreator> loader_creators = create_loader_creators(
         info.test_case, info.nof_allocations, info.allocation_size,
         info.types_count, info.iterations_minor, info.policy,
-        info.dram_pmem_ratio, &info.limits);
+        info.dram_pmem_ratio, &info.limits, info.vma_interval);
 
     std::vector<uint64_t> malloc_times;
     std::vector<uint64_t> access_times;
@@ -622,12 +775,14 @@ BenchResults run_test(const RunInfo &info)
     ret.access_times_ms.reserve(info.iterations_major);
 
     for (size_t major_it = 0; major_it < info.iterations_major; ++major_it) {
-        std::pair<uint64_t, uint64_t> times =
-            create_and_run_loaders(loader_creators);
-        ret.malloc_time_ms += times.first;
-        ret.access_time_ms += times.second;
-        ret.malloc_times_ms.push_back(times.first);
-        ret.access_times_ms.push_back(times.second);
+        auto times =
+            create_and_run_loaders(loader_creators, info.internal_repetitions);
+        for (auto time_pair : times) {
+            ret.malloc_time_ms += time_pair.first;
+            ret.access_time_ms += time_pair.second;
+            ret.malloc_times_ms.push_back(time_pair.first);
+            ret.access_times_ms.push_back(time_pair.second);
+        }
     }
 
     return ret;
@@ -643,7 +798,9 @@ struct BenchArgs {
     size_t pmem_ratio_part;
     size_t nof_allocations;
     size_t allocation_size;
+    size_t internal_repetitions;
     MTTInternalsLimits limits;
+    size_t vma_interval;
 };
 
 static int parse_opt(int key, char *arg, struct argp_state *state)
@@ -665,6 +822,10 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
         case 'f':
             args->policy.generalType = GeneralPolicy::GeneralType::RawAllocator;
             args->policy.allocator = RawAllocator::FAST_POOL;
+            break;
+        case 'v':
+            args->policy.generalType = GeneralPolicy::GeneralType::RawAllocator;
+            args->policy.allocator = RawAllocator::MULTI_VMA;
             break;
         case 'g':
             args->policy.generalType = GeneralPolicy::GeneralType::StdAllocator;
@@ -753,6 +914,18 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
             assert(args->limits.hardLimit > 0 && "limit has to be > 0");
             break;
         }
+        case KEY_VMA_INTERVAL:
+        {
+            assert(arg && "argument for vma interval not supplied");
+            args->vma_interval = std::strtoul(arg, nullptr, 10);
+            break;
+        }
+        case KEY_NOMALLOC_ITERATIONS:
+        {
+            assert(arg && "argument for vma interval not supplied");
+            args->internal_repetitions = std::strtoul(arg, nullptr, 10);
+            break;
+        }
         default:
             return ARGP_ERR_UNKNOWN;
     }
@@ -763,6 +936,7 @@ static struct argp_option options[] = {
     {"static", 's', 0, 0, "Benchmark static ratio policy.", 0},
     {"pool", 'p', 0, 0, "Benchmark pool allocator.", 0},
     {"fast_pool", 'f', 0, 0, "Benchmark fast pool allocator.", 0},
+    {"multi_vma", 'v', 0, 0, "Benchmark multi-vma allocator.", 0},
     {"movement", 'm', 0, 0, "Benchmark data movement policy.", 0},
     {"low-limit", KEY_LOW_LIMIT, "size_t", 0,
      "value below which movement from PMEM -> DRAM occurs, must be a multiple of TRACED_PAGESIZE",
@@ -786,6 +960,9 @@ static struct argp_option options[] = {
      "Number of allocations per type", 3},
     {"alloc_size", KEY_ALLOCATION_SIZE, "size_t", 0,
      "Size of each allocation - size of uint64_t buffer", 3},
+    {"vma_interval", KEY_VMA_INTERVAL, "size_t", 0,
+     "Number of opportunities to create a new VMA to skip.", 4},
+    {"no_malloc_iterations", KEY_NOMALLOC_ITERATIONS, "size_t", 0, "Number of iterations before freeing memory", 5},
     {0}};
 
 static struct argp argp = {options, parse_opt, nullptr, nullptr};
@@ -808,9 +985,11 @@ int main(int argc, char *argv[])
     args.pmem_ratio_part = 8;
     args.nof_allocations = NOF_ALLOCATIONS;
     args.allocation_size = ALLOCATION_SIZE_U64;
+    args.internal_repetitions = 1ul;
     args.limits.lowLimit = 0ul;
     args.limits.softLimit = 0ul;
     args.limits.hardLimit = 0ul;
+    args.vma_interval = 0ul;
 
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
@@ -821,6 +1000,8 @@ int main(int argc, char *argv[])
         .types_count = args.threads_count,
         .iterations_major = args.test_iterations,
         .iterations_minor = args.access_iterations,
+        .vma_interval = args.vma_interval,
+        .internal_repetitions = args.internal_repetitions,
         .policy = args.policy,
         .dram_pmem_ratio =
             std::make_pair(args.dram_ratio_part, args.pmem_ratio_part),
