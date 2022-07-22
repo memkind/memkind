@@ -45,6 +45,7 @@ RUN dnf update -y && dnf install -y \
     systemd \
     which \
     whois \
+    pandoc \
  && dnf clean all
 
 # Install pytest

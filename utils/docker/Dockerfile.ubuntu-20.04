@@ -45,6 +45,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     uuid-dev \
     xsltproc \
     whois \
+    pandoc \
  && rm -rf /var/lib/apt/lists/*
 
 # Install packages required by python tests

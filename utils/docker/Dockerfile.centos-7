@@ -35,6 +35,7 @@ RUN yum update -y && yum install -y \
     which \
     whois \
     xmlto \
+    pandoc \
  && yum clean all
 
 # Install pytest
