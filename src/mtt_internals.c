@@ -73,8 +73,8 @@ static void demote_coldest_dram(MttInternals *internals)
 ///
 /// @note This function might temporarily increase PMEM usage, but should not
 /// increase DRAM usage and should not cause DRAM limit overflow
-static void mtt_internals_tiers_juggle(MttInternals *internals,
-                                       atomic_bool *interrupt)
+/*static */ size_t mtt_internals_tiers_juggle(MttInternals *internals,
+                                              atomic_bool *interrupt)
 {
     // Handle hottest on PMEM vs coldest on dram page movement
     // different approaches possible, e.g.
@@ -103,6 +103,8 @@ static void mtt_internals_tiers_juggle(MttInternals *internals,
         if (atomic_load(interrupt))
             break;
     }
+
+    return --juggle_it;
 }
 
 static size_t mtt_internals_ranking_balance_internal(MttInternals *internals,
@@ -163,7 +165,7 @@ static size_t mtt_internals_ranking_balance_internal(MttInternals *internals,
     return ret;
 }
 
-static ssize_t mtt_internals_process_queued(MttInternals *internals)
+static ssize_t mtt_internals_process_queued_mman(MttInternals *internals)
 {
     // process queued mmaps
     MMapTracingNode *node =
@@ -200,14 +202,25 @@ static ssize_t mtt_internals_process_queued(MttInternals *internals)
                 }
                 break;
             case MMAP_TRACING_EVENT_MUNMAP:
-                dram_pages_added -= (ssize_t)ranking_try_remove_pages(
+            {
+                size_t removed_dram = ranking_try_remove_pages(
                     internals->dramRanking, start_addr, nof_pages);
-                (void)ranking_try_remove_pages(internals->pmemRanking,
-                                               start_addr, nof_pages);
-                break;
+                size_t removed_pmem = ranking_try_remove_pages(
+                    internals->pmemRanking, start_addr, nof_pages);
+                size_t removed_total = removed_dram + removed_pmem;
+                if (removed_total != nof_pages)
+                    log_info("only removed %lu/%lu pages on unmap!",
+                             removed_total, nof_pages);
+                dram_pages_added -= (ssize_t)removed_dram;
+            } break;
         }
     }
-    // process queued touches
+
+    return dram_pages_added;
+}
+
+static void mtt_internals_process_queued_touch(MttInternals *internals)
+{
     MultithreadedTouchNode *mt_node =
         multithreaded_touch_queue_multithreaded_take_all(
             &internals->touchQueue);
@@ -215,8 +228,32 @@ static ssize_t mtt_internals_process_queued(MttInternals *internals)
     while (multithreaded_touch_queue_process_one(&mt_node, &address)) {
         mtt_internals_touch(internals, address);
     }
+}
 
-    return dram_pages_added;
+static void touch_tracker_zero(TouchTracker *tracker)
+{
+    tracker->touchesDRAM = 0ul;
+    tracker->touchesPMEM = 0ul;
+}
+
+static void touch_tracker_update_touches(TouchTracker *tracker, bool dram_touch,
+                                         bool pmem_touch)
+{
+    assert(!(dram_touch && pmem_touch));
+    if (dram_touch)
+        tracker->touchesDRAM++;
+    else if (pmem_touch)
+        tracker->touchesPMEM++;
+
+    const size_t INTERVAL = 1000ul;
+    if (tracker->touchesDRAM + tracker->touchesPMEM >= INTERVAL) {
+        assert(tracker->touchesDRAM + tracker->touchesPMEM == INTERVAL);
+        log_info(
+            "touches DRAM: %lu.%.3lu, PMEM: %lu.%.3lu",
+            tracker->touchesDRAM / INTERVAL, tracker->touchesDRAM % INTERVAL,
+            tracker->touchesPMEM / INTERVAL, tracker->touchesPMEM % INTERVAL);
+        touch_tracker_zero(tracker);
+    }
 }
 
 // global functions -----------------------------------------------------------
@@ -252,7 +289,7 @@ MEMKIND_EXPORT int mtt_internals_create(MttInternals *internals,
     ranking_metadata_create(&internals->tempMetadataHandle);
     mmap_tracing_queue_create(&internals->mmapTracingQueue);
     multithreaded_touch_queue_create(&internals->touchQueue);
-
+    touch_tracker_zero(&internals->tracker);
     int ret = POOL_ALLOCATOR_TYPE(create)(&internals->pool, user_mmap);
 
     return ret;
@@ -307,8 +344,9 @@ MEMKIND_EXPORT void mtt_internals_touch(MttInternals *internals,
     // the touch will be ignored
     //
     // touch on unknown address is immediately dropped in O(1) time
-    ranking_touch(internals->dramRanking, address);
-    ranking_touch(internals->pmemRanking, address);
+    bool dram_touch = ranking_touch(internals->dramRanking, address);
+    bool pmem_touch = ranking_touch(internals->pmemRanking, address);
+    touch_tracker_update_touches(&internals->tracker, dram_touch, pmem_touch);
 }
 
 MEMKIND_EXPORT size_t mtt_internals_ranking_balance(MttInternals *internals,
@@ -316,7 +354,7 @@ MEMKIND_EXPORT size_t mtt_internals_ranking_balance(MttInternals *internals,
                                                     size_t dram_limit)
 {
     // update dram ranking
-    ssize_t diff_in_dram_used = mtt_internals_process_queued(internals);
+    ssize_t diff_in_dram_used = mtt_internals_process_queued_mman(internals);
     // handle issues with signed -> unsigned casting
     if (diff_in_dram_used >= 0) {
         atomic_fetch_add(used_dram, diff_in_dram_used);
@@ -334,7 +372,7 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
 {
     internals->lastTimestamp = timestamp;
     // 1. Add new mappings to rankings
-    ssize_t additional_dram_used = mtt_internals_process_queued(internals);
+    ssize_t additional_dram_used = mtt_internals_process_queued_mman(internals);
     // handle issues with signed -> unsigned casting
     if (additional_dram_used >= 0) {
         atomic_fetch_add(used_dram, additional_dram_used);
@@ -342,11 +380,17 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
         atomic_fetch_sub(used_dram, -additional_dram_used);
     }
     // 2. Update both rankings - hotness
-    if (atomic_load(interrupt))
+    if (atomic_load(interrupt)) {
         return;
+    }
+    mtt_internals_process_queued_touch(internals);
+    if (atomic_load(interrupt)) {
+        return;
+    }
     ranking_update(internals->dramRanking, timestamp);
-    if (atomic_load(interrupt))
+    if (atomic_load(interrupt)) {
         return;
+    }
     ranking_update(internals->pmemRanking, timestamp);
     // 3. Handle soft and hard limit - move pages dram vs pmem
     size_t surplus = mtt_internals_ranking_balance(internals, used_dram,
@@ -356,10 +400,12 @@ MEMKIND_EXPORT void mtt_internals_ranking_update(MttInternals *internals,
                  " %lu left unmoved;"
                  " was a single allocation > lowLimit requested?",
                  surplus);
-    if (atomic_load(interrupt))
+    if (atomic_load(interrupt)) {
         return;
+    }
     // 4. Handle hottest on PMEM vs coldest on dram page movement
-    mtt_internals_tiers_juggle(internals, interrupt);
+    size_t juggled = mtt_internals_tiers_juggle(internals, interrupt);
+    log_info("juggled %lu", juggled);
 }
 
 MEMKIND_EXPORT void
