@@ -518,8 +518,8 @@ MEMKIND_EXPORT void *mtt_allocator_mmap(MTTAllocator *mtt_allocator, void *addr,
                "is not implemented");
         return NULL;
     }
+    temp_used_dram = atomic_load(&mtt_allocator->internals.usedDram);
     do {
-        temp_used_dram = atomic_load(&mtt_allocator->internals.usedDram);
         ndram_size = temp_used_dram + length;
         if (temp_used_dram > mtt_allocator->internals.limits.hardLimit) {
             // await until previous operations that surpass the hard_limit are
@@ -527,9 +527,8 @@ MEMKIND_EXPORT void *mtt_allocator_mmap(MTTAllocator *mtt_allocator, void *addr,
             // in a manageable case
             mtt_allocator_await_balance(mtt_allocator);
         }
-    } while (!atomic_compare_exchange_weak(
-        &mtt_allocator->internals.usedDram, &temp_used_dram,
-        mtt_allocator->internals.usedDram + length));
+    } while (!atomic_compare_exchange_strong(&mtt_allocator->internals.usedDram,
+                                             &temp_used_dram, ndram_size));
 
     if (ndram_size > mtt_allocator->internals.limits.hardLimit) {
         mtt_allocator_await_balance(mtt_allocator);
