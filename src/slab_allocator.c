@@ -64,7 +64,7 @@ static void *slab_alloc_glob_freelist_pop_(SlabAllocator *alloc)
         if (!meta)
             break;
     } while (false ==
-             atomic_compare_exchange_weak(&alloc->globFreelist.freelist, &meta,
+             atomic_compare_exchange_strong(&alloc->globFreelist.freelist, &meta,
                                           meta->next));
 
     return meta ? slab_alloc_node_meta_to_addr_(meta) : NULL;
