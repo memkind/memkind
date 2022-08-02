@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2020 Intel Corporation.
+# Copyright (C) 2014 - 2022 Intel Corporation.
 
 # Allocator
 ALLOCATOR="glibc tbb hbw pmem"
@@ -25,8 +25,12 @@ average free time [ms], first allocation time [ms], first free time [ms]" >> all
         # For each amount of memory
         for mem in ${MEMORY[*]}
         do
-            echo "OMP_NUM_THREADS=$nthr ./alloc_benchmark_$alloc $ITERS $mem >> alloctest_$alloc.txt"
-            OMP_NUM_THREADS=$nthr ./alloc_benchmark_$alloc $ITERS $mem >> alloctest_$alloc.txt
+            if [ $alloc == "pmem" ]; then
+                DIR=$1
+            fi
+
+            echo "OMP_NUM_THREADS=$nthr ./alloc_benchmark_$alloc $ITERS $mem $DIR >> alloctest_$alloc.txt"
+            OMP_NUM_THREADS=$nthr ./alloc_benchmark_$alloc $ITERS $mem $DIR >> alloctest_$alloc.txt
             ret=$?
             if [ $ret -ne 0 ]; then
                 echo "Error: alloc_benchmark_$alloc returned $ret"
