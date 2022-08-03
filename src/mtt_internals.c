@@ -14,7 +14,11 @@
 #include "assert.h"
 #include "stdint.h"
 #include "string.h"
+
+#if defined(HAVE_THREADS_H) && defined(USE_TOUCH_ON_MALLOC)
 #include "threads.h"
+#define TOUCH_ON_MALLOC__
+#endif
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -35,12 +39,14 @@
 
 static void malloc_touch(MttInternals *internals, uintptr_t address)
 {
+#ifdef TOUCH_ON_MALLOC__
     static thread_local size_t g_mallocTouchCounter = 0ul;
     if (++g_mallocTouchCounter > MALLOC_TOUCHES_TO_SKIP) {
         multithreaded_touch_queue_multithreaded_push(&internals->touchQueue,
                                                      address);
         g_mallocTouchCounter = 0ul;
     }
+#endif
 }
 
 static void promote_hottest_pmem(MttInternals *internals)
