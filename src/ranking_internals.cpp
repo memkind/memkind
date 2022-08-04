@@ -198,6 +198,11 @@ MEMKIND_EXPORT uint64_t PageMetadata::GetLastTouchTimestamp() const
     return this->hotness.GetLastTouchTimestamp();
 }
 
+MEMKIND_EXPORT void PageMetadata::ResetTouched()
+{
+    this->touched = false;
+}
+
 // Ranking - private --------
 
 MEMKIND_EXPORT void Ranking::AddLRU_(PageMetadata *page)
@@ -296,6 +301,7 @@ size_t Ranking::TryRemovePages(uintptr_t start_address, size_t nof_pages)
         this->RemoveHotnessToPages_(metadata_ptr);
         this->RemoveLRU_(metadata_ptr);
         this->pagesToUpdate.erase(metadata_ptr);
+        metadata_ptr->ResetTouched();
         this->pageAddrToPage.erase(addr_page_it);
         ++removed;
     }
@@ -416,6 +422,7 @@ MEMKIND_EXPORT PageMetadata Ranking::PopColdest()
            "Empty set in hotnessToPages!");
     PageMetadata *coldest_page = *coldest_it;
     PageMetadata ret = *coldest_page;
+    ret.ResetTouched();
 
     this->RemoveLRU_(coldest_page);
     this->pagesToUpdate.erase(coldest_page);
@@ -442,6 +449,7 @@ MEMKIND_EXPORT PageMetadata Ranking::PopHottest()
            "Empty set in hotnessToPages!");
     PageMetadata *hottest_page = *hottest_it;
     PageMetadata ret = *hottest_page;
+    ret.ResetTouched();
 
     this->RemoveLRU_(hottest_page);
     this->pagesToUpdate.erase(hottest_page);

@@ -111,6 +111,7 @@ public:
     double GetHotness();
     uintptr_t GetStartAddr();
     uint64_t GetLastTouchTimestamp() const;
+    void ResetTouched();
 };
 
 class Ranking
