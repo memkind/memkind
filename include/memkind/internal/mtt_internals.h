@@ -52,6 +52,11 @@ typedef struct MTTInternalsLimits {
     size_t lowLimit;
 } MTTInternalsLimits;
 
+typedef struct TouchTracker {
+    size_t touchesDRAM;
+    size_t touchesPMEM;
+} TouchTracker;
+
 typedef struct MttInternals {
     ranking_handle dramRanking;
     ranking_handle pmemRanking;
@@ -62,6 +67,7 @@ typedef struct MttInternals {
     MTTInternalsLimits limits;
     MMapTracingQueue mmapTracingQueue;
     MultithreadedTouchQueue touchQueue;
+    TouchTracker tracker;
 
     atomic_size_t usedDram;
 } MttInternals;
