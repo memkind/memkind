@@ -616,6 +616,28 @@ dist_man_MANS =  man/autohbw.7 \
                  man/pmemallocator.3 \
                  # end
 
+dist_doc_DOCS = autohbw.7 \
+               fixedallocator.3 \
+               hbwallocator.3 \
+               hbwmalloc.3 \
+               libmemtier.3 \
+               libmemtier.7 \
+               memkind_arena.3 \
+               memkind_dax_kmem.3 \
+               memkind_default.3 \
+               memkind_fixed.3 \
+               memkind_hbw.3 \
+               memkind_hugetlb.3 \
+               memkind_interleave.3 \
+               memkind_pmem.3 \
+               memkind-auto-dax-kmem-nodes.1 \
+               memkind-hbw-nodes.1 \
+               memkind.3 \
+               memkindallocator.3 \
+               memtier.1 \
+               pmemallocator.3 \
+               # end
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = memkind.pc
 
@@ -645,40 +667,12 @@ AM_CXXFLAGS = $(req_flags)
 clean-local: clean-jemalloc_deps
 
 man-local:
-	utils/md2man/md2man.sh \
-		doc/memkindallocator.3.md \
-		utils/md2man/default.man \
-		man/memkindallocator.3
-	
-	utils/md2man/md2man.sh \
-		doc/fixedallocator.3.md \
-		utils/md2man/default.man \
-		man/fixedallocator.3
-	
-	utils/md2man/md2man.sh \
-		doc/hbwmalloc.3.md \
-		utils/md2man/default.man \
-		man/hbwmalloc.3
-	
-	utils/md2man/md2man.sh \
-		doc/libmemtier.3.md \
-		utils/md2man/default.man \
-		man/libmemtier.3
-	
-	utils/md2man/md2man.sh \
-		doc/memkind.3.md \
-		utils/md2man/default.man \
-		man/memkind.3
-	
-	utils/md2man/md2man.sh \
-		doc/pmemallocator.3.md \
-		utils/md2man/default.man \
-		man/pmemallocator.3
-	
-	utils/md2man/md2man.sh \
-		doc/libmemtier.7.md \
-		utils/md2man/default.man \
-		man/libmemtier.7
+	for doc_name in $(dist_doc_DOC) ; do \
+		utils/md2man/md2man.sh \
+			doc/$$doc_name.md \
+			utils/md2man/default.man \
+			man/$$doc_name ; \
+	done
 
 clean-jemalloc_deps:
 	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
