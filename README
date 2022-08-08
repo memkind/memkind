@@ -91,7 +91,7 @@ For using HMAT features in memkind:
 
 You will need to install **pandoc** for generating man documentation.
 
-`make man-local` will generate man files.
+`make man-local` will generate man files in the man/ directory.
 
 ## Building and Installing
 
