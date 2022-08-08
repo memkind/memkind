@@ -6,7 +6,6 @@ CONTRIBUTING
 COPYING
 ChangeLog
 Makefile.am
-NEWS
 README
 autogen.sh
 autohbw/Makefile.mk
