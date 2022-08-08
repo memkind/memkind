@@ -12,7 +12,7 @@
 set -e
 set -o pipefail
 
-# read input params (usually passed from doc/CMakeLists.txt)
+# read input params (usually passed from Makefile.am)
 filename=${1}
 template=${2}
 outfile=${3}

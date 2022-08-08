@@ -18,7 +18,7 @@ $for(header-includes)$
 $header-includes$
 $endfor$
 .\" SPDX-License-Identifier: BSD-2-Clause
-.\" Copyright 2014-$year$, Intel Corporation
+.\" Copyright $year$, Intel Corporation
 $for(include-before)$
 $include-before$
 $endfor$

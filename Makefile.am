@@ -646,15 +646,21 @@ clean-local: clean-jemalloc_deps
 
 man-local:
 	utils/md2man/md2man.sh \
-		doc/memkindallocator.3.md \
+		doc/autohbw.7.md \
 		utils/md2man/default.man \
-		man/memkindallocator.3 \
+		man/autohbw.7 \
 		$(VERSION)
 	
 	utils/md2man/md2man.sh \
 		doc/fixedallocator.3.md \
 		utils/md2man/default.man \
 		man/fixedallocator.3 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/hbwallocator.3.md \
+		utils/md2man/default.man \
+		man/hbwallocator.3 \
 		$(VERSION)
 	
 	utils/md2man/md2man.sh \
@@ -670,21 +676,99 @@ man-local:
 		$(VERSION)
 	
 	utils/md2man/md2man.sh \
+		doc/libmemtier.7.md \
+		utils/md2man/default.man \
+		man/libmemtier.7 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memkind_arena.3.md \
+		utils/md2man/default.man \
+		man/memkind_arena.3 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memkind_dax_kmem.3.md \
+		utils/md2man/default.man \
+		man/memkind_dax_kmem.3 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memkind_default.3.md \
+		utils/md2man/default.man \
+		man/memkind_default.3 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memkind_fixed.3.md \
+		utils/md2man/default.man \
+		man/memkind_fixed.3 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memkind_hbw.3.md \
+		utils/md2man/default.man \
+		man/memkind_hbw.3 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memkind_hugetlb.3.md \
+		utils/md2man/default.man \
+		man/memkind_hugetlb.3 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memkind_interleave.3.md \
+		utils/md2man/default.man \
+		man/memkind_interleave.3 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memkind_pmem.3.md \
+		utils/md2man/default.man \
+		man/memkind_pmem.3 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memkind-auto-dax-kmem-nodes.1.md \
+		utils/md2man/default.man \
+		man/memkind-auto-dax-kmem-nodes.1 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memkind-hbw-nodes.1.md \
+		utils/md2man/default.man \
+		man/memkind-hbw-nodes.1 \
+		$(VERSION)
+	 
+	utils/md2man/md2man.sh \
 		doc/memkind.3.md \
 		utils/md2man/default.man \
 		man/memkind.3 \
 		$(VERSION)
 	
 	utils/md2man/md2man.sh \
-		doc/pmemallocator.3.md \
+		doc/memkindallocator.3.md \
 		utils/md2man/default.man \
-		man/pmemallocator.3 \
+		man/memkindallocator.3 \
 		$(VERSION)
 	
 	utils/md2man/md2man.sh \
-		doc/libmemtier.7.md \
+		doc/memtier.1.md \
 		utils/md2man/default.man \
-		man/libmemtier.7 \
+		man/memtier.1 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/memtier.7.md \
+		utils/md2man/default.man \
+		man/memtier.7 \
+		$(VERSION)
+	
+	utils/md2man/md2man.sh \
+		doc/pmemallocator.3.md \
+		utils/md2man/default.man \
+		man/pmemallocator.3 \
 		$(VERSION)
 
 clean-jemalloc_deps:
