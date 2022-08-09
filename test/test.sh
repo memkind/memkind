@@ -45,7 +45,7 @@ OPTIONS
     -d,
         skip high bandwidth memory nodes detection tests
     -m,
-        skip tests that require 2MB pages configured on the machine
+        skip tests that require huge pages configured on the machine
     -p,
         skip python tests
     -e,
@@ -249,12 +249,37 @@ function check_auto_dax_kmem_nodes()
     fi
 }
 
+function skip_hugepages_tests()
+{
+    echo "Skipping tests that require huge pages due to unsatisfactory system conditions"
+    if [[ "$SKIPPED_GTESTS" == "" ]]; then
+        SKIPPED_GTESTS=":-*test_TC_MEMKIND_2MBPages_*:*GBPages*:*PAGE_SIZE_2MB*:*HUGETLB*:*GBTLB*"
+    else
+        SKIPPED_GTESTS=$SKIPPED_GTESTS":*test_TC_MEMKIND_2MBPages_*:*GBPages*:*PAGE_SIZE_2MB*:*HUGETLB*:*GBTLB*"
+    fi
+    if [[ "$SKIPPED_PYTESTS" == "" ]]; then
+        SKIPPED_PYTESTS=" and not test_TC_MEMKIND_2MBPages_"
+    else
+        SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not test_TC_MEMKIND_2MBPages_"
+    fi
+    show_skipped_tests "test_TC_MEMKIND_2MBPages_"
+}
+
+# Check support for hugepages - skip hugepages tests if no hugepages detected in the OS
+function check_hugepages()
+{
+    if ! grep -qx 0 "/proc/sys/vm/nr_hugepages"; then
+        skip_hugepages_tests
+    fi
+}
+
 #begin of main script
 
 check_numa
 
 check_hbw_nodes
 check_auto_dax_kmem_nodes
+check_hugepages
 
 OPTIND=1
 
@@ -273,18 +298,7 @@ while getopts "T:c:f:l:hdemsx:p:" opt; do
             LOG_FILE=$OPTARG;
             ;;
         m)
-            echo "Skipping tests that require 2MB pages due to unsatisfactory system conditions"
-            if [[ "$SKIPPED_GTESTS" == "" ]]; then
-                SKIPPED_GTESTS=":-*test_TC_MEMKIND_2MBPages_*"
-            else
-                SKIPPED_GTESTS=$SKIPPED_GTESTS":*test_TC_MEMKIND_2MBPages_*"
-            fi
-            if [[ "$SKIPPED_PYTESTS" == "" ]]; then
-                SKIPPED_PYTESTS=" and not test_TC_MEMKIND_2MBPages_"
-            else
-                SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not test_TC_MEMKIND_2MBPages_"
-            fi
-            show_skipped_tests "test_TC_MEMKIND_2MBPages_"
+            skip_hugepages_tests
             ;;
         d)
             echo "Skipping tests that detect high bandwidth memory nodes due to unsatisfactory system conditions"
