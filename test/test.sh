@@ -45,7 +45,7 @@ OPTIONS
     -d,
         skip high bandwidth memory nodes detection tests
     -m,
-        skip tests that require 2MB pages configured on the machine
+        skip tests that require huge pages configured on the machine
     -p,
         skip python tests
     -e,
@@ -83,7 +83,7 @@ function normalize_path {
 
 function show_skipped_tests()
 {
-    SKIP_PATTERN=$1
+    SKIP_PATTERNS=$@
     DEFAULT_IFS=$IFS
 
     # Search for gtests that match given pattern
@@ -93,9 +93,11 @@ function show_skipped_tests()
             if [[ $LINE == *. ]]; then
                 TEST_SUITE=$LINE;
             else
-                if [[ "$TEST_SUITE$LINE" == *"$SKIP_PATTERN"* ]]; then
-                    emit "$TEST_SUITE$LINE,${yellow}SKIPPED${default}"
-                fi
+                for pattern in $SKIP_PATTERNS; do
+                    if [[ "$TEST_SUITE$LINE" == *"$pattern"* ]]; then
+                        emit "$TEST_SUITE$LINE,${yellow}SKIPPED${default}"
+                    fi
+                done
             fi
         done
     done
@@ -105,18 +107,20 @@ function show_skipped_tests()
         PTEST_BINARY_PATH=$TEST_PATH${PYTEST_FILES[$i]}
         IFS=$'\n'
         for LINE in $($PYTEST $PTEST_BINARY_PATH --collect-only); do
+            IFS=$DEFAULT_IFS
             if [[ $LINE == *"<Class "* ]]; then
                 TEST_SUITE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
             elif [[ $LINE == *"<Function "* ]]; then
                 LINE=$(sed "s/^.*'\(.*\)'.*$/\1/" <<< $LINE)
-                if [[ "$TEST_SUITE.$LINE" == *"$SKIP_PATTERN"* ]]; then
-                    emit "$TEST_SUITE.$LINE,${yellow}SKIPPED${default}"
-                fi
+                for pattern in $SKIP_PATTERNS; do
+                    if [[ "$TEST_SUITE.$LINE" == *"$pattern"* ]]; then
+                        emit "$TEST_SUITE.$LINE,${yellow}SKIPPED${default}"
+                    fi
+                done
             fi
         done
     done
 
-    IFS=$DEFAULT_IFS
     emit ""
 }
 
@@ -249,12 +253,36 @@ function check_auto_dax_kmem_nodes()
     fi
 }
 
+function skip_hugepages_tests()
+{
+    echo "Skipping tests that require huge pages due to unsatisfactory system conditions"
+    SKIP_PATTERNS=("2MBPages" "GBPages" "PAGE_SIZE_2MB" "HUGETLB" "GBTLB")
+    for pattern in ${SKIP_PATTERNS[@]}; do
+        if [ -z $SKIPPED_GTESTS ]; then
+            SKIPPED_GTESTS="-:*"$pattern"*"
+        else
+            SKIPPED_GTESTS=$SKIPPED_GTESTS":*"$pattern"*"
+        fi
+        SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not "$pattern
+    done
+    show_skipped_tests ${SKIP_PATTERNS[@]}
+}
+
+# Check support for hugepages - skip hugepages tests if no hugepages detected in the OS
+function check_hugepages()
+{
+    if [ "$(cat /proc/sys/vm/nr_hugepages)" == "0" ]; then
+        skip_hugepages_tests
+    fi
+}
+
 #begin of main script
 
 check_numa
 
 check_hbw_nodes
 check_auto_dax_kmem_nodes
+check_hugepages
 
 OPTIND=1
 
@@ -273,18 +301,7 @@ while getopts "T:c:f:l:hdemsx:p:" opt; do
             LOG_FILE=$OPTARG;
             ;;
         m)
-            echo "Skipping tests that require 2MB pages due to unsatisfactory system conditions"
-            if [[ "$SKIPPED_GTESTS" == "" ]]; then
-                SKIPPED_GTESTS=":-*test_TC_MEMKIND_2MBPages_*"
-            else
-                SKIPPED_GTESTS=$SKIPPED_GTESTS":*test_TC_MEMKIND_2MBPages_*"
-            fi
-            if [[ "$SKIPPED_PYTESTS" == "" ]]; then
-                SKIPPED_PYTESTS=" and not test_TC_MEMKIND_2MBPages_"
-            else
-                SKIPPED_PYTESTS=$SKIPPED_PYTESTS" and not test_TC_MEMKIND_2MBPages_"
-            fi
-            show_skipped_tests "test_TC_MEMKIND_2MBPages_"
+            skip_hugepages_tests
             ;;
         d)
             echo "Skipping tests that detect high bandwidth memory nodes due to unsatisfactory system conditions"
