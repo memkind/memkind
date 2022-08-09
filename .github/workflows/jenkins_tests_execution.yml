@@ -30,7 +30,7 @@ jobs:
         - name: Clone the git repo
           uses: actions/checkout@v2
         
-        Executing jenkins job
+        # Executing jenkins job
         - name: Executing jenkins job
           run: |
             echo ${{ github.event.pull_request }}

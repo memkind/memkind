@@ -1,140 +1,140 @@
-name: MEMKIND
-on: [push, pull_request]
+# name: MEMKIND
+# on: [push, pull_request]
 
-jobs:
+# jobs:
 
-  linting:
-    runs-on: ubuntu-20.04
-    name: Code Linting - clang-format
-    steps:
+#   linting:
+#     runs-on: ubuntu-20.04
+#     name: Code Linting - clang-format
+#     steps:
 
-    - name: Install basic dependencies
-      run: sudo apt install autoconf clang-format-11 libnuma-dev
+#     - name: Install basic dependencies
+#       run: sudo apt install autoconf clang-format-11 libnuma-dev
 
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+#     - name: Checkout
+#       uses: actions/checkout@v2
+#       with:
+#         fetch-depth: 0
 
-    - name: Run code-style check
-      run: |
-        ./autogen.sh
-        ./configure
-        make code-style-check
+#     - name: Run code-style check
+#       run: |
+#         ./autogen.sh
+#         ./configure
+#         make code-style-check
 
-  codespell:
-    runs-on: ubuntu-20.04
-    name: Code Linting - Codespell
-    steps:
+#   codespell:
+#     runs-on: ubuntu-20.04
+#     name: Code Linting - Codespell
+#     steps:
 
-    - name: Checkout
-      uses: actions/checkout@v2
+#     - name: Checkout
+#       uses: actions/checkout@v2
 
-    - uses: codespell-project/actions-codespell@master
-      with:
-        skip: ./jemalloc,./test/gtest_fused/gtest,./.github/workflows/gha.yml
-        ignore_words_list: "ue"
+#     - uses: codespell-project/actions-codespell@master
+#       with:
+#         skip: ./jemalloc,./test/gtest_fused/gtest,./.github/workflows/gha.yml
+#         ignore_words_list: "ue"
 
-  docker-build:
-    runs-on: ${{ matrix.os }}
-    name: Docker build  ${{ matrix.docker_image }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04]
-        docker_image: [fedora-34, ubuntu-20.04, centos-7]
-    env:
-        MEMKIND_HOST_WORKDIR: ${{ github.workspace }}
-        ENABLE_HWLOC: 1
-        DOCKER_RUN_SCRIPT: utils/docker/run_local.sh
-        DOCKER_IMAGE_FULL_PATH: utils/docker/Dockerfile.${{ matrix.docker_image }}
-    steps:
+#   docker-build:
+#     runs-on: ${{ matrix.os }}
+#     name: Docker build  ${{ matrix.docker_image }}
+#     strategy:
+#       matrix:
+#         os: [ubuntu-20.04]
+#         docker_image: [fedora-34, ubuntu-20.04, centos-7]
+#     env:
+#         MEMKIND_HOST_WORKDIR: ${{ github.workspace }}
+#         ENABLE_HWLOC: 1
+#         DOCKER_RUN_SCRIPT: utils/docker/run_local.sh
+#         DOCKER_IMAGE_FULL_PATH: utils/docker/Dockerfile.${{ matrix.docker_image }}
+#     steps:
 
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+#       - name: Checkout
+#         uses: actions/checkout@v2
+#         with:
+#           fetch-depth: 0
 
-      - name: Change permissions for Docker user
-        run: sudo chmod -R o+rwx ${{ github.workspace }}
+#       - name: Change permissions for Docker user
+#         run: sudo chmod -R o+rwx ${{ github.workspace }}
 
-      - name: Run Docker build
-        run: |
-          if [ "${{ matrix.docker_image }}" == centos-7 ]; then
-            sudo --preserve-env=MEMKIND_HOST_WORKDIR "${{ env.DOCKER_RUN_SCRIPT }}" "${{ env.DOCKER_IMAGE_FULL_PATH }}"
-          else
-            sudo --preserve-env=MEMKIND_HOST_WORKDIR,ENABLE_HWLOC "${{ env.DOCKER_RUN_SCRIPT }}" "${{ env.DOCKER_IMAGE_FULL_PATH }}"
-          fi
+#       - name: Run Docker build
+#         run: |
+#           if [ "${{ matrix.docker_image }}" == centos-7 ]; then
+#             sudo --preserve-env=MEMKIND_HOST_WORKDIR "${{ env.DOCKER_RUN_SCRIPT }}" "${{ env.DOCKER_IMAGE_FULL_PATH }}"
+#           else
+#             sudo --preserve-env=MEMKIND_HOST_WORKDIR,ENABLE_HWLOC "${{ env.DOCKER_RUN_SCRIPT }}" "${{ env.DOCKER_IMAGE_FULL_PATH }}"
+#           fi
 
-  python-linting:
-    runs-on: ubuntu-20.04
-    name: Code Linting - Python
-    steps:
+#   python-linting:
+#     runs-on: ubuntu-20.04
+#     name: Code Linting - Python
+#     steps:
 
-    - name: Checkout
-      uses: actions/checkout@v2
+#     - name: Checkout
+#       uses: actions/checkout@v2
 
-    - name: Set up Python environment
-      uses: actions/setup-python@v2
+#     - name: Set up Python environment
+#       uses: actions/setup-python@v2
 
-    - name: flake8 Lint
-      uses: py-actions/flake8@v1
-      with:
-        exclude: "./jemalloc"
-        ignore: "W503"
+#     - name: flake8 Lint
+#       uses: py-actions/flake8@v1
+#       with:
+#         exclude: "./jemalloc"
+#         ignore: "W503"
 
-  building:
-    runs-on: ${{ matrix.os }}
-    name: Building memkind daxctl ${{ matrix.daxctl }} | hwloc ${{ matrix.hwloc }} | ${{ matrix.os }} | ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04]
-        compiler_version: [10]
-        env:
-          - { cc: gcc, cxx: g++}
-          - { cc: clang, cxx: clang++}
-        daxctl: [false, true]
-        hwloc: [false, true]
-    env:
-        CC: ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
-        CXX: ${{ matrix.env.cxx }}-${{ matrix.compiler_version }}
-        CCACHE_COMPRESS: 1
-        CCACHE_TEMPDIR: /tmp/.ccache-temp
-        CC_BUILD_ID: ${{ matrix.os }}-${{ matrix.env.cc }}-${{ matrix.compiler_version }}-d${{ matrix.daxctl }}-h${{ matrix.hwloc }}
-    steps:
+#   building:
+#     runs-on: ${{ matrix.os }}
+#     name: Building memkind daxctl ${{ matrix.daxctl }} | hwloc ${{ matrix.hwloc }} | ${{ matrix.os }} | ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
+#     strategy:
+#       matrix:
+#         os: [ubuntu-20.04]
+#         compiler_version: [10]
+#         env:
+#           - { cc: gcc, cxx: g++}
+#           - { cc: clang, cxx: clang++}
+#         daxctl: [false, true]
+#         hwloc: [false, true]
+#     env:
+#         CC: ${{ matrix.env.cc }}-${{ matrix.compiler_version }}
+#         CXX: ${{ matrix.env.cxx }}-${{ matrix.compiler_version }}
+#         CCACHE_COMPRESS: 1
+#         CCACHE_TEMPDIR: /tmp/.ccache-temp
+#         CC_BUILD_ID: ${{ matrix.os }}-${{ matrix.env.cc }}-${{ matrix.compiler_version }}-d${{ matrix.daxctl }}-h${{ matrix.hwloc }}
+#     steps:
 
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+#     - name: Checkout
+#       uses: actions/checkout@v2
+#       with:
+#         fetch-depth: 0
 
-    - name: Ccache setup
-      uses: actions/cache@v2.1.4
-      with:
-        path: ~/.ccache
-        key: ccache-${{ env.CC_BUILD_ID }}-static-build-${{ github.sha }}
-        restore-keys: ccache-${{ env.CC_BUILD_ID }}-static-build-
+#     - name: Ccache setup
+#       uses: actions/cache@v2.1.4
+#       with:
+#         path: ~/.ccache
+#         key: ccache-${{ env.CC_BUILD_ID }}-static-build-${{ github.sha }}
+#         restore-keys: ccache-${{ env.CC_BUILD_ID }}-static-build-
 
-    - name: Install basic dependencies
-      run: sudo apt install autoconf ccache libnuma-dev
+#     - name: Install basic dependencies
+#       run: sudo apt install autoconf ccache libnuma-dev
 
-    - name: Install daxctl dependency
-      run: |
-          if [ "${{ matrix.daxctl }}" == true ]; then
-            sudo apt install libdaxctl-dev
-          else
-            echo "Skipping daxctl installation"
-          fi
+#     - name: Install daxctl dependency
+#       run: |
+#           if [ "${{ matrix.daxctl }}" == true ]; then
+#             sudo apt install libdaxctl-dev
+#           else
+#             echo "Skipping daxctl installation"
+#           fi
 
-    - name: Install hwloc dependency
-      run: |
-          if [ "${{ matrix.hwloc }}" == true ]; then
-            ./utils/docker/docker_install_hwloc.sh
-          else
-            echo "Skipping hwloc installation"
-          fi
+#     - name: Install hwloc dependency
+#       run: |
+#           if [ "${{ matrix.hwloc }}" == true ]; then
+#             ./utils/docker/docker_install_hwloc.sh
+#           else
+#             echo "Skipping hwloc installation"
+#           fi
 
-    - name: Build memkind
-      run: |
-          ccache --max-size=150M
-          ./build.sh
-          make dist
+#     - name: Build memkind
+#       run: |
+#           ccache --max-size=150M
+#           ./build.sh
+#           make dist
