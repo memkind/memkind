@@ -33,7 +33,8 @@ jobs:
         # Executing jenkins job
         - name: Executing jenkins job
           run: |
-            echo ${{ github.event.pull_request }}
+            echo ${{ github.event.pull_request.branch }}
+            echo ${{ github.base_ref }}
 
         # Executing jenkins job
         # - name: Executing jenkins job
