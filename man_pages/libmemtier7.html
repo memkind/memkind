@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Wed Sep  1 09:26:26 2021 -->
+<!-- CreationDate: Thu Jun 23 12:46:34 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,12 +13,12 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title>MEMTIER</title>
+<title>LIBMEMTIER LD_PRELOAD API</title>
 
 </head>
 <body>
 
-<h1 align="center">MEMTIER</h1>
+<h1 align="center">LIBMEMTIER LD_PRELOAD API</h1>
 
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
@@ -51,8 +51,8 @@ tiering</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">In order to use
-the memkind memory tiering, pass the following environment
-variables along with the command:</p>
+the memkind memory tiering with pre-built binaries, pass the
+following environment variables along with the command:</p>
 
 
 <p style="margin-left:22%; margin-top: 1em"><b>LD_PRELOAD=libmemtier.so
@@ -342,7 +342,7 @@ variable:</p>
 
 <p style="margin-left:22%; margin-top: 1em"><b>LD_PRELOAD=libmemtier.so
 MEMKIND_MEM_TIERS=&quot;KIND:DRAM,RATIO:1;KIND:KMEM_DAX,RATIO:4;POLICY:DYNAMIC_THRESHOLD&quot;
-MEMKIND_MEM_THRESHOLDS=&quot;INIT_VAL=64,MIN_VAL=1,MAX_VAL=10000&quot;</b></p>
+MEMKIND_MEM_THRESHOLDS=&quot;INIT_VAL:64,MIN_VAL:1,MAX_VAL:10000&quot;</b></p>
 
 <h2>NOTES
 <a name="NOTES"></a>
