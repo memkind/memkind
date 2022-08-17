@@ -153,13 +153,16 @@ fi
 [enable_secure="1"]
 )
 if test "x$enable_secure" = "x1" ; then
-  CFLAGS="$CFLAGS -fstack-protector"
-  LDFLAGS="$LDFLAGS -Wl,-z,relro,-z,now"
+  CXXFLAGS="$CXXFLAGS -fstack-protector -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -fPIE -fPIC"
+  CFLAGS="$CFLAGS -fstack-protector -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -fPIE -fPIC"
+  LDFLAGS="$LDFLAGS -Wl,-z,relro,-z,now,-z,noexecstack,-pie"
 
   if test "$CFLAGS" != "${CFLAGS%-O0*}" ; then # if CFLAGS contains -O0
       echo "WARNING: Could not apply FORTIFY_SOURCE=2 due to lack of optimization (-O0)"
   else
-      CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2" #FORTITFY_SOURCE does not work with -O0 (ex. if enable_debug=1 or enable_gcov=1)
+      #FORTITFY_SOURCE does not work with -O0 (ex. if enable_debug=1 or enable_gcov=1)
+      CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2"
+      CXXFLAGS="$CXXFLAGS -D_FORTIFY_SOURCE=2"
   fi
 fi
 
