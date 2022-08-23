@@ -4,7 +4,6 @@
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/jemalloc/include
 AUTOMAKE_OPTIONS = serial-tests
-MAN2HTML = groff -mandoc -Thtml
 CLANG_FORMAT = @clang_format@ --style=file
 CLANG_FORMAT_FILES = . -path "./jemalloc" -prune -false -o -path "./test/gtest_fused" -prune -false -o \
                      -iname "*.h" -o -iname "*.hpp" -o -iname "*.c" -o -iname "*.cpp"
@@ -617,6 +616,28 @@ dist_man_MANS =  man/autohbw.7 \
                  man/pmemallocator.3 \
                  # end
 
+dist_doc_DOCS = autohbw.7 \
+               fixedallocator.3 \
+               hbwallocator.3 \
+               hbwmalloc.3 \
+               libmemtier.3 \
+               libmemtier.7 \
+               memkind_arena.3 \
+               memkind_dax_kmem.3 \
+               memkind_default.3 \
+               memkind_fixed.3 \
+               memkind_hbw.3 \
+               memkind_hugetlb.3 \
+               memkind_interleave.3 \
+               memkind_pmem.3 \
+               memkind-auto-dax-kmem-nodes.1 \
+               memkind-hbw-nodes.1 \
+               memkind.3 \
+               memkindallocator.3 \
+               memtier.1 \
+               pmemallocator.3 \
+               # end
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = memkind.pc
 
@@ -645,20 +666,19 @@ AM_CXXFLAGS = $(req_flags)
 
 clean-local: clean-jemalloc_deps
 
-html-local:
-	$(MAN2HTML) man/hbwmalloc.3 > man/hbwmalloc.html
-	$(MAN2HTML) man/memkind.3 > man/memkind.html
-	$(MAN2HTML) man/memkindallocator.3 > man/memkindallocator.html
-	$(MAN2HTML) man/pmemallocator.3 > man/pmemallocator.html
-	$(MAN2HTML) man/fixedallocator.3 > man/fixedallocator.html
-	$(MAN2HTML) man/libmemtier.3 > man/libmemtier3.html
-	$(MAN2HTML) man/libmemtier.7 > man/libmemtier7.html
+man-local:
+	for doc_name in $(dist_doc_DOCS) ; do \
+		utils/md2man/md2man.sh \
+			doc/$$doc_name.md \
+			utils/md2man/default.man \
+			man/$$doc_name ; \
+	done
 
 clean-jemalloc_deps:
 	[ -e jemalloc/configure ] && (cd jemalloc && $(MAKE) clean) || exit 0
 	[ -e jemalloc/configure ] && (cd jemalloc && rm configure) || exit 0
 
-.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps html-local \
+.PHONY: jemalloc_deps checkprogs clean-jemalloc_deps \
 	code-style-check code-style-apply
 
 .NOTPARALLEL: static_lib

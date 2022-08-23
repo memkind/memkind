@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2019 - 2021 Intel Corporation.
+# Copyright (C) 2019 - 2022 Intel Corporation.
 
 # Pull base image
 FROM ubuntu:20.04
@@ -36,6 +36,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     libxml2-utils \
     numactl \
     ninja-build \
+    pandoc \
     pkg-config \
     python-docutils \
     python3-pip \

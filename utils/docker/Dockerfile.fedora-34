@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2019 - 2021 Intel Corporation.
+# Copyright (C) 2019 - 2022 Intel Corporation.
 
 # Pull base image
 FROM fedora:34
@@ -34,6 +34,7 @@ RUN dnf update -y && dnf install -y \
     ninja-build \
     numactl \
     numactl-devel \
+    pandoc \
     pixman-devel \
     pkgconfig \
     python-docutils \

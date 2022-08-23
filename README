@@ -89,6 +89,10 @@ For using HMAT features in memkind:
 
 * **hwloc-devel** (v2.3.0 or later)
 
+You will need to install **pandoc** for generating man documentation.
+
+`make man-local` will generate man files in the man/ directory.
+
 ## Building and Installing
 
 The memkind library has a dependency on a related fork of jemalloc.

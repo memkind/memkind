@@ -33,7 +33,7 @@ jobs:
     - uses: codespell-project/actions-codespell@master
       with:
         skip: ./jemalloc,./test/gtest_fused/gtest,./.github/workflows/gha.yml
-        ignore_words_list: "ue"
+        ignore_words_list: "ue bu"
 
   docker-build:
     runs-on: ${{ matrix.os }}
@@ -138,3 +138,26 @@ jobs:
           ccache --max-size=150M
           ./build.sh
           make dist
+
+  man-local:
+    runs-on: ubuntu-20.04
+    name: man_check
+    steps:
+
+    - name: Install basic dependencies
+      run: sudo apt install pandoc autoconf clang-format-11 libnuma-dev
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: man
+      run: |
+        ./autogen.sh
+        ./configure
+        make man-local
+        if [[ $(git diff man/) ]]; then
+          echo "man and md files are not synced"
+          exit 1
+        fi
