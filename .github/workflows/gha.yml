@@ -140,7 +140,7 @@ jobs:
           make dist
 
   man-local:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: man_check
     steps:
 
@@ -157,7 +157,8 @@ jobs:
         ./autogen.sh
         ./configure
         make man-local
-        if [[ $(git diff man/) ]]; then
+        if [[ $(git diff --exit-code --ignore-matching-lines="\.TH.*\"20[0-9]+-[0-9]+-[0-9]+\".*" man/) ]]
+        then
           echo "man and md files are not synced"
           exit 1
         fi
