@@ -50,7 +50,7 @@ jobs:
 
             echo $queueLocation
 
-            sleep 5
+            sleep 10
             
             test=`curl -X GET --insecure -u $jenkins_user:$jenkins_token ${queueAddress}/$queueLocation/api/json | jq -r`
             echo $test
