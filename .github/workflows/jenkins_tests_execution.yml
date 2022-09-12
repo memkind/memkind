@@ -44,21 +44,13 @@ jobs:
               exit 1
             fi
 
-            echo $curlOutput
-
             queueLocation=`grep location <<< "$curlOutput" | grep -Eo '[0-9]{2,}'`
 
-            echo $queueLocation
-
             sleep 10
-            
-            test=`curl -X GET --insecure -u $jenkins_user:$jenkins_token ${queueAddress}/$queueLocation/api/json | jq -r`
-            echo $test
 
             job=`curl -X GET --insecure -u $jenkins_user:$jenkins_token ${queueAddress}/$queueLocation/api/json | jq -r .executable.url`
 
-            export job=$job
-            echo $job
+            echo "job=$job" >> $GITHUB_ENV
             
             curlJsonBuildOutput=`curl --insecure -u $jenkins_user:$jenkins_token ${job}api/json | jq -r '.building'`
 
@@ -72,11 +64,11 @@ jobs:
 
         - name: Show Jenkins job log
           run: |
-            curl --insecure -u $jenkins_user:$jenkins_token ${job}consoleText
+            curl --insecure -u $jenkins_user:$jenkins_token ${{ env.job }}consoleText
 
         - name: Validating job's status
           run: |
-            curlJsonResultOutput=`curl --insecure -u $jenkins_user:$jenkins_token ${job}api/json | jq -r '.result'`
+            curlJsonResultOutput=`curl --insecure -u $jenkins_user:$jenkins_token ${{ env.job }}api/json | jq -r '.result'`
 
             if [[ "$curlJsonResultOutput" == "FAILURE" ]]; then
               echo "Jenkins job failed!"
