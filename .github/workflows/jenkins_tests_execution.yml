@@ -70,7 +70,7 @@ jobs:
           run: |
             curlJsonResultOutput=`curl --insecure -u $jenkins_user:$jenkins_token ${{ env.job }}api/json | jq -r '.result'`
 
-            if [[ "$curlJsonResultOutput" == "FAILURE" ]]; then
+            if [[ "$curlJsonResultOutput" -ne "SUCCESS" ]]; then
               echo "Jenkins job failed!"
               exit 1
             fi
