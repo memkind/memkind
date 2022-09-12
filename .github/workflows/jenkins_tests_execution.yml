@@ -44,13 +44,21 @@ jobs:
               exit 1
             fi
 
+            echo $curlOutput
+
             queueLocation=`grep location <<< "$curlOutput" | grep -Eo '[0-9]{2,}'`
+
+            echo $queueLocation
 
             sleep 2
 
             job=`curl -X GET --insecure -u $jenkins_user:$jenkins_token ${queueAddress}/$queueLocation/api/json | jq -r .executable.url`
+
+            echo $job
             
             curlJsonBuildOutput=`curl --insecure -u $jenkins_user:$jenkins_token ${job}api/json | jq -r '.building'`
+
+            echo $curlJsonBuildOutput
 
             while [[ "$curlJsonBuildOutput" == "true" ]]
              do
