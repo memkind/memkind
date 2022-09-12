@@ -30,39 +30,41 @@ jobs:
         - name: Clone the git repo
           uses: actions/checkout@v2
         
-        # Executing jenkins job
-        - name: Executing jenkins job
+        # Github base ref
+        - name: Github base ref
           run: |
             echo ${{ github.base_ref }}
 
         # Executing jenkins job
         - name: Executing jenkins job
           run: |
-            curlOutput=`curl -XPOST -i --insecure -u $jenkins_user:$jenkins_token $job_address/buildWithParameters?token=$job_token`
+            curlOutput=`curl -XPOST -i --insecure -u $jenkins_user:$jenkins_token ${job_address}/buildWithParameters?token=$job_token`
             if [[ "$curlOutput" == *"Error"* ]]; then
               echo $curlOutput
               exit 1
             fi
 
-            queueLocation=`grep location <<< "$curlOutput" | cut -d " " -f 2`
+            queueLocation=`grep location <<< "$curlOutput" | grep -Eo '[0-9]{2,}'`
 
-            sleep 10
+            sleep 2
 
-            curlJsonBuildOutput=`curl --insecure -u $jenkins_user:$jenkins_token $job_address/lastBuild/api/json | jq -r '.building'`
+            job=`curl -X GET --insecure -u $jenkins_user:$jenkins_token ${queueAddress}/$queueLocation/api/json | jq -r .executable.url`
+            
+            curlJsonBuildOutput=`curl --insecure -u $jenkins_user:$jenkins_token ${job}api/json | jq -r '.building'`
 
             while [[ "$curlJsonBuildOutput" == "true" ]]
              do
               sleep 10
-              curlJsonBuildOutput=`curl --insecure -u $jenkins_user:$jenkins_token $job_address/lastBuild/api/json | jq -r '.building'`
+              curlJsonBuildOutput=`curl --insecure -u $jenkins_user:$jenkins_token ${job}api/json | jq -r '.building'`
             done
 
         - name: Show Jenkins job log
           run: |
-            curl --insecure -u $jenkins_user:$jenkins_token $job_address/lastBuild/consoleText
+            curl --insecure -u $jenkins_user:$jenkins_token ${job}consoleText
 
         - name: Validating job's status
           run: |
-            curlJsonResultOutput=`curl --insecure -u $jenkins_user:$jenkins_token $job_address/lastBuild/api/json | jq -r '.result'`
+            curlJsonResultOutput=`curl --insecure -u $jenkins_user:$jenkins_token ${job}api/json | jq -r '.result'`
 
             if [[ "$curlJsonResultOutput" == "FAILURE" ]]; then
               echo "Jenkins job failed!"
