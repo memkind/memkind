@@ -57,6 +57,7 @@ jobs:
 
             job=`curl -X GET --insecure -u $jenkins_user:$jenkins_token ${queueAddress}/$queueLocation/api/json | jq -r .executable.url`
 
+            export job=$job
             echo $job
             
             curlJsonBuildOutput=`curl --insecure -u $jenkins_user:$jenkins_token ${job}api/json | jq -r '.building'`
