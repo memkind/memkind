@@ -404,18 +404,6 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_memkind_posix_memalign_over_size)
     EXPECT_EQ(ENOMEM, ret);
 }
 
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBFailureMemalign)
-{
-    int ret = 0;
-    void *ptr = NULL;
-    int err = EINVAL;
-
-    ret = hbw_posix_memalign_psize(&ptr, 1073741824, 1073741826,
-                                   HBW_PAGESIZE_1GB_STRICT);
-    EXPECT_EQ(ret, err);
-    EXPECT_TRUE(ptr == NULL);
-}
-
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_RegularReallocWithMemAllign)
 {
     int ret = 0;
@@ -511,28 +499,6 @@ TEST_F(NegativeTest,
     EXPECT_EQ(hbw_get_policy(), HBW_POLICY_PREFERRED);
 
     hbw_free(ptr);
-}
-
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBMemalignPsizeAllign)
-{
-    void *ptr = NULL;
-    int ret = 0;
-    int err = EINVAL;
-
-    ret = hbw_posix_memalign_psize(&ptr, -1, 1024, HBW_PAGESIZE_1GB);
-    EXPECT_EQ(err, ret);
-}
-
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBNullRealloc)
-{
-    void *ptr = NULL;
-    ptr = memkind_realloc(MEMKIND_HBW_GBTLB, NULL, -1);
-    EXPECT_TRUE(ptr == NULL);
-}
-
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_GBNullFree)
-{
-    memkind_free(MEMKIND_GBTLB, NULL);
 }
 
 TEST_F(NegativeTestHuge,

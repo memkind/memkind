@@ -142,22 +142,7 @@ int hbw_verify_memory_region(void *addr, size_t size, int flags);
  described in the [SYSTEM CONFIGURATION](#system-configuration)
  section.
 
-+ **HBW_PAGESIZE_1GB (DEPRECATED)**\
- This option allows the user to specify arbitrary sizes backed
- by 1GB chunks of huge pages. Huge pages are allocated even if
- the size is not a modulo of 1GB.
- **Note:** This page size requires huge pages configuration
- described in the [SYSTEM CONFIGURATION](#system-configuration)
- section.
-
-+ **HBW_PAGESIZE_1GB_STRICT (DEPRECATED)**\
- The total size of the allocation must be a multiple of 1GB with
- this option, otherwise the allocation will fail. **Note:** This
- page size requires huge pages configuration described in the
- [SYSTEM CONFIGURATION](#system-configuration) section.
-
- **Note:** **HBW_PAGESIZE_2MB**, **HBW_PAGESIZE_1GB** and
- **HBW_PAGESIZE_1GB_STRICT** options are not supported with the
+ **Note:** **HBW_PAGESIZE_2MB**, option is not supported with the
  **HBW_POLICY_INTERLEAVE** policy which is described below.
 
 `hbw_set_policy()`

@@ -465,7 +465,7 @@ static void tcache_finalize(void *args)
 {
     int i;
     unsigned *tcache_map = args;
-    for (i = 0; i < MEMKIND_NUM_BASE_KIND; i++) {
+    for (i = 0; i < MEMKIND_NUM_STATIC_KINDS; i++) {
         if (tcache_map[i] != 0) {
             jemk_mallctl("tcache.destroy", NULL, NULL, (void *)&tcache_map[i],
                          sizeof(unsigned));
@@ -491,13 +491,13 @@ static inline int get_tcache_flag(unsigned partition, size_t size)
 
     // do not cache allocation larger than tcache_max nor those coming from
     // non-static kinds
-    if (size > TCACHE_MAX || partition >= MEMKIND_NUM_BASE_KIND) {
+    if (size > TCACHE_MAX || partition >= MEMKIND_NUM_STATIC_KINDS) {
         return MALLOCX_TCACHE_NONE;
     }
 
     unsigned *tcache_map = pthread_getspecific(tcache_key);
     if (tcache_map == NULL) {
-        tcache_map = jemk_calloc(MEMKIND_NUM_BASE_KIND, sizeof(unsigned));
+        tcache_map = jemk_calloc(MEMKIND_NUM_STATIC_KINDS, sizeof(unsigned));
         if (tcache_map == NULL) {
             return MALLOCX_TCACHE_NONE;
         }

@@ -109,9 +109,7 @@ following environment variables.
     **MEMKIND_INTERLEAVE**, **MEMKIND_HBW**,
     **MEMKIND_HBW_PREFERRED**, **MEMKIND_HBW_HUGETLB**,
     **MEMKIND_HBW_PRE‐FERRED_HUGETLB**,
-    **MEMKIND_HBW_GBTLB (DEPRECATED)**,
-    **MEMKIND_HBW_PREFERRED_GBTLB (DEPRECATED)**,
-    **MEMKIND_GBTLB (DEPRECATED)**, **MEMKIND_HBW_INTERLEAVE**
+    **MEMKIND_HBW_INTERLEAVE**
 
 If you are requesting any huge TLB pages, please make sure
 that the requested type is currently enabled in your OS.

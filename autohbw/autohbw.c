@@ -52,8 +52,7 @@ static bool MemkindInitDone = false;
 
 // Following is the type of HBW memory that is allocated using memkind.
 // By changing this type, this library can be used to allocate other
-// types of memory types (e.g., MEMKIND_HUGETLB, MEMKIND_GBTLB,
-// MEMKIND_HBW_HUGETLB etc.)
+// types of memory types (e.g., MEMKIND_HUGETLB,  MEMKIND_HBW_HUGETLB etc.)
 static memkind_t hbw_kind;
 
 // API control for HBW allocations.
@@ -154,9 +153,6 @@ static struct kind_name_t named_kinds[] = {
     {&MEMKIND_HBW_PREFERRED, "memkind_hbw_preferred"},
     {&MEMKIND_HBW_HUGETLB, "memkind_hbw_hugetlb"},
     {&MEMKIND_HBW_PREFERRED_HUGETLB, "memkind_hbw_preferred_hugetlb"},
-    {&MEMKIND_HBW_GBTLB, "memkind_hbw_gbtlb"},
-    {&MEMKIND_HBW_PREFERRED_GBTLB, "memkind_hbw_preferred_gbtlb"},
-    {&MEMKIND_GBTLB, "memkind_gbtlb"},
     {&MEMKIND_HBW_INTERLEAVE, "memkind_hbw_interleave"},
 };
 

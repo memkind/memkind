@@ -25,33 +25,6 @@ trial_t TrialGenerator ::create_trial_tuple(alloc_api_t api, size_t size,
     return ltrial;
 }
 
-void TrialGenerator ::generate_gb(alloc_api_t api, int number_of_gb_pages,
-                                  memkind_t memkind, alloc_api_t api_free,
-                                  bool psize_strict, size_t align)
-{
-    std::vector<size_t> sizes_to_alloc;
-    // When API = HBW_MEMALIGN_PSIZE: psize is set to HBW_PAGESIZE_1GB_STRICT
-    // when allocation is a multiple of 1GB. Otherwise it is set to
-    // HBW_PAGESIZE_1GB.
-    for (int i = 1; i <= number_of_gb_pages; i++) {
-        if (psize_strict || api != HBW_MEMALIGN_PSIZE)
-            sizes_to_alloc.push_back(i * GB);
-        else
-            sizes_to_alloc.push_back(i * GB + 1);
-    }
-    int k = 0;
-    trial_vec.clear();
-
-    for (int i = 0; i < (int)sizes_to_alloc.size(); i++) {
-        trial_vec.push_back(create_trial_tuple(api, sizes_to_alloc[i], align,
-                                               2 * MB, memkind, -1));
-        if (i > 0)
-            k++;
-        trial_vec.push_back(
-            create_trial_tuple(api_free, 0, 0, 0, memkind, k++));
-    }
-}
-
 int n_random(int i)
 {
     return random() % i;
@@ -165,12 +138,8 @@ void TrialGenerator ::run(int num_bandwidth, std::vector<int> &bandwidth)
                 hbw_pagesize_t psize;
                 if (trial_vec[i].page_size == (size_t)sysconf(_SC_PAGESIZE))
                     psize = HBW_PAGESIZE_4KB;
-                else if (trial_vec[i].page_size == 2097152)
-                    psize = HBW_PAGESIZE_2MB;
-                else if (trial_vec[i].size % trial_vec[i].page_size > 0)
-                    psize = HBW_PAGESIZE_1GB;
                 else
-                    psize = HBW_PAGESIZE_1GB_STRICT;
+                    psize = HBW_PAGESIZE_2MB;
 
                 ret = hbw_posix_memalign_psize(&ptr_vec[i],
                                                trial_vec[i].alignment,
