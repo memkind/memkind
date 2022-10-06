@@ -387,6 +387,29 @@ memtier_memory_init(size_t tier_size, bool is_dynamic_threshold)
     return memory;
 }
 
+extern void *__libc_malloc(size_t);
+extern void *__libc_free(void *);
+
+static bool check_allow_zero_allocs()
+{
+    void *ptr = __libc_malloc(0);
+    if (ptr) {
+        __libc_free(ptr);
+        return true;
+    }
+    return false;
+}
+
+static void set_allow_zero_allocs(struct memtier_tier_cfg *cfg,
+                                  unsigned cfg_size)
+{
+    int i;
+    bool allow_zero_allocs = check_allow_zero_allocs();
+    for (i = 0; i < cfg_size; ++i) {
+        memkind_set_allow_zero_allocs(cfg[i].kind, allow_zero_allocs);
+    }
+}
+
 static struct memtier_memory *
 builder_static_create_memory(struct memtier_builder *builder)
 {
@@ -406,6 +429,8 @@ builder_static_create_memory(struct memtier_builder *builder)
     }
     memory->cfg[0].kind = builder->cfg[0].kind;
     memory->cfg[0].kind_ratio = 1.0;
+
+    set_allow_zero_allocs(memory->cfg, memory->cfg_size);
 
     return memory;
 }
@@ -562,6 +587,8 @@ builder_dynamic_create_memory(struct memtier_builder *builder)
     }
     memory->cfg[0].kind = builder->cfg[0].kind;
     memory->cfg[0].kind_ratio = 1.0;
+
+    set_allow_zero_allocs(memory->cfg, memory->cfg_size);
 
     return memory;
 

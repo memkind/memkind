@@ -227,6 +227,12 @@ to be set in **MEMKIND_MEM_TIERS** environment variable:
 
 **libmemtier** works for applications that do not statically
 link a **malloc** implementation.
+When **libmemtier** is loaded with **LD_PRELOAD**, allocations with
+size zero, like **malloc**(0), have the same result as the system's
+standard library call.
+Most notably, a valid pointer may be returned in such calls,
+contrary to the default memkind behavior of returning NULL when
+size zero is passed to malloc-like functions.
 
 # COPYRIGHT #
 
