@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2021 Intel Corporation. */
+/* Copyright (C) 2014 - 2022 Intel Corporation. */
 
 #include "memkind.h"
 
@@ -10,6 +10,7 @@
 
 #include "check.h"
 #include "common.h"
+#include "config.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -486,6 +487,102 @@ TEST_F(
     ASSERT_NE(nullptr, ptr);
     ASSERT_GE(memkind_malloc_usable_size(MEMKIND_DEFAULT, ptr), 32U);
     memkind_free(MEMKIND_DEFAULT, ptr);
+}
+
+TEST_F(BATest, test_TC_MEMKIND_posix_memalign_default_size_zero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_DEFAULT, &ptr, 16, 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+#ifdef MEMKIND_MALLOC_NONNULL
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_DEFAULT, ptr);
+#else
+    ASSERT_EQ(ptr, nullptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_posix_memalign_hbw_size_zero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_HBW, &ptr, 16, 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+#ifdef MEMKIND_MALLOC_NONNULL
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_HBW, ptr);
+#else
+    ASSERT_EQ(ptr, nullptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbw_malloc_size_zero)
+{
+    void *ptr = hbw_malloc(0);
+#ifdef MEMKIND_MALLOC_NONNULL
+    ASSERT_NE(ptr, nullptr);
+    hbw_free(ptr);
+#else
+    ASSERT_EQ(ptr, nullptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memkind_malloc_size_zero)
+{
+    void *ptr = memkind_malloc(MEMKIND_HBW, 0);
+#ifdef MEMKIND_MALLOC_NONNULL
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_HBW, ptr);
+#else
+    ASSERT_EQ(ptr, nullptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbw_calloc_size_zero)
+{
+    void *ptr = hbw_calloc(1, 0);
+#ifdef MEMKIND_MALLOC_NONNULL
+    ASSERT_NE(ptr, nullptr);
+    hbw_free(ptr);
+#else
+    ASSERT_EQ(ptr, nullptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memkind_calloc_size_zero)
+{
+    void *ptr = memkind_calloc(MEMKIND_HBW, 1, 0);
+#ifdef MEMKIND_MALLOC_NONNULL
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_HBW, ptr);
+#else
+    ASSERT_EQ(ptr, nullptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbw_posix_memalign_size_zero)
+{
+    void *ptr = NULL;
+    errno = 0;
+
+    int ret = hbw_posix_memalign(&ptr, 4096, 0);
+    EXPECT_EQ(0, ret);
+    EXPECT_EQ(0, errno);
+#ifdef MEMKIND_MALLOC_NONNULL
+    ASSERT_NE(ptr, nullptr);
+    hbw_free(ptr);
+#else
+    ASSERT_EQ(ptr, nullptr);
+#endif
 }
 
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_Policy)

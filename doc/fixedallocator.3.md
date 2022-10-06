@@ -70,6 +70,7 @@ void libmemkind::fixed::allocator<T>::destroy(T *p) const;
   supplied to `libmemkind::fixed::allocator()`. Throw
   *std::bad_alloc* when *n = 0* or there is not enough memory to
   satisfy the request.
+  *std::bad_alloc* when *n = 0* will not be thrown when *--enable-malloc-nonnull* configure option is set.
 
 + **`libmemkind::fixed::allocator<T>::deallocate(T *p, std::size_t n)`**\
   deallocates memory associated with a pointer returned by

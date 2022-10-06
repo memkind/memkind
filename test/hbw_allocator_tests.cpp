@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2021 Intel Corporation. */
+/* Copyright (C) 2014 - 2022 Intel Corporation. */
 
 #include <hbw_allocator.h>
 
 #include "common.h"
+#include "config.h"
 #include <vector>
 
 // Tests for hbw::allocator class.
@@ -79,7 +80,11 @@ TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AllocationSizeOutOfBounds)
 
     ASSERT_THROW(allocator.allocate(max_size), std::bad_alloc);
 
+#ifdef MEMKIND_MALLOC_NONNULL
+    ASSERT_NO_THROW(allocator.allocate(0));
+#else
     ASSERT_THROW(allocator.allocate(0), std::bad_alloc);
+#endif
 }
 
 // Test if variable will be constructed.

@@ -80,8 +80,9 @@ void libmemkind::pmem::allocator<T>::destroy(T *p) const;
 **Note:**
 
 + **`T *libmemkind::pmem::allocator<T>::allocate(std::size_t n)`**\
-  allocates persistent memory using `memkind_malloc()`. Throw *std::bad_alloc*
-  when *n = 0* or there is not enough memory to satisfy the request.
+  allocates persistent memory using `memkind_malloc()`. Throw *std::bad_alloc* when *n = 0* or there is not enough memory to
+  satisfy the request.
+  *std::bad_alloc* when *n = 0* will not be thrown when *--enable-malloc-nonnull* configure option is set.
 
 + **`libmemkind::pmem::allocator<T>::deallocate(T *p, std::size_t n)`**\
   deallocates memory associated with pointer returned by `allocate()` using
