@@ -488,6 +488,138 @@ TEST_F(
     memkind_free(MEMKIND_DEFAULT, ptr);
 }
 
+TEST_F(BATest, test_TC_MEMKIND_posix_memalign_default_size_zero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_DEFAULT, &ptr, 16, 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_DEFAULT, ptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_posix_memalign_hi_capacity_size_zero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_HIGHEST_CAPACITY, &ptr, 16, 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_HIGHEST_CAPACITY, ptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_posix_memalign_hi_capacity_local_size_zero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_HIGHEST_CAPACITY_LOCAL, &ptr, 16, 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_HIGHEST_CAPACITY_LOCAL, ptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_posix_memalign_hbw_size_zero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_HBW, &ptr, 16, 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_HBW, ptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbw_malloc_size_zero)
+{
+    void *ptr = hbw_malloc(0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    hbw_free(ptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memkind_malloc_size_zero)
+{
+    void *ptr = memkind_malloc(MEMKIND_HBW, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_HBW, ptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbw_calloc_size_zero)
+{
+    void *ptr = hbw_calloc(1, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    hbw_free(ptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_memkind_calloc_size_zero)
+{
+    void *ptr = memkind_calloc(MEMKIND_HBW, 1, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_HBW, ptr);
+#endif
+}
+
+TEST_F(BATest, test_TC_MEMKIND_hbw_posix_memalign_size_zero)
+{
+    void *ptr = NULL;
+    errno = 0;
+
+    int ret = hbw_posix_memalign(&ptr, 4096, 0);
+    EXPECT_EQ(0, ret);
+    EXPECT_EQ(0, errno);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    hbw_free(ptr);
+#endif
+}
+
 TEST_F(BATest, test_TC_MEMKIND_hbwmalloc_Pref_Policy)
 {
     hbw_set_policy(HBW_POLICY_PREFERRED);

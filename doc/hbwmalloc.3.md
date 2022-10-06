@@ -65,16 +65,20 @@ int hbw_verify_memory_region(void *addr, size_t size, int flags);
 `hbw_malloc()`
 :   allocates *size* bytes of uninitialized high bandwidth
   memory. The allocated space is suitably aligned (after possible
-  pointer coercion) for storage of any type of object. If *size*
-  is zero then `hbw_malloc()` returns NULL.
+  pointer coercion) for storage of any type of object.
+  If *size* is zero, then `hbw_malloc()` returns either NULL or
+  a valid ptr, depending on the system's standard library
+  malloc(0) behavior.
 
 `hbw_calloc()`
 :   allocates space for *nmemb* objects in high bandwidth
   memory, each *size* bytes in length. The result is identical
   to calling `hbw_malloc()` with an argument of *nmemb* * *size*,
   with the exception that the allocated memory is explicitly
-  initialized to zero bytes. If *nmemb* or *size* is 0, then
-  `hbw_calloc()` returns NULL.
+  initialized to zero bytes.
+  If *nmemb* or *size* is zero, then `hbw_calloc()` returns
+  either NULL or a valid ptr, depending on the system's
+  standard library malloc(0) behavior.
 
 `hbw_realloc()`
 :   changes the size of the previously allocated high bandwidth
