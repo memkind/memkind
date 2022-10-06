@@ -189,7 +189,11 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocZero)
     void *test1 = nullptr;
 
     test1 = memkind_malloc(pmem_kind, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     ASSERT_EQ(test1, nullptr);
+#else
+    ASSERT_NE(test1, nullptr);
+#endif
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemMallocSizeMax)
@@ -232,7 +236,12 @@ TEST_P(MemkindPmemTestsCalloc, test_TC_MEMKIND_PmemCallocZero)
     size_t num = std::get<1>(GetParam());
 
     test = memkind_calloc(pmem_kind, size, num);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     ASSERT_EQ(test, nullptr);
+#else
+    ASSERT_NE(test, nullptr);
+    memkind_free(pmem_kind, test);
+#endif
 }
 
 INSTANTIATE_TEST_CASE_P(CallocParam, MemkindPmemTestsCalloc,
@@ -537,7 +546,11 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptrZero)
     void *test = nullptr;
 
     test = memkind_realloc(pmem_kind, test, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     ASSERT_EQ(test, nullptr);
+#else
+    ASSERT_NE(test, nullptr);
+#endif
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocIncreaseSize)
@@ -727,14 +740,19 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemFreeNullptr)
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemReallocNullptrSizeZero)
 {
     const double test_time = 5;
-    void *test_nullptr = nullptr;
+    void *test_ptr = nullptr;
     TimerSysTime timer;
     timer.start();
     do {
         errno = 0;
         // equivalent to memkind_malloc(pmem_kind,0)
-        test_nullptr = memkind_realloc(pmem_kind, nullptr, 0);
-        ASSERT_EQ(test_nullptr, nullptr);
+        test_ptr = memkind_realloc(pmem_kind, nullptr, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+        ASSERT_EQ(test_ptr, nullptr);
+#else
+        ASSERT_NE(test_ptr, nullptr);
+        memkind_free(pmem_kind, test_ptr);
+#endif
         ASSERT_EQ(errno, 0);
     } while (timer.getElapsedTime() < test_time);
 }
@@ -942,7 +960,11 @@ TEST_F(MemkindPmemTests,
     int ret = memkind_posix_memalign(pmem_kind, &test, alignment, size);
     ASSERT_EQ(errno, 0);
     ASSERT_EQ(ret, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(test, nullptr);
+#else
     ASSERT_NE(test, nullptr);
+#endif
 
     memkind_free(pmem_kind, test);
 }
@@ -956,7 +978,11 @@ TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignSizeZero)
     int ret = memkind_posix_memalign(pmem_kind, &test, alignment, 0);
     ASSERT_EQ(errno, 0);
     ASSERT_EQ(ret, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     ASSERT_EQ(test, nullptr);
+#else
+    ASSERT_NE(test, nullptr);
+#endif
 }
 
 TEST_F(MemkindPmemTests, test_TC_MEMKIND_PmemPosixMemalignSizeMax)

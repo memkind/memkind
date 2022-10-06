@@ -132,13 +132,17 @@ HEAP MANAGEMENT:
 `memkind_malloc()`
 :   allocates *size* bytes of uninitialized memory of the specified *kind*. The allocated
     space is suitably aligned (after possible pointer coercion) for storage of any type of
-    object. If *size* is 0, then `memkind_malloc()` returns *NULL*.
+    object.
+    If *size* is zero, then `memkind_malloc()` returns either NULL or a valid ptr,
+    depending on the system's standard library malloc(0) behavior.
 
 `memkind_calloc()`
 :   allocates space for *num* objects each *size* bytes in length in memory of the
     specified *kind*. The result is identical to calling `memkind_malloc()` with an argument
     of *num* * *size*, with the exception that the allocated memory is explicitly initialized
-    to zero bytes. If *num* or *size* is 0, then `memkind_calloc()` returns *NULL*.
+    to zero bytes.
+    If *num* or *size* is zero, then `memkind_calloc()` returns either NULL or a valid ptr,
+    depending on the system's standard library malloc(0) behavior.
 
 `memkind_realloc()`
 :   changes the size of the previously allocated memory referenced by *ptr* to *size* bytes
@@ -167,8 +171,9 @@ then `memkind_realloc()` returns *NULL* and sets *errno* to **EINVAL**.
 :   allocates *size* bytes of memory of a specified *kind* such that the allocation’s
     base address is an even multiple of *alignment*, and returns the allocation in the value
     pointed to by *memptr*. The requested *alignment* must be a power of 2 at least as large
-    as *sizeof(void*)*. If *size* is 0, then `memkind_posix_memalign()` returns 0, with a
-    *NULL* returned in *memptr*.
+    as *sizeof(void*)*.
+    If *size* is zero and the system's standard library returns NULL on malloc(0) call,
+    then `memkind_posix_memalign()` returns 0, with a *NULL* returned in *memptr*.
 
 `memkind_malloc_usable_size()`
 :   function provides the same semantics as `malloc_usable_size(3)`, but operates
