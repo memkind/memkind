@@ -672,9 +672,11 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
         err = memkind_posix_check_alignment(kind, alignment);
     }
     if (MEMKIND_LIKELY(!err)) {
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
         if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
             return 0;
         }
+#endif
         /* posix_memalign should not change errno.
            Set it to its previous value after calling jemalloc */
         int errno_before = errno;
@@ -758,13 +760,15 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
 
 static void *jemk_mallocx_check(size_t size, int flags)
 {
-    if (MEMKIND_LIKELY(size)) {
-        void *ptr = jemk_mallocx(size, flags);
-        if (MEMKIND_UNLIKELY(!ptr))
-            errno = ENOMEM;
-        return ptr;
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    if (MEMKIND_UNLIKELY(!size)) {
+        return NULL;
     }
-    return NULL;
+#endif
+    void *ptr = jemk_mallocx(size, flags);
+    if (MEMKIND_UNLIKELY(!ptr))
+        errno = ENOMEM;
+    return ptr;
 }
 
 void memkind_arena_init(struct memkind *kind)

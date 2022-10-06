@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2021 Intel Corporation.
+# Copyright (C) 2014 - 2022 Intel Corporation.
 
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
@@ -25,6 +25,29 @@ AX_PTHREAD([LIBS="$PTHREAD_LIBS $LIBS" CFLAGS="$CFLAGS $PTHREAD_CFLAGS" CC="$PTH
 AC_SEARCH_LIBS([ceilf], [m])
 
 AM_PROG_CC_C_O
+
+#================================malloc(0)=====================================
+AC_CACHE_CHECK([check standard library malloc(0) return ptr], [malloc_cv_zero_bytes],
+               AC_RUN_IFELSE([AC_LANG_PROGRAM(
+                  [[
+                    #include <stdlib.h>
+                  ]],
+                  [[
+                    void *ptr = malloc(0);
+                    if (ptr != NULL) {
+                        free(ptr);
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                  ]]
+                             )],
+                  [malloc_cv_zero_bytes=valid_ptr],
+                  [malloc_cv_zero_bytes=null_ptr]
+               ))
+if test "x${malloc_cv_zero_bytes}" = "xnull_ptr" ; then
+  AC_DEFINE([MEMKIND_MALLOC_ZERO_BYTES_NULL], [ ], [Memkind malloc-like functions return NULL for size = 0])
+fi
 
 #============================tls===============================================
 # Check for thread local storage support
