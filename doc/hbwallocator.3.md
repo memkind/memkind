@@ -75,7 +75,7 @@ Template arguments:
 :   allocates high bandwidth memory using `hbw_malloc()`.
     Throw `std::bad_alloc` when:
 
-+ n = 0,
++ n = 0 (only in case when standard library's malloc(0) returns NULL),
 + n > max_size()
 + or there is not enough memory to satisfy the request.
 
