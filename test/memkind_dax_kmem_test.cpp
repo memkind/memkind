@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2021 Intel Corporation. */
+/* Copyright (C) 2019 - 2022 Intel Corporation. */
 
 #include <memkind.h>
 
@@ -88,7 +88,11 @@ TEST_P(MemkindDaxKmemTestsParam,
 TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_alloc_zero)
 {
     void *test1 = memkind_malloc(memory_kind, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     ASSERT_EQ(test1, nullptr);
+#else
+    ASSERT_NE(test1, nullptr);
+#endif
 }
 
 TEST_P(MemkindDaxKmemTestsParam,
@@ -102,11 +106,19 @@ TEST_P(MemkindDaxKmemTestsParam,
 
 TEST_P(MemkindDaxKmemTestsParam, test_TC_MEMKIND_MEMKIND_DAX_KMEM_calloc_zero)
 {
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     void *test = memkind_calloc(memory_kind, 0, 100);
     ASSERT_EQ(test, nullptr);
 
     test = memkind_calloc(memory_kind, 100, 0);
     ASSERT_EQ(test, nullptr);
+#else
+    void *test = memkind_calloc(memory_kind, 0, 100);
+    ASSERT_NE(test, nullptr);
+
+    test = memkind_calloc(memory_kind, 100, 0);
+    ASSERT_NE(test, nullptr);
+#endif
 }
 
 TEST_P(MemkindDaxKmemTestsParam,

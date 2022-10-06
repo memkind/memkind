@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2021 Intel Corporation. */
+/* Copyright (C) 2014 - 2022 Intel Corporation. */
 
 #include <memkind.h>
 
@@ -230,45 +230,6 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorMemAlign)
     EXPECT_EQ(errno, 0);
 }
 
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_DefaultSizeZero)
-{
-    int ret = 0;
-    void *ptr = NULL;
-    int err = 0;
-
-    errno = 0;
-    ret = memkind_posix_memalign(MEMKIND_DEFAULT, &ptr, 16, 0);
-    EXPECT_EQ(err, ret);
-    EXPECT_EQ(errno, 0);
-    ASSERT_TRUE(ptr == NULL);
-}
-
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_HiCapacitySizeZero)
-{
-    int ret = 0;
-    void *ptr = NULL;
-    int err = 0;
-
-    errno = 0;
-    ret = memkind_posix_memalign(MEMKIND_HIGHEST_CAPACITY, &ptr, 16, 0);
-    EXPECT_EQ(err, ret);
-    EXPECT_EQ(errno, 0);
-    ASSERT_TRUE(ptr == NULL);
-}
-
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_LocalHiCapacitySizeZero)
-{
-    int ret = 0;
-    void *ptr = NULL;
-    int err = 0;
-
-    errno = 0;
-    ret = memkind_posix_memalign(MEMKIND_HIGHEST_CAPACITY_LOCAL, &ptr, 16, 0);
-    EXPECT_EQ(err, ret);
-    EXPECT_EQ(errno, 0);
-    ASSERT_TRUE(ptr == NULL);
-}
-
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorAlignment)
 {
     int ret = 0;
@@ -279,19 +240,6 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorAlignment)
     ret = memkind_posix_memalign(MEMKIND_HBW, &ptr, 5, 100);
     EXPECT_EQ(err, ret);
     EXPECT_EQ(errno, 0);
-}
-
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_HBWSizeZero)
-{
-    int ret = 0;
-    void *ptr = NULL;
-    int err = 0;
-
-    errno = 0;
-    ret = memkind_posix_memalign(MEMKIND_HBW, &ptr, 16, 0);
-    EXPECT_EQ(err, ret);
-    EXPECT_EQ(errno, 0);
-    ASSERT_TRUE(ptr == NULL);
 }
 
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_ErrorAllocM)
@@ -323,21 +271,9 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_hbw_malloc_over_size)
     ASSERT_TRUE(ptr == NULL);
 }
 
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_hbw_malloc_size_zero)
-{
-    void *ptr = hbw_malloc(0);
-    ASSERT_TRUE(ptr == NULL);
-}
-
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_memkind_malloc_over_size)
 {
     void *ptr = memkind_malloc(MEMKIND_HBW, SIZE_MAX);
-    ASSERT_TRUE(ptr == NULL);
-}
-
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_memkind_malloc_size_zero)
-{
-    void *ptr = memkind_malloc(MEMKIND_HBW, 0);
     ASSERT_TRUE(ptr == NULL);
 }
 
@@ -347,21 +283,9 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_hbw_calloc_over_size)
     ASSERT_TRUE(ptr == NULL);
 }
 
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_hbw_calloc_size_zero)
-{
-    void *ptr = hbw_calloc(1, 0);
-    ASSERT_TRUE(ptr == NULL);
-}
-
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_memkind_calloc_over_size)
 {
     void *ptr = memkind_calloc(MEMKIND_HBW, 1, SIZE_MAX);
-    ASSERT_TRUE(ptr == NULL);
-}
-
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_memkind_calloc_size_zero)
-{
-    void *ptr = memkind_calloc(MEMKIND_HBW, 1, 0);
     ASSERT_TRUE(ptr == NULL);
 }
 
@@ -383,17 +307,6 @@ TEST_F(NegativeTest, test_TC_MEMKIND_Negative_hbw_posix_memalign_over_size)
     int ret = hbw_posix_memalign(&ptr, 4096, SIZE_MAX);
     EXPECT_TRUE(ptr == NULL);
     EXPECT_EQ(ENOMEM, ret);
-}
-
-TEST_F(NegativeTest, test_TC_MEMKIND_Negative_hbw_posix_memalign_size_zero)
-{
-    void *ptr = NULL;
-    errno = 0;
-
-    int ret = hbw_posix_memalign(&ptr, 4096, 0);
-    EXPECT_TRUE(ptr == NULL);
-    EXPECT_EQ(0, ret);
-    EXPECT_EQ(0, errno);
 }
 
 TEST_F(NegativeTest, test_TC_MEMKIND_Negative_memkind_posix_memalign_over_size)

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2019 - 2021 Intel Corporation. */
+/* Copyright (C) 2019 - 2022 Intel Corporation. */
 
 #include "memkind.h"
 
@@ -90,7 +90,11 @@ TEST_F(MemkindNullKindTests, test_TC_MEMKIND_DefaultReallocNullptrSizeZero)
         errno = 0;
         // equivalent to memkind_malloc(MEMKIND_DEFAULT,0)
         test_nullptr = memkind_realloc(MEMKIND_DEFAULT, nullptr, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
         ASSERT_EQ(test_nullptr, nullptr);
+#else
+        ASSERT_NE(test_nullptr, nullptr);
+#endif
         ASSERT_EQ(errno, 0);
     } while (timer.getElapsedTime() < test_time);
 }
