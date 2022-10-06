@@ -26,6 +26,19 @@ protected:
     {}
 };
 
+class MemkindHiCapacityLocalFunctionalTests: public ::testing::Test
+{
+protected:
+    TestPrereq tp;
+
+    void SetUp()
+    {
+        if (!tp.is_libhwloc_supported()) {
+            GTEST_SKIP() << "libhwloc is required." << std::endl;
+        }
+    }
+};
+
 class MemkindHiCapacityFunctionalTestsParam: public ::Memkind_Param_Test
 {
 protected:
@@ -44,16 +57,51 @@ TEST_P(MemkindHiCapacityFunctionalTestsParam, test_TC_HiCapacity_alloc_size_max)
     ASSERT_EQ(errno, ENOMEM);
 }
 
-TEST_F(MemkindHiCapacityFunctionalTests, test_TC_HiCapacityLocal_alloc_size_max)
+TEST_F(MemkindHiCapacityLocalFunctionalTests,
+       test_TC_HiCapacityLocal_alloc_size_max)
 {
-    if (tp.is_libhwloc_supported()) {
-        errno = 0;
-        void *test1 = memkind_malloc(MEMKIND_HIGHEST_CAPACITY_LOCAL, SIZE_MAX);
-        ASSERT_EQ(test1, nullptr);
-        ASSERT_EQ(errno, ENOMEM);
-    } else {
-        GTEST_SKIP() << "libhwloc is required." << std::endl;
-    }
+    errno = 0;
+    void *test1 = memkind_malloc(MEMKIND_HIGHEST_CAPACITY_LOCAL, SIZE_MAX);
+    ASSERT_EQ(test1, nullptr);
+    ASSERT_EQ(errno, ENOMEM);
+}
+
+TEST_F(MemkindHiCapacityFunctionalTests,
+       test_TC_MEMKIND_posix_memalign_hi_capacity_size_zero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_HIGHEST_CAPACITY, &ptr, 16, 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_HIGHEST_CAPACITY, ptr);
+#endif
+}
+
+TEST_F(MemkindHiCapacityLocalFunctionalTests,
+       test_TC_MEMKIND_posix_memalign_hi_capacity_local_size_zero)
+{
+    int ret = 0;
+    void *ptr = NULL;
+    int err = 0;
+
+    errno = 0;
+    ret = memkind_posix_memalign(MEMKIND_HIGHEST_CAPACITY_LOCAL, &ptr, 16, 0);
+    EXPECT_EQ(err, ret);
+    EXPECT_EQ(errno, 0);
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
+    ASSERT_EQ(ptr, nullptr);
+#else
+    ASSERT_NE(ptr, nullptr);
+    memkind_free(MEMKIND_HIGHEST_CAPACITY_LOCAL, ptr);
+#endif
 }
 
 TEST_P(MemkindHiCapacityFunctionalTestsParam, test_TC_HiCapacity_correct_numa)

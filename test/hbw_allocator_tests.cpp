@@ -79,7 +79,11 @@ TEST_F(HbwAllocatorTests, test_TC_MEMKIND_AllocationSizeOutOfBounds)
 
     ASSERT_THROW(allocator.allocate(max_size), std::bad_alloc);
 
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     ASSERT_THROW(allocator.allocate(0), std::bad_alloc);
+#else
+    ASSERT_NO_THROW(allocator.allocate(0));
+#endif
 }
 
 // Test if variable will be constructed.
