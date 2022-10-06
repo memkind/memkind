@@ -64,8 +64,10 @@ void libmemkind::static_kind::allocator<T>::destroy(T *p) const;
 
 `T *libmemkind::static_kind::allocator<T>::allocate(std::size_t n)`
 :   allocates uninitialized memory of size *n* bytes of the specified kind using
-    `memkind_malloc()`. Throw **std::bad_alloc** when n = 0 or there is not enough
+    `memkind_malloc()`. Throw **std::bad_alloc** when there is not enough
     memory to satisfy the request.
+    In systems with the standard library behavior of malloc(0) returning NULL,
+    *std::bad_alloc* is also thrown when size *n* is zero.
 
 `libmemkind::static_kind::allocator<T>::deallocate(T *p, std::size_t n)`
 :   deallocates memory associated with pointer returned by `allocate()` using `memkind_free()`.

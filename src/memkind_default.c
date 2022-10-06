@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2021 Intel Corporation. */
+/* Copyright (C) 2014 - 2022 Intel Corporation. */
 
 #include <memkind/internal/heap_manager.h>
 #include <memkind/internal/memkind_arena.h>
@@ -65,18 +65,22 @@ MEMKIND_EXPORT int memkind_default_destroy(struct memkind *kind)
 
 MEMKIND_EXPORT void *memkind_default_malloc(struct memkind *kind, size_t size)
 {
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         return NULL;
     }
+#endif
     return jemk_malloc(size);
 }
 
 MEMKIND_EXPORT void *memkind_default_calloc(struct memkind *kind, size_t num,
                                             size_t size)
 {
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     if (MEMKIND_UNLIKELY(size_out_of_bounds(num) || size_out_of_bounds(size))) {
         return NULL;
     }
+#endif
     return jemk_calloc(num, size);
 }
 
@@ -84,24 +88,28 @@ MEMKIND_EXPORT int memkind_default_posix_memalign(struct memkind *kind,
                                                   void **memptr,
                                                   size_t alignment, size_t size)
 {
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         *memptr = NULL;
         return 0;
     }
+#endif
     return jemk_posix_memalign(memptr, alignment, size);
 }
 
 MEMKIND_EXPORT void *memkind_default_realloc(struct memkind *kind, void *ptr,
                                              size_t size)
 {
+#ifdef MEMKIND_MALLOC_ZERO_BYTES_NULL
     if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         jemk_free(ptr);
         return NULL;
     }
-    ptr = jemk_realloc(ptr, size);
-    if (MEMKIND_UNLIKELY(!ptr))
+#endif
+    void *ret_ptr = jemk_realloc(ptr, size);
+    if (MEMKIND_UNLIKELY(!ret_ptr && ptr && size != 0))
         errno = ENOMEM;
-    return ptr;
+    return ret_ptr;
 }
 
 MEMKIND_EXPORT void memkind_default_free(struct memkind *kind, void *ptr)
