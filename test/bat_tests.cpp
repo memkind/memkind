@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 /* Copyright (C) 2014 - 2022 Intel Corporation. */
 
+#include "include/memkind/internal/memkind_private.h"
 #include "memkind.h"
 
 #include <algorithm>
@@ -602,4 +603,127 @@ TEST_F(BATest, test_TC_MEMKIND_REGULAR_nodemask)
 
     check_numa_nodes(kind_nodemask, MPOL_BIND, mem, 1234567);
     memkind_free(MEMKIND_REGULAR, mem);
+}
+
+INSTANTIATE_TEST_CASE_P(KindParam, Memkind_Param_Test,
+                        ::testing::Values(MEMKIND_DEFAULT, MEMKIND_REGULAR));
+
+TEST_P(Memkind_Param_Test, test_TC_MEMKIND_set_allow_zero_allocs)
+{
+    void *ptr = memkind_malloc(memory_kind, 1);
+
+#ifdef MEMKIND_MALLOC_NONNULL
+    ASSERT_EQ(memory_kind->allow_zero_allocs, true);
+#else
+    ASSERT_EQ(memory_kind->allow_zero_allocs, false);
+#endif
+
+    memkind_set_allow_zero_allocs(memory_kind, true);
+    ASSERT_EQ(memory_kind->allow_zero_allocs, true);
+
+    memkind_set_allow_zero_allocs(memory_kind, false);
+    ASSERT_EQ(memory_kind->allow_zero_allocs, false);
+
+    memkind_free(memory_kind, ptr);
+}
+
+class SetAllowZeroAllocsTest
+    : public testing::TestWithParam<std::tuple<bool, memkind_t>>
+{
+protected:
+    bool allow_zero_allocs = std::get<0>(GetParam());
+    memkind_t memory_kind = std::get<1>(GetParam());
+
+    void SetUp()
+    {
+        std::cout << "Testing memory kind " << kind_name(memory_kind)
+                  << " and allow_zero_allocs set to " << allow_zero_allocs
+                  << std::endl;
+        memkind_set_allow_zero_allocs(memory_kind, allow_zero_allocs);
+    }
+};
+
+class SetAllowZeroAllocsTestCalloc
+    : public ::testing::TestWithParam<
+          std::tuple<bool, memkind_t, std::tuple<size_t, size_t>>>
+{
+protected:
+    bool allow_zero_allocs = std::get<0>(GetParam());
+    memkind_t memory_kind = std::get<1>(GetParam());
+    size_t num = std::get<0>(std::get<2>(GetParam()));
+    size_t size = std::get<1>(std::get<2>(GetParam()));
+
+    void SetUp()
+    {
+        std::cout << "Test params: memory kind=" << kind_name(memory_kind)
+                  << ", allow_zero_allocs=" << allow_zero_allocs
+                  << ", num=" << num << ", size=" << size << std::endl;
+        memkind_set_allow_zero_allocs(memory_kind, allow_zero_allocs);
+    }
+};
+
+INSTANTIATE_TEST_CASE_P(ZeroAllocsParam, SetAllowZeroAllocsTest,
+                        ::testing::Combine(::testing::Values(true, false),
+                                           ::testing::Values(MEMKIND_DEFAULT,
+                                                             MEMKIND_REGULAR)));
+
+INSTANTIATE_TEST_CASE_P(
+    ZeroAllocsCallocParam, SetAllowZeroAllocsTestCalloc,
+    ::testing::Combine(::testing::Values(true, false),
+                       ::testing::Values(MEMKIND_DEFAULT, MEMKIND_REGULAR),
+                       ::testing::Values(std::make_tuple(0, 8),
+                                         std::make_tuple(8, 0),
+                                         std::make_tuple(0, 0))));
+
+TEST_P(SetAllowZeroAllocsTest, test_TC_MEMKIND_set_allow_zero_allocs_malloc)
+{
+    void *ptr = memkind_malloc(memory_kind, 0);
+    if (allow_zero_allocs == true) {
+        ASSERT_NE(ptr, nullptr);
+        memkind_free(memory_kind, ptr);
+    } else {
+        ASSERT_EQ(ptr, nullptr);
+    }
+}
+
+TEST_P(SetAllowZeroAllocsTestCalloc,
+       test_TC_MEMKIND_set_allow_zero_allocs_calloc)
+{
+    void *ptr = memkind_calloc(memory_kind, num, size);
+    if (allow_zero_allocs == true) {
+        ASSERT_NE(ptr, nullptr);
+        memkind_free(memory_kind, ptr);
+    } else {
+        ASSERT_EQ(ptr, nullptr);
+    }
+}
+
+TEST_P(SetAllowZeroAllocsTest, test_TC_MEMKIND_set_allow_zero_allocs_realloc)
+{
+    void *ptr = memkind_realloc(memory_kind, nullptr, 0);
+    if (allow_zero_allocs == true) {
+        ASSERT_NE(ptr, nullptr);
+        memkind_free(memory_kind, ptr);
+    } else {
+        ASSERT_EQ(ptr, nullptr);
+    }
+}
+
+TEST_P(SetAllowZeroAllocsTest,
+       test_TC_MEMKIND_set_allow_zero_allocs_posix_memalign)
+{
+    int ret = 0;
+    void *ptr = nullptr;
+
+    errno = 0;
+    ret = memkind_posix_memalign(memory_kind, &ptr, 16, 0);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(errno, 0);
+
+    if (allow_zero_allocs == true) {
+        ASSERT_NE(ptr, nullptr);
+        memkind_free(memory_kind, ptr);
+    } else {
+        ASSERT_EQ(ptr, nullptr);
+    }
 }

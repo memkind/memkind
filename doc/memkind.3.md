@@ -92,6 +92,7 @@ int memkind_destroy_kind(memkind_t kind);
 int memkind_check_available(memkind_t kind);
 ssize_t memkind_get_capacity(memkind_t kind);
 int memkind_check_dax_path(const char *pmem_dir);
+void memkind_set_allow_zero_allocs(memkind_t kind, bool allow_zero_allocs);
 
 STATISTICS:
 int memkind_update_cached_stats(void);
@@ -333,6 +334,12 @@ KIND MANAGEMENT:
 :   returns zero if file-backed kind memory is in the specified directory path
     *pmem_dir*. Otherwise, it can be created with the DAX attribute or an error code
     from the [ERRORS](#errors) section.
+
+`memkind_set_allow_zero_allocs()`
+:   for a given *kind*, determines the behavior of malloc-like functions when size passed
+    to them is equal to zero.
+    These functions return a valid pointer when *allow_zero_allocs* is set to true,
+    return NULL when set to false (default memkind behavior).
 
 **MEMKIND_PMEM_MIN_SIZE** The minimum size which allows to limit the file-backed
 memory partition.

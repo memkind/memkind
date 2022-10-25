@@ -522,6 +522,9 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
     unsigned arena;
 
     int err = kind->ops->get_arena(kind, &arena, size);
+    if (!kind->allow_zero_allocs && MEMKIND_UNLIKELY(!size)) {
+        return NULL;
+    }
     if (MEMKIND_LIKELY(!err)) {
         return jemk_mallocx_check(size,
                                   MALLOCX_ARENA(arena) |
@@ -532,6 +535,9 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
 
 static void *memkind_arena_malloc_no_tcache(struct memkind *kind, size_t size)
 {
+    if (!kind->allow_zero_allocs && MEMKIND_UNLIKELY(!size)) {
+        return NULL;
+    }
     if (kind == MEMKIND_DEFAULT) {
         return jemk_mallocx_check(size, MALLOCX_TCACHE_NONE);
     }
@@ -567,6 +573,8 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
 
     if (size == 0 && ptr != NULL) {
         jemk_dallocx(ptr, get_tcache_flag(kind->partition, 0));
+    } else if (!kind->allow_zero_allocs && MEMKIND_UNLIKELY(!size)) {
+        return NULL;
     } else {
         int err = kind->ops->get_arena(kind, &arena, size);
         if (MEMKIND_LIKELY(!err)) {
@@ -649,6 +657,10 @@ MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num,
     pthread_once(&kind->init_once, kind->ops->init_once);
     unsigned arena;
 
+    if (!kind->allow_zero_allocs && (MEMKIND_UNLIKELY(!size || !num))) {
+        return NULL;
+    }
+
     int err = kind->ops->get_arena(kind, &arena, size);
     if (MEMKIND_LIKELY(!err)) {
         return jemk_mallocx_check(num * size,
@@ -672,11 +684,10 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
         err = memkind_posix_check_alignment(kind, alignment);
     }
     if (MEMKIND_LIKELY(!err)) {
-#ifndef MEMKIND_MALLOC_NONNULL
-        if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
+        if (!kind->allow_zero_allocs &&
+            MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
             return 0;
         }
-#endif
         /* posix_memalign should not change errno.
            Set it to its previous value after calling jemalloc */
         int errno_before = errno;
@@ -760,11 +771,6 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
 
 static void *jemk_mallocx_check(size_t size, int flags)
 {
-#ifndef MEMKIND_MALLOC_NONNULL
-    if (MEMKIND_UNLIKELY(!size)) {
-        return NULL;
-    }
-#endif
     void *ptr = jemk_mallocx(size, flags);
     if (MEMKIND_UNLIKELY(!ptr))
         errno = ENOMEM;
@@ -773,6 +779,10 @@ static void *jemk_mallocx_check(size_t size, int flags)
 
 void memkind_arena_init(struct memkind *kind)
 {
+#ifdef MEMKIND_MALLOC_NONNULL
+    kind->allow_zero_allocs = true;
+#endif
+
     if (kind != MEMKIND_DEFAULT) {
         int err = memkind_arena_create_map(kind, get_extent_hooks_by_kind(kind),
                                            true);

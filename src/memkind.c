@@ -584,6 +584,10 @@ static int memkind_create(struct memkind_ops *ops, const char *name,
         goto exit;
     }
 
+#ifdef MEMKIND_MALLOC_NONNULL
+    (*kind)->allow_zero_allocs = true;
+#endif
+
     (*kind)->partition = memkind_registry_g.num_kind;
     err = ops->create(*kind, ops, name);
     if (err) {
@@ -1076,4 +1080,10 @@ MEMKIND_EXPORT int memkind_stats_print(void (*write_cb)(void *, const char *),
                                        memkind_stat_print_opt opts)
 {
     return m_stats_print(write_cb, cbopaque, opts);
+}
+
+MEMKIND_EXPORT void memkind_set_allow_zero_allocs(memkind_t kind,
+                                                  bool allow_zero_allocs)
+{
+    kind->allow_zero_allocs = allow_zero_allocs;
 }

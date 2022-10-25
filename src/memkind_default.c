@@ -65,22 +65,20 @@ MEMKIND_EXPORT int memkind_default_destroy(struct memkind *kind)
 
 MEMKIND_EXPORT void *memkind_default_malloc(struct memkind *kind, size_t size)
 {
-#ifndef MEMKIND_MALLOC_NONNULL
-    if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
+    if (!kind->allow_zero_allocs &&
+        MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         return NULL;
     }
-#endif
     return jemk_malloc(size);
 }
 
 MEMKIND_EXPORT void *memkind_default_calloc(struct memkind *kind, size_t num,
                                             size_t size)
 {
-#ifndef MEMKIND_MALLOC_NONNULL
-    if (MEMKIND_UNLIKELY(size_out_of_bounds(num) || size_out_of_bounds(size))) {
+    if (!kind->allow_zero_allocs &&
+        MEMKIND_UNLIKELY(size_out_of_bounds(num) || size_out_of_bounds(size))) {
         return NULL;
     }
-#endif
     return jemk_calloc(num, size);
 }
 
@@ -88,24 +86,22 @@ MEMKIND_EXPORT int memkind_default_posix_memalign(struct memkind *kind,
                                                   void **memptr,
                                                   size_t alignment, size_t size)
 {
-#ifndef MEMKIND_MALLOC_NONNULL
-    if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
+    if (!kind->allow_zero_allocs &&
+        MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         *memptr = NULL;
         return 0;
     }
-#endif
     return jemk_posix_memalign(memptr, alignment, size);
 }
 
 MEMKIND_EXPORT void *memkind_default_realloc(struct memkind *kind, void *ptr,
                                              size_t size)
 {
-#ifndef MEMKIND_MALLOC_NONNULL
-    if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
+    if (!kind->allow_zero_allocs &&
+        MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
         jemk_free(ptr);
         return NULL;
     }
-#endif
     void *ret_ptr = jemk_realloc(ptr, size);
     if (MEMKIND_UNLIKELY(!ret_ptr && ptr && size != 0))
         errno = ENOMEM;
@@ -253,6 +249,9 @@ MEMKIND_EXPORT int memkind_posix_check_alignment(struct memkind *kind,
 
 MEMKIND_EXPORT void memkind_default_init_once(void)
 {
+#ifdef MEMKIND_MALLOC_NONNULL
+    MEMKIND_DEFAULT->allow_zero_allocs = true;
+#endif
 #ifdef MEMKIND_ENABLE_HEAP_MANAGER
     heap_manager_init(MEMKIND_DEFAULT);
 #endif

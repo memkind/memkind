@@ -666,6 +666,13 @@ int memkind_check_dax_path(const char *pmem_dir);
 ///
 int memkind_set_bg_threads(bool state);
 
+/// @brief Sets the behavior for allocations with size zero
+/// @param kind specified memory kind
+/// @param allow_zero_allocs determines returned ptr for malloc-like functions
+/// for allocations with size zero, return a valid ptr when set to true, NULL
+/// when set to false
+void memkind_set_allow_zero_allocs(memkind_t kind, bool allow_zero_allocs);
+
 #ifdef __cplusplus
 }
 #endif
