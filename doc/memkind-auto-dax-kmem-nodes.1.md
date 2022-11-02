@@ -69,4 +69,4 @@ Copyright (C) 2019 - 2022 Intel Corporation. All rights reserved.
 
 # AUTHOR #
 
-Michal Biesek <michal.biesek@intel.com>
+Michal Biesek
