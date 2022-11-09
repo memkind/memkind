@@ -1077,3 +1077,9 @@ MEMKIND_EXPORT int memkind_stats_print(void (*write_cb)(void *, const char *),
 {
     return m_stats_print(write_cb, cbopaque, opts);
 }
+
+MEMKIND_EXPORT void memkind_set_allow_zero_allocs(memkind_t kind,
+                                                  bool allow_zero_allocs)
+{
+    kind->allow_zero_allocs = allow_zero_allocs;
+}

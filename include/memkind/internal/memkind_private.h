@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2016 - 2021 Intel Corporation. */
+/* Copyright (C) 2016 - 2022 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -93,6 +93,7 @@ struct memkind {
     unsigned int arena_map_mask; // arena_map_len - 1 to optimize modulo
                                  // operation on arena_map_len
     unsigned int arena_zero;     // index first jemalloc arena of this kind
+    bool allow_zero_allocs;      // Return valid ptr for malloc(0) calls
 };
 
 struct memkind_config {

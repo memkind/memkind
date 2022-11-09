@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2021 Intel Corporation. */
+/* Copyright (C) 2014 - 2022 Intel Corporation. */
 
 #include <memkind.h>
 #include <memkind/internal/memkind_arena.h>
@@ -64,7 +64,7 @@ static const struct stats_arena arena_stats[MEMKIND_STAT_TYPE_MAX_VALUE] = {
      .stats_no = 2},
 };
 
-static void *jemk_mallocx_check(size_t size, int flags);
+static void *jemk_mallocx_check(size_t size, int flags, bool allow_zero_allocs);
 static void tcache_finalize(void *args);
 
 static unsigned integer_log2(unsigned v)
@@ -523,9 +523,9 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
 
     int err = kind->ops->get_arena(kind, &arena, size);
     if (MEMKIND_LIKELY(!err)) {
-        return jemk_mallocx_check(size,
-                                  MALLOCX_ARENA(arena) |
-                                      get_tcache_flag(kind->partition, size));
+        return jemk_mallocx_check(
+            size, MALLOCX_ARENA(arena) | get_tcache_flag(kind->partition, size),
+            kind->allow_zero_allocs);
     }
     return NULL;
 }
@@ -533,13 +533,15 @@ MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
 static void *memkind_arena_malloc_no_tcache(struct memkind *kind, size_t size)
 {
     if (kind == MEMKIND_DEFAULT) {
-        return jemk_mallocx_check(size, MALLOCX_TCACHE_NONE);
+        return jemk_mallocx_check(size, MALLOCX_TCACHE_NONE,
+                                  kind->allow_zero_allocs);
     }
     unsigned arena;
     int err = kind->ops->get_arena(kind, &arena, size);
     if (MEMKIND_LIKELY(!err)) {
         return jemk_mallocx_check(size,
-                                  MALLOCX_ARENA(arena) | MALLOCX_TCACHE_NONE);
+                                  MALLOCX_ARENA(arena) | MALLOCX_TCACHE_NONE,
+                                  kind->allow_zero_allocs);
     }
     return NULL;
 }
@@ -574,7 +576,10 @@ MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
                 return jemk_mallocx_check(
                     size,
                     MALLOCX_ARENA(arena) |
-                        get_tcache_flag(kind->partition, size));
+                        get_tcache_flag(kind->partition, size),
+                    kind->allow_zero_allocs);
+            } else if (!kind->allow_zero_allocs && MEMKIND_UNLIKELY(!size)) {
+                return NULL;
             } else {
                 ptr = jemk_rallocx(ptr, size,
                                    MALLOCX_ARENA(arena) |
@@ -653,7 +658,8 @@ MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num,
     if (MEMKIND_LIKELY(!err)) {
         return jemk_mallocx_check(num * size,
                                   MALLOCX_ARENA(arena) | MALLOCX_ZERO |
-                                      get_tcache_flag(kind->partition, size));
+                                      get_tcache_flag(kind->partition, size),
+                                  kind->allow_zero_allocs);
     }
     return NULL;
 }
@@ -672,7 +678,8 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
         err = memkind_posix_check_alignment(kind, alignment);
     }
     if (MEMKIND_LIKELY(!err)) {
-        if (MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
+        if (!kind->allow_zero_allocs &&
+            MEMKIND_UNLIKELY(size_out_of_bounds(size))) {
             return 0;
         }
         /* posix_memalign should not change errno.
@@ -681,7 +688,8 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
         *memptr =
             jemk_mallocx_check(size,
                                MALLOCX_ALIGN(alignment) | MALLOCX_ARENA(arena) |
-                                   get_tcache_flag(kind->partition, size));
+                                   get_tcache_flag(kind->partition, size),
+                               kind->allow_zero_allocs);
         errno = errno_before;
         err = *memptr ? 0 : ENOMEM;
     }
@@ -756,15 +764,15 @@ MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
 }
 #endif // MEMKIND_TLS
 
-static void *jemk_mallocx_check(size_t size, int flags)
+static void *jemk_mallocx_check(size_t size, int flags, bool allow_zero_allocs)
 {
-    if (MEMKIND_LIKELY(size)) {
-        void *ptr = jemk_mallocx(size, flags);
-        if (MEMKIND_UNLIKELY(!ptr))
-            errno = ENOMEM;
-        return ptr;
+    if (!allow_zero_allocs && MEMKIND_UNLIKELY(!size)) {
+        return NULL;
     }
-    return NULL;
+    void *ptr = jemk_mallocx(size, flags);
+    if (MEMKIND_UNLIKELY(!ptr))
+        errno = ENOMEM;
+    return ptr;
 }
 
 void memkind_arena_init(struct memkind *kind)
