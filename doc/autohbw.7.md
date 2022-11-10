@@ -142,6 +142,13 @@ system, the environment variable **MEMKIND_HBW_NODES** must be
 set to indicate the high-bandwidth node as indicated in
 [**memkind**(3)](/memkind/manpages/memkind.3.html).
 
+When **libautohbw** is loaded with **LD_PRELOAD**, allocations with
+size zero, like **malloc**(0), have the same result as the system's
+standard library call.
+Most notably, a valid pointer may be returned in such calls,
+contrary to the default memkind behavior of returning NULL when
+size zero is passed to malloc-like functions.
+
 # EXAMPLES #
 
 The following will run */bin/ls* with **AutoHBW** library. Make

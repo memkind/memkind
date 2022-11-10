@@ -262,6 +262,19 @@ static void setEnvValues()
     printLimits();
 }
 
+extern void *__libc_malloc(size_t);
+extern void *__libc_free(void *);
+
+static bool check_allow_zero_allocs()
+{
+    void *ptr = __libc_malloc(0);
+    if (ptr) {
+        __libc_free(ptr);
+        return true;
+    }
+    return false;
+}
+
 // This function is executed at library load time.
 // Initialize HBW arena by making a dummy allocation/free at library load
 // time. Until HBW initialization is complete, we must not call any
@@ -300,6 +313,10 @@ static void AUTOHBW_INIT autohbw_load(void)
 
     LOG(ALWAYS, "\t-HBW int call succeeded\n");
     memkind_free(hbw_kind, pp);
+
+    bool allow_zero_allocs = check_allow_zero_allocs();
+    memkind_set_allow_zero_allocs(hbw_kind, allow_zero_allocs);
+    memkind_set_allow_zero_allocs(MEMKIND_DEFAULT, allow_zero_allocs);
 
     MemkindInitDone = true; // enable HBW allocation
 }
