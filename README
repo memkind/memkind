@@ -93,6 +93,16 @@ You will need to install **pandoc** for generating man documentation.
 
 `make man-local` will generate man files in the man/ directory.
 
+## RPM
+
+Generating an RPM package could be done on Fedora OS and you will need to install:
+
+* **libdaxctl-devel**
+* **rpmdevtools**
+* **hwloc-devel** (despite the fact that it is normally an optional package)
+
+`make rpm` generates the RPM package.
+
 ## Building and Installing
 
 The memkind library has a dependency on a related fork of jemalloc.
