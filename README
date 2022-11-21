@@ -93,6 +93,16 @@ You will need to install **pandoc** for generating man documentation.
 
 `make man-local` will generate man files in the man/ directory.
 
+## RPM
+
+For generating RPM package you will need to install:
+
+* **libdaxctl-devel**
+* **rpmdevtools**
+* **hwloc-devel**
+
+`make rpm` will generate RPM package.
+
 ## Building and Installing
 
 The memkind library has a dependency on a related fork of jemalloc.
