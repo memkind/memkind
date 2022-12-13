@@ -43,6 +43,7 @@ static int memkind_regular_check_available(struct memkind *kind)
                                       : MEMKIND_ERROR_UNAVAILABLE;
 }
 
+/* private but used in a test */
 MEMKIND_EXPORT int memkind_regular_all_get_mbind_nodemask(
     struct memkind *kind, unsigned long *nodemask, unsigned long maxnode)
 {

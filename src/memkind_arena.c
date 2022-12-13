@@ -82,7 +82,7 @@ static unsigned round_pow2_up(unsigned v)
     return v;
 }
 
-MEMKIND_EXPORT int memkind_set_arena_map_len(struct memkind *kind)
+int memkind_set_arena_map_len(struct memkind *kind)
 {
     if (kind->ops->get_arena == memkind_bijective_get_arena) {
         kind->arena_map_len = 1;
@@ -339,9 +339,8 @@ extent_hooks_t *get_extent_hooks_by_kind(struct memkind *kind)
     return &arena_extent_hooks;
 }
 
-MEMKIND_EXPORT int memkind_arena_create_map(struct memkind *kind,
-                                            extent_hooks_t *hooks,
-                                            bool metadata_use_hooks)
+int memkind_arena_create_map(struct memkind *kind, extent_hooks_t *hooks,
+                             bool metadata_use_hooks)
 {
     int err;
 
@@ -424,7 +423,7 @@ int memkind_arena_create(struct memkind *kind, struct memkind_ops *ops,
     return err;
 }
 
-MEMKIND_EXPORT int memkind_arena_destroy(struct memkind *kind)
+int memkind_arena_destroy(struct memkind *kind)
 {
     if (kind->arena_map_len) {
         char cmd[128];
@@ -472,7 +471,7 @@ static void tcache_finalize(void *args)
     }
 }
 
-MEMKIND_EXPORT struct memkind *memkind_arena_detect_kind(void *ptr)
+struct memkind *memkind_arena_detect_kind(void *ptr)
 {
     if (!ptr) {
         return NULL;
@@ -515,7 +514,7 @@ static inline int get_tcache_flag(unsigned partition, size_t size)
     return MALLOCX_TCACHE(tcache_map[partition]);
 }
 
-MEMKIND_EXPORT void *memkind_arena_malloc(struct memkind *kind, size_t size)
+void *memkind_arena_malloc(struct memkind *kind, size_t size)
 {
     pthread_once(&kind->init_once, kind->ops->init_once);
     unsigned arena;
@@ -545,7 +544,7 @@ static void *memkind_arena_malloc_no_tcache(struct memkind *kind, size_t size)
     return NULL;
 }
 
-MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
+void memkind_arena_free(struct memkind *kind, void *ptr)
 {
     if (kind == MEMKIND_DEFAULT) {
         jemk_free(ptr);
@@ -555,13 +554,12 @@ MEMKIND_EXPORT void memkind_arena_free(struct memkind *kind, void *ptr)
     }
 }
 
-MEMKIND_EXPORT void memkind_arena_free_with_kind_detect(void *ptr)
+void memkind_arena_free_with_kind_detect(void *ptr)
 {
     memkind_arena_free(memkind_arena_detect_kind(ptr), ptr);
 }
 
-MEMKIND_EXPORT void *memkind_arena_realloc(struct memkind *kind, void *ptr,
-                                           size_t size)
+void *memkind_arena_realloc(struct memkind *kind, void *ptr, size_t size)
 {
     pthread_once(&kind->init_once, kind->ops->init_once);
     unsigned arena;
@@ -598,8 +596,7 @@ int memkind_arena_update_cached_stats(void)
     return jemk_mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
 }
 
-MEMKIND_EXPORT void *memkind_arena_realloc_with_kind_detect(void *ptr,
-                                                            size_t size)
+void *memkind_arena_realloc_with_kind_detect(void *ptr, size_t size)
 {
     if (!ptr) {
         errno = EINVAL;
@@ -612,9 +609,8 @@ MEMKIND_EXPORT void *memkind_arena_realloc_with_kind_detect(void *ptr,
     return memkind_arena_realloc(kind, ptr, size);
 }
 
-MEMKIND_EXPORT int
-memkind_arena_update_memory_usage_policy(struct memkind *kind,
-                                         memkind_mem_usage_policy policy)
+int memkind_arena_update_memory_usage_policy(struct memkind *kind,
+                                             memkind_mem_usage_policy policy)
 {
     int err = MEMKIND_SUCCESS;
     unsigned i;
@@ -647,8 +643,7 @@ memkind_arena_update_memory_usage_policy(struct memkind *kind,
     return err;
 }
 
-MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num,
-                                          size_t size)
+void *memkind_arena_calloc(struct memkind *kind, size_t num, size_t size)
 {
     pthread_once(&kind->init_once, kind->ops->init_once);
     unsigned arena;
@@ -663,9 +658,8 @@ MEMKIND_EXPORT void *memkind_arena_calloc(struct memkind *kind, size_t num,
     return NULL;
 }
 
-MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
-                                                void **memptr, size_t alignment,
-                                                size_t size)
+int memkind_arena_posix_memalign(struct memkind *kind, void **memptr,
+                                 size_t alignment, size_t size)
 {
     int err;
     unsigned arena;
@@ -695,8 +689,8 @@ MEMKIND_EXPORT int memkind_arena_posix_memalign(struct memkind *kind,
     return err;
 }
 
-MEMKIND_EXPORT int memkind_bijective_get_arena(struct memkind *kind,
-                                               unsigned int *arena, size_t size)
+int memkind_bijective_get_arena(struct memkind *kind, unsigned int *arena,
+                                size_t size)
 {
     *arena = kind->arena_zero;
     return 0;
@@ -712,6 +706,7 @@ static uint64_t hash64(uint64_t x)
 }
 
 #ifdef MEMKIND_TLS
+/* private but used in a test */
 MEMKIND_EXPORT int memkind_thread_get_arena(struct memkind *kind,
                                             unsigned int *arena, size_t size)
 {

@@ -27,7 +27,7 @@ struct memkind_ops MEMKIND_INTERLEAVE_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT void memkind_interleave_init_once(void)
+void memkind_interleave_init_once(void)
 {
     memkind_init(MEMKIND_INTERLEAVE, true);
 }

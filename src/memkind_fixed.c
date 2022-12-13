@@ -209,7 +209,7 @@ exit:
     return err;
 }
 
-MEMKIND_EXPORT int memkind_fixed_destroy(struct memkind *kind)
+int memkind_fixed_destroy(struct memkind *kind)
 {
     struct memkind_fixed *priv = kind->priv;
 
@@ -222,8 +222,7 @@ MEMKIND_EXPORT int memkind_fixed_destroy(struct memkind *kind)
     return ret;
 }
 
-MEMKIND_EXPORT void *memkind_fixed_mmap(struct memkind *kind, void *addr,
-                                        size_t size)
+void *memkind_fixed_mmap(struct memkind *kind, void *addr, size_t size)
 {
     struct memkind_fixed *priv = kind->priv;
     void *result;

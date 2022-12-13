@@ -134,6 +134,7 @@ static int memkind_dax_kmem_get_preferred_mbind_nodemask(
     return g->init_err;
 }
 
+/* used by memkind-auto-dax-kmem-nodes */
 MEMKIND_EXPORT int memkind_dax_kmem_all_get_mbind_nodemask(
     struct memkind *kind, unsigned long *nodemask, unsigned long maxnode)
 {
