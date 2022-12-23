@@ -664,11 +664,11 @@ AM_CXXFLAGS = $(req_flags)
 clean-local: clean-jemalloc_deps
 
 man-local:
-	for doc_name in $(dist_doc_DOCS) ; do \
+	@for doc_name in $(dist_doc_DOCS) ; do \
 		utils/md2man/md2man.sh \
 			doc/$$doc_name.md \
 			utils/md2man/default.man \
-			man/$$doc_name ; \
+			man/$$doc_name || exit $$? ; \
 	done
 
 clean-jemalloc_deps:
