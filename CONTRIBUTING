@@ -84,7 +84,8 @@ should be guarded with pthread_once(3).
 
 Functions not used outside of the compilation unit shall be declared
 as static.  All functions which are not declared as static shall be
-documented in a man page and have an associated interface header file.
+documented in a man page (please see *doc* directory) and have an
+associated interface header file.
 
 Preprocessor mark-up is discouraged when other options are possible.
 Please use enum in place of #define when value control at configure or
