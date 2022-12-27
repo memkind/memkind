@@ -18,16 +18,16 @@ template=${2}
 outfile=${3}
 
 # parse input file for YAML metadata block and read man page titles, section and copyright date
-title=$(sed -n 's/^title:\ \([A-Za-z_-]*\)$/\1/p' ${filename})
-section=$(sed -n 's/^section:\ \([0-9]\)$/\1/p' ${filename})
-copyright=$(grep Copyright ${filename} -m 1 | cut -d ' ' -f 4 |cut -d ',' -f1)
+title=$(sed -n 's/^title:\ \([A-Za-z_-]*\)$/\1/p' "${filename}")
+section=$(sed -n 's/^section:\ \([0-9]\)$/\1/p' "${filename}")
+copyright=$(grep Copyright "${filename}" -m 1 | cut -d ' ' -f 4 |cut -d ',' -f1)
 
 
 # set proper date
 dt="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%F)"
 
 # output dir may not exist
-mkdir -p $(dirname $outfile)
+mkdir -p '$(dirname "$outfile")'
 
 # check if the pandoc is present in the system
 if ! [ -x "$(command -v pandoc)" ]; then
@@ -38,10 +38,10 @@ fi
 # 1. cut-off metadata block and license (everything up to "NAME" section)
 # 2. prepare man page based on template, using given parameters
 # 3. unindent code blocks
-cat $filename | sed -n -e '/# NAME #/,$p' |\
-	pandoc -s -t man -o $outfile --template=$template \
-	-V title=$title -V section=$section \
-	-V date="$dt" -V copyright=$copyright |
+cat "$filename" | sed -n -e '/# NAME #/,$p' |\
+	pandoc -s -t man -o "$outfile" --template="$template" \
+	-V title="$title" -V section="$section" \
+	-V date="$dt" -V copyright="$copyrigh"t |
 sed '/^\.IP/{
 N
 /\n\.nf/{

@@ -25,7 +25,7 @@ if [ ! -f VERSION ]; then
         echo "WARNING: VERSION file does not exist and working directory is not a git repository, setting version to 0.0.0" 2>&1
         version=0.0.0
     fi
-    echo $version > VERSION
+    echo "$version" > VERSION
 fi
 
 autoreconf --install

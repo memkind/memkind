@@ -61,7 +61,7 @@ function normalize_path {
     echo "$path"
 }
 
-function show_skipped_tests()
+export function show_skipped_tests
 {
     SKIP_PATTERN=$1
     DEFAULT_IFS=$IFS

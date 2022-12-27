@@ -31,11 +31,11 @@ else
     fi
 
     # allow git operations
-    git config --global --add safe.directory $PWD
+    git config --global --add safe.directory "$PWD"
 
     # building memkind sources and tests
     ./autogen.sh
-    ./configure --prefix=/usr $GCOV_OPTION
+    ./configure --prefix=/usr "$GCOV_OPTION"
     make -j "$(nproc)"
     make -j "$(nproc)" checkprogs
 
