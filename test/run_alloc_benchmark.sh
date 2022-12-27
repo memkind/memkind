@@ -11,6 +11,9 @@ MEMORY=(1 4 16 64 256 1024 4096 16384)
 # Iterations
 ITERS=1000
 
+set -e
+set -x
+
 export KMP_AFFINITY=scatter,granularity=fine
 
 # For each algorithm
