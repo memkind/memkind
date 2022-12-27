@@ -101,11 +101,11 @@ void test_iterator_values(VectorIterator<T> &it, const C from, const C to)
         T val = it.next();
 
         if (val < from)
-            std::cout << "ivalid value: actual=" << val
+            std::cout << "invalid value: actual=" << val
                       << ", expected= >=" << from << std::endl;
 
         if (val > to)
-            std::cout << "ivalid value: actual=" << val
+            std::cout << "invalid value: actual=" << val
                       << ", expected= <=" << to << std::endl;
     }
 }

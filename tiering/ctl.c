@@ -224,7 +224,7 @@ static int ctl_parse_tier_query(char *qbuf, memkind_t *kind, unsigned *ratio)
                     }
                     memkind_free(*kind, ptr);
                 } else if (!strcmp(kind_name, "FS_DAX")) {
-                    // for FS_DAX we have to collect all parameteres before
+                    // for FS_DAX we have to collect all parameters before
                     // initialization
                     is_fsdax = 1;
                 } else {
