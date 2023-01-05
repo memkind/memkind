@@ -24,23 +24,24 @@ features.  Memkind interface allows to create and control file-backed memory
 
 1. [Interfaces](#interfaces)
 2. [Dependencies](#dependencies)
+    * [Run Requirements](#run-requirements)
 3. [Building and Installing](#building-and-installing)
+    * [RPM](#rpm)
 	* [jemalloc](#jemalloc)
-4. [Run Requirements](#run-requirements)
-5. [Kind Requirements](#kind-requirements)
-6. [Kernel](#kernel)
-7. [NVDIMM volatile usage](#nvdimm-volatile-usage)
+4. [Kind Requirements](#kind-requirements)
+5. [Kernel](#kernel)
+6. [NVDIMM volatile usage](#nvdimm-volatile-usage)
 	* [DAX device](#dax-device)
 	* [DAX filesystem](#dax-filesystem)
-8. [The Detection Mechanism of the Kind](#the-detection-mechanism-of-the-kind)
-9. [Setting Logging Mechanism](#setting-logging-mechanism)
-10. [Setting Heap Manager](#setting-heap-manager)
-11. [Simulating High Bandwidth Memory](#simulating-high-bandwidth-memory)
-12. [Identification of High Bandwidth Memory](#identification-of-high-bandwidth-memory)
-13. [Projects](#projects)
-14. [Testing](#testing)
-15. [Notes](#notes)
-16. [Disclaimer](#disclaimer)
+7. [The Detection Mechanism of the Kind](#the-detection-mechanism-of-the-kind)
+8. [Setting Logging Mechanism](#setting-logging-mechanism)
+9. [Setting Heap Manager](#setting-heap-manager)
+10. [Simulating High Bandwidth Memory](#simulating-high-bandwidth-memory)
+11. [Identification of High Bandwidth Memory](#identification-of-high-bandwidth-memory)
+12. [Projects](#projects)
+13. [Testing](#testing)
+14. [Notes](#notes)
+15. [Disclaimer](#disclaimer)
 
 ## Interfaces
 The memkind library delivers five interfaces:
@@ -91,17 +92,14 @@ For using HMAT features in memkind:
 
 You will need to install **pandoc** for generating man documentation.
 
-`make man-local` will generate man files in the man/ directory.
+### Run Requirements
 
-## RPM
+You will need to install required packages for applications,
+which are using the memkind library for dynamic linking at run time:
 
-Generating an RPM package could be done on Fedora OS and you will need to install:
-
-* **libdaxctl-devel**
-* **rpmdevtools**
-* **hwloc-devel** (despite the fact that it is normally an optional package)
-
-`make rpm` generates the RPM package.
+* **libnuma**
+* **numactl**
+* **pthread**
 
 ## Building and Installing
 
@@ -139,22 +137,28 @@ See the output of:
 
 for more information about either the memkind or the jemalloc configuration options.
 
-## jemalloc
+To generate man files in the man/ directory, execute:
+
+    make man-local
+
+### RPM
+
+Generating an RPM package could be done on Fedora OS and you will need to install:
+
+* **libdaxctl-devel**
+* **rpmdevtools**
+* **hwloc-devel** (despite the fact that it is normally an optional package)
+
+`make rpm` generates the RPM package.
+
+### jemalloc
+
 The jemalloc source was forked from jemalloc version 5.3.0.  This source tree
 is located within the jemalloc subdirectory of the memkind source.  The jemalloc
 source code has been kept close to the original form, except for the following items:
 - extend jemalloc API with "arenalookupx" and "check_reallocatex" functions
 - optimization for searching commands in mallctl
 - the build system has been slightly modified.
-
-## Run Requirements
-
-You will need to install required packages for applications,
-which are using the memkind library for dynamic linking at run time:
-
-* **libnuma**
-* **numactl**
-* **pthread**
 
 ## Kind Requirements
 
@@ -252,7 +256,7 @@ To get locality characteristics of NUMA nodes in the system you need hwloc-devel
 Memkind supports using persistent memory as an extension of DRAM.
 This volatile memory solution is provided by the library with two separate ways described below.
 
-## DAX device
+### DAX device
 
 NVDIMM memory as DAX device is supported by MEMKIND_DAX_KMEM_* kinds. With this solution
 persistent memory will be seen in OS as separate NUMA nodes.
@@ -265,7 +269,7 @@ created from persistent memory using [libdaxctl-devel](#dependencies)
 comma separated list of NUMA nodes which will be treated as NUMA nodes created from persistent memory,
 this solution overrides the first one
 
-## DAX filesystem
+### DAX filesystem
 PMEM kind supports the traditional malloc/free interfaces on a memory mapped file.
 This allows the use of [persistent memory](https://pmem.io/)
 as volatile memory, for cases where the region of persistent memory

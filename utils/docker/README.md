@@ -2,10 +2,12 @@
 
 This is utils/docker/README.
 
-Scripts in this directory let run a Docker container with Ubuntu 20.04, CentOS 7 and Fedora 33 environment
+Scripts in this directory let run a Docker container in various environments (see Dockerfiles in this directory)
 to build, test and optionally measure test coverage of any pull request to memkind project, inside it.
 
-# Environment variables
+These scripts (and Dockerfiles) are used as part of continuous integration process for this repository.
+
+## Environment variables
 
 * **MEMKIND_HOST_WORKDIR** - Defines the absolute path to memkind project root directory on host environment.
     **This variable must be defined.**
@@ -34,10 +36,11 @@ memkind to not release memory to OS in anticipation of memory reuse soon. For PM
 
 * **QEMU_TEST** - Setting **QEMU_TEST** results in the execution of tests designated for the QEMU environment.
 
-# Files
+## Files
+
 *'docker_run_build.sh'*  is used to build of memkind.
 
-*'docker_run_coverage.sh'*  is used for uploading coverage report on [Codecov.io](Codecov.io)
+*'docker_run_coverage.sh'*  is used for uploading coverage report on [Codecov.io](https://codecov.io/)
 
 *'docker_run_test.sh'*  is used to run tests of memkind.
 
@@ -53,14 +56,37 @@ memkind to not release memory to OS in anticipation of memory reuse soon. For PM
 
 *'set_host_configuration.sh'*  is used to set hugepages configuration on host machine.
 
-# Building and running the container
+## Building and running the container
 
 One can use the script *run_local.sh* just to build and run tests, e.g.:
 
-```
+```sh
 $ ./run_local.sh Dockerfile.ubuntu-20.04
 ```
 
 **Note:**
 
-Others class group must have write permission to MEMKIND_HOST_WORKDIR to use the run_local script.
+Others class group must have write permission to *MEMKIND_HOST_WORKDIR* to use the *run_local.sh* script.
+
+### Building docker images manually
+
+Images built out of Dockerfiles ("recipes") found in this directory may be used with `docker` or `podman` as
+development environments.
+
+To build a docker image manually, execute, e.g.:
+
+```sh
+docker build --build-arg https_proxy=http://proxy.com:port --build-arg http_proxy=http://proxy.com:port -t memkind:ubuntu -f ./Dockerfile.ubuntu-20.04 .
+```
+
+Later, to run such image on local machine, execute, e.g.:
+
+```sh
+docker run --network=bridge --shm-size=4G -v /your/workspace/path/:/opt/workspace:z -w /opt/workspace/ -e CC=clang -it memkind:ubuntu /bin/bash
+```
+
+To get `strace` working, add to docker run command:
+
+```sh
+ --cap-add SYS_PTRACE
+```
