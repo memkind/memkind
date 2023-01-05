@@ -63,7 +63,7 @@ enum OperationName
     Invalid
 };
 
-// Reprents a memory operation
+// Represents a memory operation
 class Operation
 {
 public:

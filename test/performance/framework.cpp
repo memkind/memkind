@@ -35,7 +35,7 @@ void Barrier::wait()
         }
         return;
     }
-    // Wait unitl the last expected thread calls wait() on Barrier instance, or
+    // Wait until the last expected thread calls wait() on Barrier instance, or
     // timeout occurs
     m_cVar.wait_until(lock, ch::system_clock::now() + ch::seconds(10),
                       []() { return GetInstance().m_waiting == 0; });

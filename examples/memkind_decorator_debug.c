@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* This is an example that enables debug printing on every alloction call */
+/* This is an example that enables debug printing on every allocation call */
 
 static void memkind_debug(const char *func, memkind_t kind, size_t size,
                           void *ptr)
