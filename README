@@ -23,25 +23,25 @@ features.  Memkind interface allows to create and control file-backed memory
 ## Contents
 
 1. [Interfaces](#interfaces)
-2. [Dependencies](#dependencies)
-    * [Run Requirements](#run-requirements)
-3. [Building and Installing](#building-and-installing)
+2. [Building and Installing](#building-and-installing)
     * [RPM](#rpm)
 	* [jemalloc](#jemalloc)
-4. [Kind Requirements](#kind-requirements)
-5. [Kernel](#kernel)
-6. [NVDIMM volatile usage](#nvdimm-volatile-usage)
+3. [Dependencies](#dependencies)
+    * [Run Requirements](#run-requirements)
+    * [Kind Requirements](#kind-requirements)
+4. [Kernel](#kernel)
+5. [NVDIMM volatile usage](#nvdimm-volatile-usage)
 	* [DAX device](#dax-device)
 	* [DAX filesystem](#dax-filesystem)
-7. [The Detection Mechanism of the Kind](#the-detection-mechanism-of-the-kind)
-8. [Setting Logging Mechanism](#setting-logging-mechanism)
-9. [Setting Heap Manager](#setting-heap-manager)
-10. [Simulating High Bandwidth Memory](#simulating-high-bandwidth-memory)
-11. [Identification of High Bandwidth Memory](#identification-of-high-bandwidth-memory)
-12. [Projects](#projects)
-13. [Testing](#testing)
-14. [Notes](#notes)
-15. [Disclaimer](#disclaimer)
+6. [The Detection Mechanism of the Kind](#the-detection-mechanism-of-the-kind)
+7. [Setting Logging Mechanism](#setting-logging-mechanism)
+8. [Setting Heap Manager](#setting-heap-manager)
+9. [Simulating High Bandwidth Memory](#simulating-high-bandwidth-memory)
+10. [Identification of High Bandwidth Memory](#identification-of-high-bandwidth-memory)
+11. [Projects](#projects)
+12. [Testing](#testing)
+13. [Notes](#notes)
+14. [Disclaimer](#disclaimer)
 
 ## Interfaces
 The memkind library delivers five interfaces:
@@ -49,7 +49,7 @@ The memkind library delivers five interfaces:
  * memkind.h - generic interface for more complex use cases (stable)
  * pmem_allocator.h - the C++ allocator that satisfies the C++ Allocator
    [requirements](https://en.cppreference.com/w/cpp/named_req/Allocator)
-   used for PMEM memory use cases (stable)
+   used for PMEM use cases (stable)
  * memkind_allocator.h - the C++ allocator that satisfies the C++ Allocator
    [requirements](https://en.cppreference.com/w/cpp/named_req/Allocator)
    used for static kinds (stable)
@@ -69,37 +69,6 @@ corresponding manpages (located in man/ subdir):
     man memkindallocator
 
     man fixedallocator
-
-## Dependencies
-
-You will need to install required packages on the build system:
-
-* **autoconf**
-* **automake**
-* **gcc-c++**
-* **libnuma-devel**
-* **libtool**
-* **numactl-devel**
-* **unzip**
-
-For using automatic recognition of PMEM NUMA in MEMKIND_DAX_KMEM:
-
-* **libdaxctl-devel** (v66 or later)
-
-For using HMAT features in memkind:
-
-* **hwloc-devel** (v2.3.0 or later)
-
-You will need to install **pandoc** for generating man documentation.
-
-### Run Requirements
-
-You will need to install required packages for applications,
-which are using the memkind library for dynamic linking at run time:
-
-* **libnuma**
-* **numactl**
-* **pthread**
 
 ## Building and Installing
 
@@ -145,11 +114,13 @@ To generate man files in the man/ directory, execute:
 
 Generating an RPM package could be done on Fedora OS and you will need to install:
 
-* **libdaxctl-devel**
 * **rpmdevtools**
+* **libdaxctl-devel** (despite the fact that it is normally an optional package)
 * **hwloc-devel** (despite the fact that it is normally an optional package)
 
-`make rpm` generates the RPM package.
+Having these dependencies installed, you can generate the RPM package executing:
+
+    make rpm
 
 ### jemalloc
 
@@ -160,7 +131,39 @@ source code has been kept close to the original form, except for the following i
 - optimization for searching commands in mallctl
 - the build system has been slightly modified.
 
-## Kind Requirements
+## Dependencies
+
+You will need to install required packages in the system, to build from sources:
+
+* **autoconf**
+* **automake**
+* **gcc-c++**
+* **numactl-devel** / **libnuma-devel**
+* **libtool**
+* **unzip**
+
+For using automatic recognition of PMEM NUMA in MEMKIND_DAX_KMEM:
+
+* **libdaxctl-devel** / **libdaxctl-dev** (v66 or later)
+
+For using HMAT features in memkind:
+
+* **hwloc-devel** / **libhwloc-dev** (v2.3.0 or later)
+
+You will need to install **pandoc** for generating man documentation.
+
+### Run Requirements
+
+You will need to install required packages for applications,
+which are using the memkind library for dynamic linking at runtime:
+
+* **numactl-libs** / **libnuma**
+* **numactl**
+* **pthread**
+
+### Kind Requirements
+
+The table below summarizes extra requirements, depending on used memory kind:
 
 | Memory kind                               | NUMA  |  HBW Memory | Hugepages | Device DAX | Filesystem supporting hole punching | HMAT | libhwloc |
 | ------------------------------------------|:-----:|:-----------:|:---------:|:----------:|:-----------------------------------:|:----:|:--------:|
@@ -191,8 +194,8 @@ source code has been kept close to the original form, except for the following i
 
 *not needed for Intel's 2nd generation Intel(R) Xeon Phi(TM)
 
-## Kernel
-To correctly control of NUMA, huge pages and file-backed memory following
+### Kernel
+To correctly control NUMA, huge pages and file-backed memory following
 requirements regarding Linux kernel must be satisfied:
 
 * **NUMA**
@@ -263,11 +266,12 @@ persistent memory will be seen in OS as separate NUMA nodes.
 
 Memkind allows two ways to use this kind:
 
-- first implicitly, by allowing memkind library for automatic recognition of NUMA nodes
-created from persistent memory using [libdaxctl-devel](#dependencies)
-- secondary explicitly, by using MEMKIND_DAX_KMEM_NODES environment variable set to
-comma separated list of NUMA nodes which will be treated as NUMA nodes created from persistent memory,
-this solution overrides the first one
+- first, implicitly, by allowing memkind library for automatic recognition of NUMA nodes
+created from persistent memory using [libdaxctl-devel](#dependencies),
+- second, explicitly, by using MEMKIND_DAX_KMEM_NODES environment variable (please refer to
+[memkind(3) section "ENVIRONMENT"](https://pmem.io/memkind/manpages/memkind.3/#environment))
+set to comma separated list of NUMA nodes which will be treated as NUMA nodes created from persistent memory;
+this solution overrides the first one.
 
 ### DAX filesystem
 PMEM kind supports the traditional malloc/free interfaces on a memory mapped file.
@@ -305,7 +309,7 @@ For more details, please see the following
 [example](https://github.com/memkind/memkind/blob/master/examples/pmem_free_with_unknown_kind.c).
 
 **Important Notes:**
-The look up for correct kind could result in serious performance penalty,
+The lookup for correct kind could result in serious performance penalty,
 which can be avoided by specifying a correct kind explicitly.
 
 ## Setting Logging Mechanism
@@ -324,7 +328,7 @@ This feature could be enabled by passing the following variable to the configure
 In memkind library heap management can be adjusted with MEMKIND_HEAP_MANAGER
 environment variable, which allows for switching to one of the available
 heap managers.
-Values:
+Accepted values:
 - JEMALLOC - sets the jemalloc heap manager
 - TBB - sets Intel Threading Building Blocks heap manager. This option requires installed
 Intel Threading Building Blocks library.
