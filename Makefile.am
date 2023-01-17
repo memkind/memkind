@@ -689,7 +689,7 @@ memkind-$(VERSION).spec:
 rpm: dist
 	$(MAKE) version="$(VERSION)" -f memkind.spec.mk $@
 
-all: jemalloc_deps static_lib
+all: static_lib
 
 # the script merge memkind and jemalloc libraries into one static library.
 define ar_prog
@@ -700,7 +700,7 @@ save\n\
 end
 endef
 
-static_lib: libmemkind.la
+static_lib: jemalloc_deps libmemkind.la
 	bash -c "ar -M < <(echo -e '$(ar_prog)')"
 	cp libmemkind.a .libs/
 	rm libmemkind.a
