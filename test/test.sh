@@ -1,6 +1,8 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2022 Intel Corporation.
+# Copyright (C) 2014 - 2023 Intel Corporation.
+
+set -e
 
 basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROGNAME=`basename $0`
