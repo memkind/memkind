@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2015 - 2021 Intel Corporation. */
+/* Copyright (C) 2015 - 2023 Intel Corporation. */
 
 ///////////////////////////////////////////////////////////////////////////
 // File   : autohbw.c
@@ -98,6 +98,7 @@ static size_t getLimit(size_t limit, char lchar)
                 mult *= 1024;
             case 'K':
                 mult *= 1024;
+                break;
         }
 
         // check for overflow, saturate at max
