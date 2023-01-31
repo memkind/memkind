@@ -98,6 +98,7 @@ static size_t getLimit(size_t limit, char lchar)
                 mult *= 1024;
             case 'K':
                 mult *= 1024;
+                break;
         }
 
         // check for overflow, saturate at max
