@@ -28,12 +28,19 @@ void cpp_allocator_test(const char *pmem_directory)
 #ifdef STL_VECTOR_TEST
     {
         std::cout << "VECTOR OPEN" << std::endl;
-        libmemkind::pmem::allocator<int> alc{pmem_directory, pmem_max_size};
-        std::vector<int, libmemkind::pmem::allocator<int>> vector{alc};
+        try
+        {
+            libmemkind::pmem::allocator<int> alc{pmem_directory, pmem_max_size};
+            std::vector<int, libmemkind::pmem::allocator<int>> vector{alc};
 
-        for (int i = 0; i < 20; ++i) {
-            vector.push_back(0xDEAD + i);
-            assert(vector.back() == 0xDEAD + i);
+            for (int i = 0; i < 20; ++i) {
+                vector.push_back(0xDEAD + i);
+                assert(vector.back() == 0xDEAD + i);
+            }
+        }
+        catch(const std::exception& e)
+        {
+            std::cout << "Something wrong happen: " << e.what() << std::endl;
         }
 
         std::cout << "VECTOR CLOSE" << std::endl;
@@ -43,17 +50,24 @@ void cpp_allocator_test(const char *pmem_directory)
 #ifdef STL_LIST_TEST
     {
         std::cout << "LIST OPEN" << std::endl;
-        libmemkind::pmem::allocator<int> alc{pmem_directory, pmem_max_size};
-        std::list<int, libmemkind::pmem::allocator<int>> list{alc};
+        try
+        {
+            libmemkind::pmem::allocator<int> alc{pmem_directory, pmem_max_size};
+            std::list<int, libmemkind::pmem::allocator<int>> list{alc};
 
-        const int nx2 = 4;
-        for (int i = 0; i < nx2; ++i) {
-            list.emplace_back(0xBEAC011 + i);
-            assert(list.back() == 0xBEAC011 + i);
+            const int nx2 = 4;
+            for (int i = 0; i < nx2; ++i) {
+                list.emplace_back(0xBEAC011 + i);
+                assert(list.back() == 0xBEAC011 + i);
+            }
+
+            for (int i = 0; i < nx2; ++i) {
+                list.pop_back();
+            }
         }
-
-        for (int i = 0; i < nx2; ++i) {
-            list.pop_back();
+        catch(const std::exception& e)
+        {
+            std::cout << "Something wrong happen: " << e.what() << std::endl;
         }
 
         std::cout << "LIST CLOSE" << std::endl;
@@ -63,21 +77,28 @@ void cpp_allocator_test(const char *pmem_directory)
 #ifdef STL_VEC_STRING_TEST
     {
         std::cout << "STRINGED VECTOR OPEN" << std::endl;
-        typedef libmemkind::pmem::allocator<char> str_alloc_t;
-        typedef std::basic_string<char, std::char_traits<char>, str_alloc_t>
-            pmem_string;
-        typedef libmemkind::pmem::allocator<pmem_string> vec_alloc_t;
+        try
+        {
+            typedef libmemkind::pmem::allocator<char> str_alloc_t;
+            typedef std::basic_string<char, std::char_traits<char>, str_alloc_t>
+                pmem_string;
+            typedef libmemkind::pmem::allocator<pmem_string> vec_alloc_t;
 
-        vec_alloc_t vec_alloc{pmem_directory, pmem_max_size};
-        str_alloc_t str_alloc{pmem_directory, pmem_max_size};
+            vec_alloc_t vec_alloc{pmem_directory, pmem_max_size};
+            str_alloc_t str_alloc{pmem_directory, pmem_max_size};
 
-        std::vector<pmem_string, std::scoped_allocator_adaptor<vec_alloc_t>>
-            vec{std::scoped_allocator_adaptor<vec_alloc_t>(vec_alloc)};
+            std::vector<pmem_string, std::scoped_allocator_adaptor<vec_alloc_t>>
+                vec{std::scoped_allocator_adaptor<vec_alloc_t>(vec_alloc)};
 
-        pmem_string arg{"Very very loooong striiiing", str_alloc};
+            pmem_string arg{"Very very loooong striiiing", str_alloc};
 
-        vec.push_back(arg);
-        assert(vec.back() == arg);
+            vec.push_back(arg);
+            assert(vec.back() == arg);
+        }
+        catch(const std::exception& e)
+        {
+            std::cout << "Something wrong happen: " << e.what() << std::endl;
+        }
 
         std::cout << "STRINGED VECTOR CLOSE" << std::endl;
     }
@@ -87,28 +108,35 @@ void cpp_allocator_test(const char *pmem_directory)
 #ifdef STL_MAP_INT_STRING_TEST
     {
         std::cout << "INT_STRING MAP OPEN" << std::endl;
-        typedef std::basic_string<char, std::char_traits<char>,
-                                  libmemkind::pmem::allocator<char>>
-            pmem_string;
-        typedef int key_t;
-        typedef pmem_string value_t;
-        typedef libmemkind::pmem::allocator<std::pair<const key_t, value_t>>
-            allocator_t;
-        typedef std::map<key_t, value_t, std::less<key_t>,
-                         std::scoped_allocator_adaptor<allocator_t>>
-            map_t;
+        try
+        {
+            typedef std::basic_string<char, std::char_traits<char>,
+                                    libmemkind::pmem::allocator<char>>
+                pmem_string;
+            typedef int key_t;
+            typedef pmem_string value_t;
+            typedef libmemkind::pmem::allocator<std::pair<const key_t, value_t>>
+                allocator_t;
+            typedef std::map<key_t, value_t, std::less<key_t>,
+                            std::scoped_allocator_adaptor<allocator_t>>
+                map_t;
 
-        allocator_t allocator(pmem_directory, pmem_max_size);
+            allocator_t allocator(pmem_directory, pmem_max_size);
 
-        value_t source_str1("Lorem ipsum dolor ", allocator);
-        value_t source_str2("sit amet consectetuer adipiscing elit", allocator);
+            value_t source_str1("Lorem ipsum dolor ", allocator);
+            value_t source_str2("sit amet consectetuer adipiscing elit", allocator);
 
-        map_t target_map{std::scoped_allocator_adaptor<allocator_t>(allocator)};
+            map_t target_map{std::scoped_allocator_adaptor<allocator_t>(allocator)};
 
-        target_map[key_t(165)] = source_str1;
-        assert(target_map[key_t(165)] == source_str1);
-        target_map[key_t(165)] = source_str2;
-        assert(target_map[key_t(165)] == source_str2);
+            target_map[key_t(165)] = source_str1;
+            assert(target_map[key_t(165)] == source_str1);
+            target_map[key_t(165)] = source_str2;
+            assert(target_map[key_t(165)] == source_str2);
+        }
+        catch(const std::exception& e)
+        {
+            std::cout << "Something wrong happen: " << e.what() << std::endl;
+        }
 
         std::cout << "INT_STRING MAP CLOSE" << std::endl;
     }
