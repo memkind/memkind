@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2022 Intel Corporation. */
+/* Copyright (C) 2014 - 2023 Intel Corporation. */
 
 #pragma once
 #ifdef __cplusplus
@@ -83,7 +83,8 @@ typedef enum memkind_policy_t
     MEMKIND_POLICY_INTERLEAVE_ALL,
 
     /**
-     * Max policy value.
+     * It's a special dummy value, to mark the last enum value.
+     * It's used to validate if policy used by the user is the proper one.
      */
     MEMKIND_POLICY_MAX_VALUE
 } memkind_policy_t;
