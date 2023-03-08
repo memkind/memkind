@@ -1,16 +1,50 @@
 # Memkind examples
 
-The example directory contains example codes that use the memkind
-interface.
+The example directory contains example codes that use the memkind interface.
+Various groups of examples represent various features and use cases.
 
 ## PMEM
 
-The pmem_*.c(pp) demonstrates how to create and use a file-backed memory kind.
+The pmem_*.c(pp) examples demonstrates how to create and use a file-backed memory kind.
 The default pmem path is "/tmp/".
-Custom directory is pass as first argument to all of PMEM example programs,
-e.g. to execute pmem_malloc example in /mnt/pmem location, call:
+Custom directory may be passed as first argument to all of PMEM example programs.
+E.g., to execute pmem_malloc example in /mnt/pmem location, call:
 
     ./pmem_malloc /mnt/pmem/
+
+### pmem_alignment.c
+
+This example shows how to use memkind alignment and how it affects allocations.
+
+### pmem_and_dax_kmem_kind.c
+
+This example shows how to allocate to PMEM memory using file-backed memory (pmem kind)
+and persistent memory NUMA node (MEMKIND_DAX_KMEM).
+
+### pmem_and_default_kind.c
+
+This example shows how to allocate in standard memory (MEMKIND_DEFAULT) and file-backed
+memory (pmem kind).
+
+### pmem_config.c
+
+This example shows how to use custom configuration to create pmem kind.
+
+### pmem_cpp_allocator.cpp
+
+This example shows usage of C++ allocator mechanism designed for file-backed memory
+kind with different data structures like: vector, list and map.
+
+### pmem_detect_kind.c
+
+This example shows how to distinguish allocation from different kinds using detect kind function.
+
+### pmem_free_with_unknown_kind.c
+
+This example shows how to allocate in standard memory and file-backed memory (pmem kind)
+and free memory without a need to remember which kind it belongs to.
+While this feature may be useful it leads to an extra internal lookup
+causing (potentially serious) performance penalty.
 
 ### pmem_kinds.c
 
@@ -24,14 +58,6 @@ This example shows how to allocate memory and possibility to exceed pmem kind si
 
 This example shows how to allocate memory with unlimited kind size.
 
-### pmem_usable_size.c
-
-This example shows difference between the expected and the actual allocation size.
-
-### pmem_alignment.c
-
-This example shows how to use memkind alignment and how it affects allocations.
-
 ### pmem_multithreads.c
 
 This example shows how to use multithreading with independent pmem kinds.
@@ -40,64 +66,50 @@ This example shows how to use multithreading with independent pmem kinds.
 
 This example shows how to use multithreading with one main pmem kind.
 
-### pmem_and_dax_kmem_kind.c
+### pmem_usable_size.c
 
-This example shows how to allocate to PMEM memory using file-backed memory (pmem kind)
-and persistent memory NUMA node (MEMKIND_DAX_KMEM).
+This example shows difference between the expected and the actual allocation size.
 
-### pmem_and_default_kind.c
+## Other memkind examples
 
-This example shows how to allocate in standard memory and file-backed memory (pmem kind).
+### Hello World examples
 
-### pmem_detect_kind.c
+The simplest examples are the hello_*_example.c which are a hello world
+variants. They are divided into two files, because they slightly differ in allocation
+forms. The first one "hello_memkind_example.c" is using generic memkind_malloc calls,
+using various kinds as the first parameter. The second example - "hello_hbw_example.c"
+focuses on using various calls, e.g., HBW specific one - hbw_malloc.
 
-This example shows how to distinguish allocation from different kinds using detect kind function.
+### autohbw_candidates.c
 
-### pmem_config.c
+This example contains cases for each heap allocation function intercepted
+by the AutoHBW library.
 
-This example shows how to use custom configuration to create pmem kind.
+### filter_example.c
 
-### pmem_free_with_unknown_kind.c
+The filter_example.c shows how you would use high bandwidth
+memory to store a reduction of a larger data set stored in DDR.
 
-This example shows how to allocate in standard memory and file-backed memory (pmem kind)
-and free memory without a need to remember which kind it belongs to.
+### fixed_malloc.c
 
-### pmem_cpp_allocator.cpp
-
-This example shows usage of C++ allocator mechanism designed for file-backed memory
-kind with different data structures like: vector, list and map.
+This example also uses fixed kind and do a simple allocations on the mmapped area.
 
 ### fixed_cpp_allocator.cpp
 
 This example shows usage of C++ allocator mechanism designed for custom kind
 created on user-specified area with different data structures like: vector, list and map.
+It is similar to "memkind_cpp_allocator" example (but make use of fixed kind).
 
-## Other memkind examples
+### memkind_allocated_example.cpp
 
-### memkind_get_stat.c
-
-This example shows how to get information about allocator and kind statistics.
-
-### other
-
-The simplest example is the hello_example.c which is a hello world
-variant.  The filter_example.c shows how you would use high bandwidth
-memory to store a reduction of a larger data set stored in DDR. There is
-also an example of how to create user defined kinds.  This example
-creates kinds which isolate allocations to a single NUMA node each
-backed by a single arena.
-
-### memkind_cpp_allocator.cpp
-
-This example shows usage of C++ allocator mechanism designed for static
-kinds with different data structures like: forward list, deque and multiset.
-
-The memkind_allocated example is simple usage of memkind in C++11 which
+The memkind_allocated_example is simple usage of memkind in C++11 which
 shows how memkind can be used to allocate objects, and consists of two files:
-memkind_allocated.hpp - which is definition of template class that should be
+
+    memkind_allocated.hpp - which is definition of template class that should be
 inherited and parametrized by derived type (curiously recurring template
 pattern), to let deriving class allocate their objects using specified kind.
-memkind_allocated_example.cpp - which is usage example of this approach.
+
+    memkind_allocated_example.cpp - which is usage example of this approach.
 Logic of memkind_allocated is based on overriding operator new() in template,
 and allocating memory on kind specified in new() parameter, or by overridable
 static method getClassKind(). This implementation also supports alignment
@@ -107,3 +119,17 @@ memkind_allocated template is inherited once in inheritance chain (which
 probably makes that not very useful for most scenarios). Other thing is that it
 overriding class new() operator which can cause various problems if used
 unwisely.
+
+### memkind_cpp_allocator.cpp
+
+This example shows usage of C++ allocator mechanism designed for static
+kinds with different data structures like: forward list, deque and multiset.
+
+### memkind_decorator_debug.c
+
+This example show usage of '_post' and '_pre' decorators.
+It enables debug printing on every allocation call.
+
+### memkind_get_stat.c
+
+This example shows how to get information about allocator and kinds' statistics.

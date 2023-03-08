@@ -10,7 +10,7 @@ section: 3
 ---
 
 [comment]: <> (SPDX-License-Identifier: BSD-2-Clause)
-[comment]: <> (Copyright 2014-2022, Intel Corporation)
+[comment]: <> (Copyright 2014-2023, Intel Corporation)
 
 [comment]: <> (memkind.3 -- man page for memkind)
 
@@ -52,7 +52,7 @@ are described below in this man page.
 
 Link with -lmemkind
 ```
-EXPERIMENTAL API:
+**EXPERIMENTAL API:**
 ```c
 HEAP MANAGEMENT:
 int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size_t size);
@@ -60,7 +60,8 @@ int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size
 KIND MANAGEMENT:
 int memkind_create_kind(memkind_memtype_t memtype_flags, memkind_policy_t policy, memkind_bits_t flags, memkind_t *kind);
 ```
-STANDARD API:
+
+**STANDARD API:**
 ```c
 ERROR HANDLING:
 void memkind_error_message(int err, char *msg, size_t size);
@@ -117,31 +118,34 @@ int memkind_set_bg_threads(bool state);
 
 # DESCRIPTION #
 
-`memkind_error_message()`
+#### ERROR HANDLING ####
+
+`void memkind_error_message(int err, char *msg, size_t size)`
 :   converts an error number err returned by a member of the memkind interface
     to an error message *msg* where the maximum size of the message is passed by the
     *size* parameter.
 
-HEAP MANAGEMENT:
-:   The functions described in this section define a heap manager with an interface
-    modeled on the ISO C standard API’s, except that the user must specify the kind
-    of memory with the first argument to each function. See the [**KINDS**](#kinds)
-    section below for a full description of the implemented kinds. For the file-backed
-    kind of memory see `memkind_create_pmem()` or `memkind_create_pmem_with_config()`.
-    For the memory kind created on user-specified area, please check `memkind_create_fixed()`.
+#### HEAP MANAGEMENT ####
 
-`memkind_malloc()`
+The functions described in this section define a heap manager with an interface
+modeled on the ISO C standard API’s, except that the user must specify the kind
+of memory with the first argument to each function. See the [**KINDS**](#kinds)
+section below for a full description of the implemented kinds. For the file-backed
+kind of memory see `memkind_create_pmem()` or `memkind_create_pmem_with_config()`.
+For the memory kind created on user-specified area, please check `memkind_create_fixed()`.
+
+`void *memkind_malloc(memkind_t kind, size_t size)`
 :   allocates *size* bytes of uninitialized memory of the specified *kind*. The allocated
     space is suitably aligned (after possible pointer coercion) for storage of any type of
     object. If *size* is 0, then `memkind_malloc()` returns *NULL*.
 
-`memkind_calloc()`
+`void *memkind_calloc(memkind_t kind, size_t num, size_t size)`
 :   allocates space for *num* objects each *size* bytes in length in memory of the
     specified *kind*. The result is identical to calling `memkind_malloc()` with an argument
     of *num* * *size*, with the exception that the allocated memory is explicitly initialized
     to zero bytes. If *num* or *size* is 0, then `memkind_calloc()` returns *NULL*.
 
-`memkind_realloc()`
+`void *memkind_realloc(memkind_t kind, void *ptr, size_t size)`
 :   changes the size of the previously allocated memory referenced by *ptr* to *size* bytes
     of the specified *kind*. The contents of the memory remain unchanged up to the lesser
     of the new and old sizes. If the new size is larger, the contents of the newly allocated
@@ -149,38 +153,38 @@ HEAP MANAGEMENT:
     freed and a pointer to the newly allocated memory is returned.
     **Note:** `memkind_realloc()` may move the memory allocation, resulting in a different
     return value than *ptr*.
+    \
+    If *ptr* is *NULL*, the `memkind_realloc()` function behaves identically to
+    `memkind_malloc()` for the specified size. If *size* is equal to zero, and
+    *ptr* is not *NULL*, then the call is equivalent to `memkind_free(kind, ptr)`
+    and *NULL* is returned. The address *ptr*, if not *NULL*, must have been returned
+    by a previous call to `memkind_malloc()`, `memkind_calloc()`, `memkind_realloc()`,
+    `memkind_defrag_reallocate()` or `memkind_posix_memalign()` with the same *kind*
+    as specified to the call to `memkind_realloc()`. Otherwise, if `memkind_free(kind, ptr)`
+    was called before, undefined behavior occurs. In cases where the kind is unknown in the
+    context of the call to `memkind_realloc()` *NULL* can be given as the *kind* specified
+    to `memkind_realloc()`, but this will require an internal lookup for a correct kind.
+    **Note:** The lookup for *kind* could result in a serious performance penalty, which
+    can be avoided by specifying a correct *kind*. If both *kind* and *ptr* are *NULL*,
+    then `memkind_realloc()` returns *NULL* and sets *errno* to **EINVAL**.
 
-If *ptr* is *NULL*, the `memkind_realloc()` function behaves identically to
-`memkind_malloc()` for the specified size. If *size* is equal to zero, and
-*ptr* is not *NULL*, then the call is equivalent to `memkind_free(kind, ptr)`
-and *NULL* is returned. The address *ptr*, if not *NULL*, must have been returned
-by a previous call to `memkind_malloc()`, `memkind_calloc()`, `memkind_realloc()`,
-`memkind_defrag_reallocate()` or `memkind_posix_memalign()` with the same *kind*
-as specified to the call to `memkind_realloc()`. Otherwise, if `memkind_free(kind, ptr)`
-was called before, undefined behavior occurs. In cases where the kind is unknown in the
-context of the call to `memkind_realloc()` *NULL* can be given as the *kind* specified
-to `memkind_realloc()`, but this will require an internal look up for a correct kind.
-**Note:** The look up for *kind* could result in a serious performance penalty, which
-can be avoided by specifying a correct *kind*. If *kind* is *NULL* and *ptr* is *NULL*,
-then `memkind_realloc()` returns *NULL* and sets *errno* to **EINVAL**.
-
-`memkind_posix_memalign()`
+`int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size_t size)`
 :   allocates *size* bytes of memory of a specified *kind* such that the allocation’s
     base address is an even multiple of *alignment*, and returns the allocation in the value
     pointed to by *memptr*. The requested *alignment* must be a power of 2 at least as large
     as *sizeof(void*)*. If *size* is 0, then `memkind_posix_memalign()` returns 0, with a
     *NULL* returned in *memptr*.
 
-`memkind_malloc_usable_size()`
+`size_t memkind_malloc_usable_size(memkind_t kind, void *ptr)`
 :   function provides the same semantics as `malloc_usable_size(3)`, but operates
     on the specified *kind*.
     **NOTE:** In cases where the kind is unknown in the context of the call to
-    `memkind_malloc_usable_size()` *NULL* can be given as the *kind* specified to
-    `memkind_malloc_usable_size()`, but this could require an internal look up for
-    correct kind. `memkind_malloc_usable_size()` is supported by TBB heap manager
-    described in the [ENVIRONMENT](#environment) section since Intel TBB 2019 Update 4.
+    `memkind_malloc_usable_size()` *NULL* can be given as the *kind*, but this could
+    require an internal lookup for correct kind.
+    `memkind_malloc_usable_size()` is supported by the TBB heap manager described in the
+    [ENVIRONMENT](#environment) section, since Intel TBB 2019 Update 4.
 
-`memkind_defrag_reallocate()`
+`void *memkind_defrag_reallocate(memkind_t kind, void *ptr)`
 :   reallocates the object conditionally inside the specific *kind*. The function
     determines if it’s worthwhile to move allocation to the reduce degree of external
     fragmentation of the heap. In case of failure function returns *NULL*, otherwise
@@ -189,19 +193,19 @@ then `memkind_realloc()` returns *NULL* and sets *errno* to **EINVAL**.
     `memkind_defrag_reallocate()` returns *NULL*. In cases where the *kind* is unknown
     in the context of the call to `memkind_defrag_reallocate()` *NULL* can be given
     as the *kind* specified to `memkind_defrag_reallocate()`, but this will require
-    an internal look up for the correct *kind*.
-    **Note:** The look up for *kind* could result in a serious performance penalty,
+    an internal lookup for the correct *kind*.
+    **Note:** The lookup for *kind* could result in a serious performance penalty,
     which can be avoided by specifying a correct *kind*.
 
-`memkind_detect_kind()`
+`memkind_t memkind_detect_kind(void *ptr)`
 :   returns the kind associated with allocated memory referenced by *ptr*.
     This pointer must have been returned by a previous call to `memkind_malloc()`,
-    memkind_calloc(), `memkind_realloc()`, memkind_defrag_reallocate() or
+    `memkind_calloc()`, `memkind_realloc()`, `memkind_defrag_reallocate()` or
     `memkind_posix_memalign()`. If *ptr* is *NULL*, then `memkind_detect_kind()`
     returns *NULL*.
     **Note:** This function has non-trivial performance overhead.
 
-`memkind_free()`
+`void memkind_free(memkind_t kind, void *ptr)`
 :   causes the allocated memory referenced by *ptr* to be made available for
     future allocations. This pointer must have been returned by a previous call to
     `memkind_malloc()`, `memkind_calloc()`, `memkind_realloc()`,
@@ -209,8 +213,8 @@ then `memkind_realloc()` returns *NULL* and sets *errno* to **EINVAL**.
     `memkind_free(*kind*, *ptr*)` has already been called before, undefined behavior
     occurs. If *ptr* is *NULL*, no operation is performed. In cases where the kind
     is unknown in the context of the call to `memkind_free()` *NULL* can be given
-    as the *kind* specified to `memkind_free()`, but this will require an internal
-    look up for correct kind. Note: The look up for *kind* could result in a serious
+    as the *kind*, but this will require an internal lookup for correct kind.
+    **Note:** The lookup for *kind* could result in a serious
     performance penalty, which can be avoided by specifying a correct *kind*.
 
 #### KIND CONFIGURATION MANAGEMENT ####
@@ -221,24 +225,24 @@ the memkind configuration with the first argument to each function. API describe
 here is most useful with file-backed kind of memory, e.g.
 `memkind_create_pmem_with_config()` method.
 
-`memkind_config_new()`
+`struct memkind_config *memkind_config_new()`
 :   creates the memkind configuration.
 
-`memkind_config_delete()`
+`void memkind_config_delete(struct memkind_config *cfg)`
 :   deletes previously created memkind configuration, which must have been
     returned by a previous call to `memkind_config_new()`.
 
-`memkind_config_set_path()`
+`void memkind_config_set_path(struct memkind_config *cfg, const char *pmem_dir)`
 :   updates the memkind *pmem_dir* configuration parameter, which specifies
     the directory path, where file-backed kind of memory will be created.
     **Note:** This function does not validate that *pmem_dir* specifies a valid path.
 
-`memkind_config_set_size()`
+`void memkind_config_set_size(struct memkind_config *cfg, size_t pmem_size)`
 :   updates the memkind *pmem_size* configuration parameter, which allows to limit
     the file-backed kind memory partition.
     **Note:** This function does not validate that *pmem_size* is in valid range.
 
-`memkind_config_set_memory_usage_policy()`
+`void memkind_config_set_memory_usage_policy(struct memkind_config *cfg, memkind_mem_usage_policy policy)`
 :   updates the memkind *policy* configuration parameter, which allows to tune up
     memory utilization. The user should set the value based on the characteristics of
     the application that is using the library (e.g. prioritize memory usage, CPU utilization),
@@ -246,13 +250,14 @@ here is most useful with file-backed kind of memory, e.g.
     section below.
     **Note:** This function does not validate that *policy* is in valid range.
 
-KIND MANAGEMENT:
-:   There are built-in kinds that are always available and these are enumerated in
-    the [KINDS](#kinds) section. The user can also create their own kinds of memory.
-    This section describes the API’s that enable the tracking of the different kinds
-    of memory and determining their properties.
+#### KIND MANAGEMENT ####
 
-`memkind_create_fixed()`
+There are built-in kinds that are always available and these are enumerated in
+the [KINDS](#kinds) section. The user can also create their own kinds of memory.
+This section describes the API’s that enable the tracking of the different kinds
+of memory and determining their properties.
+
+`int memkind_create_fixed(void *addr, size_t size, memkind_t *kind)`
 :   is a function used to create a kind under user-specified area of memory.
     The memory can be allocated in any possible way, e.g. it might be a static array
     or an mmapped area. User can specify any properties using functions such as mbind.
@@ -262,7 +267,7 @@ KIND MANAGEMENT:
     (located under user-specified area), a call to **memkind_malloc()** returns
     *NULL* and **errno** is set to **ENOMEM**.
 
-`memkind_create_pmem()`
+`int memkind_create_pmem(const char *dir, size_t max_size, memkind_t *kind)`
 :   is a convenient function used to create a file-backed kind of memory.
     It allocates a temporary file in the given directory *dir*. The file is
     created in a fashion similar to **tmpfile(3)**, so that the file name does
@@ -284,14 +289,14 @@ KIND MANAGEMENT:
     for its own metadata. Returns zero if the pmem memkind is created successfully
     or an error code from the [ERRORS](#errors) section if not.
 
-`memkind_create_pmem_with_config()`
+`int memkind_create_pmem_with_config(struct memkind_config *cfg, memkind_t *kind)`
 :   is a second function used to create a file-backed kind of memory.
     Function behaves similar to `memkind_create_pmem()` but instead of passing
     *dir* and *max_size* arguments, it uses *config* param to specify
     characteristics of created file-backed kind of memory
     (see [**KIND CONFIGURATION MANAGEMENT**](#kind-configuration-managment) section).
 
-`memkind_create_kind()`
+`int memkind_create_kind(memkind_memtype_t memtype_flags, memkind_policy_t policy, memkind_bits_t flags, memkind_t *kind)`
 :   creates kind that allocates memory with specific memory type, memory
     binding policy and flags (see [MEMORY FLAGS](#memory-flags) section).
     The *memtype_flags* (see [MEMORY TYPES](#memory-types) section) determine
@@ -300,7 +305,7 @@ KIND MANAGEMENT:
     specified kind is created successfully or an error code from the [ERRORS](#errors)
     section if not.
 
-`memkind_destroy_kind()`
+`int memkind_destroy_kind(memkind_t kind)`
 :   destroys previously created kind object, which must have been returned by
     a previous call to `memkind_create_pmem()`, `memkind_create_pmem_with_config()`
     or `memkind_create_kind()`. Otherwise, or if `*memkind_destroy_kind(kind)*`
@@ -310,11 +315,11 @@ KIND MANAGEMENT:
     kind was returned by `memkind_create_pmem()` or `memkind_create_pmem_with_config()`
     all allocated memory will be freed after kind will be destroyed.
 
-`memkind_check_available()`
+`int memkind_check_available(memkind_t kind)`
 :   returns zero if the specified *kind* is available or an error code from the
     [ERRORS](#errors) section if it is not.
 
-`memkind_get_capacity()`
+`ssize_t memkind_get_capacity(memkind_t kind)`
 :   returns memory capacity of nodes available to a given kind (file size or
     filesystem capacity in case of a file-backed PMEM kind; total area size in the
     case of fixed-kind) or -1 in case of an error. Supported kinds are:
@@ -322,12 +327,12 @@ KIND MANAGEMENT:
     file-backed PMEM and fixed-kind. *kind*. For **MEMKIND_HUGETLB** only pages with a
     default size of 2MB are supported.
 
-`memkind_check_dax_path()`
+`int memkind_check_dax_path(const char *pmem_dir)`
 :   returns zero if file-backed kind memory is in the specified directory path
     *pmem_dir*. Otherwise, it can be created with the DAX attribute or an error code
     from the [ERRORS](#errors) section.
 
-`memkind_set_allow_zero_allocs()`
+`void memkind_set_allow_zero_allocs(memkind_t kind, bool allow_zero_allocs)`
 :   for a given *kind*, determines the behavior of malloc-like functions when size passed
     to them is equal to zero.
     These functions return a valid pointer when *allow_zero_allocs* is set to true,
@@ -336,23 +341,24 @@ KIND MANAGEMENT:
 **MEMKIND_PMEM_MIN_SIZE** The minimum size which allows to limit the file-backed
 memory partition.
 
-STATISTICS:
-:   The functions described in this section define a way to get specific memory
-    allocation statistics.
+#### STATISTICS ####
 
-`memkind_update_cached_stats()`
+The functions described in this section define a way to get specific memory
+allocation statistics.
+
+`int memkind_update_cached_stats(void)`
 :   is used to force an update of cached dynamic allocator statistics. Statistics
     are not updated real-time by memkind library and this method allows to force its
     update.
 
-`memkind_get_stat()`
+`int memkind_get_stat(memkind_t kind, memkind_stat stat, size_t *value)`
 :   retrieves statistic of the specified type and returns it in *value*. Measured
     statistic applies to the specific *kind*, when *NULL* is given as *kind* then
     statistic applies to memory used by the whole memkind library.
     **Note:** You need to call `memkind_update_cached_stats()` before calling
     `memkind_get_stat()` because statistics are cached by the memkind library.
 
-`memkind_stats_print()`
+`int memkind_stats_print(void (*write_cb) (void *, const char *), void *cbopaque, memkind_stat_print_opt opts)`
 :   prints summary statistics. This function wraps the jemalloc’s function
     `je_malloc_stats_print()`. Uses *write_cb *function to print the output.
     While providing a custom writer function, use `syscall(2)` rather than `write(2)`.
@@ -363,28 +369,30 @@ STATISTICS:
     section below. Returns MEMKIND_ERROR_INVALID when failed to parse an options string,
     MEMKIND_SUCCESS on success.
 
-DECORATORS:
-:   The memkind library enables the user to define decorator functions that can be
-    called before and after each memkind heap management API. The decorators that are
-    called at the beginning of the function end are named after that function with
-    *_pre* appended to the name and those that are called at the end of the function
-    are named after that function with *_post* appended to the name. These are weak
-    symbols and if they are not present at link time they are not called. The memkind
-    library does not define these symbols which are reserved for user definition. These
-    decorators can be used to track calls to the heap management interface or to modify
-    parameters. The decorators that are called at the beginning of the allocator pass
-    all inputs by reference and the decorators that are called at the end of the allocator
-    pass the output by reference. This enables the modification of the input and output
-    of each heap management function by the decorators.
+#### DECORATORS ####
 
-**ENHANCEMENTS:**
+The memkind library enables the user to define decorator functions that can be
+called before and after each memkind heap management API. The decorators that are
+called at the beginning of the function end are named after that function with
+*_pre* appended to the name and those that are called at the end of the function
+are named after that function with *_post* appended to the name. These are weak
+symbols and if they are not present at link time they are not called. The memkind
+library does not define these symbols which are reserved for user definition. These
+decorators can be used to track calls to the heap management interface or to modify
+parameters. The decorators that are called at the beginning of the allocator pass
+all inputs by reference and the decorators that are called at the end of the allocator
+pass the output by reference. This enables the modification of the input and output
+of each heap management function by the decorators.
 
-`memkind_set_bg_threads()`
+#### ENHANCEMENTS ####
+
+`int memkind_set_bg_threads(bool state)`
 :   enables/disables internal background worker threads in jemalloc.
 
-LIBRARY VERSION:
-:   The memkind library version scheme consist major, minor and patch numbers
-    separated by dot. Combining those numbers, we got the following representation:
+#### LIBRARY VERSION ####
+
+The memkind library version scheme consist major, minor and patch numbers
+separated by dot. Combining those numbers, we got the following representation:
 
 major.minor.patch, where:
 
@@ -397,13 +405,13 @@ major.minor.patch, where:
 memkind library provide numeric representation of the version by exposing
 the following API:
 
-`memkind_get_version()`
+`int memkind_get_version()`
 :   returns version number represented by a single integer number, obtained from the formula:\
     major * 1000000 + minor * 1000 + patch
 
 **Note:** major < 1 means an unstable API.
 
-API standards:
+#### API standards ####
 
 + STANDARD API, the API is considered as stable
 + NON-STANDARD API, the API is considered as stable, however this is not a standard way
@@ -412,7 +420,7 @@ API standards:
 
 # RETURN VALUE #
 
-`memkind_calloc()`, `memkind_malloc()`, `memkind_realloc()` and `memkind_defrag_reallocate`()
+`memkind_calloc()`, `memkind_malloc()`, `memkind_realloc()` and `memkind_defrag_reallocate()`
 returns the pointer to the allocated memory or *NULL* if the request fails.
 `memkind_malloc_usable_size()` returns the number of usable bytes in the block of
 allocated memory pointed to by ptr, a pointer to a block of memory allocated by
@@ -494,7 +502,7 @@ MEMKIND_INTERLEAVE
 MEMKIND_HBW
 :   Allocate from the closest high bandwidth memory NUMA node(s) at the time of
     allocation. If there is not enough high bandwidth memory to satisfy the request
-    errno is set to **ENOMEM** and the allocated pointer is set to NULL.
+    *errno* is set to **ENOMEM** and the allocated pointer is set to NULL.
     **Note:** This kind requires memory performance characteristics information
     described in the [SYSTEM CONFIGURATION](#system-configuration) section.
 
@@ -571,12 +579,12 @@ MEMKIND_MEMTYPE_HIGH_BANDWIDTH
 The available types of memory binding policy:
 
 MEMKIND_POLICY_BIND_LOCAL
-:   Allocate local memory. If there is not enough memory to satisfy the request errno
+:   Allocate local memory. If there is not enough memory to satisfy the request *errno*
     is set to **ENOMEM** and the allocated pointer is set to NULL.
 
 MEMKIND_POLICY_BIND_ALL
 :   Memory locality is ignored. If there is not enough memory to satisfy the request
-    errno is set to **ENOMEM** and the allocated pointer is set to NULL.
+    *errno* is set to **ENOMEM** and the allocated pointer is set to NULL.
 
 MEMKIND_POLICY_PREFERRED_LOCAL
 :   Allocate preferred memory that is local. If there is not enough preferred memory
@@ -590,9 +598,6 @@ MEMKIND_POLICY_INTERLEAVE_LOCAL
 MEMKIND_POLICY_INTERLEAVE_ALL
 :   Interleave allocation. Locality is ignored. For n memory types the allocation
     will be interleaved across all of them.
-
-MEMKIND_POLICY_MAX_VALUE
-:   Max policy value.
 
 # MEMORY FLAGS #
 
@@ -806,7 +811,7 @@ characteristics of the best performing NUMA node.
 # STATIC LINKING #
 
 When linking statically against memkind, *libmemkind.a* should be used together
-with its dependencies *libnuma* and pthread. Pthread can be linked by adding
+with its dependencies *libnuma* and *pthread*. *Pthread* can be linked by adding
 */usr/lib64/libpthread.a* as a dependency (exact path may vary). Typically
 *libnuma* will need to be compiled from sources to use it as a static dependency.
 *libnuma* can be reached on [GitHub](https://github.com/numactl/numactl)
@@ -820,8 +825,11 @@ HUGETLB (huge pages)
 
 # COPYRIGHT #
 
-Copyright (C) 2014 - 2022 Intel Corporation. All rights reserved.
+Copyright (C) 2014 - 2023 Intel Corporation. All rights reserved.
 
 # SEE ALSO #
 
-**malloc**(3), **malloc_usable_size**(3), **numa**(3), **hwloc**(3), **numactl**(8), **mbind**(2), **mmap**(2), **jemalloc**(3), **memkind_dax_kmem**(3), **memkind_default**(3), **memkind_arena**(3), **memkind_fixed**(3), **memkind_hbw**(3), **memkind_hugetlb**(3), **memkind_pmem**(3), **syscall**(2), **write**(2)
+**malloc**(3), **malloc_usable_size**(3), **numa**(3), **hwloc**(3), **numactl**(8),
+**mbind**(2), **mmap**(2), **jemalloc**(3), **memkind_dax_kmem**(3), **memkind_default**(3),
+**memkind_arena**(3), **memkind_fixed**(3), **memkind_hbw**(3), **memkind_hugetlb**(3),
+**memkind_pmem**(3), **syscall**(2), **write**(2)

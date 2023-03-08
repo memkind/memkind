@@ -3,7 +3,7 @@
 This directory contains documentation files for memkind interfaces in
 a human readable format (using Markdown syntax).
 
-To see generated manpages (out of these docs), please see [man directory](../man/).
+To see generated manpages (out of these docs), please see man directory (in ../man/ directory).
 
 All changes in public interfaces/API should be followed by changes in
 documentation files in this directory.

@@ -5,9 +5,8 @@ This directory contains manpages for memkind interfaces.
 **Important Notes:**
 No manual changes should be done in this directory.
 
-All files in this directory are generated from doc files in [doc directory](../doc/).
+All files in this directory are generated from doc files in doc directory (in ../doc/ directory).
 This directory exists in the repository solely to avoid requirement of *pandoc*
-as a dependency when a user wants to call `make install` (since it installs manpages too).
+as a dependency when a user wants to call 'make install' (since it installs manpages too).
 
-To see how manpages are generated, please see top-level README:
-[Building and Installing section](README.md#building-and-installing).
+To see how manpages are generated, please see "Building and Installing" section in the top-level README.

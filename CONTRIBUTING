@@ -57,6 +57,12 @@ purposeful and deterministic testing of threading issues.  Note that
 the OpenMP run-time is only required for testing, it is not used by
 the memkind library internally.
 
+To execute more and selected group of tests you can make use of
+existing utils' script, used in testing with docker containers.
+The helper script is located in: utils/docker/docker_run_test.sh
+Normally it's executed from another helper script, the one executing
+docker builds: utils/docker/docker_run_build.sh
+
 
 CODING STYLE
 ============
