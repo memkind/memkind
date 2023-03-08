@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copyright (C) 2014 - 2022 Intel Corporation.
+# Copyright (C) 2014 - 2023 Intel Corporation.
 
 # Allocator
 ALLOCATOR="glibc tbb hbw pmem"
@@ -10,6 +10,8 @@ THREADS=(1 2 4 8 16 18 36)
 MEMORY=(1 4 16 64 256 1024 4096 16384)
 # Iterations
 ITERS=1000
+
+set -e
 
 export KMP_AFFINITY=scatter,granularity=fine
 
