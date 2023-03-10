@@ -12,7 +12,7 @@ section: 7
 [comment]: <> (SPDX-License-Identifier: BSD-2-Clause)
 [comment]: <> (Copyright 2014-2022, Intel Corporation)
 
-[comment]: <> (autohbw.7 -- man page for fixedallocator)
+[comment]: <> (autohbw.7 -- man page for autohbw)
 
 # TABLE OF CONTENTS #
 
