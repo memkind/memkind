@@ -12,7 +12,7 @@ section: 1
 [comment]: <> (SPDX-License-Identifier: BSD-2-Clause)
 [comment]: <> (Copyright 2016-2022, Intel Corporation)
 
-[comment]: <> (memkind-hbw-nodes.1 -- man page for memkind-auto-dax-kmem-nodes)
+[comment]: <> (memkind-hbw-nodes.1 -- man page for memkind-hbw-nodes)
 
 # TABLE OF CONTENTS #
 

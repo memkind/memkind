@@ -12,7 +12,7 @@ section: 3
 [comment]: <> (SPDX-License-Identifier: BSD-2-Clause)
 [comment]: <> (Copyright 2015-2022, Intel Corporation)
 
-[comment]: <> (hbwallocator.3 -- man page for fixedallocator)
+[comment]: <> (hbwallocator.3 -- man page for hbwallocator)
 
 # TABLE OF CONTENTS #
 
