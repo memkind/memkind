@@ -707,7 +707,7 @@ static_lib: jemalloc_deps libmemkind.la
 
 JEMALLOC_CONFIG = --enable-autogen @min_lg_align_opt@ --without-export --with-version=5.3.0-0-g54eaed1d8b56b1aa528be3bdd1877e59c56fa90c \
 			@jemalloc_build_type_flags@  @memkind_initial_exec_tls@ --with-jemalloc-prefix=@memkind_prefix@ \
-			--with-malloc-conf="narenas:@auto_arenas@,lg_tcache_max:@tcache_max_size_class@" \
+			--with-malloc-conf="narenas:@auto_arenas@,lg_tcache_max:@tcache_max_size_class@,oversize_threshold:@oversize_threshold@" \
 			#end
 
 jemalloc_deps:

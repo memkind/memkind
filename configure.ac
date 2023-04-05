@@ -200,6 +200,18 @@ fi
 
 AC_DEFINE_UNQUOTED([ARENA_LIMIT_PER_KIND], $arena_limit, [Upper bound for number of arenas per kind])
 
+#============================oversize_threshold================================
+oversize_threshold=8388608; # Defaults to 8MB as per jemalloc settings
+AC_ARG_VAR(OVERSIZE_THRESHOLD,
+	   [Requests in bytes greater than this value are allocated from a dedicated arena seperated from the narenas]
+)
+
+if test "$OVERSIZE_THRESHOLD" != "" ; then
+  oversize_threshold=$OVERSIZE_THRESHOLD;
+fi
+
+AC_SUBST(oversize_threshold)
+
 #============================memkind_prefix=======================================
 memkind_prefix=jemk_;
 AC_ARG_VAR(MEMKIND_PREFIX,
