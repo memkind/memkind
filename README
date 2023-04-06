@@ -42,6 +42,7 @@ features.  Memkind interface allows to create and control file-backed memory
 12. [Testing](#testing)
 13. [Notes](#notes)
 14. [Disclaimer](#disclaimer)
+15. [Contact Points](#contact-points)
 
 ## Interfaces
 The memkind library delivers five interfaces:
@@ -400,3 +401,9 @@ SEE [COPYING](COPYING) FILE FOR LICENSE INFORMATION.
 
 THIS SOFTWARE IS PROVIDED AS A DEVELOPMENT SNAPSHOT TO AID
 COLLABORATION AND WAS NOT ISSUED AS A RELEASED PRODUCT BY INTEL.
+
+## Contact Points
+
+If you want to get in touch with the maintenance team of this project, please file an
+issue on the GitHub page of this repository or reach out to
+Lin, Xiang <xiang.lin@intel.com> or Chen, Xiaobo <xiaobo.chen@intel.com>.
