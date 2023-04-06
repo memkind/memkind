@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2021 Intel Corporation. */
+/* Copyright (C) 2021-2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_fixed.h>
@@ -16,7 +16,7 @@
 
 extern void memtier_reset_size(unsigned id);
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_FIXED_OPS = {
+struct memkind_ops MEMKIND_FIXED_OPS = {
     .create = memkind_fixed_create,
     .destroy = memkind_fixed_destroy,
     .malloc = memkind_arena_malloc,
@@ -170,9 +170,8 @@ static extent_hooks_t fixed_extent_hooks = {
 };
 // clang-format on
 
-MEMKIND_EXPORT int memkind_fixed_create(struct memkind *kind,
-                                        struct memkind_ops *ops,
-                                        const char *name)
+int memkind_fixed_create(struct memkind *kind, struct memkind_ops *ops,
+                         const char *name)
 {
     struct memkind_fixed *priv;
     int err;
@@ -210,7 +209,7 @@ exit:
     return err;
 }
 
-MEMKIND_EXPORT int memkind_fixed_destroy(struct memkind *kind)
+int memkind_fixed_destroy(struct memkind *kind)
 {
     struct memkind_fixed *priv = kind->priv;
 
@@ -223,8 +222,7 @@ MEMKIND_EXPORT int memkind_fixed_destroy(struct memkind *kind)
     return ret;
 }
 
-MEMKIND_EXPORT void *memkind_fixed_mmap(struct memkind *kind, void *addr,
-                                        size_t size)
+void *memkind_fixed_mmap(struct memkind *kind, void *addr, size_t size)
 {
     struct memkind_fixed *priv = kind->priv;
     void *result;

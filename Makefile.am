@@ -600,13 +600,7 @@ dist_man_MANS =  man/autohbw.7 \
                  man/memkind-auto-dax-kmem-nodes.1 \
                  man/memkind-hbw-nodes.1 \
                  man/memkind.3 \
-                 man/memkind_arena.3 \
                  man/memkind_dax_kmem.3 \
-                 man/memkind_default.3 \
-                 man/memkind_fixed.3 \
-                 man/memkind_hbw.3 \
-                 man/memkind_hugetlb.3 \
-                 man/memkind_pmem.3 \
                  man/memkindallocator.3 \
                  man/memtier.1 \
                  man/memtier.7 \
@@ -619,14 +613,7 @@ dist_doc_DOCS = autohbw.7 \
                hbwmalloc.3 \
                libmemtier.3 \
                libmemtier.7 \
-               memkind_arena.3 \
                memkind_dax_kmem.3 \
-               memkind_default.3 \
-               memkind_fixed.3 \
-               memkind_hbw.3 \
-               memkind_hugetlb.3 \
-               memkind_interleave.3 \
-               memkind_pmem.3 \
                memkind-auto-dax-kmem-nodes.1 \
                memkind-hbw-nodes.1 \
                memkind.3 \

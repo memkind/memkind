@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2021 Intel Corporation. */
+/* Copyright (C) 2014 - 2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_default.h>
@@ -20,7 +20,7 @@
 #include <pthread.h>
 #include <stdio.h>
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HUGETLB_OPS = {
+struct memkind_ops MEMKIND_HUGETLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -41,19 +41,18 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HUGETLB_OPS = {
 static int memkind_hugetlb_check_available(struct memkind *kind,
                                            size_t huge_size);
 
-MEMKIND_EXPORT int memkind_hugetlb_get_mmap_flags(struct memkind *kind,
-                                                  int *flags)
+int memkind_hugetlb_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_2MB;
     return 0;
 }
 
-MEMKIND_EXPORT void memkind_hugetlb_init_once(void)
+void memkind_hugetlb_init_once(void)
 {
     memkind_init(MEMKIND_HUGETLB, true);
 }
 
-MEMKIND_EXPORT int memkind_hugetlb_check_available_2mb(struct memkind *kind)
+int memkind_hugetlb_check_available_2mb(struct memkind *kind)
 {
     return memkind_hugetlb_check_available(kind, 2097152);
 }

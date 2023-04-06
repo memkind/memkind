@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2017 - 2021 Intel Corporation. */
+/* Copyright (C) 2017 - 2022 Intel Corporation. */
 
 #include <memkind.h>
 #include <memkind/internal/heap_manager.h>
@@ -43,6 +43,7 @@ static int memkind_regular_check_available(struct memkind *kind)
                                       : MEMKIND_ERROR_UNAVAILABLE;
 }
 
+/* private but used in a test */
 MEMKIND_EXPORT int memkind_regular_all_get_mbind_nodemask(
     struct memkind *kind, unsigned long *nodemask, unsigned long maxnode)
 {
@@ -64,7 +65,7 @@ static int memkind_regular_finalize(memkind_t kind)
     return memkind_arena_finalize(kind);
 }
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_REGULAR_OPS = {
+struct memkind_ops MEMKIND_REGULAR_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
