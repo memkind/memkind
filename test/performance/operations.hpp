@@ -8,6 +8,7 @@
 #include "jemalloc/jemalloc.h"
 #include <cassert>
 #include <malloc.h>
+#include <string>
 
 // Malloc, jemalloc, memkind jemalloc and memkind memory operations definitions
 namespace performance_tests
