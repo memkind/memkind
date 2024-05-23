@@ -6,6 +6,18 @@
 [![Packaging status](https://repology.org/badge/tiny-repos/memkind.svg)](https://repology.org/project/memkind/versions)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/memkind/memkind.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/memkind/memkind/context:cpp)
 
+## ⚠️ Discontinuation of the project
+The **memkind** project will no longer be maintained by Intel.
+- Intel has ceased development and contributions including, but not limited to, maintenance, bug fixes, new releases,
+or updates, to this project.
+- Intel no longer accepts patches to this project.
+- If you have an ongoing need to use this project, are interested in independently developing it, or would like to
+maintain patches for the open source software community, please create your own fork of this project.
+
+If you're interested in similar functionality you can take a look at the [UMF project](https://github.com/oneapi-src/unified-memory-framework).
+
+## Introduction
+
 The memkind library is a user extensible heap manager built on top of
 jemalloc which enables control of memory characteristics and a
 partitioning of the heap between kinds of memory.  The kinds of memory
@@ -42,7 +54,6 @@ features.  Memkind interface allows to create and control file-backed memory
 12. [Testing](#testing)
 13. [Notes](#notes)
 14. [Disclaimer](#disclaimer)
-15. [Contact Points](#contact-points)
 
 ## Interfaces
 The memkind library delivers five interfaces:
@@ -401,9 +412,3 @@ SEE [COPYING](COPYING) FILE FOR LICENSE INFORMATION.
 
 THIS SOFTWARE IS PROVIDED AS A DEVELOPMENT SNAPSHOT TO AID
 COLLABORATION AND WAS NOT ISSUED AS A RELEASED PRODUCT BY INTEL.
-
-## Contact Points
-
-If you want to get in touch with the maintenance team of this project, please file an
-issue on the GitHub page of this repository or reach out to
-Lin, Xiang <xiang.lin@intel.com> or Chen, Xiaobo <xiaobo.chen@intel.com>.
