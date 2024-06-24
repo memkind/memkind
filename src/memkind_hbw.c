@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2014 - 2021 Intel Corporation. */
+/* Copyright (C) 2014 - 2022 Intel Corporation. */
 
 #include <memkind/internal/heap_manager.h>
 #include <memkind/internal/memkind_arena.h>
@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <utmpx.h>
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
+struct memkind_ops MEMKIND_HBW_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -46,7 +46,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
+struct memkind_ops MEMKIND_HBW_ALL_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -67,7 +67,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
+struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -88,7 +88,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_HUGETLB_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
+struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -109,7 +109,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_ALL_HUGETLB_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
+struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -130,7 +130,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
+struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -151,7 +151,7 @@ MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_PREFERRED_HUGETLB_OPS = {
     .defrag_reallocate = memkind_arena_defrag_reallocate,
 };
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
+struct memkind_ops MEMKIND_HBW_INTERLEAVE_OPS = {
     .create = memkind_arena_create,
     .destroy = memkind_default_destroy,
     .malloc = memkind_arena_malloc,
@@ -190,12 +190,12 @@ static void memkind_hbw_all_numanode_init(void);
 // libnuma 2.0.8
 extern unsigned int numa_bitmask_weight(const struct bitmask *bmp);
 
-MEMKIND_EXPORT int memkind_hbw_check_available(struct memkind *kind)
+int memkind_hbw_check_available(struct memkind *kind)
 {
     return kind->ops->get_mbind_nodemask(kind, NULL, 0);
 }
 
-MEMKIND_EXPORT int memkind_hbw_hugetlb_check_available(struct memkind *kind)
+int memkind_hbw_hugetlb_check_available(struct memkind *kind)
 {
     int err = memkind_hbw_check_available(kind);
     if (!err) {
@@ -204,9 +204,9 @@ MEMKIND_EXPORT int memkind_hbw_hugetlb_check_available(struct memkind *kind)
     return err;
 }
 
-MEMKIND_EXPORT int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
-                                                  unsigned long *nodemask,
-                                                  unsigned long maxnode)
+int memkind_hbw_get_mbind_nodemask(struct memkind *kind,
+                                   unsigned long *nodemask,
+                                   unsigned long maxnode)
 {
     struct hbw_numanode_t *g = &memkind_hbw_numanode_g[NODE_VARIANT_MULTIPLE];
     pthread_once(&memkind_hbw_numanode_once_g[NODE_VARIANT_MULTIPLE],
@@ -232,6 +232,7 @@ int memkind_hbw_get_preferred_mbind_nodemask(struct memkind *kind,
     return g->init_err;
 }
 
+/* used by memkind-hbw-nodes */
 MEMKIND_EXPORT int memkind_hbw_all_get_mbind_nodemask(struct memkind *kind,
                                                       unsigned long *nodemask,
                                                       unsigned long maxnode)
@@ -402,37 +403,37 @@ static void memkind_hbw_all_numanode_init(void)
     }
 }
 
-MEMKIND_EXPORT void memkind_hbw_init_once(void)
+void memkind_hbw_init_once(void)
 {
     memkind_init(MEMKIND_HBW, true);
 }
 
-MEMKIND_EXPORT void memkind_hbw_all_init_once(void)
+void memkind_hbw_all_init_once(void)
 {
     memkind_init(MEMKIND_HBW_ALL, true);
 }
 
-MEMKIND_EXPORT void memkind_hbw_hugetlb_init_once(void)
+void memkind_hbw_hugetlb_init_once(void)
 {
     memkind_init(MEMKIND_HBW_HUGETLB, true);
 }
 
-MEMKIND_EXPORT void memkind_hbw_all_hugetlb_init_once(void)
+void memkind_hbw_all_hugetlb_init_once(void)
 {
     memkind_init(MEMKIND_HBW_ALL_HUGETLB, true);
 }
 
-MEMKIND_EXPORT void memkind_hbw_preferred_init_once(void)
+void memkind_hbw_preferred_init_once(void)
 {
     memkind_init(MEMKIND_HBW_PREFERRED, true);
 }
 
-MEMKIND_EXPORT void memkind_hbw_preferred_hugetlb_init_once(void)
+void memkind_hbw_preferred_hugetlb_init_once(void)
 {
     memkind_init(MEMKIND_HBW_PREFERRED_HUGETLB, true);
 }
 
-MEMKIND_EXPORT void memkind_hbw_interleave_init_once(void)
+void memkind_hbw_interleave_init_once(void)
 {
     memkind_init(MEMKIND_HBW_INTERLEAVE, true);
 }

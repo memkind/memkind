@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
-/* Copyright (C) 2015 - 2021 Intel Corporation. */
+/* Copyright (C) 2015 - 2022 Intel Corporation. */
 
 #include <memkind/internal/memkind_arena.h>
 #include <memkind/internal/memkind_log.h>
@@ -24,7 +24,7 @@ extern void memtier_reset_size(unsigned id);
 #define MAP_SHARED_VALIDATE 0x03
 #endif
 
-MEMKIND_EXPORT struct memkind_ops MEMKIND_PMEM_OPS = {
+struct memkind_ops MEMKIND_PMEM_OPS = {
     .create = memkind_pmem_create,
     .destroy = memkind_pmem_destroy,
     .malloc = memkind_arena_malloc,
@@ -227,9 +227,8 @@ exit:
     return err;
 }
 
-MEMKIND_EXPORT int memkind_pmem_create(struct memkind *kind,
-                                       struct memkind_ops *ops,
-                                       const char *name)
+int memkind_pmem_create(struct memkind *kind, struct memkind_ops *ops,
+                        const char *name)
 {
     struct memkind_pmem *priv;
     int err;
@@ -270,7 +269,7 @@ exit:
     return err;
 }
 
-MEMKIND_EXPORT int memkind_pmem_destroy(struct memkind *kind)
+int memkind_pmem_destroy(struct memkind *kind)
 {
     struct memkind_pmem *priv = kind->priv;
 
@@ -304,8 +303,7 @@ exit:
     return status;
 }
 
-MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr,
-                                       size_t size)
+void *memkind_pmem_mmap(struct memkind *kind, void *addr, size_t size)
 {
     struct memkind_pmem *priv = kind->priv;
     void *result;
@@ -345,7 +343,7 @@ MEMKIND_EXPORT void *memkind_pmem_mmap(struct memkind *kind, void *addr,
     return result;
 }
 
-MEMKIND_EXPORT int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags)
+int memkind_pmem_get_mmap_flags(struct memkind *kind, int *flags)
 {
     *flags = MAP_SHARED;
     return 0;
